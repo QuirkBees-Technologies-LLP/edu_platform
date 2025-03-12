@@ -103,7 +103,7 @@ const Login = () => {
         <div className="flex flex-col gap-1">
           <label className="form-label text-gray-900">Email</label>
           <label className="input">
-            <input placeholder="Enter username" autoComplete="off" {...formik.getFieldProps('email')} className={clsx('form-control', {
+            <input autoComplete="off" {...formik.getFieldProps('email')} className={clsx('form-control', {
             'is-invalid': formik.touched.email && formik.errors.email
           })} />
           </label>
@@ -120,7 +120,7 @@ const Login = () => {
             </Link>
           </div>
           <label className="input">
-            <input type={showPassword ? 'text' : 'password'} placeholder="Enter Password" autoComplete="off" {...formik.getFieldProps('password')} className={clsx('form-control', {
+            <input type={showPassword ? 'text' : 'password'} autoComplete="off" {...formik.getFieldProps('password')} className={clsx('form-control', {
             'is-invalid': formik.touched.password && formik.errors.password
           })} />
             <button className="btn btn-icon" onClick={togglePassword}>

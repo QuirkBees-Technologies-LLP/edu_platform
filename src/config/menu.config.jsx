@@ -5,6 +5,16 @@ export const MENU_SIDEBAR = [
     path: '/ideas'
   },
   {
+    title: 'Live',
+    icon: 'some-files',
+    path: '/live'
+  },
+  {
+    title: 'Live Client',
+    icon: 'some-files',
+    path: '/live-client'
+  },
+  {
   title: 'Dashboards',
   icon: 'element-11',
   children: [{

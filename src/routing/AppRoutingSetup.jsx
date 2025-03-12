@@ -9,12 +9,16 @@ import { Demo1Layout } from '@/layouts/demo1';
 import { ErrorsRouting } from '@/errors';
 import { AuthenticationWelcomeMessagePage, AuthenticationAccountDeactivatedPage, AuthenticationGetStartedPage } from '@/pages/authentication';
 import Ideas from '../pages/ideas/Ideas';
+import Live from '../pages/live/Live';
+import LiveClient from '../pages/live-client/LiveClient';
 const AppRoutingSetup = () => {
   return <Routes>
       <Route element={<RequireAuth />}>
         <Route element={<Demo1Layout />}>
           <Route path="/" element={<DefaultPage />} />
           <Route path="/ideas" element={<Ideas />} />
+          <Route path="/live" element={<Live />} />
+          <Route path="/live-client" element={<LiveClient />} />
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route path="/public-profile/profiles/default" element={<ProfileDefaultPage />} />
           <Route path="/public-profile/profiles/creator" element={<ProfileCreatorPage />} />
