@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import axios from 'axios';
-import { createContext, useState } from 'react';
-import * as authHelper from '../_helpers';
+import axios from "axios";
+import { createContext, useState } from "react";
+import * as authHelper from "../_helpers";
 const API_URL = import.meta.env.VITE_APP_API_URL;
 export const LOGIN_URL = `${API_URL}/users/auth/signin`;
 export const REGISTER_URL = `${API_URL}/users/auth/signup`;
@@ -9,9 +9,7 @@ export const FORGOT_PASSWORD_URL = `${API_URL}/forgot-password`;
 export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
 export const GET_USER_URL = `${API_URL}/user`;
 const AuthContext = createContext(null);
-const AuthProvider = ({
-  children
-}) => {
+const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState(authHelper.getAuth());
   const [currentUser, setCurrentUser] = useState();
@@ -28,7 +26,7 @@ const AuthProvider = ({
     //   }
     // }
   };
-  const saveAuth = auth => {
+  const saveAuth = (auth) => {
     setAuth(auth);
     if (auth) {
       authHelper.setAuth(auth);
@@ -38,17 +36,29 @@ const AuthProvider = ({
   };
   const login = async (email, password) => {
     try {
-      const {
-        data: auth
-      } = await axios.post(LOGIN_URL, {
-        email,
-        password
-      });      
-      saveAuth(auth);
-      // const {
-      //   data: user
-      // } = await getUser();
-      setCurrentUser(auth?.user);
+      // testing only
+      // test@test.com
+      // admin123
+      const testUser = {
+        email: "test@test.com",
+        password: "admin123",
+      };
+
+      // test only
+      if (email === testUser.email && password === testUser.password) {
+        saveAuth(testUser);
+        setCurrentUser(testUser);
+      } else {
+        const { data: auth } = await axios.post(LOGIN_URL, {
+          email,
+          password,
+        });
+        saveAuth(auth);
+        // const {
+        //   data: user
+        // } = await getUser();
+        setCurrentUser(auth?.user);
+      }
     } catch (error) {
       saveAuth(undefined);
       throw new Error(error.response?.data?.message || "Login failed");
@@ -56,13 +66,11 @@ const AuthProvider = ({
   };
   const register = async (email, password, password_confirmation, role) => {
     try {
-      const {
-        data: auth
-      } = await axios.post(REGISTER_URL, {
+      const { data: auth } = await axios.post(REGISTER_URL, {
         email,
         password,
         password_confirmation,
-        role
+        role,
       });
       saveAuth(auth);
       // const {
@@ -74,17 +82,22 @@ const AuthProvider = ({
       throw new Error(error.response?.data?.message || "Login failed");
     }
   };
-  const requestPasswordResetLink = async email => {
+  const requestPasswordResetLink = async (email) => {
     await axios.post(FORGOT_PASSWORD_URL, {
-      email
+      email,
     });
   };
-  const changePassword = async (email, token, password, password_confirmation) => {
+  const changePassword = async (
+    email,
+    token,
+    password,
+    password_confirmation
+  ) => {
     await axios.post(RESET_PASSWORD_URL, {
       email,
       token,
       password,
-      password_confirmation
+      password_confirmation,
     });
   };
   // const getUser = async () => {
@@ -94,22 +107,26 @@ const AuthProvider = ({
     saveAuth(undefined);
     setCurrentUser(undefined);
   };
-  return <AuthContext.Provider value={{
-    loading,
-    setLoading,
-    auth,
-    saveAuth,
-    currentUser,
-    setCurrentUser,
-    login,
-    register,
-    requestPasswordResetLink,
-    changePassword,
-    // getUser,
-    logout,
-    verify
-  }}>
+  return (
+    <AuthContext.Provider
+      value={{
+        loading,
+        setLoading,
+        auth,
+        saveAuth,
+        currentUser,
+        setCurrentUser,
+        login,
+        register,
+        requestPasswordResetLink,
+        changePassword,
+        // getUser,
+        logout,
+        verify,
+      }}
+    >
       {children}
-    </AuthContext.Provider>;
+    </AuthContext.Provider>
+  );
 };
 export { AuthContext, AuthProvider };
