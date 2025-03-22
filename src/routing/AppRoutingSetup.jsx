@@ -101,9 +101,9 @@ const AppRoutingSetup = () => {
 
           {/* BEGIN Classroom */}
           <Route path="/classroom" element={<ClassRoomShowcasePage />} />
-          <Route path="/classroom/course/:id" element={<CoursePage />} />
+          <Route path="/classroom/course/:courseId" element={<CoursePage />} />
           <Route
-            path="/classroom/course/:id/lecture/:id"
+            path="/classroom/course/:courseId/lecture/:lectureId"
             element={<LecturePage />}
           />
           {/* END classroom */}

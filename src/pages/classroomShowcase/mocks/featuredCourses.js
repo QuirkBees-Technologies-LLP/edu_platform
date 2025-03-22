@@ -25,46 +25,6 @@ You'll learn:
 This course includes practical examples and real-world projects that will help you apply your knowledge immediately.`,
     image:
       "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&q=80&w=1200",
-    chapters: [
-      {
-        title: "Getting Started with Tailwind CSS",
-        duration: "45 minutes",
-        lessons: [
-          {
-            title: "Introduction to Tailwind CSS",
-            duration: "10 min",
-            isPreview: true,
-          },
-          {
-            title: "Setting up your development environment",
-            duration: "15 min",
-          },
-          { title: "Understanding utility-first CSS", duration: "20 min" },
-        ],
-      },
-      {
-        title: "Building Responsive Layouts",
-        duration: "1 hour",
-        lessons: [
-          {
-            title: "Flexbox basics with Tailwind",
-            duration: "20 min",
-            isPreview: true,
-          },
-          { title: "Grid system mastery", duration: "25 min" },
-          { title: "Responsive design principles", duration: "15 min" },
-        ],
-      },
-      {
-        title: "Advanced Techniques",
-        duration: "1.25 hours",
-        lessons: [
-          { title: "Custom configurations", duration: "25 min" },
-          { title: "Component extraction", duration: "30 min" },
-          { title: "Performance optimization", duration: "20 min" },
-        ],
-      },
-    ],
   },
   {
     id: 2,

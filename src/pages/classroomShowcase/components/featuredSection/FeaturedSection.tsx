@@ -11,21 +11,24 @@ const FeaturedSection = ({ featuredCourses }) => {
         </p>
       </div>
 
-      <div className="grid grid-rows-4 gap-4 mb-12">
-        <div className="col-span-2 row-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="lg:row-span-2">
           <CourseCard {...featuredCourses[0]} large={true} />
         </div>
-        <div className="col-span-1">
-          <CourseCard {...featuredCourses[1]} />
-        </div>
-        <div className="col-span-1">
-          <CourseCard {...featuredCourses[2]} />
-        </div>
-        <div className="col-span-1">
-          <CourseCard {...featuredCourses[3]} />
-        </div>
-        <div className="col-span-1">
-          <CourseCard {...featuredCourses[4]} />
+        {/* 2x2 Grid of Featured Courses (Right Side) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="col-span-1">
+            <CourseCard {...featuredCourses[1]} />
+          </div>
+          <div className="col-span-1">
+            <CourseCard {...featuredCourses[2]} />
+          </div>
+          <div className="col-span-1">
+            <CourseCard {...featuredCourses[3]} />
+          </div>
+          <div className="col-span-1">
+            <CourseCard {...featuredCourses[4]} />
+          </div>
         </div>
       </div>
     </Fragment>
