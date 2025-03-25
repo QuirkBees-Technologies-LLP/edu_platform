@@ -35,7 +35,6 @@ const ClassRoomShowcasePage = () => {
           { email: "jenny@kteam.com", icon: "sms" },
         ]}
       />
-      <Container>Hola mundo</Container>
       <Container>
         <FeaturedSection featuredCourses={featuredCourses} />
       </Container>

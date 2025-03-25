@@ -89,6 +89,7 @@ import LiveClient from "../pages/live-client/LiveClient";
 import { ClassRoomShowcasePage } from "../pages/classroomShowcase";
 import CoursePage from "../pages/classroomShowcase/courses/coursePage";
 import LecturePage from "../pages/classroomShowcase/lecture/LecturePage";
+import ClassroomAdminPage from "../pages/classroomShowcase/admin/classroom.admin";
 const AppRoutingSetup = () => {
   return (
     <Routes>
@@ -106,6 +107,7 @@ const AppRoutingSetup = () => {
             path="/classroom/course/:courseId/lecture/:lectureId"
             element={<LecturePage />}
           />
+          <Route path="/classroom/admin" element={<ClassroomAdminPage />} />
           {/* END classroom */}
 
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
