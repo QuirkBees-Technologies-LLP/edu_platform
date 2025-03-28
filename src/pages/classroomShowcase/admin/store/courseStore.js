@@ -195,4 +195,63 @@ export const useCourseStore = create((set) => ({
         selectedCourse: updatedSelectedCourse,
       };
     }),
+
+  deleteCourse: (courseId) =>
+    set((state) => {
+      const newCourses = state.courses.filter((course) => course.id !== courseId);
+      return {
+        courses: newCourses,
+        selectedCourse: state.selectedCourse?.id === courseId ? null : state.selectedCourse,
+      };
+    }),
+
+  deleteSection: (courseId, sectionId) =>
+    set((state) => {
+      const newCourses = state.courses.map((course) => {
+        if (course.id === courseId) {
+          return {
+            ...course,
+            sections: course.sections.filter((section) => section.id !== sectionId),
+          };
+        }
+        return course;
+      });
+
+      const updatedSelectedCourse =
+        newCourses.find((course) => course.id === courseId) || null;
+
+      return {
+        courses: newCourses,
+        selectedCourse: updatedSelectedCourse,
+      };
+    }),
+
+  deleteLecture: (courseId, sectionId, lectureId) =>
+    set((state) => {
+      const newCourses = state.courses.map((course) => {
+        if (course.id === courseId) {
+          return {
+            ...course,
+            sections: course.sections.map((section) => {
+              if (section.id === sectionId) {
+                return {
+                  ...section,
+                  lectures: section.lectures.filter((lecture) => lecture.id !== lectureId),
+                };
+              }
+              return section;
+            }),
+          };
+        }
+        return course;
+      });
+
+      const updatedSelectedCourse =
+        newCourses.find((course) => course.id === courseId) || null;
+
+      return {
+        courses: newCourses,
+        selectedCourse: updatedSelectedCourse,
+      };
+    }),
 }));
