@@ -1,21 +1,62 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useMemo } from "react";
 import { Container } from "@/components";
 import { toAbsoluteUrl } from "@/utils";
 
 import { UserProfileHero } from "@/partials/heros";
 import CourseCard from "./components/courseCard";
+import CategoryFilter from "./components/CategoryFilter";
+import ProfessorFilter from "./components/ProfessorFilter";
+import FeaturedSection from "./components/featuredSection/FeaturedSection";
 
 // testing
-import featuredCourses from "./mocks/featuredCourses";
-import popularCourses from "./mocks/popularCourses";
-import FeaturedSection from "./components/featuredSection/FeaturedSection";
+// import featuredCourses from "./mocks/featuredCourses";
+// import popularCourses from "./mocks/popularCourses";
+import {
+  featuredCourses,
+  popularCourses,
+  generateUnifiedCourses,
+} from "./mocks/unifiedCourses";
 
 const ClassRoomShowcasePage = () => {
   const [visibleCourses, setVisibleCourses] = useState(9);
-  const hasMoreCourses = visibleCourses < popularCourses.length;
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedProfessor, setSelectedProfessor] = useState(null);
+
+  // Filter courses based on selected category and professor
+  const filteredCourses = useMemo(() => {
+    let filtered = popularCourses;
+
+    // Apply category filter
+    if (selectedCategory) {
+      filtered = filtered.filter(
+        (course) => course.category.id === selectedCategory
+      );
+    }
+
+    // Apply professor filter
+    if (selectedProfessor) {
+      filtered = filtered.filter(
+        (course) => course.instructor.id === selectedProfessor
+      );
+    }
+
+    return filtered;
+  }, [popularCourses, selectedCategory, selectedProfessor]);
+
+  const hasMoreCourses = visibleCourses < filteredCourses.length;
 
   const handleShowMore = () => {
-    setVisibleCourses((prev) => Math.min(prev + 9, popularCourses.length));
+    setVisibleCourses((prev) => Math.min(prev + 9, filteredCourses.length));
+  };
+
+  const handleCategoryChange = (categoryId) => {
+    setSelectedCategory(categoryId);
+    setVisibleCourses(9); // Reset visible courses when changing category
+  };
+
+  const handleProfessorChange = (professorId) => {
+    setSelectedProfessor(professorId);
+    setVisibleCourses(9); // Reset visible courses when changing professor
   };
 
   const image = (
@@ -24,6 +65,7 @@ const ClassRoomShowcasePage = () => {
       className="rounded-full border-3 border-success size-[100px] shrink-0"
     />
   );
+
   return (
     <Fragment>
       <UserProfileHero
@@ -47,9 +89,19 @@ const ClassRoomShowcasePage = () => {
           </p>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
+          <ProfessorFilter
+            selectedProfessor={selectedProfessor}
+            onProfessorChange={handleProfessorChange}
+          />
+
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={handleCategoryChange}
+          />
+
           <div className="grid grid-cols-3 gap-2">
-            {popularCourses.slice(0, visibleCourses).map((course, index) => (
+            {filteredCourses.slice(0, visibleCourses).map((course, index) => (
               <div key={index} className="aspect-square">
                 <CourseCard {...course} />
               </div>

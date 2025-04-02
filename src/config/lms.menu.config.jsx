@@ -64,16 +64,6 @@ export const MENU_SIDEBAR_LMS = [
         icon: "element-1",
         path: "/classroom/admin",
       },
-      {
-        title: "Adminv2",
-        icon: "element-1",
-        path: "/classroom/adminv2",
-      },
-      {
-        title: "Adminv3",
-        icon: "element-1",
-        path: "/classroom/adminv3",
-      },
     ],
   },
 ];
