@@ -2,12 +2,15 @@
 import axios from "axios";
 import { createContext, useState } from "react";
 import * as authHelper from "../_helpers";
+import * as lmsApi from "../../services/lms.api";
+
 const API_URL = import.meta.env.VITE_APP_API_URL;
 export const LOGIN_URL = `${API_URL}/users/auth/signin`;
 export const REGISTER_URL = `${API_URL}/users/auth/signup`;
 export const FORGOT_PASSWORD_URL = `${API_URL}/forgot-password`;
 export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
 export const GET_USER_URL = `${API_URL}/user`;
+
 const AuthContext = createContext(null);
 const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
@@ -36,42 +39,45 @@ const AuthProvider = ({ children }) => {
   };
   const login = async (email, password) => {
     try {
-      // testing only
-      // test@test.com
-      // admin123
-      const testUser = {
-        email: "test@test.com",
-        password: "admin123",
+      const data = await lmsApi.login(email, password);
+      const auth = {
+        token: data.token,
+        user: data.user,
       };
-
-      // test only
-      if (email === testUser.email && password === testUser.password) {
-        saveAuth(testUser);
-        setCurrentUser(testUser);
-      } else {
-        const { data: auth } = await axios.post(LOGIN_URL, {
-          email,
-          password,
-        });
-        saveAuth(auth);
-        // const {
-        //   data: user
-        // } = await getUser();
-        setCurrentUser(auth?.user);
-      }
+      saveAuth(auth);
+      setCurrentUser(auth?.user);
     } catch (error) {
       saveAuth(undefined);
       throw new Error(error.response?.data?.message || "Login failed");
     }
   };
-  const register = async (email, password, password_confirmation, role) => {
+  const register = async (
+    email,
+    password,
+    password_confirmation,
+    role = "USER",
+    tier = "FREE"
+  ) => {
     try {
-      const { data: auth } = await axios.post(REGISTER_URL, {
+      // const { data: auth } = await axios.post(REGISTER_URL, {
+      //   email,
+      //   password,
+      //   password_confirmation,
+      //   role,
+      //   tier,
+      // });
+      const credentials = {
         email,
-        password,
-        password_confirmation,
+        password: password_confirmation,
+        name: email,
+        tier,
         role,
-      });
+      };
+      const { data } = await lmsApi.register(credentials);
+      const auth = {
+        token: data.token,
+        user: data.user,
+      };
       saveAuth(auth);
       // const {
       //   data: user

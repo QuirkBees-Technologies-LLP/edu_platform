@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
-import CourseCard from "../courseCard";
+import CourseCard from "./courseCard";
 
-const FeaturedSection = ({ featuredCourses }) => {
+const FeaturedSection = ({ courses }) => {
   return (
     <Fragment>
       <div className="mb-8">
@@ -13,21 +13,21 @@ const FeaturedSection = ({ featuredCourses }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="lg:row-span-2">
-          <CourseCard {...featuredCourses[0]} large={true} />
+          <CourseCard {...courses[0]} large={true} />
         </div>
         {/* 2x2 Grid of Featured Courses (Right Side) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="col-span-1">
-            <CourseCard {...featuredCourses[1]} />
+            <CourseCard {...courses[1]} />
           </div>
           <div className="col-span-1">
-            <CourseCard {...featuredCourses[2]} />
+            <CourseCard {...courses[2]} />
           </div>
           <div className="col-span-1">
-            <CourseCard {...featuredCourses[3]} />
+            <CourseCard {...courses[3]} />
           </div>
           <div className="col-span-1">
-            <CourseCard {...featuredCourses[4]} />
+            <CourseCard {...courses[4]} />
           </div>
         </div>
       </div>

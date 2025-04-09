@@ -10,6 +10,22 @@ export const MENU_SIDEBAR_LMS = [
     path: "/ideas",
   },
   {
+    title: "LMS",
+    icon: "some-files",
+    children: [
+      {
+        title: "Home LMS",
+        icon: "some-files",
+        path: "/classroom",
+      },
+      {
+        title: "Admin LMS",
+        icon: "some-files",
+        path: "/classroom/admin",
+      },
+    ],
+  },
+  {
     title: "Live",
     icon: "some-files",
     path: "/live",
@@ -51,21 +67,21 @@ export const MENU_SIDEBAR_LMS = [
       },
     ],
   },
-  {
-    title: "LifeStyle",
-    children: [
-      {
-        title: "Video",
-        icon: "element-1",
-        path: "/classroom",
-      },
-      {
-        title: "Admin",
-        icon: "element-1",
-        path: "/classroom/admin",
-      },
-    ],
-  },
+  // {
+  //   title: "LifeStyle",
+  //   children: [
+  //     {
+  //       title: "Video",
+  //       icon: "element-1",
+  //       path: "/classroom",
+  //     },
+  //     {
+  //       title: "Admin",
+  //       icon: "element-1",
+  //       path: "/classroom/admin",
+  //     },
+  //   ],
+  // },
 ];
 export const MENU_MEGA_LMS = [
   {

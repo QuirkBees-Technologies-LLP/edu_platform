@@ -90,7 +90,7 @@ import { ClassRoomShowcasePage } from "../pages/classroomShowcase";
 import CoursePage from "../pages/classroomShowcase/courses/coursePage";
 import LecturePage from "../pages/classroomShowcase/lecture/LecturePage";
 import ClassroomAdminPage from "../pages/classroomShowcase/admin/classroom.admin";
-import ClassroomAdminPagev2 from "../pages/classroomShowcase/admin/classroom.adminv2";
+
 const AppRoutingSetup = () => {
   return (
     <Routes>
@@ -109,7 +109,6 @@ const AppRoutingSetup = () => {
             element={<LecturePage />}
           />
           <Route path="/classroom/admin" element={<ClassroomAdminPage />} />
-          <Route path="/classroom/adminv2" element={<ClassroomAdminPagev2 />} />
           {/* END classroom */}
 
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />

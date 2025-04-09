@@ -2,25 +2,27 @@ import { Fragment, useState, useMemo } from "react";
 import { Container } from "@/components";
 import { toAbsoluteUrl } from "@/utils";
 
+import { useAuthContext } from "../../auth/useAuthContext";
+
 import { UserProfileHero } from "@/partials/heros";
 import CourseCard from "./components/courseCard";
 import CategoryFilter from "./components/CategoryFilter";
 import ProfessorFilter from "./components/ProfessorFilter";
-import FeaturedSection from "./components/featuredSection/FeaturedSection";
+import FeaturedSection from "./components/FeaturedSection";
 
-// testing
-// import featuredCourses from "./mocks/featuredCourses";
-// import popularCourses from "./mocks/popularCourses";
 import {
   featuredCourses,
   popularCourses,
   generateUnifiedCourses,
 } from "./mocks/unifiedCourses";
+import { ClassroomShowcaseContent } from "./ClassroomShowcaseContent";
 
 const ClassRoomShowcasePage = () => {
   const [visibleCourses, setVisibleCourses] = useState(9);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProfessor, setSelectedProfessor] = useState(null);
+
+  const { auth } = useAuthContext();
 
   // Filter courses based on selected category and professor
   const filteredCourses = useMemo(() => {
@@ -69,57 +71,15 @@ const ClassRoomShowcasePage = () => {
   return (
     <Fragment>
       <UserProfileHero
-        name="Jenny Klabber"
+        name={auth?.user?.name}
         image={image}
         info={[
-          { label: "KeenThemes", icon: "abstract-41" },
-          { label: "SF, Bay Area", icon: "geolocation" },
-          { email: "jenny@kteam.com", icon: "sms" },
+          { label: `${auth?.user?.tier}`, icon: "abstract-41" },
+          { label: `${auth?.user?.role}`, icon: "geolocation" },
+          { email: `${auth?.user?.email}`, icon: "sms" },
         ]}
       />
-      <Container>
-        <FeaturedSection featuredCourses={featuredCourses} />
-      </Container>
-
-      <Container>
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Popular Courses</h2>
-          <p className="text-gray-600 mt-2">
-            Explore our most popular learning resources
-          </p>
-        </div>
-
-        <div className="space-y-6">
-          <ProfessorFilter
-            selectedProfessor={selectedProfessor}
-            onProfessorChange={handleProfessorChange}
-          />
-
-          <CategoryFilter
-            selectedCategory={selectedCategory}
-            onCategoryChange={handleCategoryChange}
-          />
-
-          <div className="grid grid-cols-3 gap-2">
-            {filteredCourses.slice(0, visibleCourses).map((course, index) => (
-              <div key={index} className="aspect-square">
-                <CourseCard {...course} />
-              </div>
-            ))}
-          </div>
-
-          {hasMoreCourses && (
-            <div className="flex justify-center">
-              <button
-                onClick={handleShowMore}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Show More Courses
-              </button>
-            </div>
-          )}
-        </div>
-      </Container>
+      <ClassroomShowcaseContent />
     </Fragment>
   );
 };
