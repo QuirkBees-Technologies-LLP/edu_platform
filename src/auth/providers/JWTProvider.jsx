@@ -73,11 +73,13 @@ const AuthProvider = ({
       throw new Error(error.response?.data?.message || "Login failed");
     }
   };
-  const register = async (email, password, password_confirmation, role) => {
+  const register = async (first_name, last_name, email, password, password_confirmation, role) => {
     try {
       const {
         data: auth
       } = await axios.post(REGISTER_URL, {
+        first_name,
+        last_name,
         email,
         password,
         password_confirmation,
