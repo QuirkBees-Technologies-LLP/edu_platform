@@ -3,10 +3,12 @@ import { Login, ResetPassword, ResetPasswordChange, ResetPasswordChanged, ResetP
 import { AuthBrandedLayout } from '@/layouts/auth-branded';
 import { AuthLayout } from '@/layouts/auth';
 import { CheckEmail } from '@/auth/pages/jwt';
+import { AdminLogin } from './pages/jwt/AdminLogin';
 const AuthPage = () => <Routes>
     <Route element={<AuthBrandedLayout />}>
       <Route index element={<Login />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/2fa" element={<TwoFactorAuth />} />
       <Route path="/check-email" element={<CheckEmail />} />

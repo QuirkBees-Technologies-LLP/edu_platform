@@ -23,6 +23,7 @@ const AppRouting = () => {
       });
     }
   });
+  
   useEffect(() => {
     if (!firstLoad) {
       setProgressBarLoader(true);

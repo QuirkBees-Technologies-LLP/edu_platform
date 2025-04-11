@@ -8,6 +8,7 @@ import { DropdownUserLanguages } from './DropdownUserLanguages';
 import { useSettings } from '@/providers/SettingsProvider';
 import { DefaultTooltip, KeenIcon } from '@/components';
 import { MenuItem, MenuLink, MenuSub, MenuTitle, MenuSeparator, MenuArrow, MenuIcon } from '@/components/menu';
+import { useDispatch } from 'react-redux';
 const DropdownUser = ({
   menuItemRef
 }) => {
@@ -18,6 +19,7 @@ const DropdownUser = ({
   const {
     logout
   } = useAuthContext();
+  const dispatch = useDispatch();
   const {
     isRTL
   } = useLanguage();
@@ -27,16 +29,20 @@ const DropdownUser = ({
       themeMode: newThemeMode
     });
   };
+    const { auth } = useAuthContext();
+
+    const userEmail = auth?.user?.email;
+  
   const buildHeader = () => {
     return <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
         <div className="flex items-center gap-2">
           <img className="size-9 rounded-full border-2 border-success" src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="" />
           <div className="flex flex-col gap-1.5">
             <Link to="/account/hoteme/get-stard" className="text-sm text-gray-800 hover:text-primary font-semibold leading-none">
-              Cody Fisher
+              {/* Cody Fisher */}
             </Link>
-            <a href="mailto:c.fisher@gmail.com" className="text-xs text-gray-600 hover:text-primary font-medium leading-none">
-              c.fisher@gmail.com
+            <a href={userEmail} className="break-all text-xs text-gray-600 hover:text-primary font-medium leading-none">
+              {userEmail}
             </a>
           </div>
         </div>
@@ -199,7 +205,7 @@ const DropdownUser = ({
         </div>
 
         <div className="menu-item px-4 py-1.5">
-          <a onClick={logout} className="btn btn-sm btn-light justify-center">
+          <a onClick={()=> logout(dispatch)} className="btn btn-sm btn-light justify-center">
             <FormattedMessage id="USER.MENU.LOGOUT" />
           </a>
         </div>
