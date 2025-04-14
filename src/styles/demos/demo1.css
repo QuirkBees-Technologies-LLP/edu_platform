@@ -399,4 +399,31 @@ chat */
   .avatar_img img {
 	border-radius: 50px;
   }
-  
+  .ql-toolbar.ql-snow {
+	border-radius: 5px 5px 0 0;
+  }
+  .ql-toolbar.ql-snow + .ql-container.ql-snow {
+	border-radius: 0 0 5px 5px;
+  }
+  .ql-snow.ql-toolbar .ql-picker-label:hover,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke {
+	color: var(--tw-primary) !important;
+	stroke: var(--tw-primary) !important;
+  }
+  .ql-snow.ql-toolbar button:hover .ql-stroke {
+	stroke: var(--tw-primary) !important;
+	}
+.ql-snow.ql-toolbar button:hover .ql-fill {
+	fill: var(--tw-primary) !important;
+}
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected {
+	color: var(--tw-primary) !important;
+}
+.ql-snow.ql-toolbar .ql-picker-item:hover {
+	color: var(--tw-primary) !important;
+}
+.validation-error-border{
+	border-color: var(--tw-danger) !important;
+}
+.validation-error-border .ql-snow{
+	border-color: var(--tw-danger) !important;
+}

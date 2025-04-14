@@ -40,10 +40,10 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
         <>
             {!isFullScreen && <div className='chat-components-header p-2 border border-b-0'>
                 <div className='chat-components-header-top flex justify-between align-center'>
-                    <button onClick={() => setIsFullScreen((prev) => !prev)} class="btn btn-xs btn-icon btn-primary btn-outline ">
+                    <button onClick={() => setIsFullScreen((prev) => !prev)} className="btn btn-xs btn-icon btn-primary btn-outline ">
                         <ArrowBigRight size={18}/>
                     </button>
-                    <button class="btn btn-xs btn-primary btn-outline">
+                    <button className="btn btn-xs btn-primary btn-outline">
                     <UserRound size={16}/>
                         12354
                     </button>

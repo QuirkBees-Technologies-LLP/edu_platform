@@ -22,3 +22,20 @@ export const formatSecondsToHMS = (secondsInput) => {
 
   return parts.join(' ');
 };
+
+
+// Function to strip HTML tags
+const stripHtml = (html) => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+  return tempDiv.textContent || tempDiv.innerText || "";
+};
+
+export const TruncatedText = ({ content, maxLength = 100 }) => {
+  const plainText = stripHtml(content);
+  const displayText = plainText.length > maxLength 
+    ? plainText.substring(0, maxLength) + "..." 
+    : plainText;
+
+  return <p>{displayText}</p>;
+};
