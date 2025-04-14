@@ -9,6 +9,7 @@ import { useCreateLiveSessionMutation } from '../../../store/api/admin/adminLive
 import { useNavigate } from 'react-router';
 import { v4 as uuidv4 } from "uuid";
 import TagInput from '../../../components/ui/tagInput';
+import RichTextEditor from '../../../components/ui/rich-editor';
 
 const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
@@ -154,16 +155,13 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                                 <label className="form-label text-gray-900 gap-1">Description<span className="text-danger">
                                     *
                                 </span></label>
-                                <textarea
-                                    type="text"
-                                    placeholder="Enter a description"
-                                    autoComplete="off"
-                                    rows="2"
-                                    {...formik.getFieldProps("description")}
-                                    className={`textarea ${formik.errors.description && formik.touched.description
-                                        ? "border border-danger"
-                                        : ""
-                                        }`}
+                                <RichTextEditor
+                                    value={formik.values.description}
+                                    onChange={(value) => formik.setFieldValue('description', value)}
+                                    onBlur={() => formik.setFieldTouched('description', false)}
+                                    theme="snow"
+                                    touched={formik.touched.description}
+                                    error={formik.errors.description}
                                 />
                                 {formik.touched.description && formik.errors.description && (
                                     <span role="alert" className="text-danger text-xs mt-1">
@@ -202,6 +200,8 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                                 <TagInput
                                     value={formik.values.tags}
                                     onChange={(newTags) => formik.setFieldValue('tags', newTags)}
+                                    touched={formik.touched.tags}
+                                    error={formik.errors.tags}
                                 />
                                 {formik.touched.tags && formik.errors.tags && (
                                     <span role="alert" className="text-danger text-xs mt-1">
@@ -234,8 +234,11 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                                             <div
                                                 {...dragProps}
                                                 className={`
-        border-2 border-dashed rounded-lg text-center transition-colors 
-        p-5 ${isDragging ? 'bg-gray-100' : 'bg-white'} border-gray-300`}
+        border border-dashed rounded-lg text-center transition-colors 
+        p-5 ${isDragging ? 'bg-gray-100' : 'bg-white'} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
+                                                        ? "validation-error-border"
+                                                        : ""
+                                                    }`}
                                             >
                                                 {fileList.length === 0 ? (
                                                     <>

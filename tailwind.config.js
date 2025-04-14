@@ -718,7 +718,7 @@ module.exports = {
         }
       });
     },
-    require('@tailwindcss/line-clamp'),
+    // require('@tailwindcss/line-clamp'),
     require('tailwindcss-animate'), 
     require('./src/plugins/plugin'),
     require('./src/plugins/components/theme'),

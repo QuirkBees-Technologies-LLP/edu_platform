@@ -942,8 +942,13 @@ export const STUDENT_MENU = [
 export const ADMIN_MENU = [
   {
     title: 'Ideas',
-    icon: 'some-files',
+    icon: 'paper-plane',
     path: '/ideas'
+  },
+  {
+    title: 'Courses',
+    icon: 'book-open',
+    path: '/courses'
   },
   {
     title: 'Video Library',
@@ -952,7 +957,7 @@ export const ADMIN_MENU = [
   },
   {
     title: 'Live Sessions',
-    icon: 'some-files',
+    icon: 'profile-circle',
     path: '/live-session'
   },
 ];

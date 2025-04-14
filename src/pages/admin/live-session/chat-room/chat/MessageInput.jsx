@@ -95,7 +95,7 @@ export const MessageInputUI = () => {
         ) : (
           <>
             {/* <SendArrow /> */}
-            <i class="ki-filled ki-arrow-right"></i>
+            <i className="ki-filled ki-arrow-right"></i>
             <div>{269 - text.length}</div>
           </>
         )}

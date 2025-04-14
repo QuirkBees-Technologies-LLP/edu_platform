@@ -11,6 +11,7 @@ import DeleteAdminTradeIdeas from './DeleteAdminTradeIdeas';
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from '@/components';
 import TradeImageSlider from './TradeImageSlider';
 import { useLazyGetAdminTradeIdeasQuery } from '../../../store/api/admin/adminTradeIdeasApiSlice';
+import { TruncatedText } from '../../../lib/utils';
 
 const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -129,9 +130,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
       }) => <DataGridColumnHeader title='Message' column={column} />,
       enableSorting: true,
       cell:info => 
-      <span className="leading-none text-gray-800 font-normal">
-        {truncateText(info.row.original.message, 75)}
-      </span>,
+      <TruncatedText content={info.row.original.message} maxLength={50} />,
       meta: {
         headerClassName: 'min-w-[225px]'
       }
