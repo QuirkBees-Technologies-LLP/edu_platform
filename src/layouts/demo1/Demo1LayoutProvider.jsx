@@ -2,12 +2,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { useMenuChildren } from '@/components/menu';
-import { MENU_SIDEBAR } from '@/config/menu.config';
+import { STUDENT_MENU, ADMIN_MENU } from '@/config/menu.config';
 import { useScrollPosition } from '@/hooks/useScrollPosition';
 import { useMenus } from '@/providers';
 import { useLayout } from '@/providers';
 import { deepMerge } from '@/utils';
 import { demo1LayoutConfig } from './';
+import { useAuthContext } from '../../auth/useAuthContext';
 
 // Interface defining the structure for layout provider properties
 
@@ -61,10 +62,13 @@ const Demo1LayoutProvider = ({
   const {
     setMenuConfig
   } = useMenus(); // Accesses menu configuration methods
-  const secondaryMenu = useMenuChildren(pathname, MENU_SIDEBAR, 0); // Retrieves the secondary menu
+  const { auth } = useAuthContext();
+  const isAdmin = auth?.user?.role === "educator";
+  const SIDEBAR_MENU = isAdmin ? ADMIN_MENU : STUDENT_MENU;
+  const secondaryMenu = useMenuChildren(pathname, SIDEBAR_MENU, 0); // Retrieves the secondary menu
 
   // Sets the primary and secondary menu configurations
-  setMenuConfig('primary', MENU_SIDEBAR);
+  setMenuConfig('primary', SIDEBAR_MENU);
   setMenuConfig('secondary', secondaryMenu);
   const {
     getLayout,

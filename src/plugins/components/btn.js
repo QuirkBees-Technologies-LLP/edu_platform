@@ -14,7 +14,7 @@ export default plugin(({addComponents, theme}) => {
       'padding-inline-start': theme('custom.components.btn.DEFAULT.px'),
       'padding-inline-end': theme('custom.components.btn.DEFAULT.px'),
       'gap': theme('custom.components.btn.DEFAULT.gap'),
-      // 'border': '1px solid transparent',      
+      'border': '1px solid transparent',      
       'font-weight': theme('custom.components.btn.DEFAULT.fontWeight'),
       'font-size': theme('custom.components.btn.DEFAULT.fontSize'),
       'outline': 'none'
