@@ -9,10 +9,10 @@ import {
   X,
   Plus,
 } from "lucide-react";
-import { getLecturesBySectionId } from "../../../../../../services/lms.api";
-import { useAuthContext } from "../../../../../../auth/useAuthContext";
-import { useSectionStore } from "@/store/sectionStore";
-import { useLectureStore } from "@/store/lectureStore";
+import { getLecturesBySectionId } from "../../../../../../../services/lms.api";
+import { useAuthContext } from "../../../../../../../auth/useAuthContext";
+import { useSectionStore } from "@/store/zustand/sectionStore";
+import { useLectureStore } from "@/store/zustand/lectureStore";
 import { useDrag, useDrop } from "react-dnd";
 
 const SectionItem = (props) => {

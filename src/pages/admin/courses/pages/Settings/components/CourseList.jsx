@@ -6,8 +6,8 @@ import CreateCourseModal from "./CreateCourseModal";
 import DraggableCourseCard from "./DraggableCourseCard";
 import { toast } from "react-hot-toast";
 
-import { useAuthContext } from "../../../../../auth/useAuthContext";
-import { useCourseStore } from "../../../../../store/courseStore";
+import { useAuthContext } from "../../../../../../auth/useAuthContext";
+import { useCourseStore } from "../../../../../../store/zustand/courseStore";
 
 const CourseList = (props) => {
   const { onCourseSelect } = props;

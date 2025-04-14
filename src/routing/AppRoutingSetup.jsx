@@ -108,6 +108,7 @@ const AppRoutingSetup = () => {
             />
             <Route path="/ideas" element={<ClientTradeIdeas />} />
             <Route path="/video-library" element={<VideoLibrary />} />
+            <Route path="/courses" element={<Courses />} />
           </Route>
         ) : (
           <Route element={<Demo1Layout />}>

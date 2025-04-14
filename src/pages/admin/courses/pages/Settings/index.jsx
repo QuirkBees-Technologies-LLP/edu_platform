@@ -9,11 +9,11 @@ import {
   X,
 } from "lucide-react";
 
-import { useCourseStore } from "../../../../store/courseStore";
+import { useCourseStore } from "../../../../../store/zustand/courseStore";
 
 // components
-import CourseList from "../../../admin/courses/pages/Settings/components/CourseList";
-import CourseContent from "../../../admin/courses/pages/Settings/components/CourseContent";
+import CourseList from "./components/CourseList";
+import CourseContent from "./components/CourseContent";
 
 const SettingsSection = () => {
   const { selectedCourse, clearSelectedCourse, setSelectedCourse } =

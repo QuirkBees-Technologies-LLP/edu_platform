@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Plus, X, Check } from "lucide-react";
-import { useSectionStore } from "@/store/sectionStore";
-import { useLectureStore } from "@/store/lectureStore";
+import { useSectionStore } from "@/store/zustand/sectionStore";
+import { useLectureStore } from "@/store/zustand/lectureStore";
 import { useAuthContext } from "@/auth/useAuthContext";
 import DraggableList from "./DraggableList";
 // import SectionItem from "./SectionItem";

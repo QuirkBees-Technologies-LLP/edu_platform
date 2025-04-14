@@ -13,8 +13,8 @@ import {
 import CourseForm from "./forms/CourseForm";
 import { toast } from "react-hot-toast";
 
-import { useCourseStore } from "../../../../../store/courseStore";
-import { useAuthContext } from "../../../../../auth/useAuthContext";
+import { useCourseStore } from "../../../../../../store/zustand/courseStore";
+import { useAuthContext } from "../../../../../../auth/useAuthContext";
 
 const CreateCourseModal = ({
   isOpen,

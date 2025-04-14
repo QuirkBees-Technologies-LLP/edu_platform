@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuthContext } from "@/auth/useAuthContext";
-import { useLectureStore } from "@/store/lectureStore";
-import { useSectionStore } from "@/store/sectionStore";
+import { useLectureStore } from "@/store/zustand/lectureStore";
+import { useSectionStore } from "@/store/zustand/sectionStore";
 import TiptapEditor from "./TiptapEditor";
 import LectureFields from "./LectureFields";
-import { getLectureById } from "../../../../../../services/lms.api";
+import { getLectureById } from "../../../../../../../services/lms.api";
 
 const LectureContentEditor = ({ lecture, courseId }) => {
   const [isSaving, setIsSaving] = useState(false);

@@ -3,7 +3,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import SectionList from "./SectionList";
 import LectureContentEditor from "./lectures/LectureContentEditor";
-import { useLectureStore } from "@/store/lectureStore";
+import { useLectureStore } from "@/store/zustand/lectureStore";
 import { useAuthContext } from "@/auth/useAuthContext";
 
 const CourseContent = ({ courseId }) => {
