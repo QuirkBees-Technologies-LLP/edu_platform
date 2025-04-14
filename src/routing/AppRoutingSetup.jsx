@@ -89,6 +89,7 @@ import ClientTradeIdeas from "../pages/client/client-trade-ideas/ClientTradeIdea
 import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionView";
 import ClientLiveSession from "../pages/client/client-live-session/ClientLiveSession";
 import ClientViewLiveSession from "../pages/client/client-live-session/ClientViewLiveSession";
+import Courses from "../pages/admin/courses/Courses";
 
 const AppRoutingSetup = () => {
   const { auth } = useAuthContext();
@@ -109,6 +110,7 @@ const AppRoutingSetup = () => {
           <Route element={<Demo1Layout />}>
             <Route path="/" element={<DefaultPage />} />
             <Route path="/ideas" element={<AdminTradeIdeas />} />
+            <Route path="/courses" element={<Courses />} />
             <Route path="/live-session" element={<LiveSession />} />
             <Route path="/live-session/:callId" element={<AdminLiveSessionView />} />
             <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />

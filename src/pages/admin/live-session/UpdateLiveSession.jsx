@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import TagInput from '../../../components/ui/tagInput';
 import * as Yup from "yup";
 import { useCall } from '@stream-io/video-react-sdk';
+import RichTextEditor from '../../../components/ui/rich-editor';
 
 const UpdateLiveSession = ({ selectedRow }) => {
     const { auth } = useAuthContext();
@@ -24,7 +25,13 @@ const UpdateLiveSession = ({ selectedRow }) => {
 
     const updateSchema = Yup.object().shape({
         title: Yup.string().required("Title is required"),
-        description: Yup.string().required("Description is required"),
+        description: Yup.string()
+            .required('Description is required')
+            .test(
+                'is-not-empty',
+                'Description cannot be empty',
+                (value) => value && value.replace(/<(.|\n)*?>/g, '').trim().length > 0
+            ),
         category: Yup.string()
             .required("Category is required"),
         tags: Yup.array()
@@ -69,6 +76,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
             });
         }
     }, [call?.state?.custom, educatorId]);
+    console.log(formik, "formik");
 
     return (
         <form onSubmit={formik.handleSubmit}>
@@ -92,12 +100,12 @@ const UpdateLiveSession = ({ selectedRow }) => {
                 <div className="col-span-6">
                     <div className="flex flex-col gap-1">
                         <label className="form-label text-gray-900 gap-1">Description<span className="text-danger">*</span></label>
-                        <textarea
-                            placeholder="Enter a description"
-                            autoComplete="off"
-                            rows="2"
-                            {...formik.getFieldProps("description")}
-                            className={`textarea ${formik.errors.description && formik.touched.description ? "border border-danger" : ""}`}
+                        <RichTextEditor
+                            value={formik.values.description}
+                            onChange={(value) => formik.setFieldValue('description', value)}
+                            onBlur={() => formik.setFieldTouched('description', false)}
+                            touched={formik.touched.description}
+                            error={formik.errors.description}
                         />
                         {formik.touched.description && formik.errors.description && (
                             <span role="alert" className="text-danger text-xs mt-1">{formik.errors.description}</span>
@@ -127,6 +135,8 @@ const UpdateLiveSession = ({ selectedRow }) => {
                         <TagInput
                             value={formik.values.tags}
                             onChange={(newTags) => formik.setFieldValue('tags', newTags)}
+                            touched={formik.touched.tags}
+                            error={formik.errors.tags}
                         />
                         {formik.touched.tags && formik.errors.tags && (
                             <span role="alert" className="text-danger text-xs mt-1">{formik.errors.tags}</span>

@@ -8,6 +8,7 @@ import { ImageInput } from '@/components/image-input';
 import { Alert } from '../../../components/alert/Alert';
 import { toast } from 'sonner';
 import { useCreateTradeIdeasMutation, useUpdateTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
+import RichTextEditor from '../../../components/ui/rich-editor';
 
 const CreateTradeIdeas = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
@@ -246,16 +247,13 @@ const CreateTradeIdeas = forwardRef(({ isCreateOpen, handleCloseCreate, selected
                                 <label className="form-label text-gray-900 gap-1">Message <span className="text-danger">
                                     *
                                 </span></label>
-                                <textarea
-                                    type="text"
-                                    placeholder="Enter a message"
-                                    autoComplete="off"
-                                    rows="2"
-                                    {...formik.getFieldProps("message")}
-                                    className={`textarea ${formik.errors.message && formik.touched.message
-                                        ? "border border-danger"
-                                        : ""
-                                        }`}
+                                <RichTextEditor
+                                    value={formik.values.message}
+                                    onChange={(value) => formik.setFieldValue('message', value)}
+                                    onBlur={() => formik.setFieldTouched('message', true)}
+                                    theme="snow"
+                                    touched={formik.touched.message}
+                                    error={formik.errors.message}
                                 />
                                 {formik.touched.message && formik.errors.message && (
                                     <span role="alert" className="text-danger text-xs mt-1">

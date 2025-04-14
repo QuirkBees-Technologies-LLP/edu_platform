@@ -85,7 +85,7 @@ const ClientLiveSessionList = ({ userId, userToken }) => {
                                 </div>
                                 <div className="session-content">
                                     <h5 class="text-black text-md font-semibold" onClick={() => navigate(`/live-session/${stream.id}`)}>{stream?.state?.custom?.title}</h5>
-                                    <h6 class="text-black text-sm text-gray-700 hover:text-gray-900">{stream?.state?.custom?.description}</h6>
+                                    <h6 class="text-black text-sm text-gray-700 hover:text-gray-900">mbAdmin</h6>
                                     <div className="flex gap-2 my-3">
                                         <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">Capa</span>
                                         <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">Espanol</span>

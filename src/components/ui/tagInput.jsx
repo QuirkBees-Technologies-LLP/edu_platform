@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
-const TagInput = ({ value, onChange }) => {
+const TagInput = ({ value, onChange, touched, error }) => {
   const [input, setInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -22,9 +22,8 @@ const TagInput = ({ value, onChange }) => {
 
   return (
     <div
-      className={`w-full rounded-md px-3 py-2 flex flex-wrap items-center gap-2 border transition-colors duration-150 ${
-        isFocused ? 'border-primary' : 'border-gray-300 hover:border-gray-400'
-      }`}
+      className={`w-full rounded-md px-3 py-2 flex flex-wrap items-center gap-2 border transition-colors duration-150 ${isFocused ? 'border-primary' : 'border-gray-300 hover:border-gray-400'
+        } ${touched && error ? 'validation-error-border' : ''}`}
     >
       {value.map((tag, index) => (
         <span

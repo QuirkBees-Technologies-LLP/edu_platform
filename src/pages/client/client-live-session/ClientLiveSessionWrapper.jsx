@@ -1,24 +1,36 @@
 import { useCall, useCallStateHooks } from '@stream-io/video-react-sdk'
-import React from 'react'
+import React, { useState } from 'react'
 import ChatContainer from './chat-room/chat/ChatContainer'
 import ClientLiveSessionPlayer from './ClientLiveSessionPlayer'
 import { useEventContext } from './chat-room/context/EventContext'
 import { useResponsive } from '../../../hooks'
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
+import truncate from 'html-truncate'
 
 
 const ClientLiveSessionWrapper = ({ client, callId, token }) => {
+  const [showFull, setShowFull] = useState(false);
+  // Truncated content
   const isMdUp = useResponsive('up', 'md'); // matches Tailwind's md: 768px+
   const call = useCall();
   const { useCallCustomData } = useCallStateHooks();
   const custom = useCallCustomData();
-
+  
   const { title, description, tags } = custom;
+  const maxLength = 150
+  
+  const truncatedContent = truncate(description, maxLength, { keepImageTag: false });
 
   const {
     isFullScreen,
   } = useEventContext();
+
+   // Handler for toggling
+   const handleToggle = (e) => {
+    e.preventDefault();
+    setShowFull(!showFull);
+  };
 
   return (
     <div className='container-fluid'>
@@ -49,11 +61,27 @@ const ClientLiveSessionWrapper = ({ client, callId, token }) => {
               </div>
               <div className="card bg-light">
                 <div className="card-body p-5">
-                  <p className='text-sm font-semibold text-gray-800'>
+                  {/* <p className='text-sm font-semibold text-gray-800'>
                     {description}
-                  </p>
+                  </p> */}
+                  <div>
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: showFull ? description : truncatedContent,
+                      }}
+                      className="text-sm font-semibold text-gray-800"
+                    />
+                    {description.length > maxLength && (
+                      <span
+                        onClick={handleToggle}
+                        className="text-md font-semibold text-primary cursor-pointer"
+                      >
+                        {showFull ? ' Show Less' : 'Show More'}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex gap-2 my-3">
-                    {tags?.map((tag)=> {
+                    {tags?.map((tag) => {
                       return (
                         <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">{tag}</span>
                       )
