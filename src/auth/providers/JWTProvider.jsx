@@ -6,6 +6,7 @@ import { set } from 'date-fns';
 import { logoutUser, setToken } from '../../store/reducer/authSlice';
 const API_URL = import.meta.env.VITE_APP_API_URL;
 export const LOGIN_URL = `${API_URL}/users/auth/signin`;
+export const ADMIN_LOGIN_URL = `${API_URL}/admin/auth/signin`;
 export const REGISTER_URL = `${API_URL}/users/auth/signup`;
 export const FORGOT_PASSWORD_URL = `${API_URL}/forgot-password`;
 export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
@@ -73,6 +74,27 @@ const AuthProvider = ({
       throw new Error(error.response?.data?.message || "Login failed");
     }
   };
+
+  const adminLogin = async (email, password, dispatch) => {
+    try {
+      const {
+        data: auth
+      } = await axios.post(ADMIN_LOGIN_URL, {
+        email,
+        password
+      });      
+      saveAuth(auth);
+      // const {
+        //   data: user
+        // } = await getUser();
+        dispatch(setToken(auth.token));
+      setCurrentUser(auth?.user);
+    } catch (error) {
+      saveAuth(undefined);
+      throw new Error(error.response?.data?.message || "Login failed");
+    }
+  };
+
   const register = async (first_name, last_name, email, password, password_confirmation, role) => {
     try {
       const {
@@ -125,6 +147,7 @@ const AuthProvider = ({
     currentUser,
     setCurrentUser,
     login,
+    adminLogin,
     register,
     requestPasswordResetLink,
     changePassword,

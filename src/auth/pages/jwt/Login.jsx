@@ -194,15 +194,15 @@ const Login = () => {
           {loading ? "Please wait..." : "Sign In"}
         </button>
 
-        {/* <button
+        <button
           onClick={(e) => {
             e.preventDefault()
             navigate("/auth/admin/login");
           }}
           className="btn  btn-light flex justify-center grow"
         >
-          Admin Login
-        </button> */}
+          Admin Sign In
+        </button>
       </form>
     </div>
   );
