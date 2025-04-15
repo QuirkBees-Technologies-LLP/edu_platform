@@ -427,3 +427,6 @@ chat */
 .validation-error-border .ql-snow{
 	border-color: var(--tw-danger) !important;
 }
+.ql-editor .ql-blank:active {
+	border-color: var(--tw-primary) !important;
+}

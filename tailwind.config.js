@@ -15,7 +15,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        'pink-gradient': 'linear-gradient(90deg, rgba(135, 40, 117, 1) 0%, rgba(219, 37, 59, 1) 100%)',
+        'pink-gradient': 'linear-gradient(90deg,rgba(228, 178, 89, 1) 0%, rgba(166, 109, 10, 1) 46%)',
       },
       utilities: {
         '.bg-pink-gradient': {
@@ -58,9 +58,9 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#a21e70',
-                active: '#cb258c',
-                light: '#a21e701c',
+                default: '#C88A21',
+                active: '#a67825',
+                light: '#C88A211c',
                 clarity: 'rgba(217, 152, 184, 0.20)',
                 inverse: '#ffffff'
               },
@@ -123,8 +123,8 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#b7217e',
-                active: '#cb258c',
+                default: '#C88A21',
+                active: '#a67825',
                 light: '#b7217e26',
                 clarity: 'rgba(217, 152, 184, 0.20)',
                 inverse: '#ffffff'
