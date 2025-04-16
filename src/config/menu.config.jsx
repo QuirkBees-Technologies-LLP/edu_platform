@@ -397,6 +397,7 @@ export const MENU_SIDEBAR = [
     icon: 'note-2',
     disabled: true
   }];
+
 export const MENU_MEGA = [{
   title: 'Home',
   path: '/'
@@ -961,3 +962,73 @@ export const ADMIN_MENU = [
     path: '/live-session'
   },
 ];
+
+
+export const sideMenus = {
+  admin: [
+    {
+      title: 'Educators',
+      icon: 'paper-plane',
+      path: '/educators'
+    },
+    {
+      title: 'Ideas',
+      icon: 'paper-plane',
+      path: '/ideas'
+    },
+    {
+      title: 'Courses',
+      icon: 'book-open',
+      path: '/courses'
+    },
+    {
+      title: 'Video Library',
+      icon: 'some-files',
+      path: '/video-library'
+    },
+    {
+      title: 'Live Sessions',
+      icon: 'profile-circle',
+      path: '/live-session'
+    },
+  ],
+  educator: [
+    {
+      title: 'Ideas',
+      icon: 'paper-plane',
+      path: '/ideas'
+    },
+    {
+      title: 'Courses',
+      icon: 'book-open',
+      path: '/courses'
+    },
+    {
+      title: 'Video Library',
+      icon: 'some-files',
+      path: '/video-library'
+    },
+    {
+      title: 'Live Sessions',
+      icon: 'profile-circle',
+      path: '/live-session'
+    },
+  ],
+  student: [
+    {
+      title: 'Ideas',
+      icon: 'some-files',
+      path: '/ideas'
+    },
+    {
+      title: 'Video Library',
+      icon: 'some-files',
+      path: '/video-library'
+    },
+    {
+      title: 'Live Sessions',
+      icon: 'some-files',
+      path: '/live-session'
+    },
+  ],
+};

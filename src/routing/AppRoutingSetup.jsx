@@ -90,15 +90,44 @@ import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionVi
 import ClientLiveSession from "../pages/client/client-live-session/ClientLiveSession";
 import ClientViewLiveSession from "../pages/client/client-live-session/ClientViewLiveSession";
 import Courses from "../pages/admin/courses/Courses";
+import Educators from "../pages/super-admin/educators/Educators";
+
+const routes = {
+  student: [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/live-session", element: <ClientLiveSession /> },
+    { path: "/live-session/:callId", element: <ClientViewLiveSession /> },
+    { path: "/ideas", element: <ClientTradeIdeas /> },
+    { path: "/video-library", element: <VideoLibrary /> },
+  ],
+  educator: [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/ideas", element: <AdminTradeIdeas /> },
+    { path: "/courses", element: <Courses /> },
+    { path: "/live-session", element: <LiveSession /> },
+    { path: "/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/dark-sidebar", element: <Demo1DarkSidebarPage /> },
+  ],
+  "admin": [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/ideas", element: <AdminTradeIdeas /> },
+    { path: "/courses", element: <Courses /> },
+    { path: "/live-session", element: <LiveSession /> },
+    { path: "/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/educators", element: <Educators /> },
+  ],
+};
 
 const AppRoutingSetup = () => {
   const { auth } = useAuthContext();
-  const isAdmin = auth?.user?.role === "educator";
+  const userRole = auth?.user?.role ?? 'student';
+
+  const roleRoutes = routes[userRole] || [];
 
   return (
     <Routes>
       <Route element={<RequireAuth />}>
-        {!isAdmin ? (
+        {/* {!isAdmin ? (
           <Route element={<Demo1Layout />}>
             <Route path="/" element={<DefaultPage />} />
             <Route path="/live-session" element={<ClientLiveSession />} />
@@ -381,13 +410,24 @@ const AppRoutingSetup = () => {
               element={<AuthenticationGetStartedPage />}
             />
           </Route>
-        )}
+        )} */}
       </Route>
+
+      {roleRoutes.map((route, index) => (
+        <Route key={index} element={<RequireAuth />}>
+          <Route element={<Demo1Layout />}>
+            <Route path={route.path} element={route.element} />
+          </Route>
+        </Route>
+      ))}
+
       <Route path="error/*" element={<ErrorsRouting />} />
       <Route path="auth/*" element={<AuthPage />} />
       {/* <Route path="*" element={<Navigate to="/error/404" />} /> */}
       <Route path="*" element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />} />
-      </Routes>
+    </Routes>
   );
 };
 export { AppRoutingSetup };
+
+

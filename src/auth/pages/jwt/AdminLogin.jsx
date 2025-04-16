@@ -8,6 +8,7 @@ import { toAbsoluteUrl } from '@/utils';
 import { useAuthContext } from '@/auth';
 import { useLayout } from '@/providers';
 import { Alert } from '@/components';
+import { useDispatch } from 'react-redux';
 const loginSchema = Yup.object().shape({
   email: Yup.string().email('Wrong email format').min(3, 'Minimum 3 symbols').max(50, 'Maximum 50 symbols').required('Email is required'),
   password: Yup.string().min(3, 'Minimum 3 symbols').max(50, 'Maximum 50 symbols').required('Password is required'),
@@ -21,7 +22,7 @@ const initialValues = {
 const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const {
-    login
+    adminLogin
   } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +31,7 @@ const AdminLogin = () => {
   const {
     currentLayout
   } = useLayout();
+  const dispatch = useDispatch();
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
@@ -39,10 +41,10 @@ const AdminLogin = () => {
     }) => {
       setLoading(true);
       try {
-        if (!login) {
+        if (!adminLogin) {
           throw new Error('JWTProvider is required for this form.');
         }
-        await login(values.email, values.password);
+        await adminLogin(values.email, values.password,dispatch);
         if (values.remember) {
           localStorage.setItem('email', values.email);
         } else {
