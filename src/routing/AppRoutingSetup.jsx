@@ -91,6 +91,7 @@ import ClientLiveSession from "../pages/client/client-live-session/ClientLiveSes
 import ClientViewLiveSession from "../pages/client/client-live-session/ClientViewLiveSession";
 import Courses from "../pages/admin/courses/Courses";
 import Educators from "../pages/super-admin/educators/Educators";
+import { EducatorDetailPage } from '../pages/educatorDetail';
 
 const routes = {
   student: [
@@ -107,6 +108,7 @@ const routes = {
     { path: "/live-session", element: <LiveSession /> },
     { path: "/live-session/:callId", element: <AdminLiveSessionView /> },
     { path: "/dark-sidebar", element: <Demo1DarkSidebarPage /> },
+    { path: "/educator-details", element: <EducatorDetailPage /> },
   ],
   "admin": [
     { path: "/", element: <DefaultPage /> },
