@@ -10,7 +10,7 @@ const RecordedLive = () => {
                 </div>
             </div>
             <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-4">
+                <div className="col-span-12 md:col-span-4 sm:col-span-12">
                        <div className="course-card border-blue-500">
                         <div className="video-library overflow-hidden h-auto relative dark:">
                             <img onClick={() => navigate(`/live-session/1`)}
@@ -48,7 +48,7 @@ const RecordedLive = () => {
                         </div>
                        </div>
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-12 md:col-span-4 sm:col-span-12">
                     <a href="">
                         <div className="video-library overflow-hidden h-auto relative dark:">
                             <img onClick={() => navigate(`/live-session/1`)}
@@ -86,7 +86,7 @@ const RecordedLive = () => {
                         </div>
                     </a>
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-12 md:col-span-4 sm:col-span-12">
                     <a href="">
                         <div className="video-library overflow-hidden h-auto relative dark:">
                             <img onClick={() => navigate(`/live-session/1`)}
