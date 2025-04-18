@@ -8,6 +8,17 @@
     width: 100%;
     bottom: 0;
 }
+
+.course-library:before{
+    box-shadow: inset 0px -120px 100px -13px rgba(0, 0, 0, 0.9);
+    border-radius: inherit;
+    content: "";
+    position: absolute;
+    height: 100%;
+    top: 0;
+    width: 100%;
+    bottom: 0;
+}
 .video-details button:hover {
     box-shadow: unset;
 }
