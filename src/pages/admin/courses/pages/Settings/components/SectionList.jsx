@@ -13,7 +13,7 @@ import { createNewSection } from "@/store/reducer/sectionSlice";
 import SectionItem from "./sections/SectionItem";
 import DraggableSection from "./sections/DraggableSection";
 
-const SectionList = ({ courseId }) => {
+const SectionList = ({ courseId, onLectureSelect }) => {
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [sections, setSections] = useState([]);
@@ -128,15 +128,12 @@ const SectionList = ({ courseId }) => {
         ) : (
           <div className="space-y-2">
             {sections.map((section, index) => (
-              <DraggableSection
+              <SectionItem
                 key={section._id}
                 section={section}
-                index={index}
-                moveSection={moveSection}
-                onReorder={handleReorder}
-              >
-                <SectionItem section={section} courseId={courseId} />
-              </DraggableSection>
+                courseId={courseId}
+                onLectureSelect={onLectureSelect}
+              />
             ))}
           </div>
         )}

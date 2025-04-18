@@ -14,8 +14,9 @@ import {
   deleteSectionThunk,
 } from "@/store/reducer/sectionSlice";
 import { selectSectionsStatus } from "@/store/reducer/sectionSlice";
+import LectureList from "../lectures/lectureList";
 
-const SectionItem = ({ section, courseId }) => {
+const SectionItem = ({ section, courseId, onLectureSelect }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(section.title);
@@ -211,8 +212,10 @@ const SectionItem = ({ section, courseId }) => {
 
       {isExpanded && (
         <div className="mt-2 pl-6">
-          {/* Aquí irá el contenido de la sección cuando esté expandida */}
-          <div className="text-sm text-gray-500">No lectures yet</div>
+          <LectureList
+            sectionId={section._id}
+            onLectureSelect={onLectureSelect}
+          />
         </div>
       )}
     </div>

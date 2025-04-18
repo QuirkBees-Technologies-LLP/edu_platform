@@ -19,9 +19,9 @@ const LECTURE_STATUS = {
 // Async thunks
 export const fetchLectures = createAsyncThunk(
   "lectures/fetchAll",
-  async ({ params = {}, token }, { rejectWithValue }) => {
+  async ({ sectionId, token }, { rejectWithValue }) => {
     try {
-      const response = await getAllLectures(params, token);
+      const response = await getAllLectures({ section: sectionId }, token);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -157,8 +157,7 @@ const lectureSlice = createSlice({
       })
       .addCase(fetchLectures.fulfilled, (state, action) => {
         state.status = LECTURE_STATUS.SUCCEEDED;
-        state.lectures = action.payload.data;
-        state.pagination = action.payload.pagination;
+        // No actualizamos el estado global, solo retornamos los datos
       })
       .addCase(fetchLectures.rejected, (state, action) => {
         state.status = LECTURE_STATUS.FAILED;

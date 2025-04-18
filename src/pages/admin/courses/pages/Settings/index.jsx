@@ -11,6 +11,7 @@ import {
   selectCoursesError,
   clearError,
 } from "@/store/reducer/courseSlice";
+import { clearSections } from "@/store/reducer/sectionSlice";
 
 // Components
 import CourseList from "./components/CourseList";
@@ -63,6 +64,7 @@ const SettingsSection = () => {
   const handleBack = () => {
     setSelectedCourseId(null);
     setContent("list");
+    dispatch(clearSections());
   };
 
   // Handle error clear
