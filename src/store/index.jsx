@@ -4,10 +4,12 @@ import { adminTradeIdeasApiSlice } from './api/admin/adminTradeIdeasApiSlice';
 import { clientTradeIdeasApiSlice } from './api/client/clientTradeIdeasApiSlice';
 import { adminLiveSessionApiSlice } from './api/admin/adminLiveSessionApiSlice';
 import { clientLiveSessionApiSlice } from './api/client/clientLiveSessionApiSlice';
+import { adminEducatorsApiSlice } from './api/admin/adminEducatorsApiSlice';
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
+      [adminEducatorsApiSlice.reducerPath]: adminEducatorsApiSlice.reducer,
       [adminTradeIdeasApiSlice.reducerPath]: adminTradeIdeasApiSlice.reducer,
       [clientTradeIdeasApiSlice.reducerPath]: clientTradeIdeasApiSlice.reducer,
       [adminLiveSessionApiSlice.reducerPath]: adminLiveSessionApiSlice.reducer,
@@ -15,6 +17,7 @@ export const store = configureStore({
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(adminTradeIdeasApiSlice.middleware, adminLiveSessionApiSlice.middleware, clientTradeIdeasApiSlice.middleware, 
-        clientLiveSessionApiSlice.middleware
+        clientLiveSessionApiSlice.middleware,
+        adminEducatorsApiSlice.middleware
       ),
   });

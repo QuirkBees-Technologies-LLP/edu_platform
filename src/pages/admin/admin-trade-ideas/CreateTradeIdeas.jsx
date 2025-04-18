@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { useCreateTradeIdeasMutation, useUpdateTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import RichTextEditor from '../../../components/ui/rich-editor';
 
-const CreateTradeIdeas = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
+const CreateTradeIdeas = forwardRef(({ setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
     const [createTradeIdeas] = useCreateTradeIdeasMutation();
     const [updateTradeIdea] = useUpdateTradeIdeaMutation();
@@ -166,6 +166,7 @@ const CreateTradeIdeas = forwardRef(({ isCreateOpen, handleCloseCreate, selected
 
     return (
         <Dialog open={isCreateOpen} onOpenChange={() => {
+            setSelectedRow({});
             formik.resetForm();
             handleCloseCreate();
         }}>
@@ -429,6 +430,7 @@ const CreateTradeIdeas = forwardRef(({ isCreateOpen, handleCloseCreate, selected
                 </div>
                 <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3 md:py-5">
                     <button className='btn btn-light' onClick={() => {
+                        setSelectedRow({});
                         formik.resetForm();
                         handleCloseCreate();
                     }}>Cancel</button>

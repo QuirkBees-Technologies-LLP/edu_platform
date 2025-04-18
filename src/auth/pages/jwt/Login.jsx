@@ -194,7 +194,7 @@ const Login = () => {
           {loading ? "Please wait..." : "Sign In"}
         </button>
 
-        <button
+        {/* <button
           onClick={(e) => {
             e.preventDefault()
             navigate("/auth/admin/login");
@@ -202,7 +202,7 @@ const Login = () => {
           className="btn  btn-light flex justify-center grow"
         >
           Admin Sign In
-        </button>
+        </button> */}
       </form>
     </div>
   );
