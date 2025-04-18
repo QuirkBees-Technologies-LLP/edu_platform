@@ -13,6 +13,7 @@ const AdminLiveSessionView = () => {
   const { state: sessionData } = useLocation();
   const { callId } = useParams();
   const { address: rtmp_url, token: rtmp_stream_key } = sessionData || {};
+
   const { auth } = useAuthContext();
   const userId = auth?.user?._id;
 
@@ -37,8 +38,8 @@ const AdminLiveSessionView = () => {
       });
 
       const newCall = newClient.call("livestream", callId);
-      await newCall.join({ create: true });
-
+      await newCall.join({ create: true }); 
+      await newCall.get();
       setClient(newClient);
       setCall(newCall);
 

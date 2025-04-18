@@ -7,17 +7,17 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from '@/components';
-import { useLazyGetAdminTradeIdeasQuery } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import { TruncatedText } from '../../../lib/utils';
 import CreateEducator from './CreateEducator';
 import DeleteEducator from './DeleteEducator';
+import { useLazyGetEducatorsQuery } from '../../../store/api/admin/adminEducatorsApiSlice';
 
 const Educators = ({ title = "Educators" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [fetchTradeIdeas, { data, isLoading, refetch }] = useLazyGetAdminTradeIdeasQuery();
+  const [getEducators, { data, isLoading, refetch }] = useLazyGetEducatorsQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -81,14 +81,14 @@ const Educators = ({ title = "Educators" }) => {
           setSelectedRow(row.original)
           setIsLightBoxOpen(true);
         }}>
-          <img src={row.original.image[0]} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+          <img src={row.original.image} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
         </div>,
       meta: {
         headerClassName: 'min-w-[100px]'
       }
     },
     {
-      accessorFn: row => row.name,
+      accessorFn: row => `${row.first_name} ${row.last_name}`,
       id: 'name',
       header: ({
         column
@@ -96,9 +96,7 @@ const Educators = ({ title = "Educators" }) => {
       enableSorting: true,
       cell: info => <div className="flex items-center gap-2.5">
         <div className="flex flex-col gap-0.5">
-          <a className="leading-none font-medium text-sm text-gray-900 hover:text-primary" href="#">
-            {info.row.original.name}
-          </a>
+            {info.getValue()}
         </div>
       </div>,
       meta: {
@@ -106,30 +104,30 @@ const Educators = ({ title = "Educators" }) => {
       }
     },
     {
-      accessorFn: row => row.type,
-      id: 'type',
+      accessorFn: row => row.email,
+      id: 'email',
       header: ({
         column
-      }) => <DataGridColumnHeader title='Type' column={column} />,
+      }) => <DataGridColumnHeader title='Email' column={column} />,
       enableSorting: true,
-      cell: info => <div className="flex items-center gap-1.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.type}
-        </span>
+      cell: info => <div className="flex items-center gap-2.5">
+        <div className="flex flex-col gap-0.5">
+            {info.getValue()}
+        </div>
       </div>,
       meta: {
         headerClassName: 'min-w-[200px]'
       }
     },
     {
-      accessorFn: row => row.message,
-      id: 'message',
+      accessorFn: row => row.bio,
+      id: 'bio',
       header: ({
         column
-      }) => <DataGridColumnHeader title='Message' column={column} />,
+      }) => <DataGridColumnHeader title='Bio' column={column} />,
       enableSorting: true,
       cell: info =>
-        <TruncatedText content={info.row.original.message} maxLength={50} />,
+        <TruncatedText content={info.row.original.bio} maxLength={50} />,
       meta: {
         headerClassName: 'min-w-[225px]'
       }
@@ -141,41 +139,11 @@ const Educators = ({ title = "Educators" }) => {
         column
       }) => <DataGridColumnHeader title='Status' column={column} />,
       enableSorting: true,
-      cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === "active" ? "badge-success" : "badge-danger"}`}>
-        {info.row.original.status}
+      cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === true ? "badge-success" : "badge-danger"}`}>
+        {info.row.original.status === true ? "Active" : "Inactive"}
       </span>,
       meta: {
         headerClassName: 'w-[225px]'
-      }
-    },
-    {
-      accessorFn: row => row.entry,
-      id: 'entry',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Entry' column={column} />,
-      enableSorting: true,
-      cell: info => info.getValue(),
-      meta: {
-        headerClassName: 'min-w-[125px]'
-      }
-    },
-    {
-      accessorFn: row => row.exits,
-      id: 'exits',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Exits' column={column} />,
-      enableSorting: true,
-      cell: (info) => (
-        <div className="flex flex-col">
-          {info.getValue()?.map((exit, index) => (
-            <span key={index}>{exit}</span>
-          ))}
-        </div>
-      ),
-      meta: {
-        headerClassName: 'min-w-[125px]'
       }
     },
     {
@@ -257,14 +225,14 @@ const Educators = ({ title = "Educators" }) => {
 
     try {
       // Fetch API Data
-      const response = await fetchTradeIdeas({ page: newPage, limit: newLimit }).unwrap();
+      const response = await getEducators({ page: newPage, limit: newLimit }).unwrap();
 
       return {
         data: response.data || [],
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching trade ideas:", error);
+      console.error("Error fetching educators:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -298,10 +266,7 @@ const Educators = ({ title = "Educators" }) => {
         serverSide={true}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
           size: 10,
-        }} sorting={[{
-          id: 'name',
-          desc: true
-        }]} toolbar={<ToolbarTable />} layout={{
+        }} toolbar={<ToolbarTable />} layout={{
           card: true
         }}
         onFetchData={handleFetchData}
