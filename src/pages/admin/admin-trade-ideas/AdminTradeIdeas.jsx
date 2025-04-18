@@ -299,10 +299,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
         serverSide={true}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
           size: 10,
-        }} sorting={[{
-          id: 'name',
-          desc: true
-        }]} toolbar={<ToolbarTable />} layout={{
+        }} toolbar={<ToolbarTable />} layout={{
           card: true
         }}
         onFetchData={handleFetchData}
