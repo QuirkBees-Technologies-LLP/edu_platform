@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import {
   Plus,
@@ -33,6 +33,7 @@ const DraggableCourseCard = ({
   onSelect,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const ref = React.useRef(null);
 
   const {
     id,
@@ -50,9 +51,9 @@ const DraggableCourseCard = ({
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop";
 
   // Drag and drop configuration
-  const [{ isDragging: isDraggingState }, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag({
     type: "COURSE_CARD",
-    item: { id, index },
+    item: { id: course._id, index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -60,13 +61,36 @@ const DraggableCourseCard = ({
 
   const [, drop] = useDrop({
     accept: "COURSE_CARD",
-    hover: (item) => {
-      if (item.index !== index) {
-        onMove(item.index, index);
-        item.index = index;
+    hover: (item, monitor) => {
+      if (!ref.current) {
+        return;
       }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+
+      onMove(dragIndex, hoverIndex);
+      item.index = hoverIndex;
     },
   });
+
+  drag(drop(ref));
 
   // Handle image error
   const handleImageError = () => {
@@ -94,9 +118,9 @@ const DraggableCourseCard = ({
 
   return (
     <div
-      ref={(node) => drag(drop(node))}
-      className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 relative group ${
-        isDraggingState ? "opacity-50 scale-105 shadow-xl" : ""
+      ref={ref}
+      className={`relative bg-white rounded-lg shadow-md p-4 mb-4 transition-all duration-200 ${
+        isDragging ? "opacity-50 scale-105" : "opacity-100"
       }`}
       role="article"
       aria-label={`Course: ${title}`}

@@ -41,7 +41,11 @@ const DraggableItem = ({ id, index, moveItem, children, type = "ITEM" }) => {
   return (
     <div
       ref={ref}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+      style={{
+        opacity: isDragging ? 0.5 : 1,
+        transform: isDragging ? "scale(1.02)" : "scale(1)",
+        transition: "transform 0.2s ease",
+      }}
       className="cursor-move"
     >
       {children}
@@ -50,19 +54,23 @@ const DraggableItem = ({ id, index, moveItem, children, type = "ITEM" }) => {
 };
 
 const DraggableList = ({ items, renderItem, onMove, type }) => {
-  const [{ isOver }, drop] = useDrop({
-    accept: [ItemTypes.SECTION, ItemTypes.LECTURE],
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  });
+  const moveItem = (dragIndex, hoverIndex) => {
+    onMove(dragIndex, hoverIndex);
+  };
 
   return (
-    <div
-      ref={drop}
-      className={`space-y-2 ${isOver ? "bg-gray-50 rounded-lg p-2" : ""}`}
-    >
-      {items.map((item, index) => renderItem(item, index))}
+    <div className="space-y-2">
+      {items.map((item, index) => (
+        <DraggableItem
+          key={item._id}
+          id={item._id}
+          index={index}
+          moveItem={moveItem}
+          type={type}
+        >
+          {renderItem(item, index)}
+        </DraggableItem>
+      ))}
     </div>
   );
 };

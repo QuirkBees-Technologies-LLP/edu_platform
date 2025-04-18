@@ -1,42 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus, Book, Video, Users, X, Edit2 } from "lucide-react";
-import CreateCourseModal from "./CreateCourseModal";
-import DraggableCourseCard from "./DraggableCourseCard";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 
-import { useAuthContext } from "../../../../../../auth/useAuthContext";
-import { useCourseStore } from "../../../../../../store/zustand/courseStore";
+// Store
+import {
+  updateExistingCourse,
+  deleteExistingCourse,
+  reorderCourses,
+  selectAllCourses,
+} from "@/store/reducer/courseSlice";
 
-const CourseList = (props) => {
-  const { onCourseSelect } = props;
+// Components
+import CreateCourseModal from "./CreateCourseModal";
+import DraggableCourseCard from "./DraggableCourseCard";
 
-  // states
+const CourseList = ({ onCourseSelect }) => {
+  const dispatch = useDispatch();
+  const courses = useSelector(selectAllCourses);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // hooks
-  const { auth } = useAuthContext();
-  const {
-    courses,
-    isLoading,
-    error,
-    fetchCourses,
-    updateExistingCourse,
-    deleteCourse,
-    reorderCourses,
-  } = useCourseStore();
-
-  useEffect(() => {
-    fetchCourses(auth.token);
-  }, [courses.length, fetchCourses]);
-
   const handleUpdateCourse = async (courseData) => {
     if (!selectedCourse) return;
     try {
-      await updateExistingCourse(selectedCourse.id, courseData, auth.token);
+      await dispatch(
+        updateExistingCourse({
+          id: selectedCourse._id,
+          courseData,
+          token: localStorage.getItem("token"),
+        })
+      ).unwrap();
       toast.success("Course updated successfully!");
       setIsModalOpen(false);
       setSelectedCourse(null);
@@ -59,9 +56,13 @@ const CourseList = (props) => {
       )
     ) {
       try {
-        await deleteCourse(course.id, auth.token);
+        await dispatch(
+          deleteExistingCourse({
+            id: course._id,
+            token: localStorage.getItem("token"),
+          })
+        ).unwrap();
         toast.success("Course deleted successfully!");
-        fetchCourses(auth.token);
       } catch (error) {
         toast.error(error.message || "Failed to delete course");
       }
@@ -70,7 +71,32 @@ const CourseList = (props) => {
 
   const handleMoveCourse = async (dragIndex, hoverIndex) => {
     try {
-      await reorderCourses(dragIndex, hoverIndex, auth.token);
+      // Create a new array with the reordered courses
+      const newCourses = [...courses];
+      const draggedCourse = newCourses[dragIndex];
+      newCourses.splice(dragIndex, 1);
+      newCourses.splice(hoverIndex, 0, draggedCourse);
+
+      // Prepare the order data for the API
+      const courseOrders = newCourses.map((course, index) => ({
+        id: course._id,
+        order: index,
+      }));
+
+      // Dispatch the reorder action
+      const result = await dispatch(
+        reorderCourses({
+          courses: courseOrders,
+          token: localStorage.getItem("token"),
+        })
+      ).unwrap();
+
+      // Force a re-render by updating the courses array
+      dispatch({
+        type: "courses/updateLocalOrder",
+        payload: result,
+      });
+
       toast.success("Course order updated successfully!");
     } catch (error) {
       toast.error(error.message || "Failed to update course order");
@@ -87,7 +113,7 @@ const CourseList = (props) => {
         {/** Course Cards */}
         {courses.length > 0 ? (
           courses.map((course, index) => (
-            <div key={course.id} className="relative group">
+            <div key={course._id} className="relative group">
               <DraggableCourseCard
                 course={course}
                 index={index}
@@ -136,7 +162,6 @@ const CourseList = (props) => {
           }}
           onSubmit={isEditMode ? handleUpdateCourse : undefined}
           initialData={isEditMode ? selectedCourse : undefined}
-          isLoading={isLoading}
         />
       </div>
     </DndProvider>

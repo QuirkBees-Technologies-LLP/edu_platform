@@ -3,6 +3,7 @@ import axios from "axios";
 import { createContext, useState } from "react";
 import * as authHelper from "../_helpers";
 import * as lmsApi from "../../services/lms.api";
+import { lmsAuth } from "../../services";
 
 import { set } from "date-fns";
 import { logoutUser, setToken } from "../../store/reducer/authSlice";
@@ -57,7 +58,7 @@ const AuthProvider = ({ children }) => {
   };
   const login = async (email, password, dispatch) => {
     try {
-      const data = await lmsApi.login(email, password);
+      const data = await lmsAuth.loginAdmin(email, password);
       const auth = {
         token: data.token,
         user: data.user,

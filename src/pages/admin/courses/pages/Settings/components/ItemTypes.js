@@ -1,4 +1,4 @@
 export const ItemTypes = {
-  SECTION: "section",
-  LECTURE: "lecture",
+  SECTION: "SECTION",
+  LECTURE: "LECTURE",
 };

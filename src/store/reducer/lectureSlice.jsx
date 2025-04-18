@@ -208,4 +208,11 @@ const lectureSlice = createSlice({
 
 export const { setSelectedLecture, clearSelectedLecture, clearError } =
   lectureSlice.actions;
+
+// Selectors
+export const selectAllLectures = (state) => state.lectures.lectures;
+export const selectSelectedLecture = (state) => state.lectures.selectedLecture;
+export const selectLecturesStatus = (state) => state.lectures.isLoading;
+export const selectLecturesError = (state) => state.lectures.error;
+
 export default lectureSlice.reducer;

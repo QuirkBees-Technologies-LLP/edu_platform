@@ -1,45 +1,109 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ChevronLeft } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { useAuthContext } from "../../../../../auth/useAuthContext";
+
+// Store
 import {
-  LayoutDashboard,
-  BookOpen,
-  Users,
-  Settings,
-  ChevronLeft,
-  Menu,
-  X,
-} from "lucide-react";
+  fetchCourses,
+  selectAllCourses,
+  selectCoursesStatus,
+  selectCoursesError,
+  clearError,
+} from "@/store/reducer/courseSlice";
 
-import { useCourseStore } from "../../../../../store/zustand/courseStore";
-
-// components
+// Components
 import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ErrorMessage from "@/components/common/ErrorMessage";
 
 const SettingsSection = () => {
-  const { selectedCourse, clearSelectedCourse, setSelectedCourse } =
-    useCourseStore();
+  const dispatch = useDispatch();
+  const { auth } = useAuthContext();
   const [content, setContent] = useState("list");
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
 
-  // handle course select
+  // Selectors
+  const courses = useSelector(selectAllCourses);
+  const status = useSelector(selectCoursesStatus);
+  const error = useSelector(selectCoursesError);
+
+  // Fetch courses on mount and when token changes
+  useEffect(() => {
+    if (auth?.token) {
+      console.log("Fetching courses with token:", auth.token);
+      dispatch(
+        fetchCourses({
+          params: {
+            isDeleted: false,
+          },
+          token: auth.token,
+        })
+      )
+        .unwrap()
+        .then((response) => {
+          console.log("Courses fetched successfully:", response);
+        })
+        .catch((error) => {
+          console.error("Error fetching courses:", error);
+        });
+    } else {
+      console.log("No auth token available");
+    }
+  }, [dispatch, auth?.token]);
+
+  // Handle course select
   const handleCourseSelect = (course) => {
-    setSelectedCourse(course);
+    setSelectedCourseId(course._id);
     setContent("content");
   };
 
-  // handle on Back
+  // Handle back navigation
   const handleBack = () => {
-    clearSelectedCourse();
+    setSelectedCourseId(null);
     setContent("list");
   };
 
-  // render content
+  // Handle error clear
+  const handleErrorClear = () => {
+    dispatch(clearError());
+  };
+
+  // Render content based on status and content type
   const renderContent = () => {
+    if (status === "loading") {
+      return <LoadingSpinner />;
+    }
+
+    if (error) {
+      return (
+        <ErrorMessage
+          message={error}
+          onRetry={() =>
+            dispatch(
+              fetchCourses({
+                params: { isDeleted: false },
+                token: auth.token,
+              })
+            )
+          }
+          onDismiss={handleErrorClear}
+        />
+      );
+    }
+
     if (content === "list") {
-      return <CourseList onCourseSelect={handleCourseSelect} />;
+      return (
+        <CourseList courses={courses} onCourseSelect={handleCourseSelect} />
+      );
     }
-    if (content === "content") {
-      return <CourseContent courseId={selectedCourse.id} />;
+
+    if (content === "content" && selectedCourseId) {
+      return <CourseContent courseId={selectedCourseId} />;
     }
+
+    return null;
   };
 
   return (
@@ -50,7 +114,7 @@ const SettingsSection = () => {
         <div className="bg-white shadow-sm">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
-              {selectedCourse && (
+              {selectedCourseId && (
                 <button
                   onClick={handleBack}
                   className="flex items-center text-gray-500 hover:text-gray-700"
@@ -62,7 +126,9 @@ const SettingsSection = () => {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">
-                {selectedCourse ? selectedCourse.title : "All Courses"}
+                {selectedCourseId
+                  ? courses.find((c) => c._id === selectedCourseId)?.title
+                  : "All Courses"}
               </span>
             </div>
           </div>
