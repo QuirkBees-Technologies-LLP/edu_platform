@@ -1,116 +1,150 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  GripVertical,
   ChevronDown,
   ChevronRight,
-  Edit2,
+  Pencil,
   Trash2,
   Check,
   X,
-  Plus,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
-import { useDrag, useDrop } from "react-dnd";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuthContext } from "@/auth/useAuthContext";
 import {
   updateExistingSection,
-  deleteExistingSection,
+  deleteSectionThunk,
 } from "@/store/reducer/sectionSlice";
+import { selectSectionsStatus } from "@/store/reducer/sectionSlice";
 
-const SectionItem = (props) => {
-  const {
-    section,
-    onLectureSelect,
-    index,
-    moveSection,
-    onMoveLecture,
-    isExpanded,
-    onToggleExpand,
-    forceUpdate,
-  } = props;
-
-  const dispatch = useDispatch();
-  const { auth } = useAuthContext();
-
+const SectionItem = ({ section, courseId }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(section.title);
-  const [isAddingLecture, setIsAddingLecture] = useState(false);
-  const [newLectureTitle, setNewLectureTitle] = useState("");
-  const [editingLecture, setEditingLecture] = useState(null);
-  const [editLectureTitle, setEditLectureTitle] = useState("");
-  const [lectures, setLectures] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const { auth } = useAuthContext();
+  const sectionsStatus = useSelector(selectSectionsStatus);
 
-  // Drag and Drop for Section Title
-  const [{ isDragging }, drag] = useDrag({
-    type: "SECTION",
-    item: { id: section._id, index, type: "SECTION" },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+  // Reset edit state when section changes
+  useEffect(() => {
+    setEditTitle(section.title);
+    setIsEditing(false);
+    setError(null);
+  }, [section]);
 
-  const [, drop] = useDrop({
-    accept: ["SECTION", "LECTURE"],
-    hover(item) {
-      if (item.type === "SECTION") {
-        if (item.index === index) return;
-        moveSection(item.index, index);
-        item.index = index;
-      } else if (item.type === "LECTURE" && item.sectionId !== section._id) {
-        onMoveLecture(item.sectionId, section._id, item.lectureId);
-      }
-    },
-  });
+  const handleToggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
 
-  const handleUpdateSection = async () => {
-    if (!editTitle.trim() || !auth?.token) return;
+  const handleEditSection = async (e) => {
+    e?.preventDefault();
 
-    console.log("Updating section", section);
+    // Validations
+    if (!editTitle.trim()) {
+      setError("Title cannot be empty");
+      return;
+    }
+    if (!auth?.token) {
+      setError("Authentication required");
+      return;
+    }
+    if (!courseId) {
+      setError("Course ID is required");
+      return;
+    }
+    if (editTitle === section.title) {
+      setIsEditing(false);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      await dispatch(
+      const result = await dispatch(
         updateExistingSection({
           id: section._id,
           sectionData: {
             title: editTitle,
-            course: section.course._id || section.course,
+            course: courseId,
           },
           token: auth.token,
         })
       ).unwrap();
-      setIsEditing(false);
+
+      if (result && result._id) {
+        setIsEditing(false);
+        setEditTitle(result.title);
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
       console.error("Failed to update section:", error);
+      setError(error.message || "Failed to update section");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteSection = async () => {
-    if (!auth?.token) return;
+    if (!auth?.token) {
+      setError("Authentication required");
+      return;
+    }
 
-    try {
-      await dispatch(
-        deleteExistingSection({
-          id: section.id,
-          token: auth.token,
-        })
-      ).unwrap();
-    } catch (error) {
-      console.error("Failed to delete section:", error);
+    if (window.confirm("Are you sure you want to delete this section?")) {
+      setIsSubmitting(true);
+      setError(null);
+
+      try {
+        const result = await dispatch(
+          deleteSectionThunk({
+            sectionId: section._id,
+            token: auth.token,
+          })
+        ).unwrap();
+
+        if (!result || !result._id) {
+          throw new Error("Failed to delete section: Invalid response");
+        }
+      } catch (error) {
+        console.error("Failed to delete section:", error);
+        setError(error.message || "Failed to delete section");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleEditSection();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+      setEditTitle(section.title);
+      setError(null);
+    }
+  };
+
+  const handleStartEditing = () => {
+    setIsEditing(true);
+    setEditTitle(section.title);
+    setError(null);
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditing(false);
+    setEditTitle(section.title);
+    setError(null);
+  };
+
   return (
-    <div
-      ref={drop}
-      className={`border rounded-lg p-2 ${
-        isDragging ? "opacity-50" : "opacity-100"
-      }`}
-    >
-      <div ref={drag} className="flex items-center justify-between cursor-move">
+    <div className="border rounded-lg p-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GripVertical className="w-4 h-4 text-gray-400" />
           <button
-            onClick={onToggleExpand}
+            onClick={handleToggleExpand}
             className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-full"
           >
             {isExpanded ? (
@@ -120,216 +154,67 @@ const SectionItem = (props) => {
             )}
           </button>
           {isEditing ? (
-            <input
-              type="text"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              className="px-2 py-1 border rounded"
-              autoFocus
-            />
+            <form onSubmit={handleEditSection} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
+                  title="Save changes"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEditing}
+                  disabled={isSubmitting}
+                  className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
+                  title="Cancel"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              {error && <span className="text-xs text-red-500">{error}</span>}
+            </form>
           ) : (
             <span className="font-medium">{section.title}</span>
           )}
         </div>
-        <div className="flex items-center gap-1">
-          {isEditing ? (
-            <>
-              <button
-                onClick={handleUpdateSection}
-                className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
-              >
-                <Check className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => {
-                  setEditTitle(section.title);
-                  setIsEditing(false);
-                }}
-                className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={handleDeleteSection}
-                className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </>
-          )}
-        </div>
+        {!isEditing && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleStartEditing}
+              className="p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+              title="Edit section"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleDeleteSection}
+              className="p-1 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full"
+              title="Delete section"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {isExpanded && (
         <div className="mt-2 pl-6">
-          {isAddingLecture ? (
-            <form
-              onSubmit={handleAddLecture}
-              className="flex items-center gap-2"
-            >
-              <input
-                type="text"
-                value={newLectureTitle}
-                onChange={(e) => setNewLectureTitle(e.target.value)}
-                placeholder="New lecture title"
-                className="flex-1 px-2 py-1 border rounded"
-                autoFocus
-              />
-              <button
-                type="submit"
-                className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
-              >
-                <Check className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setNewLectureTitle("");
-                  setIsAddingLecture(false);
-                }}
-                className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </form>
-          ) : (
-            <button
-              onClick={() => setIsAddingLecture(true)}
-              className="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 rounded"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Lecture</span>
-            </button>
-          )}
-
-          <div className="space-y-1 mt-2">
-            {lectures.map((lecture, lectureIndex) => (
-              <DraggableLecture
-                key={lecture.id}
-                lecture={lecture}
-                index={lectureIndex}
-                sectionId={section.id}
-                moveLecture={moveLecture}
-                onSelect={() => onLectureSelect(lecture)}
-                onEdit={() => {
-                  setEditingLecture(lecture.id);
-                  setEditLectureTitle(lecture.title);
-                }}
-                onDelete={() => handleDeleteLecture(lecture.id)}
-                isEditing={editingLecture === lecture.id}
-                editTitle={editLectureTitle}
-                onUpdateTitle={handleUpdateLecture}
-                onCancelEdit={() => {
-                  setEditingLecture(null);
-                  setEditLectureTitle("");
-                }}
-              />
-            ))}
-          </div>
+          {/* Aquí irá el contenido de la sección cuando esté expandida */}
+          <div className="text-sm text-gray-500">No lectures yet</div>
         </div>
       )}
-    </div>
-  );
-};
-
-// Draggable Lecture Component
-const DraggableLecture = ({
-  lecture,
-  index,
-  sectionId,
-  moveLecture,
-  onSelect,
-  onEdit,
-  onDelete,
-  isEditing,
-  editTitle,
-  onUpdateTitle,
-  onCancelEdit,
-}) => {
-  const [{ isDragging }, drag] = useDrag({
-    type: "LECTURE",
-    item: { type: "LECTURE", lectureId: lecture.id, sectionId, index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const [{ isOver }, drop] = useDrop({
-    accept: "LECTURE",
-    hover(item) {
-      if (item.index === index) return;
-      moveLecture(item.index, index);
-      item.index = index;
-    },
-  });
-
-  return (
-    <div
-      ref={drop}
-      className={`flex items-center justify-between p-2 border rounded ${
-        isDragging ? "opacity-50" : "opacity-100"
-      } ${isOver ? "bg-blue-50" : ""}`}
-    >
-      <div
-        ref={drag}
-        className="flex items-center gap-2 cursor-move"
-        onClick={onSelect}
-      >
-        <GripVertical className="w-4 h-4 text-gray-400" />
-        {isEditing ? (
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="px-2 py-1 border rounded"
-            autoFocus
-          />
-        ) : (
-          <span className="text-sm">{lecture.title}</span>
-        )}
-      </div>
-      <div className="flex items-center gap-1">
-        {isEditing ? (
-          <>
-            <button
-              onClick={() => onUpdateTitle(lecture.id)}
-              className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
-            >
-              <Check className="w-4 h-4" />
-            </button>
-            <button
-              onClick={onCancelEdit}
-              className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={onEdit}
-              className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full"
-            >
-              <Edit2 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={onDelete}
-              className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </>
-        )}
-      </div>
     </div>
   );
 };

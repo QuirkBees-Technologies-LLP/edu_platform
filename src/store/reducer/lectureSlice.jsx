@@ -1,91 +1,120 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  getLecturesBySectionId,
+  getAllLectures,
+  getLectureById,
   createLecture,
   updateLecture,
   deleteLecture,
-  reorderLectures as reorderLecturesApi,
-  moveLectureToSection as moveLectureToSectionApi,
-} from "@/services/lms.api";
+  reorderLectures,
+} from "@/services/lms.lectures";
+
+// Types
+const LECTURE_STATUS = {
+  IDLE: "idle",
+  LOADING: "loading",
+  SUCCEEDED: "succeeded",
+  FAILED: "failed",
+};
 
 // Async thunks
 export const fetchLectures = createAsyncThunk(
-  "lectures/fetchLectures",
-  async ({ sectionId, token }, { rejectWithValue }) => {
+  "lectures/fetchAll",
+  async ({ params = {}, token }, { rejectWithValue }) => {
     try {
-      const lectures = await getLecturesBySectionId(sectionId, token);
-      return lectures.sort((a, b) => a.order - b.order);
+      const response = await getAllLectures(params, token);
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch lectures"
+      );
+    }
+  }
+);
+
+export const fetchLectureById = createAsyncThunk(
+  "lectures/fetchById",
+  async ({ id, token }, { rejectWithValue }) => {
+    try {
+      const response = await getLectureById(id, token);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch lecture"
+      );
     }
   }
 );
 
 export const createNewLecture = createAsyncThunk(
-  "lectures/createNewLecture",
+  "lectures/create",
   async ({ lectureData, token }, { rejectWithValue }) => {
     try {
-      return await createLecture(lectureData, token);
+      const response = await createLecture(lectureData, token);
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create lecture"
+      );
     }
   }
 );
 
 export const updateExistingLecture = createAsyncThunk(
-  "lectures/updateExistingLecture",
-  async ({ lectureId, lectureData, token }, { rejectWithValue }) => {
+  "lectures/update",
+  async ({ id, lectureData, token }, { rejectWithValue }) => {
     try {
-      return await updateLecture(lectureId, lectureData, token);
+      const response = await updateLecture(id, lectureData, token);
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update lecture"
+      );
     }
   }
 );
 
 export const deleteExistingLecture = createAsyncThunk(
-  "lectures/deleteExistingLecture",
-  async ({ lectureId, token }, { rejectWithValue }) => {
+  "lectures/delete",
+  async ({ id, token }, { rejectWithValue }) => {
     try {
-      await deleteLecture(lectureId, token);
-      return lectureId;
+      const response = await deleteLecture(id, token);
+      return { id, ...response.data };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete lecture"
+      );
     }
   }
 );
 
-export const reorderLectures = createAsyncThunk(
-  "lectures/reorderLectures",
-  async ({ dragIndex, hoverIndex, token }, { getState, rejectWithValue }) => {
+export const reorderExistingLectures = createAsyncThunk(
+  "lectures/reorder",
+  async ({ lectures, token }, { rejectWithValue }) => {
     try {
-      const state = getState();
-      const newLectures = [...state.lectures.lectures];
-      const draggedLecture = newLectures[dragIndex];
-      newLectures.splice(dragIndex, 1);
-      newLectures.splice(hoverIndex, 0, draggedLecture);
-
-      const lectureOrders = newLectures.map((lecture, index) => ({
-        id: lecture.id,
-        order: index,
-      }));
-
-      await reorderLecturesApi(lectureOrders, token);
-      return newLectures;
+      const response = await reorderLectures(lectures, token);
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to reorder lectures"
+      );
     }
   }
 );
 
 export const moveLectureToSection = createAsyncThunk(
-  "lectures/moveLectureToSection",
+  "lectures/moveToSection",
   async ({ lectureId, newSectionId, token }, { rejectWithValue }) => {
     try {
-      await moveLectureToSectionApi(lectureId, newSectionId, token);
-      return { lectureId, newSectionId };
+      const response = await updateLecture(
+        lectureId,
+        { section: newSectionId },
+        token
+      );
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to move lecture"
+      );
     }
   }
 );
@@ -93,126 +122,158 @@ export const moveLectureToSection = createAsyncThunk(
 const initialState = {
   lectures: [],
   selectedLecture: null,
-  isLoading: false,
+  status: LECTURE_STATUS.IDLE,
   error: null,
+  pagination: {
+    currentPage: 1,
+    limit: 10,
+    totalPages: 0,
+    totalRecords: 0,
+  },
 };
 
 const lectureSlice = createSlice({
   name: "lectures",
   initialState,
   reducers: {
-    setSelectedLecture: (state, action) => {
-      state.selectedLecture = action.payload;
+    clearLectures: (state) => {
+      state.lectures = [];
+      state.status = LECTURE_STATUS.IDLE;
+      state.error = null;
+      state.pagination = initialState.pagination;
     },
     clearSelectedLecture: (state) => {
       state.selectedLecture = null;
     },
-    clearError: (state) => {
-      state.error = null;
+    setSelectedLecture: (state, action) => {
+      state.selectedLecture = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
       // Fetch Lectures
       .addCase(fetchLectures.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.status = LECTURE_STATUS.LOADING;
       })
       .addCase(fetchLectures.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.lectures = action.payload;
+        state.status = LECTURE_STATUS.SUCCEEDED;
+        state.lectures = action.payload.data;
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchLectures.rejected, (state, action) => {
-        state.isLoading = false;
+        state.status = LECTURE_STATUS.FAILED;
         state.error = action.payload;
       })
       // Create Lecture
       .addCase(createNewLecture.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.status = LECTURE_STATUS.LOADING;
       })
       .addCase(createNewLecture.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.status = LECTURE_STATUS.SUCCEEDED;
         state.lectures.push(action.payload);
+        state.pagination.totalRecords += 1;
       })
       .addCase(createNewLecture.rejected, (state, action) => {
-        state.isLoading = false;
+        state.status = LECTURE_STATUS.FAILED;
         state.error = action.payload;
       })
       // Update Lecture
       .addCase(updateExistingLecture.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.status = LECTURE_STATUS.LOADING;
       })
       .addCase(updateExistingLecture.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.lectures = state.lectures.map((lecture) =>
-          lecture.id === action.payload.id ? action.payload : lecture
+        state.status = LECTURE_STATUS.SUCCEEDED;
+        const index = state.lectures.findIndex(
+          (lecture) => lecture._id === action.payload._id
         );
-        if (state.selectedLecture?.id === action.payload.id) {
+        if (index !== -1) {
+          state.lectures[index] = action.payload;
+        }
+        if (state.selectedLecture?._id === action.payload._id) {
           state.selectedLecture = action.payload;
         }
       })
       .addCase(updateExistingLecture.rejected, (state, action) => {
-        state.isLoading = false;
+        state.status = LECTURE_STATUS.FAILED;
         state.error = action.payload;
       })
       // Delete Lecture
       .addCase(deleteExistingLecture.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.status = LECTURE_STATUS.LOADING;
       })
       .addCase(deleteExistingLecture.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.status = LECTURE_STATUS.SUCCEEDED;
         state.lectures = state.lectures.filter(
-          (lecture) => lecture.id !== action.payload
+          (lecture) => lecture._id !== action.payload.id
         );
-        if (state.selectedLecture?.id === action.payload) {
+        state.pagination.totalRecords -= 1;
+        if (state.selectedLecture?._id === action.payload.id) {
           state.selectedLecture = null;
         }
       })
       .addCase(deleteExistingLecture.rejected, (state, action) => {
-        state.isLoading = false;
+        state.status = LECTURE_STATUS.FAILED;
         state.error = action.payload;
       })
       // Reorder Lectures
-      .addCase(reorderLectures.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+      .addCase(reorderExistingLectures.pending, (state) => {
+        state.status = LECTURE_STATUS.LOADING;
       })
-      .addCase(reorderLectures.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.lectures = action.payload;
+      .addCase(reorderExistingLectures.fulfilled, (state, action) => {
+        state.status = LECTURE_STATUS.SUCCEEDED;
+        // Update the order of lectures in the state
+        const newLectures = [...state.lectures];
+        action.payload.forEach(({ id, order }) => {
+          const lectureIndex = newLectures.findIndex(
+            (lecture) => lecture._id === id
+          );
+          if (lectureIndex !== -1) {
+            newLectures[lectureIndex] = {
+              ...newLectures[lectureIndex],
+              order,
+            };
+          }
+        });
+        // Sort lectures by order and update state
+        state.lectures = newLectures.sort((a, b) => a.order - b.order);
       })
-      .addCase(reorderLectures.rejected, (state, action) => {
-        state.isLoading = false;
+      .addCase(reorderExistingLectures.rejected, (state, action) => {
+        state.status = LECTURE_STATUS.FAILED;
         state.error = action.payload;
       })
       // Move Lecture to Section
       .addCase(moveLectureToSection.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.status = LECTURE_STATUS.LOADING;
       })
       .addCase(moveLectureToSection.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.lectures = state.lectures.filter(
-          (lecture) => lecture.id !== action.payload.lectureId
+        state.status = LECTURE_STATUS.SUCCEEDED;
+        const index = state.lectures.findIndex(
+          (lecture) => lecture._id === action.payload._id
         );
+        if (index !== -1) {
+          state.lectures[index] = action.payload;
+        }
+        if (state.selectedLecture?._id === action.payload._id) {
+          state.selectedLecture = action.payload;
+        }
       })
       .addCase(moveLectureToSection.rejected, (state, action) => {
-        state.isLoading = false;
+        state.status = LECTURE_STATUS.FAILED;
         state.error = action.payload;
       });
   },
 });
 
-export const { setSelectedLecture, clearSelectedLecture, clearError } =
+export const { clearLectures, clearSelectedLecture, setSelectedLecture } =
   lectureSlice.actions;
 
 // Selectors
 export const selectAllLectures = (state) => state.lectures.lectures;
+export const selectLectureById = (id) => (state) =>
+  state.lectures.lectures.find((lecture) => lecture._id === id);
 export const selectSelectedLecture = (state) => state.lectures.selectedLecture;
-export const selectLecturesStatus = (state) => state.lectures.isLoading;
+export const selectLecturesStatus = (state) => state.lectures.status;
 export const selectLecturesError = (state) => state.lectures.error;
+export const selectLecturesPagination = (state) => state.lectures.pagination;
 
 export default lectureSlice.reducer;

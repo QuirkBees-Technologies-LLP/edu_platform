@@ -88,15 +88,25 @@ export const deleteExistingSection = createAsyncThunk(
 );
 
 export const reorderSections = createAsyncThunk(
-  "sections/reorder",
-  async ({ sections, token }, { rejectWithValue }) => {
+  "sections/reorderSections",
+  async (sections, token, { rejectWithValue }) => {
     try {
       const response = await reorderSectionsApi(sections, token);
-      return response.data;
+      return response;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to reorder sections"
-      );
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const deleteSectionThunk = createAsyncThunk(
+  "sections/deleteSection",
+  async ({ sectionId, token }, { rejectWithValue }) => {
+    try {
+      await deleteSection(sectionId, token);
+      return { _id: sectionId };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -129,6 +139,11 @@ const sectionSlice = createSlice({
     },
     updateLocalOrder: (state, action) => {
       state.sections = action.payload;
+    },
+    clearSections: (state) => {
+      state.sections = [];
+      state.status = SECTION_STATUS.IDLE;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -228,27 +243,40 @@ const sectionSlice = createSlice({
       // Reorder Sections
       .addCase(reorderSections.pending, (state) => {
         state.status = SECTION_STATUS.LOADING;
-        state.error = null;
       })
       .addCase(reorderSections.fulfilled, (state, action) => {
         state.status = SECTION_STATUS.SUCCEEDED;
-        // Update the order of sections in the state
-        const newSections = [...state.sections];
+        const updatedSections = [...state.sections];
         action.payload.forEach(({ id, order }) => {
-          const sectionIndex = newSections.findIndex(
-            (section) => section._id === id
-          );
+          const sectionIndex = updatedSections.findIndex((s) => s._id === id);
           if (sectionIndex !== -1) {
-            newSections[sectionIndex] = {
-              ...newSections[sectionIndex],
+            updatedSections[sectionIndex] = {
+              ...updatedSections[sectionIndex],
               order,
             };
           }
         });
-        // Sort sections by order and update state
-        state.sections = newSections.sort((a, b) => a.order - b.order);
+        state.sections = updatedSections;
       })
       .addCase(reorderSections.rejected, (state, action) => {
+        state.status = SECTION_STATUS.FAILED;
+        state.error = action.payload;
+      })
+      .addCase(deleteSectionThunk.pending, (state) => {
+        state.status = SECTION_STATUS.LOADING;
+        state.error = null;
+      })
+      .addCase(deleteSectionThunk.fulfilled, (state, action) => {
+        state.status = SECTION_STATUS.SUCCEEDED;
+        state.sections = state.sections.filter(
+          (section) => section._id !== action.payload._id
+        );
+        state.pagination.totalRecords -= 1;
+        state.pagination.totalPages = Math.ceil(
+          state.pagination.totalRecords / state.pagination.limit
+        );
+      })
+      .addCase(deleteSectionThunk.rejected, (state, action) => {
         state.status = SECTION_STATUS.FAILED;
         state.error = action.payload;
       });
@@ -260,6 +288,7 @@ export const {
   clearError,
   resetStatus,
   updateLocalOrder,
+  clearSections,
 } = sectionSlice.actions;
 
 // Selectors

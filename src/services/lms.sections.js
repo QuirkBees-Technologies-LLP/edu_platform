@@ -79,20 +79,24 @@ export const deleteSection = async (id, token) => {
 };
 
 /**
- * Reorder sections
- * @param {Array} sections - Array of sections with their new order
- * @param {string} token - Authentication token
- * @returns {Promise<Object>} Response data
+ * Reordena las secciones de un curso
+ * @param {Array} sections - Array de secciones con sus nuevos órdenes
+ * @param {string} token - Token de autenticación
+ * @returns {Promise<Array>} - Array de secciones reordenadas
  */
-export const reorderSections = async (sections, token) => {
-  const response = await api.put(
-    "/admin/section/reorder",
-    { sections },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  return response.data;
+export const reorderSections = async (sections, token = null) => {
+  try {
+    const response = await api.post(
+      "/sections/reorder",
+      { sections },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
