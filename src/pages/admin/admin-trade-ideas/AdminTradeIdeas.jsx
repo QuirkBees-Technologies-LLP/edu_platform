@@ -308,7 +308,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
         onFetchData={handleFetchData}
       />
       <TradeImageSlider isLightBoxOpen={isLightBoxOpen} setIsLightBoxOpen={setIsLightBoxOpen} selectedRow={selectedRow} />
-      <CreateTradeIdeas handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      <CreateTradeIdeas setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
       {isDeleteOpen && <DeleteAdminTradeIdeas refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
     </div>
   )
