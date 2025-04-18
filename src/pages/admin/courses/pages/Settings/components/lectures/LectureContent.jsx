@@ -14,12 +14,13 @@ import {
 import { Switch } from "@/components/ui/switch";
 import RichEditor from "@/components/ui/rich-editor";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { Upload, Eye } from "lucide-react";
 
-const LectureContent = ({ lecture }) => {
+const LectureContent = ({ lecture, onLectureUpdate }) => {
   const { auth } = useAuthContext();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  console.log(lecture);
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
     description: lecture?.description || "",
@@ -27,7 +28,11 @@ const LectureContent = ({ lecture }) => {
     type: lecture?.type || "TEXT",
     order: lecture?.order || 0,
     preview: lecture?.preview || false,
+    section: lecture?.section._id,
   });
+
+  // Preview state for seeing changes before saving
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (lecture) {
@@ -38,7 +43,10 @@ const LectureContent = ({ lecture }) => {
         type: lecture.type || "TEXT",
         order: lecture.order || 0,
         preview: lecture.preview || false,
+        section: lecture.section._id,
       });
+      // Reset preview when lecture changes
+      setShowPreview(false);
     }
   }, [lecture]);
 
@@ -56,6 +64,8 @@ const LectureContent = ({ lecture }) => {
       type: value,
       content: "", // Reset content when type changes
     }));
+    // Reset preview when type changes
+    setShowPreview(false);
   };
 
   const handleContentChange = (content) => {
@@ -87,9 +97,20 @@ const LectureContent = ({ lecture }) => {
 
     setIsLoading(true);
     try {
-      await lmsLectures.updateLecture(lecture._id, formData, auth.token);
+      console.log(formData);
+      const updatedLecture = await lmsLectures.updateLecture(
+        lecture._id,
+        formData,
+        auth.token
+      );
       toast.success("Lecture updated successfully");
       setIsEditing(false);
+      setShowPreview(false);
+
+      // Call the onLectureUpdate callback if provided
+      if (onLectureUpdate && typeof onLectureUpdate === "function") {
+        onLectureUpdate(updatedLecture);
+      }
     } catch (error) {
       console.error("Failed to update lecture:", error);
       toast.error("Failed to update lecture");
@@ -131,6 +152,30 @@ const LectureContent = ({ lecture }) => {
                 onChange={handleVideoUrlChange}
                 placeholder="Enter video URL (YouTube, Vimeo, etc.)"
               />
+              {formData.content && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => setShowPreview(!showPreview)}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {showPreview ? "Hide Preview" : "Show Preview"}
+                </Button>
+              )}
+              {showPreview && formData.content && (
+                <div className="mt-2">
+                  <div className="aspect-video w-full border rounded-md overflow-hidden">
+                    <iframe
+                      src={formData.content}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Or upload a video file</Label>
@@ -158,13 +203,63 @@ const LectureContent = ({ lecture }) => {
     }
   };
 
+  const renderDisplayContent = () => {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h3 className="font-medium">Title</h3>
+          <p className="text-gray-700">{lecture.title}</p>
+        </div>
+
+        <div>
+          <h3 className="font-medium">Description</h3>
+          <p className="text-gray-700">{lecture.description}</p>
+        </div>
+
+        <div>
+          <h3 className="font-medium">Type</h3>
+          <p className="text-gray-700">{lecture.type}</p>
+        </div>
+
+        <div>
+          <h3 className="font-medium">Content</h3>
+          {lecture.type === "VIDEO" ? (
+            <div className="mt-2">
+              <div className="aspect-video w-full">
+                <iframe
+                  src={lecture.content}
+                  className="w-full h-full rounded-md"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          ) : (
+            <div
+              className="mt-2 p-4 bg-gray-50 rounded prose max-w-none"
+              dangerouslySetInnerHTML={{ __html: lecture.content }}
+            />
+          )}
+        </div>
+
+        <div>
+          <h3 className="font-medium">Preview</h3>
+          <p className="text-gray-700">{lecture.preview ? "Yes" : "No"}</p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Lecture Content</h2>
         <Button
           variant={isEditing ? "outline" : "default"}
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => {
+            setIsEditing(!isEditing);
+            setShowPreview(false);
+          }}
         >
           {isEditing ? "Cancel" : "Edit"}
         </Button>
@@ -226,7 +321,10 @@ const LectureContent = ({ lecture }) => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsEditing(false)}
+              onClick={() => {
+                setIsEditing(false);
+                setShowPreview(false);
+              }}
             >
               Cancel
             </Button>
@@ -236,48 +334,7 @@ const LectureContent = ({ lecture }) => {
           </div>
         </form>
       ) : (
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium">Title</h3>
-            <p className="text-gray-700">{lecture.title}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Description</h3>
-            <p className="text-gray-700">{lecture.description}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Type</h3>
-            <p className="text-gray-700">{lecture.type}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Content</h3>
-            {lecture.type === "VIDEO" ? (
-              <div className="mt-2">
-                <div className="aspect-video w-full">
-                  <iframe
-                    src={lecture.content}
-                    className="w-full h-full rounded-md"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              </div>
-            ) : (
-              <div
-                className="mt-2 p-4 bg-gray-50 rounded prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: lecture.content }}
-              />
-            )}
-          </div>
-
-          <div>
-            <h3 className="font-medium">Preview</h3>
-            <p className="text-gray-700">{lecture.preview ? "Yes" : "No"}</p>
-          </div>
-        </div>
+        renderDisplayContent()
       )}
     </div>
   );
