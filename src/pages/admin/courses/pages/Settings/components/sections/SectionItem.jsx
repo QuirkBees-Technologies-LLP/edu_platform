@@ -16,7 +16,14 @@ import {
 import { selectSectionsStatus } from "@/store/reducer/sectionSlice";
 import LectureList from "../lectures/lectureList";
 
-const SectionItem = ({ section, courseId, onLectureSelect }) => {
+const SectionItem = ({
+  section,
+  courseId,
+  onLectureSelect,
+  onLectureUpdate,
+  forceUpdateLectureList,
+  setForceUpdateLectureList,
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(section.title);
@@ -215,6 +222,9 @@ const SectionItem = ({ section, courseId, onLectureSelect }) => {
           <LectureList
             sectionId={section._id}
             onLectureSelect={onLectureSelect}
+            onLectureUpdate={onLectureUpdate}
+            forceUpdateLectureList={forceUpdateLectureList}
+            setForceUpdateLectureList={setForceUpdateLectureList}
           />
         </div>
       )}

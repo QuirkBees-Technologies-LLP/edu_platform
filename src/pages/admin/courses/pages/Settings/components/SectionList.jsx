@@ -13,7 +13,13 @@ import { createNewSection } from "@/store/reducer/sectionSlice";
 import SectionItem from "./sections/SectionItem";
 import DraggableSection from "./sections/DraggableSection";
 
-const SectionList = ({ courseId, onLectureSelect }) => {
+const SectionList = ({
+  courseId,
+  onLectureSelect,
+  onLectureUpdate,
+  forceUpdateLectureList,
+  setForceUpdateLectureList,
+}) => {
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [sections, setSections] = useState([]);
@@ -133,6 +139,9 @@ const SectionList = ({ courseId, onLectureSelect }) => {
                 section={section}
                 courseId={courseId}
                 onLectureSelect={onLectureSelect}
+                onLectureUpdate={onLectureUpdate}
+                forceUpdateLectureList={forceUpdateLectureList}
+                setForceUpdateLectureList={setForceUpdateLectureList}
               />
             ))}
           </div>
