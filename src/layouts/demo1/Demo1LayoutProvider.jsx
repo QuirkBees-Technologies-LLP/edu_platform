@@ -9,6 +9,7 @@ import { useLayout } from '@/providers';
 import { deepMerge } from '@/utils';
 import { demo1LayoutConfig } from './';
 import { useAuthContext } from '../../auth/useAuthContext';
+import { sideMenus } from '../../config/menu.config';
 
 // Interface defining the structure for layout provider properties
 
@@ -63,8 +64,8 @@ const Demo1LayoutProvider = ({
     setMenuConfig
   } = useMenus(); // Accesses menu configuration methods
   const { auth } = useAuthContext();
-  const isAdmin = auth?.user?.role === "educator";
-  const SIDEBAR_MENU = isAdmin ? ADMIN_MENU : STUDENT_MENU;
+  const userRole = auth?.user?.role ?? 'student';
+  const SIDEBAR_MENU = sideMenus[userRole] || [];
   const secondaryMenu = useMenuChildren(pathname, SIDEBAR_MENU, 0); // Retrieves the secondary menu
 
   // Sets the primary and secondary menu configurations

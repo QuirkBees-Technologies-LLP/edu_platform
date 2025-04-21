@@ -73,6 +73,16 @@ const DropdownUser = ({
               </MenuTitle>
             </MenuLink>
           </MenuItem>
+            <MenuItem>
+                <MenuLink path="/educator-details">
+                    <MenuIcon>
+                        <KeenIcon icon="profile-circle" />
+                    </MenuIcon>
+                    <MenuTitle>
+                        <FormattedMessage id="USER.MENU.EDUCATOR_DETAIL" />
+                    </MenuTitle>
+                </MenuLink>
+            </MenuItem>
           <MenuItem toggle="dropdown" trigger="hover" dropdownProps={{
           placement: isRTL() ? 'left-start' : 'right-start',
           modifiers: [{

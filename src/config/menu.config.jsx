@@ -397,6 +397,7 @@ export const MENU_SIDEBAR = [
     icon: 'note-2',
     disabled: true
   }];
+
 export const MENU_MEGA = [{
   title: 'Home',
   path: '/'
@@ -961,3 +962,73 @@ export const ADMIN_MENU = [
     path: '/live-session'
   },
 ];
+
+
+export const sideMenus = {
+  admin: [
+    {
+      title: 'Educators',
+      icon: 'paper-plane',
+      path: '/admin/educators'
+    },
+    {
+      title: 'Ideas',
+      icon: 'paper-plane',
+      path: '/admin/ideas'
+    },
+    {
+      title: 'Courses',
+      icon: 'book-open',
+      path: '/admin/courses'
+    },
+    {
+      title: 'Video Library',
+      icon: 'some-files',
+      path: '/admin/video-library'
+    },
+    {
+      title: 'Live Sessions',
+      icon: 'profile-circle',
+      path: '/admin/live-session'
+    },
+  ],
+  educator: [
+    {
+      title: 'Ideas',
+      icon: 'paper-plane',
+      path: '/educator/ideas'
+    },
+    {
+      title: 'Courses',
+      icon: 'book-open',
+      path: '/educator/courses'
+    },
+    {
+      title: 'Video Library',
+      icon: 'some-files',
+      path: '/educator/video-library'
+    },
+    {
+      title: 'Live Sessions',
+      icon: 'profile-circle',
+      path: '/educator/live-session'
+    },
+  ],
+  student: [
+    {
+      title: 'Ideas',
+      icon: 'some-files',
+      path: '/ideas'
+    },
+    {
+      title: 'Video Library',
+      icon: 'some-files',
+      path: '/video-library'
+    },
+    {
+      title: 'Live Sessions',
+      icon: 'some-files',
+      path: '/live-session'
+    },
+  ],
+};

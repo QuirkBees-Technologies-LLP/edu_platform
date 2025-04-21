@@ -14,6 +14,7 @@ export const store = configureStore({
     courses: courseReducer,
     sections: sectionReducer,
     lectures: lectureReducer,
+    [adminEducatorsApiSlice.reducerPath]: adminEducatorsApiSlice.reducer,
     [adminTradeIdeasApiSlice.reducerPath]: adminTradeIdeasApiSlice.reducer,
     [clientTradeIdeasApiSlice.reducerPath]: clientTradeIdeasApiSlice.reducer,
     [adminLiveSessionApiSlice.reducerPath]: adminLiveSessionApiSlice.reducer,
@@ -24,6 +25,7 @@ export const store = configureStore({
       adminTradeIdeasApiSlice.middleware,
       adminLiveSessionApiSlice.middleware,
       clientTradeIdeasApiSlice.middleware,
-      clientLiveSessionApiSlice.middleware
+      clientLiveSessionApiSlice.middleware,
+      adminEducatorsApiSlice.middleware
     ),
 });
