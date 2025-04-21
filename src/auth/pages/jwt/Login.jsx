@@ -50,7 +50,7 @@ const Login = () => {
         } else {
           localStorage.removeItem("email");
         }
-        navigate("/ideas", {
+        navigate("/", {
           replace: true,
         });
       } catch (error) {
