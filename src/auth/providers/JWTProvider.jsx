@@ -5,7 +5,7 @@ import * as authHelper from '../_helpers';
 import { set } from 'date-fns';
 import { logoutUser, setToken } from '../../store/reducer/authSlice';
 const API_URL = import.meta.env.VITE_APP_API_URL;
-export const LOGIN_URL = `${API_URL}/users/auth/signin`;
+export const LOGIN_URL = `${API_URL}/signin`;
 export const ADMIN_LOGIN_URL = `${API_URL}/admin/auth/signin`;
 export const REGISTER_URL = `${API_URL}/users/auth/signup`;
 export const FORGOT_PASSWORD_URL = `${API_URL}/forgot-password`;

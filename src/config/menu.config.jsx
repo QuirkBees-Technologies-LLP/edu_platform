@@ -969,49 +969,49 @@ export const sideMenus = {
     {
       title: 'Educators',
       icon: 'paper-plane',
-      path: '/educators'
+      path: '/admin/educators'
     },
     {
       title: 'Ideas',
       icon: 'paper-plane',
-      path: '/ideas'
+      path: '/admin/ideas'
     },
     {
       title: 'Courses',
       icon: 'book-open',
-      path: '/courses'
+      path: '/admin/courses'
     },
     {
       title: 'Video Library',
       icon: 'some-files',
-      path: '/video-library'
+      path: '/admin/video-library'
     },
     {
       title: 'Live Sessions',
       icon: 'profile-circle',
-      path: '/live-session'
+      path: '/admin/live-session'
     },
   ],
   educator: [
     {
       title: 'Ideas',
       icon: 'paper-plane',
-      path: '/ideas'
+      path: '/educator/ideas'
     },
     {
       title: 'Courses',
       icon: 'book-open',
-      path: '/courses'
+      path: '/educator/courses'
     },
     {
       title: 'Video Library',
       icon: 'some-files',
-      path: '/video-library'
+      path: '/educator/video-library'
     },
     {
       title: 'Live Sessions',
       icon: 'profile-circle',
-      path: '/live-session'
+      path: '/educator/live-session'
     },
   ],
   student: [
