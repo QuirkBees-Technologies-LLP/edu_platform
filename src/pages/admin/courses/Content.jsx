@@ -20,7 +20,7 @@ const Content = () => {
 
   const navItems = [
     ...baseNavItems,
-    ...(auth?.user?.role === "instructor" || auth?.user?.role === "admin"
+    ...(auth?.user?.role === "educator" || auth?.user?.role === "admin"
       ? adminNavItems
       : []),
   ];
