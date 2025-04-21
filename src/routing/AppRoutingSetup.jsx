@@ -81,24 +81,56 @@ import {
   AuthenticationGetStartedPage,
 } from "@/pages/authentication";
 import { useAuthContext } from "../auth/useAuthContext";
-import VideoLibrary from "../pages/video-library/VideoLibrary";
 import AdminTradeIdeas from "../pages/admin/admin-trade-ideas/AdminTradeIdeas";
 import LiveSession from "../pages/admin/live-session/LiveSession";
 import ViewLiveSession from "../pages/admin/live-session/AdminLiveSessionView";
-import ClientTradeIdeas from "../pages/client/client-trade-ideas/ClientTradeIdeas";
 import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionView";
-import ClientLiveSession from "../pages/client/client-live-session/ClientLiveSession";
-import ClientViewLiveSession from "../pages/client/client-live-session/ClientViewLiveSession";
 import Courses from "../pages/admin/courses/Courses";
+import { EducatorDetailPage } from '../pages/educatorDetail';
+import ClientLiveSession from "../pages/student/client-live-session/ClientLiveSession";
+import ClientViewLiveSession from "../pages/student/client-live-session/ClientViewLiveSession";
+import ClientTradeIdeas from "../pages/student/client-trade-ideas/ClientTradeIdeas";
+import VideoLibrary from "../pages/student/video-library/VideoLibrary";
+import EducatorTradeIdeas from "../pages/educator/educator-trade-ideas/EducatorTradeIdeas";
+import Educators from "../pages/admin/educators/Educators";
+
+const routes = {
+  student: [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/live-session", element: <ClientLiveSession /> },
+    { path: "/live-session/:callId", element: <ClientViewLiveSession /> },
+    { path: "/ideas", element: <ClientTradeIdeas /> },
+    { path: "/video-library", element: <VideoLibrary /> },
+  ],
+  educator: [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
+    { path: "/educator/courses", element: <Courses /> },
+    { path: "/educator/live-session", element: <LiveSession /> },
+    { path: "/educator/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/educator/dark-sidebar", element: <Demo1DarkSidebarPage /> },
+    { path: "/educator/educator-details", element: <EducatorDetailPage /> },
+  ],
+  admin: [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/admin/courses", element: <Courses /> },
+    { path: "/admin/live-session", element: <LiveSession /> },
+    { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/admin/educators", element: <Educators /> },
+  ],
+};
 
 const AppRoutingSetup = () => {
   const { auth } = useAuthContext();
-  const isAdmin = auth?.user?.role === "educator";
+  const userRole = auth?.user?.role ?? 'student';
+
+  const roleRoutes = routes[userRole] || [];
 
   return (
     <Routes>
       <Route element={<RequireAuth />}>
-        {!isAdmin ? (
+        {/* {!isAdmin ? (
           <Route element={<Demo1Layout />}>
             <Route path="/" element={<DefaultPage />} />
             <Route path="/live-session" element={<ClientLiveSession />} />
@@ -388,16 +420,24 @@ const AppRoutingSetup = () => {
               element={<AuthenticationGetStartedPage />}
             />
           </Route>
-        )}
+        )} */}
       </Route>
+
+      {roleRoutes.map((route, index) => (
+        <Route key={index} element={<RequireAuth />}>
+          <Route element={<Demo1Layout />}>
+            <Route path={route.path} element={route.element} />
+          </Route>
+        </Route>
+      ))}
+
       <Route path="error/*" element={<ErrorsRouting />} />
       <Route path="auth/*" element={<AuthPage />} />
       {/* <Route path="*" element={<Navigate to="/error/404" />} /> */}
-      <Route
-        path="*"
-        element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />}
-      />
+      <Route path="*" element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />} />
     </Routes>
   );
 };
 export { AppRoutingSetup };
+
+

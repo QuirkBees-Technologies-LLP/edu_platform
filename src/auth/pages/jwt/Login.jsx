@@ -50,7 +50,7 @@ const Login = () => {
         } else {
           localStorage.removeItem("email");
         }
-        navigate("/ideas", {
+        navigate("/", {
           replace: true,
         });
       } catch (error) {
@@ -201,7 +201,7 @@ const Login = () => {
           }}
           className="btn  btn-light flex justify-center grow"
         >
-          Admin Login
+          Admin Sign In
         </button> */}
       </form>
     </div>
