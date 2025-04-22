@@ -15,6 +15,7 @@ import { educatorTradeIdeasApiSlice } from "./api/educator/educatorTradeIdeasApi
 import { adminAcademyCategoryApiSlice } from "./api/admin/AdminAcademyCategoryApiSlice";
 import { educatorStreamScheduleApiSlice } from "./api/educator/EducatorStreamScheduleApiSlice";
 import { clientAcademyCategoryApiSlice } from "./api/client/clientAcademyCategoryApiSlice";
+import { clientCoursesApiSlice } from "./api/client/clientCoursesApiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     sections: sectionReducer,
     lectures: lectureReducer,
     [clientAcademyCategoryApiSlice.reducerPath]: clientAcademyCategoryApiSlice.reducer,
+    [clientCoursesApiSlice.reducerPath]: clientCoursesApiSlice.reducer,
     [educatorStreamScheduleApiSlice.reducerPath]: educatorStreamScheduleApiSlice.reducer,
     [adminEducatorsApiSlice.reducerPath]: adminEducatorsApiSlice.reducer,
     [adminAcademyCategoryApiSlice.reducerPath]: adminAcademyCategoryApiSlice.reducer,
@@ -38,6 +40,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       clientAcademyCategoryApiSlice.middleware,
+      clientCoursesApiSlice.middleware,
       educatorStreamScheduleApiSlice.middleware,
       adminTradeIdeasApiSlice.middleware,
       adminLiveSessionApiSlice.middleware,

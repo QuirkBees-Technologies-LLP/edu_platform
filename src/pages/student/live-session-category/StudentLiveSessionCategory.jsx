@@ -1,52 +1,42 @@
 import React from 'react'
 import { Container } from '@/components/container';
-
+import { useGetAcademyCategoryQuery } from '../../../store/api/client/clientAcademyCategoryApiSlice'
+import { Link } from 'react-router-dom';
 
 const StudentLiveSessionCategory = () => {
-  return (
-    <div>
-      <Container>
-        <div class="grid grid-cols-3 gap-4">
-          <div className="card">
-            <div className="card-body">
-              <div className="flex justify-between items-center mb-5">
-                <h4 className='text-lg font-semibold text-gray-800'>Crypto Acadmy</h4>
-                <i class="ki-filled ki-arrow-up-right"></i>
-              </div>
-              <img className='rounded-xl h-52 w-full object-cover' src="/media/images/600x400/1.jpg" alt="" />
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-body">
-              <div className="flex justify-between items-center mb-5">
-                <h4 className='text-lg font-semibold text-gray-800'>Crypto Acadmy</h4>
-                <i class="ki-filled ki-arrow-up-right"></i>
-              </div>
-              <img className='rounded-xl h-52 w-full object-cover' src="/media/images/2600x1600/1.png" alt="" />
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-body">
-              <div className="flex justify-between items-center mb-5">
-                <h4 className='text-lg font-semibold text-gray-800'>Crypto Acadmy</h4>
-                <i class="ki-filled ki-arrow-up-right"></i>
-              </div>
-              <img className='rounded-xl h-52 w-full object-cover' src="/media/images/600x600/1.jpg" alt="" />
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-body">
-              <div className="flex justify-between items-center mb-5">
-                <h4 className='text-lg font-semibold text-gray-800'>Crypto Acadmy</h4>
-                <i class="ki-filled ki-arrow-up-right"></i>
-              </div>
-              <img className='rounded-xl h-52 w-full object-cover' src="/media/images/2600x1200/1.png" alt="" />
-            </div>
-          </div>
+    const { data } = useGetAcademyCategoryQuery();
+    
+    const defaultImage = "/media/images/600x400/1.jpg";
+
+    return (
+        <div>
+            <Container>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {data?.data?.map((category, index) => (
+                        <Link
+                            to={`/academy/${category._id}`}
+                            key={category.id || index}
+                            className="card hover:shadow-lg transition-shadow duration-300"
+                        >
+                            <div className="card-body">
+                                <div className="flex justify-between items-center mb-5">
+                                    <h4 className='text-lg font-semibold text-gray-800'>
+                                        {category.name || "Crypto Academy"}
+                                    </h4>
+                                    <i className="ki-filled ki-arrow-up-right"></i>
+                                </div>
+                                <img
+                                    className='rounded-xl h-52 w-full object-cover'
+                                    src={category.image || defaultImage}
+                                    alt={category.name || "Category image"}
+                                />
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </Container>
         </div>
-      </Container>
-    </div>
-  )
+    )
 }
 
 export default StudentLiveSessionCategory
