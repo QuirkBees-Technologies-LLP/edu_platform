@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import TagInput from '../../../components/ui/tagInput';
 import RichTextEditor from '../../../components/ui/rich-editor';
 
-const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
+const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
     const [createLiveSession] = useCreateLiveSessionMutation();
     const educatorId = auth?.user?._id ?? null;
@@ -77,7 +77,7 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
 
             try {
                 const res = await createLiveSession(formData).unwrap();
-                navigate(`/educator/live-session/${callId}`, { state: res })
+                navigate(`/live-session/${callId}`, { state: res })
             } catch (err) {
                 toast.error(err.data.message);
             }
@@ -306,4 +306,4 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
     )
 });
 
-export default CreateLiveSession
+export default CreateEducatorStreamSchedule;

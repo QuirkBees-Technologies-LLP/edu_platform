@@ -24,6 +24,7 @@ import {
   Undo,
   Redo,
 } from "lucide-react";
+import { useEffect } from "react";
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -270,12 +271,18 @@ const RichEditor = ({ content, onChange, className }) => {
     },
   });
 
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
+
   return (
     <div className={cn("border rounded-md bg-white", className)}>
       <MenuBar editor={editor} />
       <EditorContent
         editor={editor}
-        className="p-4 min-h-[300px] focus:outline-none"
+        className="p-4 focus:outline-none"
       />
     </div>
   );
