@@ -8,7 +8,10 @@ export const clientAcademyCategoryApiSlice = createApi({
         getAcademyCategory: builder.query({
             query: () => `/users/category`,
         }),
+        getAcademySingleCategory: builder.query({
+            query: (categoryId) => `/users/course/category/${categoryId}`,
+        }),
     }),
 });
 
-export const { useGetAcademyCategoryQuery } = clientAcademyCategoryApiSlice;
+export const { useGetAcademyCategoryQuery, useGetAcademySingleCategoryQuery } = clientAcademyCategoryApiSlice;

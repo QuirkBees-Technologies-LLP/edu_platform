@@ -113,8 +113,8 @@ const routes = {
     { path: "/profile", element: <ClientProfile /> },
     { path: "/academy", element: <StudentLiveSessionCategory /> },
     { path: "/academy/:id", element: <StudentLiveSessionCategoryDetails /> },
-    { path: "/course", element: <ClientCourses /> },
-    { path: "/course/:id", element: <ClientSpecificCourses /> },
+    { path: "/academy/course/:id", element: <ClientCourses /> },
+    { path: "/academy/course/detail/:id", element: <ClientSpecificCourses /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
