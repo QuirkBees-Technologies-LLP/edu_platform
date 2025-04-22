@@ -1,31 +1,28 @@
-import React from 'react';
 /* eslint-disable prettier/prettier */
-import { useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
+import { useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n';
-import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle } from '@/components';
+import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle } from '@/components';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
-import { format, set } from 'date-fns';
-import { MenuIcon, MenuLink, MenuSeparator, MenuSub, MenuTitle } from '@/components';
-import { useLazyGetAdminTradeIdeasQuery } from '../../../store/api/admin/adminTradeIdeasApiSlice';
-import CreateLiveSession from './CreateLiveSession';
-import { useLazyGetLiveSessionListQuery } from '../../../store/api/admin/adminLiveSessionApiSlice';
-import { formatSecondsToHMS } from '../../../lib/utils';
+import { MenuIcon, MenuLink, MenuSub, MenuTitle } from '@/components';
+import { TruncatedText } from '../../../lib/utils';
+import CreateAdminAcademyCategory from './CreateAdminAcademyCategory';
+import DeleteAdminAcademyCategory from './DeleteAdminAcademyCategory';
+import { useLazyGetAdminAcademyCategoryQuery } from '../../../store/api/admin/AdminAcademyCategoryApiSlice';
 
-const LiveSession = ({ title = "Live session" }) => {
+const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
-  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getLiveSessionList, { data, isLoading }] = useLazyGetLiveSessionListQuery();
+  const [getAdminAcademyCategory, { data, isLoading, refetch }] = useLazyGetAdminAcademyCategoryQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
 
   const handleDeleteOpen = () => {
-    console.log("handleDeleteOpen");
     setIsDeleteOpen(true);
   };
 
@@ -65,92 +62,96 @@ const LiveSession = ({ title = "Live session" }) => {
       </MenuSub>
     )
   }
-  console.log(selectedRow, "selectedrow");
+
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+  };
 
   const columns = useMemo(() => [
     {
-      accessorFn: row => row.status,
-      id: 'status',
+      accessorFn: row => row.icon,
+      id: 'icon',
       header: ({
         column
-      }) => <DataGridColumnHeader title='Status' column={column} />,
+      }) => <DataGridColumnHeader title='Icon' column={column} />,
       enableSorting: true,
-      cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === "Active" ? "badge-success" : "badge-danger"}`}>
-        {info.row.original.status}
-      </span>,
+      cell: ({ row }) =>
+        <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
+          setSelectedRow(row.original)
+          setIsLightBoxOpen(true);
+        }}>
+          <img src={row.original.icon?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.icon} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+        </div>,
+      meta: {
+        headerClassName: 'min-w-[100px]'
+      }
     },
     {
-      accessorFn: row => row.callId,
-      id: 'callId',
+      accessorFn: row => row.image,
+      id: 'image',
       header: ({
         column
-      }) => <DataGridColumnHeader title='Call Id' column={column} />,
+      }) => <DataGridColumnHeader title='Images' column={column} />,
+      enableSorting: true,
+      cell: ({ row }) =>
+        <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
+          setSelectedRow(row.original)
+          setIsLightBoxOpen(true);
+        }}>
+          <img src={row.original.image?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.image} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+        </div>,
+      meta: {
+        headerClassName: 'min-w-[100px]'
+      }
+    },
+    {
+      accessorFn: row => row.name,
+      id: 'name',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Name' column={column} />,
       enableSorting: true,
       cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.callId}
-        </span>
+        <div className="flex flex-col gap-0.5">
+          {info.row.original.name}
+        </div>
       </div>,
       meta: {
         headerClassName: 'min-w-[200px]'
       }
     },
     {
-      accessorFn: row => row.createdAt,
-      id: 'createdAt',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Created At' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
-        </span>
-      </div>,
+      id: 'click',
+      header: () => '',
+      enableSorting: false,
+      cell: ({ row }) => <Menu className="items-stretch">
+        <MenuItem toggle="dropdown"
+          onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+          trigger="click" dropdownProps={{
+            placement: isRTL() ? 'bottom-start' : 'bottom-end',
+            modifiers: [{
+              name: 'offset',
+              options: {
+                offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
+              }
+            }]
+          }}>
+          <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+            <KeenIcon icon="dots-vertical" />
+          </MenuToggle>
+          {ActionMenu()}
+        </MenuItem>
+      </Menu>,
       meta: {
-        headerClassName: 'min-w-[200px]'
+        headerClassName: 'w-[60px]'
       }
-    },
-    {
-      accessorFn: row => row.duration,
-      id: 'duration',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Duration' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {formatSecondsToHMS(info.row.original.duration)}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.viewerCount,
-      id: 'viewerCount',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Viewer Count' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.viewerCount}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
+    }
   ], [isRTL]);
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || '';
   });
-
-  console.log(data, "data");
 
   // Filtered data based on search term
   const filteredData = useMemo(() => {
@@ -176,12 +177,13 @@ const LiveSession = ({ title = "Live session" }) => {
     } = useDataGrid();
     return <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
       <h3 className="card-title">{title}</h3>
+
       <div className="flex flex-wrap items-center gap-2.5">
-        {/* <div className="relative">
+        <div className="relative">
           <KeenIcon icon="magnifier" className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3" />
           <input type="text" placeholder="Search Members" className="input input-md ps-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} // Update search term
           />
-        </div> */}
+        </div>
         <DataGridColumnVisibility table={table} />
       </div>
     </div>;
@@ -197,11 +199,11 @@ const LiveSession = ({ title = "Live session" }) => {
 
     try {
       // Fetch API Data
-      const response = await getLiveSessionList({ page: newPage, limit: newLimit }).unwrap();
+      const response = await getAdminAcademyCategory({ page: newPage, limit: newLimit }).unwrap();
 
       return {
-        data: response.liveStreams || [],
-        totalCount: response?.totalLiveStreams || 0,
+        data: response.data || [],
+        totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
       console.error("Error fetching trade ideas:", error);
@@ -220,19 +222,21 @@ const LiveSession = ({ title = "Live session" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Live Session" />
+          <ToolbarPageTitle text="Academy Category" />
           <ToolbarDescription>
-            Track and analyze past live sessions with key insights and performance data.</ToolbarDescription>
+            Learn, Master, and Apply Trading Skills with Expert-Led Courses, Practical Strategies, and Real-World Market Insights.          </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create Live Session
+              Create Academy Category
             </button>
           </div>
         </ToolbarActions>
       </Toolbar>
-      <DataGrid serverSide={true}
+      <DataGrid
+        key={tableKey}
+        serverSide={true}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
           size: 10,
         }} toolbar={<ToolbarTable />} layout={{
@@ -240,10 +244,10 @@ const LiveSession = ({ title = "Live session" }) => {
         }}
         onFetchData={handleFetchData}
       />
-
-      <CreateLiveSession handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      <CreateAdminAcademyCategory setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      {isDeleteOpen && <DeleteAdminAcademyCategory refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
     </div>
   )
-}
+};
 
-export default LiveSession
+export default AdminAcademyCategory;

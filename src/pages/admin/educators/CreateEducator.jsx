@@ -11,15 +11,15 @@ import { useCreateTradeIdeasMutation, useUpdateTradeIdeaMutation } from '../../.
 import RichTextEditor from '../../../components/ui/rich-editor';
 import { Avatar } from 'stream-chat-react';
 import { AvatarUpload } from './AvatarUpload';
-import { useCreateEducatorMutation } from '../../../store/api/admin/adminEducatorsApiSlice';
+import { useCreateEducatorMutation, useUpdateEducatorMutation } from '../../../store/api/admin/adminEducatorsApiSlice';
 import clsx from "clsx";
 import { KeenIcon } from "@/components";
 
-const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
+const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch, setSelectedRow }, ref) => {
     const { auth } = useAuthContext();
     const [passwordVisible, setPasswordVisible] = React.useState(false);
     const [createEducator] = useCreateEducatorMutation();
-    const [updateTradeIdea] = useUpdateTradeIdeaMutation();
+    const [updateEducator] = useUpdateEducatorMutation();
 
     const initialValues = {
         first_name: "",
@@ -27,8 +27,8 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
         email: "",
         password: "",
         role: "educator",
-        bio: "",
         status: true,
+        is_create_stream: false
     };
 
     const createSchema = Yup.object().shape({
@@ -44,8 +44,14 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
             .email("Invalid email format")
             .required("Email is required"),
 
-        password: Yup.string().min(3, 'Minimum 3 symbols').max(50, 'Maximum 50 symbols').required('Password is required'),
-
+        password: Yup.string()
+            .min(3, 'Minimum 3 symbols')
+            .max(50, 'Maximum 50 symbols')
+            .when([], {
+                is: () => !selectedRow?._id,
+                then: (schema) => schema.required('Password is required'),
+                otherwise: (schema) => schema.notRequired(),
+            }),
 
         // image: Yup.mixed()
         //     .required("Image is required")
@@ -68,9 +74,6 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
         role: Yup.string()
             .required("Role is required"),
 
-        bio: Yup.string()
-            .max(500, "Bio cannot exceed 500 characters")
-            .required("Bio is required"),
         status: Yup.boolean()
             .required("Status is required"),
     });
@@ -93,13 +96,13 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
 
             try {
                 if (selectedRow?._id) {
-                    await updateTradeIdea(payload).unwrap();
+                    await updateEducator(payload).unwrap();
                     refetch();
-                    toast.success("Trade idea updated successfully!");
+                    toast.success("Educator updated successfully!");
                 } else {
                     await createEducator(payload).unwrap();
                     refetch();
-                    toast.success("Trade idea created successfully!");
+                    toast.success("Educator created successfully!");
                 }
                 formik.resetForm();
                 handleCloseCreate();
@@ -108,6 +111,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                 const errorMessage = err?.data?.message || "An unexpected error occurred.";
                 toast.error(errorMessage);
             }
+
         },
     });
 
@@ -119,8 +123,8 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                 email: selectedRow?.email,
                 password: selectedRow?.password,
                 role: "educator",
-                bio: selectedRow?.bio,
                 status: selectedRow?.status,
+                is_create_stream: selectedRow?.is_create_stream
             }
             formik.setValues(initData)
         }
@@ -137,6 +141,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
         <Dialog open={isCreateOpen} onOpenChange={() => {
             formik.resetForm();
             handleCloseCreate();
+            setSelectedRow({});
         }}>
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
             <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
@@ -252,7 +257,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                                 <label className="form-label text-gray-900 gap-1">Status <span className="text-danger">
                                     *
                                 </span></label>
-                                <Select defaultValue={true} onValueChange={(value) => formik.setFieldValue('status', value)} className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
+                                <Select defaultValue={formik.values.status} onValueChange={(value) => formik.setFieldValue('status', value)} className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
                                     ? "border border-danger"
                                     : ""
                                     }`}>
@@ -273,20 +278,25 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                         </div>
                         <div className="col-span-6">
                             <div className="flex flex-col gap-1">
-                                <label className="form-label text-gray-900 gap-1">Bio <span className="text-danger">
+                                <label className="form-label text-gray-900 gap-1">Can create a stream ?<span className="text-danger">
                                     *
                                 </span></label>
-                                <RichTextEditor
-                                    value={formik.values.bio}
-                                    onChange={(value) => formik.setFieldValue('bio', value)}
-                                    onBlur={() => formik.setFieldTouched('bio', true)}
-                                    theme="snow"
-                                    touched={formik.touched.bio}
-                                    error={formik.errors.bio}
-                                />
-                                {formik.touched.bio && formik.errors.bio && (
+                                <Select defaultValue={formik.values.is_create_stream} onValueChange={(value) => formik.setFieldValue('is_create_stream', value)} className={`form-control input input-md w-full 
+                                ${formik.errors.is_create_stream && formik.touched.is_create_stream
+                                    ? "border border-danger"
+                                    : ""
+                                    }`}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={true}>Yes</SelectItem>
+                                        <SelectItem value={false}>No</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {formik.touched.is_create_stream && formik.errors.is_create_stream && (
                                     <span role="alert" className="text-danger text-xs mt-1">
-                                        {formik.errors.bio}
+                                        {formik.errors.is_create_stream}
                                     </span>
                                 )}
                             </div>
@@ -317,6 +327,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                     <button className='btn btn-light' onClick={() => {
                         formik.resetForm();
                         handleCloseCreate();
+                        setSelectedRow({});
                     }}>Cancel</button>
                     <button disabled={formik.isSubmitting} type='submit' onClick={formik.handleSubmit} className='btn btn-primary'>Submit</button>
                 </div>

@@ -9,16 +9,17 @@ import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPag
 import { format, set } from 'date-fns';
 import { MenuIcon, MenuLink, MenuSeparator, MenuSub, MenuTitle } from '@/components';
 import { useLazyGetAdminTradeIdeasQuery } from '../../../store/api/admin/adminTradeIdeasApiSlice';
-import CreateLiveSession from './CreateLiveSession';
 import { useLazyGetLiveSessionListQuery } from '../../../store/api/admin/adminLiveSessionApiSlice';
 import { formatSecondsToHMS } from '../../../lib/utils';
+import CreateEducatorStreamSchedule from './CreateEducatorStreamSchedule';
+import { useLazyGetEducatorStreamScheduleQuery } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
 
-const LiveSession = ({ title = "Live session" }) => {
+const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getLiveSessionList, { data, isLoading }] = useLazyGetLiveSessionListQuery();
+  const [getEducatorStreamSchedule, { data, isLoading }] = useLazyGetEducatorStreamScheduleQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -197,7 +198,7 @@ const LiveSession = ({ title = "Live session" }) => {
 
     try {
       // Fetch API Data
-      const response = await getLiveSessionList({ page: newPage, limit: newLimit }).unwrap();
+      const response = await getEducatorStreamSchedule({ page: newPage, limit: newLimit }).unwrap();
 
       return {
         data: response.liveStreams || [],
@@ -220,7 +221,7 @@ const LiveSession = ({ title = "Live session" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Live Session" />
+          <ToolbarPageTitle text="Schedule Stream" />
           <ToolbarDescription>
             Track and analyze past live sessions with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
@@ -241,9 +242,9 @@ const LiveSession = ({ title = "Live session" }) => {
         onFetchData={handleFetchData}
       />
 
-      <CreateLiveSession handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      <CreateEducatorStreamSchedule handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
     </div>
   )
 }
 
-export default LiveSession
+export default EducatorStreamSchedule

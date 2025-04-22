@@ -41,7 +41,6 @@ const UpdateLiveSession = ({ selectedRow }) => {
     const formik = useFormik({
         initialValues,
         enableReinitialize: true,
-        revalidateOnMount: true,
         validationSchema: updateSchema,
         onSubmit: async (values) => {
             try {
@@ -66,6 +65,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
     useEffect(() => {
         if (call?.state?.custom) {
             const custom = call.state.custom;
+console.log(custom, "custom");
 
             formik.setValues({
                 title: custom.title || '',
@@ -101,7 +101,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
                     <div className="flex flex-col gap-1">
                         <label className="form-label text-gray-900 gap-1">Description<span className="text-danger">*</span></label>
                         <RichTextEditor
-                            value={formik.values.description}
+                            content={formik.values.description}
                             onChange={(value) => formik.setFieldValue('description', value)}
                             onBlur={() => formik.setFieldTouched('description', false)}
                             touched={formik.touched.description}

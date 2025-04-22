@@ -6,13 +6,13 @@ export const clientProfileApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getClientProfile: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/admin/educator/list?page=${page}&limit=${limit}`,
+            query: () => `/users/auth/profile`,
         }),
         updateClientProfile: builder.mutation({
-            query: (updatedTrade) => ({
-                url: `/admin/idea/updated/${updatedTrade.get("id")}`,
+            query: (updatedData) => ({
+                url: `/users/auth/update`,
                 method: 'POST',
-                body: updatedTrade,
+                body: updatedData,
                 formData: true
             }),
         }),
