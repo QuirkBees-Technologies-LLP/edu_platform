@@ -14,7 +14,7 @@ const initialValues = {
   password: "",
   changepassword: "",
   acceptTerms: false,
-  role: "STUDENT",
+  role: "student",
   tier: "FREE",
 };
 const signupSchema = Yup.object().shape({
@@ -66,9 +66,7 @@ const Signup = () => {
           values.changepassword,
           values.role
         );
-        navigate(from, {
-          replace: true,
-        });
+        navigate("/auth/login", { replace: true });
       } catch (error) {
         setStatus(error.message);
         setSubmitting(false);

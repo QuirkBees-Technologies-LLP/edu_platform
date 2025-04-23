@@ -81,7 +81,7 @@ const AuthProvider = ({ children }) => {
     email,
     password,
     password_confirmation,
-    role = "USER",
+    role = "student",
     tier = "FREE"
   ) => {
     try {

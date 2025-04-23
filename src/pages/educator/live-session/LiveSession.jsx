@@ -200,8 +200,8 @@ const LiveSession = ({ title = "Live session" }) => {
       const response = await getLiveSessionList({ page: newPage, limit: newLimit }).unwrap();
 
       return {
-        data: response.liveStreams || [],
-        totalCount: response?.totalLiveStreams || 0,
+        data: response.data || [],
+        totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
       console.error("Error fetching trade ideas:", error);

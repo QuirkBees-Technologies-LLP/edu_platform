@@ -11,14 +11,17 @@ import {
 
 // Components
 import CourseForm from "./forms/CourseForm";
+import { useAuthContext } from "../../../../../../auth/useAuthContext";
 
 const CreateCourseModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { auth } = useAuthContext();
 
   if (!isOpen) return null;
 
   const handleSubmit = async (data) => {
+
     setIsSubmitting(true);
     try {
       if (initialData) {
@@ -35,7 +38,9 @@ const CreateCourseModal = ({ isOpen, onClose, onSubmit, initialData }) => {
         // Creation mode
         await dispatch(
           createNewCourse({
-            courseData: data,
+            courseData: {
+              ...data, instructor: auth?.user?._id
+            },
             token: localStorage.getItem("token"),
           })
         ).unwrap();

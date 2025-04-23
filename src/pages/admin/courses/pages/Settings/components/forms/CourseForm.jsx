@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
+import { useGetEducatorAcademyCategoryQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 // Categories for the course
 const COURSE_CATEGORIES = [
@@ -34,6 +35,7 @@ const courseSchema = z.object({
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const { data } = useGetEducatorAcademyCategoryQuery();
 
   const {
     register,
@@ -173,9 +175,14 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             {...register("category")}
           >
             <option value="">Select a category</option>
-            {COURSE_CATEGORIES.map((category) => (
+            {/* {COURSE_CATEGORIES.map((category) => (
               <option key={category} value={category}>
                 {category}
+              </option>
+            ))} */}
+            {data?.data?.map((item) => (
+              <option key={item._id} value={item._id}>
+                {item.name}
               </option>
             ))}
           </select>

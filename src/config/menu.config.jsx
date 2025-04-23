@@ -1038,7 +1038,7 @@ export const sideMenus = {
     {
       title: 'Live Sessions',
       icon: 'some-files',
-      path: '/live-session'
+      path: '/academy'
     },
   ],
 };

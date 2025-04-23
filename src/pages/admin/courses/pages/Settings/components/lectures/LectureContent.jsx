@@ -26,6 +26,7 @@ const LectureContent = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+console.log(lecture, "lecture");
 
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
@@ -34,7 +35,7 @@ const LectureContent = ({
     type: lecture?.type || "TEXT",
     order: lecture?.order || 0,
     preview: lecture?.preview || false,
-    section: lecture?.section?._id || "",
+    section: lecture?.section || "",
   });
 
   useEffect(() => {
@@ -46,7 +47,7 @@ const LectureContent = ({
         type: lecture.type || "TEXT",
         order: lecture.order || 0,
         preview: lecture.preview || false,
-        section: lecture.section?._id || "",
+        section: lecture.section || "",
       });
       setShowPreview(false);
       setIsEditing(false);

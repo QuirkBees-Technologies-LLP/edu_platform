@@ -71,13 +71,13 @@ const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
   const columns = useMemo(() => [
     {
       accessorFn: row => row.status,
-      id: 'status',
+      id: 'title',
       header: ({
         column
-      }) => <DataGridColumnHeader title='Status' column={column} />,
+      }) => <DataGridColumnHeader title='Title' column={column} />,
       enableSorting: true,
-      cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === "Active" ? "badge-success" : "badge-danger"}`}>
-        {info.row.original.status}
+      cell: info => <span >
+        {info.row.original.title}
       </span>,
     },
     {
@@ -112,38 +112,6 @@ const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
         headerClassName: 'min-w-[200px]'
       }
     },
-    {
-      accessorFn: row => row.duration,
-      id: 'duration',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Duration' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {formatSecondsToHMS(info.row.original.duration)}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.viewerCount,
-      id: 'viewerCount',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Viewer Count' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.viewerCount}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
   ], [isRTL]);
 
   // Initialize search term from localStorage if available
@@ -151,7 +119,6 @@ const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
     return localStorage.getItem(storageFilterId) || '';
   });
 
-  console.log(data, "data");
 
   // Filtered data based on search term
   const filteredData = useMemo(() => {
@@ -201,8 +168,8 @@ const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
       const response = await getEducatorStreamSchedule({ page: newPage, limit: newLimit }).unwrap();
 
       return {
-        data: response.liveStreams || [],
-        totalCount: response?.totalLiveStreams || 0,
+        data: response.data || [],
+        totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
       console.error("Error fetching trade ideas:", error);
