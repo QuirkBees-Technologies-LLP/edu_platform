@@ -1,8 +1,9 @@
-import { Play, Clock, Tag } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Play, Clock, Tag, Award, User, BarChart2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 
 const CourseCard = (props) => {
+  const { course, onSelectCourse } = props;
   const {
     id,
     title,
@@ -13,10 +14,10 @@ const CourseCard = (props) => {
     tier,
     instructor,
     large,
-  } = props;
+  } = course;
 
-  const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Generate random progress for mock courses (between 0 and 100)
   const progress = useMemo(() => Math.floor(Math.random() * 101), [id]);
@@ -25,70 +26,152 @@ const CourseCard = (props) => {
   const fallbackImage =
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop";
 
+  // Color based on tier
+  const getTierColor = () => {
+    switch (tier?.toLowerCase()) {
+      case "FREE" || "free":
+        return "bg-emerald-500";
+      case "PRO" || "pro":
+        return "bg-amber-500";
+      default:
+        return "bg-blue-500";
+    }
+  };
+
+  // Format instructor name
+  const formatInstructorName = (name) => {
+    if (!name) return "Unknown";
+    return name.length > 15 ? `${name.substring(0, 15)}...` : name;
+  };
+
   return (
-    <div
-      className={`relative group overflow-hidden rounded-2xl h-full ${large ? "aspect-square" : "aspect-square"}`}
+    <motion.div
+      className={`relative group overflow-hidden rounded-2xl h-full shadow-lg ${
+        large ? "aspect-square" : "aspect-square"
+      }`}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      <img
-        src={imageError || !imageUrl ? fallbackImage : imageUrl}
-        alt={title}
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        onError={() => setImageError(true)}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-        <div className="absolute bottom-0 p-6 w-full">
-          <div className="flex items-center gap-2 mb-3">
-            <Tag className="w-4 h-4 text-white/90" />
-            <span className="text-white/90 text-sm font-medium">
-              {category}
-            </span>
-            <span className="text-white/60 text-sm">•</span>
-            <span className="text-white/80 text-sm">{tier}</span>
+      {/* Course Image */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.img
+          src={imageError || !imageUrl ? fallbackImage : imageUrl}
+          alt={title}
+          className="w-full h-full object-cover"
+          animate={{ scale: isHovered ? 1.05 : 1 }}
+          transition={{ duration: 0.3 }}
+          onError={() => setImageError(true)}
+        />
+      </div>
+
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+        {/* Status Badge */}
+        <div className="absolute top-4 right-4">
+          <div
+            className={`px-2 py-0.5 rounded-full ${published ? "bg-green-500" : "bg-gray-500"} text-white text-xs font-medium`}
+          >
+            {published ? "Published" : "Draft"}
           </div>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+        </div>
+
+        {/* Top Info */}
+        <div className="absolute top-4 left-4 flex items-center gap-2">
+          <div
+            className={`px-2 py-0.5 rounded-full ${getTierColor()} text-white text-xs font-medium flex items-center gap-1`}
+          >
+            <Award className="w-3 h-3" />
+            <span>{tier || "Standard"}</span>
+          </div>
+        </div>
+
+        {/* Content Container */}
+        <div className="absolute bottom-0 p-6 w-full">
+          {/* Category Badge */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5 text-white/90" />
+              <span className="text-white/90 text-xs font-medium">
+                {category || "General"}
+              </span>
+            </div>
+          </div>
+
+          {/* Instructor */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center ring-2 ring-white/20">
               <span className="text-white text-sm font-medium">
                 {instructor?.name?.charAt(0) || "U"}
               </span>
             </div>
-            <span className="text-white/90 text-sm">{instructor?.name}</span>
+            <span className="text-white/90 text-sm font-medium">
+              {formatInstructorName(instructor?.name)}
+            </span>
           </div>
-          <h3
-            className={`text-white font-bold mb-2 ${large ? "text-3xl" : "text-xl"} line-clamp-2`}
+
+          {/* Title & Description */}
+          <motion.div
+            animate={{ y: isHovered ? -5 : 0 }}
+            transition={{ duration: 0.2 }}
           >
-            {title}
-          </h3>
-          <p className="text-white/80 text-sm mb-4 line-clamp-2">
-            {description}
-          </p>
-          <div className="space-y-3">
-            <button
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
-              onClick={() => navigate(`/classroom/course/${id}`)}
+            <h3
+              className={`text-white font-bold mb-2 ${
+                large ? "text-2xl" : "text-xl"
+              } line-clamp-2`}
+            >
+              {title}
+            </h3>
+            <p className="text-white/70 text-sm mb-4 line-clamp-2">
+              {description}
+            </p>
+          </motion.div>
+
+          {/* Actions & Progress */}
+          <motion.div
+            className="space-y-3"
+            animate={{ opacity: isHovered ? 1 : 0.9 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Watch Button */}
+            <motion.button
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white w-full py-2.5 rounded-lg transition-all shadow-lg shadow-indigo-500/30"
+              onClick={() => onSelectCourse(course)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Play className="w-4 h-4" />
-              <span>Watch Now</span>
-            </button>
+              <span className="font-medium">Watch Now</span>
+            </motion.button>
 
-            {/* Minimalistic Progress Bar */}
+            {/* Progress Bar */}
             <div className="relative">
-              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white transition-all duration-300 ease-in-out rounded-full"
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
                   style={{ width: `${progress}%` }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
                 />
               </div>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-xs text-white/60">Progress</span>
-                <span className="text-xs text-white/80 font-medium">
+              <div className="flex justify-between items-center mt-1.5">
+                <span className="text-xs text-white/60 flex items-center gap-1">
+                  <BarChart2 className="w-3 h-3" />
+                  <span>Progress</span>
+                </span>
+                <span className="text-xs text-white/90 font-medium">
                   {progress}%
                 </span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

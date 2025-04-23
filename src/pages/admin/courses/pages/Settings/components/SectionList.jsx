@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
-import { Plus, X, Check } from "lucide-react";
+import {
+  Plus,
+  X,
+  Check,
+  Folder,
+  FolderPlus,
+  Loader2,
+  List,
+  AlertCircle,
+  MoveVertical,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { DndProvider } from "react-dnd";
@@ -12,6 +22,7 @@ import {
 import { createNewSection } from "@/store/reducer/sectionSlice";
 import SectionItem from "./sections/SectionItem";
 import DraggableSection from "./sections/DraggableSection";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SectionList = ({
   courseId,
@@ -19,10 +30,13 @@ const SectionList = ({
   onLectureUpdate,
   forceUpdateLectureList,
   setForceUpdateLectureList,
+  isLoading,
 }) => {
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [sections, setSections] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reorderMode, setReorderMode] = useState(false);
 
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
@@ -50,6 +64,8 @@ const SectionList = ({
       console.error("Failed to reorder sections:", error);
       // Si falla, volvemos al estado anterior
       setSections(reduxSections);
+    } finally {
+      setReorderMode(false);
     }
   };
 
@@ -57,6 +73,7 @@ const SectionList = ({
     e.preventDefault();
     if (!newSectionTitle.trim() || !auth?.token || !courseId) return;
 
+    setIsSubmitting(true);
     try {
       await dispatch(
         createNewSection({
@@ -72,6 +89,8 @@ const SectionList = ({
       setIsAddingSection(false);
     } catch (error) {
       console.error("Failed to create section:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -83,66 +102,149 @@ const SectionList = ({
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="space-y-4">
-        {/* Header with Add Button */}
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Sections</h3>
-          <button
-            onClick={() => setIsAddingSection(true)}
-            className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+        {/* Header with Add and Reorder Buttons */}
+        <div className="flex justify-between items-center mb-5">
+          <div className="flex items-center gap-2">
+            <Folder className="h-5 w-5 text-blue-600" />
+            <h3 className="text-lg font-semibold text-gray-800">Sections</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            {sections.length > 1 && (
+              <button
+                onClick={() => setReorderMode(!reorderMode)}
+                className={`p-2 rounded-full transition-colors ${
+                  reorderMode
+                    ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                }`}
+                title={reorderMode ? "Exit reorder mode" : "Reorder sections"}
+              >
+                <MoveVertical className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setIsAddingSection(true)}
+              disabled={isAddingSection}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm font-medium">Add Section</span>
+            </button>
+          </div>
         </div>
 
         {/* Add Section Form */}
-        {isAddingSection && (
-          <form
-            onSubmit={handleAddSection}
-            className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg"
-          >
-            <input
-              type="text"
-              value={newSectionTitle}
-              onChange={(e) => setNewSectionTitle(e.target.value)}
-              placeholder="Enter section title"
-              className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-            <button
-              type="submit"
-              className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
-              title="Create section"
+        <AnimatePresence>
+          {isAddingSection && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
             >
-              <Check className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleCancelAdd}
-              className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-              title="Cancel"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </form>
-        )}
+              <form
+                onSubmit={handleAddSection}
+                className="flex flex-col gap-3 p-5 bg-blue-50 border border-blue-100 rounded-lg mb-4"
+              >
+                <div className="flex items-center gap-2 text-blue-700 mb-1">
+                  <FolderPlus className="w-4 h-4" />
+                  <h4 className="font-medium">New Section</h4>
+                </div>
+                <input
+                  type="text"
+                  value={newSectionTitle}
+                  onChange={(e) => setNewSectionTitle(e.target.value)}
+                  placeholder="Enter section title"
+                  className="w-full px-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoFocus
+                  disabled={isSubmitting}
+                />
+                <div className="flex justify-end gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={handleCancelAdd}
+                    className="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-md transition-colors"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-2"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Creating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span>Create Section</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Sections List */}
-        {sectionsStatus === "loading" ? (
-          <div className="text-center text-gray-500">Loading sections...</div>
+        {isLoading || sectionsStatus === "loading" ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-3" />
+            <p className="text-gray-500">Loading sections...</p>
+          </div>
         ) : sections.length === 0 ? (
-          <div className="text-center text-gray-500">No sections found</div>
+          <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <div className="bg-gray-100 p-3 rounded-full mb-3">
+              <AlertCircle className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-gray-500 mb-1">No sections found</p>
+            <p className="text-gray-400 text-sm mb-4">
+              Create a section to get started
+            </p>
+            <button
+              onClick={() => setIsAddingSection(true)}
+              className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add First Section</span>
+            </button>
+          </div>
         ) : (
-          <div className="space-y-2">
+          <div
+            className={`space-y-3 transition-all ${reorderMode ? "pt-2" : ""}`}
+          >
+            {reorderMode && (
+              <div className="bg-indigo-50 text-indigo-700 text-sm p-3 rounded-md flex items-center mb-3">
+                <List className="w-4 h-4 mr-2 flex-shrink-0" />
+                <span>
+                  Drag sections to reorder them. Changes are saved
+                  automatically.
+                </span>
+              </div>
+            )}
             {sections.map((section, index) => (
-              <SectionItem
+              <motion.div
                 key={section._id}
-                section={section}
-                courseId={courseId}
-                onLectureSelect={onLectureSelect}
-                onLectureUpdate={onLectureUpdate}
-                forceUpdateLectureList={forceUpdateLectureList}
-                setForceUpdateLectureList={setForceUpdateLectureList}
-              />
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: index * 0.05 }}
+                className="transform transition-transform"
+              >
+                <SectionItem
+                  section={section}
+                  courseId={courseId}
+                  onLectureSelect={onLectureSelect}
+                  onLectureUpdate={onLectureUpdate}
+                  forceUpdateLectureList={forceUpdateLectureList}
+                  setForceUpdateLectureList={setForceUpdateLectureList}
+                  reorderMode={reorderMode}
+                />
+              </motion.div>
             ))}
           </div>
         )}

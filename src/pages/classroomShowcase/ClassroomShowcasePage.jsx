@@ -8,7 +8,7 @@ import { UserProfileHero } from "@/partials/heros";
 import CourseCard from "./components/courseCard";
 import CategoryFilter from "./components/CategoryFilter";
 import ProfessorFilter from "./components/ProfessorFilter";
-import FeaturedSection from "./components/FeaturedSection";
+import FeaturedSection from "../admin/courses/components/FeaturedSection";
 
 import {
   featuredCourses,
