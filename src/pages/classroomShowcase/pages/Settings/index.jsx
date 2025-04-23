@@ -12,8 +12,8 @@ import {
 import { useCourseStore } from "../../../../store/courseStore";
 
 // components
-import CourseList from "./components/CourseList";
-import CourseContent from "./components/CourseContent";
+import CourseList from "../../../admin/courses/pages/Settings/components/CourseList";
+import CourseContent from "../../../admin/courses/pages/Settings/components/CourseContent";
 
 const SettingsSection = () => {
   const { selectedCourse, clearSelectedCourse, setSelectedCourse } =

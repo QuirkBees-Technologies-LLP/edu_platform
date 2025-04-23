@@ -9,6 +9,8 @@ import { Alert, KeenIcon } from "@/components";
 import { useLayout } from "@/providers";
 const initialValues = {
   email: "",
+  first_name: "",
+  last_name: "",
   password: "",
   changepassword: "",
   acceptTerms: false,
@@ -21,6 +23,12 @@ const signupSchema = Yup.object().shape({
     .min(3, "Minimum 3 symbols")
     .max(50, "Maximum 50 symbols")
     .required("Email is required"),
+  first_name: Yup.string()
+    .min(2, "First name must be at least 2 characters")
+    .required("First name is required"),
+  last_name: Yup.string()
+    .min(2, "Last name must be at least 2 characters")
+    .required("Last name is required"),
   password: Yup.string()
     .min(3, "Minimum 3 symbols")
     .max(50, "Maximum 50 symbols")
@@ -51,11 +59,12 @@ const Signup = () => {
           throw new Error("JWTProvider is required for this form.");
         }
         await register(
+          values?.first_name,
+          values.last_name,
           values.email,
           values.password,
           values.changepassword,
-          values.role,
-          values.tier
+          values.role
         );
         navigate(from, {
           replace: true,
@@ -134,6 +143,62 @@ const Signup = () => {
         </div>
 
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
+
+        <div className="flex flex-col gap-1">
+          <label className="form-label text-gray-900">First Name</label>
+          <label className="input">
+            <input
+              placeholder="Enter first name"
+              type="text"
+              autoComplete="off"
+              {...formik.getFieldProps("first_name")}
+              className={clsx(
+                "form-control bg-transparent",
+                {
+                  "is-invalid":
+                    formik.touched.first_name && formik.errors.first_name,
+                },
+                {
+                  "is-valid":
+                    formik.touched.first_name && !formik.errors.first_name,
+                }
+              )}
+            />
+          </label>
+          {formik.touched.first_name && formik.errors.first_name && (
+            <span role="alert" className="text-danger text-xs mt-1">
+              {formik.errors.first_name}
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="form-label text-gray-900">Last Name</label>
+          <label className="input">
+            <input
+              placeholder="Enter last name"
+              type="text"
+              autoComplete="off"
+              {...formik.getFieldProps("last_name")}
+              className={clsx(
+                "form-control bg-transparent",
+                {
+                  "is-invalid":
+                    formik.touched.last_name && formik.errors.last_name,
+                },
+                {
+                  "is-valid":
+                    formik.touched.last_name && !formik.errors.last_name,
+                }
+              )}
+            />
+          </label>
+          {formik.touched.last_name && formik.errors.last_name && (
+            <span role="alert" className="text-danger text-xs mt-1">
+              {formik.errors.last_name}
+            </span>
+          )}
+        </div>
 
         <div className="flex flex-col gap-1">
           <label className="form-label text-gray-900">Email</label>

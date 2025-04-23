@@ -2,6 +2,7 @@ module.exports = {
   content: ['index.html', './src/**/*.{js,jsx}'],
   safelist: [
     'demo1',
+    "client",
     'hidden',
     'ki-filled',
     'ki-outline',
@@ -14,7 +15,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        'pink-gradient': 'linear-gradient(90deg, rgba(135, 40, 117, 1) 0%, rgba(219, 37, 59, 1) 100%)',
+        'pink-gradient': 'linear-gradient(90deg,rgba(228, 178, 89, 1) 0%, rgba(166, 109, 10, 1) 46%)',
       },
       utilities: {
         '.bg-pink-gradient': {
@@ -57,10 +58,10 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#a21e70',
-                active: '#cb258c',
-                light: '#EFF6FF',
-                clarity: 'rgba(27, 132, 255, 0.20)',
+                default: '#C88A21',
+                active: '#a67825',
+                light: '#C88A211c',
+                clarity: 'rgba(217, 152, 184, 0.20)',
                 inverse: '#ffffff'
               },
               success: {
@@ -122,10 +123,10 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#b7217e',
-                active: '#cb258c',
-                light: '#172331',
-                clarity: 'rgba(0, 106, 230, 0.20)',
+                default: '#C88A21',
+                active: '#a67825',
+                light: '#b7217e26',
+                clarity: 'rgba(217, 152, 184, 0.20)',
                 inverse: '#ffffff'
               },
               success: {
@@ -686,11 +687,38 @@ module.exports = {
               mobile: '60px'
             }
           }
+        },
+        client: {
+          sidebar: {
+            width: {
+              desktop: '0',
+              desktopCollapse: '80px',
+              mobile: '0'
+            }
+          },
+          header: {
+            height: {
+              desktop: '70px',
+              mobile: '60px'
+            }
+          }
         }
       }
     })
   },
   plugins: [
+    function ({ addBase }) {
+      addBase({
+        'input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button': {
+          '-webkit-appearance': 'none',
+          margin: '0'
+        },
+        'input[type="number"]': {
+          '-moz-appearance': 'textfield'
+        }
+      });
+    },
+    // require('@tailwindcss/line-clamp'),
     require('tailwindcss-animate'), 
     require('./src/plugins/plugin'),
     require('./src/plugins/components/theme'),
