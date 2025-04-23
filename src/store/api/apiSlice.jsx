@@ -19,7 +19,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     if (result.error) {
         const { status, data } = result.error;
 
-        if (status === 401 || data?.error === "jwt expired") {
+        if (status === 401 || data?.error === "jwt expired" || data?.error === "invalid signature") {
             console.warn("JWT expired! Logging out...");
 
             // Clear local storage

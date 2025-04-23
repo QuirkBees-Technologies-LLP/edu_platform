@@ -245,26 +245,6 @@ const CreateTradeIdeas = forwardRef(({ setSelectedRow, isCreateOpen, handleClose
                         </div>
                         <div className="col-span-6">
                             <div className="flex flex-col gap-1">
-                                <label className="form-label text-gray-900 gap-1">Message <span className="text-danger">
-                                    *
-                                </span></label>
-                                <RichTextEditor
-                                    value={formik.values.message}
-                                    onChange={(value) => formik.setFieldValue('message', value)}
-                                    onBlur={() => formik.setFieldTouched('message', true)}
-                                    theme="snow"
-                                    touched={formik.touched.message}
-                                    error={formik.errors.message}
-                                />
-                                {formik.touched.message && formik.errors.message && (
-                                    <span role="alert" className="text-danger text-xs mt-1">
-                                        {formik.errors.message}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        <div className="col-span-6">
-                            <div className="flex flex-col gap-1">
                                 <label className="form-label text-gray-900 gap-1">Status <span className="text-danger">
                                     *
                                 </span></label>
@@ -381,7 +361,27 @@ const CreateTradeIdeas = forwardRef(({ setSelectedRow, isCreateOpen, handleClose
                                 ))}
                             </div>
                         </div>
-                        <div className="col-span-12">
+                        <div className="col-span-6">
+                            <div className="flex flex-col gap-1">
+                                <label className="form-label text-gray-900 gap-1">Message <span className="text-danger">
+                                    *
+                                </span></label>
+                                <RichTextEditor
+                                    content={formik.values.message}
+                                    onChange={(value) => formik.setFieldValue('message', value)}
+                                    onBlur={() => formik.setFieldTouched('message', true)}
+                                    theme="snow"
+                                    touched={formik.touched.message}
+                                    error={formik.errors.message}
+                                />
+                                {formik.touched.message && formik.errors.message && (
+                                    <span role="alert" className="text-danger text-xs mt-1">
+                                        {formik.errors.message}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="col-span-6">
                             <div className="flex flex-col gap-1">
                                 <label className="form-label text-gray-900 gap-1">Images <span className="text-danger">
                                     *

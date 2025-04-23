@@ -1,16 +1,17 @@
 import React, { forwardRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import { toast } from 'sonner';
-import { useDeleteEducatorMutation } from '../../../store/api/admin/adminEducatorsApiSlice';
+import { useDeleteAdminAcademyCategoryMutation } from '../../../store/api/admin/AdminAcademyCategoryApiSlice';
 
 
-const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
-    const [deleteEducator, { isLoading, isSuccess, isError, error }] = useDeleteEducatorMutation();
+const DeleteAdminAcademyCategory = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
+    const [deleteAdminAcademyCategory, { isLoading, isSuccess, isError, error }] = useDeleteAdminAcademyCategoryMutation();
 
     const handleDelete = async () => {
         try {
-            await deleteEducator(selectedRow?._id).unwrap();
+            await deleteAdminAcademyCategory(selectedRow?._id).unwrap();
             refetch();
             toast.success("Trade idea deleted successfully!");
             handleDeleteClose();
@@ -27,9 +28,8 @@ const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRo
                 <VisuallyHidden>
                     <DialogTitle>Hidden Title</DialogTitle>
                 </VisuallyHidden>
-                <div className="text-center">
-                <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
-
+                <div className='text-center'>
+                    <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
                 </div>
                 {/* Modal Text */}
                 <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
@@ -56,4 +56,4 @@ const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRo
     )
 })
 
-export default DeleteEducator;
+export default DeleteAdminAcademyCategory;

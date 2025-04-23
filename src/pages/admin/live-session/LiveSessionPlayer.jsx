@@ -141,7 +141,7 @@ console.log(call?.state?.backstage, "call1234");
 
             {
                 isCallEnd ?
-                    <div className="flex flex-col justify-center items-center gap-5 pb-20">
+                    <div className="flex flex-col justify-center items-center gap-5 pb-20 pt-20">
                         <RouteOff size={44} className='text-primary' />
                         <span className='text-gray-300 dark:text-gray-900 font-semibold text-2xl'>Live Stream Ended</span>
                         <p className="text-gray-300 dark:text-gray-900 mb-0 font-semibold">

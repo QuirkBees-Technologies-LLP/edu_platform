@@ -50,7 +50,7 @@ const LectureContent = ({
     type: lecture?.type || "TEXT",
     order: lecture?.order || 0,
     preview: lecture?.preview || false,
-    section: lecture?.section?._id || "",
+    section: lecture?.section || "",
   });
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const LectureContent = ({
         type: lecture.type || "TEXT",
         order: lecture.order || 0,
         preview: lecture.preview || false,
-        section: lecture.section?._id || "",
+        section: lecture.section || "",
       });
       setShowPreview(false);
       setIsEditing(false);

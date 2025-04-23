@@ -6,13 +6,13 @@ export const educatorProfileApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getEducatorProfile: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/admin/educator/list?page=${page}&limit=${limit}`,
+            query: () => `/educator/auth/profile`,
         }),
         updateEducatorProfile: builder.mutation({
-            query: (updatedTrade) => ({
-                url: `/admin/idea/updated/${updatedTrade.get("id")}`,
-                method: 'POST',
-                body: updatedTrade,
+            query: (updatedData) => ({
+                url: `/educator/auth/update`,
+                method: 'PUT',
+                body: updatedData,
                 formData: true
             }),
         }),
