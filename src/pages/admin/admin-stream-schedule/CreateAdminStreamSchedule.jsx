@@ -10,44 +10,77 @@ import { useNavigate } from 'react-router';
 import { v4 as uuidv4 } from "uuid";
 import TagInput from '../../../components/ui/tagInput';
 import RichTextEditor from '../../../components/ui/rich-editor';
+import { useGetEducatorAcademyCategoryQuery } from '../../../store/api/educator/educatorAcademyCategoryApiSlice';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
+import DateTimePicker from './DateTimePicker';
+import { useGetEducatorsQuery } from '../../../store/api/admin/adminEducatorsApiSlice';
 
-const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
+const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow,setSelectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
-    const [createLiveSession] = useCreateLiveSessionMutation();
+    const [createEducatorStreamSchedule] = useCreateEducatorStreamScheduleMutation();
+    const [updateEducatorStreamSchedule] = useUpdateEducatorStreamScheduleMutation();
+    const { data : educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
+    const { data } = useGetEducatorAcademyCategoryQuery();
     const educatorId = auth?.user?._id ?? null;
     const navigate = useNavigate();
 
     const initialValues = {
         title: "",
         description: "",
+        datetime: "",
         tags: [],
         category: "",
         thumbnail: null,
-        userId: ""
+        userId: "",
+        educator: ""
     };
 
     const createSchema = Yup.object().shape({
         title: Yup.string().required("Title is required"),
+        datetime: Yup.date()
+            .required("Date & time is required")
+            .typeError("Invalid date & time format")
+            .min(new Date(), "Start date & time can't be in the past"),
         description: Yup.string().required("Description is required"),
         category: Yup.string().required("Category is required"),
         tags: Yup.array()
             .min(1, "At least one tag is required")
             .of(Yup.string().required("Tag cannot be empty")),
-        thumbnail: Yup.array()
+            thumbnail: Yup.array()
             .required("Thumbnail is required")
             .min(1, "Thumbnail is required")
             .test("fileType", "Unsupported file type", (value) => {
-                if (!value || value.length === 0) return false;
-                const file = value[0]?.file;
-                const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-                return file && allowedTypes.includes(file.type);
+              if (!value || value.length === 0) return false;
+          
+              const item = value[0];
+          
+              // Case: Edit time (has dataURL, no file)
+              if (!item.file && item.dataURL) {
+                return true;
+              }
+          
+              // Case: Create time (new file uploaded)
+              const file = item?.file;
+              const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+              return file && allowedTypes.includes(file.type);
             })
             .test("fileSize", "File size too large (max 2MB)", (value) => {
-                if (!value || value.length === 0) return false;
-                const file = value[0]?.file;
-                const maxSize = 2 * 1024 * 1024; // 2MB
-                return file && file.size <= maxSize;
+              if (!value || value.length === 0) return false;
+          
+              const item = value[0];
+          
+              // Skip size check if it's from edit (existing image)
+              if (!item.file && item.dataURL) {
+                return true;
+              }
+          
+              // New upload
+              const file = item?.file;
+              const maxSize = 2 * 1024 * 1024; // 2MB
+              return file && file.size <= maxSize;
             }),
+          
     });
 
     const formik = useFormik({
@@ -65,21 +98,49 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
             formData.append('title', values.title);
             formData.append('category', values.category);
             formData.append('description', values.description);
+            formData.append('datetime', values.datetime);
             values.tags.forEach((tag) => {
                 formData.append(`tags[]`, tag);
             });
 
             formData.append('userId', values?.userId);
+            formData.append('educator', values?.educator);
 
             if (thumbnailFile) {
                 formData.append('files', thumbnailFile); // key must match your backend field
             }
 
+            if (selectedRow?._id) {
+                formData.append('id', selectedRow._id); // key must match your backend field
+            }
+
+            // try {
+            //     const res = await createEducatorStreamSchedule(formData).unwrap();
+            //     handleCloseCreate();
+            //     refetch();
+            //     // navigate(`/live-session/${callId}`, { state: res })
+            // } catch (err) {
+            //     toast.error(err.data.message);
+            // }
+
             try {
-                const res = await createLiveSession(formData).unwrap();
-                navigate(`/educator/live-session/${callId}`, { state: res })
+                if (selectedRow?._id) {
+                    await updateEducatorStreamSchedule({data: formData, id:selectedRow._id}).unwrap();
+                    setSelectedRow({});
+                    refetch();
+                    toast.success("Educator updated successfully!");
+                } else {
+                    await createEducatorStreamSchedule(formData).unwrap();
+                    refetch();
+                    toast.success("Educator created successfully!");
+                    setSelectedRow({});
+                }
+                formik.resetForm();
+                handleCloseCreate();
             } catch (err) {
-                toast.error(err.data.message);
+                console.error("API Error:", err);
+                const errorMessage = err?.data?.message || "An unexpected error occurred.";
+                toast.error(errorMessage);
             }
         },
     });
@@ -89,24 +150,19 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
             formik.setFieldValue("userId", educatorId);
         }
     }, [educatorId, formik.values]);
+console.log(selectedRow, "selectedRow");
 
     useEffect(() => {
         if (selectedRow?._id) {
-            const existingImages = selectedRow.image?.map((img) => ({
-                file: null,
-                dataURL: img,
-            })) || [];
-
             const initData = {
-                name: selectedRow?.name,
-                files: existingImages,
-                type: selectedRow?.type,
-                price: selectedRow?.price,
-                message: selectedRow?.message,
-                status: selectedRow?.status,
-                entry: selectedRow?.entry,
-                invalidation: selectedRow?.invalidation,
-                exits: selectedRow?.exits,
+                title: selectedRow?.title,
+                description: selectedRow?.description,
+                datetime: selectedRow?.datetime,
+                tags: selectedRow?.tags,
+                category: selectedRow?.category?._id,
+                educator: selectedRow?.educator?._id,
+                thumbnail: [{file: null, dataURL: selectedRow?.image}],
+                userId: selectedRow?.userId
             }
             formik.setValues(initData)
         }
@@ -115,10 +171,12 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
     const handleImageChange = (updatedImages) => {
         formik.setFieldValue('thumbnail', updatedImages);
     };
+    console.log(formik, "formik");
 
     return (
         <Dialog open={isCreateOpen} onOpenChange={() => {
             formik.resetForm();
+            setSelectedRow({});
             handleCloseCreate();
         }}>
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
@@ -156,7 +214,7 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                                     *
                                 </span></label>
                                 <RichTextEditor
-                                    value={formik.values.description}
+                                    content={formik.values.description}
                                     onChange={(value) => formik.setFieldValue('description', value)}
                                     onBlur={() => formik.setFieldTouched('description', false)}
                                     theme="snow"
@@ -172,24 +230,82 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                         </div>
                         <div className="col-span-12">
                             <div className="flex flex-col gap-1">
-                                <label className="form-label text-gray-900 gap-1">Category<span className="text-danger">
+                                <label className="form-label text-gray-900 gap-1">Date Time<span className="text-danger">
                                     *
                                 </span></label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter category"
-                                    autoComplete="off"
-                                    className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
-                                        ? "border border-danger"
-                                        : ""
-                                        }`}
-                                    {...formik.getFieldProps("category")}
-                                />
-                                {formik.touched.category && formik.errors.category && (
-                                    <span role="alert" className="text-danger text-xs mt-1">
-                                        {formik.errors.category}
-                                    </span>
+                                <div className='custom_datepicket'>
+                                    <DateTimePicker
+                                        value={formik.values.datetime}
+                                        onChange={(date) => formik.setFieldValue("datetime", date)}
+                                        className={formik.errors.datetime && formik.touched.datetime ? "border border-danger" : ""}
+                                    />
+                                </div>
+                                {formik.touched.datetime && formik.errors.datetime && (
+                                    <span className="text-danger text-xs">{formik.errors.datetime}</span>
                                 )}
+
+                            </div>
+                        </div>
+                        <div className="col-span-12">
+                            <div className="col-span-6">
+                                <div className="flex flex-col gap-1">
+                                    <label className="form-label text-gray-900 gap-1">Assign to Educator<span className="text-danger">
+                                        *
+                                    </span></label>
+                                    <Select
+                                        defaultValue={formik.values.educator}
+                                        onValueChange={(value) => formik.setFieldValue('educator', value)}
+                                        className={`form-control input input-md w-full ${formik.errors.educator && formik.touched.educator ? "border border-danger" : ""
+                                            }`}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {educators?.data?.map((item) => (
+                                                <SelectItem key={item._id} value={item._id}>
+                                                    {item.first_name + " " + item.last_name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {formik.touched.educator && formik.errors.educator && (
+                                        <span role="alert" className="text-danger text-xs mt-1">
+                                            {formik.errors.educator}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-span-12">
+                            <div className="col-span-6">
+                                <div className="flex flex-col gap-1">
+                                    <label className="form-label text-gray-900 gap-1">Academy Category<span className="text-danger">
+                                        *
+                                    </span></label>
+                                    <Select
+                                        defaultValue={formik.values.category}
+                                        onValueChange={(value) => formik.setFieldValue('category', value)}
+                                        className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category ? "border border-danger" : ""
+                                            }`}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {data?.data?.map((item) => (
+                                                <SelectItem key={item._id} value={item._id}>
+                                                    {item.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {formik.touched.category && formik.errors.category && (
+                                        <span role="alert" className="text-danger text-xs mt-1">
+                                            {formik.errors.category}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="col-span-12">
@@ -306,4 +422,4 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
     )
 });
 
-export default CreateLiveSession
+export default CreateAdminStreamSchedule;

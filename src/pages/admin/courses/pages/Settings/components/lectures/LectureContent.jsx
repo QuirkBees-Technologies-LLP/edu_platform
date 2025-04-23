@@ -99,12 +99,54 @@ const LectureContent = ({
     }));
   };
 
-  const handleVideoUrlChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      content: e.target.value,
-    }));
-  };
+    const handleVideoUrlChange = (e) => {
+        const url = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            content: url,
+        }));
+        
+        if (isValidVideoUrl(url)) {
+            setShowPreview(true);
+        } else {
+            setShowPreview(false);
+        }
+    };
+    
+    const isValidVideoUrl = (url) => {
+        if (!url) return false;
+        
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            return true;
+        }
+        
+        if (url.includes('vimeo.com')) {
+            return true;
+        }
+
+        return false;
+    };
+    
+    const getEmbedUrl = (url) => {
+        if (!url) return '';
+        
+        if (url.includes('youtube.com/watch?v=')) {
+            const videoId = url.split('v=')[1].split('&')[0];
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+
+        if (url.includes('youtu.be/')) {
+            const videoId = url.split('youtu.be/')[1].split('?')[0];
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+        
+        if (url.includes('vimeo.com/')) {
+            const videoId = url.split('vimeo.com/')[1].split('?')[0];
+            return `https://player.vimeo.com/video/${videoId}`;
+        }
+        
+        return url;
+    };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -223,7 +265,7 @@ const LectureContent = ({
                   >
                     <div className="aspect-video w-full border border-purple-200 rounded-md overflow-hidden shadow-sm">
                       <iframe
-                        src={formData.content}
+                        src={getEmbedUrl(formData.content)}
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -303,7 +345,7 @@ const LectureContent = ({
             {lecture.type === "VIDEO" ? (
               <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                 <iframe
-                  src={lecture.content}
+                  src={getEmbedUrl(lecture.content)}
                   className="w-full h-full rounded-md"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen

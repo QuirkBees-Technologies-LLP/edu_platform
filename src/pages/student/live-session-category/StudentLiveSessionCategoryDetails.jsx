@@ -2,6 +2,7 @@ import React from 'react'
 import { Container } from '@/components/container';
 import { useGetAcademySingleCategoryQuery } from '../../../store/api/client/clientAcademyCategoryApiSlice';
 import { Link, useParams } from 'react-router-dom';
+import WeeklyCalendar from './WeeklyCalendar';
 
 const StudentLiveSessionCategoryDetails = () => {
     const { id } = useParams();
@@ -9,10 +10,12 @@ const StudentLiveSessionCategoryDetails = () => {
 
     const defaultImage = '/media/images/600x400/1.jpg';
     const educators = data?.data?.category?.educators;
+    console.log(data, "educators===>");
 
     return (
         <div>
             <Container>
+                {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div>There are no schedule found</div>}
                 {educators && educators.length > 0 ? (
                     <div className="grid xl:grid-cols-3 sm:grid-cols-2 gap-4">
                         {educators.map((educator, index) => (
@@ -22,7 +25,7 @@ const StudentLiveSessionCategoryDetails = () => {
                                 className="card hover:shadow-lg transition-shadow duration-300"
                             >
                                 <div key={`educator-${educator.id || index}`}
-                                     className="card">
+                                    className="card">
                                     <div className="card-body">
                                         <h6 className="text-lg text-center font-medium text-gray-900 mb-3">
                                             {educator.first_name} {educator.last_name}

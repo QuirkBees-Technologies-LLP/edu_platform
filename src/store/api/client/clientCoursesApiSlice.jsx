@@ -11,7 +11,10 @@ export const clientCoursesApiSlice = createApi({
         getClientSingleCourses: builder.query({
             query: (courseId) => `/users/course/${courseId}`,
         }),
+        getClientSingleCourseSection: builder.query({
+            query: (courseId) => `/users/course/section/list?course=${courseId}`,
+        }),
     }),
 });
 
-export const { useGetClientCoursesQuery, useGetClientSingleCoursesQuery } = clientCoursesApiSlice;
+export const { useGetClientCoursesQuery, useGetClientSingleCoursesQuery, useGetClientSingleCourseSectionQuery } = clientCoursesApiSlice;

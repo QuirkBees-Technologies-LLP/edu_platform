@@ -32,11 +32,12 @@ const DropdownUser = ({
   const { auth } = useAuthContext();
 
   const userEmail = auth?.user?.email;
+  const profilePhoto = auth?.user?.image;
 
   const buildHeader = () => {
     return <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
       <div className="flex items-center gap-2">
-        <img className="size-9 rounded-full border-2 border-success" src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="" />
+        <img className="size-9 rounded-full border-2 border-success" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
         <div className="flex flex-col gap-1.5">
           <Link to="/account/hoteme/get-stard" className="text-sm text-gray-800 hover:text-primary font-semibold leading-none">
             {/* Cody Fisher */}

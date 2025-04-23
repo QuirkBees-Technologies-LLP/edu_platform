@@ -987,6 +987,11 @@ export const sideMenus = {
       path: '/admin/video-library'
     },
     {
+      title: 'Stream Schedule',
+      icon: 'profile-circle',
+      path: '/admin/stream-schedule'
+    },
+    {
       title: 'Live Sessions',
       icon: 'profile-circle',
       path: '/admin/live-session'
