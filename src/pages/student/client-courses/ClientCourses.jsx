@@ -1,6 +1,6 @@
 import React from 'react'
 import { Container } from '@/components/container';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useGetClientCoursesQuery } from '../../../store/api/client/clientCoursesApiSlice';
 
 const ClientCourses = () => {
@@ -20,7 +20,12 @@ const ClientCourses = () => {
                             <>
                                 <ul className='flex flex-col md:gap-12 gap-8'>
                                     {courses.map((course) => (
-                                        <li key={course._id}>
+                                        <Link
+                                            to={`/academy/course/detail/${course._id}`}
+                                            key={course._id}
+                                            className="card hover:shadow-lg transition-shadow duration-300"
+                                        >
+                                        <li>
                                             <a href="#">
                                                 <div className="flex items-center gap-5">
                                                     <img
@@ -34,6 +39,7 @@ const ClientCourses = () => {
                                                 </div>
                                             </a>
                                         </li>
+                                        </Link>
                                     ))}
                                 </ul>
                                 <div className="text-end mt-3">
