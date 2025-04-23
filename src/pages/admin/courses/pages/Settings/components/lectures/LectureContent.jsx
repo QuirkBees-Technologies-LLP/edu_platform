@@ -14,7 +14,20 @@ import {
 import { Switch } from "@/components/ui/switch";
 import RichEditor from "@/components/ui/rich-editor";
 import { toast } from "sonner";
-import { Upload, Eye } from "lucide-react";
+import {
+  Upload,
+  Eye,
+  FileText,
+  Video,
+  Save,
+  PencilLine,
+  X,
+  Check,
+  Clock,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const LectureContent = ({
   lecture,
@@ -26,6 +39,9 @@ const LectureContent = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [activeTab, setActiveTab] = useState("content");
+
+  const [lectureContent, setLectureContent] = useState(null);
 
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
@@ -38,6 +54,11 @@ const LectureContent = ({
   });
 
   useEffect(() => {
+    const fetchLectureContent = async () => {
+      const response = await lmsLectures.getLecture(lecture._id, auth.token);
+      setLectureContent(response);
+    };
+
     if (lecture) {
       setFormData({
         title: lecture.title || "",
@@ -50,6 +71,7 @@ const LectureContent = ({
       });
       setShowPreview(false);
       setIsEditing(false);
+      setActiveTab("content");
     }
   }, [lecture]);
 
@@ -118,6 +140,10 @@ const LectureContent = ({
       }
 
       setForceUpdateLectureList(true);
+    } catch (error) {
+      toast.error(
+        "Failed to update lecture: " + (error.message || "Unknown error")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -125,8 +151,15 @@ const LectureContent = ({
 
   if (!lecture) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Select a lecture to view its content</p>
+      <div className="flex items-center justify-center h-full p-8 bg-gray-50 rounded-lg">
+        <div className="text-center">
+          <div className="bg-gray-100 rounded-full p-4 inline-block mx-auto mb-4">
+            <FileText className="h-8 w-8 text-gray-400" />
+          </div>
+          <p className="text-gray-500 max-w-md">
+            Select a lecture from the sidebar to view or edit its content
+          </p>
+        </div>
       </div>
     );
   }
@@ -135,8 +168,13 @@ const LectureContent = ({
     switch (formData.type) {
       case "TEXT":
         return (
-          <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-blue-700">
+              <FileText className="w-4 h-4" />
+              <Label htmlFor="content" className="font-medium">
+                Text Content
+              </Label>
+            </div>
             <RichEditor
               content={formData.content}
               onChange={handleContentChange}
@@ -147,42 +185,59 @@ const LectureContent = ({
       case "VIDEO":
         return (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="videoUrl">Video URL</Label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-purple-700">
+                <Video className="w-4 h-4" />
+                <Label htmlFor="videoUrl" className="font-medium">
+                  Video URL
+                </Label>
+              </div>
               <Input
                 id="videoUrl"
                 name="videoUrl"
                 value={formData.content}
                 onChange={handleVideoUrlChange}
                 placeholder="Enter video URL (YouTube, Vimeo, etc.)"
+                className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
               />
               {formData.content && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="mt-2"
+                  className="mt-2 border-purple-200 text-purple-700 hover:bg-purple-50"
                   onClick={() => setShowPreview(!showPreview)}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   {showPreview ? "Hide Preview" : "Show Preview"}
                 </Button>
               )}
-              {showPreview && formData.content && (
-                <div className="mt-2">
-                  <div className="aspect-video w-full border rounded-md overflow-hidden">
-                    <iframe
-                      src={formData.content}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {showPreview && formData.content && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-3"
+                  >
+                    <div className="aspect-video w-full border border-purple-200 rounded-md overflow-hidden shadow-sm">
+                      <iframe
+                        src={formData.content}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="space-y-2">
-              <Label>Or upload a video file</Label>
+            <div className="space-y-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 text-purple-700">
+                <Upload className="w-4 h-4" />
+                <Label className="font-medium">Upload Video</Label>
+              </div>
               <div className="flex items-center gap-2">
                 <Input
                   type="file"
@@ -193,12 +248,15 @@ const LectureContent = ({
                 />
                 <Label
                   htmlFor="videoUpload"
-                  className="flex items-center gap-2 cursor-pointer border rounded-md px-4 py-2 hover:bg-gray-50"
+                  className="flex items-center gap-2 cursor-pointer border border-purple-200 rounded-md px-4 py-2 hover:bg-purple-50 transition-colors"
                 >
-                  <Upload className="h-4 w-4" />
-                  <span>Choose File</span>
+                  <Upload className="h-4 w-4 text-purple-500" />
+                  <span>Choose Video File</span>
                 </Label>
               </div>
+              <p className="text-xs text-gray-500 italic">
+                Supported formats: MP4, WebM, Ogg (max 100MB)
+              </p>
             </div>
           </div>
         );
@@ -207,133 +265,417 @@ const LectureContent = ({
     }
   };
 
+  const renderViewContent = () => {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+            <h3 className="font-medium text-gray-800 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-blue-500" />
+              Title
+            </h3>
+            <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
+              {lecture.title}
+            </p>
+          </div>
+
+          <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+            <h3 className="font-medium text-gray-800 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-blue-500" />
+              Description
+            </h3>
+            <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
+              {lecture.description || "No description provided"}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="font-medium text-gray-800 flex items-center gap-2">
+            {lecture.type === "VIDEO" ? (
+              <Video className="w-4 h-4 text-purple-500" />
+            ) : (
+              <FileText className="w-4 h-4 text-blue-500" />
+            )}
+            {lecture.type === "VIDEO" ? "Video Content" : "Text Content"}
+          </h3>
+          <div className="mt-2">
+            {lecture.type === "VIDEO" ? (
+              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                <iframe
+                  src={lecture.content}
+                  className="w-full h-full rounded-md"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div
+                className="p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: lecture.content }}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex-1">
+            <h3 className="font-medium text-gray-800 flex items-center gap-2">
+              <Eye className="w-4 h-4 text-green-500" />
+              Preview Access
+            </h3>
+            <p className="text-sm text-gray-500">
+              {lecture.preview
+                ? "Students can preview this lecture before enrollment"
+                : "This lecture is only available after enrollment"}
+            </p>
+          </div>
+          <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
+            <span
+              className={`flex items-center gap-1.5 text-sm font-medium ${
+                lecture.preview ? "text-green-700" : "text-gray-500"
+              }`}
+            >
+              {lecture.preview ? (
+                <>
+                  <Check className="w-4 h-4 text-green-500" />
+                  Enabled
+                </>
+              ) : (
+                <>
+                  <X className="w-4 h-4 text-gray-500" />
+                  Disabled
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSettings = () => {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="font-medium text-gray-800 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-blue-500" />
+            Lecture Order
+          </h3>
+          <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
+            {lecture.order || "0"} (Position in section)
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex-1">
+            <h3 className="font-medium text-gray-800 flex items-center gap-2">
+              <Eye className="w-4 h-4 text-green-500" />
+              Preview Access
+            </h3>
+            <p className="text-sm text-gray-500">
+              {lecture.preview
+                ? "Students can preview this lecture before enrolling in the course"
+                : "This lecture is only available after enrollment"}
+            </p>
+          </div>
+          <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
+            <span
+              className={`flex items-center gap-1.5 text-sm font-medium ${
+                lecture.preview ? "text-green-700" : "text-gray-500"
+              }`}
+            >
+              {lecture.preview ? (
+                <>
+                  <Check className="w-4 h-4 text-green-500" />
+                  Enabled
+                </>
+              ) : (
+                <>
+                  <X className="w-4 h-4 text-gray-500" />
+                  Disabled
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="font-medium text-gray-800 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-blue-500" />
+            Lecture Type
+          </h3>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                lecture.type === "VIDEO"
+                  ? "bg-purple-100 text-purple-800"
+                  : "bg-blue-100 text-blue-800"
+              }`}
+            >
+              {lecture.type === "VIDEO" ? (
+                <>
+                  <Video className="w-3.5 h-3.5" />
+                  Video
+                </>
+              ) : (
+                <>
+                  <FileText className="w-3.5 h-3.5" />
+                  Text
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-6 p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Lecture Content</h2>
+    <div className="space-y-6 p-4 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            {lecture.type === "VIDEO" ? (
+              <Video className="w-5 h-5 text-purple-500" />
+            ) : (
+              <FileText className="w-5 h-5 text-blue-500" />
+            )}
+            {lecture.title}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">{lecture.description}</p>
+        </div>
         <Button
           variant={isEditing ? "outline" : "default"}
+          className={
+            isEditing
+              ? "border-red-200 text-red-600 hover:bg-red-50"
+              : "bg-blue-600 hover:bg-blue-700"
+          }
           onClick={() => {
             setIsEditing(!isEditing);
             setShowPreview(false);
           }}
         >
-          {isEditing ? "Cancel" : "Edit"}
+          {isEditing ? (
+            <>
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </>
+          ) : (
+            <>
+              <PencilLine className="h-4 w-4 mr-2" />
+              Edit
+            </>
+          )}
         </Button>
       </div>
 
-      {isEditing ? (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="Lecture title"
-              required
-            />
-          </div>
+      {/* Content */}
+      <AnimatePresence mode="wait">
+        {isEditing ? (
+          <motion.div
+            key="edit-form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-blue-700">
+                      <FileText className="w-4 h-4" />
+                      <Label htmlFor="title" className="font-medium">
+                        Title
+                      </Label>
+                    </div>
+                    <Input
+                      id="title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      placeholder="Lecture title"
+                      required
+                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+                    />
+                  </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Lecture description"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
-            <Select value={formData.type} onValueChange={handleSelectChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="TEXT">Text</SelectItem>
-                <SelectItem value="VIDEO">Video</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {renderContentEditor()}
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="preview"
-              checked={formData.preview}
-              onCheckedChange={(checked) =>
-                setFormData((prev) => ({ ...prev, preview: checked }))
-              }
-            />
-            <Label htmlFor="preview">Allow preview</Label>
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setIsEditing(false);
-                setShowPreview(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </form>
-      ) : (
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium">Title</h3>
-            <p className="text-gray-700">{lecture.title}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Description</h3>
-            <p className="text-gray-700">{lecture.description}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Type</h3>
-            <p className="text-gray-700">{lecture.type}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Content</h3>
-            {lecture.type === "VIDEO" ? (
-              <div className="mt-2">
-                <div className="aspect-video w-full">
-                  <iframe
-                    src={lecture.content}
-                    className="w-full h-full rounded-md"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-blue-700">
+                      <FileText className="w-4 h-4" />
+                      <Label htmlFor="description" className="font-medium">
+                        Description
+                      </Label>
+                    </div>
+                    <Input
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      placeholder="Brief description of this lecture"
+                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div
-                className="mt-2 p-4 bg-gray-50 rounded prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: lecture.content }}
-              />
-            )}
-          </div>
 
-          <div>
-            <h3 className="font-medium">Preview</h3>
-            <p className="text-gray-700">{lecture.preview ? "Yes" : "No"}</p>
-          </div>
-        </div>
-      )}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-blue-700">
+                    <FileText className="w-4 h-4" />
+                    <Label htmlFor="type" className="font-medium">
+                      Content Type
+                    </Label>
+                  </div>
+                  <Select
+                    value={formData.type}
+                    onValueChange={handleSelectChange}
+                  >
+                    <SelectTrigger className="border-blue-200 focus:border-blue-400 focus:ring-blue-400">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        value="TEXT"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-blue-500" />
+                          <span>Text</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="VIDEO">
+                        <div className="flex items-center gap-2">
+                          <Video className="w-4 h-4 text-purple-500" />
+                          <span>Video</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="border-t border-gray-100 pt-4">
+                  {renderContentEditor()}
+                </div>
+
+                <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
+                  <Switch
+                    id="preview"
+                    checked={formData.preview}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, preview: checked }))
+                    }
+                    className="data-[state=checked]:bg-green-600"
+                  />
+                  <div>
+                    <Label htmlFor="preview" className="font-medium">
+                      Allow Preview
+                    </Label>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      If enabled, students can view this lecture before
+                      enrolling in the course
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 border-t border-gray-100 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setShowPreview(false);
+                    }}
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="view-content"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              {/* Tabs */}
+              <div className="flex border-b border-gray-200">
+                <button
+                  onClick={() => setActiveTab("content")}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
+                    activeTab === "content"
+                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  Content
+                </button>
+                <button
+                  onClick={() => setActiveTab("settings")}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
+                    activeTab === "settings"
+                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  Settings
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-5">
+                <AnimatePresence mode="wait">
+                  {activeTab === "content" ? (
+                    <motion.div
+                      key="content-tab"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {renderViewContent()}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="settings-tab"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {renderSettings()}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

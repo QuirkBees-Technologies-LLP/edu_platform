@@ -1,15 +1,15 @@
 import { Clock, Users, BookOpen, ChevronLeft } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import featuredCourses from "../mocks/featuredCourses";
+import featuredCourses from "../../../../../classroomShowcase/mocks/featuredCourses";
 import { Container } from "@/components";
 
 // components
-import HeroSectionCourse from "./components/HeroSectionCourse";
-import CourseProgressBar from "./components/CourseProgressBar";
+import HeroSectionCourse from "./HeroSectionCourse";
+import CourseProgressBar from "./CourseProgressBar";
 
 // mock data
-import courseSections from "../mocks/sectionCourse";
-import LectureCard from "./components/LectureCard";
+import courseSections from "../../../../../classroomShowcase/mocks/sectionCourse";
+import LectureCard from "./LectureCard";
 
 const CoursePage = () => {
   let { courseId } = useParams();

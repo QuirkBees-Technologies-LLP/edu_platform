@@ -5,7 +5,7 @@ import { useAuthContext } from "../../../../auth/useAuthContext";
 import { useCourseStore } from "../../../../store/courseStore";
 // components
 import CourseCard from "../../components/courseCard";
-import FeaturedSection from "../../components/FeaturedSection";
+import FeaturedSection from "../../../admin/courses/components/FeaturedSection";
 
 const ClassroomSection = () => {
   const [visibleCourses, setVisibleCourses] = useState(9);

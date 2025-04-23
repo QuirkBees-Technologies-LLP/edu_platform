@@ -6,6 +6,10 @@ import {
   Trash2,
   Check,
   X,
+  Folder,
+  FolderOpen,
+  Loader2,
+  GripVertical,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuthContext } from "@/auth/useAuthContext";
@@ -23,11 +27,13 @@ const SectionItem = ({
   onLectureUpdate,
   forceUpdateLectureList,
   setForceUpdateLectureList,
+  reorderMode,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(section.title);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
@@ -148,84 +154,143 @@ const SectionItem = ({
   };
 
   return (
-    <div className="border rounded-lg p-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggleExpand}
-            className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-full"
-          >
-            {isExpanded ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
-          </button>
-          {isEditing ? (
-            <form onSubmit={handleEditSection} className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
-                  title="Save changes"
-                >
-                  <Check className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancelEditing}
-                  disabled={isSubmitting}
-                  className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-                  title="Cancel"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+    <div
+      className={`border-l-4 ${isExpanded ? "border-l-blue-500" : "border-l-transparent"} 
+                  bg-white rounded-lg shadow-sm transition-all duration-200 
+                  ${reorderMode ? "cursor-move pl-2 border-l-indigo-400" : ""}`}
+    >
+      {/* Section Header */}
+      <div
+        className={`px-4 py-3 rounded-t-lg transition-colors ${isHovered && !isEditing ? "bg-blue-50/50" : ""}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {reorderMode && (
+              <div className="text-gray-400 cursor-move">
+                <GripVertical className="w-4 h-4" />
               </div>
-              {error && <span className="text-xs text-red-500">{error}</span>}
-            </form>
-          ) : (
-            <span className="font-medium">{section.title}</span>
+            )}
+
+            <button
+              onClick={handleToggleExpand}
+              className={`p-1.5 rounded-full transition-colors ${
+                isExpanded
+                  ? "text-blue-600 bg-blue-100 hover:bg-blue-200"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+              }`}
+              aria-label={isExpanded ? "Collapse section" : "Expand section"}
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+
+            <div className={`mr-2 text-${isExpanded ? "blue" : "gray"}-500`}>
+              {isExpanded ? (
+                <FolderOpen className="w-4 h-4" />
+              ) : (
+                <Folder className="w-4 h-4" />
+              )}
+            </div>
+
+            {isEditing ? (
+              <form onSubmit={handleEditSection} className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="w-full px-3 py-1.5 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                      disabled={isSubmitting}
+                      placeholder="Section title"
+                    />
+                    {error && (
+                      <p className="text-xs text-red-500 mt-1">{error}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md flex items-center gap-1 transition-colors"
+                      title="Save changes"
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelEditing}
+                      disabled={isSubmitting}
+                      className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                      title="Cancel"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-gray-800 truncate">
+                  {section.title}
+                </h3>
+              </div>
+            )}
+          </div>
+
+          {!isEditing && !reorderMode && (
+            <div
+              className={`flex items-center gap-1 transition-opacity ${
+                isHovered ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <button
+                onClick={handleStartEditing}
+                className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                title="Edit section"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleDeleteSection}
+                className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                title="Delete section"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           )}
         </div>
-        {!isEditing && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleStartEditing}
-              className="p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-              title="Edit section"
-            >
-              <Pencil className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleDeleteSection}
-              className="p-1 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full"
-              title="Delete section"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        )}
       </div>
 
+      {/* Lecture List (Expanded View) */}
       {isExpanded && (
-        <div className="mt-2 pl-6">
-          <LectureList
-            sectionId={section._id}
-            onLectureSelect={onLectureSelect}
-            onLectureUpdate={onLectureUpdate}
-            forceUpdateLectureList={forceUpdateLectureList}
-            setForceUpdateLectureList={setForceUpdateLectureList}
-          />
+        <div className="border-t pt-2 pb-3 px-3 bg-gray-50/50 rounded-b-lg">
+          <div className="ml-7">
+            <LectureList
+              sectionId={section._id}
+              onLectureSelect={onLectureSelect}
+              onLectureUpdate={onLectureUpdate}
+              forceUpdateLectureList={forceUpdateLectureList}
+              setForceUpdateLectureList={setForceUpdateLectureList}
+            />
+          </div>
         </div>
       )}
     </div>
