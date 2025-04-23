@@ -97,6 +97,8 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
             try {
                 if (selectedRow?._id) {
                     await updateEducator(payload).unwrap();
+                    setSelectedRow({});
+
                     refetch();
                     toast.success("Educator updated successfully!");
                 } else {

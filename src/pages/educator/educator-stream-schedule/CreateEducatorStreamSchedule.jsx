@@ -10,16 +10,22 @@ import { useNavigate } from 'react-router';
 import { v4 as uuidv4 } from "uuid";
 import TagInput from '../../../components/ui/tagInput';
 import RichTextEditor from '../../../components/ui/rich-editor';
+import { useGetEducatorAcademyCategoryQuery } from '../../../store/api/educator/educatorAcademyCategoryApiSlice';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCreateEducatorStreamScheduleMutation } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
+import DateTimePicker from './DateTimePicker';
 
 const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
-    const [createLiveSession] = useCreateLiveSessionMutation();
+    const [createEducatorStreamSchedule] = useCreateEducatorStreamScheduleMutation();
     const educatorId = auth?.user?._id ?? null;
     const navigate = useNavigate();
+    const { data, isLoading } = useGetEducatorAcademyCategoryQuery();
 
     const initialValues = {
         title: "",
         description: "",
+        datetime: "",
         tags: [],
         category: "",
         thumbnail: null,
@@ -28,6 +34,10 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
 
     const createSchema = Yup.object().shape({
         title: Yup.string().required("Title is required"),
+        datetime: Yup.date()
+            .required("Date & time is required")
+            .typeError("Invalid date & time format")
+            .min(new Date(), "Start date & time can't be in the past"),
         description: Yup.string().required("Description is required"),
         category: Yup.string().required("Category is required"),
         tags: Yup.array()
@@ -65,19 +75,22 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
             formData.append('title', values.title);
             formData.append('category', values.category);
             formData.append('description', values.description);
+            formData.append('datetime', values.datetime);
             values.tags.forEach((tag) => {
                 formData.append(`tags[]`, tag);
             });
 
             formData.append('userId', values?.userId);
+            formData.append('educator', values?.userId);
 
             if (thumbnailFile) {
                 formData.append('files', thumbnailFile); // key must match your backend field
             }
 
             try {
-                const res = await createLiveSession(formData).unwrap();
-                navigate(`/live-session/${callId}`, { state: res })
+                const res = await createEducatorStreamSchedule(formData).unwrap();
+                handleCloseCreate();
+                // navigate(`/live-session/${callId}`, { state: res })
             } catch (err) {
                 toast.error(err.data.message);
             }
@@ -115,6 +128,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
     const handleImageChange = (updatedImages) => {
         formik.setFieldValue('thumbnail', updatedImages);
     };
+    console.log(formik, "formik");
 
     return (
         <Dialog open={isCreateOpen} onOpenChange={() => {
@@ -172,24 +186,51 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                         </div>
                         <div className="col-span-12">
                             <div className="flex flex-col gap-1">
-                                <label className="form-label text-gray-900 gap-1">Category<span className="text-danger">
+                                <label className="form-label text-gray-900 gap-1">Date Time<span className="text-danger">
                                     *
                                 </span></label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter category"
-                                    autoComplete="off"
-                                    className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
-                                        ? "border border-danger"
-                                        : ""
-                                        }`}
-                                    {...formik.getFieldProps("category")}
-                                />
-                                {formik.touched.category && formik.errors.category && (
-                                    <span role="alert" className="text-danger text-xs mt-1">
-                                        {formik.errors.category}
-                                    </span>
+                                <div className='custom_datepicket'>
+                                    <DateTimePicker
+                                        value={formik.values.datetime}
+                                        onChange={(date) => formik.setFieldValue("datetime", date)}
+                                        className={formik.errors.datetime && formik.touched.datetime ? "border border-danger" : ""}
+                                    />
+                                </div>
+                                {formik.touched.datetime && formik.errors.datetime && (
+                                    <span className="text-danger text-xs">{formik.errors.datetime}</span>
                                 )}
+
+                            </div>
+                        </div>
+                        <div className="col-span-12">
+                            <div className="col-span-6">
+                                <div className="flex flex-col gap-1">
+                                    <label className="form-label text-gray-900 gap-1">Academy Category<span className="text-danger">
+                                        *
+                                    </span></label>
+                                    <Select
+                                        defaultValue={formik.values.category}
+                                        onValueChange={(value) => formik.setFieldValue('category', value)}
+                                        className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category ? "border border-danger" : ""
+                                            }`}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {data?.data?.map((item) => (
+                                                <SelectItem key={item._id} value={item._id}>
+                                                    {item.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {formik.touched.category && formik.errors.category && (
+                                        <span role="alert" className="text-danger text-xs mt-1">
+                                            {formik.errors.category}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="col-span-12">

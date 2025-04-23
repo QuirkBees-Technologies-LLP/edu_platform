@@ -112,7 +112,6 @@ console.log(custom, "custom");
                         )}
                     </div>
                 </div>
-
                 <div className="col-span-6">
                     <div className="flex flex-col gap-1">
                         <label className="form-label text-gray-900 gap-1">Category<span className="text-danger">*</span></label>

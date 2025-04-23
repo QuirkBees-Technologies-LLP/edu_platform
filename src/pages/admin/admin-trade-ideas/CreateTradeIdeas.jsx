@@ -367,7 +367,7 @@ const CreateTradeIdeas = forwardRef(({ setSelectedRow, isCreateOpen, handleClose
                                     *
                                 </span></label>
                                 <RichTextEditor
-                                    value={formik.values.message}
+                                    content={formik.values.message}
                                     onChange={(value) => formik.setFieldValue('message', value)}
                                     onBlur={() => formik.setFieldTouched('message', true)}
                                     theme="snow"
