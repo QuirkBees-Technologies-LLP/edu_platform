@@ -13,6 +13,7 @@ import { useLazyGetLiveSessionListQuery } from '../../../store/api/admin/adminLi
 import { formatSecondsToHMS } from '../../../lib/utils';
 import CreateEducatorStreamSchedule from './CreateEducatorStreamSchedule';
 import { useLazyGetEducatorStreamScheduleQuery } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
+import DeleteEducatorStreamSchedule from './DeleteEducatorStreamSchedule';
 
 const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -112,6 +113,48 @@ const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
         headerClassName: 'min-w-[200px]'
       }
     },
+    {
+      accessorFn: row => row.create_by,
+      id: 'create_by',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Created By' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.create_by?.first_name + " " + info.row.original.create_by?.last_name}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      id: 'click',
+      header: () => '',
+      enableSorting: false,
+      cell: ({ row }) => <Menu className="items-stretch">
+        <MenuItem toggle="dropdown"
+          onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+          trigger="click" dropdownProps={{
+            placement: isRTL() ? 'bottom-start' : 'bottom-end',
+            modifiers: [{
+              name: 'offset',
+              options: {
+                offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
+              }
+            }]
+          }}>
+          <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+            <KeenIcon icon="dots-vertical" />
+          </MenuToggle>
+          {ActionMenu()}
+        </MenuItem>
+      </Menu>,
+      meta: {
+        headerClassName: 'w-[60px]'
+      }
+    }
   ], [isRTL]);
 
   // Initialize search term from localStorage if available
@@ -201,6 +244,7 @@ const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
         </ToolbarActions>
       </Toolbar>
       <DataGrid serverSide={true}
+        key={tableKey}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
           size: 10,
         }} toolbar={<ToolbarTable />} layout={{
@@ -209,7 +253,8 @@ const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
         onFetchData={handleFetchData}
       />
 
-      <CreateEducatorStreamSchedule handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      <CreateEducatorStreamSchedule setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      {isDeleteOpen && <DeleteEducatorStreamSchedule refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
     </div>
   )
 }

@@ -102,6 +102,8 @@ import StudentLiveSessionCategory from "../pages/student/live-session-category/S
 import StudentLiveSessionCategoryDetails from "../pages/student/live-session-category/StudentLiveSessionCategoryDetails";
 import ClientCourses from "../pages/student/client-courses/ClientCourses";
 import ClientSpecificCourses from "../pages/student/client-courses/ClientSpecificCourses";
+import AdminStreamSchedule from "../pages/admin/admin-stream-schedule/AdminStreamSchedule";
+import EducatorLiveSession from "../pages/educator/live-session/EducatorLiveSession";
 
 const routes = {
   student: [
@@ -120,7 +122,7 @@ const routes = {
     { path: "/", element: <DefaultPage /> },
     { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
     { path: "/educator/courses", element: <Courses /> },
-    { path: "/educator/live-session", element: <LiveSession /> },
+    { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/live-session/:callId", element: <AdminLiveSessionView /> },
     { path: "/educator/dark-sidebar", element: <Demo1DarkSidebarPage /> },
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
@@ -136,6 +138,7 @@ const routes = {
     { path: "/admin/educators", element: <Educators /> },
     { path: "/admin/profile", element: <AdminProfile /> },
     { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
+    { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
   ],
 };
 

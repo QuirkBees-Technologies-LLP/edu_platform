@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,15 +12,18 @@ import TagInput from '../../../components/ui/tagInput';
 import RichTextEditor from '../../../components/ui/rich-editor';
 import { useGetEducatorAcademyCategoryQuery } from '../../../store/api/educator/educatorAcademyCategoryApiSlice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCreateEducatorStreamScheduleMutation } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
+import { useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
 import DateTimePicker from './DateTimePicker';
+import { set } from 'date-fns';
 
-const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch }, ref) => {
+const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, setSelectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
     const [createEducatorStreamSchedule] = useCreateEducatorStreamScheduleMutation();
+    const [updateEducatorStreamSchedule] = useUpdateEducatorStreamScheduleMutation();
     const educatorId = auth?.user?._id ?? null;
     const navigate = useNavigate();
     const { data, isLoading } = useGetEducatorAcademyCategoryQuery();
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
 
     const initialValues = {
         title: "",
@@ -87,12 +90,37 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                 formData.append('files', thumbnailFile); // key must match your backend field
             }
 
+            if (selectedRow?._id) {
+                formData.append('id', selectedRow._id); // key must match your backend field
+            }
+
+            // try {
+            //     const res = await createEducatorStreamSchedule(formData).unwrap();
+            //     handleCloseCreate();
+            //     refetch();
+            //     // navigate(`/live-session/${callId}`, { state: res })
+            // } catch (err) {
+            //     toast.error(err.data.message);
+            // }
+
             try {
-                const res = await createEducatorStreamSchedule(formData).unwrap();
+                if (selectedRow?._id) {
+                    await updateEducatorStreamSchedule({ data: formData, id: selectedRow._id }).unwrap();
+                    setSelectedRow({});
+                    refetch();
+                    toast.success("Educator updated successfully!");
+                } else {
+                    await createEducatorStreamSchedule(formData).unwrap();
+                    refetch();
+                    toast.success("Educator created successfully!");
+                    setSelectedRow({});
+                }
+                formik.resetForm();
                 handleCloseCreate();
-                // navigate(`/live-session/${callId}`, { state: res })
             } catch (err) {
-                toast.error(err.data.message);
+                console.error("API Error:", err);
+                const errorMessage = err?.data?.message || "An unexpected error occurred.";
+                toast.error(errorMessage);
             }
         },
     });
@@ -105,21 +133,14 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
 
     useEffect(() => {
         if (selectedRow?._id) {
-            const existingImages = selectedRow.image?.map((img) => ({
-                file: null,
-                dataURL: img,
-            })) || [];
-
             const initData = {
-                name: selectedRow?.name,
-                files: existingImages,
-                type: selectedRow?.type,
-                price: selectedRow?.price,
-                message: selectedRow?.message,
-                status: selectedRow?.status,
-                entry: selectedRow?.entry,
-                invalidation: selectedRow?.invalidation,
-                exits: selectedRow?.exits,
+                title: selectedRow?.title,
+                description: selectedRow?.description,
+                datetime: selectedRow?.datetime,
+                tags: selectedRow?.tags,
+                category: selectedRow?.category?._id,
+                thumbnail: [{ file: null, dataURL: selectedRow?.image }],
+                userId: selectedRow?.userId
             }
             formik.setValues(initData)
         }
@@ -133,6 +154,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
     return (
         <Dialog open={isCreateOpen} onOpenChange={() => {
             formik.resetForm();
+            setSelectedRow({});
             handleCloseCreate();
         }}>
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
@@ -170,7 +192,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                                     *
                                 </span></label>
                                 <RichTextEditor
-                                    value={formik.values.description}
+                                    content={formik.values.description}
                                     onChange={(value) => formik.setFieldValue('description', value)}
                                     onBlur={() => formik.setFieldTouched('description', false)}
                                     theme="snow"
@@ -191,6 +213,8 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                                 </span></label>
                                 <div className='custom_datepicket'>
                                     <DateTimePicker
+                                        isPickerOpen={isPickerOpen}
+                                        setIsPickerOpen={setIsPickerOpen}
                                         value={formik.values.datetime}
                                         onChange={(date) => formik.setFieldValue("datetime", date)}
                                         className={formik.errors.datetime && formik.touched.datetime ? "border border-danger" : ""}
