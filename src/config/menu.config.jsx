@@ -991,6 +991,11 @@ export const sideMenus = {
       icon: 'profile-circle',
       path: '/admin/live-session'
     },
+    {
+      title: 'Academy Category',
+      icon: 'profile-circle',
+      path: '/admin/academy-category'
+    },
   ],
   educator: [
     {
@@ -1007,6 +1012,11 @@ export const sideMenus = {
       title: 'Video Library',
       icon: 'some-files',
       path: '/educator/video-library'
+    },
+    {
+      title: 'Stream Schedule',
+      icon: 'profile-circle',
+      path: '/educator/stream-schedule'
     },
     {
       title: 'Live Sessions',
@@ -1028,7 +1038,7 @@ export const sideMenus = {
     {
       title: 'Live Sessions',
       icon: 'some-files',
-      path: '/live-session'
+      path: '/academy'
     },
   ],
 };

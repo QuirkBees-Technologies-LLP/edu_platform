@@ -93,6 +93,15 @@ import ClientTradeIdeas from "../pages/student/client-trade-ideas/ClientTradeIde
 import VideoLibrary from "../pages/student/video-library/VideoLibrary";
 import EducatorTradeIdeas from "../pages/educator/educator-trade-ideas/EducatorTradeIdeas";
 import Educators from "../pages/admin/educators/Educators";
+import EducatorProfile from "../pages/educator/educator-profile/EducatorProfile";
+import ClientProfile from "../pages/client/client-profile/ClientProfile";
+import AdminProfile from "../pages/admin/admin-profile/AdminProfile";
+import AdminAcademyCategory from "../pages/admin/academy-category/AdminAcademyCategory";
+import EducatorStreamSchedule from "../pages/educator/educator-stream-schedule/EducatorStreamSchedule";
+import StudentLiveSessionCategory from "../pages/student/live-session-category/StudentLiveSessionCategory";
+import StudentLiveSessionCategoryDetails from "../pages/student/live-session-category/StudentLiveSessionCategoryDetails";
+import ClientCourses from "../pages/student/client-courses/ClientCourses";
+import ClientSpecificCourses from "../pages/student/client-courses/ClientSpecificCourses";
 
 const routes = {
   student: [
@@ -101,6 +110,11 @@ const routes = {
     { path: "/live-session/:callId", element: <ClientViewLiveSession /> },
     { path: "/ideas", element: <ClientTradeIdeas /> },
     { path: "/video-library", element: <VideoLibrary /> },
+    { path: "/profile", element: <ClientProfile /> },
+    { path: "/academy", element: <StudentLiveSessionCategory /> },
+    { path: "/academy/:id", element: <StudentLiveSessionCategoryDetails /> },
+    { path: "/academy/course/:id", element: <ClientCourses /> },
+    { path: "/academy/course/detail/:id", element: <ClientSpecificCourses /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
@@ -110,6 +124,8 @@ const routes = {
     { path: "/educator/live-session/:callId", element: <AdminLiveSessionView /> },
     { path: "/educator/dark-sidebar", element: <Demo1DarkSidebarPage /> },
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
+    { path: "/educator/profile", element: <EducatorProfile /> },
+    { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
@@ -118,6 +134,8 @@ const routes = {
     { path: "/admin/live-session", element: <LiveSession /> },
     { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
     { path: "/admin/educators", element: <Educators /> },
+    { path: "/admin/profile", element: <AdminProfile /> },
+    { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
   ],
 };
 

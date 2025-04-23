@@ -200,8 +200,8 @@ const LiveSession = ({ title = "Live session" }) => {
       const response = await getLiveSessionList({ page: newPage, limit: newLimit }).unwrap();
 
       return {
-        data: response.liveStreams || [],
-        totalCount: response?.totalLiveStreams || 0,
+        data: response.data || [],
+        totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
       console.error("Error fetching trade ideas:", error);
@@ -235,10 +235,7 @@ const LiveSession = ({ title = "Live session" }) => {
       <DataGrid serverSide={true}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
           size: 10,
-        }} sorting={[{
-          id: 'name',
-          desc: true
-        }]} toolbar={<ToolbarTable />} layout={{
+        }} toolbar={<ToolbarTable />} layout={{
           card: true
         }}
         onFetchData={handleFetchData}

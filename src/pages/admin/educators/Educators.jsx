@@ -11,6 +11,8 @@ import { TruncatedText } from '../../../lib/utils';
 import CreateEducator from './CreateEducator';
 import DeleteEducator from './DeleteEducator';
 import { useLazyGetEducatorsQuery } from '../../../store/api/admin/adminEducatorsApiSlice';
+import { toAbsoluteUrl } from '@/utils/Assets';
+
 
 const Educators = ({ title = "Educators" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -81,10 +83,10 @@ const Educators = ({ title = "Educators" }) => {
           setSelectedRow(row.original)
           setIsLightBoxOpen(true);
         }}>
-          <img src={row.original.image} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+          <img src={row.original.image?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.image} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
         </div>,
       meta: {
-        headerClassName: 'min-w-[100px]'
+        headerClassName: 'w-[80px]'
       }
     },
     {
@@ -117,19 +119,6 @@ const Educators = ({ title = "Educators" }) => {
       </div>,
       meta: {
         headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.bio,
-      id: 'bio',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Bio' column={column} />,
-      enableSorting: true,
-      cell: info =>
-        <TruncatedText content={info.row.original.bio} maxLength={50} />,
-      meta: {
-        headerClassName: 'min-w-[225px]'
       }
     },
     {
@@ -271,7 +260,7 @@ const Educators = ({ title = "Educators" }) => {
         }}
         onFetchData={handleFetchData}
       />
-      <CreateEducator handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      <CreateEducator setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
       {isDeleteOpen && <DeleteEducator refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
     </div>
   )
