@@ -8,7 +8,10 @@ export const educatorLiveStreamApiSlice = createApi({
         getEducatorAcademyCategory: builder.query({
             query: () => `/educator/category`,
         }),
+        getLiveSessionList: builder.query({
+            query: ({ page = 1, limit = 10 }) => `/educator/live-stream/list?page=${page}&limit=${limit}`,
+        }),
     }),
 });
 
-export const { useGetEducatorAcademyCategoryQuery } = educatorLiveStreamApiSlice;
+export const { useGetEducatorAcademyCategoryQuery, useLazyGetLiveSessionListQuery } = educatorLiveStreamApiSlice;

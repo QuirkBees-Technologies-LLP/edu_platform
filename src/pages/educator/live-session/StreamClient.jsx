@@ -43,6 +43,15 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
     console.log(isLive, "isLive123");
     console.log("call123", call);
 
+    const maskAndTruncateText = (text, maxLength = 50) => {
+        const masked = "•".repeat(text.length);
+        if (masked.length > maxLength) {
+            return masked.substring(0, maxLength) + "...";
+        }
+        return masked;
+    };
+
+
     return (
         <div className='container-fluid'>
             <div className='flex justify-between flex-col md:flex-row'>
@@ -69,49 +78,51 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                             <div className="card-body py-7">
                                 <div className="flex flex-col gap-4">
                                     <div className="grid gap-5 px-0">
-                                        <UpdateLiveSession  />
+                                        <UpdateLiveSession />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                            <div className="card border-2 mb-5">
-                                <div className="card-body py-7">
-                                    <div className="flex flex-col gap-4">
-                                        <div className="grid grid-cols-12 gap-5 items-center">
-                                            <label className="col-span-3 text-md text-gray-900 font-semibold">Livestream ID</label>
-                                            <div className='col-span-9 '>
-                                                <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.callId} placement="bottom" className="max-w-48">
-                                                    <p onClick={() => handleCopy(callId, "callId")} className="cursor-pointer rounded-full border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
-                                                        {callId}
-                                                        <Copy size={16} className='shrink-0' />
-                                                    </p>
-                                                </DefaultTooltip>
-                                            </div>
+                        <div className="card border-2 mb-5">
+                            <div className="card-body py-7">
+                                <div className="flex flex-col gap-4">
+                                    <div className="grid grid-cols-12 gap-5 items-center">
+                                        <label className="col-span-3 text-md text-gray-900 font-semibold">Livestream ID</label>
+                                        <div className='col-span-9 '>
+                                            <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.callId} placement="bottom" className="max-w-48">
+                                                <p onClick={() => handleCopy(callId, "callId")} className="cursor-pointer rounded-full border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
+                                                    {callId}
+                                                    <Copy size={16} className='shrink-0' />
+                                                </p>
+                                            </DefaultTooltip>
                                         </div>
-                                        <div className="grid grid-cols-12 gap-5 items-center">
-                                            <label className="col-span-3 text-md text-gray-900 font-semibold">RTMP URL</label>
-                                            <div className='col-span-9'>
-                                                <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.rtmp_url} placement="bottom" className="max-w-48">
-                                                    <p onClick={() => handleCopy(rtmp_url, "rtmp_url")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
-                                                        {truncateText(rtmp_url, 100)}<Copy size={16} className='shrink-0' />
-                                                    </p>
-                                                </DefaultTooltip>
-                                            </div>
+                                    </div>
+                                    <div className="grid grid-cols-12 gap-5 items-center">
+                                        <label className="col-span-3 text-md text-gray-900 font-semibold">RTMP URL</label>
+                                        <div className='col-span-9'>
+                                            <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.rtmp_url} placement="bottom" className="max-w-48">
+                                                <p onClick={() => handleCopy(rtmp_url, "rtmp_url")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
+                                                    {maskAndTruncateText(rtmp_url, 100)}
+                                                    <Copy size={16} className='shrink-0' />
+                                                </p>
+                                            </DefaultTooltip>
                                         </div>
+                                    </div>
 
-                                        <div className="grid grid-cols-12 gap-5 items-center">
-                                            <label className="col-span-3 text-md text-gray-900 font-semibold">RTMP Stream Key</label>
-                                            <div className='col-span-9'>
-                                                <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.rtmp_stream_key} placement="bottom" className="max-w-48">
-                                                    <p onClick={() => handleCopy(rtmp_stream_key, "rtmp_stream_key")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
-                                                        {truncateText(rtmp_stream_key, 100)}<Copy size={16} className='shrink-0' />
-                                                    </p>
-                                                </DefaultTooltip>
-                                            </div>
+                                    <div className="grid grid-cols-12 gap-5 items-center">
+                                        <label className="col-span-3 text-md text-gray-900 font-semibold">RTMP Stream Key</label>
+                                        <div className='col-span-9'>
+                                            <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.rtmp_stream_key} placement="bottom" className="max-w-48">
+                                                <p onClick={() => handleCopy(rtmp_stream_key, "rtmp_stream_key")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">                                                    
+                                                    {maskAndTruncateText(rtmp_stream_key, 140)}
+                                                    <Copy size={16} className='shrink-0' />
+                                                </p>
+                                            </DefaultTooltip>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     </div>
                 </div>
                 <div className={`${isFullScreen ? isMdUp ? "w-[8.3333%]" : "w-[100%]" : isMdUp ? "w-[35%]" : "w-[100%]"} transition-all duration-300 ease-in-out`}>

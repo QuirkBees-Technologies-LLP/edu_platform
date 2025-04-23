@@ -44,8 +44,10 @@ const ClientViewLiveSession = () => {
 
         const newClient = new StreamVideoClient({ apiKey });
         const newCall = newClient.call("livestream", callId);
-        await newClient.connectUser({ id: userId }, token);
-        await newCall.get(); 
+        const userRes = await newClient.connectUser({ id: userId }, token);
+        const response = await newCall.get();
+        console.log(userRes, "userResponse");
+        
         setClient(newClient);
         setCall(newCall);
         console.log("Stream client initialized successfully.");

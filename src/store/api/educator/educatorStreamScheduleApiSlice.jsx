@@ -27,7 +27,7 @@ export const educatorStreamScheduleApiSlice = createApi({
         deleteEducatorStreamSchedule: builder.mutation({
             query: (id) => ({
                 url: `/educator/schedule/${id}`,
-                method: 'POST',
+                method: 'DELETE',
             }),
         }),
     }),

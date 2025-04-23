@@ -8,6 +8,7 @@ import { DropdownApps } from '@/partials/dropdowns/apps';
 import { DropdownChat } from '@/partials/dropdowns/chat';
 import { ModalSearch } from '@/partials/modals/search/ModalSearch';
 import { useLanguage } from '@/i18n';
+import { useAuthContext } from '../../../auth/useAuthContext';
 const HeaderTopbar = () => {
   const {
     isRTL
@@ -15,6 +16,8 @@ const HeaderTopbar = () => {
   const itemChatRef = useRef(null);
   const itemAppsRef = useRef(null);
   const itemUserRef = useRef(null);
+  const {auth} = useAuthContext();
+  const profilePhoto = auth?.user?.image;
   const itemNotificationsRef = useRef(null);
   const handleShow = () => {
     window.dispatchEvent(new Event('resize'));
@@ -98,7 +101,7 @@ const HeaderTopbar = () => {
         }]
       }}>
           <MenuToggle className="btn btn-icon rounded-full">
-            <img className="size-9 rounded-full border-2 border-success shrink-0" src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="" />
+            <img className="size-9 rounded-full border-2 border-success shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
           </MenuToggle>
           {DropdownUser({
           menuItemRef: itemUserRef
