@@ -3,9 +3,13 @@ import axios from "axios";
 import { createContext, useState } from "react";
 import * as authHelper from "../_helpers";
 import * as lmsApi from "../../services/lms.api";
+import { lmsAuth } from "../../services";
 
+import { set } from "date-fns";
+import { logoutUser, setToken } from "../../store/reducer/authSlice";
 const API_URL = import.meta.env.VITE_APP_API_URL;
-export const LOGIN_URL = `${API_URL}/users/auth/signin`;
+export const LOGIN_URL = `${API_URL}/signin`;
+export const ADMIN_LOGIN_URL = `${API_URL}/admin/auth/signin`;
 export const REGISTER_URL = `${API_URL}/users/auth/signup`;
 export const FORGOT_PASSWORD_URL = `${API_URL}/forgot-password`;
 export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
@@ -16,19 +20,35 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState(authHelper.getAuth());
   const [currentUser, setCurrentUser] = useState();
+  // const verify = async () => {
+  //   if (auth) {
+  //     try {
+  //       // const {
+  //       //   data: user
+  //       // } = await getUser();
+  //       if(auth?.token){
+  //         setCurrentUser(auth);
+  //       }
+  //     } catch {
+  //       saveAuth(undefined);
+  //       setCurrentUser(undefined);
+  //     }
+  //   }
+  // };
+
   const verify = async () => {
-    // if (auth) {
-    //   try {
-    //     const {
-    //       data: user
-    //     } = await getUser();
-    //     setCurrentUser(user);
-    //   } catch {
-    //     saveAuth(undefined);
-    //     setCurrentUser(undefined);
-    //   }
-    // }
+    try {
+      if (auth?.token) {
+        setCurrentUser(auth);
+      } else {
+        throw new Error("No valid auth token");
+      }
+    } catch {
+      saveAuth(undefined);
+      setCurrentUser(undefined);
+    }
   };
+
   const saveAuth = (auth) => {
     setAuth(auth);
     if (auth) {
@@ -37,43 +57,9 @@ const AuthProvider = ({ children }) => {
       authHelper.removeAuth();
     }
   };
-  const login = async (email, password) => {
+  const login = async (email, password, dispatch) => {
     try {
-      const data = await lmsApi.login(email, password);
-      const auth = {
-        token: data.token,
-        user: data.user,
-      };
-      saveAuth(auth);
-      setCurrentUser(auth?.user);
-    } catch (error) {
-      saveAuth(undefined);
-      throw new Error(error.response?.data?.message || "Login failed");
-    }
-  };
-  const register = async (
-    email,
-    password,
-    password_confirmation,
-    role = "USER",
-    tier = "FREE"
-  ) => {
-    try {
-      // const { data: auth } = await axios.post(REGISTER_URL, {
-      //   email,
-      //   password,
-      //   password_confirmation,
-      //   role,
-      //   tier,
-      // });
-      const credentials = {
-        email,
-        password: password_confirmation,
-        name: email,
-        tier,
-        role,
-      };
-      const { data } = await lmsApi.register(credentials);
+      const data = await lmsAuth.login(email, password);
       const auth = {
         token: data.token,
         user: data.user,
@@ -82,7 +68,43 @@ const AuthProvider = ({ children }) => {
       // const {
       //   data: user
       // } = await getUser();
+      dispatch(setToken(auth.token));
       setCurrentUser(auth?.user);
+    } catch (error) {
+      saveAuth(undefined);
+      throw new Error(error.response?.data?.message || "Login failed");
+    }
+  };
+  const register = async (
+    first_name,
+    last_name,
+    email,
+    password,
+    password_confirmation,
+    role = "USER",
+    tier = "FREE"
+  ) => {
+    try {
+      const { data: auth } = await axios.post(REGISTER_URL, {
+        first_name,
+        last_name,
+        email,
+        password: password_confirmation,
+        name: email,
+        tier,
+        role,
+      });
+
+      // const { data } = await lmsApi.register(credentials);
+      const authData = {
+        token: auth.token,
+        user: auth.user,
+      };
+      saveAuth(authData);
+      // const {
+      //   data: user
+      // } = await getUser();
+      setCurrentUser(authData?.user);
     } catch (error) {
       saveAuth(undefined);
       throw new Error(error.response?.data?.message || "Login failed");
@@ -109,9 +131,11 @@ const AuthProvider = ({ children }) => {
   // const getUser = async () => {
   //   return await axios.get(GET_USER_URL);
   // };
-  const logout = () => {
+  const logout = (dispatch) => {
     saveAuth(undefined);
     setCurrentUser(undefined);
+    dispatch(logoutUser());
+    localStorage.clear();
   };
   return (
     <AuthContext.Provider

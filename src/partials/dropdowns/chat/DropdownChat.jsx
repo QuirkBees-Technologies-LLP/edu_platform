@@ -262,19 +262,304 @@ const DropdownChat = ({
   return <MenuSub rootClassName="w-full max-w-[450px]" className="light:border-gray-300">
       <div ref={headerRef}>
         {buildHeader()}
-        {buildTopbar()}
+        {/* {buildTopbar()} */}
+        
       </div>
 
       <div ref={messagesRef} className="scrollable-y-auto" style={{
-      maxHeight: `${scrollableHeight}px`
+      // maxHeight: `${scrollableHeight}px`,
+      maxHeight: "84vh", 
     }}>
-        {buildMessages()}
+        {/* {buildMessages()} */}
+          <div className="border-2 card my-5 mx-10">
+            <div className="flex flex-col border-b-2 gap-2 px-5 py-4.5">
+              <div className="flex items-center">
+                <img
+                  src={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                  className="rounded-full size-7 me-2"
+                  alt=""
+                />
+                <div>
+                  <Link
+                    to="/public-profile/profiles/nft"
+                    className="text-2sm text-gray-800 hover:text-primary mb-px"
+                  >
+                    Cody Fisher
+                  </Link>
+                  <div className="text-2sm text-gray-700 mb-px">
+                    Posted: Mar 11, 2025, 5:30 AM
+                  </div>
+                </div>
+              </div>
+            </div>
+            <img
+              src={toAbsoluteUrl(`/media/images/600x400/1.jpg`)}
+              className="w-full h-[200px]"
+              alt=""
+            />
+            <div className="flex flex-col gap-4 px-5 py-4.5">
+              <div className="flex gap-4">
+                <div className="flex items-center">
+                  <span class="badge rounded-full p-3">BTC/USD</span>
+                </div>
+                <div className="flex items-center">
+                  <span class="badge rounded-full p-3">BTC/USD</span>
+                </div>
+                <div className="flex items-center">
+                  <span class="badge rounded-full p-3">BTC/USD</span>
+                </div>
+              </div>
+              <div>
+                <p className='text-md font-medium text-gray-900'>XRP Scalp smashed Tp1 for 180+ pips. 📈</p>
+              </div>
+            </div>
+          </div>
+          <div className="border-2 card my-5 mx-10">
+            <div className="flex flex-col border-b-2 gap-2 px-5 py-4.5">
+              <div className="flex items-center">
+                <img
+                  src={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                  className="rounded-full size-7 me-2"
+                  alt=""
+                />
+                <div>
+                  <Link
+                    to="/public-profile/profiles/nft"
+                    className="text-2sm text-gray-800 hover:text-primary mb-px"
+                  >
+                    Cody Fisher
+                  </Link>
+                  <div className="text-2sm text-gray-700 mb-px">
+                    Posted: Mar 11, 2025, 5:30 AM
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4 px-5 py-4.5">
+              <div className="flex gap-4">
+                <div className="flex items-center">
+                  <span class="badge rounded-full p-3">BTC/USD</span>
+                </div>
+                <div className="flex items-center">
+                  <span class="badge rounded-full p-3">BTC/USD</span>
+                </div>
+                <div className="flex items-center">
+                  <span class="badge rounded-full p-3">BTC/USD</span>
+                </div>
+              </div>
+              <div className='flex flex-col gap-3'>
+                <p className='text-md font-medium text-gray-900'>XRP Scalp is running 110+ pips in profits and looks like approaching Tp1 pretty nicely.</p>
+                <p className='text-md font-medium text-gray-900'>Securing some Partials here and holding it for targets as a risk free setup.</p>
+              </div>
+            </div>
+          </div>
+          <div className="card border-2 my-5 mx-10">
+            <div className="card-border card-rounded-b flex flex-col gap-2 px-5 py-4.5">
+              <div className="flex items-center">
+                <img
+                  src={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                  className="rounded-full size-7 me-2"
+                  alt=""
+                />
+                <div>
+                  <Link
+                    to="/public-profile/profiles/nft"
+                    className="text-2sm text-gray-800 hover:text-primary mb-px"
+                  >
+                    Cody Fisher
+                  </Link>
+                  <div className="text-2sm text-gray-700 mb-px">
+                    Posted: Mar 11, 2025, 5:30 AM
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* <div className="flex items-center px-4 pt-3">
+            <span class="badge">BTC/USD</span>
+            </div> */}
+            <img
+              src={toAbsoluteUrl(`/media/images/600x400/1.jpg`)}
+              className="w-full h-[200px]"
+              alt=""
+            />
+            <div className="card-border card-rounded-b flex flex-col gap-2 px-5 py-4.5">
+              <div className="flex gap-10">
+                <div>
+                  <div className="text-2sm text-gray-800 uppercase">Entry</div>
+                  <div className="text-sm text-gray-900">78200 - 78500</div>
+                </div>
+                <div>
+                  <div className="text-2sm text-gray-800 uppercase">
+                    Invalidation
+                  </div>
+                  <div className="text-sm text-gray-900">77400</div>
+                </div>
+              </div>
+              <div>
+                <div className="text-2sm text-gray-800 uppercase">Exits</div>
+                <div className="flex items-center flex-wrap gap-4">
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      1
+                    </div>
+                    <div className="text-sm text-gray-900">82000</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      2
+                    </div>
+                    <div className="text-sm text-gray-900">89000</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      3
+                    </div>
+                    <div className="text-sm text-gray-900">98000</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="card border-2 my-5 mx-10">
+            <div className="card-border card-rounded-b flex flex-col gap-2 px-5 py-4.5">
+              <div className="flex items-center">
+                <img
+                  src={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                  className="rounded-full size-7 me-2"
+                  alt=""
+                />
+                <div>
+                  <Link
+                    to="/public-profile/profiles/nft"
+                    className="text-2sm text-gray-800 hover:text-primary mb-px"
+                  >
+                    Cody Fisher
+                  </Link>
+                  <div className="text-2sm text-gray-700 mb-px">
+                    Posted: Mar 11, 2025, 5:30 AM
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* <div className="flex items-center px-4 pt-3">
+            <span class="badge">BTC/USD</span>
+            </div> */}
+            <img
+              src={toAbsoluteUrl(`/media/images/600x400/1.jpg`)}
+              className="w-full h-[200px]"
+              alt=""
+            />
+            <div className="card-border card-rounded-b flex flex-col gap-2 px-5 py-4.5">
+              <div className="flex gap-10">
+                <div>
+                  <div className="text-2sm text-gray-800 uppercase">Entry</div>
+                  <div className="text-sm text-gray-900">78200 - 78500</div>
+                </div>
+                <div>
+                  <div className="text-2sm text-gray-800 uppercase">
+                    Invalidation
+                  </div>
+                  <div className="text-sm text-gray-900">77400</div>
+                </div>
+              </div>
+              <div>
+                <div className="text-2sm text-gray-800 uppercase">Exits</div>
+                <div className="flex items-center flex-wrap gap-4">
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      1
+                    </div>
+                    <div className="text-sm text-gray-900">82000</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      2
+                    </div>
+                    <div className="text-sm text-gray-900">89000</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      3
+                    </div>
+                    <div className="text-sm text-gray-900">98000</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="card border-2 my-5 mx-10">
+            <div className="card-border card-rounded-b flex flex-col gap-2 px-5 py-4.5">
+              <div className="flex items-center">
+                <img
+                  src={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                  className="rounded-full size-7 me-2"
+                  alt=""
+                />
+                <div>
+                  <Link
+                    to="/public-profile/profiles/nft"
+                    className="text-2sm text-gray-800 hover:text-primary mb-px"
+                  >
+                    Cody Fisher
+                  </Link>
+                  <div className="text-2sm text-gray-700 mb-px">
+                    Posted: Mar 11, 2025, 5:30 AM
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* <div className="flex items-center px-4 pt-3">
+            <span class="badge">BTC/USD</span>
+            </div> */}
+            <img
+              src={toAbsoluteUrl(`/media/images/600x400/1.jpg`)}
+              className="w-full h-[200px]"
+              alt=""
+            />
+            <div className="card-border card-rounded-b flex flex-col gap-2 px-5 py-4.5">
+              <div className="flex gap-10">
+                <div>
+                  <div className="text-2sm text-gray-800 uppercase">Entry</div>
+                  <div className="text-sm text-gray-900">78200 - 78500</div>
+                </div>
+                <div>
+                  <div className="text-2sm text-gray-800 uppercase">
+                    Invalidation
+                  </div>
+                  <div className="text-sm text-gray-900">77400</div>
+                </div>
+              </div>
+              <div>
+                <div className="text-2sm text-gray-800 uppercase">Exits</div>
+                <div className="flex items-center flex-wrap gap-4">
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      1
+                    </div>
+                    <div className="text-sm text-gray-900">82000</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      2
+                    </div>
+                    <div className="text-sm text-gray-900">89000</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      3
+                    </div>
+                    <div className="text-sm text-gray-900">98000</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
 
-      <div ref={footerRef}>
+      {/* <div ref={footerRef}>
         {buildInviteNotification()}
         {buildForm()}
-      </div>
+      </div> */}
     </MenuSub>;
 };
 export { DropdownChat };

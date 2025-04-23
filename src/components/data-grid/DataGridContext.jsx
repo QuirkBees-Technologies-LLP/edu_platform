@@ -118,7 +118,7 @@ export const DataGridProvider = props => {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     manualPagination: mergedProps.serverSide,
-    manualSorting: mergedProps.serverSide,
+    // manualSorting: mergedProps.serverSide,
     manualFiltering: mergedProps.serverSide
   });
   return <DataGridContext.Provider value={{
