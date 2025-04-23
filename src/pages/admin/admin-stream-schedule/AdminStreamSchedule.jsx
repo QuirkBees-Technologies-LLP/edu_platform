@@ -9,18 +9,18 @@ import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPag
 import { format, set } from 'date-fns';
 import { MenuIcon, MenuLink, MenuSeparator, MenuSub, MenuTitle } from '@/components';
 import { useLazyGetAdminTradeIdeasQuery } from '../../../store/api/admin/adminTradeIdeasApiSlice';
-import CreateLiveSession from './CreateLiveSession';
 import { useLazyGetLiveSessionListQuery } from '../../../store/api/admin/adminLiveSessionApiSlice';
 import { formatSecondsToHMS } from '../../../lib/utils';
-import { useNavigate } from 'react-router';
+import DeleteAdminStreamSchedule from './DeleteAdminStreamSchedule';
+import CreateAdminStreamSchedule from './CreateAdminStreamSchedule';
+import { useLazyGetAdminStreamScheduleQuery } from '../../../store/api/admin/adminStreamScheduleApiSlice';
 
-const LiveSession = ({ title = "Live session" }) => {
+const AdminStreamSchedule = ({ title = "Schedule Stream" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getLiveSessionList, { data, isLoading }] = useLazyGetLiveSessionListQuery();
-    const navigate = useNavigate();
+  const [getAdminStreamSchedule, { data, isLoading }] = useLazyGetAdminStreamScheduleQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -69,33 +69,16 @@ const LiveSession = ({ title = "Live session" }) => {
   }
   console.log(selectedRow, "selectedrow");
 
-  const handleRedirect = (callId, row) => {
-    navigate(`/admin/live-session/${callId}`, { state: row })
-  }
-
   const columns = useMemo(() => [
-    // {
-    //   accessorFn: row => row.status,
-    //   id: 'status',
-    //   header: ({
-    //     column
-    //   }) => <DataGridColumnHeader title='Status' column={column} />,
-    //   enableSorting: true,
-    //   cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === "Active" ? "badge-success" : "badge-danger"}`}>
-    //     {info.row.original.status}
-    //   </span>,
-    // },
     {
-      accessorFn: row => row.title,
+      accessorFn: row => row.status,
       id: 'title',
       header: ({
         column
       }) => <DataGridColumnHeader title='Title' column={column} />,
       enableSorting: true,
-      cell: info => <span>
-        <p className='cursor-pointer hover:text-primary' onClick={()=> handleRedirect(info.row.original.callId, info.row.original)}>
-          {info.row.original.title}
-        </p>
+      cell: info => <span >
+        {info.row.original.title}
       </span>,
     },
     {
@@ -114,54 +97,64 @@ const LiveSession = ({ title = "Live session" }) => {
         headerClassName: 'min-w-[200px]'
       }
     },
-    // {
-    //   accessorFn: row => row.createdAt,
-    //   id: 'createdAt',
-    //   header: ({
-    //     column
-    //   }) => <DataGridColumnHeader title='Created At' column={column} />,
-    //   enableSorting: true,
-    //   cell: info => <div className="flex items-center gap-2.5">
-    //     <span className="leading-none text-gray-800 font-normal">
-    //       {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
-    //     </span>
-    //   </div>,
-    //   meta: {
-    //     headerClassName: 'min-w-[200px]'
-    //   }
-    // },
-    // {
-    //   accessorFn: row => row.duration,
-    //   id: 'duration',
-    //   header: ({
-    //     column
-    //   }) => <DataGridColumnHeader title='Duration' column={column} />,
-    //   enableSorting: true,
-    //   cell: info => <div className="flex items-center gap-2.5">
-    //     <span className="leading-none text-gray-800 font-normal">
-    //       {formatSecondsToHMS(info.row.original.duration)}
-    //     </span>
-    //   </div>,
-    //   meta: {
-    //     headerClassName: 'min-w-[200px]'
-    //   }
-    // },
-    // {
-    //   accessorFn: row => row.viewerCount,
-    //   id: 'viewerCount',
-    //   header: ({
-    //     column
-    //   }) => <DataGridColumnHeader title='Viewer Count' column={column} />,
-    //   enableSorting: true,
-    //   cell: info => <div className="flex items-center gap-2.5">
-    //     <span className="leading-none text-gray-800 font-normal">
-    //       {info.row.original.viewerCount}
-    //     </span>
-    //   </div>,
-    //   meta: {
-    //     headerClassName: 'min-w-[200px]'
-    //   }
-    // },
+    {
+      accessorFn: row => row.createdAt,
+      id: 'createdAt',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Created At' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      accessorFn: row => row.create_by,
+      id: 'create_by',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Created By' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.create_by?.first_name + " " + info.row.original.create_by?.last_name}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      id: 'click',
+      header: () => '',
+      enableSorting: false,
+      cell: ({ row }) => <Menu className="items-stretch">
+        <MenuItem toggle="dropdown"
+          onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+          trigger="click" dropdownProps={{
+            placement: isRTL() ? 'bottom-start' : 'bottom-end',
+            modifiers: [{
+              name: 'offset',
+              options: {
+                offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
+              }
+            }]
+          }}>
+          <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+            <KeenIcon icon="dots-vertical" />
+          </MenuToggle>
+          {ActionMenu()}
+        </MenuItem>
+      </Menu>,
+      meta: {
+        headerClassName: 'w-[60px]'
+      }
+    }
   ], [isRTL]);
 
   // Initialize search term from localStorage if available
@@ -169,7 +162,6 @@ const LiveSession = ({ title = "Live session" }) => {
     return localStorage.getItem(storageFilterId) || '';
   });
 
-  console.log(data, "data");
 
   // Filtered data based on search term
   const filteredData = useMemo(() => {
@@ -216,7 +208,7 @@ const LiveSession = ({ title = "Live session" }) => {
 
     try {
       // Fetch API Data
-      const response = await getLiveSessionList({ page: newPage, limit: newLimit }).unwrap();
+      const response = await getAdminStreamSchedule({ page: newPage, limit: newLimit }).unwrap();
 
       return {
         data: response.data || [],
@@ -239,7 +231,7 @@ const LiveSession = ({ title = "Live session" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Live Session" />
+          <ToolbarPageTitle text="Schedule Stream" />
           <ToolbarDescription>
             Track and analyze past live sessions with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
@@ -252,6 +244,7 @@ const LiveSession = ({ title = "Live session" }) => {
         </ToolbarActions>
       </Toolbar>
       <DataGrid serverSide={true}
+        key={tableKey}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
           size: 10,
         }} toolbar={<ToolbarTable />} layout={{
@@ -260,9 +253,10 @@ const LiveSession = ({ title = "Live session" }) => {
         onFetchData={handleFetchData}
       />
 
-      <CreateLiveSession handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      <CreateAdminStreamSchedule setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      {isDeleteOpen && <DeleteAdminStreamSchedule refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
     </div>
   )
 }
 
-export default LiveSession
+export default AdminStreamSchedule

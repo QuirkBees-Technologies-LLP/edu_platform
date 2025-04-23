@@ -81,9 +81,9 @@ const ClientLiveSessionWrapper = ({ client, callId, token }) => {
                     )}
                   </div>
                   <div className="flex gap-2 my-3">
-                    {tags?.map((tag) => {
+                    {tags?.map((tag, ind) => {
                       return (
-                        <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">{tag}</span>
+                        <span key={ind} class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">{tag}</span>
                       )
                     })}
                   </div>

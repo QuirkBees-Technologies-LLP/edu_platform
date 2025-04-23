@@ -10,15 +10,17 @@ import { format, set } from 'date-fns';
 import { MenuIcon, MenuLink, MenuSeparator, MenuSub, MenuTitle } from '@/components';
 import { useLazyGetAdminTradeIdeasQuery } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import CreateLiveSession from './CreateLiveSession';
-import { useLazyGetLiveSessionListQuery } from '../../../store/api/admin/adminLiveSessionApiSlice';
 import { formatSecondsToHMS } from '../../../lib/utils';
+import { useNavigate } from 'react-router';
+import { useLazyGetLiveSessionListQuery } from '../../../store/api/educator/educatorLiveStreamApiSlice';
 
-const LiveSession = ({ title = "Live session" }) => {
+const EducatorLiveSession = ({ title = "Live session" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [getLiveSessionList, { data, isLoading }] = useLazyGetLiveSessionListQuery();
+    const navigate = useNavigate();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -67,16 +69,33 @@ const LiveSession = ({ title = "Live session" }) => {
   }
   console.log(selectedRow, "selectedrow");
 
+  const handleRedirect = (callId, row) => {
+    navigate(`/educator/live-session/${callId}`, { state: row })
+  }
+
   const columns = useMemo(() => [
+    // {
+    //   accessorFn: row => row.status,
+    //   id: 'status',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Status' column={column} />,
+    //   enableSorting: true,
+    //   cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === "Active" ? "badge-success" : "badge-danger"}`}>
+    //     {info.row.original.status}
+    //   </span>,
+    // },
     {
-      accessorFn: row => row.status,
-      id: 'status',
+      accessorFn: row => row.title,
+      id: 'title',
       header: ({
         column
-      }) => <DataGridColumnHeader title='Status' column={column} />,
+      }) => <DataGridColumnHeader title='Title' column={column} />,
       enableSorting: true,
-      cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === "Active" ? "badge-success" : "badge-danger"}`}>
-        {info.row.original.status}
+      cell: info => <span>
+        <p className='cursor-pointer hover:text-primary' onClick={()=> handleRedirect(info.row.original.callId, info.row.original)}>
+          {info.row.original.title}
+        </p>
       </span>,
     },
     {
@@ -95,54 +114,54 @@ const LiveSession = ({ title = "Live session" }) => {
         headerClassName: 'min-w-[200px]'
       }
     },
-    {
-      accessorFn: row => row.createdAt,
-      id: 'createdAt',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Created At' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.duration,
-      id: 'duration',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Duration' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {formatSecondsToHMS(info.row.original.duration)}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.viewerCount,
-      id: 'viewerCount',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Viewer Count' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.viewerCount}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
+    // {
+    //   accessorFn: row => row.createdAt,
+    //   id: 'createdAt',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Created At' column={column} />,
+    //   enableSorting: true,
+    //   cell: info => <div className="flex items-center gap-2.5">
+    //     <span className="leading-none text-gray-800 font-normal">
+    //       {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
+    //     </span>
+    //   </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[200px]'
+    //   }
+    // },
+    // {
+    //   accessorFn: row => row.duration,
+    //   id: 'duration',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Duration' column={column} />,
+    //   enableSorting: true,
+    //   cell: info => <div className="flex items-center gap-2.5">
+    //     <span className="leading-none text-gray-800 font-normal">
+    //       {formatSecondsToHMS(info.row.original.duration)}
+    //     </span>
+    //   </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[200px]'
+    //   }
+    // },
+    // {
+    //   accessorFn: row => row.viewerCount,
+    //   id: 'viewerCount',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Viewer Count' column={column} />,
+    //   enableSorting: true,
+    //   cell: info => <div className="flex items-center gap-2.5">
+    //     <span className="leading-none text-gray-800 font-normal">
+    //       {info.row.original.viewerCount}
+    //     </span>
+    //   </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[200px]'
+    //   }
+    // },
   ], [isRTL]);
 
   // Initialize search term from localStorage if available
@@ -246,4 +265,4 @@ const LiveSession = ({ title = "Live session" }) => {
   )
 }
 
-export default LiveSession
+export default EducatorLiveSession
