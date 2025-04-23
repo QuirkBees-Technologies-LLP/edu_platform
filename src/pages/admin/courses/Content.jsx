@@ -4,7 +4,7 @@ import { useAuthContext } from "../../../auth/useAuthContext";
 
 // components
 import SettingsSection from "./pages/Settings";
-
+import Classroom from "./pages/Classroom";
 const Content = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState("classroom");
@@ -33,7 +33,7 @@ const Content = () => {
   const renderContent = () => {
     switch (activePage) {
       case "classroom":
-        return <div>Classroom</div>;
+        return <Classroom />;
       case "settings":
         return <SettingsSection />;
       default:
