@@ -15,7 +15,6 @@ const CourseCard = (props) => {
     instructor,
     large,
   } = course;
-
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -34,7 +33,7 @@ const CourseCard = (props) => {
       case "PRO" || "pro":
         return "bg-amber-500";
       default:
-        return "bg-blue-500";
+        return "bg-primary";
     }
   };
 
@@ -46,9 +45,8 @@ const CourseCard = (props) => {
 
   return (
     <motion.div
-      className={`relative group overflow-hidden rounded-2xl h-full shadow-lg ${
-        large ? "aspect-square" : "aspect-square"
-      }`}
+      className={`relative group overflow-hidden rounded-2xl h-full shadow-lg ${large ? "aspect-square" : "aspect-square"
+        }`}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -96,20 +94,21 @@ const CourseCard = (props) => {
             <div className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1.5">
               <Tag className="w-3.5 h-3.5 text-white/90" />
               <span className="text-white/90 text-xs font-medium">
-                {category || "General"}
+                {category?.name || "General"}
               </span>
             </div>
           </div>
 
           {/* Instructor */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center ring-2 ring-white/20">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-white/20">
               <span className="text-white text-sm font-medium">
-                {instructor?.name?.charAt(0) || "U"}
+                {((instructor?.first_name?.charAt(0) || '').toUpperCase() +
+                  (instructor?.last_name?.charAt(0) || '').toUpperCase()) || 'U'}
               </span>
             </div>
             <span className="text-white/90 text-sm font-medium">
-              {formatInstructorName(instructor?.name)}
+              {formatInstructorName(instructor?.first_name + " " + instructor?.last_name)}
             </span>
           </div>
 
@@ -119,9 +118,8 @@ const CourseCard = (props) => {
             transition={{ duration: 0.2 }}
           >
             <h3
-              className={`text-white font-bold mb-2 ${
-                large ? "text-2xl" : "text-xl"
-              } line-clamp-2`}
+              className={`text-white font-bold mb-2 ${large ? "text-2xl" : "text-xl"
+                } line-clamp-2`}
             >
               {title}
             </h3>
@@ -138,7 +136,7 @@ const CourseCard = (props) => {
           >
             {/* Watch Button */}
             <motion.button
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white w-full py-2.5 rounded-lg transition-all shadow-lg shadow-indigo-500/30"
+              className="flex items-center justify-center gap-2 bg-pink-gradient text-white w-full py-2.5 rounded-lg transition-all shadow-lg shadow-indigo-500/30"
               onClick={() => onSelectCourse(course)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -151,7 +149,7 @@ const CourseCard = (props) => {
             <div className="relative">
               <div className="h-1.5 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: `${progress}%` }}
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}

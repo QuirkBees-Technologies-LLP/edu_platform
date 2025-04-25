@@ -211,14 +211,14 @@ const DraggableCourseCard = ({
           <div className="flex items-center gap-3 text-sm">
             <div className="flex items-center gap-1.5 text-blue-600">
               <Book className="w-4 h-4" />
-              <span className="font-medium">{category || "Uncategorized"}</span>
+              <span className="font-medium">{category?.name || "Uncategorized"}</span>
             </div>
 
             <div className="h-4 w-px bg-gray-300"></div>
 
             <div className="flex items-center gap-1.5 text-gray-500">
               <Users className="w-4 h-4" />
-              <span>{instructor?.name || "Unknown Instructor"}</span>
+              <span>{instructor?.first_name + " " + instructor?.last_name || "Unknown Instructor"}</span>
             </div>
           </div>
         </div>
@@ -265,7 +265,7 @@ DraggableCourseCard.propTypes = {
     title: PropTypes.string.isRequired,
     description: PropTypes.string,
     imageUrl: PropTypes.string,
-    category: PropTypes.string,
+    category: PropTypes.any,
     published: PropTypes.bool,
     tier: PropTypes.oneOf(["FREE", "PRO"]),
     instructor: PropTypes.shape({

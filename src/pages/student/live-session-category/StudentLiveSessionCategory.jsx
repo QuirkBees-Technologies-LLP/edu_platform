@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const StudentLiveSessionCategory = () => {
     const { data } = useGetAcademyCategoryQuery();
-    
+
     const defaultImage = "/media/images/600x400/1.jpg";
 
     return (
@@ -20,9 +20,12 @@ const StudentLiveSessionCategory = () => {
                         >
                             <div className="card-body">
                                 <div className="flex justify-between items-center mb-5">
-                                    <h4 className='text-lg font-semibold text-gray-800'>
-                                        {category.name || "Crypto Academy"}
-                                    </h4>
+                                    <div className="flex items-center gap-3">
+                                        <div className='size-12 rounded-lg bg-primary flex items-center justify-center text-xl text-gray-100 dark:text-gray-900'><i class="ki-filled ki-messages"></i></div>
+                                        <h4 className='text-lg font-semibold text-gray-800'>
+                                            {category.name || "Crypto Academy"}
+                                        </h4>
+                                    </div>
                                     <i className="ki-filled ki-arrow-up-right"></i>
                                 </div>
                                 <img

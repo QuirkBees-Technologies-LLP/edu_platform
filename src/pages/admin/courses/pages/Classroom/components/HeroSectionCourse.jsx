@@ -66,24 +66,24 @@ const HeroSectionCourse = ({ course }) => {
   };
 
   // Obtener icono para la categoría
-  const getCategoryIcon = () => {
-    switch (category?.toLowerCase()) {
-      case "programming":
-        return <CodeIcon className="w-4 h-4" />;
-      case "design":
-        return <PenToolIcon className="w-4 h-4" />;
-      case "business":
-        return <BarChartIcon className="w-4 h-4" />;
-      default:
-        return <Bookmark className="w-4 h-4" />;
-    }
-  };
+  // const getCategoryIcon = () => {
+  //   switch (category?.toLowerCase()) {
+  //     case "programming":
+  //       return <CodeIcon className="w-4 h-4" />;
+  //     case "design":
+  //       return <PenToolIcon className="w-4 h-4" />;
+  //     case "business":
+  //       return <BarChartIcon className="w-4 h-4" />;
+  //     default:
+  //       return <Bookmark className="w-4 h-4" />;
+  //   }
+  // };
 
   // Obtener imagen de fallback basada en la categoría
   const getFallbackImage = () => {
     if (!category) return FALLBACK_IMAGES.default;
 
-    const lowercaseCategory = category.toLowerCase();
+    const lowercaseCategory = category.name.toLowerCase();
     return FALLBACK_IMAGES[lowercaseCategory] || FALLBACK_IMAGES.default;
   };
 
@@ -148,7 +148,7 @@ const HeroSectionCourse = ({ course }) => {
           {category && (
             <div className="px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full text-white font-medium text-sm flex items-center gap-1.5 border border-white/20">
               <Bookmark className="w-3.5 h-3.5" />
-              <span>{category}</span>
+              <span>{category?.name}</span>
             </div>
           )}
         </div>
@@ -170,10 +170,11 @@ const HeroSectionCourse = ({ course }) => {
               {instructor && (
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center text-white font-medium text-sm">
-                    {instructor.name.charAt(0)}
+                    {((instructor?.first_name?.charAt(0) || '').toUpperCase() +
+                      (instructor?.last_name?.charAt(0) || '').toUpperCase()) || 'U'}
                   </div>
                   <span className="text-white/90 text-sm">
-                    {instructor.name}
+                    {instructor.first_name + ' ' + instructor.last_name}
                   </span>
                 </div>
               )}
