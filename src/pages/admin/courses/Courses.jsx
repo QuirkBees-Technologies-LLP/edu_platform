@@ -16,7 +16,7 @@ const Courses = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <UserProfileHero
         name={auth?.user?.name}
         image={image}

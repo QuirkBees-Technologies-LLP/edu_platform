@@ -57,22 +57,26 @@ const Main = ({ onSelectCourse }) => {
         .then((response) => {
           setCoursesList(response);
 
-          // Extract unique instructors
-          const uniqueInstructors = Array.from(
-            new Set(response.map((course) => course.instructor?._id))
-          )
-            .map((id) => {
-              return response.find((course) => course.instructor?._id === id)
-                ?.instructor;
-            })
-            .filter(Boolean);
+          const instructorsWithCourses = Object.values(
+            response.reduce((acc, course) => {
+              const instructor = course.instructor;
+              if (!instructor?._id) return acc;
 
-          setInstructors(uniqueInstructors);
+              if (!acc[instructor._id]) {
+                acc[instructor._id] = { ...instructor, courses: [] };
+              }
+
+              acc[instructor._id].courses.push(course);
+              return acc;
+            }, {})
+          );
+
+          setInstructors(instructorsWithCourses);
 
           // Extract unique categories
-          const uniqueCategories = Array.from(
-            new Set(response.map((course) => course.category))
-          ).filter(Boolean);
+          const uniqueCategories = [
+            ...new Map(response.map(c => [c.category?._id, c.category])).values()
+          ];
 
           setCategories(uniqueCategories);
           setIsLoading(false);
@@ -86,16 +90,19 @@ const Main = ({ onSelectCourse }) => {
 
   // Filter courses based on search term and selected category
   const filteredCourses = coursesList.filter((course) => {
+    console.log(course, "course");
+
     const matchesSearch =
       !searchTerm ||
       course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory =
-      !selectedCategory || course.category === selectedCategory;
+      !selectedCategory || course.category._id === selectedCategory?._id;
 
     return matchesSearch && matchesCategory;
   });
+  console.log(selectedCategory, "selectedCategory");
 
   // Get featured courses (highest rated or marked as featured)
   const featuredCourses = coursesList
@@ -107,7 +114,7 @@ const Main = ({ onSelectCourse }) => {
     <div className="mb-10">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+          <div className="p-2 bg-primary-light text-primary rounded-lg">
             {icon}
           </div>
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
@@ -115,7 +122,7 @@ const Main = ({ onSelectCourse }) => {
         {viewAllLink && (
           <a
             href={viewAllLink}
-            className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
+            className="text-primary text-sm font-medium flex items-center gap-1"
           >
             View all
             <ChevronRight className="w-4 h-4" />
@@ -126,16 +133,18 @@ const Main = ({ onSelectCourse }) => {
     </div>
   );
 
+
   // Instructor card component
   const InstructorCard = ({ instructor }) => (
     <motion.div
-      className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4 border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all"
+      className="rounded-xl shadow-sm p-4 flex items-center gap-4 border border-gray-100 hover:shadow-md transition-all"
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
         <span className="text-white font-bold text-lg">
-          {instructor?.name?.charAt(0) || "U"}
+          {((instructor?.first_name?.charAt(0) || '').toUpperCase() +
+            (instructor?.last_name?.charAt(0) || '').toUpperCase()) || 'U'}
         </span>
       </div>
       <div>
@@ -150,17 +159,16 @@ const Main = ({ onSelectCourse }) => {
   // Category badge component
   const CategoryBadge = ({ category, isSelected, onClick }) => (
     <motion.button
-      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-        isSelected
-          ? "bg-indigo-100 text-indigo-700 border-2 border-indigo-300"
-          : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-      }`}
+      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${isSelected
+        ? "bg-primary-clarity text-primary border-2 border-primary-light"
+        : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
+        }`}
       onClick={() => onClick(category)}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
       <Tag className="w-3.5 h-3.5" />
-      {category}
+      {category?.name}
     </motion.button>
   );
 
@@ -176,24 +184,25 @@ const Main = ({ onSelectCourse }) => {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-primary rounded-full animate-spin"></div>
           <p className="text-gray-600">Loading courses...</p>
         </div>
       </div>
     );
   }
+  console.log(categories, "categories");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       {/* Hero Banner */}
-      <div className="relative bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl p-8 mb-10 overflow-hidden">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
-        <div className="absolute left-20 bottom-0 w-40 h-40 bg-purple-500 rounded-full blur-3xl opacity-20 -mb-20"></div>
-        <div className="relative z-10 max-w-xl">
+      <div className="relative bg-pink-gradient rounded-2xl p-8 mb-10 overflow-hidden">
+        <div className="absolute right-0 top-0 w-64 h-64 bg-primary rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
+        <div className="absolute left-20 bottom-0 w-40 h-40 bg-primary rounded-full blur-3xl opacity-20 -mb-20"></div>
+        <div className="relative max-w-xl">
           <h1 className="text-3xl font-bold text-white mb-2">
             Explore Our Best Courses
           </h1>
-          <p className="text-indigo-100 mb-6">
+          <p className="text-gray-100 dark:text-gray-900 mb-6">
             Enhance your skills with our industry-leading instructors and
             expertly crafted courses.
           </p>
@@ -230,7 +239,7 @@ const Main = ({ onSelectCourse }) => {
             <CategoryBadge
               key={category}
               category={category}
-              isSelected={selectedCategory === category}
+              isSelected={selectedCategory?._id === category?._id}
               onClick={handleCategoryClick}
             />
           ))}
@@ -259,7 +268,7 @@ const Main = ({ onSelectCourse }) => {
 
       {/* All Courses */}
       <Section
-        title={selectedCategory ? `${selectedCategory} Courses` : "All Courses"}
+        title={selectedCategory ? `${selectedCategory?.name} Courses` : "All Courses"}
         icon={<BookOpen className="w-5 h-5" />}
       >
         {filteredCourses.length > 0 ? (

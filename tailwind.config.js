@@ -61,7 +61,7 @@ module.exports = {
                 default: '#C88A21',
                 active: '#a67825',
                 light: '#C88A211c',
-                clarity: 'rgba(217, 152, 184, 0.20)',
+                clarity: 'rgb(217 ,198 ,152 , 0.20)',
                 inverse: '#ffffff'
               },
               success: {
@@ -126,7 +126,7 @@ module.exports = {
                 default: '#C88A21',
                 active: '#a67825',
                 light: '#c88a2129',
-                clarity: 'rgba(217, 152, 184, 0.20)',
+                clarity: 'rgb(217 ,198 ,152 , 0.20)',
                 inverse: '#ffffff'
               },
               success: {

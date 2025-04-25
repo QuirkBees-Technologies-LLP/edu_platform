@@ -75,7 +75,7 @@ const ClassroomContent = () => {
                 </h1>
                 {currentCourse?.category && (
                   <span className="text-sm text-gray-500">
-                    {currentCourse.category}
+                    {currentCourse.category?.name}
                   </span>
                 )}
               </div>
