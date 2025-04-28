@@ -20,7 +20,7 @@ const EducatorLiveSession = ({ title = "Live session" }) => {
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [getLiveSessionList, { data, isLoading }] = useLazyGetLiveSessionListQuery();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -93,7 +93,7 @@ const EducatorLiveSession = ({ title = "Live session" }) => {
       }) => <DataGridColumnHeader title='Title' column={column} />,
       enableSorting: true,
       cell: info => <span>
-        <p className='cursor-pointer hover:text-primary' onClick={()=> handleRedirect(info.row.original.callId, info.row.original)}>
+        <p className='cursor-pointer hover:text-primary' onClick={() => handleRedirect(info.row.original.callId, info.row.original)}>
           {info.row.original.title}
         </p>
       </span>,
@@ -108,6 +108,25 @@ const EducatorLiveSession = ({ title = "Live session" }) => {
       cell: info => <div className="flex items-center gap-2.5">
         <span className="leading-none text-gray-800 font-normal">
           {info.row.original.callId}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      accessorFn: row => row.status,
+      id: 'status',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Status' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        {/* <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.status}
+        </span> */}
+        <span class={`badge badge-outline ${info.row.original.status === "Active" ? "badge-primary" : "badge-danger"}`}>
+          {info.row.original.status}
         </span>
       </div>,
       meta: {

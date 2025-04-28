@@ -7,6 +7,7 @@ import {
   deleteCourse,
   reorderCourses as reorderCoursesApi,
 } from "@/services/lms.courses";
+import { getCourseByEducatorId } from "../../services/lms.courses";
 
 // Types
 const COURSE_STATUS = {
@@ -22,6 +23,22 @@ export const fetchCourses = createAsyncThunk(
   async ({ params = {}, token }, { rejectWithValue }) => {
     try {
       const response = await getAllCourses(params, token);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch courses"
+      );
+    }
+  }
+);
+
+export const fetchCoursesByEducatorId = createAsyncThunk(
+  "courses/fetchByEducatorId",
+  async ({ id, token }, { rejectWithValue }) => {
+    console.log(id, "id in api");
+    
+    try {
+      const response = await getCourseByEducatorId(id, token);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -152,6 +169,28 @@ const courseSlice = createSlice({
         state.status = COURSE_STATUS.FAILED;
         state.error = action.payload;
       })
+
+      // Fetch Course By educator ID
+      .addCase(fetchCoursesByEducatorId.pending, (state) => {
+        state.status = COURSE_STATUS.LOADING;
+        state.error = null;
+      })
+      .addCase(fetchCoursesByEducatorId.fulfilled, (state, action) => {
+        state.status = COURSE_STATUS.SUCCEEDED;
+        state.courses = action.payload;
+        state.pagination = {
+          currentPage: 1,
+          limit: action.payload.length,
+          totalPages: 1,
+          totalRecords: action.payload.length,
+        };
+      })
+      .addCase(fetchCoursesByEducatorId.rejected, (state, action) => {
+        state.status = COURSE_STATUS.FAILED;
+        state.error = action.payload;
+      })
+
+
       // Fetch Course By ID
       .addCase(fetchCourseById.pending, (state) => {
         state.status = COURSE_STATUS.LOADING;

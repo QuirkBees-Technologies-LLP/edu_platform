@@ -26,6 +26,19 @@ export const getAllCourses = async (params = {}, token = null) => {
   }
 };
 
+export const getCourseByEducatorId = async (id, token = null) => {
+  try {
+    const response = await api.get(`/users/course?instructor=${id}&isPublished=true`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 /**
  * Get a single course by ID
  * @param {string} id - Course ID

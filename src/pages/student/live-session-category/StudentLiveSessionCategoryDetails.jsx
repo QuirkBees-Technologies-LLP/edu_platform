@@ -3,14 +3,14 @@ import { Container } from '@/components/container';
 import { useGetAcademySingleCategoryQuery } from '../../../store/api/client/clientAcademyCategoryApiSlice';
 import { Link, useParams } from 'react-router-dom';
 import WeeklyCalendar from './WeeklyCalendar';
+import EducatorImage from './EducatorImage';
 
 const StudentLiveSessionCategoryDetails = () => {
     const { id } = useParams();
     const { data } = useGetAcademySingleCategoryQuery(id);
 
-    const defaultImage = '/media/images/600x400/1.jpg';
+    const defaultImage = '/media/avatars/300-2.png';
     const educators = data?.data?.category?.educators;
-    console.log(data, "educators===>");
 
     return (
         <div>
@@ -19,33 +19,35 @@ const StudentLiveSessionCategoryDetails = () => {
                 {educators && educators.length > 0 ? (
                     <div className="grid xl:grid-cols-3 sm:grid-cols-2 gap-4">
                         {educators.map((educator, index) => (
-                            <Link
-                                to={`/academy/course/${educator._id}`}
-                                key={educator.id || index}
-                                className="card hover:shadow-lg transition-shadow duration-300"
-                            >
-                                <div key={`educator-${educator.id || index}`}
-                                    className="card">
+
+                            <div key={`educator-${educator.id || index}`}
+                                className="card">
+                                <Link
+                                    to={`/academy/course/${educator._id}`}
+                                    key={educator.id || index}
+                                    className="card hover:shadow-lg transition-shadow duration-300"
+                                >
                                     <div className="card-body">
                                         <h6 className="text-lg text-center font-medium text-gray-900 mb-3">
                                             {educator.first_name} {educator.last_name}
                                         </h6>
-                                        <img
-                                            className="rounded-xl h-80 w-full object-cover"
-                                            src={educator.image || defaultImage}
-                                            alt={`${educator.first_name} ${educator.last_name}`}
+                                        <EducatorImage
+                                            educator={educator}  // The course object containing the imageUrl and title
+                                            defaultImage={defaultImage}  // Your fallback default image
                                         />
+
                                         <button
                                             className="btn text-md btn-primary text-white w-full justify-center mt-3">
                                             Access to live
                                         </button>
+
                                         <button
                                             className="btn text-md bg-primary-light text-primary w-full justify-center mt-3">
                                             Access to Courses
                                         </button>
                                     </div>
-                                </div>
-                            </Link>
+                                </Link>
+                            </div>
                         ))}
                     </div>
                 ) : (
@@ -57,9 +59,10 @@ const StudentLiveSessionCategoryDetails = () => {
                             Please check back later or browse other categories
                         </p>
                     </div>
-                )}
-            </Container>
-        </div>
+                )
+                }
+            </Container >
+        </div >
     )
 }
 

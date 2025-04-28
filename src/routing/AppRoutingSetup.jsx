@@ -104,7 +104,6 @@ import ClientCourses from "../pages/student/client-courses/ClientCourses";
 import ClientSpecificCourses from "../pages/student/client-courses/ClientSpecificCourses";
 import AdminStreamSchedule from "../pages/admin/admin-stream-schedule/AdminStreamSchedule";
 import EducatorLiveSession from "../pages/educator/live-session/EducatorLiveSession";
-import StudentCourses from "../pages/student/courses/StudentCourses";
 
 const routes = {
   student: [
@@ -118,7 +117,6 @@ const routes = {
     { path: "/academy/:id", element: <StudentLiveSessionCategoryDetails /> },
     { path: "/academy/course/:id", element: <ClientCourses /> },
     { path: "/academy/course/detail/:id", element: <ClientSpecificCourses /> },
-    { path: "/educator/:id", element: <StudentCourses /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
