@@ -42,7 +42,7 @@ const Content = () => {
   };
 
   return (
-    <div className="card">
+    <div className="card mb-10">
       <div className="card-body pt-0">
         <div className="min-h-screen">
           {/* Navigation Bar */}
