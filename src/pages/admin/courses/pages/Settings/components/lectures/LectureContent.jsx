@@ -50,7 +50,7 @@ const LectureContent = ({
     type: lecture?.type || "TEXT",
     order: lecture?.order || 0,
     preview: lecture?.preview || false,
-    section: lecture?.section || "",
+    section: lecture?.section?._id || "",
   });
 
   useEffect(() => {
@@ -58,6 +58,7 @@ const LectureContent = ({
       const response = await lmsLectures.getLecture(lecture._id, auth.token);
       setLectureContent(response);
     };
+    console.log(lecture, "lecture");
 
     if (lecture) {
       setFormData({
@@ -67,19 +68,26 @@ const LectureContent = ({
         type: lecture.type || "TEXT",
         order: lecture.order || 0,
         preview: lecture.preview || false,
-        section: lecture.section || "",
+        section: lecture.section?._id || "",
       });
       setShowPreview(false);
       setIsEditing(false);
       setActiveTab("content");
     }
-  }, [lecture]);
+  }, [lecture, onLectureUpdate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleDescriptionChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      ["description"]: value,
     }));
   };
 
@@ -99,54 +107,54 @@ const LectureContent = ({
     }));
   };
 
-    const handleVideoUrlChange = (e) => {
-        const url = e.target.value;
-        setFormData((prev) => ({
-            ...prev,
-            content: url,
-        }));
-        
-        if (isValidVideoUrl(url)) {
-            setShowPreview(true);
-        } else {
-            setShowPreview(false);
-        }
-    };
-    
-    const isValidVideoUrl = (url) => {
-        if (!url) return false;
-        
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            return true;
-        }
-        
-        if (url.includes('vimeo.com')) {
-            return true;
-        }
+  const handleVideoUrlChange = (e) => {
+    const url = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      content: url,
+    }));
 
-        return false;
-    };
-    
-    const getEmbedUrl = (url) => {
-        if (!url) return '';
-        
-        if (url.includes('youtube.com/watch?v=')) {
-            const videoId = url.split('v=')[1].split('&')[0];
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
+    if (isValidVideoUrl(url)) {
+      setShowPreview(true);
+    } else {
+      setShowPreview(false);
+    }
+  };
 
-        if (url.includes('youtu.be/')) {
-            const videoId = url.split('youtu.be/')[1].split('?')[0];
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
-        
-        if (url.includes('vimeo.com/')) {
-            const videoId = url.split('vimeo.com/')[1].split('?')[0];
-            return `https://player.vimeo.com/video/${videoId}`;
-        }
-        
-        return url;
-    };
+  const isValidVideoUrl = (url) => {
+    if (!url) return false;
+
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      return true;
+    }
+
+    if (url.includes('vimeo.com')) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const getEmbedUrl = (url) => {
+    if (!url) return '';
+
+    if (url.includes('youtube.com/watch?v=')) {
+      const videoId = url.split('v=')[1].split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1].split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1].split('?')[0];
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+
+    return url;
+  };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -310,7 +318,7 @@ const LectureContent = ({
   const renderViewContent = () => {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
           <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
               <FileText className="w-4 h-4 text-blue-500" />
@@ -327,8 +335,17 @@ const LectureContent = ({
               Description
             </h3>
             <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
-              {lecture.description || "No description provided"}
+              {lecture.description ? (
+                /<[^>]+>/.test(lecture.description) ? (
+                  <span dangerouslySetInnerHTML={{ __html: lecture.description }} />
+                ) : (
+                  <span>{lecture.description}</span>
+                )
+              ) : (
+                "No description provided"
+              )}
             </p>
+
           </div>
         </div>
 
@@ -374,9 +391,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lecture.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lecture.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lecture.preview ? (
                 <>
@@ -423,9 +439,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lecture.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lecture.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lecture.preview ? (
                 <>
@@ -449,11 +464,10 @@ const LectureContent = ({
           </h3>
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                lecture.type === "VIDEO"
-                  ? "bg-purple-100 text-purple-800"
-                  : "bg-blue-100 text-blue-800"
-              }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture.type === "VIDEO"
+                ? "bg-purple-100 text-purple-800"
+                : "bg-blue-100 text-blue-800"
+                }`}
             >
               {lecture.type === "VIDEO" ? (
                 <>
@@ -486,7 +500,18 @@ const LectureContent = ({
             )}
             {lecture.title}
           </h2>
-          <p className="text-sm text-gray-500 mt-1">{lecture.description}</p>
+          {/* <p className="text-sm text-gray-500 mt-1">{lecture.description}</p> */}
+          <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
+              {lecture.description ? (
+                /<[^>]+>/.test(lecture.description) ? (
+                  <span dangerouslySetInnerHTML={{ __html: lecture.description }} />
+                ) : (
+                  <span>{lecture.description}</span>
+                )
+              ) : (
+                "No description provided"
+              )}
+            </p>
         </div>
         <Button
           variant={isEditing ? "outline" : "default"}
@@ -526,7 +551,7 @@ const LectureContent = ({
           >
             <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-blue-700">
                       <FileText className="w-4 h-4" />
@@ -552,13 +577,21 @@ const LectureContent = ({
                         Description
                       </Label>
                     </div>
-                    <Input
+                    {/* <Input
                       id="description"
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
                       placeholder="Brief description of this lecture"
                       className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+                    /> */}
+                    <RichEditor
+                      id="description"
+                      name="description"
+                      content={formData.description}
+                      onChange={handleDescriptionChange}
+                      placeholder="Brief description of this lecture"
+                      className="min-h-[300px]"
                     />
                   </div>
                 </div>
@@ -668,21 +701,19 @@ const LectureContent = ({
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "content"
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
+                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    }`}
                 >
                   Content
                 </button>
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "settings"
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "settings"
+                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    }`}
                 >
                   Settings
                 </button>

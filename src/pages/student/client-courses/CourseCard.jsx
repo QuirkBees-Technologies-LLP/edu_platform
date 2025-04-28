@@ -33,7 +33,7 @@ const CourseCard = (props) => {
       case "PRO" || "pro":
         return "bg-amber-500";
       default:
-        return "bg-blue-500";
+        return "bg-primary";
     }
   };
 
@@ -101,7 +101,7 @@ const CourseCard = (props) => {
 
           {/* Instructor */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center ring-2 ring-white/20">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-white/20">
               <span className="text-white text-sm font-medium">
                 {((instructor?.first_name?.charAt(0) || '').toUpperCase() +
                   (instructor?.last_name?.charAt(0) || '').toUpperCase()) || 'U'}
@@ -136,7 +136,7 @@ const CourseCard = (props) => {
           >
             {/* Watch Button */}
             <motion.button
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white w-full py-2.5 rounded-lg transition-all shadow-lg shadow-indigo-500/30"
+              className="flex items-center justify-center gap-2 bg-pink-gradient text-white w-full py-2.5 rounded-lg transition-all shadow-lg shadow-indigo-500/30"
               onClick={() => onSelectCourse(course)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -149,7 +149,7 @@ const CourseCard = (props) => {
             <div className="relative">
               <div className="h-1.5 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: `${progress}%` }}
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}

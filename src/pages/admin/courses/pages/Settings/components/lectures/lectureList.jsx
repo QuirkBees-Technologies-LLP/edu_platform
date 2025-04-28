@@ -187,9 +187,20 @@ const LectureList = ({
                       {lecture.title}
                     </h4>
                     {lecture.description && (
+                      // <p className="text-xs text-gray-500 truncate mt-0.5">
+                      //   {lecture.description}
+                      // </p>
                       <p className="text-xs text-gray-500 truncate mt-0.5">
-                        {lecture.description}
-                      </p>
+                      {lecture.description ? (
+                        /<[^>]+>/.test(lecture.description) ? (
+                          <span dangerouslySetInnerHTML={{ __html: lecture.description }} />
+                        ) : (
+                          <span>{lecture.description}</span>
+                        )
+                      ) : (
+                        "No description provided"
+                      )}
+                    </p>
                     )}
                   </div>
 
