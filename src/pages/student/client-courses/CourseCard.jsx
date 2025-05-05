@@ -69,13 +69,13 @@ const CourseCard = (props) => {
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
         {/* Status Badge */}
-        <div className="absolute top-4 right-4">
+        {/* <div className="absolute top-4 right-4">
           <div
             className={`px-2 py-0.5 rounded-full ${published ? "bg-green-500" : "bg-gray-500"} text-white text-xs font-medium`}
           >
             {published ? "Published" : "Draft"}
           </div>
-        </div>
+        </div> */}
 
         {/* Top Info */}
         <div className="absolute top-4 left-4 flex items-center gap-2">

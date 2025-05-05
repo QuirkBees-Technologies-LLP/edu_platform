@@ -1,80 +1,103 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StreamVideoClient, StreamTheme } from "@stream-io/video-react-sdk";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import { useParams } from "react-router";
-import { useGetClientTokenMutation } from "../../../store/api/client/clientLiveSessionApiSlice";
+import { useGetClientLiveScheduleQuery, useGetClientTokenMutation } from "../../../store/api/client/clientLiveSessionApiSlice";
 import { useAuthContext } from "../../../auth/useAuthContext";
 import { EventProvider } from "./chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "./ClientLiveSessionWrapper";
 import StreamWrapper from "../../admin/live-session/StreamWrapper";
+import { format } from "date-fns";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
 const ClientViewLiveSession = () => {
   const [client, setClient] = useState(null);
   const [call, setCall] = useState(null);
+  const isInitializing = useRef(false); // Track initialization attempts
   const { callId } = useParams();
   const { auth } = useAuthContext();
-
   const userId = auth?.user?._id ?? null;
-  const [payload, setPayload] = useState({ userId: userId, callId: callId });
+
+  // 1. Fetch token and schedule data (uncomment schedule logic)
   const [token, setToken] = useState(null);
-  const [getClientToken, { data, error, isLoading }] = useGetClientTokenMutation();
+  const [getClientToken] = useGetClientTokenMutation();
+  const { data: scheduleData } = useGetClientLiveScheduleQuery(callId);
 
   useEffect(() => {
     const fetchClientToken = async () => {
       try {
-        const response = await getClientToken(payload).unwrap();
+        const response = await getClientToken({ userId, callId }).unwrap();
         setToken(response.token);
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Token fetch failed:", err);
       }
     };
-
     fetchClientToken();
-  }, []);
+  }, [userId, callId]);
 
+  // 2. Initialize Stream client
   useEffect(() => {
     const initClient = async () => {
-      try {
-        if (client) {
-          console.warn("Stream client already initialized, skipping re-creation.");
-          return;
-        }
+      if (!token || client || isInitializing.current) return;
+      isInitializing.current = true;
 
-        const newClient = new StreamVideoClient({ apiKey });
+      let newClient;
+      try {
+        newClient = new StreamVideoClient({ apiKey });
+        await newClient.connectUser({ id: userId }, token); // Authenticate FIRST
         const newCall = newClient.call("livestream", callId);
-        const userRes = await newClient.connectUser({ id: userId }, token);
-        const response = await newCall.get();
-        console.log(userRes, "userResponse");
-        
+        await newCall.get(); // Verify call exists
+
         setClient(newClient);
         setCall(newCall);
-        console.log("Stream client initialized successfully.");
-      } catch (error) {
-        console.error("Error initializing Stream client:", error);
+      } catch (err) {
+        console.error("Stream init failed:", err);
+        if (newClient) await newClient.disconnectUser(); // Cleanup on failure
+      } finally {
+        isInitializing.current = false;
       }
     };
 
-    token && initClient();
+    initClient();
+  }, [token, callId, userId, client]); // Re-run only if these change
 
+  // 3. Cleanup on unmount
+  useEffect(() => {
     return () => {
       if (client) {
-        client.disconnectUser()
-          .then(() => console.log("User disconnected from Stream."))
-          .catch(err => console.error("Error disconnecting user:", err));
+        client.disconnectUser().catch(console.error);
       }
     };
-  }, [client, token]);
+  }, [client]);
+
+  // 4. Render logic with safe scheduleData access
+  const isUpcoming = scheduleData?.data?.datetime 
+    ? new Date(scheduleData.data.datetime) > new Date()
+    : false;
 
   return (
-    <EventProvider>
-      <StreamWrapper call={call} callId={callId}>
-        <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
-          <ClientLiveSessionWrapper token={token} client={client} callId={callId} />
-        </StreamTheme>
-      </StreamWrapper>
-    </EventProvider>
+    <>
+      {/* {isUpcoming ? (
+        <div className="live_center w-full">
+          <p className="text-center font-bold text-xl">Live Session is Upcoming</p>
+          <p className="text-center text-lg pt-10 px-2">
+            The event will start on{" "}
+            {scheduleData?.data?.datetime 
+              ? format(new Date(scheduleData.data.datetime), "MMM dd, yyyy, hh:mm a")
+              : "a future date"}
+          </p>
+        </div>
+      ) : ( */}
+        <EventProvider>
+          <StreamWrapper call={call} callId={callId}>
+            <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
+              {client && <ClientLiveSessionWrapper client={client} callId={callId} token={token}/>}
+            </StreamTheme>
+          </StreamWrapper>
+        </EventProvider>
+      {/* )} */}
+    </>
   );
 };
 

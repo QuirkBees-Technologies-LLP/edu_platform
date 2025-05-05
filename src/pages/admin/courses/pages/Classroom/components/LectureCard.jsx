@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useAuthContext } from "../../../../../../auth/useAuthContext";
 import { lmsLectures } from "../../../../../../services";
+import ShowMoreLess from "../../../../../../components/ui/showmoreless";
 
 const LectureCard = ({ lectureId, courseId, handleViewLecture }) => {
   const { auth } = useAuthContext();
@@ -226,9 +227,7 @@ const LectureCard = ({ lectureId, courseId, handleViewLecture }) => {
             </h3>
 
             {lecture.description && (
-              <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                {lecture.description}
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: lecture.description }} className="text-xs text-gray-600 line-clamp-2 mb-2" />  
             )}
           </div>
 

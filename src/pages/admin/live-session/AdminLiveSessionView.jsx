@@ -34,7 +34,7 @@ const AdminLiveSessionView = () => {
       const newClient = new StreamVideoClient({
         apiKey,
         token,
-        user: { id: userId, name: "Admin Host" },
+        user: { id: userId, name: auth?.user?.first_name + " " + auth?.user?.last_name },
       });
 
       const newCall = newClient.call("livestream", callId);

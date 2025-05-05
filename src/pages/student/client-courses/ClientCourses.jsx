@@ -15,14 +15,15 @@ import {
     Bookmark,
 } from "lucide-react";
 import CourseCard from './CourseCard';
+import Loader from '../../../components/ui/loader';
 
 const ClientCourses = () => {
     const [categoryId, setCategoryId] = useState();
     const { id } = useParams();
-    const { data } = useGetClientCoursesQuery(id);
+    const { data, isLoading } = useGetClientCoursesQuery(id);
     const defaultImage = '/media/images/600x400/1.jpg';
     const courses = data?.data;
-    const { data: scheduleData } = useGetAcademySingleCategoryQuery(categoryId);
+    const { data: scheduleData, isLoading: scheduleLoading } = useGetAcademySingleCategoryQuery(categoryId);
     const eduID = data?.data?.[0]?.instructor?._id;
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -86,17 +87,19 @@ const ClientCourses = () => {
     return (
         <div>
             <Container>
-                <div className='mb-10'>
-                    <h4 className='text-xl font-medium text-primary mb-2'>Live Session Schedule</h4>
-                    {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div className='text-center p-4 card mb-5'>
-                        <div className="card-body">
-                            There are no schedule found
+                {(isLoading || scheduleLoading || !data || !scheduleData) ? <Loader /> :
+                    <>
+                        <div className='mb-10'>
+                            <h4 className='text-xl font-medium text-primary mb-2'>Live Session Schedule</h4>
+                            {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div className='text-center p-4 card mb-5'>
+                                <div className="card-body">
+                                    There are no schedule found
+                                </div>
+                            </div>}
                         </div>
-                    </div>}
-                </div>
-                <div className='mb-10'>
-                    <h4 className='text-xl font-medium text-primary mb-2'>Courses</h4>
-                    {/* <div className="card">
+                        <div className='mb-10'>
+                            <h4 className='text-xl font-medium text-primary mb-2'>Courses</h4>
+                            {/* <div className="card">
                         <div className="card-body">
                             {courses && courses.length > 0 ? (
                                 <>
@@ -141,46 +144,48 @@ const ClientCourses = () => {
                     </div> */}
 
 
-                    <Section
-                        title={selectedCategory ? `${selectedCategory?.name} Courses` : "All Courses"}
-                        icon={<BookOpen className="w-5 h-5" />}
-                    >
-                        {filteredCourses.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredCourses.map((course) => (
-                                    <CourseCard
-                                        key={course._id}
-                                        course={{ ...course, id: course._id }}
-                                        onSelectCourse={onSelectCourse}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-12 rounded-lg border border-gray-200">
-                                <div className="mx-auto w-16 h-16 bg-gray-100 flex items-center justify-center rounded-full mb-4">
-                                    <Search className="w-8 h-8 text-gray-400" />
-                                </div>
-                                <h3 className="text-lg font-medium text-gray-700">
-                                    No courses found
-                                </h3>
-                                <p className="text-gray-500 mt-2 max-w-md mx-auto">
-                                    {searchTerm
-                                        ? `No results for "${searchTerm}"`
-                                        : "No courses available in this category yet"}
-                                </p>
-                                <button
-                                    className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                    onClick={() => {
-                                        setSearchTerm("");
-                                        setSelectedCategory(null);
-                                    }}
-                                >
-                                    Clear filters
-                                </button>
-                            </div>
-                        )}
-                    </Section>
-                </div>
+                            <Section
+                                title={selectedCategory ? `${selectedCategory?.name} Courses` : "All Courses"}
+                                icon={<BookOpen className="w-5 h-5" />}
+                            >
+                                {filteredCourses.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {filteredCourses.map((course) => (
+                                            <CourseCard
+                                                key={course._id}
+                                                course={{ ...course, id: course._id }}
+                                                onSelectCourse={onSelectCourse}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12 rounded-lg border border-gray-200">
+                                        <div className="mx-auto w-16 h-16 bg-gray-100 flex items-center justify-center rounded-full mb-4">
+                                            <Search className="w-8 h-8 text-gray-400" />
+                                        </div>
+                                        <h3 className="text-lg font-medium text-gray-700">
+                                            No courses found
+                                        </h3>
+                                        <p className="text-gray-500 mt-2 max-w-md mx-auto">
+                                            {searchTerm
+                                                ? `No results for "${searchTerm}"`
+                                                : "No courses available in this category yet"}
+                                        </p>
+                                        <button
+                                            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                            onClick={() => {
+                                                setSearchTerm("");
+                                                setSelectedCategory(null);
+                                            }}
+                                        >
+                                            Clear filters
+                                        </button>
+                                    </div>
+                                )}
+                            </Section>
+                        </div>
+                    </>
+                }
             </Container>
         </div>
     )
