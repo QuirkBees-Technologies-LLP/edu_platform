@@ -2,15 +2,17 @@ import React from 'react'
 import { Container } from '@/components/container';
 import { useGetAcademyCategoryQuery } from '../../../store/api/client/clientAcademyCategoryApiSlice'
 import { Link } from 'react-router-dom';
+import Loader from '../../../components/ui/loader';
 
 const StudentLiveSessionCategory = () => {
-    const { data } = useGetAcademyCategoryQuery();
+    const { data, isLoading } = useGetAcademyCategoryQuery();
 
     const defaultImage = "/media/images/600x400/1.jpg";
 
     return (
         <div>
             <Container>
+                {(isLoading || !data) ? <Loader /> :
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {data?.data?.map((category, index) => (
                         <Link
@@ -36,7 +38,7 @@ const StudentLiveSessionCategory = () => {
                             </div>
                         </Link>
                     ))}
-                </div>
+                </div>}
             </Container>
         </div>
     )

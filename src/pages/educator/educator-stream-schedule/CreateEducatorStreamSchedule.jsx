@@ -136,7 +136,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
             const initData = {
                 title: selectedRow?.title,
                 description: selectedRow?.description,
-                datetime: selectedRow?.datetime,
+                datetime: (selectedRow?.datetime) ? new Date(selectedRow?.datetime) : null,
                 tags: selectedRow?.tags,
                 category: selectedRow?.category?._id,
                 thumbnail: [{ file: null, dataURL: selectedRow?.image }],

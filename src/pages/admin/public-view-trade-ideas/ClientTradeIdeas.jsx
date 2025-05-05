@@ -5,7 +5,6 @@ import { useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTra
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
-import EducatorImage from "./EducatorImage";
 
 const ClientTradeIdeas = () => {
   const [page, setPage] = useState(1);
@@ -113,7 +112,11 @@ const ClientTradeIdeas = () => {
                     </div>
                   </div>
                   <div className="flex items-center pt-4">
-                    <EducatorImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
+                    <img
+                      src={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                      className="rounded-full size-7 me-2"
+                      alt=""
+                    />
                     <div>
                       <Link
                         to="/public-profile/profiles/nft"

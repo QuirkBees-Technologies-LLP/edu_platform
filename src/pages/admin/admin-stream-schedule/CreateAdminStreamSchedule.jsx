@@ -94,7 +94,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
             const thumbnailFile = values.thumbnail?.[0]?.file; // Get the actual File object
 
             const formData = new FormData();
-            formData.append('callId', callId);
+            // formData.append('callId', callId);
             formData.append('title', values.title);
             formData.append('category', values.category);
             formData.append('description', values.description);
@@ -157,7 +157,7 @@ console.log(selectedRow, "selectedRow");
             const initData = {
                 title: selectedRow?.title,
                 description: selectedRow?.description,
-                datetime: selectedRow?.datetime,
+                datetime: new Date(selectedRow?.datetime),
                 tags: selectedRow?.tags,
                 category: selectedRow?.category?._id,
                 educator: selectedRow?.educator?._id,

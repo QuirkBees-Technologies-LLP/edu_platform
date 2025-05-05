@@ -22,6 +22,7 @@ const ClientLiveSession = () => {
 
         fetchClientToken();
     }, []);     
+    
     return (
         <div className='container-fluid'>
             <div className="popular pb-5 flex items-center justify-between">

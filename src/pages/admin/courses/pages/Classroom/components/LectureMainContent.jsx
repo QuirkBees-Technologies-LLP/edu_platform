@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 
 import { lmsLectures } from "../../../../../../services";
 import { useAuthContext } from "../../../../../../auth/useAuthContext";
+import ShowMoreLess from "../../../../../../components/ui/showmoreless";
 
 const LectureMainContent = ({ currentLecture }) => {
   const [lectureContent, setLectureContent] = useState(null);
@@ -113,7 +114,8 @@ const LectureMainContent = ({ currentLecture }) => {
           <h3 className="text-sm font-medium text-indigo-800 mb-2">
             Description
           </h3>
-          <p className="text-indigo-700">{lectureContent.description}</p>
+          {/* <p className="text-indigo-700">{lectureContent.description}</p> */}
+          <ShowMoreLess html={lectureContent.description} limit={120} />
         </div>
       )}
 

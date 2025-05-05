@@ -18,6 +18,7 @@ import { getAllLectures } from "@/services/lms.lectures";
 import { lmsLectures } from "../../../../../../../services";
 import CreateLectureForm from "../sections/CreateLectureForm";
 import { motion, AnimatePresence } from "framer-motion";
+import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
 
 const LectureList = ({
   sectionId,
@@ -186,7 +187,7 @@ const LectureList = ({
                     <h4 className="font-medium text-sm text-gray-800 truncate">
                       {lecture.title}
                     </h4>
-                    {lecture.description && (
+                    {/* {lecture.description && (
                       // <p className="text-xs text-gray-500 truncate mt-0.5">
                       //   {lecture.description}
                       // </p>
@@ -201,7 +202,10 @@ const LectureList = ({
                         "No description provided"
                       )}
                     </p>
-                    )}
+                    )} */}
+            {/* {lecture.description ? <ShowMoreLess html={lecture.description} limit={10} />: "No description provided"} */}
+
+                    
                   </div>
 
                   {/* Preview indicator */}

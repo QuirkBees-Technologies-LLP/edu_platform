@@ -1,5 +1,5 @@
 import { useCall, useCallStateHooks } from '@stream-io/video-react-sdk'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ChatContainer from './chat-room/chat/ChatContainer'
 import ClientLiveSessionPlayer from './ClientLiveSessionPlayer'
 import { useEventContext } from './chat-room/context/EventContext'
@@ -7,6 +7,7 @@ import { useResponsive } from '../../../hooks'
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
 import truncate from 'html-truncate'
+import { useLivestreamStatus } from './liveStreamStatus'
 
 
 const ClientLiveSessionWrapper = ({ client, callId, token }) => {
@@ -14,23 +15,83 @@ const ClientLiveSessionWrapper = ({ client, callId, token }) => {
   // Truncated content
   const isMdUp = useResponsive('up', 'md'); // matches Tailwind's md: 768px+
   const call = useCall();
-  const { useCallCustomData } = useCallStateHooks();
+  const { useCallCustomData, useIsCallLive, useCallIngress, useCallEndedAt } = useCallStateHooks();
   const custom = useCallCustomData();
-  
+  const endedAt = useCallEndedAt();
+  const hasEnded = !!endedAt;
+  const isBroadcasting = useIsCallLive();
+  const scheduledTime = custom?.datetime ? new Date(custom.datetime) : null;
+
+  // Status priority: Ended > Live > Upcoming > Not Started
+  const getStreamStatus = () => {
+    if (hasEnded) return 'ended';
+    if (isBroadcasting) return 'live';
+    if (scheduledTime && Date.now() < scheduledTime.getTime()) return 'upcoming';
+    return 'not-started';
+  };
+
+  const status = getStreamStatus();
+
   const { title, description, tags } = custom;
   const maxLength = 150
-  
+
   const truncatedContent = truncate(description, maxLength, { keepImageTag: false });
 
   const {
     isFullScreen,
   } = useEventContext();
 
-   // Handler for toggling
-   const handleToggle = (e) => {
+  // Handler for toggling
+  const handleToggle = (e) => {
     e.preventDefault();
     setShowFull(!showFull);
   };
+
+  if (status === 'ended') {
+    return (
+      <div className="live_center w-full">
+        <p className="text-center font-bold text-xl text-gray-900">Stream Ended</p>
+        <div class="loading-bar">
+          <div class="yellow-bar"></div>
+        </div>
+        <p className="text-center text-lg pt-10 px-2 text-gray-800">
+          The live session has concluded.
+        </p>
+      </div>
+    )
+  }
+
+  if (status === 'not-started') {
+    return (
+      <div className="live_center w-full">
+        <p className="text-center font-bold text-xl text-gray-900">Stream Not Started</p>
+        <div class="loading-bar">
+          <div class="yellow-bar"></div>
+        </div>
+        <p className="text-center text-lg pt-10 px-2 text-gray-800">
+          The host has not begun the stream yet.
+        </p>
+      </div>
+    )
+  }
+
+
+  if (status === 'upcoming') {
+    return (
+      <div className="live_center w-full">
+        <p className="text-center font-bold text-xl text-gray-900">Live Session is Upcoming</p>
+        <div class="loading-bar">
+          <div class="yellow-bar"></div>
+        </div>
+        <p className="text-center text-lg pt-10 px-2 text-gray-800">
+          The event will start on{" "}
+          {custom.datetime
+            ? format(new Date(custom.datetime), "MMM dd, yyyy, hh:mm a")
+            : "a future date"}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className='container-fluid'>

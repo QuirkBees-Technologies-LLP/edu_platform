@@ -28,6 +28,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
 
 const LectureContent = ({
   lecture,
@@ -334,18 +335,7 @@ const LectureContent = ({
               <FileText className="w-4 h-4 text-blue-500" />
               Description
             </h3>
-            <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
-              {lecture.description ? (
-                /<[^>]+>/.test(lecture.description) ? (
-                  <span dangerouslySetInnerHTML={{ __html: lecture.description }} />
-                ) : (
-                  <span>{lecture.description}</span>
-                )
-              ) : (
-                "No description provided"
-              )}
-            </p>
-
+            {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} />: "No description provided"}
           </div>
         </div>
 
@@ -500,18 +490,7 @@ const LectureContent = ({
             )}
             {lecture.title}
           </h2>
-          {/* <p className="text-sm text-gray-500 mt-1">{lecture.description}</p> */}
-          <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
-              {lecture.description ? (
-                /<[^>]+>/.test(lecture.description) ? (
-                  <span dangerouslySetInnerHTML={{ __html: lecture.description }} />
-                ) : (
-                  <span>{lecture.description}</span>
-                )
-              ) : (
-                "No description provided"
-              )}
-            </p>
+          {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} />: "No description provided"}
         </div>
         <Button
           variant={isEditing ? "outline" : "default"}

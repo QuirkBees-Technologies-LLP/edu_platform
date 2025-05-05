@@ -6,7 +6,7 @@ export const clientCoursesApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getClientCourses: builder.query({
-            query: (educatorId) => `/users/course?instructor=${educatorId}`,
+            query: (educatorId) => `/users/course?instructor=${educatorId}&published=true`,
         }),
         getClientSingleCourses: builder.query({
             query: (courseId) => `/users/course/${courseId}`,
@@ -14,7 +14,10 @@ export const clientCoursesApiSlice = createApi({
         getClientSingleCourseSection: builder.query({
             query: (courseId) => `/users/course/section/list?course=${courseId}`,
         }),
+        getClientAllCourses: builder.query({
+            query: () => `/users/course?published=true`,
+        }),
     }),
 });
 
-export const { useGetClientCoursesQuery, useGetClientSingleCoursesQuery, useGetClientSingleCourseSectionQuery } = clientCoursesApiSlice;
+export const { useGetClientCoursesQuery, useGetClientSingleCoursesQuery, useGetClientSingleCourseSectionQuery, useGetClientAllCoursesQuery } = clientCoursesApiSlice;
