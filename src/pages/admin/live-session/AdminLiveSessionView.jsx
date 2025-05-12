@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation, useParams } from "react-router";
 import { StreamVideoClient } from "@stream-io/video-react-sdk";
 import { useAuthContext } from "../../../auth/useAuthContext";
@@ -22,6 +22,7 @@ const AdminLiveSessionView = () => {
   const [call, setCall] = useState(null);
 
   const [getClientToken] = useGetClientTokenMutation();
+  const effectRan = useRef(false);
 
   const fetchTokenAndInitialize = useCallback(async () => {
     if (!apiKey || !userId || !callId) return;
@@ -34,41 +35,61 @@ const AdminLiveSessionView = () => {
       const newClient = new StreamVideoClient({
         apiKey,
         token,
-        user: { id: userId, name: auth?.user?.first_name + " " + auth?.user?.last_name },
+        user: { 
+          id: userId, 
+          name: auth?.user?.first_name + " " + auth?.user?.last_name 
+        },
       });
 
       const newCall = newClient.call("livestream", callId);
-      await newCall.join({ create: true }); 
-      await newCall.get();
+      
+      // Check if already joined before joining
+      if (!newCall.state.joined) {
+        await newCall.join();
+        await newCall.get();
+      }
+
       setClient(newClient);
       setCall(newCall);
 
       return () => {
-        newCall.leave();
+        if (newCall.state.joined) {
+          newCall.leave();
+        }
         newClient.disconnectUser();
         console.log("🔴 Cleaned up Stream client and call.");
       };
     } catch (error) {
       console.error("❌ Error initializing Stream:", error);
     }
-  }, [apiKey, userId, callId, getClientToken]);
+  }, [apiKey, userId, callId, getClientToken, auth?.user]);
 
   useEffect(() => {
+    if (effectRan.current) return;
+    effectRan.current = true;
+
     let cleanupFn;
-  
+
     const init = async () => {
       cleanupFn = await fetchTokenAndInitialize();
     };
-  
+
     init();
-  
+
     return () => {
+      effectRan.current = false;
       if (typeof cleanupFn === 'function') {
         cleanupFn();
       }
+      // Cleanup existing client and call on unmount
+      if (call) {
+        call.leave().catch(console.error);
+      }
+      if (client) {
+        client.disconnectUser();
+      }
     };
   }, [fetchTokenAndInitialize]);
-  
 
   return (
     <EventProvider>

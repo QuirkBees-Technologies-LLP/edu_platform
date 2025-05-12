@@ -7,9 +7,12 @@ import { EventProvider, useEventContext } from './chat-room/context/EventContext
 import ChatContainer from './chat-room/chat/ChatContainer';
 import UpdateLiveSession from './UpdateLiveSession';
 import { useResponsive } from '../../../hooks';
+import Recording from './Recording';
 
 
 const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rtmp_url, setIsTooltipOpen, isTooltipOpen }) => {
+    const call = useCall();
+
     const truncateText = (text, maxLength) => {
         return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
     };
@@ -38,10 +41,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
         }
     };
 
-    const call = useCall();
     const isLive = !!call?.state?.startedAt && !call?.state?.endedAt;
-    console.log(isLive, "isLive123");
-    console.log("call123", call);
 
     const maskAndTruncateText = (text, maxLength = 50) => {
         const masked = "•".repeat(text.length);
@@ -50,7 +50,6 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
         }
         return masked;
     };
-
 
     return (
         <div className='container-fluid'>
@@ -113,7 +112,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                                         <label className="col-span-3 text-md text-gray-900 font-semibold">RTMP Stream Key</label>
                                         <div className='col-span-9'>
                                             <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.rtmp_stream_key} placement="bottom" className="max-w-48">
-                                                <p onClick={() => handleCopy(rtmp_stream_key, "rtmp_stream_key")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">                                                    
+                                                <p onClick={() => handleCopy(rtmp_stream_key, "rtmp_stream_key")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
                                                     {maskAndTruncateText(rtmp_stream_key, 140)}
                                                     <Copy size={16} className='shrink-0' />
                                                 </p>
@@ -127,6 +126,9 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                 </div>
                 <div className={`${isFullScreen ? isMdUp ? "w-[8.3333%]" : "w-[100%]" : isMdUp ? "w-[35%]" : "w-[100%]"} transition-all duration-300 ease-in-out`}>
                     <ChatContainer sessionToken={sessionToken} />
+                    <div>
+                        <Recording />
+                    </div>
                 </div>
             </div>
         </div>

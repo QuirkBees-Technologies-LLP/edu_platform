@@ -169,7 +169,7 @@ const HeroSectionCourse = ({ course }) => {
             <div className="flex flex-wrap items-center gap-4">
               {instructor && (
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center text-white font-medium text-sm">
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm">
                     {((instructor?.first_name?.charAt(0) || '').toUpperCase() +
                       (instructor?.last_name?.charAt(0) || '').toUpperCase()) || 'U'}
                   </div>

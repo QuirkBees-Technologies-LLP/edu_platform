@@ -193,16 +193,16 @@ const Main = ({ onSelectCourse }) => {
   console.log(categories, "categories");
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
+    <div className="py-6">
       {/* Hero Banner */}
-      <div className="relative bg-pink-gradient rounded-2xl p-8 mb-10 overflow-hidden">
+      <div className="relative bg-gray-200 rounded-2xl p-8 mb-10 overflow-hidden">
         <div className="absolute right-0 top-0 w-64 h-64 bg-primary rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
         <div className="absolute left-20 bottom-0 w-40 h-40 bg-primary rounded-full blur-3xl opacity-20 -mb-20"></div>
         <div className="relative max-w-xl">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Explore Our Best Courses
           </h1>
-          <p className="text-gray-100 dark:text-gray-900 mb-6">
+          <p className="text-gray-900 mb-6">
             Enhance your skills with our industry-leading instructors and
             expertly crafted courses.
           </p>
@@ -211,7 +211,7 @@ const Main = ({ onSelectCourse }) => {
             <input
               type="text"
               placeholder="Search for courses..."
-              className="w-full bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg px-4 py-3 pl-10 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              className="w-full backdrop-blur-sm text-gray-800 rounded-lg px-4 py-3 pl-10 input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

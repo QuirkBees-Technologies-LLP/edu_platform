@@ -155,13 +155,13 @@ const SectionItem = ({
 
   return (
     <div
-      className={`border-l-4 ${isExpanded ? "border-l-blue-500" : "border-l-transparent"} 
-                  bg-white rounded-lg shadow-sm transition-all duration-200 
+      className={`border-l-4 ${isExpanded ? "border-l-primary" : "border-l-transparent"} 
+                   rounded-lg shadow-sm transition-all duration-200 
                   ${reorderMode ? "cursor-move pl-2 border-l-indigo-400" : ""}`}
     >
       {/* Section Header */}
       <div
-        className={`px-4 py-3 rounded-t-lg transition-colors ${isHovered && !isEditing ? "bg-blue-50/50" : ""}`}
+        className={`border px-4 py-3  transition-colors ${isHovered && !isEditing ? "bg-primary-light" : ""}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -177,7 +177,7 @@ const SectionItem = ({
               onClick={handleToggleExpand}
               className={`p-1.5 rounded-full transition-colors ${
                 isExpanded
-                  ? "text-blue-600 bg-blue-100 hover:bg-blue-200"
+                  ? "text-primary bg-primary-light hover:bg-primary-clarity"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               }`}
               aria-label={isExpanded ? "Collapse section" : "Expand section"}
@@ -189,7 +189,7 @@ const SectionItem = ({
               )}
             </button>
 
-            <div className={`mr-2 text-${isExpanded ? "blue" : "gray"}-500`}>
+            <div className={`mr-2 text-${isExpanded ? "primary" : "primary"}-500`}>
               {isExpanded ? (
                 <FolderOpen className="w-4 h-4" />
               ) : (
@@ -206,7 +206,7 @@ const SectionItem = ({
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      className="w-full px-3 py-1.5 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-1.5 bg-light border border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       autoFocus
                       disabled={isSubmitting}
                       placeholder="Section title"
@@ -219,7 +219,7 @@ const SectionItem = ({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md flex items-center gap-1 transition-colors"
+                      className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-800 dark:hover:text-green-100 rounded-md flex items-center gap-1 transition-colors"
                       title="Save changes"
                     >
                       {isSubmitting ? (
@@ -232,7 +232,7 @@ const SectionItem = ({
                       type="button"
                       onClick={handleCancelEditing}
                       disabled={isSubmitting}
-                      className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                      className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-800 dark:hover:text-red-100 rounded-md transition-colors"
                       title="Cancel"
                     >
                       <X className="w-4 h-4" />
@@ -257,14 +257,14 @@ const SectionItem = ({
             >
               <button
                 onClick={handleStartEditing}
-                className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                className="p-1.5 text-gray-500 hover:text-primary hover:bg-primary-light rounded-md transition-colors"
                 title="Edit section"
               >
                 <Pencil className="w-4 h-4" />
               </button>
               <button
                 onClick={handleDeleteSection}
-                className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-600 dark:hover:text-red-100  rounded-md transition-colors"
                 title="Delete section"
                 disabled={isSubmitting}
               >
@@ -281,7 +281,7 @@ const SectionItem = ({
 
       {/* Lecture List (Expanded View) */}
       {isExpanded && (
-        <div className="border-t pt-2 pb-3 px-3 bg-gray-50/50 rounded-b-lg">
+        <div className="border border-t-0 pt-2 pb-3 px-3 rounded-b-lg">
           <div className="ml-7">
             <LectureList
               sectionId={section._id}

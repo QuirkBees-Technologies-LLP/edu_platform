@@ -83,11 +83,11 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                 if (selectedRow?._id) {
                     await updateAdminAcademyCategory({data: formData, id: selectedRow?._id}).unwrap();
                     refetch();
-                    toast.success("Educator updated successfully!");
+                    toast.success("Academy category updated successfully!");
                 } else {
                     await createAdminAcademyCategory(formData).unwrap();
                     refetch();
-                    toast.success("Educator created successfully!");
+                    toast.success("Academy category created successfully!");
                 }
                 formik.resetForm();
                 handleCloseCreate();
@@ -127,7 +127,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
             <DialogContent className="p-5 max-w-[600px]" ref={ref}>
                 <DialogHeader>
-                    <DialogTitle>{selectedRow?._id ? "Update Educator" : "Create Educator"}</DialogTitle>
+                    <DialogTitle>{selectedRow?._id ? "Update Academy Category" : "Create Academy Category"}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-5 px-0 py-5">
                     <div className="grid grid-cols-12 gap-4">

@@ -1,27 +1,52 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
 import { X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 // Store
 import {
   createNewCourse,
   updateExistingCourse,
+  fetchCourses
 } from "@/store/reducer/courseSlice";
 
 // Components
 import CourseForm from "./forms/CourseForm";
 import { useAuthContext } from "../../../../../../auth/useAuthContext";
 
-const CreateCourseModal = ({ isOpen, onClose, onSubmit, initialData }) => {
+const CreateCourseModal = forwardRef(({ isOpen, onClose, onSubmit, initialData }, ref) => {
   const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { auth } = useAuthContext();
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (data) => {
+  // Fetch courses on mount and when token changes
+  const fetchAllCourses = async () => {
+    if (auth?.token) {
+      console.log("Fetching courses with token:", auth.token);
+      dispatch(
+        fetchCourses({
+          params: {
+            isDeleted: false,
+          },
+          token: auth.token,
+        })
+      )
+        .unwrap()
+        .then((response) => {
+          console.log("Courses fetched successfully:", response);
+        })
+        .catch((error) => {
+          console.error("Error fetching courses:", error);
+        });
+    } else {
+      console.log("No auth token available");
+    }
+  }
 
+  const handleSubmit = async (data) => {
     setIsSubmitting(true);
     try {
       if (initialData) {
@@ -34,6 +59,7 @@ const CreateCourseModal = ({ isOpen, onClose, onSubmit, initialData }) => {
           })
         ).unwrap();
         toast.success("Course updated successfully!");
+        await fetchAllCourses();
       } else {
         // Creation mode
         await dispatch(
@@ -55,28 +81,21 @@ const CreateCourseModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
-            {initialData ? "Edit Course" : "Create New Course"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
+    <Dialog open={isOpen} onOpenChange={() => {
+      onClose();
+    }}>
+      <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
+        <DialogHeader>
+          <DialogTitle>{initialData ? "Edit Course" : "Create New Course"}</DialogTitle>
+        </DialogHeader>
         <CourseForm
           onSubmit={handleSubmit}
           initialData={initialData}
           isSubmitting={isSubmitting}
         />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog >
   );
-};
+});
 
 export default CreateCourseModal;

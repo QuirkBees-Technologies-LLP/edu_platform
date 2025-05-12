@@ -47,6 +47,8 @@ const DraggableCourseCard = ({
     tier,
     instructor,
   } = course;
+  console.log(course, "course");
+  
 
   // Fallback image URL
   const fallbackImage =
@@ -121,7 +123,7 @@ const DraggableCourseCard = ({
   return (
     <div
       ref={ref}
-      className={`relative bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 ${
+      className={`relative rounded-xl shadow-md overflow-hidden transition-all duration-300 ${
         isDragging
           ? "opacity-50 scale-105 rotate-1 shadow-xl"
           : isHovered
@@ -160,7 +162,7 @@ const DraggableCourseCard = ({
           >
             {isHovered && (
               <div className="absolute bottom-4 right-4 p-2 bg-white bg-opacity-90 rounded-full shadow-md animate-fadeIn">
-                <Eye className="w-5 h-5 text-blue-600" />
+                <Eye className="w-5 h-5 text-primary" />
               </div>
             )}
           </div>
@@ -168,7 +170,7 @@ const DraggableCourseCard = ({
           {/* Drag handle that appears on hover */}
           {isHovered && (
             <div
-              className="absolute top-4 left-4 p-2 bg-white rounded-full shadow-md cursor-move animate-fadeIn"
+              className="absolute -top-4 left-44 p-2 bg-white rounded-xl shadow-md cursor-move animate-fadeIn rotate-90 py-5 px-0"
               role="button"
               aria-label="Drag handle"
             >
@@ -200,7 +202,7 @@ const DraggableCourseCard = ({
 
         {/** Content Section */}
         <div className="p-5">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">
             {title}
           </h3>
           <p className="text-sm text-gray-600 mb-4 line-clamp-2">
@@ -210,8 +212,8 @@ const DraggableCourseCard = ({
           {/* Course metadata with improved styling */}
           <div className="flex items-center gap-3 text-sm">
             <div className="flex items-center gap-1.5 text-blue-600">
-              <Book className="w-4 h-4" />
-              <span className="font-medium">{category?.name || "Uncategorized"}</span>
+              <Book className="w-4 h-4 text-primary" />
+              <span className="font-medium text-primary">{category?.name || "Uncategorized"}</span>
             </div>
 
             <div className="h-4 w-px bg-gray-300"></div>
@@ -231,7 +233,7 @@ const DraggableCourseCard = ({
         >
           <button
             onClick={handleEdit}
-            className="p-2.5 bg-blue-500 rounded-full shadow-lg transition-all duration-200 hover:bg-blue-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
+            className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
             title="Edit course"
             aria-label="Edit course"
           >
@@ -251,7 +253,7 @@ const DraggableCourseCard = ({
 
       {/* Bottom border indicator */}
       <div
-        className={`h-1 w-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-opacity duration-300 ${
+        className={`h-1 w-full bg-gradient-to-r bg-primary to-indigo-600 transition-opacity duration-300 ${
           isHovered ? "opacity-100" : "opacity-0"
         }`}
       ></div>

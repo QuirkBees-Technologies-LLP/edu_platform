@@ -1,9 +1,13 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
 import { useGetEducatorAcademyCategoryQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { da } from "@faker-js/faker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox'; // Adjust import path
+
 
 // Categories for the course
 const COURSE_CATEGORIES = [
@@ -36,8 +40,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const { data } = useGetEducatorAcademyCategoryQuery();
+  console.log(initialData, "initialData");
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -57,6 +63,12 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     },
   });
 
+  useEffect(() => {
+    if (initialData && data?.data) {
+      setValue("category", initialData.category?._id);
+    }
+  }, [initialData, data, setValue]);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -75,6 +87,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     setThumbnailPreview(null);
   };
 
+  const selectedTier = watch('tier');
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
@@ -87,7 +101,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         <input
           id="title"
           type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
           placeholder="Enter course title"
           {...register("title")}
         />
@@ -105,7 +119,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         </label>
         <textarea
           id="description"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+          className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm min-h-[100px]"
           placeholder="Enter course description"
           {...register("description")}
         />
@@ -123,7 +137,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           <div className="flex-1">
             <input
               type="url"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               placeholder="https://example.com/image.jpg"
               {...register("imageUrl", { onChange: handleUrlChange })}
             />
@@ -138,7 +152,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             />
             <label
               htmlFor="thumbnail-upload"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              className="flex cursor-pointer items-center px-3 h-[40px] py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-primary-light text-primary"
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload
@@ -169,23 +183,18 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           >
             Category
           </label>
-          <select
-            id="category"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            {...register("category")}
-          >
-            <option value="">Select a category</option>
-            {/* {COURSE_CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))} */}
-            {data?.data?.map((item) => (
-              <option key={item._id} value={item._id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
+          <Select defaultValue={initialData?.category?._id} onValueChange={(value) => setValue("category", value)} className={`form-control input input-md w-full ${errors.category && "border border-danger"}`}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              {data?.data?.map((item) => (
+                <SelectItem key={item._id} value={item._id}>
+                  {item.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {errors.category && (
             <p className="text-sm text-red-600">{errors.category.message}</p>
           )}
@@ -198,14 +207,15 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           >
             Course Tier
           </label>
-          <select
-            id="tier"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            {...register("tier")}
-          >
-            <option value="FREE">Free</option>
-            <option value="PRO">Pro</option>
-          </select>
+          <Select defaultValue={selectedTier} onValueChange={(value) => setValue("tier", value)} className={`form-control input input-md w-full ${errors.tier && "border border-danger"}`}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FREE">Free</SelectItem>
+              <SelectItem value="PRO">Pro</SelectItem>
+            </SelectContent>
+          </Select>
           {errors.tier && (
             <p className="text-sm text-red-600">{errors.tier.message}</p>
           )}
@@ -224,11 +234,16 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             Make this course available to students
           </p>
         </div>
-        <input
-          id="published"
-          type="checkbox"
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          {...register("published")}
+        <Controller
+          name="published"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="published"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
       </div>
 
@@ -244,11 +259,16 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             Highlight this course on the homepage
           </p>
         </div>
-        <input
-          id="isFeatured"
-          type="checkbox"
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          {...register("isFeatured")}
+        <Controller
+          name="isFeatured"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="isFeatured"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
       </div>
 
@@ -257,14 +277,14 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           type="button"
           onClick={() => reset()}
           disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-light text-gray-700 hover:bg-gray-50 dark:hover:bg-dark"
         >
           Reset
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex items-center px-3 h-[40px] py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-primary-light text-primary hover:bg-primary hover:text-white"
         >
           {isLoading && (
             <Loader2 className="inline-block mr-2 h-4 w-4 animate-spin" />

@@ -220,7 +220,7 @@ const LectureContent = ({
       case "TEXT":
         return (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-blue-700">
+            <div className="flex items-center gap-2 text-primary">
               <FileText className="w-4 h-4" />
               <Label htmlFor="content" className="font-medium">
                 Text Content
@@ -237,8 +237,8 @@ const LectureContent = ({
         return (
           <div className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-purple-700">
-                <Video className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-primary">
+                <Video className="w-4 h-4 text-primary" />
                 <Label htmlFor="videoUrl" className="font-medium">
                   Video URL
                 </Label>
@@ -249,17 +249,17 @@ const LectureContent = ({
                 value={formData.content}
                 onChange={handleVideoUrlChange}
                 placeholder="Enter video URL (YouTube, Vimeo, etc.)"
-                className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                className="form-control input input-md w-full"
               />
               {formData.content && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="mt-2 border-purple-200 text-purple-700 hover:bg-purple-50"
+                  className="mt-2 hover:bg-primary hover:text-white [&>*]:hover:text-white bg-none"
                   onClick={() => setShowPreview(!showPreview)}
                 >
-                  <Eye className="h-4 w-4 mr-2" />
+                  <Eye className="h-4 w-4 mr-2 text-primary" />
                   {showPreview ? "Hide Preview" : "Show Preview"}
                 </Button>
               )}
@@ -285,9 +285,9 @@ const LectureContent = ({
               </AnimatePresence>
             </div>
             <div className="space-y-3 pt-3 border-t border-gray-100">
-              <div className="flex items-center gap-2 text-purple-700">
-                <Upload className="w-4 h-4" />
-                <Label className="font-medium">Upload Video</Label>
+              <div className="flex items-center gap-2">
+                <Upload className="w-4 h-4 text-primary" />
+                <Label className="font-medium text-primary">Upload Video</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Input
@@ -299,9 +299,9 @@ const LectureContent = ({
                 />
                 <Label
                   htmlFor="videoUpload"
-                  className="flex items-center gap-2 cursor-pointer border border-purple-200 rounded-md px-4 py-2 hover:bg-purple-50 transition-colors"
+                  className="text-sm flex items-center gap-2 cursor-pointer border [&>*]:hover:text-white rounded-md px-4 py-2 hover:bg-primary hover:text-white transition-colors"
                 >
-                  <Upload className="h-4 w-4 text-purple-500" />
+                  <Upload className="h-4 w-4 text-primary" />
                   <span>Choose Video File</span>
                 </Label>
               </div>
@@ -320,31 +320,31 @@ const LectureContent = ({
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-          <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-blue-500" />
+              <FileText className="w-4 h-4 text-primary" />
               Title
             </h3>
-            <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
+            <p className="text-gray-700 p-2 rounded-md">
               {lecture.title}
             </p>
           </div>
 
-          <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-blue-500" />
+              <FileText className="w-4 h-4 text-primary" />
               Description
             </h3>
             {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} />: "No description provided"}
           </div>
         </div>
 
-        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
             {lecture.type === "VIDEO" ? (
-              <Video className="w-4 h-4 text-purple-500" />
+              <Video className="w-4 h-4 text-primary" />
             ) : (
-              <FileText className="w-4 h-4 text-blue-500" />
+              <FileText className="w-4 h-4 text-primary" />
             )}
             {lecture.type === "VIDEO" ? "Video Content" : "Text Content"}
           </h3>
@@ -360,14 +360,14 @@ const LectureContent = ({
               </div>
             ) : (
               <div
-                className="p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none"
+                className="p-4  border border-gray-200 rounded-lg prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: lecture.content }}
               />
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
               <Eye className="w-4 h-4 text-green-500" />
@@ -405,17 +405,17 @@ const LectureContent = ({
   const renderSettings = () => {
     return (
       <div className="space-y-6">
-        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="space-y-3  p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-blue-500" />
+            <Clock className="w-4 h-4 text-primary" />
             Lecture Order
           </h3>
-          <p className="text-gray-700 p-2 bg-gray-50 rounded-md">
+          <p className="text-gray-700 p-2  rounded-md">
             {lecture.order || "0"} (Position in section)
           </p>
         </div>
 
-        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-4  p-4 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
               <Eye className="w-4 h-4 text-green-500" />
@@ -447,26 +447,26 @@ const LectureContent = ({
           </div>
         </div>
 
-        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="space-y-3  p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-blue-500" />
+            <AlertCircle className="w-4 h-4 text-primary" />
             Lecture Type
           </h3>
           <div className="flex items-center gap-2">
             <span
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture.type === "VIDEO"
-                ? "bg-purple-100 text-purple-800"
-                : "bg-blue-100 text-blue-800"
+                ? "bg-primary-light text-primary"
+                : "bg-primary-light text-primary"
                 }`}
             >
               {lecture.type === "VIDEO" ? (
                 <>
-                  <Video className="w-3.5 h-3.5" />
+                  <Video className="w-3.5 h-3.5 text-primary" />
                   Video
                 </>
               ) : (
                 <>
-                  <FileText className="w-3.5 h-3.5" />
+                  <FileText className="w-3.5 h-3.5 text-primary" />
                   Text
                 </>
               )}
@@ -478,15 +478,15 @@ const LectureContent = ({
   };
 
   return (
-    <div className="space-y-6 p-4 max-w-4xl mx-auto">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between  p-4 rounded-lg border border-gray-200 shadow-sm">
         <div>
           <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             {lecture.type === "VIDEO" ? (
-              <Video className="w-5 h-5 text-purple-500" />
+              <Video className="w-5 h-5 text-primary" />
             ) : (
-              <FileText className="w-5 h-5 text-blue-500" />
+              <FileText className="w-5 h-5 text-primary" />
             )}
             {lecture.title}
           </h2>
@@ -496,8 +496,8 @@ const LectureContent = ({
           variant={isEditing ? "outline" : "default"}
           className={
             isEditing
-              ? "border-red-200 text-red-600 hover:bg-red-50"
-              : "bg-blue-600 hover:bg-blue-700"
+              ? "btn border-red-600 text-red-600"
+              : "bg-primary hover:bg-primary"
           }
           onClick={() => {
             setIsEditing(!isEditing);
@@ -528,11 +528,11 @@ const LectureContent = ({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+            <div className=" p-6 rounded-lg border border-gray-200 shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-blue-700">
+                    <div className="flex items-center gap-2 text-primary">
                       <FileText className="w-4 h-4" />
                       <Label htmlFor="title" className="font-medium">
                         Title
@@ -545,12 +545,12 @@ const LectureContent = ({
                       onChange={handleInputChange}
                       placeholder="Lecture title"
                       required
-                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+                      className="border-primary focus:border-primary focus:ring-primary"
                     />
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-blue-700">
+                    <div className="flex items-center gap-2 text-primary">
                       <FileText className="w-4 h-4" />
                       <Label htmlFor="description" className="font-medium">
                         Description
@@ -576,7 +576,7 @@ const LectureContent = ({
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-blue-700">
+                  <div className="flex items-center gap-2 text-primary">
                     <FileText className="w-4 h-4" />
                     <Label htmlFor="type" className="font-medium">
                       Content Type
@@ -586,7 +586,7 @@ const LectureContent = ({
                     value={formData.type}
                     onValueChange={handleSelectChange}
                   >
-                    <SelectTrigger className="border-blue-200 focus:border-blue-400 focus:ring-blue-400">
+                    <SelectTrigger className="border-primary focus:border-primary focus:ring-primary">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -595,13 +595,13 @@ const LectureContent = ({
                         className="flex items-center gap-2"
                       >
                         <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-blue-500" />
+                          <FileText className="w-4 h-4 text-primary" />
                           <span>Text</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="VIDEO">
                         <div className="flex items-center gap-2">
-                          <Video className="w-4 h-4 text-purple-500" />
+                          <Video className="w-4 h-4 text-primary" />
                           <span>Video</span>
                         </div>
                       </SelectItem>
@@ -620,7 +620,7 @@ const LectureContent = ({
                     onCheckedChange={(checked) =>
                       setFormData((prev) => ({ ...prev, preview: checked }))
                     }
-                    className="data-[state=checked]:bg-green-600"
+                    className="data-[state=checked]:bg-primary"
                   />
                   <div>
                     <Label htmlFor="preview" className="font-medium">
@@ -641,7 +641,7 @@ const LectureContent = ({
                       setIsEditing(false);
                       setShowPreview(false);
                     }}
-                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    className="border-red-900 text-red-600 hover:bg-light"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Cancel
@@ -649,7 +649,7 @@ const LectureContent = ({
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-primary hover:bg-primary"
                   >
                     {isLoading ? (
                       <>
@@ -675,14 +675,14 @@ const LectureContent = ({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className=" rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               {/* Tabs */}
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
                   className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
-                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
                     }`}
                 >
                   Content
@@ -690,8 +690,8 @@ const LectureContent = ({
                 <button
                   onClick={() => setActiveTab("settings")}
                   className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "settings"
-                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
                     }`}
                 >
                   Settings

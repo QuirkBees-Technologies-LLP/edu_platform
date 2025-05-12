@@ -9,11 +9,14 @@ import TagInput from '../../../components/ui/tagInput';
 import * as Yup from "yup";
 import { useCall } from '@stream-io/video-react-sdk';
 import RichTextEditor from '../../../components/ui/rich-editor';
+import { useGetEducatorAcademyCategoryQuery } from '../../../store/api/educator/educatorAcademyCategoryApiSlice';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const UpdateLiveSession = ({ selectedRow }) => {
     const { auth } = useAuthContext();
     const educatorId = auth?.user?._id ?? null;
     const call = useCall();
+    const { data } = useGetEducatorAcademyCategoryQuery();
 
     const initialValues = {
         title: "",
@@ -63,19 +66,24 @@ const UpdateLiveSession = ({ selectedRow }) => {
     });
 
     useEffect(() => {
-        if (call?.state?.custom) {
+        if (call?.state?.custom && data?.data) { // Check if data is available
             const custom = call.state.custom;
-console.log(custom, "custom");
+            const categoryItem = data.data.find((item) => item._id === custom.category);
+            const categoryId = categoryItem?._id;
 
-            formik.setValues({
-                title: custom.title || '',
-                description: custom.description || '',
-                tags: custom.tags || [],
-                category: custom.category || '',
-                userId: educatorId || '',
-            });
+            console.log("Fetched Category ID:", categoryId); // Debugging log
+
+            if (categoryId) {
+                formik.setValues({
+                    title: custom.title || '',
+                    description: custom.description || '',
+                    tags: custom.tags || [],
+                    category: categoryId, // Directly use the found ID
+                    userId: educatorId || '',
+                });
+            }
         }
-    }, [call?.state?.custom, educatorId]);
+    }, [call?.state?.custom, educatorId, data]);
     console.log(formik, "formik");
 
     return (
@@ -114,20 +122,35 @@ console.log(custom, "custom");
                 </div>
                 <div className="col-span-6">
                     <div className="flex flex-col gap-1">
-                        <label className="form-label text-gray-900 gap-1">Category<span className="text-danger">*</span></label>
-                        <input
-                            type="text"
-                            placeholder="Enter category"
-                            autoComplete="off"
-                            className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category ? "border border-danger" : ""}`}
-                            {...formik.getFieldProps("category")}
-                        />
-                        {formik.touched.category && formik.errors.category && (
-                            <span role="alert" className="text-danger text-xs mt-1">{formik.errors.category}</span>
-                        )}
+                        <div className="flex flex-col gap-1">
+                            <label className="form-label text-gray-900 gap-1">Academy Category<span className="text-danger">
+                                *
+                            </span></label>
+                            <Select
+                                value={formik.values.category}
+                                onValueChange={(value) => formik.setFieldValue('category', value)}
+                                className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category ? "border border-danger" : ""
+                                    }`}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {data?.data?.map((item) => (
+                                        <SelectItem key={item._id} value={item._id}>
+                                            {item.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {formik.touched.category && formik.errors.category && (
+                                <span role="alert" className="text-danger text-xs mt-1">
+                                    {formik.errors.category}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
-
                 <div className="col-span-6">
                     <div className="flex flex-col gap-1 tag-input">
                         <label className="form-label text-gray-900 gap-1">Tags<span className="text-danger">*</span></label>

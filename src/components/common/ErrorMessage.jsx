@@ -3,7 +3,7 @@ import { AlertCircle, RefreshCw, X } from "lucide-react";
 const ErrorMessage = ({ message, onRetry, onDismiss }) => {
   return (
     <div className="flex flex-col items-center justify-center w-full h-full min-h-[200px] p-4">
-      <div className="flex flex-col items-center max-w-md p-6 bg-white rounded-lg shadow-md">
+      <div className="flex flex-col items-center max-w-md p-6 bg-light rounded-lg shadow-md">
         <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-red-100">
           <AlertCircle className="w-6 h-6 text-red-500" />
         </div>

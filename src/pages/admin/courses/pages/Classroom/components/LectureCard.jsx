@@ -59,12 +59,12 @@ const LectureCard = ({ lectureId, courseId, handleViewLecture }) => {
 
   // Obtener icono basado en el tipo de lección
   const getLectureTypeIcon = () => {
-    if (!lecture) return <FileText className="w-5 h-5 text-gray-400" />;
+    if (!lecture) return <FileText className="w-5 h-5 text-primary" />;
 
     if (lecture.type === "video" || lecture.type === "VIDEO") {
-      return <Video className="w-5 h-5 text-blue-400" />;
+      return <Video className="w-5 h-5 text-primary" />;
     } else {
-      return <FileText className="w-5 h-5 text-purple-400" />;
+      return <FileText className="w-5 h-5 text-primary" />;
     }
   };
 
@@ -110,7 +110,7 @@ const LectureCard = ({ lectureId, courseId, handleViewLecture }) => {
   // Si hay un error, muestra un mensaje de error
   if (error) {
     return (
-      <div className="h-full bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 p-4 flex flex-col items-center justify-center">
+      <div className="h-full bg-light rounded-xl overflow-hidden shadow-sm border border-gray-100 p-4 flex flex-col items-center justify-center">
         <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
         <p className="text-sm text-gray-700 font-medium">
           Failed to load lecture
@@ -138,7 +138,7 @@ const LectureCard = ({ lectureId, courseId, handleViewLecture }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative flex flex-col h-full bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100">
+      <div className="relative flex flex-col h-full rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100">
         {/* Imagen superior con altura mayor */}
         <div className="relative aspect-[16/9] overflow-hidden">
           {/* Imagen con fallback */}
@@ -246,7 +246,7 @@ const LectureCard = ({ lectureId, courseId, handleViewLecture }) => {
               >
                 <button
                   onClick={() => handleViewLecture(lecture)}
-                  className="bg-indigo-600 text-white py-0.5 px-2 rounded-full flex items-center gap-1 font-medium"
+                  className="bg-primary text-white py-0.5 px-2 rounded-full flex items-center gap-1 font-medium"
                 >
                   <span>View</span>
                   <ChevronRight className="w-3 h-3" />

@@ -49,7 +49,7 @@ const TagInput = ({ value, onChange, touched, error }) => {
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder="Add a tag"
-        className="flex-1 border-none focus:ring-0 focus:outline-none text-sm"
+        className="flex-1 border-none focus:ring-0 focus:outline-none text-sm dark:bg-coal-300"
       />
     </div>
   );
