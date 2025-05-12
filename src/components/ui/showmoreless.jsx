@@ -28,7 +28,7 @@ const ShowMoreLess = ({
       {isLong && (
         <span
           onClick={() => setExpanded(!expanded)}
-          className="text-blue-500 cursor-pointer hover:underline"
+          className="text-primary cursor-pointer hover:underline"
         >
           {expanded ? showLessText : showMoreText}
         </span>

@@ -122,9 +122,9 @@ const LectureList = ({
   const getLectureIcon = (type) => {
     switch (type) {
       case "VIDEO":
-        return <Video className="w-4 h-4 text-purple-500" />;
+        return <Video className="w-4 h-4 text-primary" />;
       case "TEXT":
-        return <FileText className="w-4 h-4 text-blue-500" />;
+        return <FileText className="w-4 h-4 text-primary" />;
       default:
         return <Type className="w-4 h-4 text-gray-500" />;
     }
@@ -135,12 +135,12 @@ const LectureList = ({
       {isLoading ? (
         <div className="flex items-center justify-center py-6">
           <div className="flex flex-col items-center">
-            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin mb-2" />
             <p className="text-sm text-gray-500">Loading lectures...</p>
           </div>
         </div>
       ) : lectures.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-6 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200">
+        <div className="flex flex-col items-center justify-center py-6 text-center rounded-lg border border-dashed border-gray-200">
           <div className="bg-gray-100 p-3 rounded-full mb-2">
             <BookOpen className="w-5 h-5 text-gray-400" />
           </div>
@@ -150,7 +150,7 @@ const LectureList = ({
           </p>
           <button
             onClick={() => setIsCreatingLecture(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary-light text-primary hover:bg-primary-light rounded-md transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             Add First Lecture
@@ -172,8 +172,8 @@ const LectureList = ({
                 <div
                   className={`flex items-center gap-2 p-2.5 rounded-md cursor-pointer transition-all ${
                     selectedLectureId === lecture._id
-                      ? "bg-blue-50 border-l-4 border-l-blue-500"
-                      : "bg-white hover:bg-gray-50 border-l-4 border-l-transparent"
+                      ? "bg-primary-light border-l-4 border-l-primary"
+                      : "hover:bg-primary-light border-l-4 border-l-transparent"
                   }`}
                   onClick={() => handleLectureSelect(lecture)}
                 >
@@ -210,7 +210,7 @@ const LectureList = ({
 
                   {/* Preview indicator */}
                   {lecture.preview && (
-                    <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded">
+                    <span className="px-1.5 py-0.5 bg-light text-primary text-xs rounded">
                       Preview
                     </span>
                   )}
@@ -225,7 +225,7 @@ const LectureList = ({
                     }`}
                   >
                     <button
-                      className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
+                      className="p-1.5 text-gray-700 hover:text-primary rounded-md transition-colors"
                       title="Edit lecture"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -240,7 +240,7 @@ const LectureList = ({
                         handleDeleteLecture(lecture._id);
                       }}
                       disabled={deleteLoading === lecture._id}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+                      className="p-1.5 text-gray-700 hover:text-red-500 rounded-md transition-colors disabled:opacity-50"
                       title="Delete lecture"
                     >
                       {deleteLoading === lecture._id ? (
@@ -253,7 +253,7 @@ const LectureList = ({
 
                   {/* Selected indicator */}
                   {selectedLectureId === lecture._id && (
-                    <div className="text-blue-500">
+                    <div className="text-primary">
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   )}
@@ -274,7 +274,7 @@ const LectureList = ({
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="border border-blue-100 rounded-md bg-blue-50 p-3 mb-2">
+              <div className="border border-gray-200 rounded-md bg-light p-3 mb-2">
                 <CreateLectureForm
                   sectionId={sectionId}
                   onCancel={() => setIsCreatingLecture(false)}
@@ -290,7 +290,7 @@ const LectureList = ({
             >
               <button
                 onClick={() => setIsCreatingLecture(true)}
-                className="flex items-center gap-2 w-full py-2 px-3 text-sm text-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-md transition-colors border border-dashed border-gray-200"
+                className="flex items-center gap-2 w-full py-2 px-3 text-sm text-center justify-center hover:bg-gray-100 text-gray-700 rounded-md transition-colors border border-dashed border-gray-200"
                 title="Add new lecture"
               >
                 <Plus className="w-4 h-4" />

@@ -116,7 +116,7 @@ const Content = () => {
           </nav>
 
           {/* Main Content */}
-          <main className="max-w-7xl pt-8">
+          <main className="pt-8">
             {renderContent()}
           </main>
         </div>

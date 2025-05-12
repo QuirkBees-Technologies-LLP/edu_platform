@@ -3,6 +3,7 @@ import { Copy, PhoneOff, Podcast, Radio, Route, RouteOff } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { DefaultTooltip } from '@/components';
 import { useNavigate } from 'react-router';
+import RecordingControls from './RecordingControls';
 
 
 const LiveSessionPlayer = ({ client, callId, token, rtmp_stream_key, rtmp_url, setIsTooltipOpen, isTooltipOpen }) => {
@@ -168,6 +169,7 @@ console.log(call?.state?.backstage, "call1234");
                             </div>
                         </div>}
                         <div className="flex justify-center gap-3 mt-10">
+                            <RecordingControls call={call}/>
                             <button type="button" onClick={async () => {
                                 try {
                                     await call.endCall();

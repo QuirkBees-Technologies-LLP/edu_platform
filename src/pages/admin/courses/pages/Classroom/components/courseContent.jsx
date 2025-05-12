@@ -47,11 +47,11 @@ const CourseContent = ({ course, handleBack, handleViewLecture }) => {
   }, [listOfSections]);
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-16">
+    <div className=" min-h-screen pb-16">
       <HeroSectionCourse course={course} />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <CourseContentSideBar
             course={course}
@@ -72,7 +72,7 @@ const CourseContent = ({ course, handleBack, handleViewLecture }) => {
                 {listOfSections.map((section, sectionIndex) => (
                   <div
                     key={section._id || sectionIndex}
-                    className="bg-white rounded-xl shadow-sm overflow-hidden"
+                    className="rounded-xl shadow-sm overflow-hidden"
                   >
                     <div className="p-6 border-b border-gray-100">
                       <h2 className="text-xl font-bold text-gray-900 mb-1">

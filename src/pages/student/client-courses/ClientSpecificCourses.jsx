@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Container } from '@/components/container';
 import { Play } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useGetClientSingleCourseSectionQuery } from '../../../store/api/client/clientCoursesApiSlice';
 import ShowMoreLess from '../../../components/ui/showmoreless';
 import Loader from '../../../components/ui/loader';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
 
 const ClientSpecificCourses = () => {
     const { id } = useParams();
@@ -51,7 +52,20 @@ const ClientSpecificCourses = () => {
 
     return (
         <div>
-            {(!isLoading && data && (!sections || sections.length === 0) && !currentLecture)  ? (
+            <Container>
+                <Breadcrumb className="mb-5">
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <Link to="/video-library" className='hover:text-primary'>Courses</Link>
+                            <BreadcrumbSeparator />
+                        </BreadcrumbItem>
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>{sections?.[0]?.title || 'No sections'}</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
+            </Container>
+            {(!isLoading && data && (!sections || sections.length === 0) && !currentLecture) ? (
                 <div className="flex items-center justify-center h-64">
                     <div className="text-center">
                         <h3 className="text-xl font-medium text-gray-900">No sections available</h3>
@@ -77,7 +91,7 @@ const ClientSpecificCourses = () => {
                                     ></iframe>
                                 </div>
                             ) : currentLecture?.type === 'TEXT' ? (
-                                <div className="bg-white p-6 rounded-lg shadow mb-4">
+                                <div className="bg-light p-6 rounded-lg shadow mb-4">
                                     <h2 className="text-2xl font-bold mb-4">{currentLecture.title}</h2>
                                     <div
                                         className="prose max-w-none"
@@ -119,7 +133,7 @@ const ClientSpecificCourses = () => {
                                         <div className="flex flex-col">
                                             {section.lectures.map((lecture, index) => (
                                                 <div
-                                                    className={`rounded-lg p-3 mb-2 cursor-pointer transition-all ${currentLecture?._id === lecture._id ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'}`}
+                                                    className={`rounded-lg p-3 mb-2 cursor-pointer transition-all ${currentLecture?._id === lecture._id ? 'bg-light border border-primary' : 'hover:bg-light'}`}
                                                     key={lecture._id}
                                                     onClick={() => handleLectureClick(lecture)}
                                                 >
@@ -154,7 +168,7 @@ const ClientSpecificCourses = () => {
                                                                     {lecture.type}
                                                                 </p>
                                                                 {lecture.preview && (
-                                                                    <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                                                                    <span className="text-xs bg-primary-light text-primary px-2 py-0.5 rounded">
                                                                         Preview
                                                                     </span>
                                                                 )}

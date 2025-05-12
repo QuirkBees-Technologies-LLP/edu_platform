@@ -70,7 +70,7 @@ const ClassroomContent = () => {
               </button>
               <div>
                 <h1 className="text-xl font-bold text-gray-800 flex items-center">
-                  <BookOpen className="w-5 h-5 mr-2 text-indigo-600" />
+                  <BookOpen className="w-5 h-5 mr-2 text-primary" />
                   {currentCourse?.title || "Curso seleccionado"}
                 </h1>
                 {currentCourse?.category && (

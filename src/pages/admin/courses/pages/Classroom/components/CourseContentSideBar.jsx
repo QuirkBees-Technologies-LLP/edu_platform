@@ -27,17 +27,17 @@ const LectureListItem = ({ lecture, isActive, onClick, handleViewLecture }) => {
       }}
       className={`
         flex items-center justify-between py-2 px-3 rounded-md cursor-pointer
-        transition-all duration-200 hover:bg-gray-50
-        ${isActive ? "bg-indigo-50 border-l-2 border-indigo-500" : ""}
+        transition-all duration-200 hover:bg-primary [&_.text-gray-700]:hover:text-white [&_.text-primary]:hover:text-white
+        ${isActive ? "bg-primary-light border-l-2 border-primary" : ""}
       `}
     >
       <div className="flex items-center gap-2 flex-1 min-w-0">
         {isActive ? (
-          <Play className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+          <Play className="w-4 h-4 text-primary flex-shrink-0" />
         ) : isVideo ? (
-          <Video className="w-4 h-4 text-blue-500 flex-shrink-0" />
+          <Video className="w-4 h-4 text-primary flex-shrink-0" />
         ) : (
-          <FileText className="w-4 h-4 text-purple-500 flex-shrink-0" />
+          <FileText className="w-4 h-4 text-primary flex-shrink-0" />
         )}
         <span
           className={`text-sm truncate ${isCompleted ? "text-gray-400" : "text-gray-700"}`}
@@ -54,11 +54,11 @@ const LectureListItem = ({ lecture, isActive, onClick, handleViewLecture }) => {
       </div>
 
       {isCompleted && (
-        <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0 ml-2" />
+        <CheckCircle className="w-3.5 h-3.5 text-primary flex-shrink-0 ml-2" />
       )}
 
       {lecture.preview && (
-        <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full ml-2 flex-shrink-0">
+        <span className="text-xs bg-primary-light text-primary px-1.5 py-0.5 rounded-full ml-2 flex-shrink-0">
           Preview
         </span>
       )}
@@ -108,7 +108,7 @@ const CourseContentSideBar = ({
 
   return (
     <motion.div
-      className="lg:w-72 bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
+      className="lg:w-72 bg-light rounded-xl shadow-md overflow-hidden border border-gray-200"
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4 }}
@@ -116,16 +116,16 @@ const CourseContentSideBar = ({
       <div className="p-5 border-b border-gray-100">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors group"
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6 group"
         >
-          <div className="p-1.5 bg-gray-100 rounded-full group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+          <div className="p-1.5 bg-gray-100 rounded-full group-hover:bg-primary group-hover:text-white">
             <ChevronLeft className="w-4 h-4" />
           </div>
           <span className="font-medium">Back to Courses</span>
         </button>
 
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-indigo-500" />
+          <BookOpen className="w-5 h-5 text-primary" />
           {course.title}
         </h2>
 
@@ -140,7 +140,7 @@ const CourseContentSideBar = ({
         </div>
         <div className="flex justify-between items-center mb-4">
           <span className="text-xs text-gray-500">Course Progress</span>
-          <span className="text-xs font-medium text-indigo-600">
+          <span className="text-xs font-medium text-primary">
             {progress}%
           </span>
         </div>
@@ -152,13 +152,13 @@ const CourseContentSideBar = ({
             <div key={`${section._id || sectionIndex}`} className="py-2">
               <button
                 onClick={() => toggleSection(section._id)}
-                className="w-full flex items-center justify-between px-4 py-2 text-left rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center [&_.bg-light]:hover:bg-white [&_.bg-gray-100]:hover:bg-white [&_.lucide-chevron-right]:hover:text-white [&_.lucide-chevron-down]:hover:text-white justify-between px-4 py-2 text-left rounded-lg hover:bg-primary hover:text-white transition-colors"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="p-1 bg-indigo-100 rounded-md text-indigo-700">
+                  <div className="p-1 bg-light rounded-md text-primary">
                     <BookOpen className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-medium text-gray-800 truncate">
+                  <h3 className="text-sm font-medium truncate">
                     {section.title || `Section ${sectionIndex + 1}`}
                   </h3>
                 </div>
@@ -168,9 +168,9 @@ const CourseContentSideBar = ({
                     {section.lectures?.length || 0}
                   </span>
                   {activeSection === section._id ? (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    <ChevronDown className="w-4 h-4 text-gray-800" />
                   ) : (
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-800" />
                   )}
                 </div>
               </button>

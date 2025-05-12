@@ -18,6 +18,7 @@ const ClientViewLiveSession = () => {
   const { callId } = useParams();
   const { auth } = useAuthContext();
   const userId = auth?.user?._id ?? null;
+  const [recordings, setRecordings] = useState([]);
 
   // 1. Fetch token and schedule data (uncomment schedule logic)
   const [token, setToken] = useState(null);
@@ -76,6 +77,22 @@ const ClientViewLiveSession = () => {
     ? new Date(scheduleData.data.datetime) > new Date()
     : false;
 
+     const fetchRecordings = async () => {
+        try {
+          const response = await call.queryRecordings();
+          setRecordings(response.recordings);
+        } catch (err) {
+          console.error('Failed to fetch recordings:', err);
+        }
+      };
+    
+      useEffect(() => {
+        // Fetch recordings when the component mounts
+        fetchRecordings();
+      }, [call]);
+
+      console.log(call, "call");
+      
   return (
     <>
       {/* {isUpcoming ? (

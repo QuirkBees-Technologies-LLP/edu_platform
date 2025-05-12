@@ -23,6 +23,7 @@ const CourseList = ({ onCourseSelect }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+console.log(courses, "courses1");
 
   const handleUpdateCourse = async (courseData) => {
     if (!selectedCourse) return;
@@ -139,7 +140,7 @@ const CourseList = ({ onCourseSelect }) => {
             setSelectedCourse(null);
             setIsModalOpen(true);
           }}
-          className="bg-white rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300 hover:border-blue-500 cursor-pointer transition-colors duration-200"
+          className="rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300 hover:border-primary cursor-pointer transition-colors duration-200"
         >
           <div className="flex flex-col items-center justify-center h-full">
             <Plus className="w-12 h-12 text-gray-400 mb-4" />

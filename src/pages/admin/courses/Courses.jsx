@@ -27,9 +27,9 @@ const Courses = () => {
         ]}
       />
 
-      <Container>
+      <div className="container-fluid">
         <Content />
-      </Container>
+      </div>
     </div>
   );
 };

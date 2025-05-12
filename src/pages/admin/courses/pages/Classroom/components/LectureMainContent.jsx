@@ -92,9 +92,9 @@ const LectureMainContent = ({ currentLecture }) => {
           <div className="flex items-center gap-3 mt-2">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-sm">
               {isVideoType ? (
-                <Video className="w-4 h-4 text-blue-500" />
+                <Video className="w-4 h-4 text-primary" />
               ) : (
-                <FileText className="w-4 h-4 text-purple-500" />
+                <FileText className="w-4 h-4 text-primary" />
               )}
               <span>{isVideoType ? "Video" : "Text"}</span>
             </div>
@@ -110,8 +110,8 @@ const LectureMainContent = ({ currentLecture }) => {
       </div>
 
       {lectureContent.description && (
-        <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-5 mt-6">
-          <h3 className="text-sm font-medium text-indigo-800 mb-2">
+        <div className="bg-primary-light border border-primary-100 rounded-lg p-5 mt-6">
+          <h3 className="text-sm font-medium text-primary mb-2">
             Description
           </h3>
           {/* <p className="text-indigo-700">{lectureContent.description}</p> */}
@@ -120,7 +120,7 @@ const LectureMainContent = ({ currentLecture }) => {
       )}
 
       {isVideoType ? (
-        <div className="bg-gray-900 rounded-xl overflow-hidden mb-6 shadow-lg">
+        <div className="bg-light rounded-xl overflow-hidden mb-6 shadow-lg">
           <div className="aspect-video">
             {lectureContent.content ? (
               <ReactPlayer
@@ -147,7 +147,7 @@ const LectureMainContent = ({ currentLecture }) => {
                 }
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-white">
+              <div className="flex flex-col items-center justify-center h-full text-gray-900">
                 <Video className="w-16 h-16 text-gray-500 mb-4" />
                 <p>No video URL provided</p>
               </div>
@@ -155,7 +155,7 @@ const LectureMainContent = ({ currentLecture }) => {
           </div>
         </div>
       ) : (
-        <div className="prose prose-lg max-w-none bg-white p-8 rounded-xl shadow-sm border border-gray-200 prose-headings:text-gray-800 prose-a:text-indigo-600">
+        <div className="prose prose-lg max-w-noneNo video URL provided p-8 rounded-xl shadow-sm border border-gray-200 prose-headings:text-gray-800 prose-a:text-indigo-600">
           {lectureContent.content ? (
             <div
               dangerouslySetInnerHTML={{ __html: lectureContent.content }}

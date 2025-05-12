@@ -47,7 +47,7 @@ const CreateLectureForm = ({ sectionId, onCancel, onSuccess }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2 p-2 bg-gray-50 rounded"
+      className="flex flex-col gap-2 p-2 bg-light rounded"
     >
       <div className="flex items-center gap-2">
         <input
@@ -56,14 +56,14 @@ const CreateLectureForm = ({ sectionId, onCancel, onSuccess }) => {
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Enter lecture title"
-          className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-3 py-2 border rounded focus:outline-none bg-light focus:ring-2 focus:ring-primary w-full"
           autoFocus
           disabled={isSubmitting}
         />
         <button
           type="submit"
           disabled={isSubmitting}
-          className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full"
+          className="p-2 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900 rounded-full"
           title="Create lecture"
         >
           <Check className="w-4 h-4" />
@@ -72,7 +72,7 @@ const CreateLectureForm = ({ sectionId, onCancel, onSuccess }) => {
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
+          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900 rounded-full"
           title="Cancel"
         >
           <X className="w-4 h-4" />
