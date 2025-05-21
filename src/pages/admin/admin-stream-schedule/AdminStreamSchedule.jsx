@@ -238,7 +238,7 @@ const AdminStreamSchedule = ({ title = "Schedule Stream" }) => {
         <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create Live Session
+              Schedule a Stream
             </button>
           </div>
         </ToolbarActions>

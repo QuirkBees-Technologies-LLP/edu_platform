@@ -8,6 +8,9 @@ export const educatorRecordingApiSlice = createApi({
         getEducatorRecording: builder.query({
             query: ({ page = 1, limit = 10 }) => `/educator/recording?page=${page}&limit=${limit}`,
         }),
+        getEducatorRecordingByCallID: builder.query({
+            query: (id) => `/educator/recording?call_id=${id}`,
+        }),
         saveEducatorRecording: builder.mutation({
             query: (data) => ({
                 url: '/educator/recording',
@@ -17,14 +20,14 @@ export const educatorRecordingApiSlice = createApi({
             }),
         }),
         updateEducatorRecording: builder.mutation({
-            query: ({data, id}) => ({
-                url: `/educator/recording/${id}`,
+            query: (data) => ({
+                url: `/educator/recording/${data?.id}`,
                 method: 'PUT',
                 body: data,
-                formData: true
+                // formData: true
             }),
         }),
-        deleteEducatorStreamSchedule: builder.mutation({
+        deleteEducatorRecording: builder.mutation({
             query: (id) => ({
                 url: `/educator/recording/${id}`,
                 method: 'DELETE',
@@ -33,4 +36,4 @@ export const educatorRecordingApiSlice = createApi({
     }),
 });
 
-export const { useGetEducatorStreamScheduleQuery, useLazyGetEducatorStreamScheduleQuery, useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation, useDeleteEducatorStreamScheduleMutation } = educatorRecordingApiSlice;
+export const { useGetEducatorStreamScheduleQuery,useGetEducatorRecordingByCallIDQuery, useLazyGetEducatorRecordingQuery, useSaveEducatorRecordingMutation, useUpdateEducatorRecordingMutation, useDeleteEducatorRecordingMutation } = educatorRecordingApiSlice;

@@ -45,7 +45,7 @@ const AdminLiveSessionView = () => {
       
       // Check if already joined before joining
       if (!newCall.state.joined) {
-        await newCall.join();
+        await newCall.join({ role: 'admin' });
         await newCall.get();
       }
 

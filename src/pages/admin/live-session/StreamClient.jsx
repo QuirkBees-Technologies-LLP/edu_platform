@@ -57,7 +57,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                 <div className={`${isFullScreen ? isMdUp ? "w-[90%]" : "w-[100%]" : isMdUp ? "w-[63%]" : "w-[100%]"} transition-all duration-300 ease-in-out`}>
                     <div className="grid gap-5">
                         <div className="flex flex-col rounded-lg items-center justify-start text-white ">
-                            <div className="flex flex-col gap-12 bg-black rounded-xl text-center pb-6 w-full">
+                            <div className="live-stream-videos flex flex-col justify-center gap-12 bg-black rounded-xl text-center pb-6 w-full">
                                 <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
                                     {client && call && (
                                         <StreamVideo client={client}>
@@ -82,11 +82,22 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                                 </div>
                             </div>
                         </div>
-                        <div className="card border-2 mb-5">
-                            <div className="card-body py-7">
+                        <div>
+                            <Recording />
+                        </div>
+                        
+                    </div>
+                </div>
+                <div className={`${isFullScreen ? isMdUp ? "w-[8.3333%]" : "w-[100%]" : isMdUp ? "w-[35%]" : "w-[100%]"} transition-all duration-300 ease-in-out`}>
+                    <ChatContainer sessionToken={sessionToken} />
+                    {/* <div>
+                        <Recording />
+                    </div> */}
+                    <div className="card border-2 mt-5">
+                            <div className="card-body py-7 px-5">
                                 <div className="flex flex-col gap-4">
                                     <div className="grid grid-cols-12 gap-5 items-center">
-                                        <label className="col-span-3 text-md text-gray-900 font-semibold">Livestream ID</label>
+                                        <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">Live stream ID</label>
                                         <div className='col-span-9 '>
                                             <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.callId} placement="bottom" className="max-w-48">
                                                 <p onClick={() => handleCopy(callId, "callId")} className="cursor-pointer rounded-full border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
@@ -97,7 +108,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-12 gap-5 items-center">
-                                        <label className="col-span-3 text-md text-gray-900 font-semibold">RTMP URL</label>
+                                        <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">RTMP URL</label>
                                         <div className='col-span-9'>
                                             <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.rtmp_url} placement="bottom" className="max-w-48">
                                                 <p onClick={() => handleCopy(rtmp_url, "rtmp_url")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
@@ -109,7 +120,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                                     </div>
 
                                     <div className="grid grid-cols-12 gap-5 items-center">
-                                        <label className="col-span-3 text-md text-gray-900 font-semibold">RTMP Stream Key</label>
+                                        <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">RTMP Stream Key</label>
                                         <div className='col-span-9'>
                                             <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.rtmp_stream_key} placement="bottom" className="max-w-48">
                                                 <p onClick={() => handleCopy(rtmp_stream_key, "rtmp_stream_key")} className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">
@@ -122,13 +133,6 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div className={`${isFullScreen ? isMdUp ? "w-[8.3333%]" : "w-[100%]" : isMdUp ? "w-[35%]" : "w-[100%]"} transition-all duration-300 ease-in-out`}>
-                    <ChatContainer sessionToken={sessionToken} />
-                    <div>
-                        <Recording />
-                    </div>
                 </div>
             </div>
         </div>

@@ -1,3 +1,5 @@
+import { BookOpen, CalendarClock, CircleDot, Clapperboard, Layers, Lightbulb, PlayCircle, User } from "lucide-react";
+
 export const MENU_SIDEBAR = [
   {
     title: 'Ideas',
@@ -968,81 +970,86 @@ export const sideMenus = {
   admin: [
     {
       title: 'Educators',
-      icon: 'paper-plane',
+      icon: <User />,
       path: '/admin/educators'
     },
     {
       title: 'Ideas',
-      icon: 'paper-plane',
+      icon: <Lightbulb />,
       path: '/admin/ideas'
     },
     {
       title: 'Courses',
-      icon: 'book-open',
+      icon: <BookOpen />,
       path: '/admin/courses'
     },
-    {
-      title: 'Video Library',
-      icon: 'some-files',
-      path: '/admin/video-library'
-    },
+    // {
+    //   title: 'Video Library',
+    //   icon: <Clapperboard />,
+    //   path: '/admin/video-library'
+    // },
     {
       title: 'Stream Schedule',
-      icon: 'profile-circle',
+      icon: <CalendarClock />,
       path: '/admin/stream-schedule'
     },
     {
       title: 'Live Sessions',
-      icon: 'profile-circle',
+      icon: <PlayCircle />,
       path: '/admin/live-session'
     },
     {
+      title: 'Stream Recording',
+      icon: <CircleDot />,
+      path: '/admin/'
+    },
+    {
       title: 'Academy Category',
-      icon: 'profile-circle',
+      icon: <Layers />,
       path: '/admin/academy-category'
     },
   ],
   educator: [
     {
       title: 'Ideas',
-      icon: 'paper-plane',
+      icon: <Lightbulb />,
       path: '/educator/ideas'
     },
     {
       title: 'Courses',
-      icon: 'book-open',
+      icon: <BookOpen />,
       path: '/educator/courses'
     },
-    {
-      title: 'Video Library',
-      icon: 'some-files',
-      path: '/educator/video-library'
-    },
+    // {
+    //   title: 'Video Library',
+    //   icon: <Clapperboard />,
+    //   path: '/educator/video-library'
+    // },
     {
       title: 'Stream Schedule',
-      icon: 'profile-circle',
+      icon: <CalendarClock />,
       path: '/educator/stream-schedule'
     },
     {
       title: 'Live Sessions',
-      icon: 'profile-circle',
+      icon: <PlayCircle />,
       path: '/educator/live-session'
     },
   ],
   student: [
     {
       title: 'Ideas',
-      icon: 'some-files',
+      icon: <Lightbulb />,
       path: '/ideas'
     },
     {
       title: 'Video Library',
-      icon: 'some-files',
+      icon: <Clapperboard />,
       path: '/video-library'
     },
     {
       title: 'Live Sessions',
-      icon: 'some-files',
+      icon: <PlayCircle />,
       path: '/academy'
     },
   ],

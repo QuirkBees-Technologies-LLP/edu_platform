@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -16,14 +16,15 @@ import { useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamSchedul
 import DateTimePicker from './DateTimePicker';
 import { useGetEducatorsQuery } from '../../../store/api/admin/adminEducatorsApiSlice';
 
-const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow,setSelectedRow, refetch }, ref) => {
+const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, setSelectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
     const [createEducatorStreamSchedule] = useCreateEducatorStreamScheduleMutation();
     const [updateEducatorStreamSchedule] = useUpdateEducatorStreamScheduleMutation();
-    const { data : educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
+    const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
     const { data } = useGetEducatorAcademyCategoryQuery();
     const educatorId = auth?.user?._id ?? null;
     const navigate = useNavigate();
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
 
     const initialValues = {
         title: "",
@@ -47,40 +48,28 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
         tags: Yup.array()
             .min(1, "At least one tag is required")
             .of(Yup.string().required("Tag cannot be empty")),
-            thumbnail: Yup.array()
+        thumbnail: Yup.array()
             .required("Thumbnail is required")
             .min(1, "Thumbnail is required")
+            .test("fileOrUrl", "Thumbnail is required", (value) => {
+                if (!value || value.length === 0) return false;
+                const file = value[0]?.file;
+                const dataURL = value[0]?.dataURL;
+                return !!file || !!dataURL; // allow either new file or existing URL
+            })
             .test("fileType", "Unsupported file type", (value) => {
-              if (!value || value.length === 0) return false;
-          
-              const item = value[0];
-          
-              // Case: Edit time (has dataURL, no file)
-              if (!item.file && item.dataURL) {
-                return true;
-              }
-          
-              // Case: Create time (new file uploaded)
-              const file = item?.file;
-              const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-              return file && allowedTypes.includes(file.type);
+                const file = value?.[0]?.file;
+                if (!file) return true; // skip type check if no new file
+                const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+                return allowedTypes.includes(file.type);
             })
             .test("fileSize", "File size too large (max 2MB)", (value) => {
-              if (!value || value.length === 0) return false;
-          
-              const item = value[0];
-          
-              // Skip size check if it's from edit (existing image)
-              if (!item.file && item.dataURL) {
-                return true;
-              }
-          
-              // New upload
-              const file = item?.file;
-              const maxSize = 2 * 1024 * 1024; // 2MB
-              return file && file.size <= maxSize;
-            }),
-          
+                const file = value?.[0]?.file;
+                if (!file) return true; // skip size check if no new file
+                const maxSize = 2 * 1024 * 1024;
+                return file.size <= maxSize;
+            })
+
     });
 
     const formik = useFormik({
@@ -125,7 +114,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
 
             try {
                 if (selectedRow?._id) {
-                    await updateEducatorStreamSchedule({data: formData, id:selectedRow._id}).unwrap();
+                    await updateEducatorStreamSchedule({ data: formData, id: selectedRow._id }).unwrap();
                     setSelectedRow({});
                     refetch();
                     toast.success("Educator updated successfully!");
@@ -150,7 +139,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
             formik.setFieldValue("userId", educatorId);
         }
     }, [educatorId, formik.values]);
-console.log(selectedRow, "selectedRow");
+    console.log(selectedRow, "selectedRow");
 
     useEffect(() => {
         if (selectedRow?._id) {
@@ -161,7 +150,7 @@ console.log(selectedRow, "selectedRow");
                 tags: selectedRow?.tags,
                 category: selectedRow?.category?._id,
                 educator: selectedRow?.educator?._id,
-                thumbnail: [{file: null, dataURL: selectedRow?.image}],
+                thumbnail: [{ file: null, dataURL: selectedRow?.image }],
                 userId: selectedRow?.userId
             }
             formik.setValues(initData)
@@ -180,11 +169,11 @@ console.log(selectedRow, "selectedRow");
             handleCloseCreate();
         }}>
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
-            <DialogContent className="p-5 max-w-[475px]" ref={ref}>
+            <DialogContent className="p-5 max-w-[800px]" ref={ref}>
                 <DialogHeader className="pb-5 pt-0 px-0">
-                    <DialogTitle>{selectedRow?._id ? "Update Live Session" : "Create Live Session"}</DialogTitle>
+                    <DialogTitle>{selectedRow?._id ? "Update Stream Schedule" : "Create Stream Schedule"}</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-5 px-0 py-5">
+                <div className="grid gap-5 px-0">
                     <div className="grid grid-cols-12 gap-4">
                         <div className="col-span-12">
                             <div className="flex flex-col gap-1">
@@ -235,6 +224,8 @@ console.log(selectedRow, "selectedRow");
                                 </span></label>
                                 <div className='custom_datepicket'>
                                     <DateTimePicker
+                                        isPickerOpen={isPickerOpen}
+                                        setIsPickerOpen={setIsPickerOpen}
                                         value={formik.values.datetime}
                                         onChange={(date) => formik.setFieldValue("datetime", date)}
                                         className={formik.errors.datetime && formik.touched.datetime ? "border border-danger" : ""}
@@ -351,7 +342,7 @@ console.log(selectedRow, "selectedRow");
                                                 {...dragProps}
                                                 className={`
         border border-dashed rounded-lg text-center transition-colors 
-        p-5 ${isDragging ? 'bg-gray-100' : 'bg-white'} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
+        p-5 ${isDragging ? 'bg-gray-100' : 'bg-light'} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
                                                         ? "validation-error-border"
                                                         : ""
                                                     }`}

@@ -6,6 +6,7 @@ const ShowMoreLess = ({
   limit = 120,
   showMoreText = ' Show More',
   showLessText = ' Show Less',
+  className,
 }) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -19,7 +20,7 @@ const ShowMoreLess = ({
     : plainText.substring(0, limit);
 
   return (
-    <div className="text-sm text-gray-700 leading-relaxed">
+    <div className={ className ? className : "text-sm text-gray-700 leading-relaxed"}>
       {isHtml ? (
         <span dangerouslySetInnerHTML={{ __html: displayed }} />
       ) : (

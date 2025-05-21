@@ -7,11 +7,23 @@ const DateTimePicker = ({
   placeholder = "Select date & time",
   className = "",
   options = {},
+  isPickerOpen,
+  setIsPickerOpen
 }) => {
+  const handleChange = (date) => {
+    onChange(date);
+    // Only close when time is selected (not just date)
+    if (date instanceof Date && date.getHours() !== 0 && date.getMinutes() !== 0) {
+      setIsPickerOpen(false);
+    }
+  };
   return (
     <DatePicker
       selected={value}
-      onChange={onChange}
+      onChange={handleChange}
+      onClickOutside={() => setIsPickerOpen(false)} // Close when clicking outside
+      onInputClick={() => setIsPickerOpen(true)} // Open on input click
+      open={isPickerOpen} // Control open/close state
       showTimeSelect
       timeFormat="HH:mm"
       timeIntervals={2}

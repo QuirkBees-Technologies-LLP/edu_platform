@@ -1,0 +1,39 @@
+import { createApi } from "@reduxjs/toolkit/query/react";
+import baseQueryWithReauth from "../apiSlice";
+
+export const adminRecordingApiSlice = createApi({
+    reducerPath: 'adminRecording',
+    baseQuery: baseQueryWithReauth,
+    endpoints: (builder) => ({
+        getAdminRecording: builder.query({
+            query: ({ page = 1, limit = 10 }) => `/admin/recording?page=${page}&limit=${limit}`,
+        }),
+        getAdminRecordingByCallID: builder.query({
+            query: (id) => `/admin/recording?call_id=${id}`,
+        }),
+        saveAdminRecording: builder.mutation({
+            query: (data) => ({
+                url: '/admin/recording',
+                method: 'POST',
+                body: data,
+                formData: true,
+            }),
+        }),
+        updateAdminRecording: builder.mutation({
+            query: (data) => ({
+                url: `/admin/recording/${data?.id}`,
+                method: 'PUT',
+                body: data,
+                // formData: true
+            }),
+        }),
+        deleteAdminRecording: builder.mutation({
+            query: (id) => ({
+                url: `/admin/recording/${id}`,
+                method: 'DELETE',
+            }),
+        }),
+    }),
+});
+
+export const { useGetAdminRecordingQuery,useGetAdminRecordingByCallIDQuery, useLazyGetAdminRecordingQuery, useSaveAdminRecordingMutation, useUpdateAdminRecordingMutation, useDeleteAdminRecordingMutation } = adminRecordingApiSlice;
