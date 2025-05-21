@@ -104,6 +104,11 @@ import ClientCourses from "../pages/student/client-courses/ClientCourses";
 import ClientSpecificCourses from "../pages/student/client-courses/ClientSpecificCourses";
 import AdminStreamSchedule from "../pages/admin/admin-stream-schedule/AdminStreamSchedule";
 import EducatorLiveSession from "../pages/educator/live-session/EducatorLiveSession";
+import EducatorRecording from "../pages/educator/recording/EducatorRecording";
+import { Create } from "@mui/icons-material";
+import CreateEducatorRecording from "../pages/educator/recording/CreateEducatorRecording";
+import EducatorLiveSessionView from "../pages/educator/live-session/EducatorLiveSessionView";
+import AdminRecording from "../pages/admin/recording/AdminRecording";
 
 const routes = {
   student: [
@@ -123,7 +128,9 @@ const routes = {
     { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
     { path: "/educator/courses", element: <Courses /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
-    { path: "/educator/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/educator/recordings", element: <EducatorRecording /> },
+    { path: "/educator/recordings/:callId", element: <CreateEducatorRecording /> },
+    { path: "/educator/live-session/:callId", element: <EducatorLiveSessionView /> },
     { path: "/educator/dark-sidebar", element: <Demo1DarkSidebarPage /> },
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
     { path: "/educator/profile", element: <EducatorProfile /> },
@@ -135,6 +142,7 @@ const routes = {
     { path: "/admin/courses", element: <Courses /> },
     { path: "/admin/live-session", element: <LiveSession /> },
     { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/admin/recordings", element: <AdminRecording /> },
     { path: "/admin/educators", element: <Educators /> },
     { path: "/admin/profile", element: <AdminProfile /> },
     { path: "/admin/academy-category", element: <AdminAcademyCategory /> },

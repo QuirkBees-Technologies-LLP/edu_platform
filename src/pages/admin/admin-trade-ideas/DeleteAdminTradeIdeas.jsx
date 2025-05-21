@@ -5,7 +5,7 @@ import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeI
 import { toast } from 'sonner';
 
 
-const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
+const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
     const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] = useDeleteTradeIdeaMutation();
 
     const handleDelete = async () => {
@@ -27,11 +27,13 @@ const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, sel
                 <VisuallyHidden>
                     <DialogTitle>Hidden Title</DialogTitle>
                 </VisuallyHidden>
-                <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
-                {/* Modal Text */}
-                <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
-                    Are you sure you want to delete this item?
-                </p>
+                <div className='text-center'>
+                    <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+                    {/* Modal Text */}
+                    <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
+                        Are you sure you want to delete this item?
+                    </p>
+                </div>
                 {/* Action Buttons */}
                 <div className="flex justify-center items-center space-x-4">
                     <button className='btn btn-light' onClick={() => {

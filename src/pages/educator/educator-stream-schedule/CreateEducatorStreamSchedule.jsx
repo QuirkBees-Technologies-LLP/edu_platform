@@ -24,6 +24,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
     const navigate = useNavigate();
     const { data, isLoading } = useGetEducatorAcademyCategoryQuery();
     const [isPickerOpen, setIsPickerOpen] = useState(false);
+    console.log(selectedRow, "selectedRow");
 
     const initialValues = {
         title: "",
@@ -32,7 +33,8 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
         tags: [],
         category: "",
         thumbnail: null,
-        userId: ""
+        userId: "",
+        thumbnailUrl: ""
     };
 
     const createSchema = Yup.object().shape({
@@ -49,18 +51,24 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
         thumbnail: Yup.array()
             .required("Thumbnail is required")
             .min(1, "Thumbnail is required")
-            .test("fileType", "Unsupported file type", (value) => {
+            .test("fileOrUrl", "Thumbnail is required", (value) => {
                 if (!value || value.length === 0) return false;
                 const file = value[0]?.file;
+                const dataURL = value[0]?.dataURL;
+                return !!file || !!dataURL; // allow either new file or existing URL
+            })
+            .test("fileType", "Unsupported file type", (value) => {
+                const file = value?.[0]?.file;
+                if (!file) return true; // skip type check if no new file
                 const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-                return file && allowedTypes.includes(file.type);
+                return allowedTypes.includes(file.type);
             })
             .test("fileSize", "File size too large (max 2MB)", (value) => {
-                if (!value || value.length === 0) return false;
-                const file = value[0]?.file;
-                const maxSize = 2 * 1024 * 1024; // 2MB
-                return file && file.size <= maxSize;
-            }),
+                const file = value?.[0]?.file;
+                if (!file) return true; // skip size check if no new file
+                const maxSize = 2 * 1024 * 1024;
+                return file.size <= maxSize;
+            })
     });
 
     const formik = useFormik({
@@ -140,7 +148,8 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                 tags: selectedRow?.tags,
                 category: selectedRow?.category?._id,
                 thumbnail: [{ file: null, dataURL: selectedRow?.image }],
-                userId: selectedRow?.userId
+                userId: selectedRow?.userId,
+                thumbnailUrl: selectedRow?.image
             }
             formik.setValues(initData)
         }
@@ -160,7 +169,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
             <DialogContent className="p-5 max-w-[475px]" ref={ref}>
                 <DialogHeader className="pb-5 pt-0 px-0">
-                    <DialogTitle>{selectedRow?._id ? "Update Live Session" : "Create Live Session"}</DialogTitle>
+                    <DialogTitle>{selectedRow?._id ? "Update Stream Schedule" : "Create Stream Schedule"}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-5 px-0 py-5">
                     <div className="grid grid-cols-12 gap-4">

@@ -22,7 +22,7 @@ const TagInput = ({ value, onChange, touched, error }) => {
 
   return (
     <div
-      className={`w-full rounded-md px-3 py-2 flex flex-wrap items-center gap-2 border transition-colors duration-150 ${isFocused ? 'border-primary' : 'border-gray-300 hover:border-gray-400'
+      className={`w-full bg-light rounded-md px-3 py-2 flex flex-wrap items-center gap-2 border transition-colors duration-150 ${isFocused ? 'border-primary' : 'border-gray-300 hover:border-gray-400'
         } ${touched && error ? 'validation-error-border' : ''}`}
     >
       {value.map((tag, index) => (
@@ -49,7 +49,7 @@ const TagInput = ({ value, onChange, touched, error }) => {
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder="Add a tag"
-        className="flex-1 border-none focus:ring-0 focus:outline-none text-sm dark:bg-coal-300"
+        className="flex-1 border-none focus:ring-0 focus:outline-none text-sm bg-light"
       />
     </div>
   );
