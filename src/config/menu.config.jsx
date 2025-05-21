@@ -1001,7 +1001,7 @@ export const sideMenus = {
     {
       title: 'Stream Recording',
       icon: <CircleDot />,
-      path: '/admin/'
+      path: '/admin/stream-recording'
     },
     {
       title: 'Academy Category',
@@ -1034,6 +1034,11 @@ export const sideMenus = {
       title: 'Live Sessions',
       icon: <PlayCircle />,
       path: '/educator/live-session'
+    },
+        {
+      title: 'Stream Recording',
+      icon: <CircleDot />,
+      path: '/educator/stream-recording'
     },
   ],
   student: [

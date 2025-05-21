@@ -109,6 +109,8 @@ import { Create } from "@mui/icons-material";
 import CreateEducatorRecording from "../pages/educator/recording/CreateEducatorRecording";
 import EducatorLiveSessionView from "../pages/educator/live-session/EducatorLiveSessionView";
 import AdminRecording from "../pages/admin/recording/AdminRecording";
+import Recording from "../pages/admin/live-session/Recording";
+import RecordingControls from "../pages/educator/live-session/RecordingControls";
 
 const routes = {
   student: [
@@ -135,6 +137,7 @@ const routes = {
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
     { path: "/educator/profile", element: <EducatorProfile /> },
     { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
+    { path: "/educator/stream-recording", element: <EducatorRecording /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
@@ -147,6 +150,7 @@ const routes = {
     { path: "/admin/profile", element: <AdminProfile /> },
     { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
     { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
+    { path: "admin/stream-recording", element: <AdminRecording /> },
   ],
 };
 
