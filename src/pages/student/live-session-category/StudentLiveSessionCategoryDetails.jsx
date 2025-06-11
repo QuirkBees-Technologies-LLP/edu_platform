@@ -9,16 +9,18 @@ import Loader from '../../../components/ui/loader';
 const StudentLiveSessionCategoryDetails = () => {
     const { id } = useParams();
     const { data, isLoading } = useGetAcademySingleCategoryQuery(id);
+    console.log(id, "id");
 
     const defaultImage = '/media/avatars/300-2.png';
     const educators = data?.data?.category?.educators;
+    console.log(educators, "educators");
 
     return (
         <div>
             <Container>
                 {isLoading ? <Loader /> :
                     <>
-                        {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div>There are no schedule found</div>}
+                        {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div className='text-center'>There are no schedule found</div>}
                         {educators && educators.length > 0 ? (
                             <div className="grid xl:grid-cols-3 sm:grid-cols-2 gap-4">
                                 {educators.map((educator, index) => (

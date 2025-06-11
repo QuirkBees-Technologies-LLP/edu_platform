@@ -18,7 +18,7 @@ export const educatorTradeIdeasApiSlice = createApi({
         updateEducatorTradeIdea: builder.mutation({
             query: (updatedTrade) => ({
                 url: `/educator/trade-idea/updated/${updatedTrade.get("id")}`,
-                method: 'POST',
+                method: 'PUT',
                 body: updatedTrade,
                 formData: true
             }),
@@ -26,7 +26,7 @@ export const educatorTradeIdeasApiSlice = createApi({
         deleteEducatorTradeIdea: builder.mutation({
             query: (id) => ({
                 url: `/educator/trade-idea/remove/${id}`,
-                method: 'POST',
+                method: 'DELETE',
             }),
         }),
     }),

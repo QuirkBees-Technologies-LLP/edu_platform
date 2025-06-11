@@ -274,7 +274,7 @@ const CreateTradeIdeas = forwardRef(({ setSelectedRow, isCreateOpen, handleClose
                                 </span></label>
                                 <input
                                     {...formik.getFieldProps("entry")}
-                                    type="text"
+                                    type="number"
                                     placeholder="Enter entry"
                                     autoComplete="off"
                                     className={`form-control input input-md w-full ${formik.errors.entry && formik.touched.entry

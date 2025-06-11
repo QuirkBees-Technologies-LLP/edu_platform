@@ -67,7 +67,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
 
   const truncateText = (text, maxLength) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-};
+  };
 
   const columns = useMemo(() => [
     {
@@ -129,8 +129,8 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
         column
       }) => <DataGridColumnHeader title='Message' column={column} />,
       enableSorting: true,
-      cell:info => 
-      <TruncatedText content={info.row.original.message} maxLength={50} />,
+      cell: info =>
+        <TruncatedText content={info.row.original.message} maxLength={50} />,
       meta: {
         headerClassName: 'min-w-[225px]'
       }
@@ -147,6 +147,18 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
       </span>,
       meta: {
         headerClassName: 'w-[225px]'
+      }
+    },
+    {
+      accessorFn: row => row.price,
+      id: 'price',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Price' column={column} />,
+      enableSorting: true,
+      cell: info => info.getValue(),
+      meta: {
+        headerClassName: 'min-w-[125px]'
       }
     },
     {
@@ -275,7 +287,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
 
   const reloadTable = () => {
     setTableKey(prevKey => prevKey + 1); // ✅ Change key to force re-fetch
-};
+  };
 
   return (
     <div className='container-fluid'>

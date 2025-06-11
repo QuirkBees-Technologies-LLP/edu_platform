@@ -989,17 +989,17 @@ export const sideMenus = {
     //   path: '/admin/video-library'
     // },
     {
-      title: 'Stream Schedule',
+      title: 'Live Stream Schedule',
       icon: <CalendarClock />,
       path: '/admin/stream-schedule'
     },
     {
-      title: 'Live Sessions',
+      title: 'Live Stream',
       icon: <PlayCircle />,
       path: '/admin/live-session'
     },
     {
-      title: 'Stream Recording',
+      title: 'Recorded Sessions',
       icon: <CircleDot />,
       path: '/admin/stream-recording'
     },
@@ -1016,7 +1016,7 @@ export const sideMenus = {
       path: '/educator/ideas'
     },
     {
-      title: 'Courses',
+      title: 'Courses Library',
       icon: <BookOpen />,
       path: '/educator/courses'
     },
@@ -1026,17 +1026,17 @@ export const sideMenus = {
     //   path: '/educator/video-library'
     // },
     {
-      title: 'Stream Schedule',
+      title: 'Live Stream Schedule',
       icon: <CalendarClock />,
       path: '/educator/stream-schedule'
     },
     {
-      title: 'Live Sessions',
+      title: 'Live Stream',
       icon: <PlayCircle />,
       path: '/educator/live-session'
     },
-        {
-      title: 'Stream Recording',
+    {
+      title: 'Recorded Sessions',
       icon: <CircleDot />,
       path: '/educator/stream-recording'
     },
@@ -1048,12 +1048,12 @@ export const sideMenus = {
       path: '/ideas'
     },
     {
-      title: 'Video Library',
+      title: 'Courses Library',
       icon: <Clapperboard />,
       path: '/video-library'
     },
     {
-      title: 'Live Sessions',
+      title: 'Live Stream',
       icon: <PlayCircle />,
       path: '/academy'
     },

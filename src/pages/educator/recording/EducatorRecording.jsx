@@ -295,7 +295,7 @@ const EducatorRecording = ({ title = "Session Recordings" }) => {
 
       return {
         data: response.data || [],
-        totalCount: response.pagination?.totalRecords || 0,
+        totalCount: response.pagination?.total || 0,
       };
     } catch (error) {
       console.error("Error fetching educators:", error);

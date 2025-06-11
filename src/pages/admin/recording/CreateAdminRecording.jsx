@@ -13,10 +13,10 @@ import { Avatar } from 'stream-chat-react';
 import { AvatarUpload } from './AvatarUpload';
 import clsx from "clsx";
 import { KeenIcon } from "@/components";
-import { useUpdateEducatorRecordingMutation } from '../../../store/api/educator/educatorRecordingApiSlice';
+import { useUpdateAdminRecordingMutation } from '../../../store/api/admin/adminRecordingApiSlice';
 
 const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch, setSelectedRow }, ref) => {
-    const [updateEducatorRecording] = useUpdateEducatorRecordingMutation();
+    const [updateEducatorRecording] = useUpdateAdminRecordingMutation();
 
     const initialValues = {
         title: "",

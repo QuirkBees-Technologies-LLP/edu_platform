@@ -24,7 +24,7 @@ export const adminTradeIdeasApiSlice = createApi({
         updateTradeIdea: builder.mutation({
             query: (updatedTrade) => ({
                 url: `/admin/idea/updated/${updatedTrade.get("id")}`,
-                method: 'POST',
+                method: 'PUT',
                 body: updatedTrade,
                 formData: true
             }),
@@ -32,7 +32,7 @@ export const adminTradeIdeasApiSlice = createApi({
         deleteTradeIdea: builder.mutation({
             query: (id) => ({
                 url: `/admin/idea/remove/${id}`,
-                method: 'POST',
+                method: 'DELETE',
             }),
         }),
     }),
