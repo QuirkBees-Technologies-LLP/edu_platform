@@ -13,14 +13,17 @@ import { toAbsoluteUrl } from '@/utils/Assets';
 import { Create } from '@mui/icons-material';
 import DeleteAdminRecording from './DeleteAdminRecording';
 import CreateAdminRecording from './CreateAdminRecording';
+import { useLazyGetAdminRecordingQuery } from '../../../store/api/admin/adminRecordingApiSlice';
+import { PlayCircle } from 'lucide-react';
+import ShowMoreLess from '../../../components/ui/showmoreless';
 
 
-const AdminRecording = ({ title = "Educators" }) => {
+const AdminRecording = ({ title = "Recorded Sessions" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getEducators, { data, isLoading, refetch }] = useLazyGetEducatorsQuery();
+  const [getEducators, { data, isLoading, refetch }] = useLazyGetAdminRecordingQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -71,98 +74,139 @@ const AdminRecording = ({ title = "Educators" }) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   };
 
-  const columns = useMemo(() => [
-    {
-      accessorFn: row => row.image,
-      id: 'image',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Images' column={column} />,
-      enableSorting: true,
-      cell: ({ row }) =>
-        <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
-          setSelectedRow(row.original)
-          setIsLightBoxOpen(true);
-        }}>
-          <img src={row.original.image?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.image} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
-        </div>,
-      meta: {
-        headerClassName: 'w-[80px]'
-      }
-    },
-    {
-      accessorFn: row => `${row.first_name} ${row.last_name}`,
-      id: 'name',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Name' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <div className="flex flex-col gap-0.5">
-            {info.getValue()}
-        </div>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.email,
-      id: 'email',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Email' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <div className="flex flex-col gap-0.5">
-            {info.getValue()}
-        </div>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.status,
-      id: 'status',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Status' column={column} />,
-      enableSorting: true,
-      cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === true ? "badge-success" : "badge-danger"}`}>
-        {info.row.original.status === true ? "Active" : "Inactive"}
-      </span>,
-      meta: {
-        headerClassName: 'w-[225px]'
-      }
-    },
-    {
-      id: 'click',
-      header: () => '',
-      enableSorting: false,
-      cell: ({ row }) => <Menu className="items-stretch">
-        <MenuItem toggle="dropdown"
-          onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
-          trigger="click" dropdownProps={{
-            placement: isRTL() ? 'bottom-start' : 'bottom-end',
-            modifiers: [{
-              name: 'offset',
-              options: {
-                offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
-              }
-            }]
-          }}>
-          <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-            <KeenIcon icon="dots-vertical" />
-          </MenuToggle>
-          {ActionMenu()}
-        </MenuItem>
-      </Menu>,
-      meta: {
-        headerClassName: 'w-[60px]'
-      }
-    }
-  ], [isRTL]);
+  const columns = useMemo(
+    () => [
+      // {
+      //   accessorFn: row => row.url,
+      //   id: 'Recoding',
+      //   header: ({
+      //     column
+      //   }) => <DataGridColumnHeader title='Recoding' column={column} />,
+      //   enableSorting: true,
+      //   cell: ({ row }) =>
+      //     <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
+      //       setSelectedRow(row.original)
+      //       setIsLightBoxOpen(true);
+      //     }}>
+      //       <img src={row.original.url?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.url} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+
+      //     </div>,
+      //   meta: {
+      //     headerClassName: 'w-[80px]'
+      //   }
+      // },
+      {
+        accessorFn: (row) => row.url,
+        id: "Recoding",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Recoding" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => {
+          const videoUrl = row.original.url;
+
+          return (
+            <a
+              href={videoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Play Recording"
+              className="flex items-center justify-center text-blue-600 hover:text-blue-800"
+            >
+              <PlayCircle size={24} />
+            </a>
+          );
+        },
+        meta: {
+          headerClassName: "w-[80px]",
+        },
+      },
+
+      {
+        accessorFn: (row) => `${row.call_title}`,
+        id: "title",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Title" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">{info.getValue()}</div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.call_description,
+        id: "Description",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Description" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              {/* {info.getValue()} */}
+              <ShowMoreLess isHtml={true} html={info.getValue()} />
+            </div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
+      // {
+      //   accessorFn: row => row.status,
+      //   id: 'status',
+      //   header: ({
+      //     column
+      //   }) => <DataGridColumnHeader title='Status' column={column} />,
+      //   enableSorting: true,
+      //   cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === true ? "badge-success" : "badge-danger"}`}>
+      //     {info.row.original.status === true ? "Active" : "Inactive"}
+      //   </span>,
+      //   meta: {
+      //     headerClassName: 'w-[225px]'
+      //   }
+      // },
+      {
+        id: "click",
+        header: () => "",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <Menu className="items-stretch">
+            <MenuItem
+              toggle="dropdown"
+              onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+              trigger="click"
+              dropdownProps={{
+                placement: isRTL() ? "bottom-start" : "bottom-end",
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: {
+                      offset: isRTL() ? [0, -10] : [0, 10], // [skid, distance]
+                    },
+                  },
+                ],
+              }}
+            >
+              <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+                <KeenIcon icon="dots-vertical" />
+              </MenuToggle>
+              {ActionMenu()}
+            </MenuItem>
+          </Menu>
+        ),
+        meta: {
+          headerClassName: "w-[60px]",
+        },
+      },
+    ],
+    [isRTL]
+  );
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
@@ -238,18 +282,11 @@ const AdminRecording = ({ title = "Educators" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Educators" />
+          <ToolbarPageTitle text="Recorded Sessions" />
           <ToolbarDescription>
             Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
           </ToolbarDescription>
         </ToolbarHeading>
-        <ToolbarActions>
-          <div className="text-end pb-4">
-            <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create Educator
-            </button>
-          </div>
-        </ToolbarActions>
       </Toolbar>
       <DataGrid
         key={tableKey}

@@ -78,11 +78,11 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
         validationSchema: createSchema,
         onSubmit: async (values) => {
 
-            const callId = uuidv4();
+            // const callId = uuidv4();
             const thumbnailFile = values.thumbnail?.[0]?.file; // Get the actual File object
 
             const formData = new FormData();
-            formData.append('callId', callId);
+            // formData.append('callId', callId);
             formData.append('title', values.title);
             formData.append('category', values.category);
             formData.append('description', values.description);
@@ -91,11 +91,11 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                 formData.append(`tags[]`, tag);
             });
 
-            formData.append('userId', values?.userId);
+            // formData.append('userId', values?.userId);
             formData.append('educator', values?.userId);
 
             if (thumbnailFile) {
-                formData.append('files', thumbnailFile); // key must match your backend field
+                formData.append('thumbnail', thumbnailFile); // key must match your backend field
             }
 
             if (selectedRow?._id) {

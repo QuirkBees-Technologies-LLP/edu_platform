@@ -29,6 +29,7 @@ const ClientCourses = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [coursesList, setCoursesList] = useState([]);
     const navigate = useNavigate();
+console.log(categoryId, "categoryId");
 
     useEffect(() => {
         if (data?.data?.length > 0) {
@@ -87,7 +88,7 @@ const ClientCourses = () => {
     return (
         <div>
             <Container>
-                {(isLoading || scheduleLoading || !data || !scheduleData) ? <Loader /> :
+                {(isLoading || scheduleLoading ) ? <Loader /> :
                     <>
                         <div className='mb-10'>
                             <h4 className='text-xl font-medium text-primary mb-2'>Live Session Schedule</h4>

@@ -2,12 +2,11 @@ import React, { forwardRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from 'sonner';
-import { useDeleteEducatorMutation } from '../../../store/api/admin/adminEducatorsApiSlice';
-import { useDeleteEducatorRecordingMutation } from '../../../store/api/educator/educatorRecordingApiSlice';
+import { useDeleteAdminRecordingMutation } from '../../../store/api/admin/adminRecordingApiSlice';
 
 
 const DeleteAdminRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
-    const [deleteEducatorRecording, { isLoading, isSuccess, isError, error }] = useDeleteEducatorRecordingMutation();
+    const [deleteEducatorRecording, { isLoading, isSuccess, isError, error }] = useDeleteAdminRecordingMutation();
 
     const handleDelete = async () => {
         try {
