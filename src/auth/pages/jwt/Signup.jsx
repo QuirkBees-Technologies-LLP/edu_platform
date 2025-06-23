@@ -100,7 +100,7 @@ const Signup = () => {
             <Link
               to={
                 currentLayout?.name === "auth-branded"
-                  ? "/auth/login"
+                  ? "/auth"
                   : "/auth/classic/login"
               }
               className="text-2sm link"
@@ -339,7 +339,7 @@ const Signup = () => {
           className="btn btn-primary bg-pink-gradient flex justify-center grow w-64 mx-auto"
           disabled={loading || formik.isSubmitting}
         >
-          {loading ? "Please wait..." : "Sign UP"}
+          {loading ? "Please wait..." : "Sign up"}
         </button>
       </form>
     </div>

@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
-import { Login, ResetPassword, ResetPasswordChange, ResetPasswordChanged, ResetPasswordCheckEmail, ResetPasswordEnterEmail, Signup, TwoFactorAuth } from './pages/jwt';
+import { ClientLogin, EducatorLogin, Login, ResetPassword, ResetPasswordChange, ResetPasswordChanged, ResetPasswordCheckEmail, ResetPasswordEnterEmail, Signup, TwoFactorAuth } from './pages/jwt';
 import { AuthBrandedLayout } from '@/layouts/auth-branded';
 import { AuthLayout } from '@/layouts/auth';
 import { CheckEmail } from '@/auth/pages/jwt';
@@ -9,6 +9,8 @@ const AuthPage = () => <Routes>
       <Route index element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/student/login" element={<ClientLogin />} />
+      <Route path="/educator/login" element={<EducatorLogin />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/2fa" element={<TwoFactorAuth />} />
       <Route path="/check-email" element={<CheckEmail />} />
