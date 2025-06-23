@@ -7,6 +7,7 @@ import { lmsAuth } from "../../services";
 
 import { set } from "date-fns";
 import { logoutUser, setToken } from "../../store/reducer/authSlice";
+import { useCreateEducatorMutation } from "../../store/api/admin/adminEducatorsApiSlice";
 const API_URL = import.meta.env.VITE_APP_API_URL;
 export const LOGIN_URL = `${API_URL}/signin`;
 export const ADMIN_LOGIN_URL = `${API_URL}/admin/auth/signin`;
@@ -137,6 +138,101 @@ const AuthProvider = ({ children }) => {
     dispatch(logoutUser());
     localStorage.clear();
   };
+
+  const API_KEY = import.meta.env.VITE_APP_CRM_API_KEY;
+
+  const educatorSignin = async (email, password, createEducator, dispatch) => {
+    try {
+      // Step 1: External Login
+      const loginRes = await fetch(
+        `https://icon-api.mlmprotec.com/api/cb/outbound/iqverse/user/details?email=${email}&password=${password}`,
+        {
+          method: 'GET',
+          headers: {
+            'api-key': API_KEY,
+          },
+        }
+      );
+
+      const loginData = await loginRes.json();
+
+      if (!loginData.success || !loginData.data) {
+        return { success: false, error: loginData.message || 'Login failed.' };
+      }
+
+      const { id: userId, name, email: userEmail, expire_at, plan, status } = loginData.data;
+
+      // Step 2: Check Plan Expiry
+      const isExpired = new Date(expire_at) < new Date();
+
+      if (isExpired) {
+        // Step 3: Get token and redirect
+        const tokenRes = await fetch(
+          `https://icon-api.mlmprotec.com/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'api-key': API_KEY,
+            },
+          }
+        );
+        const tokenData = await tokenRes.json();
+        const token = tokenData?.data?.token;
+        if (!token) {
+          return { success: false, error: 'Token not received for subscription renewal.' };
+        }
+
+        const redirectUrl = `https://icon-user.mlmprotec.com/login?auto-token-login&&pathName=%2Fmy_account%2Fsubscription&token=${token}`;
+        window.location.href = redirectUrl;
+
+        return { success: true, redirect: true }; // Optional success response before redirect
+      } else {
+        // ✅ Step 4: Plan active — create educator
+        const [firstName, ...rest] = name.trim().split(" ");
+        const lastName = rest.join(" ");
+
+        try {
+          const res = await createEducator({
+            name,
+            email: userEmail,
+            crm_id: userId,
+            first_name: firstName,
+            last_name: lastName,
+            plan,
+            status,
+            expire_at,
+            role: 'educator',
+          }).unwrap();
+
+          const auth = {
+            token: res.token,
+            user: res.user,
+          };
+
+          saveAuth(auth);
+          dispatch(setToken(auth.token));
+          setCurrentUser(auth?.user);
+
+          return {
+            success: true,
+            user: res.user,
+            token: res.token,
+          };
+        } catch (apiError) {
+          const errorMessage =
+            apiError?.data?.error?.[0] ||
+            apiError?.data?.message ||
+            'Educator creation failed.';
+          return { success: false, error: errorMessage };
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      return { success: false, error: err.message || 'Something went wrong.' };
+    }
+  };
+
+
   return (
     <AuthContext.Provider
       value={{
@@ -153,6 +249,7 @@ const AuthProvider = ({ children }) => {
         // getUser,
         logout,
         verify,
+        educatorSignin,
       }}
     >
       {children}

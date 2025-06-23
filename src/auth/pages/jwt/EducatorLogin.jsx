@@ -9,6 +9,7 @@ import { useAuthContext } from "@/auth";
 import { useLayout } from "@/providers";
 import { Alert } from "@/components";
 import { useDispatch } from "react-redux";
+import { useCreateEducatorMutation } from "../../../store/api/admin/adminEducatorsApiSlice";
 const loginSchema = Yup.object().shape({
   email: Yup.string()
     .email("Wrong email format")
@@ -26,33 +27,42 @@ const initialValues = {
   password: "",
   remember: false,
 };
-const Login = () => {
+const EducatorLogin = () => {
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthContext();
+  const { login, educatorSignin } = useAuthContext();
+  const [createEducator] = useCreateEducatorMutation();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
   const [showPassword, setShowPassword] = useState(false);
   const { currentLayout } = useLayout();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const role = searchParams.get("role");
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
-        if (!login) {
-          throw new Error("JWTProvider is required for this form.");
-        }
-        await login(values.email, values.password, dispatch);
+        const res = await educatorSignin(values.email, values.password, createEducator, dispatch);
         if (values.remember) {
           localStorage.setItem("email", values.email);
         } else {
           localStorage.removeItem("email");
         }
-        navigate("/", {
-          replace: true,
-        });
+
+        if (res?.redirect) {
+          // Already redirected
+          return;
+        }
+        if (res?.success) {
+          // Optional: save token/user here if needed
+          navigate("/", { replace: true });
+        }
+        if (res?.error) {
+          throw new Error(res.error);
+        }
       } catch (error) {
         setStatus(error.message);
         setSubmitting(false);
@@ -72,21 +82,6 @@ const Login = () => {
           <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
             Sign in
           </h3>
-          {/* <div className="flex items-center justify-center font-medium">
-            <span className="text-2sm text-gray-600 me-1.5">
-              Need an account?
-            </span>
-            <Link
-              to={
-                currentLayout?.name === "auth-branded"
-                  ? "/auth/signup"
-                  : "/auth/classic/signup"
-              }
-              className="text-2sm link"
-            >
-              Sign up
-            </Link>
-          </div> */}
         </div>
 
         {/* <div className="grid grid-cols-2 gap-2.5">
@@ -115,7 +110,7 @@ const Login = () => {
 
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 
-        {/* <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1">
           <label className="form-label text-gray-900">Email</label>
           <label className="input">
             <input
@@ -185,32 +180,21 @@ const Login = () => {
             {...formik.getFieldProps("remember")}
           />
           <span className="checkbox-label">Remember me</span>
-        </label> */}
+        </label>
 
-        {/* <button
+        <button
           onClick={formik.handleSubmit}
           className="btn bg-pink-gradient btn-primary flex justify-center grow"
           disabled={loading || formik.isSubmitting}
         >
           {loading ? "Please wait..." : "Sign In"}
-        </button> */}
-        <Link
-          to="/auth/student/login"
-          className="btn  btn-light flex justify-center grow"
-        >  Student Sign In/Sign Up
-        </Link>
-        <Link
-          to="/auth/educator/login"
-          className="btn  btn-light flex justify-center grow"
-        >   Educator Sign In
-        </Link>
-        <Link
-          to="/auth/admin/login"
-          className="btn  btn-light flex justify-center grow"
-        >          Admin Sign In
+        </button>
+        <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="flex items-center justify-center text-sm gap-2 text-gray-700 hover:text-primary">
+          <KeenIcon icon="black-left" />
+          Back
         </Link>
       </form>
     </div>
   );
 };
-export { Login };
+export { EducatorLogin };
