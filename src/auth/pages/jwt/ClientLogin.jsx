@@ -9,6 +9,7 @@ import { useAuthContext } from "@/auth";
 import { useLayout } from "@/providers";
 import { Alert } from "@/components";
 import { useDispatch } from "react-redux";
+import { useClientCreateUpdateMutation } from "../../../store/api/client/clientCreateUpdateApiSlice";
 const loginSchema = Yup.object().shape({
   email: Yup.string()
     .email("Wrong email format")
@@ -28,7 +29,8 @@ const initialValues = {
 };
 const ClientLogin = () => {
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthContext();
+  const { login, clientSignin } = useAuthContext();
+  const [clientCreateUpdate] = useClientCreateUpdateMutation();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
@@ -40,21 +42,48 @@ const ClientLogin = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
+    // onSubmit: async (values, { setStatus, setSubmitting }) => {
+    //   setLoading(true);
+    //   try {
+    //     if (!login) {
+    //       throw new Error("JWTProvider is required for this form.");
+    //     }
+    //     await login(values.email, values.password, dispatch);
+    //     if (values.remember) {
+    //       localStorage.setItem("email", values.email);
+    //     } else {
+    //       localStorage.removeItem("email");
+    //     }
+    //     navigate("/", {
+    //       replace: true,
+    //     });
+    //   } catch (error) {
+    //     setStatus(error.message);
+    //     setSubmitting(false);
+    //   }
+    //   setLoading(false);
+    // },
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
-        if (!login) {
-          throw new Error("JWTProvider is required for this form.");
-        }
-        await login(values.email, values.password, dispatch);
+        const res = await clientSignin(values.email, values.password, clientCreateUpdate, dispatch);
         if (values.remember) {
           localStorage.setItem("email", values.email);
         } else {
           localStorage.removeItem("email");
         }
-        navigate("/", {
-          replace: true,
-        });
+
+        if (res?.redirect) {
+          // Already redirected
+          return;
+        }
+        if (res?.success) {
+          // Optional: save token/user here if needed
+          navigate("/ideas", { replace: true });
+        }
+        if (res?.error) {
+          throw new Error(res.error);
+        }
       } catch (error) {
         setStatus(error.message);
         setSubmitting(false);

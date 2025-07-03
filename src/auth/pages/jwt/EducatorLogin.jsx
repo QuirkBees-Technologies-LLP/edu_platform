@@ -45,24 +45,18 @@ const EducatorLogin = () => {
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
-        const res = await educatorSignin(values.email, values.password, createEducator, dispatch);
+        if (!login) {
+          throw new Error("JWTProvider is required for this form.");
+        }
+        await login(values.email, values.password, dispatch);
         if (values.remember) {
           localStorage.setItem("email", values.email);
         } else {
           localStorage.removeItem("email");
         }
-
-        if (res?.redirect) {
-          // Already redirected
-          return;
-        }
-        if (res?.success) {
-          // Optional: save token/user here if needed
-          navigate("/", { replace: true });
-        }
-        if (res?.error) {
-          throw new Error(res.error);
-        }
+        navigate("/", {
+          replace: true,
+        });
       } catch (error) {
         setStatus(error.message);
         setSubmitting(false);
