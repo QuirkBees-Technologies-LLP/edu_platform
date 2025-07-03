@@ -13,7 +13,7 @@ import { Avatar } from 'stream-chat-react';
 import { AvatarUpload } from './AvatarUpload';
 import clsx from "clsx";
 import { KeenIcon } from "@/components";
-import { useCreateAdminAcademyCategoryMutation, useUpdateAdminAcademyCategoryMutation } from '../../../store/api/admin/AdminAcademyCategoryApiSlice';
+import { useCreateAdminAcademyCategoryMutation, useUpdateAdminAcademyCategoryMutation } from '../../../store/api/admin/adminAcademyCategoryApiSlice';
 
 const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch, setSelectedRow }, ref) => {
     const { auth } = useAuthContext();

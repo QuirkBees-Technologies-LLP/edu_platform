@@ -10,7 +10,7 @@ import { MenuIcon, MenuLink, MenuSub, MenuTitle } from '@/components';
 import { TruncatedText } from '../../../lib/utils';
 import CreateAdminAcademyCategory from './CreateAdminAcademyCategory';
 import DeleteAdminAcademyCategory from './DeleteAdminAcademyCategory';
-import { useLazyGetAdminAcademyCategoryQuery } from '../../../store/api/admin/AdminAcademyCategoryApiSlice';
+import { useLazyGetAdminAcademyCategoryQuery } from '../../../store/api/admin/adminAcademyCategoryApiSlice';
 
 const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);

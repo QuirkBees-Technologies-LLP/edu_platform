@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import { toast } from 'sonner';
-import { useDeleteAdminAcademyCategoryMutation } from '../../../store/api/admin/AdminAcademyCategoryApiSlice';
+import { useDeleteAdminAcademyCategoryMutation } from '../../../store/api/admin/adminAcademyCategoryApiSlice';
 
 
 const DeleteAdminAcademyCategory = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
