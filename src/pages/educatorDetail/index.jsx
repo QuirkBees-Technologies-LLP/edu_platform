@@ -4,7 +4,7 @@ import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPag
 import { PageNavbar } from '@/pages/account';
 import { useLayout } from '@/providers';
 import { toAbsoluteUrl } from '@/utils/Assets';
-import { UserProfileHero } from './userProfileHero';
+import { UserProfileHero } from './UserProfileHero';
 import RecordedLive from './RecordedLive';
 import Courses from './Courses';
 
