@@ -89,6 +89,10 @@ const Signup = () => {
         noValidate
         onSubmit={formik.handleSubmit}
       >
+        <div className="flex justify-center mb-5">
+          <img src="/media/app/default-logo.svg" className="w-100 light_mode" alt="" />
+          <img src="/media/app/default-logo-dark.svg" className="w-100 dark_mode" alt="" />
+        </div>
         <div className="text-center mb-2.5">
           <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
             Sign up
