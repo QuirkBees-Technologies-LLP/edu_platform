@@ -197,17 +197,17 @@ const Login = () => {
         <Link
           to="/auth/student/login"
           className="btn  btn-light flex justify-center grow"
-        >  Student Sign In/Sign Up
+        >  Student Sign In
         </Link>
-        <Link
+        {/* <Link
           to="/auth/educator/login"
           className="btn  btn-light flex justify-center grow"
         >   Educator Sign In
-        </Link>
+        </Link> */}
         <Link
           to="/auth/admin/login"
           className="btn  btn-light flex justify-center grow"
-        >          Admin Sign In
+        >          Admin/Educator Sign In
         </Link>
       </form>
     </div>

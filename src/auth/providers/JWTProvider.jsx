@@ -7,7 +7,6 @@ import { lmsAuth } from "../../services";
 
 import { set } from "date-fns";
 import { logoutUser, setToken } from "../../store/reducer/authSlice";
-import { useCreateEducatorMutation } from "../../store/api/admin/adminEducatorsApiSlice";
 const API_URL = import.meta.env.VITE_APP_API_URL;
 export const LOGIN_URL = `${API_URL}/signin`;
 export const ADMIN_LOGIN_URL = `${API_URL}/admin/auth/signin`;
@@ -141,7 +140,7 @@ const AuthProvider = ({ children }) => {
 
   const API_KEY = import.meta.env.VITE_APP_CRM_API_KEY;
 
-  const educatorSignin = async (email, password, createEducator, dispatch) => {
+  const clientSignin = async (email, password, clientCreateUpdate, dispatch) => {
     try {
       // Step 1: External Login
       const loginRes = await fetch(
@@ -192,7 +191,7 @@ const AuthProvider = ({ children }) => {
         const lastName = rest.join(" ");
 
         try {
-          const res = await createEducator({
+          const res = await clientCreateUpdate({
             name,
             email: userEmail,
             crm_id: userId,
@@ -201,7 +200,7 @@ const AuthProvider = ({ children }) => {
             plan,
             status,
             expire_at,
-            role: 'educator',
+            role: 'student',
           }).unwrap();
 
           const auth = {
@@ -222,7 +221,7 @@ const AuthProvider = ({ children }) => {
           const errorMessage =
             apiError?.data?.error?.[0] ||
             apiError?.data?.message ||
-            'Educator creation failed.';
+            'User creation failed.';
           return { success: false, error: errorMessage };
         }
       }
@@ -249,7 +248,7 @@ const AuthProvider = ({ children }) => {
         // getUser,
         logout,
         verify,
-        educatorSignin,
+        clientSignin,
       }}
     >
       {children}
