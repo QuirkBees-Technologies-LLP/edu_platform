@@ -13,7 +13,7 @@ import { clientProfileApiSlice } from "./api/client/clientProfileApiSlice";
 import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice";
 import { educatorTradeIdeasApiSlice } from "./api/educator/educatorTradeIdeasApiSlice";
 import { adminAcademyCategoryApiSlice } from "./api/admin/adminAcademyCategoryApiSlice";
-import { educatorStreamScheduleApiSlice } from "./api/educator/EducatorStreamScheduleApiSlice";
+import { educatorStreamScheduleApiSlice } from "./api/educator/educatorStreamScheduleApiSlice";
 import { clientAcademyCategoryApiSlice } from "./api/client/clientAcademyCategoryApiSlice";
 import { clientCoursesApiSlice } from "./api/client/clientCoursesApiSlice";
 import { educatorAcademyCategoryApiSlice } from "./api/educator/educatorAcademyCategoryApiSlice";
