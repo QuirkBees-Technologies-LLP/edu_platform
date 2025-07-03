@@ -764,3 +764,12 @@ chat */
 .live-stream-videos {
 	height: calc(100vh - 128px);
 }
+.dark_mode {
+	display: none;
+}
+.dark .dark_mode {
+	display: block;
+}
+.dark .light_mode {
+	display: none;
+}
