@@ -12,7 +12,7 @@ import TagInput from '../../../components/ui/tagInput';
 import RichTextEditor from '../../../components/ui/rich-editor';
 import { useGetEducatorAcademyCategoryQuery } from '../../../store/api/educator/educatorAcademyCategoryApiSlice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
+import { useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation } from '../../../store/api/educator/educatorStreamScheduleApiSlice';
 import DateTimePicker from './DateTimePicker';
 import { useGetEducatorsQuery } from '../../../store/api/admin/adminEducatorsApiSlice';
 

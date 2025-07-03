@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from 'sonner';
 import { useDeleteEducatorMutation } from '../../../store/api/admin/adminEducatorsApiSlice';
-import { useDeleteEducatorStreamScheduleMutation } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
+import { useDeleteEducatorStreamScheduleMutation } from '../../../store/api/educator/educatorStreamScheduleApiSlice';
 
 
 const DeleteEducatorStreamSchedule = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
