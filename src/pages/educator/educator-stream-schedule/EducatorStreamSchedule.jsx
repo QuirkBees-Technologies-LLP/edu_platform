@@ -12,7 +12,7 @@ import { useLazyGetAdminTradeIdeasQuery } from '../../../store/api/admin/adminTr
 import { useLazyGetLiveSessionListQuery } from '../../../store/api/admin/adminLiveSessionApiSlice';
 import { formatSecondsToHMS } from '../../../lib/utils';
 import CreateEducatorStreamSchedule from './CreateEducatorStreamSchedule';
-import { useLazyGetEducatorStreamScheduleQuery } from '../../../store/api/educator/EducatorStreamScheduleApiSlice';
+import { useLazyGetEducatorStreamScheduleQuery } from '../../../store/api/educator/educatorStreamScheduleApiSlice';
 import DeleteEducatorStreamSchedule from './DeleteEducatorStreamSchedule';
 
 const EducatorStreamSchedule = ({ title = "Schedule Stream" }) => {
