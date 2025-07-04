@@ -1017,6 +1017,11 @@ export const sideMenus = {
   ],
   educator: [
     {
+      title: 'Dashboard',
+      icon: <LayoutDashboard />,
+      path: '/'
+    },
+    {
       title: 'Ideas',
       icon: <Lightbulb />,
       path: '/educator/ideas'
