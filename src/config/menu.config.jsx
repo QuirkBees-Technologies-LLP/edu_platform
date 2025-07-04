@@ -1,4 +1,5 @@
-import { BookOpen, CalendarClock, CircleDot, Clapperboard, Layers, Lightbulb, PlayCircle, User } from "lucide-react";
+
+import { BookOpen, CalendarClock, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User } from "lucide-react";
 
 export const MENU_SIDEBAR = [
   {
@@ -968,6 +969,11 @@ export const ADMIN_MENU = [
 
 export const sideMenus = {
   admin: [
+    {
+      title: 'Dashboard',
+      icon: <LayoutDashboard />,
+      path: '/'
+    },
     {
       title: 'Educators',
       icon: <User />,

@@ -10,7 +10,8 @@ import { Link } from 'react-router-dom';
 import ThumbnailImage from './ThumbnailImage';
 import Loader from '../../../components/ui/loader';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../components/ui/breadcrumb';
-
+import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
+ 
 const VideoLibrary = () => {
   const { data, isLoading } = useGetClientAllCoursesQuery();
   const courses = data?.data;
@@ -20,13 +21,14 @@ const VideoLibrary = () => {
 
   return (
     <div className='container-fluid'>
-      <Breadcrumb className="mb-5">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbPage>Video Library</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Toolbar>
+        <ToolbarHeading>
+          <ToolbarPageTitle text="Video Library" />
+          <ToolbarDescription>
+            Explore a collection of educational videos to enhance your trading knowledge and skills.
+          </ToolbarDescription>
+        </ToolbarHeading>
+      </Toolbar>
       {(isLoading || !data) ? <Loader /> : null}
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-6">

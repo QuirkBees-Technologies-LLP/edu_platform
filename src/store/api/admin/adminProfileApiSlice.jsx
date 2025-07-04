@@ -8,6 +8,9 @@ export const adminProfileApiSlice = createApi({
         getAdminProfile: builder.query({
             query: () => `/admin/auth/profile`,
         }),
+        getAdminDashboard: builder.query({
+            query: () => `/admin/dashboard/`,
+        }),
         updateAdminProfile: builder.mutation({
             query: (updatedData) => ({
                 url: `/admin/auth/update`,
@@ -19,4 +22,4 @@ export const adminProfileApiSlice = createApi({
     }),
 });
 
-export const { useGetAdminProfileQuery, useUpdateAdminProfileMutation } = adminProfileApiSlice;
+export const { useGetAdminProfileQuery,useGetAdminDashboardQuery, useUpdateAdminProfileMutation } = adminProfileApiSlice;

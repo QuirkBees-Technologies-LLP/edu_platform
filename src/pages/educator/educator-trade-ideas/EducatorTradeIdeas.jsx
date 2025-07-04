@@ -294,6 +294,7 @@ const EducatorTradeIdeas = ({ title = "Trade Ideas" }) => {
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Trade Ideas" />
+          
           <ToolbarDescription>
             Generate, analyze, and execute profitable trading opportunities with smart insights, market trends, and data-driven strategies
           </ToolbarDescription>

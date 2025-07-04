@@ -25,23 +25,25 @@ const ViewClientTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selected
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Scalp</div>
                             </div> */}
-                            <ClientTradeSlider sliderImages={selectedIdea?.image} setIsLightBoxOpen={setIsLightBoxOpen} selectedIdea={selectedIdea}/>
+                            <div className='h-80 max-h-80 object-cover overflow-hidden'>
+                                <ClientTradeSlider sliderImages={selectedIdea?.image} setIsLightBoxOpen={setIsLightBoxOpen} selectedIdea={selectedIdea} />
+                            </div>
                             <div className="grid gap-5 p-5">
                                 <div className="grid grid-cols-12 gap-4">
-                                    <div className="col-span-6">
+                                    <div className="col-span-12">
                                         <div className="flex flex-col gap-2 py-4.5">
                                             <div className="flex gap-10">
-                                                <div>
-                                                    <div className="text-2sm text-gray-800 uppercase">Entry</div>
-                                                    <div className="text-sm text-gray-900 font-semibold">{selectedIdea?.entry ?? "-"}</div>
+                                                <div className='flex items-center gap-3'>
+                                                    <div className="text-xs text-gray-800 uppercase">Entry</div>
+                                                    <span class="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{selectedIdea?.entry ?? "-"}</span>
                                                 </div>
-                                                <div>
+                                                <div className='flex items-center gap-3'>
                                                     <div className="text-2sm text-gray-800 uppercase">Invalidation</div>
-                                                    <div className="text-sm text-gray-900 font-semibold">{selectedIdea?.invalidation ?? "-"}</div>
+                                                    <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{selectedIdea?.invalidation ?? "-"}</span>
                                                 </div>
                                             </div>
                                             <div>
-                                                <div className="text-2sm text-gray-800 uppercase">Exits</div>
+                                                <div className="text-2sm text-gray-800 uppercase mb-3">Exits</div>
                                                 <div className="flex items-center flex-wrap gap-2">
                                                     {selectedIdea?.exits?.length > 0 && selectedIdea?.exits?.map((exit, index) => (
                                                         <div key={index} className="flex items-center gap-2 mt-1">
@@ -53,7 +55,7 @@ const ViewClientTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selected
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="col-span-6">
+                                    <div className="col-span-12">
                                         <div className="card">
                                             <div className="flex flex-col gap-4 px-5 py-4.5">
                                                 <div className="flex flex-col gap-3">

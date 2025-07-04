@@ -32,17 +32,17 @@ const EntryCallout = ({
           }]} />
 
             <h2 className="text-1.5xl font-semibold text-gray-900">
-              Connect Today & Join <br />
-              the{' '}
+              Where Trading Knowledge  <br />
+              Meets{' '}
               <a href="#" className="link">
-                KeenThemes Network
+                Intelligent Execution.
               </a>
             </h2>
 
             <p className="text-sm font-normal text-gray-700 leading-5.5">
-              Enhance your projects with premium themes and <br />
-              templates. Join the KeenThemes community today <br />
-              for top-quality designs and resources.
+              Level up your trading skills with structured <br />
+               lessons and expert insights. Join IQVerse  <br />
+              for smarter, faster learning.
             </p>
           </div>
         </div>

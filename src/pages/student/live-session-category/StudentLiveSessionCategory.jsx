@@ -4,6 +4,7 @@ import { useGetAcademyCategoryQuery } from '../../../store/api/client/clientAcad
 import { Link } from 'react-router-dom';
 import Loader from '../../../components/ui/loader';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../components/ui/breadcrumb';
+import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 
 const StudentLiveSessionCategory = () => {
     const { data, isLoading } = useGetAcademyCategoryQuery();
@@ -13,13 +14,14 @@ const StudentLiveSessionCategory = () => {
     return (
         <div>
             <Container>
-                <Breadcrumb className="mb-5">
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>Live Sessions</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
+                <Toolbar>
+                    <ToolbarHeading>
+                        <ToolbarPageTitle text="Live Sessions" />
+                        <ToolbarDescription>
+                              Join real-time sessions hosted by top educators to stay updated and interact live.
+                        </ToolbarDescription>
+                    </ToolbarHeading>
+                </Toolbar>
             </Container>
             <Container>
                 {(isLoading || !data) ? <Loader /> :

@@ -35,7 +35,7 @@ console.log(educator, "educator");
 
     return (
         <img
-            className="rounded-full size-10 me-2"
+            className="rounded-full size-8 me-2"
             src={imageUrl}
             alt={`${educator?.first_name} ${educator?.last_name}`}
         />

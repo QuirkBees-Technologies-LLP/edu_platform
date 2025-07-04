@@ -7,6 +7,8 @@ import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
 import EducatorImage from "./EducatorImage";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
+import { Container } from "lucide-react";
+import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 
 const ClientTradeIdeas = () => {
   const [page, setPage] = useState(1);
@@ -63,78 +65,80 @@ const ClientTradeIdeas = () => {
 
   return (
     <div className="container-fluid">
-      <Breadcrumb className="mb-5">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbPage>Trade Ideas</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Toolbar>
+        <ToolbarHeading>
+          <ToolbarPageTitle text="Trade Ideas" />
+          <ToolbarDescription>
+            Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
+          </ToolbarDescription>
+        </ToolbarHeading>
+      </Toolbar>
+
+
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
-                className="card border-2 hover:bg-gray-200 cursor-pointer"
-                onClick={() => {
-                  setSelectedIdea(idea);
-                  setIsViewOpen(true);
-                }}
-                ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
-              >
-                <div className="flex items-center px-4 pt-3">
-                  <div className="mr-3 mb-3 text-gray-900">{idea?.name}</div>
+                className="card border-2 hover:bg-gray-200 cursor-pointer overflow-hidden h-fit" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null} >
+                <div className="h-52 overflow-hidden">
+                  <img
+                    src={idea?.image?.[0]}
+                    className="w-full h-full	 object-cover"
+                    alt=""
+                  />
                 </div>
-                <img
-                  src={idea?.image?.[0]}
-                  className="w-full h-44 object-cover"
-                  alt=""
-                />
-                <div className="card-border card-rounded-b flex flex-col gap-2 px-5 py-4.5">
-                  <div className="flex gap-10">
-                    <div>
-                      <div className="text-2sm text-gray-800 uppercase">Entry</div>
-                      <div className="text-sm text-gray-900">{idea?.entry}</div>
-                    </div>
-                    <div>
-                      <div className="text-2sm text-gray-800 uppercase">
-                        Invalidation
+                <div className="card-border card-rounded-b flex flex-col gap-2 justify-between">
+                  <div className="px-5 py-4.5 min-h-64 ">
+                    <div className="font-bold mr-3 text-gray-900 mb-3">{idea?.name}</div>
+                    <div className="flex gap-10 mb-3">
+                      <div>
+                        <div className="text-2sm text-gray-800 uppercase">Entry</div>
+                        <span class="mt-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{idea?.entry}</span>
                       </div>
-                      <div className="text-sm text-gray-900">{idea?.invalidation}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-2sm text-gray-800 uppercase">Exits</div>
-                    <div className="flex items-center flex-wrap gap-2">
-                      {idea?.exits?.map((exit, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-2 mt-1"
-                        >
-                          <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
-                            {idx + 1}
-                          </div>
-                          <div className="text-sm text-gray-900">{exit}</div>
+                      <div>
+                        <div className="text-2sm text-gray-800 uppercase">
+                          Invalidation
                         </div>
-                      ))}
+                        <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{idea?.invalidation}</span>
+                      </div>
+                    </div>
+                    <div className="">
+                      <div className="text-2sm mb-2   text-gray-800 uppercase ">Exits</div>
+                      <div className="flex items-center flex-wrap gap-2">
+                        {idea?.exits?.map((exit, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 mt-1"
+                          >
+                            <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                              {idx + 1}
+                            </div>
+                            <div className="text-sm text-gray-900">{exit}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center pt-4">
-                    <EducatorImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
-                    <div>
-                      <Link
-                        to="/public-profile/profiles/nft"
-                        className="text-2sm text-gray-800 hover:text-primary mb-px"
-                      >
-                        {idea?.educatorDetails?.name}
-                      </Link>
-                      <div className="text-2sm text-gray-700 mb-px">
-                        {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
+                  <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
+                    <div className="flex items-center">
+                      <EducatorImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
+                      <div>
+                        <Link
+                          to="/public-profile/profiles/nft"
+                          className="text-2sm text-gray-800 hover:text-primary mb-px"
+                        >
+                          {idea?.educatorDetails?.name}
+                        </Link>
+                        <div className="text-2sm text-gray-700 mb-px">
+                          {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
               </div>
             ))}
           </div>
