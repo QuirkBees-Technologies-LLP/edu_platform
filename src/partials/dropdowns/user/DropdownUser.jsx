@@ -58,11 +58,11 @@ const DropdownUser = ({
     };
 
     const profilePath = roleBasedProfilePaths[auth.user.role] || '/profile';
-    
+
     return <Fragment>
       <MenuSeparator />
       <div className="flex flex-col">
-        <MenuItem>
+        {/* <MenuItem>
           <MenuLink path="/public-profile/profiles/default">
             <MenuIcon className="menu-icon">
               <KeenIcon icon="badge" />
@@ -71,7 +71,7 @@ const DropdownUser = ({
               <FormattedMessage id="USER.MENU.PUBLIC_PROFILE" />
             </MenuTitle>
           </MenuLink>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem>
           <MenuLink path={profilePath}>
             <MenuIcon>
@@ -82,7 +82,7 @@ const DropdownUser = ({
             </MenuTitle>
           </MenuLink>
         </MenuItem>
-        <MenuItem>
+        {/* <MenuItem>
           <MenuLink path="/educator-details">
             <MenuIcon>
               <KeenIcon icon="profile-circle" />
@@ -201,7 +201,7 @@ const DropdownUser = ({
               <FormattedMessage id="USER.MENU.DEV_FORUM" />
             </MenuTitle>
           </MenuLink>
-        </MenuItem>
+        </MenuItem> */}
         <DropdownUserLanguages menuItemRef={menuItemRef} />
         <MenuSeparator />
       </div>

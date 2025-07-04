@@ -23,16 +23,16 @@ const DropdownUserLanguages = ({
     return I18N_LANGUAGES.map((item, index) => <MenuItem key={index} className={clsx(item.code === currentLanguage.code && 'active')} onClick={() => {
       handleLanguage(item);
     }}>
-        <MenuLink className="h-10">
-          <MenuIcon>
-            <img src={item.flag} className="inline-block size-4 rounded-full" alt={item.label} />
-          </MenuIcon>
-          <MenuTitle>{item.label}</MenuTitle>
-          {item.code === currentLanguage.code && <MenuBadge>
-              <KeenIcon icon="check-circle" style="solid" className="text-success text-base" />
-            </MenuBadge>}
-        </MenuLink>
-      </MenuItem>);
+      <MenuLink className="h-10">
+        <MenuIcon>
+          <img src={item.flag} className="inline-block size-4 rounded-full" alt={item.label} />
+        </MenuIcon>
+        <MenuTitle>{item.label}</MenuTitle>
+        {item.code === currentLanguage.code && <MenuBadge>
+          <KeenIcon icon="check-circle" style="solid" className="text-success text-base" />
+        </MenuBadge>}
+      </MenuLink>
+    </MenuItem>);
   };
   return <MenuItem toggle="dropdown" trigger="hover" dropdownProps={{
     placement: isRTL() ? 'left-start' : 'right-start',
@@ -43,7 +43,7 @@ const DropdownUserLanguages = ({
       }
     }]
   }}>
-      <MenuLink>
+    {/* <MenuLink>
         <MenuIcon>
           <KeenIcon icon="icon" />
         </MenuIcon>
@@ -54,8 +54,8 @@ const DropdownUserLanguages = ({
           {currentLanguage.label}
           <img src={currentLanguage.flag} className="inline-block size-3.5 rounded-full" alt="{currentLanguage.label}" />
         </div>
-      </MenuLink>
-      <MenuSub className="menu-default light:border-gray-300 w-[190px]">{buildItems()}</MenuSub>
-    </MenuItem>;
+      </MenuLink> */}
+    <MenuSub className="menu-default light:border-gray-300 w-[190px]">{buildItems()}</MenuSub>
+  </MenuItem>;
 };
 export { DropdownUserLanguages };
