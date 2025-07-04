@@ -12,7 +12,7 @@ const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRo
         try {
             await deleteEducator(selectedRow?._id).unwrap();
             refetch();
-            toast.success("Trade idea deleted successfully!");
+            toast.success("educator deleted successfully!");
             handleDeleteClose();
         } catch (error) {
             toast.error(err.data.message);

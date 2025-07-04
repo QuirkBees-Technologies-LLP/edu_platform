@@ -6,7 +6,7 @@ export const adminEducatorsApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getEducators: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/admin/educator/list?page=${page}&limit=${limit}`,
+            query: ({ page = 1, limit = 10 ,search="" }) => `/admin/educator/list?page=${page}&limit=${limit}&search=${search}`,
         }),
        
         createEducator: builder.mutation({
