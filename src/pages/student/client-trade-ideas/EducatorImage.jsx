@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { toAbsoluteUrl } from '@/utils/Assets';
 function EducatorImage({ educator, defaultImage }) {
     const [isImageWorking, setIsImageWorking] = useState(null);
-console.log(educator, "educator");
-
     // Function to check if the image URL is working
     const isImageUrlWorking = async (url) => {
         const img = new Image();
