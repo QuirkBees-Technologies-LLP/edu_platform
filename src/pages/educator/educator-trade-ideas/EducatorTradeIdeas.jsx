@@ -76,7 +76,7 @@ const EducatorTradeIdeas = ({ title = "Trade Ideas" }) => {
       header: ({
         column
       }) => <DataGridColumnHeader title='Images' column={column} />,
-      enableSorting: true,
+      enableSorting: false,
       cell: ({ row }) =>
         <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
           setSelectedRow(row.original)

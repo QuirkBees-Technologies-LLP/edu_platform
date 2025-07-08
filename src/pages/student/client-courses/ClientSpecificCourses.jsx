@@ -6,260 +6,259 @@ import { useGetClientSingleCourseSectionQuery } from '../../../store/api/client/
 import ShowMoreLess from '../../../components/ui/showmoreless';
 import Loader from '../../../components/ui/loader';
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from '../../../components/ui/breadcrumb';
 
 const ClientSpecificCourses = () => {
-    const { id } = useParams();
-    const { data, isLoading } = useGetClientSingleCourseSectionQuery(id);
-    const defaultImage = '/media/images/600x400/1.jpg';
+  const { id } = useParams();
+  const { data, isLoading } = useGetClientSingleCourseSectionQuery(id);
+  const defaultImage = '/media/images/600x400/1.jpg';
 
-    const sections = data?.data;
-    const [currentLecture, setCurrentLecture] = useState(null);
-    const [thumbnails, setThumbnails] = useState({});
+  const sections = data?.data;
+  const [currentLecture, setCurrentLecture] = useState(null);
+  const [thumbnails, setThumbnails] = useState({});
 
-    useEffect(() => {
-        if (sections && sections.length > 0) {
-            const firstSectionWithLectures = sections.find(section => section.lectures?.length > 0);
-            if (firstSectionWithLectures) {
-                setCurrentLecture(firstSectionWithLectures.lectures[0]);
-            }
-        }
-    }, [sections]);
-
-    const handleLectureClick = (lecture) => {
-        setCurrentLecture(lecture);
-    };
-
-    // Video Platform Detection & IDs
-    const getVideoPlatform = (url) => {
-        if (!url) return null;
-        if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
-        if (url.includes('vimeo.com')) return 'vimeo';
-        if (url.includes('dailymotion.com') || url.includes('dai.ly')) return 'dailymotion';
-        return null;
-    };
-
-    const getYouTubeVideoId = (url) => {
-        const match = url.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
-        return match ? match[1] : null;
-    };
-
-    const getVimeoVideoId = (url) => {
-        const match = url.match(/vimeo\.com\/(\d+)/);
-        return match ? match[1] : null;
-    };
-
-    const getDailymotionVideoId = (url) => {
-        const match = url.match(/(?:dai\.ly\/|video\/)([\w]+)/);
-        return match ? match[1] : null;
-    };
-
-    // Video Embed URL
-    const getVideoEmbedUrl = (url) => {
-        const platform = getVideoPlatform(url);
-        let videoId;
-
-        switch (platform) {
-            case 'youtube':
-                videoId = getYouTubeVideoId(url);
-                return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            case 'vimeo':
-                videoId = getVimeoVideoId(url);
-                return `https://player.vimeo.com/video/${videoId}?autoplay=1`;
-            case 'dailymotion':
-                videoId = getDailymotionVideoId(url);
-                return `https://www.dailymotion.com/embed/video/${videoId}?autoplay=1`;
-            default:
-                return null;
-        }
-    };
-
-    // Thumbnail Loader
-    const fetchThumbnails = async () => {
-        const thumbMap = {};
-        for (const section of sections || []) {
-            for (const lecture of section.lectures || []) {
-                const url = lecture.content;
-                const platform = getVideoPlatform(url);
-
-                try {
-                    if (platform === 'youtube') {
-                        const videoId = getYouTubeVideoId(url);
-                        thumbMap[lecture._id] = videoId
-                            ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-                            : defaultImage;
-                    } else if (platform === 'vimeo') {
-                        const videoId = getVimeoVideoId(url);
-                        const res = await fetch(`https://vimeo.com/api/v2/video/${videoId}.json`);
-                        const data = await res.json();
-                        thumbMap[lecture._id] = data[0].thumbnail_large || defaultImage;
-                    } else if (platform === 'dailymotion') {
-                        const videoId = getDailymotionVideoId(url);
-                        const res = await fetch(`https://www.dailymotion.com/services/oembed?url=https://www.dailymotion.com/video/${videoId}`);
-                        const data = await res.json();
-                        thumbMap[lecture._id] = data.thumbnail_url || defaultImage;
-                    } else {
-                        thumbMap[lecture._id] = defaultImage;
-                    }
-                } catch {
-                    thumbMap[lecture._id] = defaultImage;
-                }
-            }
-        }
-        setThumbnails(thumbMap);
-    };
-
-    useEffect(() => {
-        if (sections?.length > 0) {
-            fetchThumbnails();
-        }
-    }, [sections]);
-
-    if (isLoading || !data) {
-        return <Loader />;
+  useEffect(() => {
+    if (sections && sections.length > 0) {
+      const firstSectionWithLectures = sections.find(section => section.lectures?.length > 0);
+      if (firstSectionWithLectures) {
+        setCurrentLecture(firstSectionWithLectures.lectures[0]);
+      }
     }
+  }, [sections]);
 
-    return (
-        <div>
-            <Container>
-                <Breadcrumb className="mb-5">
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <Link to="/video-library" className="hover:text-primary">Courses</Link>
-                            <BreadcrumbSeparator />
-                        </BreadcrumbItem>
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>{sections?.[0]?.title || 'No sections'}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            </Container>
+  const handleLectureClick = (lecture) => {
+    setCurrentLecture(lecture);
+  };
 
-            {(!sections || sections.length === 0 || !currentLecture) ? (
-                <div className="flex items-center justify-center h-64">
-                    <div className="text-center">
-                        <h3 className="text-xl font-medium text-gray-900">No sections available</h3>
-                        <p className="mt-2 text-gray-600">This course doesn't have any sections yet.</p>
-                    </div>
-                </div>
-            ) : (
-                <Container>
-                    <div className="grid grid-cols-12 gap-4">
-                        {/* Main Content */}
-                        <div className="xl:col-span-8 col-span-12">
-                            {currentLecture?.type === 'VIDEO' && currentLecture.content ? (
-                                <div className="mb-4">
-                                    <iframe
-                                        className="w-full rounded-lg"
-                                        height="480"
-                                        src={getVideoEmbedUrl(currentLecture.content)}
-                                        title={currentLecture.title}
-                                        frameBorder="0"
-                                        allow="autoplay; fullscreen; encrypted-media"
-                                        allowFullScreen
-                                    />
-                                </div>
-                            ) : currentLecture?.type === 'TEXT' ? (
-                                <div className="bg-light p-6 rounded-lg shadow mb-4">
-                                    <h2 className="text-2xl font-bold mb-4">{currentLecture.title}</h2>
-                                    <div
-                                        className="prose max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: currentLecture.content }}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
-                                    <p>Select a lecture to view content</p>
-                                </div>
-                            )}
+  const getVideoPlatform = (url) => {
+    if (!url) return null;
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+    if (url.includes('vimeo.com')) return 'vimeo';
+    if (url.includes('dailymotion.com') || url.includes('dai.ly')) return 'dailymotion';
+    if (url.includes('loom.com')) return 'loom';
+    return null;
+  };
 
-                            <div className="mt-3 mb-5">
-                                <h3 className="text-2xl font-semibold text-gray-900">
-                                    {currentLecture?.title || 'Select a lecture'}
-                                </h3>
-                                <h5 className="text-md font-medium text-gray-700">
-                                    {sections?.[0]?.course?.title || 'Course Content'}
-                                </h5>
-                                <ShowMoreLess html={currentLecture?.description} limit={180} />
-                            </div>
-                        </div>
+  const getYouTubeVideoId = (url) => {
+    const match = url.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+    return match ? match[1] : null;
+  };
 
-                        {/* Sidebar */}
-                        <div className="xl:col-span-4 col-span-12 space-y-4">
-                            {sections?.map((section) => (
-                                <div className="card p-3 rounded-lg" key={section._id}>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="text-lg font-medium text-gray-900">{section.title}</h4>
-                                        <span className="text-sm text-gray-500">
-                                            {section.lectures?.length || 0} lectures
-                                        </span>
-                                    </div>
-                                    {section.lectures?.length > 0 ? (
-                                        <div className="flex flex-col">
-                                            {section.lectures.map((lecture, index) => (
-                                                <div
-                                                    className={`rounded-lg p-3 mb-2 cursor-pointer transition-all ${currentLecture?._id === lecture._id
-                                                            ? 'bg-light border border-primary'
-                                                            : 'hover:bg-light'
-                                                        }`}
-                                                    key={lecture._id}
-                                                    onClick={() => handleLectureClick(lecture)}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-sm text-gray-500 w-5">{index + 1}</span>
-                                                            {lecture.type === 'VIDEO' ? (
-                                                                <div className="relative">
-                                                                    <img
-                                                                        className="rounded-lg h-14 w-24 object-cover"
-                                                                        src={thumbnails[lecture._id] || defaultImage}
-                                                                        alt={lecture.title}
-                                                                    />
-                                                                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-lg">
-                                                                        <Play className="text-white w-5 h-5" />
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="rounded-lg h-14 w-24 bg-gray-100 flex items-center justify-center">
-                                                                    <span className="text-gray-500 text-sm">Text</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="text-md font-medium text-gray-900 truncate">
-                                                                {lecture.title}
-                                                            </h4>
-                                                            <div className="flex items-center justify-between">
-                                                                <p className="text-xs text-gray-500">{lecture.type}</p>
-                                                                {lecture.preview && (
-                                                                    <span className="text-xs bg-primary-light text-primary px-2 py-0.5 rounded">
-                                                                        Preview
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-4 text-gray-500 text-sm">
-                                            No lectures in this section
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </Container>
-            )}
+  const getVimeoVideoId = (url) => {
+    const match = url.match(/vimeo\.com\/(\d+)/);
+    return match ? match[1] : null;
+  };
+
+  const getDailymotionVideoId = (url) => {
+    const match = url.match(/(?:dai\.ly\/|video\/)([\w]+)/);
+    return match ? match[1] : null;
+  };
+
+  const getVideoEmbedUrl = (url) => {
+    const platform = getVideoPlatform(url);
+    let videoId;
+
+    switch (platform) {
+      case 'youtube':
+        videoId = getYouTubeVideoId(url);
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      case 'vimeo':
+        videoId = getVimeoVideoId(url);
+        return `https://player.vimeo.com/video/${videoId}?autoplay=1`;
+      case 'dailymotion':
+        videoId = getDailymotionVideoId(url);
+        return `https://www.dailymotion.com/embed/video/${videoId}?autoplay=1`;
+      case 'loom':
+        return url.replace('/share/', '/embed/');
+      default:
+        return null;
+    }
+  };
+
+  const fetchThumbnails = async () => {
+    const thumbMap = {};
+    for (const section of sections || []) {
+      for (const lecture of section.lectures || []) {
+        const url = lecture.content;
+        const platform = getVideoPlatform(url);
+
+        try {
+          if (platform === 'youtube') {
+            const videoId = getYouTubeVideoId(url);
+            thumbMap[lecture._id] = videoId
+              ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+              : defaultImage;
+          } else if (platform === 'vimeo') {
+            const videoId = getVimeoVideoId(url);
+            const res = await fetch(`https://vimeo.com/api/v2/video/${videoId}.json`);
+            const data = await res.json();
+            thumbMap[lecture._id] = data[0].thumbnail_large || defaultImage;
+          } else if (platform === 'dailymotion') {
+            const videoId = getDailymotionVideoId(url);
+            const res = await fetch(`https://www.dailymotion.com/services/oembed?url=https://www.dailymotion.com/video/${videoId}`);
+            const data = await res.json();
+            thumbMap[lecture._id] = data.thumbnail_url || defaultImage;
+          } else {
+            thumbMap[lecture._id] = defaultImage;
+          }
+        } catch {
+          thumbMap[lecture._id] = defaultImage;
+        }
+      }
+    }
+    setThumbnails(thumbMap);
+  };
+
+  useEffect(() => {
+    if (sections?.length > 0) {
+      fetchThumbnails();
+    }
+  }, [sections]);
+
+  if (isLoading || !data) {
+    return <Loader />;
+  }
+
+  return (
+    <div>
+      <Container>
+        <Breadcrumb className="mb-5">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <Link to="/video-library" className="hover:text-primary">Courses</Link>
+              <BreadcrumbSeparator />
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbPage>{sections?.[0]?.title || 'No sections'}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </Container>
+
+      {!sections?.length || !currentLecture ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <h3 className="text-xl font-medium text-gray-900">No sections available</h3>
+            <p className="mt-2 text-gray-600">This course doesn't have any sections yet.</p>
+          </div>
         </div>
-    );
+      ) : (
+        <Container>
+          <div className="grid grid-cols-12 gap-4">
+            <div className="xl:col-span-8 col-span-12">
+              {currentLecture?.type === 'VIDEO' && currentLecture.content ? (
+                <div className="mb-4">
+                  <iframe
+                    className="w-full rounded-lg"
+                    height="480"
+                    src={getVideoEmbedUrl(currentLecture.content)}
+                    title={currentLecture.title}
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; encrypted-media"
+                    allowFullScreen
+                  />
+                </div>
+              ) : currentLecture?.type === 'TEXT' ? (
+                <div className="bg-light p-6 rounded-lg shadow mb-4">
+                  <h2 className="text-2xl font-bold mb-4">{currentLecture.title}</h2>
+                  <div
+                    className="prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: currentLecture.content }}
+                  />
+                </div>
+              ) : (
+                <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
+                  <p>Select a lecture to view content</p>
+                </div>
+              )}
+
+              <div className="mt-3 mb-5">
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  {currentLecture?.title || 'Select a lecture'}
+                </h3>
+                <h5 className="text-md font-medium text-gray-700">
+                  {sections?.[0]?.course?.title || 'Course Content'}
+                </h5>
+                <ShowMoreLess html={currentLecture?.description} limit={180} />
+              </div>
+            </div>
+
+            <div className="xl:col-span-4 col-span-12 space-y-4">
+              {sections?.map((section) => (
+                <div className="card p-3 rounded-lg" key={section._id}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-medium text-gray-900">{section.title}</h4>
+                    <span className="text-sm text-gray-500">
+                      {section.lectures?.length || 0} lectures
+                    </span>
+                  </div>
+                  {section.lectures?.length > 0 ? (
+                    <div className="flex flex-col">
+                      {section.lectures.map((lecture, index) => (
+                        <div
+                          className={`rounded-lg p-3 mb-2 cursor-pointer transition-all ${
+                            currentLecture?._id === lecture._id
+                              ? 'bg-light border border-primary'
+                              : 'hover:bg-light'
+                          }`}
+                          key={lecture._id}
+                          onClick={() => handleLectureClick(lecture)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500 w-5">{index + 1}</span>
+                              {lecture.type === 'VIDEO' ? (
+                                <div className="relative">
+                                  <img
+                                    className="rounded-lg h-14 w-24 object-cover"
+                                    src={thumbnails[lecture._id] || defaultImage}
+                                    alt={lecture.title}
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-lg">
+                                    <Play className="text-white w-5 h-5" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="rounded-lg h-14 w-24 bg-gray-100 flex items-center justify-center">
+                                  <span className="text-gray-500 text-sm">Text</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-md font-medium text-gray-900 truncate">
+                                {lecture.title}
+                              </h4>
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-gray-500">{lecture.type}</p>
+                                {lecture.preview && (
+                                  <span className="text-xs bg-primary-light text-primary px-2 py-0.5 rounded">
+                                    Preview
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-500 text-sm">
+                      No lectures in this section
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Container>
+      )}
+    </div>
+  );
 };
 
 export default ClientSpecificCourses;
