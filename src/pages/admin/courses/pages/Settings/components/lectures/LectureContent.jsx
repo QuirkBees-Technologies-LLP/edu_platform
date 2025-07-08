@@ -154,6 +154,17 @@ const LectureContent = ({
       return `https://player.vimeo.com/video/${videoId}`;
     }
 
+    if (url.includes('dailymotion.com/video/')) {
+      const videoId = url.split('dailymotion.com/video/')[1].split('?')[0];
+      return `https://www.dailymotion.com/embed/video/${videoId}`;
+    }
+
+    // Loom
+    if (url.includes('loom.com/share/')) {
+      const videoId = url.split('loom.com/share/')[1].split('?')[0];
+      return `https://www.loom.com/embed/${videoId}`;
+    }
+
     return url;
   };
 
@@ -335,7 +346,7 @@ const LectureContent = ({
               <FileText className="w-4 h-4 text-primary" />
               Description
             </h3>
-            {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} />: "No description provided"}
+            {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} /> : "No description provided"}
           </div>
         </div>
 
@@ -490,7 +501,7 @@ const LectureContent = ({
             )}
             {lecture.title}
           </h2>
-          {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} />: "No description provided"}
+          {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} /> : "No description provided"}
         </div>
         <Button
           variant={isEditing ? "outline" : "default"}
