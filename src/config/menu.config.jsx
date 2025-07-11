@@ -1051,6 +1051,11 @@ export const sideMenus = {
       icon: <CircleDot />,
       path: '/educator/stream-recording'
     },
+    // {
+    //   title: 'Community Feed',
+    //   icon: <LayoutDashboard />,
+    //   path: '/community-feed'
+    // },
   ],
   student: [
     {
