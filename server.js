@@ -1,21 +1,17 @@
-// server.js
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const express = require("express");
+const path = require("path");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
-const app  = express();
-const port = process.env.PORT || 8080;    // <- required by Azure
+const app = express();
+const port = process.env.PORT || 3000;
 
-// ①  Static files
-app.use(express.static(path.join(__dirname, 'dist')));
+// Serve static files from dist
+app.use(express.static(path.join(__dirname, "dist")));
 
-// ②  SPA fallback
-app.get('*', (_, res) =>
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
-);
+// Fallback for SPA routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
-app.listen(port, () =>
-  console.log(`✅  Web server running on http://0.0.0.0:${port}`)
-);
+app.listen(port, () => {
+  console.log(Server is running on port ${port});
+})
