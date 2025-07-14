@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
+    allowedHosts: ["edu-fsasavghftf7h2da.westus2-01.azurewebsites.net"],
   },
   plugins: [react()],
   css: {
