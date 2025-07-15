@@ -32,7 +32,7 @@ jobs:
           VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
           echo "VITE_API_URL = $VITE_API_URL"
-          echo "VITE_APP_API_URL" = $VITE_APP_API_URL"
+          echo "VITE_APP_API_URL = $VITE_APP_API_URL"
           npm install
           npm run build
 
