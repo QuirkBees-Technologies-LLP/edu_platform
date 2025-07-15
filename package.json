@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "postinstall": "npm run build",
-    "start": "node server.cjs"
+    "start": "node server.js"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.1.3",
