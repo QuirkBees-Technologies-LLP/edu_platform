@@ -15,6 +15,9 @@ const AppRouting = () => {
   const [firstLoad, setFirstLoad] = useState(true);
   const location = useLocation();
   const path = location.pathname.trim();
+  const API_URL = import.meta.env.VITE_APP_API_URL;
+  console.log(API_URL, "API_URL");
+
   useEffect(() => {
     if (firstLoad) {
       verify().finally(() => {
@@ -23,7 +26,7 @@ const AppRouting = () => {
       });
     }
   });
-  
+
   useEffect(() => {
     if (!firstLoad) {
       setProgressBarLoader(true);
