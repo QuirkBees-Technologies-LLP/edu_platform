@@ -23,9 +23,16 @@ jobs:
       # ✅ Inject VITE env vars before build
       - name: Build Vite App
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}   # ✅ Injected here
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
+          VITE_APP_NAME: ${{ secrets.VITE_APP_NAME }}
+          VITE_APP_VERSION: ${{ secrets.VITE_APP_VERSION }}
+          GENERATE_SOURCEMAP: ${{ secrets.GENERATE_SOURCEMAP }}
+          VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
+          VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
           echo "VITE_API_URL = $VITE_API_URL"
+          echo "VITE_APP_API_URL" = $VITE_APP_API_URL"
           npm install
           npm run build
 
