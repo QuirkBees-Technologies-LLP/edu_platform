@@ -27,7 +27,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
         email: "",
         password: "",
         role: "educator",
-        status: true,
+        status: "",
         is_create_stream: false
     };
 
@@ -267,8 +267,8 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                                         <SelectValue placeholder="Select" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value={true}>Active</SelectItem>
-                                        <SelectItem value={false}>Inactive</SelectItem>
+                                        <SelectItem value={"true"}>Active</SelectItem>
+                                        <SelectItem value={"false"}>Inactive</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 {formik.touched.status && formik.errors.status && (
