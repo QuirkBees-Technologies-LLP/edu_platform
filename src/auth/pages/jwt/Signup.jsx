@@ -90,8 +90,8 @@ const Signup = () => {
         onSubmit={formik.handleSubmit}
       >
         <div className="flex justify-center mb-5">
-          <img src="/media/app/default-logo.png" className="w-100 h-5 light_mode" alt="" />
-          <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" />
+          <img src="/media/app/default-logo.svg" className="w-100 light_mode" alt="" />
+          <img src="/media/app/default-logo-dark.svg" className="w-100 dark_mode" alt="" />
         </div>
         <div className="text-center mb-2.5">
           <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
@@ -340,7 +340,7 @@ const Signup = () => {
 
         <button
           type="submit"
-          className="btn btn-primary bg-blue-gradient flex justify-center grow w-64 mx-auto"
+          className="btn btn-primary bg-pink-gradient flex justify-center grow w-64 mx-auto"
           disabled={loading || formik.isSubmitting}
         >
           {loading ? "Please wait..." : "Sign up"}

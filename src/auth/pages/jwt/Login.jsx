@@ -68,10 +68,10 @@ const Login = () => {
 
   return (
     <div className="card max-w-[390px] w-full">
-      <form className="card-body flex flex-col login_card gap-5 py-7 px-4" noValidate>
+      <form className="card-body flex flex-col login_card gap-5 p-7" noValidate>
         <div className="flex justify-center mb-5">
-          <img src="/media/app/default-logo.png" className="w-100 h-5 light_mode" alt="" />
-          <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" />
+          <img src="/media/app/default-logo.svg" className="w-100 light_mode" alt="" />
+          <img src="/media/app/default-logo-dark.svg" className="w-100 dark_mode" alt="" />
         </div>
         <div className="text-center mb-2.5">
           <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">

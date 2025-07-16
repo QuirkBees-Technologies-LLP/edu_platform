@@ -5,7 +5,7 @@ const CourseProgressBar = ({ progress = 0 }) => {
     <div className="w-full bg-white p-4 rounded-lg shadow-sm">
       <div className="w-full h-6 bg-gray-100 rounded-full overflow-hidden relative">
         <div
-          className="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-in-out"
+          className="h-full bg-primary rounded-full transition-all duration-300 ease-in-out"
           style={{ width: `${progress}%` }}
         />
 

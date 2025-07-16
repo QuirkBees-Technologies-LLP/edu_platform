@@ -7,7 +7,7 @@ const MenuToggle = ({
 }) => {
   if (hasItemSub) {
     return <div className={clsx('menu-toggle pe-0', className && className)} onClick={handleToggle}>
-        {children}  <span class="badge badge-xs badge-primary badge-outline ms-2">Premium</span>
+        {children}
       </div>;
   } else {
     return <div className={clsx('menu-toggle', className && className)}>{children}</div>;

@@ -38,7 +38,7 @@ const CreateTradeIdeas = forwardRef(
       name: "",
       files: [""],
       type: "",
-      timeFrame: [""],
+      timeFrame: "",
       educatorId: "",
       status: "",
       entry: "",
@@ -54,9 +54,7 @@ const CreateTradeIdeas = forwardRef(
         .string()
         .oneOf(["active", "pending", "win", "partialWin", "loss"])
         .required("Status is required"),
-      timeFrame: Yup.array().of(
-        Yup.string().oneOf(["scalp", "intraday", "swing"])
-      ),
+      timeFrame:  Yup.string().required("Time frame is required"),
       educatorId: Yup.string().required("Educator ID is required"),
       entry: Yup.string().required("Entry is required"),
       invalidation: Yup.number()
@@ -90,9 +88,7 @@ const CreateTradeIdeas = forwardRef(
           formData.append("files", file?.file?.file)
         );
         formData.append("type", values.type);
-        values.timeFrame.forEach((frame) =>
-          formData.append("timeFrame[]", frame)
-        );
+        formData.append("timeFrame[]", [values.timeFrame])
         formData.append("educatorId", values.educatorId);
         formData.append("status", values.status);
         formData.append("entry", values.entry);
@@ -142,7 +138,7 @@ const CreateTradeIdeas = forwardRef(
           name: selectedRow?.name,
           files: existingImages,
           type: selectedRow?.type,
-          timeFrame: selectedRow?.timeFrame,
+          timeFrame: selectedRow?.timeFrame[0],
           status: selectedRow?.status,
           entry: selectedRow?.entry,
           invalidation: selectedRow?.invalidation,
@@ -217,11 +213,10 @@ const CreateTradeIdeas = forwardRef(
                     type="text"
                     placeholder="Enter name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.name && formik.touched.name
+                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (
@@ -234,7 +229,7 @@ const CreateTradeIdeas = forwardRef(
               <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Type <span className="text-danger">*</span>
+                    Direction <span className="text-danger">*</span>
                   </label>
 
                   <Select
@@ -246,11 +241,10 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("type", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.type && formik.touched.type
+                      className={`form-control input input-md w-full ${formik.errors.type && formik.touched.type
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -274,34 +268,28 @@ const CreateTradeIdeas = forwardRef(
                     Time Frame <span className="text-danger">*</span>
                   </label>
 
-                  <div className="flex flex-col gap-2">
-                    {["scalp", "intraday", "swing"].map((opt) => (
-                      <label
-                        key={opt}
-                        className="inline-flex items-center gap-2"
-                      >
-                        <input
-                          type="checkbox"
-                          name="timeFrame"
-                          value={opt}
-                          checked={formik.values.timeFrame.includes(opt)}
-                          onChange={(e) => {
-                            const { checked, value } = e.target;
-                            const current = formik.values.timeFrame.filter(
-                              (v) => v
-                            ); // remove empty strings if any
-                            formik.setFieldValue(
-                              "timeFrame",
-                              checked
-                                ? [...current, value]
-                                : current.filter((v) => v !== value)
-                            );
-                          }}
-                        />
-                        <span className="capitalize">{opt}</span>
-                      </label>
-                    ))}
-                  </div>
+                  <Select
+                    name="timeFrame"
+                    value={formik.values.timeFrame}
+                    onValueChange={(value) =>
+                      formik.setFieldValue("timeFrame", value)
+                    }
+                    onBlur={() => formik.setFieldTouched("timeFrame", true)}
+                  >
+                    <SelectTrigger
+                      className={`form-control input input-md w-full ${formik.errors.timeFrame && formik.touched.timeFrame
+                          ? "border border-danger"
+                          : ""
+                        }`}
+                    >
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="scalp">Scalp</SelectItem>
+                      <SelectItem value="intraday">Intraday</SelectItem>
+                      <SelectItem value="swing">Swing</SelectItem>
+                    </SelectContent>
+                  </Select>
 
                   {formik.touched.timeFrame && formik.errors.timeFrame && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -326,11 +314,10 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("status", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.status && formik.touched.status
+                      className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -361,11 +348,10 @@ const CreateTradeIdeas = forwardRef(
                     type="number"
                     placeholder="Enter entry"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.entry && formik.touched.entry
+                    className={`form-control input input-md w-full ${formik.errors.entry && formik.touched.entry
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                   />
                   {formik.touched.entry && formik.errors.entry && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -384,11 +370,10 @@ const CreateTradeIdeas = forwardRef(
                     placeholder="Enter invalidation"
                     autoComplete="off"
                     {...formik.getFieldProps("invalidation")}
-                    className={`form-control input input-md w-full ${
-                      formik.errors.invalidation && formik.touched.invalidation
+                    className={`form-control input input-md w-full ${formik.errors.invalidation && formik.touched.invalidation
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                   />
                   {formik.touched.invalidation &&
                     formik.errors.invalidation && (
@@ -420,12 +405,11 @@ const CreateTradeIdeas = forwardRef(
                             newExits[index] = e.target.value;
                             formik.setFieldValue("exits", newExits);
                           }}
-                          className={`form-control input input-md w-full ${
-                            formik.errors.exits?.[index] &&
-                            formik.touched.exits?.[index]
+                          className={`form-control input input-md w-full ${formik.errors.exits?.[index] &&
+                              formik.touched.exits?.[index]
                               ? "border border-danger"
                               : ""
-                          }`}
+                            }`}
                         />
 
                         {/* Remove Button (if more than 1 exit) */}

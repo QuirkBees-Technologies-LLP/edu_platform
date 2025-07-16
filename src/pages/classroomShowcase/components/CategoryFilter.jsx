@@ -11,7 +11,7 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange }) => {
           onClick={() => onCategoryChange(null)}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             !selectedCategory
-              ? "bg-indigo-600 text-white"
+              ? "bg-primary text-white"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -23,7 +23,7 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange }) => {
             onClick={() => onCategoryChange(category.id)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               selectedCategory === category.id
-                ? "bg-indigo-600 text-white"
+                ? "bg-primary text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >

@@ -33,7 +33,7 @@ const HeaderTopbar = () => {
       </button> */}
     {/* <ModalSearch open={searchModalOpen} onOpenChange={handleClose} /> */}
 
-     <Menu>
+    <Menu>
       <MenuItem ref={itemChatRef} onShow={handleShow} toggle="dropdown" trigger="click" dropdownProps={{
         placement: isRTL() ? 'bottom-start' : 'bottom-end',
         modifiers: [{
@@ -96,11 +96,12 @@ const HeaderTopbar = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [-20, 10] : [20, 10] 
+            offset: isRTL() ? [-20, 10] : [20, 10]
           }
         }]
       }}>
         <MenuToggle className="btn rounded-full">
+          <span class="badge badge-xs badge-primary badge-outline ms-2">Premium</span>
           <img className="size-9 rounded-full border-2 border-success shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
         </MenuToggle>
         {DropdownUser({
@@ -108,7 +109,7 @@ const HeaderTopbar = () => {
         })}
       </MenuItem>
     </Menu>
-    
+
   </div>;
 };
 export { HeaderTopbar };
