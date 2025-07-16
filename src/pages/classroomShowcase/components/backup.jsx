@@ -36,7 +36,7 @@ const backupHomePage = () => {
             <div className="flex justify-center">
               <button
                 onClick={handleShowMore}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-active transition-colors"
               >
                 Show More Courses
               </button>

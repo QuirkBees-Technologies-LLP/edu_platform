@@ -15,11 +15,11 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        'blue-gradient': 'linear-gradient(11deg, #7f80ff, #5b4bff, #1e0066)',
+        'pink-gradient': 'linear-gradient(90deg,rgba(228, 178, 89, 1) 0%, rgba(166, 109, 10, 1) 46%)',
       },
       utilities: {
-        '.bg-blue-gradient': {
-          'background-image': 'var(--blue-gradient)',
+        '.bg-pink-gradient': {
+          'background-image': 'var(--pink-gradient)',
         }
       },
       base: {
@@ -58,10 +58,10 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#5A3DFF',
-                active: '#533ae3',
-                light: '#e5e0ff',
-                clarity: 'rgb(157 ,152, 217 , 0.20)',
+                default: '#C88A21',
+                active: '#a67825',
+                light: '#C88A211c',
+                clarity: 'rgb(217 ,198 ,152 , 0.20)',
                 inverse: '#ffffff'
               },
               success: {
@@ -123,10 +123,10 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#5A3DFF',
-                active: '#533ae3',
-                light: '#3521c829',
-                clarity: 'rgb(157 ,152 ,217 , 0.20)',
+                default: '#C88A21',
+                active: '#a67825',
+                light: '#c88a2129',
+                clarity: 'rgb(217 ,198 ,152 , 0.20)',
                 inverse: '#ffffff'
               },
               success: {
@@ -205,11 +205,9 @@ module.exports = {
         }
       },
       fontFamily: {
-        termina: ['Termina', 'sans-serif'],
+        sans: ['Outfit',  'sans-serif']
+       
       },
-      // fontFamily: {
-      //   sans: ['Outfit',  'sans-serif']
-      // },
       colors: {
         //begin: Shadcn UI Colors
         background: 'hsl(var(--background))',

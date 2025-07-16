@@ -63,7 +63,7 @@ const CourseCard = (props) => {
           </p>
           <div className="space-y-3">
             <button
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-2 bg-primary hover:bg-primary-active text-white px-4 py-2 rounded-lg transition-colors"
               onClick={() => navigate(`/classroom/course/${id}`)}
             >
               <Play className="w-4 h-4" />
