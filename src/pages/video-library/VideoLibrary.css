@@ -1,4 +1,4 @@
-.video-library:before {
+/* .video-library:before {
     box-shadow: inset 0px -120px 100px -13px rgba(0, 0, 0, 0.9);
     border-radius: 0.75rem;
     content: "";
@@ -7,7 +7,7 @@
     top: 0;
     width: 100%;
     bottom: 0;
-}
+} */
 
 .course-library:before{
     box-shadow: inset 0px -120px 100px -13px rgba(0, 0, 0, 0.9);

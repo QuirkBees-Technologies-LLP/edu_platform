@@ -34,7 +34,7 @@ function EducatorImage({ educator, defaultImage }) {
 
     return (
         <img
-            className="rounded-full size-10 me-2"
+            className="rounded-full size-10"
             src={imageUrl}
             alt={`${educator?.first_name} ${educator?.last_name}`}
         />

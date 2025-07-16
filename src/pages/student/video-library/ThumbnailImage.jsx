@@ -24,7 +24,7 @@ function ThumbnailImage({ image, defaultImage }) {
 
 
     if (isImageWorking === null) {
-        return <img className="rounded-xl sm:h-24 sm:w-40 w-20 h-22 object-cover" src={toAbsoluteUrl(defaultImage)} alt="Loading..." />;
+        return <img className="rounded-xl sm:h-24 sm:w-40 w-20 h-24 object-cover" src={toAbsoluteUrl(defaultImage)} alt="Loading..." />;
     }
 
     const imageUrl = isImageWorking ? image : toAbsoluteUrl(defaultImage);
@@ -32,7 +32,7 @@ console.log(imageUrl, "imageUrl");
 
     return (
         <img
-            className="w-full h-full rounded-xl"
+            className="w-full h-56 rounded-xl shadow-xl object-cover"
             src={imageUrl}
             alt="Thumbnail"
         />
