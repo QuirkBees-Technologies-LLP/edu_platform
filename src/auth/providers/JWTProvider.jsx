@@ -162,8 +162,8 @@ const AuthProvider = ({ children }) => {
       const { id: userId, name, email: userEmail, expire_at, plan, status } = loginData.data;
 
       // Step 2: Check Plan Expiry
-      // const isExpired = new Date(expire_at) < new Date();
-      const isExpired = false;
+      const isExpired = new Date(expire_at) < new Date();
+      // const isExpired = false;
 
       if (isExpired) {
         // Step 3: Get token and redirect
