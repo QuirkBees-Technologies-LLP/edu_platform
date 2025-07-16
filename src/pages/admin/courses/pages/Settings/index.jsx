@@ -17,7 +17,7 @@ import { clearSections } from "@/store/reducer/sectionSlice";
 import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import ErrorMessage from "@/components/common/ErrorMessage";
+import ErrorMessages from "@/components/common/ErrorsMessage"
 
 const SettingsSection = () => {
   const dispatch = useDispatch();
@@ -80,8 +80,9 @@ const SettingsSection = () => {
 
     if (error) {
       return (
-        <ErrorMessage
-          message={error}
+        <ErrorMessages
+         heading={"No Courses Yet"}
+          message={"You haven’t created any courses yet. Let’s get your first one set up and ready to go."}
           onRetry={() =>
             dispatch(
               fetchCourses({

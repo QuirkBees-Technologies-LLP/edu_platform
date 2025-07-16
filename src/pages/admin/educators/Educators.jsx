@@ -194,8 +194,8 @@ React.useEffect(() => {
       header: ({ column }) => <DataGridColumnHeader title='Status' column={column} />,
       enableSorting: true,
       cell: info => (
-        <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === true ? "badge-success" : "badge-danger"}`}>
-          {info.row.original.status === true ? "Active" : "Inactive"}
+        <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === "true" ? "badge-success" : "badge-danger"}`}>
+          {info.row.original.status === "true" ? "Active" : "Inactive"}
         </span>
       ),
       meta: { headerClassName: 'w-[225px]' },
