@@ -111,7 +111,7 @@ const AdminRecording = ({ title = "Recorded Sessions" }) => {
               target="_blank"
               rel="noopener noreferrer"
               title="Play Recording"
-              className="flex items-center justify-center text-blue-600 hover:text-blue-800"
+              className="flex items-center justify-center text-primary hover:text-primary-active"
             >
               <PlayCircle size={24} />
             </a>

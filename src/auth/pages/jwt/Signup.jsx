@@ -340,7 +340,7 @@ const Signup = () => {
 
         <button
           type="submit"
-          className="btn btn-primary bg-pink-gradient flex justify-center grow w-64 mx-auto"
+          className="btn btn-primary bg-blue-gradient flex justify-center grow w-64 mx-auto"
           disabled={loading || formik.isSubmitting}
         >
           {loading ? "Please wait..." : "Sign up"}

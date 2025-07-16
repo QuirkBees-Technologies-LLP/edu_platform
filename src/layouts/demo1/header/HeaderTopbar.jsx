@@ -100,7 +100,7 @@ const HeaderTopbar = () => {
           }
         }]
       }}>
-        <MenuToggle className="btn btn-icon rounded-full">
+        <MenuToggle className="btn rounded-full">
           <img className="size-9 rounded-full border-2 border-success shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
         </MenuToggle>
         {DropdownUser({

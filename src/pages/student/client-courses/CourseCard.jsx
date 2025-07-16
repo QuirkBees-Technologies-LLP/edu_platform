@@ -136,7 +136,7 @@ const CourseCard = (props) => {
           >
             {/* Watch Button */}
             <motion.button
-              className="flex items-center justify-center gap-2 bg-pink-gradient text-white w-full py-2.5 rounded-lg transition-all shadow-lg shadow-indigo-500/30"
+              className="flex items-center justify-center gap-2 bg-blue-gradient text-white w-full py-2.5 rounded-lg transition-all shadow-lg shadow-indigo-500/30"
               onClick={() => onSelectCourse(course)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
