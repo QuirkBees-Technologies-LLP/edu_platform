@@ -47,7 +47,7 @@ const DropdownUser = ({
           </a>
         </div>
       </div>
-      <span className="badge badge-xs badge-primary badge-outline">Pro</span>
+      {/* <span className="badge badge-xs badge-primary badge-outline">Pro</span> */}
     </div>;
   };
   const buildMenu = () => {

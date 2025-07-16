@@ -1,6 +1,8 @@
 import React from 'react';
 import { MessageInput, VirtualizedMessageList, Window } from 'stream-chat-react';
 import { useOverrideSubmit } from '../hooks/useOverrideSubmit';
+import { User } from 'lucide-react';
+import UserList from './UserList';
 
 
 
@@ -10,11 +12,12 @@ export const ChannelInner = () => {
   return (
     <>
       <Window>
-        <VirtualizedMessageList
+        {/* <VirtualizedMessageList
           additionalVirtuosoProps={{ alignToBottom: true }}
           hideDeletedMessages
           separateGiphyPreview
-        />
+        /> */}
+        <UserList />
         <MessageInput maxRows={2} grow overrideSubmitHandler={overrideSubmitHandler} />
       </Window>
     </>

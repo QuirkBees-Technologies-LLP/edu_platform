@@ -10,36 +10,32 @@ const Layout = () => {
     <style>
       {`
           .branded-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/signin4.png')}');
+            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/edwin-andrade.jpg')}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: relative;
+             
+          }
+          .branded-bg::before {
+            content: ''; /* Essential for pseudo-elements to render */
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgb(219 168 72 / 27%)); 
+            pointer-events: none; 
           }
           .dark .branded-bg {
             background-image: url('${toAbsoluteUrl('/media/images/2600x1600/1-dark.png')}');
           }
-        `}
+      `}
     </style>
 
-    <div className="grid lg:grid-cols-2 grow">
-      <div className="flex justify-center items-center p-8 lg:p-10 order-2 lg:order-1">
+    <div className="grid lg:grid-cols-1 grow branded-bg">
+      <div className="flex justify-center items-center p-8 lg:p-10  z-10">
         <Outlet />
-      </div>
-
-      <div className="lg:rounded-xl lg:border lg:border-gray-200 order-1 lg:m-5 lg:order-2 bg-top xxl:bg-center xl:bg-cover bg-no-repeat branded-bg">
-        {/* <div className="flex flex-col p-8 lg:p-16 gap-4">
-            <Link to="/">
-              <img src={toAbsoluteUrl('/media/app/mini-logo.svg')} className="h-[28px] max-w-none" alt="" />
-            </Link>
-
-            <div className="flex flex-col gap-3">
-              <h3 className="text-2xl font-semibold text-gray-900">Secure Access Portal</h3>
-              <div className="text-base font-medium text-gray-600">
-                A robust authentication gateway ensuring
-                <br /> secure&nbsp;
-                <span className="text-gray-900 font-semibold">efficient user access</span>
-                &nbsp;to the Metronic
-                <br /> Dashboard interface.
-              </div>
-            </div>
-          </div> */}
       </div>
     </div>
   </Fragment>;

@@ -69,10 +69,16 @@ const AdminLogin = () => {
 
   return (
     <div className="card max-w-[390px] w-full">
-      <form className="card-body flex flex-col gap-5 p-10" noValidate>
+      <form className="card-body flex flex-col gap-5 p-7" noValidate>
+
         <div className="text-center mb-2.5">
-          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
-            Sign in
+          <div className="flex justify-start mb-5">
+            <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="flex items-center justify-center text-sm gap-2 text-gray-700 hover:text-primary btn btn-rounded btn-secondary btn-outline w-fit btn-sm mb-3">
+              <KeenIcon icon="black-left" />
+            </Link>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-0 text-left">
+            Admin/Educator Sign In
           </h3>
           {/* <div className="flex items-center justify-center font-medium">
             <span className="text-2sm text-gray-600 me-1.5">
@@ -138,16 +144,7 @@ const AdminLogin = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-1">
             <label className="form-label text-gray-900">Password</label>
-            <Link
-              to={
-                currentLayout?.name === "auth-branded"
-                  ? "/auth/reset-password"
-                  : "/auth/classic/reset-password"
-              }
-              className="text-2sm link shrink-0"
-            >
-              Forgot Password?
-            </Link>
+
           </div>
           <label className="input">
             <input
@@ -179,15 +176,26 @@ const AdminLogin = () => {
             </span>
           )}
         </div>
-
-        <label className="checkbox-group">
-          <input
-            className="checkbox checkbox-sm"
-            type="checkbox"
-            {...formik.getFieldProps("remember")}
-          />
-          <span className="checkbox-label">Remember me</span>
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="checkbox-group">
+            <input
+              className="checkbox checkbox-sm"
+              type="checkbox"
+              {...formik.getFieldProps("remember")}
+            />
+            <span className="checkbox-label">Remember me</span>
+          </label>
+          <Link
+            to={
+              currentLayout?.name === "auth-branded"
+                ? "/auth/reset-password"
+                : "/auth/classic/reset-password"
+            }
+            className="text-2sm link shrink-0"
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
         <button
           onClick={formik.handleSubmit}
@@ -196,10 +204,8 @@ const AdminLogin = () => {
         >
           {loading ? "Please wait..." : "Sign In"}
         </button>
-        <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="flex items-center justify-center text-sm gap-2 text-gray-700 hover:text-primary">
-          <KeenIcon icon="black-left" />
-          Back
-        </Link>
+
+
       </form>
     </div>
   );

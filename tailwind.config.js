@@ -205,7 +205,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif']
+        sans: ['Outfit',  'sans-serif']
+       
       },
       colors: {
         //begin: Shadcn UI Colors

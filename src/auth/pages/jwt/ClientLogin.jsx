@@ -98,52 +98,18 @@ const ClientLogin = () => {
 
   return (
     <div className="card max-w-[390px] w-full">
-      <form className="card-body flex flex-col gap-5 p-10" noValidate>
+      <form className="card-body flex flex-col gap-5 p-7 relative" noValidate>
+
         <div className="text-center mb-2.5">
-          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
-            Sign in
-          </h3>
-          <div className="flex items-center justify-center font-medium">
-            <span className="text-2sm text-gray-600 me-1.5">
-              Need an account?
-            </span>
-            <Link
-              to={
-                currentLayout?.name === "auth-branded"
-                  ? "/auth/signup"
-                  : "/auth/classic/signup"
-              }
-              className="text-2sm link"
-            >
-              Sign up
+          <div className="flex justify-start mb-5">
+            <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="text-sm gap-2 text-gray-700 hover:text-primary btn btn-rounded btn-secondary btn-sm btn-outline w-fit mb-3">
+              <KeenIcon icon="black-left" />
             </Link>
           </div>
+          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-0 text-left">
+            Student Sign In
+          </h3>
         </div>
-
-        {/* <div className="grid grid-cols-2 gap-2.5">
-          <a href="#" className="btn btn-light btn-sm justify-center">
-            <img src={toAbsoluteUrl('/media/brand-logos/google.svg')} className="size-3.5 shrink-0" />
-            Use Google
-          </a>
-
-          <a href="#" className="btn btn-light btn-sm justify-center">
-            <img src={toAbsoluteUrl('/media/brand-logos/apple-black.svg')} className="size-3.5 shrink-0 dark:hidden" />
-            <img src={toAbsoluteUrl('/media/brand-logos/apple-white.svg')} className="size-3.5 shrink-0 light:hidden" />
-            Use Apple
-          </a>
-        </div> */}
-
-        {/* <div className="flex items-center gap-2">
-          <span className="border-t border-gray-200 w-full"></span>
-          <span className="text-2xs text-gray-500 font-medium uppercase">Or</span>
-          <span className="border-t border-gray-200 w-full"></span>
-        </div> */}
-
-        {/* <Alert variant="primary">
-          Use <span className="font-semibold text-gray-900">demo@keenthemes.com</span> username and{' '}
-          <span className="font-semibold text-gray-900">demo1234</span> password.
-        </Alert> */}
-
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 
         <div className="flex flex-col gap-1">
@@ -167,16 +133,7 @@ const ClientLogin = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-1">
             <label className="form-label text-gray-900">Password</label>
-            <Link
-              to={
-                currentLayout?.name === "auth-branded"
-                  ? "/auth/reset-password"
-                  : "/auth/classic/reset-password"
-              }
-              className="text-2sm link shrink-0"
-            >
-              Forgot Password?
-            </Link>
+
           </div>
           <label className="input">
             <input
@@ -208,15 +165,26 @@ const ClientLogin = () => {
             </span>
           )}
         </div>
-
-        <label className="checkbox-group">
-          <input
-            className="checkbox checkbox-sm"
-            type="checkbox"
-            {...formik.getFieldProps("remember")}
-          />
-          <span className="checkbox-label">Remember me</span>
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="checkbox-group">
+            <input
+              className="checkbox checkbox-sm"
+              type="checkbox"
+              {...formik.getFieldProps("remember")}
+            />
+            <span className="checkbox-label">Remember me</span>
+          </label>
+          <Link
+            to={
+              currentLayout?.name === "auth-branded"
+                ? "/auth/reset-password"
+                : "/auth/classic/reset-password"
+            }
+            className="text-2sm link shrink-0"
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
         <button
           onClick={formik.handleSubmit}
@@ -225,10 +193,22 @@ const ClientLogin = () => {
         >
           {loading ? "Please wait..." : "Sign In"}
         </button>
-        <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="flex items-center justify-center text-sm gap-2 text-gray-700 hover:text-primary">
-          <KeenIcon icon="black-left" />
-          Back
-        </Link>
+        
+        <div className="font-medium text-left">
+          <span className="text-2sm text-gray-600 me-1.5">
+            Need an account ?
+          </span>
+          <Link
+            to={
+              currentLayout?.name === "auth-branded"
+                ? "/auth/signup"
+                : "/auth/classic/signup"
+            }
+            className="text-2sm link"
+          >
+            Sign up
+          </Link>
+        </div>
       </form>
     </div>
   );
