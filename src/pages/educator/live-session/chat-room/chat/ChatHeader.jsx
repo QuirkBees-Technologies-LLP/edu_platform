@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useEventContext } from '../context/EventContext';
-import { ArrowBigLeft, ArrowBigRight, UserRound } from 'lucide-react';
+import { ArrowBigLeft, ArrowBigRight, MessageCircle, UserRound } from 'lucide-react';
 
 export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) => {
     const {
@@ -41,12 +41,18 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
             {!isFullScreen && <div className='chat-components-header p-2 border border-b-0'>
                 <div className='chat-components-header-top flex justify-between align-center'>
                     <button onClick={() => setIsFullScreen((prev) => !prev)} className="btn btn-xs btn-icon btn-primary btn-outline ">
-                        <ArrowBigRight size={18}/>
+                        <ArrowBigRight size={18} />
                     </button>
-                    <button className="btn btn-xs btn-primary btn-outline">
-                    <UserRound size={16}/>
-                        12354
-                    </button>
+                    <div className='flex gap-3 items-center'>
+                        <button className="btn btn-xs btn-primary btn-outline">
+                            <MessageCircle size={16} />
+                            Chat
+                        </button>
+                        <button className="btn btn-xs btn-primary btn-outline">
+                            <UserRound size={16} />
+                            12354
+                        </button>
+                    </div>
                 </div>
             </div>
             }

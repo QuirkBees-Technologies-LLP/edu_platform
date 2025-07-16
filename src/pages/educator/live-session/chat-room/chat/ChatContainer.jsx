@@ -12,6 +12,7 @@ import { useAuthContext } from "../../../../../auth/useAuthContext";
 import { MessageInputUI } from "./MessageInput";
 import { ChatHeader } from "./ChatHeader";
 import { ChatSidebar } from "./ChatSidebar";
+import UserList from "./UserList";
 
 const ChatContainer = ({ sessionToken }) => {
   const {

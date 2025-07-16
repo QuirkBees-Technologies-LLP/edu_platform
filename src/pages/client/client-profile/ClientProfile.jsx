@@ -97,6 +97,7 @@ const ClientProfile = () => {
                                                 value={formik.values.first_name}
                                                 onChange={formik.handleChange}
                                                 onBlur={formik.handleBlur}
+                                                disabled
                                             />
                                             {formik.touched.first_name && formik.errors.first_name && (
                                                 <span className="text-danger text-xs">{formik.errors.first_name}</span>
@@ -118,6 +119,7 @@ const ClientProfile = () => {
                                                 value={formik.values.last_name}
                                                 onChange={formik.handleChange}
                                                 onBlur={formik.handleBlur}
+                                                disabled
                                             />
                                             {formik.touched.last_name && formik.errors.last_name && (
                                                 <span className="text-danger text-xs">{formik.errors.last_name}</span>
@@ -140,6 +142,7 @@ const ClientProfile = () => {
                                                 value={formik.values.email}
                                                 onChange={formik.handleChange}
                                                 onBlur={formik.handleBlur}
+                                                disabled
                                             />
                                             {formik.touched.email && formik.errors.email && (
                                                 <span className="text-danger text-xs">{formik.errors.email}</span>
