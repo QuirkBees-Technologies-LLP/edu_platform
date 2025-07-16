@@ -176,7 +176,7 @@ const AdminLogin = () => {
             </span>
           )}
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
           <label className="checkbox-group">
             <input
               className="checkbox checkbox-sm"
