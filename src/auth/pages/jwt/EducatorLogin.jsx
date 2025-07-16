@@ -178,7 +178,7 @@ const EducatorLogin = () => {
 
         <button
           onClick={formik.handleSubmit}
-          className="btn bg-pink-gradient btn-primary flex justify-center grow"
+          className="btn bg-blue-gradient btn-primary flex justify-center grow"
           disabled={loading || formik.isSubmitting}
         >
           {loading ? "Please wait..." : "Sign In"}

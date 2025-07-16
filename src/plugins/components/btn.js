@@ -347,6 +347,7 @@ export default plugin(({addComponents, theme}) => {
           'border-color':  'transparent',
           'background-color': 'transparent',     
           'color': 'var(--tw-gray-700)',   
+          'width': '100%',
           'i': {
             'color': 'var(--tw-gray-600)',
           },

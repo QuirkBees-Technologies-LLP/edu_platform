@@ -88,7 +88,7 @@ const ResetPassword = () => {
         </div>
 
         <div className="flex flex-col gap-5 items-stretch">
-          <button type="submit" className="btn btn-primary bg-pink-gradient flex justify-center grow" disabled={loading || formik.isSubmitting}>
+          <button type="submit" className="btn btn-primary bg-blue-gradient flex justify-center grow" disabled={loading || formik.isSubmitting}>
             {loading ? 'Please wait...' : 'Continue'}
           </button>
 

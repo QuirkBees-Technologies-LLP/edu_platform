@@ -227,7 +227,7 @@ React.useEffect(() => {
           </MenuItem>
         </Menu>
       ),
-      meta: { headerClassName: 'w-[60px]' },
+      meta: { headerClassName: 'w-[150px]' },
     }
   ], [isRTL]);
 
