@@ -38,37 +38,12 @@ jobs:
           VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
           VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
-          echo "[INFO] Installing dependencies..."
           npm ci
-
-          echo "[INFO] Building project..."
           npm run build
 
-          echo "[INFO] Checking dist folder contents..."
-          ls -l dist
-
-      - name: Zip the build output
-        run: |
-          echo "[INFO] Cleaning old zip file (if any)..."
-          rm -f site.zip
-
-          echo "[INFO] Creating new site.zip from dist/"
-          cd dist
-          zip -r ../site.zip .
-          cd ..
-          echo "[INFO] Verifying zip file..."
-          unzip -l site.zip
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E0658178099D4C98ABF3AA7A39085F24 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_01008F7B4B784A34BB7D2742483ED52F }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2EA6958ABB2E4874B29BDD5245696536 }}
-
-      - name: Deploy static content to Azure Web App
+      - name: Deploy dist/ to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'edu'
           slot-name: 'Production'
-          package: site.zip
+          package: './dist'
