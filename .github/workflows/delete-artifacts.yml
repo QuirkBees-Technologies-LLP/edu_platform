@@ -1,0 +1,14 @@
+name: Delete Old Artifacts
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete all artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '0' # 0 = delete everything regardless of age
