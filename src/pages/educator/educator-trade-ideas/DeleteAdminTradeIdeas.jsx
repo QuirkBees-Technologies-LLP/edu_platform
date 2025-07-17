@@ -5,6 +5,7 @@ import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeI
 import { toast } from 'sonner';
 import { useDeleteEducatorTradeIdeaMutation } from '../../../store/api/educator/educatorTradeIdeasApiSlice';
 
+// Delete eductor trade idea
 
 const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
     const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] = useDeleteEducatorTradeIdeaMutation();
