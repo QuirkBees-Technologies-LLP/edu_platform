@@ -7,18 +7,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies and build
         env:
@@ -30,30 +38,26 @@ jobs:
           VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
           VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
-          npm install
+          echo "[INFO] Installing dependencies..."
+          npm ci
+
+          echo "[INFO] Building project..."
           npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vite-build
-          path: dist
+          echo "[INFO] Checking dist folder contents..."
+          ls -l dist
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
+      - name: Zip the build output
+        run: |
+          echo "[INFO] Cleaning old zip file (if any)..."
+          rm -f site.zip
 
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: vite-build
-
-      - name: Zip static site for deployment
-        run: zip -r site.zip .
+          echo "[INFO] Creating new site.zip from dist/"
+          cd dist
+          zip -r ../site.zip .
+          cd ..
+          echo "[INFO] Verifying zip file..."
+          unzip -l site.zip
 
       - name: Azure Login
         uses: azure/login@v2
@@ -68,8 +72,3 @@ jobs:
           app-name: 'edu'
           slot-name: 'Production'
           package: site.zip
-
-      - name: Delete artifact after deploy
-        uses: geekyeggo/delete-artifact@v2
-        with:
-          name: node-app
