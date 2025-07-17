@@ -6,13 +6,20 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: write   # ✅ Needed to delete artifacts
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
+      - name: Delete old artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '1 day'  # Change as needed, e.g., '0' to delete all
+
       - uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -37,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vite-build
-          path: dist/
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,12 +59,8 @@ jobs:
         with:
           name: vite-build
 
-      - name: Zip dist folder for deployment
-        run: |
-          mkdir zip-output
-          mv * zip-output/
-          cd zip-output
-          zip -r ../site.zip .
+      - name: Zip static site for deployment
+        run: zip -r site.zip .
 
       - name: Azure Login
         uses: azure/login@v2
@@ -73,7 +76,7 @@ jobs:
           slot-name: 'Production'
           package: site.zip
 
-      - name: Delete build artifact
+      - name: Delete artifact after deploy
         uses: geekyeggo/delete-artifact@v2
         with:
-          name: vite-build
+          name: node-app
