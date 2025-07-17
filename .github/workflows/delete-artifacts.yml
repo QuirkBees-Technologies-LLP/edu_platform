@@ -3,6 +3,10 @@ name: Delete Old Artifacts
 on:
   workflow_dispatch:
 
+permissions:
+  actions: write  # 👈 REQUIRED to delete artifacts
+  contents: read
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest
@@ -11,4 +15,4 @@ jobs:
       - name: Delete all artifacts
         uses: c-hive/gha-remove-artifacts@v1
         with:
-          age: '0' # 0 = delete everything regardless of age
+          age: '0'  # delete all artifacts
