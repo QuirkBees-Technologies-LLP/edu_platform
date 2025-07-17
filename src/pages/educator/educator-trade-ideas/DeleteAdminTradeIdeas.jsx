@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import { toast } from 'sonner';
+import { useDeleteEducatorTradeIdeaMutation } from '../../../store/api/educator/educatorTradeIdeasApiSlice';
 
 
 const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
-    const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] = useDeleteTradeIdeaMutation();
+    const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] = useDeleteEducatorTradeIdeaMutation();
 
     const handleDelete = async () => {
         try {
