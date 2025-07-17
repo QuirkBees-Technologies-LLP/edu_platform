@@ -6,21 +6,16 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-  actions: write   # ✅ Needed to delete artifacts
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
-      - name: Delete old artifacts
-        uses: c-hive/gha-remove-artifacts@v1
-        with:
-          age: '1 day'  # Change as needed, e.g., '0' to delete all
-
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -40,27 +35,10 @@ jobs:
           npm install
           npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vite-build
-          path: dist
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: vite-build
-
-      - name: Zip static site for deployment
-        run: zip -r site.zip .
+      - name: Zip build output
+        run: |
+          cd dist
+          zip -r ../site.zip .
 
       - name: Azure Login
         uses: azure/login@v2
@@ -69,14 +47,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_01008F7B4B784A34BB7D2742483ED52F }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2EA6958ABB2E4874B29BDD5245696536 }}
 
-      - name: Deploy static content to Azure Web App
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'edu'
           slot-name: 'Production'
           package: site.zip
-
-      - name: Delete artifact after deploy
-        uses: geekyeggo/delete-artifact@v2
-        with:
-          name: node-app
