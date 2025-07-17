@@ -4,10 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
 import { useGetEducatorAcademyCategoryQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
-import { da } from "@faker-js/faker";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox'; // Adjust import path
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Categories for the course
 const COURSE_CATEGORIES = [
@@ -27,7 +31,7 @@ const COURSE_CATEGORIES = [
 const courseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  imageUrl: z.string().url("Must be a valid URL").optional(),
+  imageFile: z.instanceof(File).optional(),
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
@@ -37,10 +41,11 @@ const courseSchema = z.object({
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
-  const [thumbnailFile, setThumbnailFile] = useState(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(
+    initialData?.imageUrl || null
+  );
+  const [currentImageFile, setCurrentImageFile] = useState(null);
   const { data } = useGetEducatorAcademyCategoryQuery();
-  console.log(initialData, "initialData");
 
   const {
     control,
@@ -55,7 +60,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     defaultValues: initialData || {
       title: "",
       description: "",
-      imageUrl: "",
+      imageFile: undefined,
       category: "",
       published: false,
       isFeatured: false,
@@ -64,33 +69,61 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   });
 
   useEffect(() => {
-    if (initialData && data?.data) {
-      setValue("category", initialData.category?._id);
+    if (initialData) {
+      if (initialData.imageUrl) {
+        setThumbnailPreview(initialData.imageUrl);
+        setValue("imageFile", initialData.imageUrl);
+      }
+      if (initialData.category?._id) {
+        setValue("category", initialData.category._id);
+      }
     }
-  }, [initialData, data, setValue]);
+  }, [initialData, setValue]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setThumbnailFile(file);
+      setCurrentImageFile(file);
+      setValue("imageFile", file, { shouldValidate: true });
       const reader = new FileReader();
       reader.onloadend = () => {
         setThumbnailPreview(reader.result);
       };
       reader.readAsDataURL(file);
-      setValue("imageUrl", URL.createObjectURL(file));
     }
   };
 
-  const handleUrlChange = (e) => {
-    setThumbnailFile(null);
-    setThumbnailPreview(null);
+  const selectedTier = watch("tier");
+  const submitHandler = async (data) => {
+    const formData = new FormData();
+
+    // Append all regular fields
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("category", data.category);
+    formData.append("published", data.published);
+    formData.append("isFeatured", data.isFeatured);
+    formData.append("tier", data.tier);
+
+    // Handle image file
+    if (data.imageFile instanceof File) {
+      formData.append("imageUrl", data.imageFile);
+    }
+
+    // For debugging
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    await onSubmit(formData);
   };
 
-  const selectedTier = watch('tier');
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      onSubmit={handleSubmit(submitHandler)}
+      className="space-y-6"
+      encType="multipart/form-data"
+    >
       <div className="space-y-2">
         <label
           htmlFor="title"
@@ -133,16 +166,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           Course Thumbnail
         </label>
 
-        <div className="flex items-center space-x-4">
-          <div className="flex-1">
-            <input
-              type="url"
-              className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-              placeholder="https://example.com/image.jpg"
-              {...register("imageUrl", { onChange: handleUrlChange })}
-            />
-          </div>
-          <div className="relative">
+        <div className="flex flex-col space-y-2">
+          <div className="relative w-full">
             <input
               type="file"
               id="thumbnail-upload"
@@ -152,12 +177,17 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             />
             <label
               htmlFor="thumbnail-upload"
-              className="flex cursor-pointer items-center px-3 h-[40px] py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-primary-light text-primary"
+              className="flex cursor-pointer items-center justify-center w-full h-[40px] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-primary-light text-primary border border-gray-300"
             >
               <Upload className="h-4 w-4 mr-2" />
-              Upload
+              {thumbnailPreview ? "Change Image" : "Upload Image"}
             </label>
           </div>
+          <p className="text-sm text-gray-500">
+            {currentImageFile
+              ? `Selected file: ${currentImageFile.name}`
+              : "No file selected"}
+          </p>
         </div>
 
         {thumbnailPreview && (
@@ -169,10 +199,6 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             />
           </div>
         )}
-
-        {errors.imageUrl && (
-          <p className="text-sm text-red-600">{errors.imageUrl.message}</p>
-        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -183,7 +209,11 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           >
             Category
           </label>
-          <Select defaultValue={initialData?.category?._id} onValueChange={(value) => setValue("category", value)} className={`form-control input input-md w-full ${errors.category && "border border-danger"}`}>
+          <Select
+            defaultValue={initialData?.category?._id}
+            onValueChange={(value) => setValue("category", value)}
+            className={`form-control input input-md w-full ${errors.category && "border border-danger"}`}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select" />
             </SelectTrigger>
@@ -207,7 +237,11 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           >
             Course Tier
           </label>
-          <Select defaultValue={selectedTier} onValueChange={(value) => setValue("tier", value)} className={`form-control input input-md w-full ${errors.tier && "border border-danger"}`}>
+          <Select
+            defaultValue={selectedTier}
+            onValueChange={(value) => setValue("tier", value)}
+            className={`form-control input input-md w-full ${errors.tier && "border border-danger"}`}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select" />
             </SelectTrigger>

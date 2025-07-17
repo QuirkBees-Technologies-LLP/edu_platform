@@ -28,11 +28,14 @@ export const getAllCourses = async (params = {}, token = null) => {
 
 export const getCourseByEducatorId = async (id, token = null) => {
   try {
-    const response = await api.get(`/users/course?instructor=${id}&isPublished=true`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.get(
+      `/users/course?instructor=${id}&isPublished=true`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error;
@@ -69,6 +72,7 @@ export const createCourse = async (courseData, token = null) => {
     const response = await api.post("/admin/course", courseData, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -96,6 +100,7 @@ export const updateCourse = async (id, courseData, token = null) => {
     const response = await api.put(`/admin/course/${id}`, courseData, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
