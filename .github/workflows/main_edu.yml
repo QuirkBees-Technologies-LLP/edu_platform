@@ -68,3 +68,8 @@ jobs:
           app-name: 'edu'
           slot-name: 'Production'
           package: site.zip
+
+      - name: Delete artifact after deploy
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: node-app
