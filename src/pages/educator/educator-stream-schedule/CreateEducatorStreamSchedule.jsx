@@ -32,9 +32,9 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
         datetime: "",
         tags: [],
         category: "",
-        thumbnail: null,
+        files: null,
         userId: "",
-        thumbnailUrl: ""
+        // files: ""
     };
 
     const createSchema = Yup.object().shape({
@@ -48,7 +48,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
         tags: Yup.array()
             .min(1, "At least one tag is required")
             .of(Yup.string().required("Tag cannot be empty")),
-        thumbnail: Yup.array()
+        files: Yup.array()
             .required("Thumbnail is required")
             .min(1, "Thumbnail is required")
             .test("fileOrUrl", "Thumbnail is required", (value) => {
@@ -79,7 +79,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
         onSubmit: async (values) => {
 
             // const callId = uuidv4();
-            const thumbnailFile = values.thumbnail?.[0]?.file; // Get the actual File object
+            const files = values.files?.[0]?.file; // Get the actual File object
 
             const formData = new FormData();
             // formData.append('callId', callId);
@@ -94,8 +94,8 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
             // formData.append('userId', values?.userId);
             formData.append('educator', values?.userId);
 
-            if (thumbnailFile) {
-                formData.append('thumbnail', thumbnailFile); // key must match your backend field
+            if (files) {
+                formData.append('files', files); // key must match your backend field
             }
 
             if (selectedRow?._id) {
@@ -116,11 +116,11 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                     await updateEducatorStreamSchedule({ data: formData, id: selectedRow._id }).unwrap();
                     setSelectedRow({});
                     refetch();
-                    toast.success("Educator updated successfully!");
+                    toast.success("Live stream schedule updated successfully!");
                 } else {
                     await createEducatorStreamSchedule(formData).unwrap();
                     refetch();
-                    toast.success("Educator created successfully!");
+                    toast.success("Live stream schedule created successfully!");
                     setSelectedRow({});
                 }
                 formik.resetForm();
@@ -147,16 +147,16 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                 datetime: (selectedRow?.datetime) ? new Date(selectedRow?.datetime) : null,
                 tags: selectedRow?.tags,
                 category: selectedRow?.category?._id,
-                thumbnail: [{ file: null, dataURL: selectedRow?.image }],
+                files: [{ file: null, dataURL: selectedRow?.image }],
                 userId: selectedRow?.userId,
-                thumbnailUrl: selectedRow?.image
+                // files: selectedRow?.image
             }
             formik.setValues(initData)
         }
     }, [selectedRow?._id, isCreateOpen]);
 
     const handleImageChange = (updatedImages) => {
-        formik.setFieldValue('thumbnail', updatedImages);
+        formik.setFieldValue('files', updatedImages);
     };
     console.log(formik, "formik");
 
@@ -292,7 +292,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                                 <div className='flex-wrap gap-5'>
                                     {/* Image Input */}
                                     <ImageInput
-                                        value={formik.values.thumbnail}
+                                        value={formik.values.files}
                                         onChange={handleImageChange}
                                         acceptType={['jpg', 'jpeg', 'png']}
                                         multiple={false}
@@ -309,7 +309,7 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                                                 {...dragProps}
                                                 className={`
         border border-dashed rounded-lg text-center transition-colors 
-        p-5 ${isDragging ? 'bg-gray-100' : 'bg-white'} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
+        p-5 ${isDragging ? 'bg-gray-100' : 'bg-white'} border-gray-300 ${formik.touched.files && formik.errors.files
                                                         ? "validation-error-border"
                                                         : ""
                                                     }`}
@@ -359,9 +359,9 @@ const CreateEducatorStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCrea
                                         )}
                                     </ImageInput>
                                 </div>
-                                {formik.touched.thumbnail && formik.errors.thumbnail && (
+                                {formik.touched.files && formik.errors.files && (
                                     <span role="alert" className="text-danger text-xs mt-1">
-                                        {formik.errors.thumbnail}
+                                        {formik.errors.files}
                                     </span>
                                 )}
                             </div>
