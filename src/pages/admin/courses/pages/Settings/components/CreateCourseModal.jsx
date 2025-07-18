@@ -137,6 +137,8 @@ const CreateCourseModal = forwardRef(
         console.log(key, value);
       }
 
+      console.log("initialData====================>",initialData)
+
       if (initialData) {
         await dispatch(
           updateExistingCourse({

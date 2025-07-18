@@ -72,7 +72,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     if (initialData) {
       if (initialData.imageUrl) {
         setThumbnailPreview(initialData.imageUrl);
-        setValue("imageFile", initialData.imageUrl);
+        // setValue("imageFile", initialData.imageUrl);
       }
       if (initialData.category?._id) {
         setValue("category", initialData.category._id);
@@ -95,6 +95,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 
   const selectedTier = watch("tier");
   const submitHandler = async (data) => {
+    
     const formData = new FormData();
 
     // Append all regular fields
