@@ -32,6 +32,13 @@ jobs:
           VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
           VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
+          echo "VITE_API_URL=${VITE_API_URL}" >> .env
+          echo "VITE_APP_API_URL=${VITE_APP_API_URL}" >> .env
+          echo "VITE_APP_NAME=${VITE_APP_NAME}" >> .env
+          echo "VITE_APP_VERSION=${VITE_APP_VERSION}" >> .env
+          echo "GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP}" >> .env
+          echo "VITE_APP_CRM_API_KEY=${VITE_APP_CRM_API_KEY}" >> .env
+          echo "VITE_APP_STREAM_API_KEY=${VITE_APP_STREAM_API_KEY}" >> .env
           npm install
           npm run build
 
