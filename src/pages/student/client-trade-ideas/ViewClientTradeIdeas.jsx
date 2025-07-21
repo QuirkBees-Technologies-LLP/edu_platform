@@ -25,14 +25,14 @@ const ViewClientTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selected
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Scalp</div>
                             </div> */}
-                            <div className='h-80 max-h-80 object-cover overflow-hidden'>
+                            <div className=''>
                                 <ClientTradeSlider sliderImages={selectedIdea?.image} setIsLightBoxOpen={setIsLightBoxOpen} selectedIdea={selectedIdea} />
                             </div>
                             <div className="grid gap-5 p-5">
                                 <div className="grid grid-cols-12 gap-4">
-                                    <div className="col-span-12">
+                                    {/* <div className="col-span-12">
                                         <div className="flex flex-col gap-2 py-4.5">
-                                            <div className="flex gap-10">
+                                            <div className="flex gap-5 sm:gap-10 flex-wrap">
                                                 <div className='flex items-center gap-3'>
                                                     <div className="text-xs text-gray-800 uppercase">Entry</div>
                                                     <span class="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{selectedIdea?.entry ?? "-"}</span>
@@ -54,7 +54,7 @@ const ViewClientTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selected
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
                                     <div className="col-span-12">
                                         <div className="card">
                                             <div className="flex flex-col gap-4 px-5 py-4.5">

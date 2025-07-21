@@ -827,3 +827,27 @@ chat */
 .leading-none {
 	line-height: unset;
 }
+.ideas_message .message-ui .message-ui-content-top-name {
+	color: var(--tw-gray-900);
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	flex: 1 0;
+	font-weight: 600;
+	font-size: 12px;
+}
+.dark .ideas_message .message-ui .message-ui-content-top-name {
+	color: var(--tw-gray-900) !important;
+}
+.ideas_message .message-ui .message-ui-content-top-time {
+	color: #607d8b;
+    font-size: 12px;
+}
+.ideas_message .message-ui .message-ui-content-bottom {
+	word-break: break-word;
+	font-size: 12px;
+	color: #2c3e50;
+}
+.dark .ideas_message .message-ui .message-ui-content-bottom {
+	color: var(--tw-gray-800);
+}

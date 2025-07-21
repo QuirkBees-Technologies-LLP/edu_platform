@@ -27,12 +27,17 @@ import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import TradeImageSlider from "./TradeImageSlider";
 import { useLazyGetAdminTradeIdeasQuery } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import { TruncatedText } from "../../../lib/utils";
+import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
+import AdminTradeCards from "./AdminTradeCards";
 
 const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [tradeIdeas, setTradeIdeas] = useState([]);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState({});
   const [fetchTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetAdminTradeIdeasQuery();
 
@@ -46,6 +51,11 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
 
   const handleDeleteClose = () => {
     setIsDeleteOpen(false);
+  };
+
+
+  const handleCloseView = () => {
+    setIsLightBoxOpen(false);
   };
 
   const { isRTL } = useLanguage();
@@ -115,7 +125,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
         accessorFn: (row) => row.image,
         id: "image",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Images" column={column} />
+          <DataGridColumnHeader title="Images" column={column}  />
         ),
         enableSorting: true,
         cell: ({ row }) => (
@@ -367,9 +377,36 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
+  const [activeTab, setActiveTab] = useState('TableView');
 
   return (
     <div className="container-fluid">
+      <div className="pb-10">
+        <div className="inline-flex bg-gray-200 rounded-lg p-1">
+          <button
+            onClick={() => setActiveTab('TableView')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'TableView'
+                ? 'bg-gray-100 text-gray-900 shadow'
+                : 'text-gray-600'
+            }`}
+          >
+            Table View
+          </button>
+          <button
+            onClick={() => setActiveTab('UserView')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'UserView'
+                ? 'bg-gray-100 text-gray-900 shadow'
+                : 'text-gray-600'
+            }`}
+          >
+            User View
+          </button>
+        </div>
+      </div>
+      {activeTab === "TableView" && (
+        <>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Trade Ideas" />
@@ -402,11 +439,19 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
         }}
         onFetchData={handleFetchData}
       />
-      <TradeImageSlider
+      {/* <TradeImageSlider
         isLightBoxOpen={isLightBoxOpen}
         setIsLightBoxOpen={setIsLightBoxOpen}
         selectedRow={selectedRow}
+      /> */}
+
+      <ViewAdminTradeIdeas
+        isViewOpen={isLightBoxOpen}
+        setIsLightBoxOpen={setIsLightBoxOpen}
+        handleCloseView={handleCloseView}
+        selectedIdea={selectedRow}
       />
+
       <CreateTradeIdeas
         setSelectedRow={setSelectedRow}
         handleCloseCreate={handleCloseCreate}
@@ -423,7 +468,13 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
           selectedRow={selectedRow}
         />
       )}
+      </>
+      )}
+      {activeTab === "UserView" && (
+        <AdminTradeCards />
+      )}
     </div>
+
   );
 };
 export default AdminTradeIdeas;
