@@ -35,7 +35,7 @@ const courseSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  tier: z.enum(["FREE", "PRO"], {
+  tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
 });
@@ -248,7 +248,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="FREE">Free</SelectItem>
-              <SelectItem value="PRO">Pro</SelectItem>
+              <SelectItem value="PREMIUM">Pro</SelectItem>
             </SelectContent>
           </Select>
           {errors.tier && (
