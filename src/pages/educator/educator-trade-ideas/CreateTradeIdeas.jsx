@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -170,6 +170,8 @@ const CreateTradeIdeas = forwardRef(({ setSelectedRow, isCreateOpen, handleClose
   };
 
   return (
+    <>
+    
     <Dialog
       open={isCreateOpen}
       onOpenChange={() => {
@@ -514,6 +516,7 @@ const CreateTradeIdeas = forwardRef(({ setSelectedRow, isCreateOpen, handleClose
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 });
 

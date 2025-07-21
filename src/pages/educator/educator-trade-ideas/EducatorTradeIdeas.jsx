@@ -27,15 +27,23 @@ import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import TradeImageSlider from "./TradeImageSlider";
 import { TruncatedText } from "../../../lib/utils";
 import { useLazyGetEducatorTradeIdeasQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
+import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
+import EducatorTradeCards from "./EducatorTradeCards";
 
 const EducatorTradeIdeas = ({ title = "Trade Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [tradeIdeas, setTradeIdeas] = useState([]);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState({});
   const [getEducatorTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetEducatorTradeIdeasQuery();
 
+  const handleCloseView = () => {
+    setIsLightBoxOpen(false);
+  };
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
@@ -367,61 +375,95 @@ const EducatorTradeIdeas = ({ title = "Trade Ideas" }) => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
 
+  const [activeTab, setActiveTab] = useState('TableView');
+
   return (
     <div className="container-fluid">
-      <Toolbar>
-        <ToolbarHeading>
-          <ToolbarPageTitle text="Trade Ideas" />
+      <div className="pb-10">
+        <div className="inline-flex bg-gray-200 rounded-lg p-1">
+          <button
+            onClick={() => setActiveTab('TableView')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'TableView'
+                ? 'bg-gray-100 text-gray-900 shadow'
+                : 'text-gray-600'
+            }`}
+          >
+            Table View
+          </button>
+          <button
+            onClick={() => setActiveTab('UserView')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'UserView'
+                ? 'bg-gray-100 text-gray-900 shadow'
+                : 'text-gray-600'
+            }`}
+          >
+            User View
+          </button>
+        </div>
+      </div>
+      
+      {activeTab === "TableView" && (
+        <>
+          <Toolbar>
+            <ToolbarHeading>
+              <ToolbarPageTitle text="Trade Ideas" />
+              <ToolbarDescription>
+                Generate, analyze, and execute profitable trading opportunities with
+                smart insights, market trends, and data-driven strategies
+              </ToolbarDescription>
+            </ToolbarHeading>
+            <ToolbarActions>
+              <div className="text-end pb-4">
+                <button className="btn btn-primary" onClick={handleClickOpen}>
+                  Create Trade Idea
+                </button>
+              </div>
+            </ToolbarActions>
+          </Toolbar>
 
-          <ToolbarDescription>
-            Generate, analyze, and execute profitable trading opportunities with
-            smart insights, market trends, and data-driven strategies
-          </ToolbarDescription>
-        </ToolbarHeading>
-        <ToolbarActions>
-          <div className="text-end pb-4">
-            <button className="btn btn-primary" onClick={handleClickOpen}>
-              Create Trade Idea
-            </button>
-          </div>
-        </ToolbarActions>
-      </Toolbar>
-      <DataGrid
-        key={tableKey}
-        serverSide={true}
-        loading={isLoading}
-        columns={columns}
-        rowSelection={true}
-        onRowSelectionChange={handleRowSelection}
-        pagination={{
-          size: 10,
-        }}
-        toolbar={<ToolbarTable />}
-        layout={{
-          card: true,
-        }}
-        onFetchData={handleFetchData}
-      />
-      <TradeImageSlider
-        isLightBoxOpen={isLightBoxOpen}
-        setIsLightBoxOpen={setIsLightBoxOpen}
-        selectedRow={selectedRow}
-      />
-      <CreateTradeIdeas
-        setSelectedRow={setSelectedRow}
-        handleCloseCreate={handleCloseCreate}
-        refetch={reloadTable}
-        isCreateOpen={isCreateOpen}
-        setIsCreateOpen={setIsCreateOpen}
-        selectedRow={selectedRow}
-      />
-      {isDeleteOpen && (
-        <DeleteAdminTradeIdeas
-          refetch={reloadTable}
-          isDeleteOpen={isDeleteOpen}
-          handleDeleteClose={handleDeleteClose}
-          selectedRow={selectedRow}
-        />
+          <DataGrid
+            key={tableKey}
+            serverSide={true}
+            loading={isLoading}
+            columns={columns}
+            rowSelection={true}
+            onRowSelectionChange={handleRowSelection}
+            pagination={{ size: 10 }}
+            toolbar={<ToolbarTable />}
+            layout={{ card: true }}
+            onFetchData={handleFetchData}
+          />
+
+          <ViewEducatorTradeIdeas
+            isViewOpen={isLightBoxOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            handleCloseView={handleCloseView}
+            selectedIdea={selectedRow}
+          />
+
+          <CreateTradeIdeas
+            setSelectedRow={setSelectedRow}
+            handleCloseCreate={handleCloseCreate}
+            refetch={reloadTable}
+            isCreateOpen={isCreateOpen}
+            setIsCreateOpen={setIsCreateOpen}
+            selectedRow={selectedRow}
+          />
+
+          {isDeleteOpen && (
+            <DeleteAdminTradeIdeas
+              refetch={reloadTable}
+              isDeleteOpen={isDeleteOpen}
+              handleDeleteClose={handleDeleteClose}
+              selectedRow={selectedRow}
+            />
+          )}
+        </>
+      )}
+      {activeTab === "UserView" && (
+        <EducatorTradeCards />
       )}
     </div>
   );
