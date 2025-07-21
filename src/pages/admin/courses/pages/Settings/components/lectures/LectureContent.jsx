@@ -51,17 +51,24 @@ const LectureContent = ({
     type: lecture?.type || "TEXT",
     order: lecture?.order || 0,
     preview: lecture?.preview || false,
-    section: lecture?.section?._id || "",
+    section:
+      typeof lecture?.section === "object"
+        ? lecture?.section?._id
+        : lecture?.section,
   });
 
   useEffect(() => {
     const fetchLectureContent = async () => {
-      const response = await lmsLectures.getLecture(lecture._id, auth.token);
-      setLectureContent(response);
+      const response = await lmsLectures.getLectureById(lecture._id, auth.token);
+      setLectureContent(response?.data);
     };
-    console.log(lecture, "lecture");
+    console.log(lectureContent, "lectureContent");
 
     if (lecture) {
+      const sectionId =
+        typeof lecture.section === "object"
+          ? lecture.section._id
+          : lecture.section;
       setFormData({
         title: lecture.title || "",
         description: lecture.description || "",
@@ -69,11 +76,18 @@ const LectureContent = ({
         type: lecture.type || "TEXT",
         order: lecture.order || 0,
         preview: lecture.preview || false,
-        section: lecture.section?._id || "",
+        section: sectionId || "",
       });
-      setShowPreview(false);
-      setIsEditing(false);
-      setActiveTab("content");
+      // setShowPreview(false);
+      // setIsEditing(false);
+      // setActiveTab("content");
+
+      if (lecture?._id) {
+        fetchLectureContent();
+        setShowPreview(false);
+        setIsEditing(false);
+        setActiveTab("content");
+      }
     }
   }, [lecture, onLectureUpdate]);
 
@@ -125,11 +139,11 @@ const LectureContent = ({
   const isValidVideoUrl = (url) => {
     if (!url) return false;
 
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
       return true;
     }
 
-    if (url.includes('vimeo.com')) {
+    if (url.includes("vimeo.com")) {
       return true;
     }
 
@@ -137,31 +151,31 @@ const LectureContent = ({
   };
 
   const getEmbedUrl = (url) => {
-    if (!url) return '';
+    if (!url) return "";
 
-    if (url.includes('youtube.com/watch?v=')) {
-      const videoId = url.split('v=')[1].split('&')[0];
+    if (url.includes("youtube.com/watch?v=")) {
+      const videoId = url.split("v=")[1].split("&")[0];
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    if (url.includes('youtu.be/')) {
-      const videoId = url.split('youtu.be/')[1].split('?')[0];
+    if (url.includes("youtu.be/")) {
+      const videoId = url.split("youtu.be/")[1].split("?")[0];
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    if (url.includes('vimeo.com/')) {
-      const videoId = url.split('vimeo.com/')[1].split('?')[0];
+    if (url.includes("vimeo.com/")) {
+      const videoId = url.split("vimeo.com/")[1].split("?")[0];
       return `https://player.vimeo.com/video/${videoId}`;
     }
 
-    if (url.includes('dailymotion.com/video/')) {
-      const videoId = url.split('dailymotion.com/video/')[1].split('?')[0];
+    if (url.includes("dailymotion.com/video/")) {
+      const videoId = url.split("dailymotion.com/video/")[1].split("?")[0];
       return `https://www.dailymotion.com/embed/video/${videoId}`;
     }
 
     // Loom
-    if (url.includes('loom.com/share/')) {
-      const videoId = url.split('loom.com/share/')[1].split('?')[0];
+    if (url.includes("loom.com/share/")) {
+      const videoId = url.split("loom.com/share/")[1].split("?")[0];
       return `https://www.loom.com/embed/${videoId}`;
     }
 
@@ -336,9 +350,7 @@ const LectureContent = ({
               <FileText className="w-4 h-4 text-primary" />
               Title
             </h3>
-            <p className="text-gray-700 p-2 rounded-md">
-              {lecture.title}
-            </p>
+            <p className="text-gray-700 p-2 rounded-md">{lectureContent?.title}</p>
           </div>
 
           <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
@@ -346,24 +358,28 @@ const LectureContent = ({
               <FileText className="w-4 h-4 text-primary" />
               Description
             </h3>
-            {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} /> : "No description provided"}
+            {lectureContent?.description ? (
+              <ShowMoreLess html={lectureContent?.description} limit={120} />
+            ) : (
+              "No description provided"
+            )}
           </div>
         </div>
 
         <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
-            {lecture.type === "VIDEO" ? (
+            {lectureContent?.type === "VIDEO" ? (
               <Video className="w-4 h-4 text-primary" />
             ) : (
               <FileText className="w-4 h-4 text-primary" />
             )}
-            {lecture.type === "VIDEO" ? "Video Content" : "Text Content"}
+            {lectureContent?.type === "VIDEO" ? "Video Content" : "Text Content"}
           </h3>
           <div className="mt-2">
-            {lecture.type === "VIDEO" ? (
+            {lectureContent?.type === "VIDEO" ? (
               <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                 <iframe
-                  src={getEmbedUrl(lecture.content)}
+                  src={getEmbedUrl(lectureContent?.content)}
                   className="w-full h-full rounded-md"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -372,7 +388,7 @@ const LectureContent = ({
             ) : (
               <div
                 className="p-4  border border-gray-200 rounded-lg prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: lecture.content }}
+                dangerouslySetInnerHTML={{ __html: lectureContent?.content }}
               />
             )}
           </div>
@@ -385,17 +401,18 @@ const LectureContent = ({
               Preview Access
             </h3>
             <p className="text-sm text-gray-500">
-              {lecture.preview
+              {lectureContent?.preview
                 ? "Students can preview this lecture before enrollment"
                 : "This lecture is only available after enrollment"}
             </p>
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${lecture.preview ? "text-green-700" : "text-gray-500"
-                }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${
+                lectureContent?.preview ? "text-green-700" : "text-gray-500"
+              }`}
             >
-              {lecture.preview ? (
+              {lectureContent?.preview ? (
                 <>
                   <Check className="w-4 h-4 text-green-500" />
                   Enabled
@@ -422,7 +439,7 @@ const LectureContent = ({
             Lecture Order
           </h3>
           <p className="text-gray-700 p-2  rounded-md">
-            {lecture.order || "0"} (Position in section)
+            {lecture?.order || "0"} (Position in section)
           </p>
         </div>
 
@@ -433,17 +450,18 @@ const LectureContent = ({
               Preview Access
             </h3>
             <p className="text-sm text-gray-500">
-              {lecture.preview
+              {lecture?.preview
                 ? "Students can preview this lecture before enrolling in the course"
                 : "This lecture is only available after enrollment"}
             </p>
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${lecture.preview ? "text-green-700" : "text-gray-500"
-                }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${
+                lecture?.preview ? "text-green-700" : "text-gray-500"
+              }`}
             >
-              {lecture.preview ? (
+              {lecture?.preview ? (
                 <>
                   <Check className="w-4 h-4 text-green-500" />
                   Enabled
@@ -465,12 +483,13 @@ const LectureContent = ({
           </h3>
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture.type === "VIDEO"
-                ? "bg-primary-light text-primary"
-                : "bg-primary-light text-primary"
-                }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                lecture?.type === "VIDEO"
+                  ? "bg-primary-light text-primary"
+                  : "bg-primary-light text-primary"
+              }`}
             >
-              {lecture.type === "VIDEO" ? (
+              {lecture?.type === "VIDEO" ? (
                 <>
                   <Video className="w-3.5 h-3.5 text-primary" />
                   Video
@@ -494,14 +513,18 @@ const LectureContent = ({
       <div className="flex items-center justify-between  p-4 rounded-lg border border-gray-200 shadow-sm">
         <div>
           <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            {lecture.type === "VIDEO" ? (
+            {lecture?.type === "VIDEO" ? (
               <Video className="w-5 h-5 text-primary" />
             ) : (
               <FileText className="w-5 h-5 text-primary" />
             )}
-            {lecture.title}
+            {lecture?.title}
           </h2>
-          {lecture.description ? <ShowMoreLess html={lecture.description} limit={120} /> : "No description provided"}
+          {lecture?.description ? (
+            <ShowMoreLess html={lecture?.description} limit={120} />
+          ) : (
+            "No description provided"
+          )}
         </div>
         <Button
           variant={isEditing ? "outline" : "default"}
@@ -691,19 +714,21 @@ const LectureContent = ({
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
-                    ? "text-primary border-b-2 border-primary bg-light"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                    }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
+                    activeTab === "content"
+                      ? "text-primary border-b-2 border-primary bg-light"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                  }`}
                 >
                   Content
                 </button>
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "settings"
-                    ? "text-primary border-b-2 border-primary bg-light"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                    }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
+                    activeTab === "settings"
+                      ? "text-primary border-b-2 border-primary bg-light"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                  }`}
                 >
                   Settings
                 </button>
