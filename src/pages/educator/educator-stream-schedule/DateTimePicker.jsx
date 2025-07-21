@@ -23,7 +23,7 @@ const DateTimePicker = ({
       onChange={handleChange}
       onClickOutside={() => setIsPickerOpen(false)} // Close when clicking outside
       onInputClick={() => setIsPickerOpen(true)} // Open on input click
-      open={isPickerOpen} // Control open/close state
+      open={isPickerOpen} // Control open / close state
       showTimeSelect
       timeFormat="HH:mm"
       timeIntervals={2}
