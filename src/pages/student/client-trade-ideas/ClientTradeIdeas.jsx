@@ -9,6 +9,21 @@ import EducatorImage from "./EducatorImage";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
 import { Container } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
+const LabelMap = {
+    active: "Active",
+    pending: "Pending",
+    win: "Win",
+    partialWin: "Partial Win",
+    loss: "Loss",
+  };
+
+ const statusColorMap = {
+  active: "bg-green-50 text-green-700 ring-green-600/20",
+  pending: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
+  win: "bg-blue-50 text-blue-700 ring-blue-600/20",
+  partialWin: "bg-violet-50 text-violet-700 ring-violet-600/20",
+  loss: "bg-red-50 text-red-700 ring-red-600/20",
+};
 
 const ClientTradeIdeas = () => {
   const [page, setPage] = useState(1);
@@ -77,7 +92,7 @@ const ClientTradeIdeas = () => {
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
             {tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
@@ -90,8 +105,11 @@ const ClientTradeIdeas = () => {
                   />
                 </div>
                 <div className="card-border card-rounded-b flex flex-col gap-2 justify-between">
-                  <div className="px-5 py-4.5 min-h-64 ">
-                    <div className="font-bold mr-3 text-gray-900 mb-3">{idea?.name}</div>
+                  <div className="px-5 py-4.5 ">
+                    <div className="flex item-center justify-between  mb-5">
+                      <div className="font-bold mr-3 text-gray-900">{idea?.name}</div>
+                      <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}>{LabelMap[idea?.status]}</span>
+                    </div>
                     <div className="flex gap-10 mb-3">
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
