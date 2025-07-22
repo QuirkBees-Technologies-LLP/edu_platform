@@ -40,7 +40,12 @@ const LectureContent = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showPreview1, setShowPreview1] = useState(false);
   const [activeTab, setActiveTab] = useState("content");
+  const [videoFile, setVideoFile] = useState({});
+  const [videoURL, setVideoURL] = useState(null);
+  const [showPreviewVideo, setShowPreviewVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [lectureContent, setLectureContent] = useState(null);
 
@@ -59,7 +64,10 @@ const LectureContent = ({
 
   useEffect(() => {
     const fetchLectureContent = async () => {
-      const response = await lmsLectures.getLectureById(lecture._id, auth.token);
+      const response = await lmsLectures.getLectureById(
+        lecture._id,
+        auth.token
+      );
       setLectureContent(response?.data);
     };
     console.log(lectureContent, "lectureContent");
@@ -69,6 +77,7 @@ const LectureContent = ({
         typeof lecture.section === "object"
           ? lecture.section._id
           : lecture.section;
+
       setFormData({
         title: lecture.title || "",
         description: lecture.description || "",
@@ -77,6 +86,7 @@ const LectureContent = ({
         order: lecture.order || 0,
         preview: lecture.preview || false,
         section: sectionId || "",
+        thumbnailUrl: lecture?.thumbnailUrl || null,
       });
       // setShowPreview(false);
       // setIsEditing(false);
@@ -182,26 +192,59 @@ const LectureContent = ({
     return url;
   };
 
-  const handleFileUpload = async (e) => {
+  const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    // Aquí deberías implementar la lógica para subir el archivo a tu servidor
-    // Por ahora, solo mostraremos un mensaje
-    toast.info("File upload functionality to be implemented");
+    if (file && file.type.startsWith("video/")) {
+      setVideoFile(file);
+    } else {
+      setVideoFile(null);
+      setShowPreviewVideo(null);
+    }
   };
 
+  useEffect(() => {
+    if (videoFile instanceof File) {
+      const url = URL.createObjectURL(videoFile);
+      setShowPreviewVideo(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [videoFile]);
+
   const handleSubmit = async (e) => {
+    console.log(videoFile, "videoFile");
     e.preventDefault();
     if (!auth?.token || !lecture?._id) return;
 
+    const dataToSend = new FormData();
+    dataToSend.append("title", formData.title);
+    dataToSend.append("description", formData.description);
+    dataToSend.append("type", formData.type);
+    dataToSend.append("order", formData.order);
+    dataToSend.append("preview", formData.preview);
+    dataToSend.append("section", formData.section);
+
+    if (videoFile) {
+      dataToSend.append("video", videoFile);
+    } else {
+      dataToSend.append("content", formData.content);
+    }
+
     setIsLoading(true);
+    setUploadProgress(0);
     try {
       const updatedLecture = await lmsLectures.updateLecture(
         lecture._id,
-        formData,
-        auth.token
+        dataToSend,
+        auth.token,
+        (progressEvent) => {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percent); // 👈 Update % in UI
+        }
       );
+
+      setUploadProgress(100);
 
       // Notify success
       toast.success("Lecture updated successfully");
@@ -261,7 +304,7 @@ const LectureContent = ({
       case "VIDEO":
         return (
           <div className="space-y-4">
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <div className="flex items-center gap-2 text-primary">
                 <Video className="w-4 h-4 text-primary" />
                 <Label htmlFor="videoUrl" className="font-medium">
@@ -308,12 +351,13 @@ const LectureContent = ({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </div> */}
             <div className="space-y-3 pt-3 border-t border-gray-100">
               <div className="flex items-center gap-2">
                 <Upload className="w-4 h-4 text-primary" />
                 <Label className="font-medium text-primary">Upload Video</Label>
               </div>
+
               <div className="flex items-center gap-2">
                 <Input
                   type="file"
@@ -330,9 +374,43 @@ const LectureContent = ({
                   <span>Choose Video File</span>
                 </Label>
               </div>
+              {showPreviewVideo && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 hover:bg-primary hover:text-white [&>*]:hover:text-white bg-none"
+                  onClick={() => setShowPreview1(!showPreview1)}
+                >
+                  <Eye className="h-4 w-4 mr-2 text-primary" />
+                  {showPreview ? "Hide Preview" : "Show Preview"}
+                </Button>
+              )}
+
               <p className="text-xs text-gray-500 italic">
                 Supported formats: MP4, WebM, Ogg (max 100MB)
               </p>
+
+              <AnimatePresence>
+                {showPreview1 && videoFile && (
+                  <motion.div
+                    key="videoPreview"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-3"
+                  >
+                    <div className="aspect-video w-full border border-purple-200 rounded-md overflow-hidden shadow-sm">
+                      <video
+                        src={showPreviewVideo}
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         );
@@ -350,7 +428,9 @@ const LectureContent = ({
               <FileText className="w-4 h-4 text-primary" />
               Title
             </h3>
-            <p className="text-gray-700 p-2 rounded-md">{lectureContent?.title}</p>
+            <p className="text-gray-700 p-2 rounded-md">
+              {lectureContent?.title}
+            </p>
           </div>
 
           <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
@@ -373,13 +453,15 @@ const LectureContent = ({
             ) : (
               <FileText className="w-4 h-4 text-primary" />
             )}
-            {lectureContent?.type === "VIDEO" ? "Video Content" : "Text Content"}
+            {lectureContent?.type === "VIDEO"
+              ? "Video Content"
+              : "Text Content"}
           </h3>
           <div className="mt-2">
             {lectureContent?.type === "VIDEO" ? (
               <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                 <iframe
-                  src={getEmbedUrl(lectureContent?.content)}
+                  src={getEmbedUrl(lectureContent?.videoUrl)}
                   className="w-full h-full rounded-md"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -388,7 +470,7 @@ const LectureContent = ({
             ) : (
               <div
                 className="p-4  border border-gray-200 rounded-lg prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: lectureContent?.content }}
+                dangerouslySetInnerHTML={{ __html: lectureContent?.videoUrl }}
               />
             )}
           </div>
@@ -439,7 +521,7 @@ const LectureContent = ({
             Lecture Order
           </h3>
           <p className="text-gray-700 p-2  rounded-md">
-            {lecture?.order || "0"} (Position in section)
+            {lectureContent?.order || "0"} (Position in section)
           </p>
         </div>
 
@@ -450,7 +532,7 @@ const LectureContent = ({
               Preview Access
             </h3>
             <p className="text-sm text-gray-500">
-              {lecture?.preview
+              {lectureContent?.preview
                 ? "Students can preview this lecture before enrolling in the course"
                 : "This lecture is only available after enrollment"}
             </p>
@@ -458,10 +540,10 @@ const LectureContent = ({
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
               className={`flex items-center gap-1.5 text-sm font-medium ${
-                lecture?.preview ? "text-green-700" : "text-gray-500"
+                lectureContent?.preview ? "text-green-700" : "text-gray-500"
               }`}
             >
-              {lecture?.preview ? (
+              {lectureContent?.preview ? (
                 <>
                   <Check className="w-4 h-4 text-green-500" />
                   Enabled
@@ -688,7 +770,9 @@ const LectureContent = ({
                     {isLoading ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
+                        {uploadProgress < 100
+                          ? `Uploading ${uploadProgress}%`
+                          : "Saving..."}
                       </>
                     ) : (
                       <>

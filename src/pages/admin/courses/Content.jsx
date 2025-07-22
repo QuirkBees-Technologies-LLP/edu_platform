@@ -7,7 +7,10 @@ import SettingsSection from "./pages/Settings";
 import Classroom from "./pages/Classroom";
 const Content = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activePage, setActivePage] = useState("classroom");
+  const [activePage, setActivePage] = useState(() => {
+    const hash = window.location.hash.replace("#", "");
+    return hash || "classroom";
+  });
   const { auth } = useAuthContext();
 
   const baseNavItems = [
@@ -28,8 +31,8 @@ const Content = () => {
   const handleNavigation = (page) => {
     setActivePage(page);
     setIsMobileMenuOpen(false);
+    window.location.hash = page; // this sets the hash in the URL
   };
-
   const renderContent = () => {
     switch (activePage) {
       case "classroom":
@@ -70,11 +73,14 @@ const Content = () => {
                       <a
                         key={item.label}
                         href={item.href}
-                        onClick={() => handleNavigation(item.label.toLowerCase())}
-                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${activePage === item.label.toLowerCase()
+                        onClick={() =>
+                          handleNavigation(item.label.toLowerCase())
+                        }
+                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                          activePage === item.label.toLowerCase()
                             ? "bg-primary-light text-primary"
                             : "bg-light text-gray-700 hover:bg-gray-50 dark:hover:bg-dark"
-                          }`}
+                        }`}
                       >
                         {item.label}
                       </a>
@@ -96,16 +102,18 @@ const Content = () => {
                       key={item.label}
                       href={item.href}
                       onClick={() => handleNavigation(item.label.toLowerCase())}
-                      className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${activePage === item.label.toLowerCase()
+                      className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                        activePage === item.label.toLowerCase()
                           ? "bg-blue-50 text-blue-700"
                           : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                        }`}
+                      }`}
                     >
                       <item.icon
-                        className={`h-5 w-5 mr-2 ${activePage === item.label.toLowerCase()
+                        className={`h-5 w-5 mr-2 ${
+                          activePage === item.label.toLowerCase()
                             ? "text-blue-600"
                             : ""
-                          }`}
+                        }`}
                       />
                       {item.label}
                     </a>
@@ -116,9 +124,7 @@ const Content = () => {
           </nav>
 
           {/* Main Content */}
-          <main className="pt-8">
-            {renderContent()}
-          </main>
+          <main className="pt-8">{renderContent()}</main>
         </div>
       </div>
     </div>

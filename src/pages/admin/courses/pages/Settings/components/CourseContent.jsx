@@ -15,30 +15,50 @@ import {
 const CourseContent = ({ courseId }) => {
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
-  const [selectedLecture, setSelectedLecture] = useState(null);
+  const [selectedLecture, setSelectedLecture] = useState(() => {
+  const savedLectureId = localStorage.getItem("selectedLectureId");
+  return savedLectureId ? { _id: savedLectureId } : null;
+});
   const [forceUpdateLectureList, setForceUpdateLectureList] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [sections, setSections] = useState([]); // ✅ Local state for sections
 
-  // Fetch sections when courseId changes
+   // Fetch sections when courseId changes
   useEffect(() => {
     if (courseId && auth?.token) {
       setIsLoading(true);
       dispatch(fetchSections({ courseId, token: auth.token }))
         .unwrap()
+        .then((data) => {
+          setSections(data.sections || []); // ✅ Save sections locally
+        })
         .finally(() => {
           setIsLoading(false);
         });
     }
   }, [courseId, auth?.token, dispatch]);
 
-  // Función para manejar cuando se actualiza un lecture
+  // ✅ Restore selected lecture from localStorage when sections are ready
+ useEffect(() => {
+  const savedLectureId = localStorage.getItem("selectedLectureId");
+  if (!savedLectureId || !Array.isArray(sections)) return;
+
+  const allLectures = sections.flatMap((section) => section.lectures || []);
+  const foundLecture = allLectures.find((l) => l._id === savedLectureId);
+
+  if (foundLecture) {
+    setSelectedLecture(foundLecture);
+  }
+}, [sections]);
+
+  // Update handler
   const handleLectureUpdate = (updatedLecture) => {
     if (updatedLecture && selectedLecture?._id === updatedLecture._id) {
       setSelectedLecture(updatedLecture);
     } else if (updatedLecture === null && selectedLecture) {
-      // Si se ha eliminado el lecture seleccionado
       setSelectedLecture(null);
+      localStorage.removeItem("selectedLectureId");
     }
   };
 
@@ -82,6 +102,7 @@ const CourseContent = ({ courseId }) => {
                 courseId={courseId}
                 onLectureSelect={(lecture) => {
                   setSelectedLecture(lecture);
+                  localStorage.setItem("selectedLectureId", lecture._id);
                   if (window.innerWidth < 768) {
                     setSidebarCollapsed(true);
                   }

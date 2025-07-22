@@ -89,12 +89,14 @@ export const createLecture = async (lectureData, token = null) => {
  * @param {string} token - Authentication token
  * @returns {Promise<Object>} Updated lecture data
  */
-export const updateLecture = async (id, lectureData, token = null) => {
+export const updateLecture = async (id, lectureData, token = null,onUploadProgress) => {
   try {
     const response = await api.put(`/admin/lecture/${id}`, lectureData, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
       },
+      onUploadProgress
     });
     return response.data;
   } catch (error) {

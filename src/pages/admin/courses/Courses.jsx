@@ -10,7 +10,7 @@ const Courses = () => {
 
   const image = (
     <img
-      src={toAbsoluteUrl("/media/avatars/300-1.png")}
+      src={toAbsoluteUrl(auth?.user?.image)}
       className="rounded-full border-3 border-success size-[100px] shrink-0"
     />
   );
@@ -21,7 +21,7 @@ const Courses = () => {
         name={auth?.user?.name}
         image={image}
         info={[
-          { label: `${auth?.user?.tier}`, icon: "abstract-41" },
+          { label: `${auth?.user?.first_name} ${auth?.user?.last_name}`, icon: "abstract-41" },
           { label: `${auth?.user?.role}`, icon: "geolocation" },
           { email: `${auth?.user?.email}`, icon: "sms" },
         ]}

@@ -151,12 +151,12 @@ const ClientSpecificCourses = () => {
         <Container>
           <div className="grid grid-cols-12 gap-4">
             <div className="xl:col-span-8 col-span-12">
-              {currentLecture?.type === 'VIDEO' && currentLecture.content ? (
+              {currentLecture?.type === 'VIDEO' && currentLecture.videoUrl ? (
                 <div className="mb-4">
                   <iframe
                     className="w-full rounded-lg"
                     height="480"
-                    src={getVideoEmbedUrl(currentLecture.content)}
+                    src={(currentLecture.videoUrl)}
                     title={currentLecture.title}
                     frameBorder="0"
                     allow="autoplay; fullscreen; encrypted-media"
@@ -168,7 +168,7 @@ const ClientSpecificCourses = () => {
                   <h2 className="text-2xl font-bold mb-4">{currentLecture.title}</h2>
                   <div
                     className="prose max-w-none"
-                    dangerouslySetInnerHTML={{ __html: currentLecture.content }}
+                    dangerouslySetInnerHTML={{ __html: currentLecture.videoUrl }}
                   />
                 </div>
               ) : (
@@ -216,7 +216,7 @@ const ClientSpecificCourses = () => {
                                 <div className="relative">
                                   <img
                                     className="rounded-lg h-14 w-24 object-cover"
-                                    src={thumbnails[lecture._id] || defaultImage}
+                                    src={currentLecture[lecture._id] || defaultImage}
                                     alt={lecture.title}
                                   />
                                   <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-lg">
