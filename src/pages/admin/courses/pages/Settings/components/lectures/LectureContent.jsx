@@ -231,21 +231,27 @@ const LectureContent = ({
 
     setIsLoading(true);
     setUploadProgress(0);
+    let fakeProgress = 0;
+    const interval = setInterval(() => {
+      fakeProgress += 2;
+      if (fakeProgress < 80) {
+        setUploadProgress(fakeProgress);
+      } else {
+        clearInterval(interval);
+      }
+    }, 100); // adjust speed
     try {
       const updatedLecture = await lmsLectures.updateLecture(
         lecture._id,
         dataToSend,
-        auth.token,
-        (progressEvent) => {
-          const percent = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(percent); // 👈 Update % in UI
-        }
+        auth.token
       );
 
       setUploadProgress(100);
-
+      setTimeout(() => {
+        setIsLoading(false);
+        setUploadProgress(0);
+      }, 500);
       // Notify success
       toast.success("Lecture updated successfully");
 
@@ -260,6 +266,9 @@ const LectureContent = ({
 
       setForceUpdateLectureList(true);
     } catch (error) {
+      clearInterval(interval);
+      setIsLoading(false);
+      setUploadProgress(0);
       toast.error(
         "Failed to update lecture: " + (error.message || "Unknown error")
       );
