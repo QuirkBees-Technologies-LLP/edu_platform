@@ -37,6 +37,7 @@ const LectureContent = ({
   setForceUpdateLectureList,
 }) => {
   const { auth } = useAuthContext();
+
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -46,7 +47,7 @@ const LectureContent = ({
   const [videoURL, setVideoURL] = useState(null);
   const [showPreviewVideo, setShowPreviewVideo] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-
+  const [videoInputType, setVideoInputType] = useState("");
   const [lectureContent, setLectureContent] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -222,11 +223,9 @@ const LectureContent = ({
     dataToSend.append("order", formData.order);
     dataToSend.append("preview", formData.preview);
     dataToSend.append("section", formData.section);
-
+    dataToSend.append("content", formData.content);
     if (videoFile) {
       dataToSend.append("video", videoFile);
-    } else {
-      dataToSend.append("content", formData.content);
     }
 
     setIsLoading(true);
@@ -313,114 +312,148 @@ const LectureContent = ({
       case "VIDEO":
         return (
           <div className="space-y-4">
-            {/* <div className="space-y-3">
-              <div className="flex items-center gap-2 text-primary">
-                <Video className="w-4 h-4 text-primary" />
-                <Label htmlFor="videoUrl" className="font-medium">
-                  Video URL
-                </Label>
-              </div>
-              <Input
-                id="videoUrl"
-                name="videoUrl"
-                value={formData.content}
-                onChange={handleVideoUrlChange}
-                placeholder="Enter video URL (YouTube, Vimeo, etc.)"
-                className="form-control input input-md w-full"
-              />
-              {formData.content && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 hover:bg-primary hover:text-white [&>*]:hover:text-white bg-none"
-                  onClick={() => setShowPreview(!showPreview)}
-                >
-                  <Eye className="h-4 w-4 mr-2 text-primary" />
-                  {showPreview ? "Hide Preview" : "Show Preview"}
-                </Button>
-              )}
-              <AnimatePresence>
-                {showPreview && formData.content && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="mt-3"
-                  >
-                    <div className="aspect-video w-full border border-purple-200 rounded-md overflow-hidden shadow-sm">
-                      <iframe
-                        src={getEmbedUrl(formData.content)}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div> */}
-            <div className="space-y-3 pt-3 border-t border-gray-100">
-              <div className="flex items-center gap-2">
-                <Upload className="w-4 h-4 text-primary" />
-                <Label className="font-medium text-primary">Upload Video</Label>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="videoUpload"
-                />
-                <Label
-                  htmlFor="videoUpload"
-                  className="text-sm flex items-center gap-2 cursor-pointer border [&>*]:hover:text-white rounded-md px-4 py-2 hover:bg-primary hover:text-white transition-colors"
-                >
-                  <Upload className="h-4 w-4 text-primary" />
-                  <span>Choose Video File</span>
-                </Label>
-              </div>
-              {showPreviewVideo && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 hover:bg-primary hover:text-white [&>*]:hover:text-white bg-none"
-                  onClick={() => setShowPreview1(!showPreview1)}
-                >
-                  <Eye className="h-4 w-4 mr-2 text-primary" />
-                  {showPreview ? "Hide Preview" : "Show Preview"}
-                </Button>
-              )}
-
-              <p className="text-xs text-gray-500 italic">
-                Supported formats: MP4, WebM, Ogg (max 100MB)
-              </p>
-
-              <AnimatePresence>
-                {showPreview1 && videoFile && (
-                  <motion.div
-                    key="videoPreview"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="mt-3"
-                  >
-                    <div className="aspect-video w-full border border-purple-200 rounded-md overflow-hidden shadow-sm">
-                      <video
-                        src={showPreviewVideo}
-                        controls
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Dropdown Selector */}
+            <div className="space-y-2">
+              <Label className="font-medium text-primary">
+                Select Video Input Type
+              </Label>
+              <select
+                value={videoInputType}
+                onChange={(e) => {
+                  setVideoInputType(e.target.value);
+                  // reset fields when switching
+                  setFormData({ ...formData, content: "" });
+                  setVideoFile(null);
+                  setShowPreview(false);
+                  setShowPreview1(false);
+                  setShowPreviewVideo(null);
+                }}
+                className="border px-3 py-2 rounded-md w-full text-sm"
+              >
+                <option value="">-- Select --</option>
+                <option value="url">Video URL</option>
+                <option value="upload">Upload File</option>
+              </select>
             </div>
+
+            {/* Video URL Input UI */}
+            {videoInputType === "url" && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <Video className="w-4 h-4 text-primary" />
+                  <Label htmlFor="videoUrl" className="font-medium">
+                    Video URL
+                  </Label>
+                </div>
+                <Input
+                  id="videoUrl"
+                  name="videoUrl"
+                  value={formData.content}
+                  onChange={handleVideoUrlChange}
+                  placeholder="Enter video URL (YouTube, Vimeo, etc.)"
+                  className="form-control input input-md w-full"
+                />
+                {formData.content && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 hover:bg-primary hover:text-white [&>*]:hover:text-white bg-none"
+                    onClick={() => setShowPreview(!showPreview)}
+                  >
+                    <Eye className="h-4 w-4 mr-2 text-primary" />
+                    {showPreview ? "Hide Preview" : "Show Preview"}
+                  </Button>
+                )}
+                <AnimatePresence>
+                  {showPreview && formData.content && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="mt-3"
+                    >
+                      <div className="aspect-video w-full border border-purple-200 rounded-md overflow-hidden shadow-sm">
+                        <iframe
+                          src={getEmbedUrl(formData.content)}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Video Upload UI */}
+            {videoInputType === "upload" && (
+              <div className="space-y-3 pt-3 border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-primary" />
+                  <Label className="font-medium text-primary">
+                    Upload Video
+                  </Label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="videoUpload"
+                  />
+                  <Label
+                    htmlFor="videoUpload"
+                    className="text-sm flex items-center gap-2 cursor-pointer border [&>*]:hover:text-white rounded-md px-4 py-2 hover:bg-primary hover:text-white transition-colors"
+                  >
+                    <Upload className="h-4 w-4 text-primary" />
+                    <span>Choose Video File</span>
+                  </Label>
+                </div>
+
+                {videoFile && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 hover:bg-primary hover:text-white [&>*]:hover:text-white bg-none"
+                    onClick={() => setShowPreview1(!showPreview1)}
+                  >
+                    <Eye className="h-4 w-4 mr-2 text-primary" />
+                    {showPreview1 ? "Hide Preview" : "Show Preview"}
+                  </Button>
+                )}
+
+                <p className="text-xs text-gray-500 italic">
+                  Supported formats: MP4, WebM, Ogg (max 100MB)
+                </p>
+
+                <AnimatePresence>
+                  {showPreview1 && videoFile && (
+                    <motion.div
+                      key="videoPreview"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="mt-3"
+                    >
+                      <div className="aspect-video w-full border border-purple-200 rounded-md overflow-hidden shadow-sm">
+                        <video
+                          src={showPreviewVideo}
+                          controls
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         );
       default:
@@ -470,7 +503,7 @@ const LectureContent = ({
             {lectureContent?.type === "VIDEO" ? (
               <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                 <iframe
-                  src={getEmbedUrl(lectureContent?.videoUrl)}
+                  src={getEmbedUrl(lectureContent?.videoUrl?lectureContent?.videoUrl:lectureContent?.content)}
                   className="w-full h-full rounded-md"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -479,7 +512,7 @@ const LectureContent = ({
             ) : (
               <div
                 className="p-4  border border-gray-200 rounded-lg prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: lectureContent?.videoUrl }}
+                dangerouslySetInnerHTML={{ __html: lectureContent?.videoUrl?lectureContent?.videoUrl:lectureContent?.content }}
               />
             )}
           </div>
