@@ -19,6 +19,8 @@ const VideoLibrary = () => {
   const otherVideos = courses?.slice(1, 5); // Get the next 4 videos for the second 
   const remainingVideos = courses?.slice(5); // You can lazy-load these
 
+
+  console.log("featuredVideo",featuredVideo)
   return (
     <div className='container-fluid'>
       <Toolbar>
@@ -66,7 +68,7 @@ const VideoLibrary = () => {
           {otherVideos?.length > 0 && otherVideos.map((video, index) => {
             return (
                 <div className="xl:col-span-4 sm:col-span-6 col-span-12">
-                  <Link to={`/academy/course/detail/${featuredVideo?._id}`}>
+                  <Link to={`/academy/course/detail/${video?._id}`}>
                     <div className="video-library">
                     <ThumbnailImage
                       image={video?.imageUrl}
