@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, BookOpen } from "lucide-react";
 
 // components
@@ -6,13 +6,36 @@ import Main from "./components/Main";
 import CourseContent from "./components/courseContent";
 import LectureContent from "./components/LectureContent";
 const ClassroomContent = () => {
-  const [activeTab, setActiveTab] = useState("main");
-  const [currentCourse, setCurrentCourse] = useState(null);
-  const [currentLecture, setCurrentLecture] = useState(null);
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem("activeTab") || "main");
+const [currentCourse, setCurrentCourse] = useState(() => {
+  const savedCourse = localStorage.getItem("currentCourse");
+  return savedCourse ? JSON.parse(savedCourse) : null;
+});
+const [currentLecture, setCurrentLecture] = useState(() => {
+  const savedLecture = localStorage.getItem("currentLecture");
+  return savedLecture ? JSON.parse(savedLecture) : null;
+});
+
+useEffect(() => {
+  localStorage.setItem("activeTab", activeTab);
+}, [activeTab]);
+
+useEffect(() => {
+  if (currentCourse) {
+    localStorage.setItem("currentCourse", JSON.stringify(currentCourse));
+  }
+}, [currentCourse]);
+
+useEffect(() => {
+  if (currentLecture) {
+    localStorage.setItem("currentLecture", JSON.stringify(currentLecture));
+  }
+}, [currentLecture]);
   const handleViewCourse = (course) => {
     setCurrentCourse(course);
     setActiveTab("course");
   };
+
 
   const handleViewLecture = (lecture) => {
     setCurrentLecture(lecture);
@@ -21,12 +44,17 @@ const ClassroomContent = () => {
 
   const handleBackToMain = () => {
     setActiveTab("main");
-    setCurrentCourse(null);
+  setCurrentCourse(null);
+  localStorage.removeItem("currentCourse");
+  localStorage.removeItem("currentLecture");
+  localStorage.setItem("activeTab", "main");
   };
 
   const handleBackToCourse = () => {
-    setActiveTab("course");
-    setCurrentLecture(null);
+     setActiveTab("course");
+  setCurrentLecture(null);
+  localStorage.removeItem("currentLecture");
+  localStorage.setItem("activeTab", "course");
   };
 
   const renderContent = () => {

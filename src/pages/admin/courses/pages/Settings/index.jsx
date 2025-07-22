@@ -22,8 +22,8 @@ import ErrorMessages from "@/components/common/ErrorsMessage"
 const SettingsSection = () => {
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
-  const [content, setContent] = useState("list");
-  const [selectedCourseId, setSelectedCourseId] = useState(null);
+ const [content, setContent] = useState(() => localStorage.getItem("courseView") || "list");
+const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getItem("selectedCourseId"));
 
   // Selectors
   const courses = useSelector(selectAllCourses);
@@ -56,16 +56,21 @@ const SettingsSection = () => {
 
   // Handle course select
   const handleCourseSelect = (course) => {
-    setSelectedCourseId(course._id);
-    setContent("content");
-  };
+  setSelectedCourseId(course._id);
+  setContent("content");
+  localStorage.setItem("selectedCourseId", course._id);
+  localStorage.setItem("courseView", "content");
+};
 
   // Handle back navigation
   const handleBack = () => {
-    setSelectedCourseId(null);
-    setContent("list");
-    dispatch(clearSections());
-  };
+  setSelectedCourseId(null);
+  setContent("list");
+  localStorage.removeItem("selectedCourseId");
+  localStorage.setItem("courseView", "list");
+  dispatch(clearSections());
+};
+
 
   // Handle error clear
   const handleErrorClear = () => {
@@ -73,6 +78,13 @@ const SettingsSection = () => {
   };
 
   // Render content based on status and content type
+
+  useEffect(() => {
+  return () => {
+    localStorage.removeItem("selectedCourseId");
+    localStorage.removeItem("courseView");
+  };
+}, []);
   const renderContent = () => {
     if (status === "loading") {
       return <LoadingSpinner />;
