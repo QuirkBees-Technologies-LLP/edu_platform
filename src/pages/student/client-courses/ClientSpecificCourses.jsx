@@ -151,12 +151,12 @@ const ClientSpecificCourses = () => {
         <Container>
           <div className="grid grid-cols-12 gap-4">
             <div className="xl:col-span-8 col-span-12">
-              {currentLecture?.type === 'VIDEO' && currentLecture.videoUrl ? (
+              {currentLecture?.type === 'VIDEO' && currentLecture.videoUrl || currentLecture.content ? (
                 <div className="mb-4">
                   <iframe
                     className="w-full rounded-lg"
                     height="480"
-                    src={(currentLecture.videoUrl)}
+                    src={(currentLecture.videoUrl?currentLecture.videoUrl:getVideoEmbedUrl(currentLecture.content))}
                     title={currentLecture.title}
                     frameBorder="0"
                     allow="autoplay; fullscreen; encrypted-media"
@@ -168,7 +168,7 @@ const ClientSpecificCourses = () => {
                   <h2 className="text-2xl font-bold mb-4">{currentLecture.title}</h2>
                   <div
                     className="prose max-w-none"
-                    dangerouslySetInnerHTML={{ __html: currentLecture.videoUrl }}
+                    dangerouslySetInnerHTML={{ __html: currentLecture.videoUrl?currentLecture.videoUrl:getVideoEmbedUrl(currentLecture.content) }}
                   />
                 </div>
               ) : (
