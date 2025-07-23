@@ -86,8 +86,8 @@ export const deleteSection = async (id, token) => {
  */
 export const reorderSections = async (sections, token = null) => {
   try {
-    const response = await api.post(
-      "/sections/reorder",
+    const response = await api.put(
+      "/admin/section/reorder",
       { sections },
       {
         headers: {

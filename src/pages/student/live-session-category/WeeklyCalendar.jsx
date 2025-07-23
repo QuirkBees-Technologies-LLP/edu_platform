@@ -47,7 +47,7 @@ const WeeklyCalendar = ({ educators }) => {
                             <React.Fragment key={edu._id}>
                                 <div className="flex flex-col justify-center items-center text-center space-x-2 bg-dark-light p-3 border-r-2">
                                     <img
-                                        src={edu.image.includes("undefined") ? toAbsoluteUrl('/media/avatars/blank.png') : edu.image}
+                                        src={edu.image ? edu.image :  toAbsoluteUrl('/media/avatars/blank.png')}
                                         alt={edu.first_name}
                                         className="w-12 h-12 mb-2 rounded-full object-cover"
                                     />

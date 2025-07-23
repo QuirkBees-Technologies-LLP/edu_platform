@@ -37,6 +37,7 @@ const SectionList = ({
   const [sections, setSections] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
+  
 
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
@@ -49,15 +50,29 @@ const SectionList = ({
   }, [reduxSections]);
 
   const moveSection = (fromIndex, toIndex) => {
-    const newSections = [...sections];
-    const [movedSection] = newSections.splice(fromIndex, 1);
-    newSections.splice(toIndex, 0, movedSection);
-    setSections(newSections);
+     setSections((prevSections) => {
+    const updated = [...prevSections];
+    const [moved] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, moved);
+    return updated;
+  });
   };
 
   const handleReorder = async (newOrder) => {
+    console.log("newOrder----->", newOrder);
+
     try {
-      await dispatch(reorderSections(newOrder, auth.token)).unwrap();
+      const payload = newOrder.map(({ id, order }) => ({
+        _id: id,
+        order,
+      }));
+
+      console.log("PPayload", payload);
+      console.log("PPayload", auth.token);
+      await dispatch(
+        reorderSections({ sections: payload, token: auth.token })
+      ).unwrap();
+      console.log("✅ API called: sections reordered");
       // No necesitamos actualizar el estado local aquí porque el useEffect
       // se encargará de actualizarlo cuando cambien las secciones en Redux
     } catch (error) {
@@ -112,10 +127,11 @@ const SectionList = ({
             {sections.length > 1 && (
               <button
                 onClick={() => setReorderMode(!reorderMode)}
-                className={`p-2 rounded-full transition-colors ${reorderMode
+                className={`p-2 rounded-full transition-colors ${
+                  reorderMode
                     ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                  }`}
+                }`}
                 title={reorderMode ? "Exit reorder mode" : "Reorder sections"}
               >
                 <MoveVertical className="w-4 h-4" />
@@ -234,15 +250,42 @@ const SectionList = ({
                 transition={{ duration: 0.2, delay: index * 0.05 }}
                 className="transform transition-transform"
               >
-                <SectionItem
-                  section={section}
-                  courseId={courseId}
-                  onLectureSelect={onLectureSelect}
-                  onLectureUpdate={onLectureUpdate}
-                  forceUpdateLectureList={forceUpdateLectureList}
-                  setForceUpdateLectureList={setForceUpdateLectureList}
-                  reorderMode={reorderMode}
-                />
+                {reorderMode ? (
+                  <DraggableSection
+                    section={section}
+                    index={index}
+                    moveSection={moveSection}
+                    sections={sections}
+                    onReorder={handleReorder} // ✅ Pass this prop
+                    // onReorder={async (newOrder) => {
+                    //   try {
+                    //     const reorderedPayload = newOrder.map(
+                    //       ({ id, order }) => ({
+                    //         _id: id,
+                    //         order,
+                    //       })
+                    //     );
+                    //     await dispatch(
+                    //       reorderSections(reorderedPayload, auth.token)
+                    //     ).unwrap();
+                    //   } catch (error) {
+                    //     console.error("Failed to reorder:", error);
+                    //   }
+                    // }}
+                  >
+                    <SectionItem section={section} reorderMode={true} />
+                  </DraggableSection>
+                ) : (
+                  <SectionItem
+                    section={section}
+                    courseId={courseId}
+                    onLectureSelect={onLectureSelect}
+                    onLectureUpdate={onLectureUpdate}
+                    forceUpdateLectureList={forceUpdateLectureList}
+                    setForceUpdateLectureList={setForceUpdateLectureList}
+                    reorderMode={false}
+                  />
+                )}
               </motion.div>
             ))}
           </div>
