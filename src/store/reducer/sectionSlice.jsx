@@ -89,11 +89,14 @@ export const deleteExistingSection = createAsyncThunk(
 
 export const reorderSections = createAsyncThunk(
   "sections/reorderSections",
-  async (sections, token, { rejectWithValue }) => {
+  async ({ sections, token }, { rejectWithValue }) => {
+    console.log("sections createAsyncThunk", sections);
+    console.log("token createAsyncThunk", token);
     try {
       const response = await reorderSectionsApi(sections, token);
       return response;
     } catch (error) {
+      console.log("error createAsyncThunk", error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -246,17 +249,16 @@ const sectionSlice = createSlice({
       })
       .addCase(reorderSections.fulfilled, (state, action) => {
         state.status = SECTION_STATUS.SUCCEEDED;
-        const updatedSections = [...state.sections];
-        action.payload.forEach(({ id, order }) => {
-          const sectionIndex = updatedSections.findIndex((s) => s._id === id);
-          if (sectionIndex !== -1) {
-            updatedSections[sectionIndex] = {
-              ...updatedSections[sectionIndex],
-              order,
-            };
-          }
-        });
-        state.sections = updatedSections;
+        // const updatedSections = [...state.sections];
+        // action.payload?.data.forEach(({ id, order }) => {
+        //   const sectionIndex = updatedSections.findIndex((s) => s._id === id);
+        //   if (sectionIndex !== -1) {
+        //     updatedSections[sectionIndex].order = order
+        //   }
+        // });
+        // state.sections = updatedSections.sort((a, b) => a.order - b.order);
+        // state.sections = updatedSections;
+        state.sections = action.payload.data;
       })
       .addCase(reorderSections.rejected, (state, action) => {
         state.status = SECTION_STATUS.FAILED;

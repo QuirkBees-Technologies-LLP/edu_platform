@@ -6,6 +6,7 @@ export const clientLiveSessionApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getClientToken: builder.mutation({
+            
             query: (payload) => ({
                 url: '/admin/stream/get-token',
                 method: 'POST',

@@ -18,6 +18,9 @@ const ClientViewLiveSession = () => {
   const { callId } = useParams();
   const { auth } = useAuthContext();
   const userId = auth?.user?._id ?? null;
+
+  console.log("userId",auth)
+  console.log("callId",callId)
   const [recordings, setRecordings] = useState([]);
 
   // 1. Fetch token and schedule data (uncomment schedule logic)

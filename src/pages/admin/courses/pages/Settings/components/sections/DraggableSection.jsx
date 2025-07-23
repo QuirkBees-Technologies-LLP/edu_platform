@@ -1,16 +1,6 @@
 import { useDrag, useDrop } from "react-dnd";
-import { useDispatch } from "react-redux";
-import { useAuthContext } from "@/auth/useAuthContext";
 
-const DraggableSection = ({
-  section,
-  index,
-  moveSection,
-  onReorder,
-  children,
-}) => {
-  const { auth } = useAuthContext();
-
+const DraggableSection = ({ section, index, moveSection, onReorder,sections, children }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "SECTION",
     item: { id: section._id, index },
@@ -22,24 +12,27 @@ const DraggableSection = ({
   const [, drop] = useDrop({
     accept: "SECTION",
     hover: (draggedItem) => {
-      if (draggedItem.index === index) return;
-
-      moveSection(draggedItem.index, index);
-      draggedItem.index = index;
+      if (draggedItem.index !== index) {
+        moveSection(draggedItem.index, index);
+        draggedItem.index = index;
+      }
     },
-    drop: async (draggedItem) => {
-      if (draggedItem.index === index) return;
+    drop: async () => {
+      if (!onReorder) return;
+
+      // const sections = document.querySelectorAll("[data-section-id]");
+      console.log("sections________________>",sections)
+      const newOrder = Array.from(sections).map((el, idx) => ({
+        id: el._id,
+        order: idx,
+      }));
+
+      console.log("📦 Sending reorder payload to API", newOrder);
 
       try {
-        const sections = document.querySelectorAll("[data-section-id]");
-        const newOrder = Array.from(sections).map((el, idx) => ({
-          id: el.dataset.sectionId,
-          order: idx,
-        }));
-
         await onReorder(newOrder);
-      } catch (error) {
-        console.error("Failed to reorder sections:", error);
+      } catch (err) {
+        console.error("❌ Reorder API error:", err);
       }
     },
   });

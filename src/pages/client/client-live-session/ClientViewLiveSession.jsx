@@ -17,6 +17,7 @@ const ClientViewLiveSession = () => {
   const { auth } = useAuthContext();
 
   const userId = auth?.user?._id ?? null;
+  console.log("userId",userId)
   const [payload, setPayload] = useState({ userId: userId, callId: callId });
   const [token, setToken] = useState(null);
   const [getClientToken, { data, error, isLoading }] = useGetClientTokenMutation();
