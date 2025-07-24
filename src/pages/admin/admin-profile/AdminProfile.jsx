@@ -5,9 +5,11 @@ import { useFormik } from 'formik';
 import { toast } from 'sonner';
 import { AvatarUpload } from '../../admin/educators/AvatarUpload';
 import * as Yup from 'yup';
+import { useAuthContext } from '../../../auth/useAuthContext';
 
 const AdminProfile = () => {
-    const { data } = useGetAdminProfileQuery();
+    const { currentUser, setCurrentUser } = useAuthContext();
+    const { data, refetch } = useGetAdminProfileQuery();
     const [updateAdminProfile] = useUpdateAdminProfileMutation();
 
     const formik = useFormik({
@@ -32,6 +34,7 @@ const AdminProfile = () => {
                 if (values.files) formData.append('files', values.files);
                 const res = await updateAdminProfile(formData).unwrap();
                 toast.success('Profile updated successfully');
+                await refetch();
             } catch (error) {
                 toast.error(error?.data?.message || 'Failed to update profile');
             }

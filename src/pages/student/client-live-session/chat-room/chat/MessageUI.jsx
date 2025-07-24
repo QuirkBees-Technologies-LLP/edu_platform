@@ -182,6 +182,8 @@ export const MessageUI = ({ setMessageActionUser }) => {
   const { chatType, themeModalOpen } = useEventContext();
   const { message } = useMessageContext();  
 
+  console.log(message)
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showReactionSelector, setShowReactionSelector] = useState(false);

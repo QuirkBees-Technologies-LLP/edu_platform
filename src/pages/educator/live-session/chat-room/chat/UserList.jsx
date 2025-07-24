@@ -104,10 +104,10 @@ const UserList = () => {
     <div className='str-chat__main-panel-inner str-chat__message-list-main-panel p-4 bg-gray-50 '>
        
       <div className="max-w-md mx-auto"> {/* Center the list for better presentation */}
-        {users.map((user) => (
+        {/* {users.map((user) => (
           // Render a UserCard for each user, passing the user data as a prop
           <UserCard key={user.id} user={user} />
-        ))}
+        ))} */}
       </div>
     </div>
   );

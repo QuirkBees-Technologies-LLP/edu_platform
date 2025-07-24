@@ -12,12 +12,12 @@ export const ChannelInner = () => {
   return (
     <>
       <Window>
-        {/* <VirtualizedMessageList
+        <VirtualizedMessageList
           additionalVirtuosoProps={{ alignToBottom: true }}
           hideDeletedMessages
           separateGiphyPreview
-        /> */}
-        <UserList />
+        />
+        {/* <UserList /> */}
         <MessageInput maxRows={2} grow overrideSubmitHandler={overrideSubmitHandler} />
       </Window>
     </>
