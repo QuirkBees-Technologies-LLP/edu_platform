@@ -182,6 +182,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
   const { chatType, themeModalOpen } = useEventContext();
   const { message } = useMessageContext();  
 
+  console.log(message,"message-ui-content")
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showReactionSelector, setShowReactionSelector] = useState(false);
@@ -233,7 +234,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
       <Avatar className="size-10 avatar_img" image={message.user.image} name={message.user.name || message.user.id} />
       <div className='message-ui-content'>
         <div className='message-ui-content-top'>
-          <div className='message-ui-content-top-name'>{message.user.name || message.user.id}</div>
+          <div className='message-ui-content-top-name'>{message.user.first_name || message.user.id}</div>
           {showTitle && <div className='message-ui-content-top-title'>{message.user.title}</div>}
           <div className='message-ui-content-top-time'>{getTimeSinceMessage()}</div>
         </div>

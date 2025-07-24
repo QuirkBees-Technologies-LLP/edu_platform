@@ -44,7 +44,7 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
                     </button>
                     <button class="btn btn-xs btn-primary btn-outline">
                     <UserRound size={16}/>
-                        12354
+                        2
                     </button>
                 </div>
             </div>

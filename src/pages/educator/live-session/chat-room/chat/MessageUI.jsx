@@ -222,7 +222,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
       onMouseEnter={() => setShowOptions(true)}
       onMouseLeave={clearModals}
     >
-      {/* {showOptions && !isQA && (
+      {showOptions && !isQA && (
         <MessageOptions
           dropdownOpen={dropdownOpen}
           isRecentMessage={isRecentMessage}
@@ -232,7 +232,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
           setShowReactionSelector={setShowReactionSelector}
           showReactionSelector={showReactionSelector}
         />
-      )} */}
+      )}
       <Avatar className='size-10 avatar_img' image={message.user.image} name={message.user.name || message.user.id} />
       <div className='message-ui-content'>
         <div className='message-ui-content-top'>

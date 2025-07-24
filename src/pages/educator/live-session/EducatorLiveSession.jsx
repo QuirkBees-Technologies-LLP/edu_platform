@@ -278,13 +278,13 @@ const EducatorLiveSession = ({ title = "Live session" }) => {
           <ToolbarDescription>
             Track and analyze past live sessions with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
-        <ToolbarActions>
+        {/* <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
               Create Live Session
             </button>
           </div>
-        </ToolbarActions>
+        </ToolbarActions> */}
       </Toolbar>
       <DataGrid serverSide={true}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
