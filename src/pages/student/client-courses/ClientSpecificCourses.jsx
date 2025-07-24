@@ -19,6 +19,8 @@ const ClientSpecificCourses = () => {
   const defaultImage = '/media/images/600x400/1.jpg';
 
   const sections = data?.data;
+
+  console.log("sections------------>",sections)
   const [currentLecture, setCurrentLecture] = useState(null);
   const [thumbnails, setThumbnails] = useState({});
 
@@ -80,39 +82,16 @@ const ClientSpecificCourses = () => {
     }
   };
 
-  const fetchThumbnails = async () => {
-    const thumbMap = {};
-    for (const section of sections || []) {
-      for (const lecture of section.lectures || []) {
-        const url = lecture.content;
-        const platform = getVideoPlatform(url);
-
-        try {
-          if (platform === 'youtube') {
-            const videoId = getYouTubeVideoId(url);
-            thumbMap[lecture._id] = videoId
-              ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-              : defaultImage;
-          } else if (platform === 'vimeo') {
-            const videoId = getVimeoVideoId(url);
-            const res = await fetch(`https://vimeo.com/api/v2/video/${videoId}.json`);
-            const data = await res.json();
-            thumbMap[lecture._id] = data[0].thumbnail_large || defaultImage;
-          } else if (platform === 'dailymotion') {
-            const videoId = getDailymotionVideoId(url);
-            const res = await fetch(`https://www.dailymotion.com/services/oembed?url=https://www.dailymotion.com/video/${videoId}`);
-            const data = await res.json();
-            thumbMap[lecture._id] = data.thumbnail_url || defaultImage;
-          } else {
-            thumbMap[lecture._id] = defaultImage;
-          }
-        } catch {
-          thumbMap[lecture._id] = defaultImage;
-        }
-      }
+ const fetchThumbnails = () => {
+  const thumbMap = {};
+  for (const section of sections || []) {
+    for (const lecture of section.lectures || []) {
+      thumbMap[lecture._id] = lecture.thumbnailUrl || defaultImage;
     }
-    setThumbnails(thumbMap);
-  };
+  }
+  setThumbnails(thumbMap);
+};
+
 
   useEffect(() => {
     if (sections?.length > 0) {
@@ -216,7 +195,7 @@ const ClientSpecificCourses = () => {
                                 <div className="relative">
                                   <img
                                     className="rounded-lg h-14 w-24 object-cover"
-                                    src={currentLecture[lecture._id] || defaultImage}
+                                    src={thumbnails[lecture._id] || defaultImage}
                                     alt={lecture.title}
                                   />
                                   <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-lg">

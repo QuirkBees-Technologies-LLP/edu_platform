@@ -41,8 +41,6 @@ const ChatContainer = ({ sessionToken }) => {
     ? auth?.user?.name
     : auth?.user?.first_name + " " + auth?.user?.last_name;
 
-  console.log("------------------------------------------->", userName);
-
   const {
     chatClient,
     currentChannel,

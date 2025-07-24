@@ -10,7 +10,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
                         layoutProps={{
                             showLiveBadge: true,
                             showSpeakerName: true,
-                            showParticipantCount: true,
+                            showParticipantCount: false,
                             showDuration: true,
                             enableFullScreen: true,
                         }}

@@ -3,6 +3,7 @@ import { useAuthContext } from "@/auth/useAuthContext";
 import { lmsLectures } from "@/services";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImageInput } from "@/components/image-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -49,6 +50,7 @@ const LectureContent = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [videoInputType, setVideoInputType] = useState("");
   const [lectureContent, setLectureContent] = useState(null);
+  const [thumbnail, setThumbnail] = useState(null);
 
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
@@ -61,6 +63,7 @@ const LectureContent = ({
       typeof lecture?.section === "object"
         ? lecture?.section?._id
         : lecture?.section,
+    thumbnail: lecture?.thumbnail || null,
   });
 
   useEffect(() => {
@@ -87,7 +90,7 @@ const LectureContent = ({
         order: lecture.order || 0,
         preview: lecture.preview || false,
         section: sectionId || "",
-        thumbnailUrl: lecture?.thumbnailUrl || null,
+        thumbnail: lecture?.thumbnail || null,
       });
       // setShowPreview(false);
       // setIsEditing(false);
@@ -224,6 +227,7 @@ const LectureContent = ({
     dataToSend.append("preview", formData.preview);
     dataToSend.append("section", formData.section);
     dataToSend.append("content", formData.content);
+    dataToSend.append("thumbnail", formData.thumbnail.file);
     if (videoFile) {
       dataToSend.append("video", videoFile);
     }
@@ -313,6 +317,71 @@ const LectureContent = ({
         return (
           <div className="space-y-4">
             {/* Dropdown Selector */}
+
+            <div className="flex flex-col gap-1">
+              <label className="form-label text-gray-900 gap-1">
+                Thumbnail <span className="text-danger">*</span>
+              </label>
+
+              <div className="flex items-center gap-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          thumbnail: {
+                            file,
+                            preview: reader.result, // base64 for preview
+                          },
+                        }));
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                  id="thumbnailUpload"
+                />
+                <label
+                  htmlFor="thumbnailUpload"
+                  className="cursor-pointer border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100"
+                >
+                  <i className="ki-filled ki-upload mr-2"></i> Upload Thumbnail
+                </label>
+
+                {formData.thumbnail && (
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-icon rounded-full btn-danger"
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, thumbnail: null }))
+                    }
+                  >
+                    <i className="ki-outline ki-cross"></i>
+                  </button>
+                )}
+              </div>
+
+              {/* Thumbnail Preview */}
+              {formData.thumbnail?.preview || formData.thumbnail?.url ? (
+                <div className="mt-3">
+                  <img
+                    src={
+                      formData.thumbnail.preview ||
+                      formData.thumbnail.url || // fallback to existing thumbnail URL
+                      ""
+                    }
+                    alt="Thumbnail"
+                    className="w-48 h-28 rounded border border-success object-cover"
+                  />
+                </div>
+              ) : null}
+            </div>
+
             <div className="space-y-2">
               <Label className="font-medium text-primary">
                 Select Video Input Type
@@ -503,7 +572,11 @@ const LectureContent = ({
             {lectureContent?.type === "VIDEO" ? (
               <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                 <iframe
-                  src={getEmbedUrl(lectureContent?.videoUrl?lectureContent?.videoUrl:lectureContent?.content)}
+                  src={getEmbedUrl(
+                    lectureContent?.videoUrl
+                      ? lectureContent?.videoUrl
+                      : lectureContent?.content
+                  )}
                   className="w-full h-full rounded-md"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -512,7 +585,11 @@ const LectureContent = ({
             ) : (
               <div
                 className="p-4  border border-gray-200 rounded-lg prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: lectureContent?.videoUrl?lectureContent?.videoUrl:lectureContent?.content }}
+                dangerouslySetInnerHTML={{
+                  __html: lectureContent?.videoUrl
+                    ? lectureContent?.videoUrl
+                    : lectureContent?.content,
+                }}
               />
             )}
           </div>
