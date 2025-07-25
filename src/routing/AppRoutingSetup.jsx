@@ -112,6 +112,8 @@ import AdminRecording from "../pages/admin/recording/AdminRecording";
 import Recording from "../pages/admin/live-session/Recording";
 import RecordingControls from "../pages/educator/live-session/RecordingControls";
 import TrandingPlatform from "../pages/trading-platform/TradingPlatform";
+import RecordingSession from "../pages/student/live-session-category/RecordingSession";
+import RecordingEducatorList from "../pages/student/live-session-category/RecordingEducatorList";
 
 const routes = {
   student: [
@@ -126,6 +128,8 @@ const routes = {
     { path: "/academy/course/:id", element: <ClientCourses /> },
     { path: "/academy/course/detail/:id", element: <ClientSpecificCourses /> },
     { path: "/tranding-platform", element: <TrandingPlatform /> },
+    { path: "/recording-session", element: <RecordingSession /> },
+    { path: "/educator-recording-session", element: <RecordingEducatorList /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },

@@ -385,7 +385,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab('TableView')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
               activeTab === 'TableView'
                 ? 'bg-gray-100 text-gray-900 shadow'
                 : 'text-gray-600'
@@ -395,7 +395,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
           </button>
           <button
             onClick={() => setActiveTab('UserView')}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
               activeTab === 'UserView'
                 ? 'bg-gray-100 text-gray-900 shadow'
                 : 'text-gray-600'
