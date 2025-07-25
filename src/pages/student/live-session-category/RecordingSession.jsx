@@ -1,6 +1,6 @@
 import { Container } from '@/components/container';
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
-import { Calendar, CirclePlay, Timer } from 'lucide-react';
+import { Calendar, CirclePlay, Timer, Videotape } from 'lucide-react';
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/providers';
@@ -291,7 +291,15 @@ const RecordingSession = () => {
                         </div>
                     </div>
                 </div>
-
+                {/* no data found  */}
+                <div className="card w-full h-100 items-center justify-center hidden">
+                    <div className="text-center flex items-center gap-3 flex-col py-24">
+                        <Videotape size={30}/>
+                        <h3 className="text-xl font-medium text-gray-700">
+                            No Recording available
+                        </h3>
+                    </div>
+                </div>
 
             </Container>
         </div>
