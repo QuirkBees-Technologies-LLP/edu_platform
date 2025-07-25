@@ -22,6 +22,7 @@ const AvatarUpload = ({ value, onChange }) => {
   return (
     <ImageInput value={avatar} onChange={handleChange}>
       {({ onImageUpload }) => (
+        <>
         <div className="image-input size-16" onClick={onImageUpload}>
           <div
             className="btn btn-icon btn-icon-xs btn-light shadow-default absolute z-1 size-5 -top-0.5 -end-0.5 rounded-full"
@@ -39,9 +40,13 @@ const AvatarUpload = ({ value, onChange }) => {
               backgroundImage: `url(${toAbsoluteUrl(`/media/avatars/blank.png`)})`,
             }}
           >
-            {avatar.length > 0 && <img src={avatar[0].dataURL} className='h-full object-fit-cover' alt="avatar" />}
+            {avatar.length > 0 && <img src={avatar[0].dataURL} className='h-full w-full object-cover' alt="avatar" />}
           </div>
         </div>
+        <small className="">
+          Recommended size: 1920×1080 pixels (16:9 aspect ratio)
+        </small>
+        </>
       )}
     </ImageInput>
   );
