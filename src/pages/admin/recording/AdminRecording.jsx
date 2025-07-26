@@ -16,6 +16,8 @@ import CreateAdminRecording from './CreateAdminRecording';
 import { useLazyGetAdminRecordingQuery } from '../../../store/api/admin/adminRecordingApiSlice';
 import { PlayCircle } from 'lucide-react';
 import ShowMoreLess from '../../../components/ui/showmoreless';
+import EducatorViseRecording from './EducatorViseRecording';
+import { useEffect } from 'react';
 
 
 const AdminRecording = ({ title = "Recorded Sessions" }) => {
@@ -23,7 +25,7 @@ const AdminRecording = ({ title = "Recorded Sessions" }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getEducators, { data, isLoading, refetch }] = useLazyGetAdminRecordingQuery();
+  const [getEducators, { data, isLoading, refetch, error, isError, isFetching }] = useLazyGetAdminRecordingQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -253,13 +255,13 @@ const AdminRecording = ({ title = "Recorded Sessions" }) => {
     setIsCreateOpen(false);
   };
 
-  const handleFetchData = async ({ pageIndex, pageSize }) => {
-    const newPage = pageIndex + 1;
-    const newLimit = pageSize;
+  const handleFetchData = async () => {
+    // const newPage = pageIndex + 1;
+    // const newLimit = pageSize;
 
     try {
       // Fetch API Data
-      const response = await getEducators({ page: newPage, limit: newLimit }).unwrap();
+      const response = await getEducators().unwrap();
 
       return {
         data: response.data || [],
@@ -278,17 +280,21 @@ const AdminRecording = ({ title = "Recorded Sessions" }) => {
     setTableKey(prevKey => prevKey + 1); // ✅ Change key to force re-fetch
   };
 
+  useEffect(() => {
+    handleFetchData();
+  }, []);
+
   return (
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Recorded Sessions" />
+          <ToolbarPageTitle text="Educator & Admin Recordings" />
           <ToolbarDescription>
-            Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
+            View and access all video recordings uploaded by educators and admins.
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
-      <DataGrid
+      {/* <DataGrid
         key={tableKey}
         serverSide={true}
         loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
@@ -297,7 +303,8 @@ const AdminRecording = ({ title = "Recorded Sessions" }) => {
           card: true
         }}
         onFetchData={handleFetchData}
-      />
+      /> */}
+      <EducatorViseRecording data={data?.data} isLoading={isLoading} error={error} isError={isError} isFetching={isFetching} />
       <CreateAdminRecording setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
       {isDeleteOpen && <DeleteAdminRecording refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
     </div>
