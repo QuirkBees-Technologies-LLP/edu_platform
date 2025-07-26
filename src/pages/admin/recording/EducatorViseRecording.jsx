@@ -55,10 +55,10 @@ const EducatorViseRecording = ({ data, isLoading, isError, error }) => {
                                     className="card hover:shadow-lg transition-shadow duration-300"
                                 >
                                     <div className="card-body">
-                                        <h6 className="text-lg text-center font-medium text-gray-900 mb-2">
+                                        <h6 className="flex items-center justify-between text-lg text-center font-medium text-gray-900 mb-2">
                                             {recorder.full_name}{" "}
                                             <span
-                                                className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${recorder.role === 'admin'
+                                                className={`inline-block badge badge-xs rounded-full font-medium ${recorder.role === 'admin'
                                                     ? 'bg-red-100 text-red-600'
                                                     : 'bg-blue-100 text-blue-600'
                                                     }`}

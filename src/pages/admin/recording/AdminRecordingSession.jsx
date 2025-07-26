@@ -120,7 +120,7 @@ const AdminRecordingSession = () => {
                                         <img className="w-full h-full object-cover" src="/media/images/600x400/1.jpg" alt="" />
                                         <div className="absolute inset-0 bg-black/50" />
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            <button type="button" className="btn btn-icon btn-primary btn-circle btn-lg" onClick={() => handleOpen(item?.url)}>
+                                            <button type="button" className="btn btn-icon btn-circle btn-lg" onClick={() => handleOpen(item?.url)}>
                                                 <CirclePlay size={60} className="text-white" />
                                             </button>
                                         </div>
