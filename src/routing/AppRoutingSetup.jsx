@@ -114,6 +114,7 @@ import RecordingControls from "../pages/educator/live-session/RecordingControls"
 import TrandingPlatform from "../pages/trading-platform/TradingPlatform";
 import RecordingSession from "../pages/student/live-session-category/RecordingSession";
 import RecordingEducatorList from "../pages/student/live-session-category/RecordingEducatorList";
+import AdminRecordingSession from "../pages/admin/recording/AdminRecordingSession";
 
 const routes = {
   student: [
@@ -157,6 +158,7 @@ const routes = {
     { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
     { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
     { path: "/admin/stream-recording", element: <AdminRecording /> },
+    { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
   ],
 };
 

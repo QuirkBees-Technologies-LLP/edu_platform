@@ -6,10 +6,13 @@ export const adminRecordingApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getAdminRecording: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/admin/recording?page=${page}&limit=${limit}`,
+            query: () => `/admin/recording`,
         }),
         getAdminRecordingByCallID: builder.query({
             query: (id) => `/admin/recording?call_id=${id}`,
+        }),
+        getAdminRecordingByUserID: builder.query({
+            query: (id) => `/admin/recording?user_id=${id}`,
         }),
         saveAdminRecording: builder.mutation({
             query: (data) => ({
@@ -36,4 +39,4 @@ export const adminRecordingApiSlice = createApi({
     }),
 });
 
-export const { useGetAdminRecordingQuery,useGetAdminRecordingByCallIDQuery, useLazyGetAdminRecordingQuery, useSaveAdminRecordingMutation, useUpdateAdminRecordingMutation, useDeleteAdminRecordingMutation } = adminRecordingApiSlice;
+export const { useGetAdminRecordingQuery, useLazyGetAdminRecordingByUserIDQuery, useGetAdminRecordingByCallIDQuery, useLazyGetAdminRecordingQuery, useSaveAdminRecordingMutation, useUpdateAdminRecordingMutation, useDeleteAdminRecordingMutation } = adminRecordingApiSlice;
