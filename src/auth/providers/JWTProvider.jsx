@@ -183,7 +183,7 @@ const AuthProvider = ({ children }) => {
       try {
         // Step 1: External Login
         const loginRes = await fetch(
-          `https://icon-api.mlmprotec.com/api/cb/outbound/iqverse/user/details?email=${email}&password=${password}`,
+          `https://api.iqonic.life/api/cb/outbound/iqverse/user/details?email=${email}&password=${password}`,
           {
             method: 'GET',
             headers: {
