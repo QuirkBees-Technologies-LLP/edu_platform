@@ -50,7 +50,7 @@ const StudentLiveSessionCategoryDetails = () => {
                                                     className="btn text-md bg-primary-light text-primary w-full justify-center mt-3">
                                                     Access to Courses
                                                 </button>
-                                                <Link to="login">
+                                                <Link to={`/educator-recording-session/${educator._id}`}>
                                                     <button
                                                         className="btn text-md bg-primary-light text-primary w-full justify-center mt-3">
                                                         Access to recording session

@@ -40,7 +40,7 @@ const DropdownUser = ({
         <img className="size-9 rounded-full border-2 border-success flex-shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
         <div className="flex flex-col">
           <Link to="/account/hoteme/get-stard" className="text-sm text-gray-800 hover:text-primary font-semibold leading-none">
-            Cody Fisher
+          {auth?.user.first_name}{" "}{auth?.user.last_name}
           </Link> 
           <a
             href={`mailto:${userEmail}`}
