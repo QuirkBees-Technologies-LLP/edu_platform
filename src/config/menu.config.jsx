@@ -1049,7 +1049,7 @@ export const sideMenus = {
     {
       title: 'Recorded Sessions',
       icon: <CircleDot />,
-      path: '/educator/stream-recording'
+      path: '/educator/stream-recording/list'
     },
     // {
     //   title: 'Community Feed',

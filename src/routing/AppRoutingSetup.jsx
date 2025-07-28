@@ -115,6 +115,8 @@ import TrandingPlatform from "../pages/trading-platform/TradingPlatform";
 import RecordingSession from "../pages/student/live-session-category/RecordingSession";
 import RecordingEducatorList from "../pages/student/live-session-category/RecordingEducatorList";
 import AdminRecordingSession from "../pages/admin/recording/AdminRecordingSession";
+import EducatorRecordingSession from "../pages/educator/recording/EducatorRecordingSession";
+import UserRecordingSession from "../pages/student/recording/UserRecordingSession";
 
 const routes = {
   student: [
@@ -130,7 +132,7 @@ const routes = {
     { path: "/academy/course/detail/:id", element: <ClientSpecificCourses /> },
     { path: "/tranding-platform", element: <TrandingPlatform /> },
     { path: "/recording-session", element: <RecordingSession /> },
-    { path: "/educator-recording-session", element: <RecordingEducatorList /> },
+    { path: "/educator-recording-session/:id", element: <UserRecordingSession /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
@@ -145,6 +147,7 @@ const routes = {
     { path: "/educator/profile", element: <EducatorProfile /> },
     { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
     { path: "/educator/stream-recording", element: <EducatorRecording /> },
+    { path: "/educator/stream-recording/list", element: <EducatorRecordingSession /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
