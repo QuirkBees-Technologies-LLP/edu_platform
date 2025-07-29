@@ -22,6 +22,8 @@ const Recording = () => {
     const { data: backendRecordings = [], refetch } = useGetEducatorRecordingByCallIDQuery(call?.id);
     const [addRecording] = useSaveEducatorRecordingMutation();
 
+
+    console.log("backendRecordings",backendRecordings)
     // Fetch Stream recordings
     const fetchStreamRecordings = async () => {
         try {
@@ -113,9 +115,9 @@ const Recording = () => {
                         <h4 className="text-lg font-semibold mb-4 text-gray-800">Available Recordings</h4>
                         <p className="text-sm mb-4 text-danger">Note: This recording will be available for the next 2 weeks. Please make sure to save it if you wish to retain access.</p>
                         <div className="grid grid-cols-1  gap-4">
-                            {streamRecordings.map((rec, index) => {
+                            {streamRecordings?.map((rec, index) => {
                                 // Check if this recording is already saved
-                                const isSaved = backendRecordings?.data?.some(
+                                const isSaved = backendRecordings?.data?.recordings?.some(
                                     backendRec => backendRec.streamio_filename === rec.filename
                                 );
 
@@ -163,7 +165,7 @@ const Recording = () => {
                     <div className="mb-8">
                         <h4 className="text-lg font-semibold mb-4 text-gray-800">Saved Recordings</h4>
                         <div className="grid grid-cols-1 gap-4">
-                            {backendRecordings?.data?.map((rec, index) => (
+                            {backendRecordings?.data?.recordings?.map((rec, index) => (
                                 <div key={rec._id} className="border rounded-lg p-4 hover:shadow-md">
                                     <div className="w-full mb-3">
                                         <div>
@@ -181,7 +183,7 @@ const Recording = () => {
                             ))}
                         </div>
 
-                        {backendRecordings?.data?.length === 0 && (
+                        {backendRecordings?.data?.recordings?.length === 0 && (
                             <div className="text-center py-4 text-gray-500">
                                 <p>No saved recordings available</p>
                             </div>
