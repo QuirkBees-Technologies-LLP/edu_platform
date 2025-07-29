@@ -117,6 +117,8 @@ import RecordingEducatorList from "../pages/student/live-session-category/Record
 import AdminRecordingSession from "../pages/admin/recording/AdminRecordingSession";
 import EducatorRecordingSession from "../pages/educator/recording/EducatorRecordingSession";
 import UserRecordingSession from "../pages/student/recording/UserRecordingSession";
+import ClientDashboard from "../pages/student/client-dashboard/ClientDashboard";
+import FastStartTraining from "../pages/student/fast-start-training/FastStartTraining";
 
 const routes = {
   student: [
@@ -131,8 +133,10 @@ const routes = {
     { path: "/academy/course/:id", element: <ClientCourses /> },
     { path: "/academy/course/detail/:id", element: <ClientSpecificCourses /> },
     { path: "/tranding-platform", element: <TrandingPlatform /> },
+    { path: "/dashboard", element: <ClientDashboard /> },
     { path: "/recording-session", element: <RecordingSession /> },
     { path: "/educator-recording-session/:id", element: <UserRecordingSession /> },
+    { path: "/fast-start-training", element: <FastStartTraining /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },

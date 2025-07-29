@@ -10,21 +10,21 @@ const SidebarHeader = forwardRef((props, ref) => {
     <Fragment>
       <Link to="/" className="dark:hidden">
         <img
-          src={toAbsoluteUrl("/media/app/default-logo.svg")}
+          src={toAbsoluteUrl("/media/app/default-logo.png")}
           className="default-logo min-h-[22px] max-w-none"
         />
         <img
-          src={toAbsoluteUrl("/media/app/mini-logo.svg")}
+          src={toAbsoluteUrl("/media/app/mini-logo.png")}
           className="small-logo min-h-[22px] max-w-none"
         />
       </Link>
       <Link to="/" className="hidden dark:block">
         <img
-          src={toAbsoluteUrl("/media/app/default-logo-dark.svg")}
+          src={toAbsoluteUrl("/media/app/default-logo-dark.png")}
           className="default-logo min-h-[22px] max-w-none"
         />
         <img
-          src={toAbsoluteUrl("/media/app/mini-logo.svg")}
+          src={toAbsoluteUrl("/media/app/mini-logo.png")}
           className="small-logo min-h-[22px] max-w-none"
         />
       </Link>

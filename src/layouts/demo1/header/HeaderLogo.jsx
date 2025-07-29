@@ -14,9 +14,12 @@ const HeaderLogo = () => {
   const handleMegaMenuOpen = () => {
     setMobileMegaMenuOpen(true);
   };
-  return <div className="flex gap-1 lg:hidden items-center -ms-1">
-      <Link to="/" className="shrink-0">
-        <img src={toAbsoluteUrl('/media/app/mini-logo.svg')} className="max-h-[25px] w-full" alt="mini-logo" />
+  return <div className="flex gap-3 lg:hidden items-center -ms-1">
+      <Link to="/" className="shrink-0 dark:hidden">
+        <img src={toAbsoluteUrl('/media/app/mini-logo.png')} className="max-h-[25px] w-full" alt="mini-logo" />
+      </Link>
+      <Link to="/" className="shrink-0 hidden dark:block">
+        <img src={toAbsoluteUrl('/media/app/mini-logo-dark.png')} className="max-h-[25px] w-full" alt="mini-logo" />
       </Link>
 
       <div className="flex items-center">

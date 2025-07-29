@@ -10,7 +10,7 @@ const Layout = () => {
     <style>
       {`
           .branded-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/edwin-andrade.jpg')}');
+            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/edwin-andrade.png')}');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -24,11 +24,11 @@ const Layout = () => {
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgb(219 168 72 / 27%)); 
+            // background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgb(219 168 72 / 27%)); 
             pointer-events: none; 
           }
           .dark .branded-bg {
-            // background-image: url('${toAbsoluteUrl('/media/images/2600x1600/1-dark.png')}');
+            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/bg-dark.png')}');
           }
       `}
     </style>

@@ -79,7 +79,7 @@ const ClientLogin = () => {
         }
         if (res?.success) {
           // Optional: save token/user here if needed
-          navigate("/ideas", { replace: true });
+          navigate("/dashboard", { replace: true });
         }
         if (res?.error) {
           throw new Error(res.error);
