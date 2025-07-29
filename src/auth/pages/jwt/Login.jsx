@@ -77,7 +77,7 @@ const Login = () => {
           <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
             Sign in
           </h3>
-          <p>Let's Get Started IQVerse</p>
+          <p>Let's Get Started IQONIC</p>
         </div>
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
         <Link
