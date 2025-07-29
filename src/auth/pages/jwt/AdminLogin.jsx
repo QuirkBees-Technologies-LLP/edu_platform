@@ -70,7 +70,6 @@ const AdminLogin = () => {
   return (
     <div className="card max-w-[390px] w-full">
       <form className="card-body flex flex-col gap-5 p-7" noValidate>
-
         <div className="text-center mb-2.5">
           <div className="flex justify-start mb-5">
             <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="flex items-center justify-center text-sm gap-2 text-gray-700 hover:text-primary btn btn-rounded btn-secondary btn-outline w-fit btn-sm mb-3">
