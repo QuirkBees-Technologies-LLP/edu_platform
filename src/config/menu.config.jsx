@@ -1,4 +1,5 @@
 
+import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User } from "lucide-react";
 import { BookOpen, CalendarClock, CircleDot, Clapperboard, Dot, Layers, LayoutDashboard, Lightbulb, PlayCircle, School, User } from "lucide-react";
 
 export const MENU_SIDEBAR = [
@@ -985,6 +986,11 @@ export const sideMenus = {
       path: '/admin/ideas'
     },
     {
+      title: 'Trade Analysis',
+      icon: <ChartCandlestick />,
+      path: '/admin/trade-analysis'
+    },
+    {
       title: 'Courses',
       icon: <BookOpen />,
       path: '/admin/courses'
@@ -1025,6 +1031,11 @@ export const sideMenus = {
       title: 'Ideas',
       icon: <Lightbulb />,
       path: '/educator/ideas'
+    },
+    {
+      title: 'Trade Analysis',
+      icon: <ChartCandlestick />,
+      path: '/educator/trade-analysis'
     },
     {
       title: 'Courses Library',
