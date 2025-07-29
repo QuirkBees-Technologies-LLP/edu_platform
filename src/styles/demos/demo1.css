@@ -851,3 +851,67 @@ chat */
 .dark .ideas_message .message-ui .message-ui-content-bottom {
 	color: var(--tw-gray-800);
 }
+.welcome_banner {
+	background-image: url("/media/images/2600x1600/dashboard_banner.jpg");
+	background-repeat: no-repeat;
+    background-size: cover;
+}
+.live_updates {
+	height: 600px;
+}
+
+@media screen and (max-width : 1279.98px) {
+	.live_updates {
+		height: 430px;
+	}
+}
+
+@media screen and (max-width : 849.98px) {
+	.forex_calender {
+		overflow: auto;
+		max-width: 600px;
+        margin-inline: auto;
+	}
+	.forex_calender .calender {
+		width: 900px;
+	}
+}
+@media screen and (max-width : 649.98px) {
+	.forex_calender {
+		overflow: auto;
+		max-width: 500px;
+        margin-inline: auto;
+	}
+	.forex_calender .calender {
+		width: 900px;
+	}
+}
+@media screen and (max-width : 565.98px) {
+	.forex_calender {
+		overflow: auto;
+		max-width: 400px;
+        margin-inline: auto;
+	}
+	.forex_calender .calender {
+		width: 900px;
+	}
+}
+@media screen and (max-width : 472.98px) {
+	.forex_calender {
+		overflow: auto;
+		max-width: 255px;
+        margin-inline: auto;
+	}
+	.forex_calender .calender {
+		width: 900px;
+	}
+}
+/* @media screen and (max-width : 849.98px) {
+	.forex_calender {
+		overflow: auto;
+		max-width: calc(255px + (780 - 255) * ((100vw - 320px) / (1920 - 320)));
+	}
+	.forex_calender .calender {
+		width: 900px;
+	}
+} */

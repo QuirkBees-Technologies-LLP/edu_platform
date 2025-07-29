@@ -1069,6 +1069,16 @@ export const sideMenus = {
       path: '/fast-start-training'
     },
     {
+      title: 'IQ Live',
+      icon: <Dot />,
+      path: '/iq-live'
+    },
+    {
+      title: 'IQ Educators',
+      icon: <Dot />,
+      path: '/iq-educators'
+    },
+    {
       title: 'Ideas',
       icon: <Lightbulb />,
       path: '/ideas'
