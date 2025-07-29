@@ -1,5 +1,5 @@
 
-import { BookOpen, CalendarClock, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User } from "lucide-react";
+import { BookOpen, CalendarClock, CircleDot, Clapperboard, Dot, Layers, LayoutDashboard, Lightbulb, PlayCircle, User } from "lucide-react";
 
 export const MENU_SIDEBAR = [
   {
@@ -1058,6 +1058,16 @@ export const sideMenus = {
     // },
   ],
   student: [
+    {
+      title: 'Dashboard',
+      icon: <LayoutDashboard />,
+      path: '/dashboard'
+    },
+    {
+      title: 'Fast Start Training',
+      icon: <Dot />,
+      path: '/fast-start-training'
+    },
     {
       title: 'Ideas',
       icon: <Lightbulb />,
