@@ -116,6 +116,8 @@ const Recording = () => {
                         <p className="text-sm mb-4 text-danger">Note: This recording will be available for the next 2 weeks. Please make sure to save it if you wish to retain access.</p>
                         <div className="grid grid-cols-1  gap-4">
                             {streamRecordings?.map((rec, index) => {
+
+                                console.log(rec,"rec")
                                 // Check if this recording is already saved
                                 const isSaved = backendRecordings?.data?.recordings?.some(
                                     backendRec => backendRec.streamio_filename === rec.filename

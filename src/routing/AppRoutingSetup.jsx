@@ -117,6 +117,9 @@ import RecordingEducatorList from "../pages/student/live-session-category/Record
 import AdminRecordingSession from "../pages/admin/recording/AdminRecordingSession";
 import EducatorRecordingSession from "../pages/educator/recording/EducatorRecordingSession";
 import UserRecordingSession from "../pages/student/recording/UserRecordingSession";
+import EducatorTradeAnalysis from "../pages/educator/educator-trade-analysis/EducatorTradeAnalysis";
+import ViewAdminTradeAnalysis from "../pages/admin/admin-trade-analysis/ViewAdminTradeAnalysis";
+import AdminTradeAnalysis from "../pages/admin/admin-trade-analysis/AdminTradeAnalysis";
 
 const routes = {
   student: [
@@ -137,6 +140,7 @@ const routes = {
   educator: [
     { path: "/", element: <DefaultPage /> },
     { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
+    { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
     { path: "/educator/courses", element: <Courses /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/recordings", element: <EducatorRecording /> },
@@ -152,6 +156,7 @@ const routes = {
   admin: [
     { path: "/", element: <DefaultPage /> },
     { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
     { path: "/admin/courses", element: <Courses /> },
     { path: "/admin/live-session", element: <LiveSession /> },
     { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
