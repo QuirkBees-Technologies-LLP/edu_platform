@@ -1,6 +1,6 @@
 
-import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User } from "lucide-react";
-import { BookOpen, CalendarClock, CircleDot, Clapperboard, Dot, Layers, LayoutDashboard, Lightbulb, PlayCircle, School, User } from "lucide-react";
+import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User, Dot, School } from "lucide-react";
+
 
 export const MENU_SIDEBAR = [
   {
