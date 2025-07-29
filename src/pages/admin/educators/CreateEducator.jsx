@@ -50,8 +50,8 @@ const CreateEducator = forwardRef(
       role: "educator",
       status: "",
       is_create_stream: false,
-      is_access_trade_ideas: false,
-      is_access_trade_analysis: false,
+      is_access_trade_ideas: true,
+      is_access_trade_analysis: true,
     };
 
     const createSchema = Yup.object().shape({
@@ -79,13 +79,8 @@ const CreateEducator = forwardRef(
         .required("This field is required")
         .typeError("Please select a valid option"),
 
-      is_access_trade_ideas: Yup.boolean()
-        .required("This field is required")
-        .typeError("Please select a valid option"),
-
-      is_access_trade_analysis: Yup.boolean()
-        .required("This field is required")
-        .typeError("Please select a valid option"),
+      is_access_trade_ideas: Yup.boolean(),
+      is_access_trade_analysis: Yup.boolean(),
 
       // image: Yup.mixed()
       //     .required("Image is required")
@@ -364,75 +359,30 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-              {/* is_access_trade_ideas */}
               <div className="col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Can access trade ideas?
-                    <span className="text-danger">*</span>
+                <label className="form-label text-gray-900">Can access  </label>
+                <div className="flex items-center gap-6 mt-1">
+                  <label className="flex items-center gap-2 text-gray-800">
+                    <input
+                      type="checkbox"
+                      name="is_access_trade_ideas"
+                      checked={formik.values.is_access_trade_ideas}
+                      onChange={formik.handleChange}
+                      className="form-checkbox h-5 w-5 text-primary"
+                    />
+                    Trade Ideas
                   </label>
-                  <Select
-                    defaultValue={formik.values.is_access_trade_ideas}
-                    onValueChange={(value) =>
-                      formik.setFieldValue("is_access_trade_ideas", value)
-                    }
-                    className={`form-control input input-md w-full ${
-                      formik.errors.is_access_trade_ideas &&
-                      formik.touched.is_access_trade_ideas
-                        ? "border border-danger"
-                        : ""
-                    }`}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={true}>Yes</SelectItem>
-                      <SelectItem value={false}>No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formik.touched.is_access_trade_ideas &&
-                    formik.errors.is_access_trade_ideas && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.is_access_trade_ideas}
-                      </span>
-                    )}
-                </div>
-              </div>
 
-              {/* is_access_trade_analysis */}
-              <div className="col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Can access trade analysis?
-                    <span className="text-danger">*</span>
+                  <label className="flex items-center gap-2 text-gray-800">
+                    <input
+                      type="checkbox"
+                      name="is_access_trade_analysis"
+                      checked={formik.values.is_access_trade_analysis}
+                      onChange={formik.handleChange}
+                      className="form-checkbox h-5 w-5 text-primary"
+                    />
+                    Trade Analysis
                   </label>
-                  <Select
-                    defaultValue={formik.values.is_access_trade_analysis}
-                    onValueChange={(value) =>
-                      formik.setFieldValue("is_access_trade_analysis", value)
-                    }
-                    className={`form-control input input-md w-full ${
-                      formik.errors.is_access_trade_analysis &&
-                      formik.touched.is_access_trade_analysis
-                        ? "border border-danger"
-                        : ""
-                    }`}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={true}>Yes</SelectItem>
-                      <SelectItem value={false}>No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formik.touched.is_access_trade_analysis &&
-                    formik.errors.is_access_trade_analysis && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.is_access_trade_analysis}
-                      </span>
-                    )}
                 </div>
               </div>
 
