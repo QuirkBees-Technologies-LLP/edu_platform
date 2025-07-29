@@ -119,6 +119,10 @@ import EducatorRecordingSession from "../pages/educator/recording/EducatorRecord
 import UserRecordingSession from "../pages/student/recording/UserRecordingSession";
 import ClientDashboard from "../pages/student/client-dashboard/ClientDashboard";
 import FastStartTraining from "../pages/student/fast-start-training/FastStartTraining";
+import IqAcademy from "../pages/student/iq-academy/IqAcademy";  
+import IqStrategies from "../pages/student/iq-strategies/IqStrategies";
+ 
+
 import IQLive from "../pages/student/iq-live/IQLive";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
 
@@ -139,6 +143,8 @@ const routes = {
     { path: "/recording-session", element: <RecordingSession /> },
     { path: "/educator-recording-session/:id", element: <UserRecordingSession /> },
     { path: "/fast-start-training", element: <FastStartTraining /> },
+    { path: "/iq-academy", element: <IqAcademy /> },
+    { path: "/iq-strategies", element: <IqStrategies /> },
     { path: "/iq-live", element: <IQLive /> },
     { path: "/iq-educators", element: <IqEducators /> },
   ],

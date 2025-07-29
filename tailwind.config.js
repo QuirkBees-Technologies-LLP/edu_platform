@@ -206,6 +206,7 @@ module.exports = {
       },
       fontFamily: {
         termina: ['Termina', 'sans-serif'],
+        roboto: ['Roboto Flex', 'sans-serif'],
       },
       // fontFamily: {
       //   sans: ['Outfit',  'sans-serif']
