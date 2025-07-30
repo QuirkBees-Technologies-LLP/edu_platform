@@ -1,6 +1,7 @@
 import { EllipsisVertical } from 'lucide-react';
 import React, { useState } from 'react';
 import { Plus, Minus } from "lucide-react";
+import { Link } from 'react-router-dom';
 
 const faqData = [
     { id: 1, question: "How is pricing determined for each plan?", answer: "Pricing is determined based on the features and usage limits included in each plan." },
@@ -17,37 +18,37 @@ export default function IqStrategies() {
             id: 1,
             title: 'Course Title',
             address: '456 Innovation Street, Floor 6, Techland, New York 54321',
-            image: 'public/media/images/video-thumbail.jpg',
+            image: 'public/media/images/2600x1600/recordings.jpg',
         },
         {
             id: 2,
             title: 'Course Title',
             address: '456 Innovation Street, Floor 6, Techland, New York 54321',
-            image: 'public/media/images/video-thumbail.jpg',
+            image: 'public/media/images/2600x1600/recordings.jpg',
         },
         {
             id: 3,
             title: 'Course Title',
             address: '456 Innovation Street, Floor 6, Techland, New York 54321',
-            image: 'public/media/images/video-thumbail.jpg',
+            image: 'public/media/images/2600x1600/recordings.jpg',
         },
         {
             id: 4,
             title: 'Course Title',
             address: '456 Innovation Street, Floor 6, Techland, New York 54321',
-            image: 'public/media/images/video-thumbail.jpg',
+            image: 'public/media/images/2600x1600/recordings.jpg',
         },
         {
             id: 5,
             title: 'Course Title',
             address: '456 Innovation Street, Floor 6, Techland, New York 54321',
-            image: 'public/media/images/video-thumbail.jpg',
+            image: 'public/media/images/2600x1600/recordings.jpg',
         },
         {
             id: 6,
             title: 'Course Title',
             address: '456 Innovation Street, Floor 6, Techland, New York 54321',
-            image: 'public/media/images/video-thumbail.jpg',
+            image: 'public/media/images/2600x1600/recordings.jpg',
         },
     ];
     const [openId, setOpenId] = useState(null);
@@ -60,27 +61,32 @@ export default function IqStrategies() {
     return (
         <>
             <div className="container-fluid">
-                <div className="mb-6">
+                <div className=" welcome_image w-full mb-10 rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-center md:justify-end h-full p-4">
+                    </div>
+                </div>
+                {/* <div className="mb-6">
                     <img
                         src="public/media/images/IQ-Strategies.jpg"
                         alt="Course Banner"
                         className="w-full h-72 object-cover rounded-xl"
                     />
-                </div>
+                </div> */}
 
-                <div className="grid grid-cols-3 gap-4 mb-7">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
                     {['GOLDMINE', 'KILLSHOT', 'SMARTMONICS'].map((tag, idx) => (
-                        <div className=' border border-gray-200 px-7 py-7 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition'>
-                            <button
-                                key={idx}
-                                className="flex items-center gap-2"
-                            >
-                                <img src="public/media/images/item.png" alt="" />
+                        <div
+                            key={idx}
+                            className="border border-gray-200 px-7 py-7 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition"
+                        >
+                            <button className="flex items-center gap-2">
+                                <img src="/media/images/item.png" alt="" />
                                 {tag}
                             </button>
                         </div>
                     ))}
                 </div>
+
 
                 <div className="grid md:grid-cols-3 gap-4 mb-10">
                     {/* Description */}
@@ -92,7 +98,7 @@ export default function IqStrategies() {
                                 </div>
                             </div>
                             <div class="card-content px-8 py-6">
-                                <div className='min-h-64'>
+                                <div className='min-h-64 mb-5'>
                                     <p className='text-gray-700 text-sm '>Now that I’m done thoroughly mangling that vague metaphor, let’s get down to business. You know you need to start blogging to grow your business, but you don’t know how. In this post, I’ll show you how to write a great blog post in five simple steps that people will actually want to read. </p>
                                 </div>
                                 <div>
@@ -247,7 +253,7 @@ export default function IqStrategies() {
                     </div>
                 </div>
 
-                <div className="text-gray-900 mb-28">
+                {/* <div className="text-gray-900 mb-28">
                     <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                         <div className="flex justify-between items-center">
                             <h2 className="text-2xl font-bold ">Tutorials</h2>
@@ -259,7 +265,7 @@ export default function IqStrategies() {
                             {courses.map((course) => (
                                 <div
                                     key={course.id}
-                                    className="w-1/4 card rounded-xl shadow-sm flex-shrink-0"
+                                    className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 card rounded-xl shadow-sm flex-shrink-0"
                                 >
                                     <div className="rounded-t-xl overflow-hidden">
                                         <img
@@ -276,24 +282,62 @@ export default function IqStrategies() {
                             ))}
                         </div>
                     </div>
-                </div>
+                </div> */}
+                <div className='grid grid-cols-1'>
+                    <div>
+                        <div className="text-gray-900 mb-10">
+                            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-xl font-medium">Courses</h2>
+                                    <Link className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary">View All</Link>
+                                </div>
+                            </div>
 
-                <div className="mb-10">
-                    <div className='card'>
-                        <div className='card-header'>
-                            <h3 className="text-xl font-semibold mb-0">Replays</h3>
-                        </div>
-                        <div className="card-content p-8">
-                            <div className="flex flex-wrap gap-4">
-                                {Array(3).fill().map((_, idx) => (
-                                    <div key={idx} className="w-64 card">
-                                        <img src="public/media/images/dummy-image-card.jpg" alt="Replay" className="rounded-t-xl w-full h-36 object-cover" />
-                                        <div className="p-4 text-xs text-gray-600">
-                                            <p className="font-semibold text-sm mb-1">CyberStorm Cup</p>
-                                            <p>Wed, Feb 18, 12:00 CDT</p>
+                            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+                                <div className="flex gap-4">
+                                    {courses.map((course) => (
+                                        <div
+                                            key={course.id}
+                                            className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0"
+                                        >
+                                            <div className="rounded-t-xl overflow-hidden">
+                                                <img
+                                                    src={course.image}
+                                                    alt={course.title}
+                                                    className="w-full h-36 object-cover"
+                                                />
+                                            </div>
+                                            <div className="p-4">
+                                                <h3 className="text-md font-normal mb-2">{course.title}</h3>
+                                                <p className="text-xs text-gray-600">{course.address}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className='grid grid-cols-1'>
+
+                    <div className="mb-10">
+                        <div className='card'>
+                            <div className='card-header'>
+                                <h3 className="text-xl font-semibold mb-0">Replays</h3>
+                            </div>
+                            <div className="card-content p-8">
+                                <div className="flex gap-4 overflow-x-auto">
+                                    {Array(3).fill().map((_, idx) => (
+                                        <div key={idx} className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0">
+                                            <img src="public/media/images/dummy-image-card.jpg" alt="Replay" className="rounded-t-xl w-full h-36 object-cover" />
+                                            <div className="p-4 text-xs text-gray-600">
+                                                <p className="font-semibold text-sm mb-1">CyberStorm Cup</p>
+                                                <p>Wed, Feb 18, 12:00 CDT</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -314,9 +358,9 @@ export default function IqStrategies() {
                                         >
                                             <span className="text-sm text-gray-800 font-medium">{faq.question}</span>
                                             {openId === faq.id ? (
-                                                <Minus size={16} className="text-gray-500" />
+                                                <Minus size={16} className="text-gray-500 shrink-0"  />
                                             ) : (
-                                                <Plus size={16} className="text-gray-500" />
+                                                <Plus size={16} className="text-gray-500 shrink-0"  />
                                             )}
                                         </button>
 
