@@ -245,19 +245,12 @@ const ClientDashboard = () => {
     return (
         <>
             <div className="container-fluid pb-8">
-                <div className="relative welcome_banner w-full h-80 mb-10 rounded-xl overflow-hidden">
-                    <div className="relative z-1 flex items-center justify-center h-full p-4">
-                        <div className="text-center">
-                            <div>
-                                <h1 className="text-xl md:text-4xl font-bold text-white mb-2 animate-fadeInUp">
-                                    Welcome, {userName}
-                                </h1>
-                                <div className="flex items-center justify-center flex-col sm:flex-row space-x-2 animate-fadeInUp delay-200">
-                                    <span className="text-xl text-white/90">Empowering</span>
-                                    <span className="text-xl font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
-                                        Growth Through Every Lesson
-                                    </span>
-                                </div>
+                <div className="relative welcome_banner w-full mb-10 rounded-xl overflow-hidden">
+                    <div className="relative z-1 flex items-center justify-center md:justify-end h-full p-4">
+                        <div className="xl:hidden absolute inset-0 bg-black/40"></div>
+                        <div className="text-center z-1">
+                            <div className="flex items-center justify-center flex-col sm:flex-row space-x-2 animate-fadeInUp delay-200 md:pr-20">
+                                <span className="text-xl text-gray-50 font-medium tracking-widest">RISE ABOVE ORDINARY</span>
                             </div>
                         </div>
                     </div>
@@ -268,41 +261,73 @@ const ClientDashboard = () => {
                         <div className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-y-8 lg:gap-x-8 md:gap-y-8">
                                 <div className="col-span-12 lg:col-span-12">
-                                    <div className="card rounded-none rounded-b-xl">
-                                        <div className="card-body bg-gray-400 h-72 rounded-t-xl">
-
+                                    <div className="card rounded-none rounded-b-xl relative">
+                                        <div className="card-body p-0 relative">
+                                            <img 
+                                                src="/media/images/2600x1600/banner_1.jpg" 
+                                                className="w-full h-72 object-cover rounded-t-xl" 
+                                                alt="" 
+                                            />
+                                            <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
+                                            <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
+                                                COURSES
+                                            </span>
                                         </div>
-                                        <div className="p-4 md:p-8">
+
+                                        <div className="p-4 md:p-7">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-                                                <h5 className='font-semibold text-gray-900 text-md'>IQ Academy</h5>
-                                                <button className='btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium'>View Academies</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="col-span-12 lg:col-span-12">
-                                    <div className="card rounded-none rounded-b-xl">
-                                        <div className="card-body bg-gray-400 h-72 rounded-t-xl">
-
-                                        </div>
-                                        <div className="p-4 md:p-8">
-                                            <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-                                                <h5 className='font-semibold text-gray-900 text-md'>IQ Live</h5>
-                                                <button className='btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium'>View Live Sessions</button>
+                                                <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
+                                                <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
+                                                View Academies
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-span-12 lg:col-span-12">
-                                    <div className="card rounded-none rounded-b-xl">
-                                        <div className="card-body bg-gray-400 h-72 rounded-t-xl">
-
+                                    <div className="card rounded-none rounded-b-xl relative">
+                                        <div className="card-body p-0 relative">
+                                            <img 
+                                                src="/media/images/2600x1600/banner_2.jpg" 
+                                                className="w-full h-72 object-cover rounded-t-xl" 
+                                                alt="" 
+                                            />
+                                            <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
+                                            <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
+                                                MENTORSHIP
+                                            </span>
                                         </div>
-                                        <div className="p-4 md:p-8">
+
+                                        <div className="p-4 md:p-7">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-                                                <h5 className='font-semibold text-gray-900 text-md'>Strategies</h5>
-                                                <button className='btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium'>View Strategies</button>
+                                                <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
+                                                <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
+                                                View Academies
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-span-12 lg:col-span-12">
+                                    <div className="card rounded-none rounded-b-xl relative">
+                                        <div className="card-body p-0 relative">
+                                            <img 
+                                                src="/media/images/2600x1600/banner_3.jpg" 
+                                                className="w-full h-72 object-cover rounded-t-xl" 
+                                                alt="" 
+                                            />
+                                            <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
+                                            <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
+                                                GUIDANCE
+                                            </span>
+                                        </div>
+
+                                        <div className="p-4 md:p-7">
+                                            <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
+                                                <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
+                                                <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
+                                                View Academies
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -316,7 +341,24 @@ const ClientDashboard = () => {
                     <div className="col-span-12 xl:col-span-4">
                         <div className="grid grid-cols-12 gap-6">
                             <div className='col-span-12 md:col-span-6 xl:col-span-12 space-y-6'>
-                                <div className="card rounded-2xl shadow-md p-6 border">
+                                <div className="relative rounded-2xl overflow-hidden shadow-lg">
+                                    <img
+                                        src="/media/images/2600x1600/fast_start.jpg"
+                                        alt="Fast Start Training"
+                                        className="w-full h-96 object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-[linear-gradient(178.03deg,rgba(43,76,107,0)_35.61%,rgba(0,0,0,0.8)_91.24%)]"></div>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
+                                        <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
+                                        FAST START <br /> TRAINING
+                                        </h2>
+
+                                        <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
+                                        Start Here
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* <div className="card rounded-2xl shadow-md p-6 border">
                                     <h2 className="text-lg font-semibold text-gray-800 mb-4">
                                         Fast Start Training
                                     </h2>
@@ -359,7 +401,7 @@ const ClientDashboard = () => {
                                             <span className="font-medium text-gray-800">Online Education</span>
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
 
                                 <div className="card rounded-2xl shadow-md overflow-hidden">
                                     {/* Header */}
@@ -374,9 +416,25 @@ const ClientDashboard = () => {
                                         </div>
                                     </div>
 
-                                    {/* Body */}
-                                    <div className="p-4 flex items-center space-x-4">
-                                        {/* Profile Image */}
+                                    <div className="relative h-96 rounded-b-2xl overflow-hidden shadow-lg">
+                                        <img
+                                            src="/media/images/2600x1600/watch_live.jpg"
+                                            alt="Fast Start Training"
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                        <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
+                                            <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
+                                            RALPH  <br /> DANQUAH
+                                            </h2>
+
+                                            <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
+                                            Watch Live
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {/* <div className="p-4 flex items-center space-x-4"> 
+                                       
                                         <img
                                             src="/media/avatars/300-14.png"
                                             alt="Profile"
@@ -390,7 +448,7 @@ const ClientDashboard = () => {
                                                 Live Now <span className="mx-2">•</span> 190 watching
                                             </p>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             <div className="col-span-12 md:col-span-6 xl:col-span-12">

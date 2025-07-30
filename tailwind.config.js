@@ -339,7 +339,14 @@ module.exports = {
           600: '#0B0C10',
           black: '#000000',
           clarity: 'rgba(24, 25, 31, 0.50)'
-        },        
+        },
+        'dark-imperial-blue': {
+          DEFAULT: '#201946',
+          active: '#342B62',
+          light: '#CFC7FF99',
+          clarity: 'rgba(32, 25, 70, 0.20)',
+          inverse: '#ffffff'
+        },
       },
       boxShadow: {
         card: 'var(--tw-card-box-shadow)',
