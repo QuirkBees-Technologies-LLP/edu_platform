@@ -493,46 +493,57 @@ const CreateTradeIdeas = forwardRef(
                   <label className="form-label text-gray-900 gap-1">
                     Images <span className="text-danger">*</span>
                   </label>
-                  <div className="flex flex-wrap gap-5">
-                    {/* Image Input */}
-                    <ImageInput
-                      multiple={true}
-                      value={formik.values.files}
-                      onChange={handleImageChange}
-                    >
-                      {({ onImageUpload }) => (
-                        <div
-                          className="cursor-pointer image-input size-24"
-                          onClick={onImageUpload}
-                        >
+                  {formik.values.files.length > 0 && (
+                    <div className="flex flex-wrap gap-5">
+                      {/* Upload Box (always show) */}
+                      <ImageInput
+                        multiple={true}
+                        value={formik.values.files}
+                        onChange={handleImageChange}
+                      >
+                        {({ onImageUpload }) => (
                           <div
-                            className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-                                                ${formik.touched.files && formik.errors.files ? "border-danger" : "border-gray-200"}`}
+                            className="cursor-pointer image-input size-24"
+                            onClick={onImageUpload}
                           >
-                            <i className="ki-filled ki-picture"></i>
+                            <div
+                              className={`flex border justify-center rounded-lg image-input-placeholder items-center 
+              ${
+                formik.touched.files && formik.errors.files
+                  ? "border-danger"
+                  : "border-gray-200"
+              }`}
+                            >
+                              <i className="ki-filled ki-picture"></i>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </ImageInput>
-                    {formik.values.files.map((file, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={file.dataURL}
-                          alt="uploaded"
-                          className="rounded-lg border-2 border-success size-24 object-cover"
-                        />
-                        <div className="absolute -right-4 -top-4">
-                          <button
-                            type="button"
-                            className="btn btn-xs btn-icon rounded-full btn-danger"
-                            onClick={() => handleRemoveImage(index)}
-                          >
-                            <i className="ki-outline ki-cross"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        )}
+                      </ImageInput>
+
+                      {/* Only show images with a valid dataURL */}
+                      {formik.values.files
+                        .filter((file) => !!file?.dataURL) // ✅ Only if there's a valid dataURL
+                        .map((file, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={file.dataURL}
+                              alt="uploaded"
+                              className="rounded-lg border-2 border-success size-24 object-cover"
+                            />
+                            <div className="absolute -right-4 -top-4">
+                              <button
+                                type="button"
+                                className="btn btn-xs btn-icon rounded-full btn-danger"
+                                onClick={() => handleRemoveImage(index)}
+                              >
+                                <i className="ki-outline ki-cross"></i>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+
                   {formik.touched.files && formik.errors.files && (
                     <span role="alert" className="text-danger text-xs mt-1">
                       {formik.errors.files}
