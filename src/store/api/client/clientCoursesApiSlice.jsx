@@ -8,6 +8,9 @@ export const clientCoursesApiSlice = createApi({
         getClientCourses: builder.query({
             query: (educatorId) => `/users/course?instructor=${educatorId}&published=true`,
         }),
+        getEducatorWithCourses: builder.query({
+            query: (educatorId) => `/users/educator-course/${educatorId}`,
+        }),
         getClientSingleCourses: builder.query({
             query: (courseId) => `/users/course/${courseId}`,
         }),
@@ -20,4 +23,4 @@ export const clientCoursesApiSlice = createApi({
     }),
 });
 
-export const { useGetClientCoursesQuery, useGetClientSingleCoursesQuery, useGetClientSingleCourseSectionQuery, useGetClientAllCoursesQuery } = clientCoursesApiSlice;
+export const { useGetClientCoursesQuery,useGetEducatorWithCoursesQuery ,useGetClientSingleCoursesQuery, useGetClientSingleCourseSectionQuery, useGetClientAllCoursesQuery } = clientCoursesApiSlice;

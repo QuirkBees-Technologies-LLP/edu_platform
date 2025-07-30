@@ -150,7 +150,7 @@ const routes = {
     { path: "/iq-academy", element: <IqAcademy /> },
     { path: "/iq-strategies", element: <IqStrategies /> },
     { path: "/iq-live", element: <IQLive /> },
-    { path: "/iq-educators", element: <IqEducators /> },
+    { path: "/iq-educators/:id", element: <IqEducators /> },
     { path: "/iq-live-educators", element: <IqLiveEducators /> },
   ],
   educator: [
