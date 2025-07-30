@@ -25,6 +25,7 @@ import {
 import RichTextEditor from "../../../components/ui/rich-editor";
 import {
   useCreateEducatorTradeIdeasMutation,
+  useGetEducatorTradeCategoryQuery,
   useUpdateEducatorTradeIdeaMutation,
 } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
 
@@ -36,6 +37,8 @@ const CreateTradeIdeas = forwardRef(
     const { auth } = useAuthContext();
     const [createEducatorTradeIdeas] = useCreateEducatorTradeIdeasMutation();
     const [updateEducatorTradeIdea] = useUpdateEducatorTradeIdeaMutation();
+    const { data } = useGetEducatorTradeCategoryQuery();
+
     const educatorId = auth?.user?._id ?? null;
 
     const initialValues = {
@@ -49,6 +52,7 @@ const CreateTradeIdeas = forwardRef(
       invalidation: "",
       exits: [""],
       description: "",
+      category: "",
     };
 
     const createSchema = Yup.object().shape({
@@ -60,6 +64,7 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Time frame is required"),
       educatorId: Yup.string().required("Educator ID is required"),
+      category: Yup.string().required("Educator ID is required"),
       entry: Yup.string().required("Entry is required"),
       description: Yup.string().required("Entry is required"),
       invalidation: Yup.number()
@@ -95,6 +100,7 @@ const CreateTradeIdeas = forwardRef(
         formData.append("type", values.type);
         formData.append("timeFrame[]", [values.timeFrame]);
         formData.append("educatorId", values.educatorId);
+        formData.append("category", values.category);
         formData.append("status", values.status);
         formData.append("entry", values.entry);
         formData.append("invalidation", values.invalidation);
@@ -146,6 +152,7 @@ const CreateTradeIdeas = forwardRef(
           type: selectedRow?.type,
           timeFrame: selectedRow?.timeFrame[0],
           status: selectedRow?.status,
+          category: selectedRow?.category,
           entry: selectedRow?.entry,
           invalidation: selectedRow?.invalidation,
           description: selectedRow?.description,
@@ -339,6 +346,52 @@ const CreateTradeIdeas = forwardRef(
                 <div className="col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
+                      Category <span className="text-danger">*</span>
+                    </label>
+
+                    <Select
+                      name="category"
+                      value={formik.values.category}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("category", value)
+                      }
+                      onBlur={() => formik.setFieldTouched("category", true)}
+                    >
+                      <SelectTrigger
+                        className={`form-control input input-md w-full ${
+                          formik.errors.category && formik.touched.category
+                            ? "border border-danger"
+                            : ""
+                        }`}
+                      >
+                        {/* 🔽 YAHI PART IMPORTANT HAI */}
+                        <SelectValue>
+                          {data?.category?.find(
+                            (cat) => cat._id === formik.values.category
+                          )?.name || "Select Category"}
+                        </SelectValue>
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        {data?.data?.map((cat) => (
+                          <SelectItem key={cat._id} value={cat._id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {formik.touched.category && formik.errors.category && (
+                      <span role="alert" className="text-danger text-xs mt-1">
+                        {formik.errors.category}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="col-span-6">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
                       Status <span className="text-danger">*</span>
                     </label>
 
@@ -502,46 +555,57 @@ const CreateTradeIdeas = forwardRef(
                     <label className="form-label text-gray-900 gap-1">
                       Images <span className="text-danger">*</span>
                     </label>
-                    <div className="flex flex-wrap gap-5">
-                      {/* Image Input */}
-                      <ImageInput
-                        multiple={true}
-                        value={formik.values.files}
-                        onChange={handleImageChange}
-                      >
-                        {({ onImageUpload }) => (
-                          <div
-                            className="cursor-pointer image-input size-24"
-                            onClick={onImageUpload}
-                          >
+                    {formik.values.files.length > 0 && (
+                      <div className="flex flex-wrap gap-5">
+                        {/* Upload Box (always show) */}
+                        <ImageInput
+                          multiple={true}
+                          value={formik.values.files}
+                          onChange={handleImageChange}
+                        >
+                          {({ onImageUpload }) => (
                             <div
-                              className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-                                                ${formik.touched.files && formik.errors.files ? "border-danger" : "border-gray-200"}`}
+                              className="cursor-pointer image-input size-24"
+                              onClick={onImageUpload}
                             >
-                              <i className="ki-filled ki-picture"></i>
+                              <div
+                                className={`flex border justify-center rounded-lg image-input-placeholder items-center 
+              ${
+                formik.touched.files && formik.errors.files
+                  ? "border-danger"
+                  : "border-gray-200"
+              }`}
+                              >
+                                <i className="ki-filled ki-picture"></i>
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </ImageInput>
-                      {formik.values.files.map((file, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={file.dataURL}
-                            alt="uploaded"
-                            className="rounded-lg border-2 border-success size-24 object-cover"
-                          />
-                          <div className="absolute -right-4 -top-4">
-                            <button
-                              type="button"
-                              className="btn btn-xs btn-icon rounded-full btn-danger"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <i className="ki-outline ki-cross"></i>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                          )}
+                        </ImageInput>
+
+                        {/* Only show images with a valid dataURL */}
+                        {formik.values.files
+                          .filter((file) => !!file?.dataURL) // ✅ Only if there's a valid dataURL
+                          .map((file, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={file.dataURL}
+                                alt="uploaded"
+                                className="rounded-lg border-2 border-success size-24 object-cover"
+                              />
+                              <div className="absolute -right-4 -top-4">
+                                <button
+                                  type="button"
+                                  className="btn btn-xs btn-icon rounded-full btn-danger"
+                                  onClick={() => handleRemoveImage(index)}
+                                >
+                                  <i className="ki-outline ki-cross"></i>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+
                     {formik.touched.files && formik.errors.files && (
                       <span role="alert" className="text-danger text-xs mt-1">
                         {formik.errors.files}
