@@ -1073,13 +1073,11 @@ export const sideMenus = {
       title: 'Dashboard',
       icon: <LayoutDashboard />,
       path: '/dashboard',
-      children: [
-        {
-          title: 'Fast Start Training',
-          icon: <Dot />,
-          path: '/fast-start-training'
-        }
-      ]
+    },
+    {
+      title: 'Fast Start Training',
+      icon: <Dot />,
+      path: '/fast-start-training'
     },
     {
       title: 'IQ Academy',
@@ -1091,20 +1089,17 @@ export const sideMenus = {
       title: 'IQ Live',
       icon: <Tv />,
       path: '/iq-live',
-      children: [
-        {
-          title: 'IQ Educators',
-          icon: <Dot />,
-          path: '/iq-educators'
-        },
-        {
-          title: 'IQ Live Educators',
-          icon: <Dot />,
-          path: '/iq-live-educators'
-        },
-      ]
     },
-
+    {
+      title: 'IQ Educators',
+      icon: <Dot />,
+      path: '/iq-educators'
+    },
+    {
+      title: 'IQ Live Educators',
+      icon: <Dot />,
+      path: '/iq-live-educators'
+    },
     {
       title: 'Ideas',
       icon: <Lightbulb />,
