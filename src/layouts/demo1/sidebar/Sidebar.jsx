@@ -46,7 +46,7 @@ export const Sidebar = () => {
     setSidebarMouseLeave(true);
   };
   const renderContent = () => {
-    return <div ref={selfRef} onMouseLeave={handleMouseLeave} onMouseEnter={handleMouseEnter} className={clsx('sidebar bg-light lg:border-e lg:border-e-gray-200 dark:border-e-coal-100 lg:fixed lg:top-0 lg:bottom-0 lg:z-20 lg:flex flex-col items-stretch shrink-0', themeClass)}>
+    return <div ref={selfRef} onMouseLeave={handleMouseLeave} onMouseEnter={handleMouseEnter} className={clsx('sidebar bg-dark-imperial-blue lg:border-e lg:border-e-gray-200 dark:border-e-coal-100 lg:fixed lg:top-0 lg:bottom-0 lg:z-20 lg:flex flex-col items-stretch shrink-0', themeClass)}>
         {desktopMode && <SidebarHeader ref={headerRef} />}
         <SidebarContent {...desktopMode && {
         height: scrollableHeight
