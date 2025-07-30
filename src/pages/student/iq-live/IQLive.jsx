@@ -148,7 +148,7 @@ export default function IQLive() {
                     <h3 className="text-gray-900 font-medium text-md mb-4">
                         {educator.name}
                     </h3>
-                    <Link to="#" className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
+                    <Link to="/iq-educators" className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
 
                         View Profile
                     </Link>
