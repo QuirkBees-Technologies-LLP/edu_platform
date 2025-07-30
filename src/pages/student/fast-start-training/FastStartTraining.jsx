@@ -4,7 +4,7 @@ import React from 'react';
 export default function FastStartTraining() {
     return (
         <div className="min-h-screen text-gray-900">
-            <div className='container mx-auto p-5'>
+            <div className='container mx-auto p-10'>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Banner */}
                     <div className='md:col-span-3'>

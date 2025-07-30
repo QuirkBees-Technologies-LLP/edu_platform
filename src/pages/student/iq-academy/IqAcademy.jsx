@@ -71,7 +71,7 @@ export default function IqAcademy() {
     return (
         <>
             <div className="min-h-screen text-gray-900">
-                <div className='container mx-auto p-5'>
+                <div className='container mx-auto p-10'>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Header Banner - always full width */}
                         <div className='col-span-full'>
@@ -240,12 +240,11 @@ export default function IqAcademy() {
                                     </div>
                                 </div>
 
-                                <div className=" rounded-b-2xl shadow-md p-6 overflow-x-auto"> {/* Keep overflow-x-auto for horizontal scroll */}
-                                    <div className="flex gap-4 pb-0"> {/* Added padding-bottom for scrollbar */}
+                                <div className=" rounded-b-2xl shadow-md p-6 overflow-x-auto">
+                                    <div className="flex gap-4 pb-0"> 
                                         {courses.map((course) => (
                                             <div
                                                 key={course.id}
-                                                // Adjust width: full on extra small, half on small, third on medium, quarter on large
                                                 className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4   border rounded-xl shadow-sm flex-shrink-0"
                                             >
                                                 <div className="rounded-t-xl overflow-hidden">
