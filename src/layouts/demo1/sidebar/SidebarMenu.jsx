@@ -35,25 +35,25 @@ const SidebarMenu = () => {
         trigger: item.trigger
       }}>
         <MenuLink className={clsx('flex items-center grow cursor-pointer border border-transparent', accordionLinkGap[0], linkPl, linkPr, linkPy)}>
-          <MenuIcon className={clsx('items-start text-gray-500 dark:text-gray-400', iconWidth)}>
+          <MenuIcon className={clsx('items-start text-gray-400 dark:text-gray-700 ', iconWidth)}>
             {item.icon && item.icon}
           </MenuIcon>
-          <MenuTitle className="text-sm font-medium menu-item-active:text-dark menu-link-hover:!text-light">
+          <MenuTitle className="text-sm text-gray-400 dark:text-gray-700 font-noraml dark:menu-item-active:text-gray-900 menu-item-active:text-gray-100">
             {item.title}
           </MenuTitle>
           {buildMenuArrow()}
         </MenuLink>
-        <MenuSub className={clsx('relative before:absolute before:top-0 before:bottom-0 before:border-s before:border-gray-200', itemsGap, accordionBorderLeft[0], accordionPl[0])}>
+        <MenuSub className={clsx('', itemsGap, accordionBorderLeft[0], accordionPl[0])}>
           {buildMenuItemChildren(item.children, index, 1)}
         </MenuSub>
       </MenuItem>;
     } else {
       return <MenuItem key={index}>
         <MenuLink path={item.path} className={clsx('border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-dark-imperial-blue-active dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[0], linkPy, linkPl, linkPr)}>
-          <MenuIcon className={clsx('items-start text-gray-600 dark:text-gray-500 menu-item-active:text-dark-imperial-light menu-link-hover:!text-dark-imperial-light', iconWidth)}>
+          <MenuIcon className={clsx('items-start text-gray-400 dark:text-gray-700 dark:menu-item-active:text-gray-900 menu-item-active:text-gray-100', iconWidth)}>
             {item.icon && item.icon}
           </MenuIcon>
-          <MenuTitle className="text-sm font-medium text-light-800 menu-item-active:text-white menu-link-hover:!text-white">
+          <MenuTitle className="text-sm text-gray-400 dark:text-gray-700 font-noraml dark:menu-item-active:text-gray-900 menu-item-active:text-gray-100">
             {item.title}
           </MenuTitle>
         </MenuLink>

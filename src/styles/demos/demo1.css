@@ -855,17 +855,30 @@ chat */
 	background-image: url("/media/images/2600x1600/dashboard_banner.jpg");
 	background-repeat: no-repeat;
     background-size: cover;
+	height: 300px;
 }
 .live_updates {
+	height: 250px;
+}
+.live_updates.iq_educators {
 	height: 600px;
 }
-
 @media screen and (max-width : 1279.98px) {
 	.live_updates {
-		height: 430px;
+		height: 790px;
+	}
+	.live_updates.iq_educators {
+		height: 790px;
 	}
 }
-
+@media screen and (max-width : 767.98px) {
+	.live_updates {
+		height: 600px;
+	}
+	.live_updates.iq_educators {
+		height: 600px;
+	}
+}
 @media screen and (max-width : 849.98px) {
 	.forex_calender {
 		overflow: auto;
@@ -915,3 +928,34 @@ chat */
 		width: 900px;
 	}
 } */
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 7px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+  height: 5px;
+  width: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #E3E3E3;
+  border-radius: 30px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #E3E3E3;
+}
+
+
+/* Handle */
+.dark ::-webkit-scrollbar-thumb {
+  background: #1f1f1f;
+  border-radius: 30px;
+}
