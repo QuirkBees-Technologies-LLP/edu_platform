@@ -72,7 +72,7 @@ export default function CryptoAcademy() {
 
     return (
         <div className="min-h-screen bg-white text-gray-900">
-            <div className='container mx-auto p-5'>
+            <div className='container mx-auto p-10'>
                 <div className="grid grid-cols-3 gap-4">
                     <div className='col-span-3'>
                         <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">

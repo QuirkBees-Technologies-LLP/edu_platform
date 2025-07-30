@@ -1,3 +1,4 @@
+import { EllipsisVertical } from 'lucide-react';
 import React from 'react';
 
 export default function IqStrategies() {
@@ -42,9 +43,8 @@ export default function IqStrategies() {
     ];
 
 
-    return (
-        <div className="min-h-screen p-6">
-            {/* Top Section - Course Banner */}
+    return (<>
+        <div className="min-h-screen p-10">
             <div className="mb-6">
                 <img
                     src="public/media/images/IQ-Strategies.jpg"
@@ -53,69 +53,189 @@ export default function IqStrategies() {
                 />
             </div>
 
-            {/* Course Tags */}
-            <div className="flex flex-wrap gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-7">
                 {['GOLDMINE', 'KILLSHOT', 'SMARTMONICS'].map((tag, idx) => (
-                    <div className=''>
+                    <div className=' border border-gray-200 px-7 py-7 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition'>
                         <button
                             key={idx}
-                            className="bg-white border border-gray-200 px-6 py-3 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition"
+                            className="flex items-center gap-2"
                         >
+                            <img src="public/media/images/item.png" alt="" />
                             {tag}
                         </button>
                     </div>
                 ))}
             </div>
 
-            {/* Description & Educators */}
-            <div className="grid md:grid-cols-3 gap-6 mb-10">
+            <div className="grid md:grid-cols-3 gap-4 mb-10">
                 {/* Description */}
-
                 <div className="md:col-span-2">
-                    <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-                        <h3 className="text-lg font-semibold mb-2">Description</h3>
-                        <p className="text-sm text-gray-600">
-                            Now that I’m done thoroughly mangling that vague metaphor, let’s get down to business. You know you
-                            need to start blogging to grow your business, but you don’t know how. In this post, I’ll show you
-                            how to write a great blog post in five simple steps that people will actually want to read.
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            {['Lingo Kids', 'Lingo Express', 'Fun Learning'].map((product, idx) => (
-                                <span key={idx} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
-                                    {product}
-                                </span>
-                            ))}
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-heading">
+                                <h2 class="card-title">Description</h2>
+                            </div>
                         </div>
+                        <div class="card-content px-8 py-6">
+                            <div className='min-h-64'>
+                                <p className='text-gray-700 text-sm font-roboto'>Now that I’m done thoroughly mangling that vague metaphor, let’s get down to business. You know you need to start blogging to grow your business, but you don’t know how. In this post, I’ll show you how to write a great blog post in five simple steps that people will actually want to read. </p>
+                            </div>
+                            <div>
+                                <h4 class="mb-3 font-semibold text-foreground font-roboto">Products</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-2.5 font-roboto">
+                                <span class="badge badge-stroke">Lingo Kids</span>
+                                <span class="badge badge-stroke">Lingo Express</span>
+                                <span class="badge badge-stroke">Fun Learning</span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
                 {/* Educators */}
-                <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-                    <h3 className="text-lg font-semibold mb-4">Goldmind Educators</h3>
-                    <ul className="space-y-3">
-                        {[
-                            { name: 'Tyler Hero', contributions: '6 contributors' },
-                            { name: 'Esther Howard', contributions: '29 contributors' },
-                            { name: 'Cody Fisher', contributions: '34 contributors' },
-                            { name: 'Arlene McCoy', contributions: '1 contributors' },
-                            { name: 'Arlene McCoy', contributions: '1 contributors' },
-                            { name: 'Arlene McCoy', contributions: '1 contributors' },
-                        ].map((edu, idx) => (
-                            <li key={idx} className="flex justify-between text-sm">
-                                <span>{edu.name}</span>
-                                <span className="text-gray-500">{edu.contributions}</span>
-                            </li>
-                        ))}
-                    </ul>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-heading">
+                            <h2 class="card-title">Goldmind Educators</h2>
+                        </div>
+                        <div class="card-toolbar">
+                            <button type="button" class="btn btn-xs btn-outline btn-icon">
+                                <EllipsisVertical size={15} strokeWidth={1.75} />
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content py-1">
+                        <div class="flex items-center justify-between gap-2 py-2 px-9 border-b border-border border-dashed last:border-none">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar size-8 rounded-full overflow-hidden">
+                                    <div class="avatar-image">
+                                        <img src="public/media/images/avatar.jpg" alt="Kathryn Campbell" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <a
+                                        href="#"
+                                        class="text-sm font-roboto font-medium text-foreground hover:text-primary"
+                                    >Kathryn Campbell</a
+                                    >
+                                    <div class="text-sm font-roboto font-normal text-muted-foreground">
+                                        6 сontributors
+                                    </div>
+                                </div>
+                            </div>
+                            <EllipsisVertical size={15} strokeWidth={1.75} />
+                        </div>
+                        <div class="flex items-center justify-between gap-2 py-2 px-9 border-b border-border border-dashed last:border-none">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar size-8 rounded-full overflow-hidden">
+                                    <div class="avatar-image">
+                                        <img src="public/media/images/avatar.jpg" alt="Kathryn Campbell" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <a
+                                        href="#"
+                                        class="text-sm font-roboto font-medium text-foreground hover:text-primary"
+                                    >Kathryn Campbell</a
+                                    >
+                                    <div class="text-sm font-roboto font-normal text-muted-foreground">
+                                        6 сontributors
+                                    </div>
+                                </div>
+                            </div>
+                            <EllipsisVertical size={15} strokeWidth={1.75} />
+                        </div>
+                        <div class="flex items-center justify-between gap-2 py-2 px-9 border-b border-border border-dashed last:border-none">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar size-8 rounded-full overflow-hidden">
+                                    <div class="avatar-image">
+                                        <img src="public/media/images/avatar.jpg" alt="Kathryn Campbell" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <a
+                                        href="#"
+                                        class="text-sm font-roboto font-medium text-foreground hover:text-primary"
+                                    >Kathryn Campbell</a
+                                    >
+                                    <div class="text-sm font-roboto font-normal text-muted-foreground">
+                                        6 сontributors
+                                    </div>
+                                </div>
+                            </div>
+                            <EllipsisVertical size={15} strokeWidth={1.75} />
+                        </div>
+                        <div class="flex items-center justify-between gap-2 py-2 px-9 border-b border-border border-dashed last:border-none">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar size-8 rounded-full overflow-hidden">
+                                    <div class="avatar-image">
+                                        <img src="public/media/images/avatar.jpg" alt="Kathryn Campbell" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <a
+                                        href="#"
+                                        class="text-sm font-roboto font-medium text-foreground hover:text-primary"
+                                    >Kathryn Campbell</a
+                                    >
+                                    <div class="text-sm font-roboto font-normal text-muted-foreground">
+                                        6 сontributors
+                                    </div>
+                                </div>
+                            </div>
+                            <EllipsisVertical size={15} strokeWidth={1.75} />
+                        </div>
+                        <div class="flex items-center justify-between gap-2 py-2 px-9 border-b border-border border-dashed last:border-none">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar size-8 rounded-full overflow-hidden">
+                                    <div class="avatar-image">
+                                        <img src="public/media/images/avatar.jpg" alt="Kathryn Campbell" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <a
+                                        href="#"
+                                        class="text-sm font-roboto font-medium text-foreground hover:text-primary"
+                                    >Kathryn Campbell</a
+                                    >
+                                    <div class="text-sm font-roboto font-normal text-muted-foreground">
+                                        6 сontributors
+                                    </div>
+                                </div>
+                            </div>
+                            <EllipsisVertical size={15} strokeWidth={1.75} />
+                        </div>
+                        <div class="flex items-center justify-between gap-2 py-2 px-9 border-b border-border border-dashed last:border-none">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar size-8 rounded-full overflow-hidden">
+                                    <div class="avatar-image">
+                                        <img src="public/media/images/avatar.jpg" alt="Kathryn Campbell" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <a
+                                        href="#"
+                                        class="text-sm font-roboto font-medium text-foreground hover:text-primary"
+                                    >Kathryn Campbell</a
+                                    >
+                                    <div class="text-sm font-roboto font-normal text-muted-foreground">
+                                        6 сontributors
+                                    </div>
+                                </div>
+                            </div>
+                            <EllipsisVertical size={15} strokeWidth={1.75} />
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
 
-            {/* Tutorials */}
             <div className="text-gray-900 mb-28">
                 <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                     <div className="flex justify-between items-center">
                         <h2 className="text-2xl font-bold font-roboto">Tutorials</h2>
-                        
                     </div>
                 </div>
 
@@ -124,7 +244,7 @@ export default function IqStrategies() {
                         {courses.map((course) => (
                             <div
                                 key={course.id}
-                                className="w-1/4  border rounded-xl shadow-sm flex-shrink-0"
+                                className="w-1/4 card rounded-xl shadow-sm flex-shrink-0"
                             >
                                 <div className="rounded-t-xl overflow-hidden">
                                     <img
@@ -143,45 +263,48 @@ export default function IqStrategies() {
                 </div>
             </div>
 
-            {/* Replays */}
             <div className="mb-10">
-                <h3 className="text-xl font-semibold mb-4">Replays</h3>
-                <div className="flex flex-wrap gap-4">
-                    {Array(3).fill().map((_, idx) => (
-                        <div key={idx} className="w-64 bg-white border rounded-xl shadow-sm">
-                            <img src="/replay-thumb.jpg" alt="Replay" className="rounded-t-xl w-full h-36 object-cover" />
-                            <div className="p-4 text-xs text-gray-600">
-                                <p className="font-semibold text-sm mb-1">CyberStorm Cup</p>
-                                <p>Wed, Feb 18, 12:00 CDT</p>
-                            </div>
+                <div className='card'>
+                    <div className='card-header'>
+                        <h3 className="text-xl font-semibold mb-0">Replays</h3>
+                    </div>
+                    <div className="card-content p-8">
+                        <div className="flex flex-wrap gap-4">
+                            {Array(3).fill().map((_, idx) => (
+                                <div key={idx} className="w-64 card">
+                                    <img src="public/media/images/dummy-image-card.jpg" alt="Replay" className="rounded-t-xl w-full h-36 object-cover" />
+                                    <div className="p-4 text-xs text-gray-600">
+                                        <p className="font-semibold text-sm mb-1">CyberStorm Cup</p>
+                                        <p>Wed, Feb 18, 12:00 CDT</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             </div>
 
-            {/* FAQ */}
             <div className="mb-10">
-                <h3 className="text-xl font-semibold mb-4">FAQ</h3>
-                <div className="space-y-3">
-                    {[
-                        'How is pricing determined for each plan?',
-                        'What payment methods are accepted for subscriptions?',
-                        'Are there any hidden fees in the pricing?',
-                        'Is there a discount for annual subscriptions?',
-                        'Do you offer refunds on subscription cancellations?',
-                        'Can I add extra features to my current plan?'
-                    ].map((faq, idx) => (
-                        <div key={idx} className="border border-gray-200 p-4 rounded-lg hover:bg-gray-50 cursor-pointer">
-                            <p className="text-sm text-gray-700 font-medium">{faq}</p>
-                        </div>
-                    ))}
+                <div className='card'>
+                    <div className='card-header'>
+                        <h3 className="text-xl font-semibold mb-0">FAQ</h3>
+                    </div>
+                    <div className="card-content p-8">
+
+                    </div>
+
                 </div>
+
             </div>
 
-            {/* Bottom Image */}
-            <div>
-                <img src="/your-banner-image.jpg" alt="Footer Banner" className="w-full h-72 object-cover rounded-xl" />
+            <div className="mb-6">
+                <img
+                    src="public/media/images/IQ-Strategies.jpg"
+                    alt="Course Banner"
+                    className="w-full h-72 object-cover rounded-xl"
+                />
             </div>
         </div>
+    </>
     );
 }

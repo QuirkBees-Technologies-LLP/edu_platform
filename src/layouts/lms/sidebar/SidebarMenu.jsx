@@ -87,8 +87,8 @@ const SidebarMenu = () => {
             >
               {item.icon && <KeenIcon icon={item.icon} className={iconSize} />}
             </MenuIcon>
-            <MenuTitle className="text-sm font-medium text-gray-800 menu-item-active:text-primary menu-link-hover:!text-primary">
-              {item.title}
+            <MenuTitle className="text-sm font-medium menu-item-active:text-primary menu-link-hover:!text-gray-800">
+              {item.title} 21
             </MenuTitle>
             {buildMenuArrow()}
           </MenuLink>
@@ -125,7 +125,7 @@ const SidebarMenu = () => {
             >
               {item.icon && <KeenIcon icon={item.icon} className={iconSize} />}
             </MenuIcon>
-            <MenuTitle className="text-sm font-medium text-gray-800 menu-item-active:text-primary menu-link-hover:!text-primary">
+            <MenuTitle className="text-sm font-medium menu-item-active:text-primary menu-link-hover:!text-gray-800">
               {item.title}
             </MenuTitle>
           </MenuLink>
