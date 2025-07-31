@@ -19,6 +19,7 @@ import {
 // Components
 import CourseForm from "./forms/CourseForm";
 import { useAuthContext } from "../../../../../../auth/useAuthContext";
+import { languages } from "eslint-plugin-prettier";
 
 const CreateCourseModal = forwardRef(
   ({ isOpen, onClose, onSubmit, initialData }, ref) => {
@@ -113,6 +114,8 @@ const CreateCourseModal = forwardRef(
       published: formData.get('published') === 'true',
       isFeatured: formData.get('isFeatured') === 'true',
       tier: formData.get('tier'),
+      language: formData.get('language'),
+      section: formData.get('section'),
       instructor: auth?.user?._id,
     };
 

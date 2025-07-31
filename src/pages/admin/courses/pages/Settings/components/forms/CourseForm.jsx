@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { languages } from "eslint-plugin-prettier";
 
 // Categories for the course
 const COURSE_CATEGORIES = [
@@ -37,6 +38,12 @@ const courseSchema = z.object({
   isFeatured: z.boolean().default(false),
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
+  }),
+  section: z.enum(["fastStartTraining", "iqAcademy"], {
+    required_error: "Please select a Section",
+  }),
+  language: z.enum(["english", "italian"], {
+    required_error: "Please select a language",
   }),
 });
 
@@ -64,6 +71,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       category: "",
       published: false,
       isFeatured: false,
+      section:"fastStartTraining",
+      language:"english",
       tier: "FREE",
     },
   });
@@ -94,8 +103,11 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   };
 
   const selectedTier = watch("tier");
+  const selectedSection = watch("section");
+  const selectedLanguage = watch("language");
   const submitHandler = async (data) => {
-    
+
+    console.log('data==============>',data)
     const formData = new FormData();
 
     // Append all regular fields
@@ -105,6 +117,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     formData.append("published", data.published);
     formData.append("isFeatured", data.isFeatured);
     formData.append("tier", data.tier);
+    formData.append("section", data.section);
+    formData.append("language", data.language);
 
     // Handle image file
     if (data.imageFile instanceof File) {
@@ -200,6 +214,60 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             />
           </div>
         )}
+      </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label
+            htmlFor="section"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Course Section
+          </label>
+          <Select
+            defaultValue={selectedSection}
+            onValueChange={(value) => setValue("section", value)}
+            className={`form-control input input-md w-full ${errors.section && "border border-danger"}`}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fastStartTraining">
+                Fast Start Training
+              </SelectItem>
+              <SelectItem value="iqAcademy">IQ Academy</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.section && (
+            <p className="text-sm text-red-600">{errors.section.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="language"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Course Language
+          </label>
+          <Select
+            defaultValue={selectedLanguage}
+            onValueChange={(value) => setValue("language", value)}
+            className={`form-control input input-md w-full ${errors.language && "border border-danger"}`}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="english">English</SelectItem>
+              <SelectItem value="italian"> Italian </SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.language && (
+            <p className="text-sm text-red-600">{errors.language.message}</p>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
