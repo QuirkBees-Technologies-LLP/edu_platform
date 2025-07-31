@@ -263,10 +263,10 @@ const ClientDashboard = () => {
                                 <div className="col-span-12 lg:col-span-12">
                                     <div className="card rounded-none rounded-b-xl relative">
                                         <div className="card-body p-0 relative">
-                                            <img 
-                                                src="/media/images/2600x1600/banner_1.jpg" 
-                                                className="w-full h-72 object-cover rounded-t-xl" 
-                                                alt="" 
+                                            <img
+                                                src="/media/images/2600x1600/banner_1.jpg"
+                                                className="w-full h-72 object-cover rounded-t-xl"
+                                                alt=""
                                             />
                                             <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
                                             <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
@@ -278,7 +278,7 @@ const ClientDashboard = () => {
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                                                 <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
                                                 <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                                                View Academies
+                                                    View Academies
                                                 </button>
                                             </div>
                                         </div>
@@ -287,10 +287,10 @@ const ClientDashboard = () => {
                                 <div className="col-span-12 lg:col-span-12">
                                     <div className="card rounded-none rounded-b-xl relative">
                                         <div className="card-body p-0 relative">
-                                            <img 
-                                                src="/media/images/2600x1600/banner_2.jpg" 
-                                                className="w-full h-72 object-cover rounded-t-xl" 
-                                                alt="" 
+                                            <img
+                                                src="/media/images/2600x1600/banner_2.jpg"
+                                                className="w-full h-72 object-cover rounded-t-xl"
+                                                alt=""
                                             />
                                             <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
                                             <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
@@ -300,38 +300,44 @@ const ClientDashboard = () => {
 
                                         <div className="p-4 md:p-7">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-                                                <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
+                                                <h5 className="font-semibold text-gray-900 text-md">IQ Live</h5>
                                                 <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                                                View Academies
+                                                    View Live Session
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-span-12 lg:col-span-12">
-                                    <div className="card rounded-none rounded-b-xl relative">
+                                    <div className="card rounded-none rounded-b-xl relative group overflow-hidden">
+                                        {/* Full Overlay */}
+                                        <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 rounded-xl">
+                                            {/* <span className="text-2xl font-semibold tracking-widest">GUIDANCE</span> */}
+                                            <p className="mt-2">No This feature is under-development</p>
+                                        </div>
+
                                         <div className="card-body p-0 relative">
-                                            <img 
-                                                src="/media/images/2600x1600/banner_3.jpg" 
-                                                className="w-full h-72 object-cover rounded-t-xl" 
-                                                alt="" 
+                                            <img
+                                                src="/media/images/2600x1600/banner_3.jpg"
+                                                className="w-full h-72 object-cover rounded-t-xl"
+                                                alt=""
                                             />
-                                            <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
                                             <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
                                                 GUIDANCE
                                             </span>
                                         </div>
 
-                                        <div className="p-4 md:p-7">
+                                        <div className="p-4 md:p-7 rounded-b-xl relative z-0">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-                                                <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
+                                                <h5 className="font-semibold text-gray-900 text-md">IQ Strategies</h5>
                                                 <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                                                View Academies
+                                                    View Strategies
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
 
                         </div>
@@ -341,23 +347,38 @@ const ClientDashboard = () => {
                     <div className="col-span-12 xl:col-span-4">
                         <div className="grid grid-cols-12 gap-6">
                             <div className='col-span-12 md:col-span-6 xl:col-span-12 space-y-6'>
-                                <div className="relative rounded-2xl overflow-hidden shadow-lg">
+                                <div className="relative rounded-2xl overflow-hidden shadow-lg group">
                                     <img
                                         src="/media/images/2600x1600/fast_start.jpg"
                                         alt="Fast Start Training"
                                         className="w-full h-96 object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-[linear-gradient(178.03deg,rgba(43,76,107,0)_35.61%,rgba(0,0,0,0.8)_91.24%)]"></div>
-                                    <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
-                                        <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
-                                        FAST START <br /> TRAINING
+
+                                    {/* Gradient Overlay */}
+                                    <div className="absolute inset-0 bg-[linear-gradient(178.03deg,rgba(43,76,107,0)_35.61%,rgba(0,0,0,0.8)_91.24%)]
+                  transition duration-300"></div>
+
+                                    {/* Default Content */}
+                                    <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11 z-10">
+                                        <h2 className="text-gray-100 text-2xl font-bold tracking-wide">
+                                            FAST START <br /> TRAINING
                                         </h2>
 
-                                        <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
-                                        Start Here
+                                        <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 text-sm 
+                       font-normal btn-lg rounded-2xl border border-white/30 
+                       hover:bg-white/20 transition">
+                                            Start Here
                                         </button>
                                     </div>
+
+                                    {/* Hover Extra Data */}
+                                    <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 rounded-xl">
+                                        <p className="text-center p-4">
+                                            No This feature is under-development
+                                        </p>
+                                    </div>
                                 </div>
+
                                 {/* <div className="card rounded-2xl shadow-md p-6 border">
                                     <h2 className="text-lg font-semibold text-gray-800 mb-4">
                                         Fast Start Training
@@ -425,11 +446,11 @@ const ClientDashboard = () => {
 
                                         <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
                                             <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
-                                            RALPH  <br /> DANQUAH
+                                                RALPH  <br /> DANQUAH
                                             </h2>
 
                                             <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
-                                            Watch Live
+                                                Watch Live
                                             </button>
                                         </div>
                                     </div>
@@ -452,9 +473,15 @@ const ClientDashboard = () => {
                                 </div>
                             </div>
                             <div className="col-span-12 md:col-span-6 xl:col-span-12">
-                                <div className="card rounded-2xl shadow-md overflow-hidden">
+                                <div className="card rounded-2xl shadow-md overflow-hidden relative group">
+                                    {/* Hover Overlay */}
+                                    <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 opacity-0 group-hover:opacity-100 
+                  transition-opacity duration-300 z-10 flex flex-col items-center justify-center text-center p-4">
+                                        <h3 className="">No This feature is under-development</h3>
+                                    </div>
+
                                     {/* Header */}
-                                    <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+                                    <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl relative z-20">
                                         <h3 className="text-white font-semibold text-sm">Live Updates</h3>
                                         <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
                                             <button
@@ -475,7 +502,7 @@ const ClientDashboard = () => {
                                     </div>
 
                                     {/* Updates */}
-                                    <div className="p-4 space-y-3 live_updates overflow-auto">
+                                    <div className="p-4 space-y-3 live_updates overflow-auto relative">
                                         {updates.map((update) => (
                                             <div key={update.id} className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4">
                                                 <div className="flex flex-col gap-4 mb-4">
@@ -485,9 +512,7 @@ const ClientDashboard = () => {
                                                         className="w-12 h-12 rounded-full"
                                                     />
                                                     <div>
-                                                        <h4 className="text-sm font-normal mb-1 text-gray-900">
-                                                            {update.name}
-                                                        </h4>
+                                                        <h4 className="text-sm font-normal mb-1 text-gray-900">{update.name}</h4>
                                                         <p className="text-xs font-normal text-gray-600">{update.time}</p>
                                                     </div>
                                                 </div>
@@ -496,6 +521,7 @@ const ClientDashboard = () => {
                                         ))}
                                     </div>
                                 </div>
+
                             </div>
                             <div className='col-span-12'>
                                 <button className="w-full bg-blue-gradient p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300  group">

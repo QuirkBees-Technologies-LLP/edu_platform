@@ -9,10 +9,10 @@ const EntryCallout = ({
       <style>
         {`
           .entry-callout-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/22.png')}');
+            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2.png')}');
           }
           .dark .entry-callout-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/22.png')}');
+            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2-dark.png')}');
           }
         `}
       </style>
