@@ -1120,5 +1120,10 @@ export const sideMenus = {
       icon: <School />,
       path: '/iq-strategies'
     },
+    {
+      title: 'Forex Academy',
+      icon: <Dot />,
+      path: '/forex-academy'
+    },
   ],
 };

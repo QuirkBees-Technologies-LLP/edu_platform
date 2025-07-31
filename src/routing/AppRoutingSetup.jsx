@@ -129,6 +129,7 @@ import IqStrategies from "../pages/student/iq-strategies/IqStrategies";
 import IQLive from "../pages/student/iq-live/IQLive";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
 import IqLiveEducators from "../pages/student/iq-live-educators/IqLiveEducators";
+import ForexAcademy from "../pages/student/client-dashboard/forex-academy/ForexAcademy";
 
 const routes = {
   student: [
@@ -152,6 +153,7 @@ const routes = {
     { path: "/iq-live", element: <IQLive /> },
     { path: "/iq-educators/:id", element: <IqEducators /> },
     { path: "/iq-live-educators", element: <IqLiveEducators /> },
+    { path: "/forex-academy", element: <ForexAcademy /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },

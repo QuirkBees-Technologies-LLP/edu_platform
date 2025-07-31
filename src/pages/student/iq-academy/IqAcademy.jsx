@@ -255,9 +255,9 @@ export default function IqAcademy() {
                                                     onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error" }} // Fallback image
                                                 />
                                             </div>
-                                            <div className="p-4">
-                                                <h3 className="text-lg font-semibold dark:text-white">{course.title}</h3>
-                                                <p className="text-sm text-gray-600 ">{course.address}</p>
+                                            <div className="p-5">
+                                                <h3 className="text-md text-gray-800 font-medium mb-2">{course.title}</h3>
+                                                <p className="text-xs text-gray-600">{course.address}</p>
                                             </div>
                                         </div>
                                     ))}
