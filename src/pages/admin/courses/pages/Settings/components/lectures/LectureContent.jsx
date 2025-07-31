@@ -227,8 +227,8 @@ const LectureContent = ({
     dataToSend.append("preview", formData.preview);
     dataToSend.append("section", formData.section);
     dataToSend.append("content", formData.content);
-    dataToSend.append("thumbnail", formData.thumbnail.file);
     if (videoFile) {
+      dataToSend.append("thumbnail", formData.thumbnail.file);
       dataToSend.append("video", videoFile);
     }
 
