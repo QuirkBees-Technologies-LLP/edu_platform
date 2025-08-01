@@ -130,6 +130,7 @@ import IQLive from "../pages/student/iq-live/IQLive";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
 import IqLiveEducators from "../pages/student/iq-live-educators/IqLiveEducators";
 import ForexAcademy from "../pages/student/client-dashboard/forex-academy/ForexAcademy";
+import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
 
 const routes = {
   student: [
@@ -185,6 +186,7 @@ const routes = {
     { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
     { path: "/admin/stream-recording", element: <AdminRecording /> },
     { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
+    { path: "admin/general-setting", element: <GeneralSetting /> },
   ],
 };
 
