@@ -157,7 +157,7 @@ const VideoLibrary = () => {
         <>
           <div className="popular py-5 flex items-center justify-between">
             <div>
-              <p className="text-lg text-gray-800 mb-px">Popular Videos</p>
+              <p className="text-lg font-medium text-gray-800 mb-px">Popular Videos</p>
               <div className="text-2sm text-gray-600 mb-px">
                 Videos that were recently viewed by many people
               </div>
@@ -173,8 +173,8 @@ const VideoLibrary = () => {
                       image={video?.imageUrl}
                       defaultImage="/media/images/600x400/1.jpg"
                     />
-                    <div className="video-details absolute bottom-0 p-4">
-                      <h2 className="text-3sm font-semibold text-gray-100 dark:text-gray-900">
+                    <div className="video-details p-4">
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900">
                         {video?.title}
                       </h2>
                       <div className="flex items-center justify-between pt-2">
@@ -186,7 +186,7 @@ const VideoLibrary = () => {
                           <div>
                             {video?.instructor && (
                               <Link
-                                className="text-2sm text-gray-100 mb-px dark:text-gray-900"
+                                className="text-2sm text-gray-900 mb-px dark:text-gray-900"
                                 to={`/academy/course/${video?.instructor?._id}`}
                               >
                                 {video?.instructor?.first_name}{" "}
@@ -194,7 +194,7 @@ const VideoLibrary = () => {
                               </Link>
                             )}
                             {video?.createdAt && (
-                              <div className="text-2xs text-gray-300 mb-px dark:text-gray-700">
+                              <div className="text-2xs text-gray-900 mb-px dark:text-gray-700">
                                 {format(new Date(video.createdAt), "MMM dd, yyyy")}
                               </div>
                             )}
