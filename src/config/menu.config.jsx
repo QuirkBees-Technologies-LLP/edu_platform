@@ -1020,6 +1020,11 @@ export const sideMenus = {
       icon: <Layers />,
       path: '/admin/academy-category'
     },
+    {
+      title: 'General Setting',
+      icon: <Layers />,
+      path: '/admin/general-setting'
+    },
   ],
   educator: [
     {
@@ -1070,14 +1075,21 @@ export const sideMenus = {
   ],
   student: [
     {
-      title: 'Dashboard',
+      title: 'Home',
       icon: <LayoutDashboard />,
-      path: '/dashboard',
-    },
-    {
-      title: 'Fast Start Training',
-      icon: <Dot />,
-      path: '/fast-start-training'
+      // path: '/dashboard',
+      children: [
+        {
+          title: 'Dashboard',
+          icon: <Dot />,
+          path: '/dashboard'
+        },
+        {
+          title: 'Fast Start Training',
+          icon: <Dot />,
+          path: '/fast-start-training'
+        },
+      ],
     },
     {
       title: 'IQ Academy',
@@ -1088,18 +1100,25 @@ export const sideMenus = {
     {
       title: 'IQ Live',
       icon: <Tv />,
-      path: '/iq-live',
+      // path: '/iq-live',
+      children: [
+        {
+          title: 'IQ Live',
+          icon: <Tv />,
+          path: '/iq-live',
+        },
+        {
+        title: 'IQ Live Educators',
+        icon: <Dot />,
+        path: '/iq-live-educators'
+      },
+      ]
     },
-    {
-      title: 'IQ Educators',
-      icon: <Dot />,
-      path: '/iq-educators'
-    },
-    {
-      title: 'IQ Live Educators',
-      icon: <Dot />,
-      path: '/iq-live-educators'
-    },
+    // {
+    //   title: 'IQ Educators',
+    //   icon: <Dot />,
+    //   path: '/iq-educators'
+    // },
     {
       title: 'Ideas',
       icon: <Lightbulb />,

@@ -94,9 +94,9 @@ export default function IQLive() {
               <div className="calender">
                 {/* Table Header */}
                 <div className="grid grid-cols-8 text-center table_head">
-                  <div className="bg-[#1A1446] text-gray-100 py-5 px-4 font-normal">Educators</div>
+                  <div className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal">Educators</div>
                   {days.map((day) => (
-                    <div key={day} className="bg-[#1A1446] text-gray-100 py-5 px-4 font-normal">
+                    <div key={day} className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal">
                       {day}
                     </div>
                   ))}
@@ -106,7 +106,7 @@ export default function IQLive() {
                 {educators.map((educator, index) => (
                   <div key={index} className="grid grid-cols-8 border-t">
                     {/* Educator Info */}
-                    <div className="flex flex-col items-center justify-center p-4 bg-[#F7F6FE] border-r">
+                    <div className="flex flex-col items-center justify-center p-4 bg-gray-200 border-r">
                       <img
                         src={educator.image}
                         alt={educator.first_name}
@@ -143,7 +143,7 @@ export default function IQLive() {
                               </div>
                             ))
                           ) : (
-                            <div className="text-xs text-gray-400 text-center">–</div>
+                            <div className="text-xs text-gray-700 text-center">–</div>
                           )}
                         </div>
                       );
