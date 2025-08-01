@@ -106,7 +106,7 @@ const SidebarMenu = () => {
       </MenuItem>;
     } else {
       return <MenuItem key={index}>
-        <MenuLink path={item.path} className={clsx('border border-transparent items-center grow menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[level], accordionLinkPl, linkPr, subLinkPy)}>
+        <MenuLink path={item.path} className={clsx('border mt-2 border-transparent items-center grow menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[level], accordionLinkPl, linkPr, subLinkPy)}>
           {buildMenuBullet()}
           <MenuTitle className="text-2sm font-normal menu-item-active:text-white menu-item-active:font-semibold menu-link-hover:!text-white">
             {item.title}

@@ -277,9 +277,11 @@ const ClientDashboard = () => {
                                         <div className="p-4 md:p-7">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                                                 <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
+                                                <Link to="/video-library">
                                                 <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
                                                     View Academies
                                                 </button>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
@@ -301,9 +303,11 @@ const ClientDashboard = () => {
                                         <div className="p-4 md:p-7">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                                                 <h5 className="font-semibold text-gray-900 text-md">IQ Live</h5>
+                                                <Link to="/iq-live">
                                                 <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
                                                     View Live Session
                                                 </button>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
