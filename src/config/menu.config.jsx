@@ -1100,19 +1100,13 @@ export const sideMenus = {
     {
       title: 'IQ Live',
       icon: <Tv />,
-      // path: '/iq-live',
-      children: [
-        {
-          title: 'IQ Live',
-          icon: <Tv />,
-          path: '/iq-live',
-        },
-        {
-        title: 'IQ Live Educators',
-        icon: <Dot />,
-        path: '/iq-live-educators'
-      },
-      ]
+      path: '/iq-live',
+    },
+   
+    {
+      title: 'IQ Live Educators',
+      icon: <Dot />,
+      path: '/iq-live-educators'
     },
     // {
     //   title: 'IQ Educators',
