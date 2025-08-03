@@ -104,91 +104,154 @@ const CreateCourseModal = forwardRef(
 
 
     const handleSubmit = async (formData) => {
-  setIsSubmitting(true);
-  try {
-    // 1. Create the base payload
-    const payload = {
-      title: formData.get('title'),
-      description: formData.get('description'),
-      category: formData.get('category'),
-      published: formData.get('published') === 'true',
-      isFeatured: formData.get('isFeatured') === 'true',
-      tier: formData.get('tier'),
-      language: formData.get('language'),
-      section: formData.get('section'),
-      instructor: auth?.user?._id,
+      setIsSubmitting(true);
+      // try {
+      //   // 1. Create the base payload
+      //   const payload = {
+      //     title: formData.get('title'),
+      //     description: formData.get('description'),
+      //     category: formData.get('category'),
+      //     published: formData.get('published') === 'true',
+      //     isFeatured: formData.get('isFeatured') === 'true',
+      //     tier: formData.get('tier'),
+      //     language: formData.get('language'),
+      //     section: formData.get('section'),
+      //     instructor: auth?.user?._id,
+      //   };
+
+      //   // 2. Handle the image file properly
+      //   const imageFile = formData.get('imageUrl'); // Note: use 'image' not 'imageUrl'
+      //   console.log("Image file:", imageFile); // Debug what we're getting
+
+      //   if (imageFile instanceof File) {
+      //     // For file uploads, we need to send as FormData
+      //     const uploadFormData = new FormData();
+
+      //     // Append all regular fields
+      //     Object.entries(payload).forEach(([key, value]) => {
+      //       uploadFormData.append(key, value);
+      //     });
+
+      //     // Append the file
+      //     uploadFormData.append('image', imageFile);
+
+      //     console.log("FormData entries:");
+      //     for (let [key, value] of uploadFormData.entries()) {
+      //       console.log(key, value);
+      //     }
+
+      //     console.log("initialData====================>",initialData)
+
+      //     if (initialData) {
+      //       await dispatch(
+      //         updateExistingCourse({
+      //           id: initialData._id,
+      //           courseData: uploadFormData, // Send as FormData
+      //           token: localStorage.getItem("token"),
+      //         })
+      //       ).unwrap();
+      //     } else {
+      //       await dispatch(
+      //         createNewCourse({
+      //           courseData: uploadFormData, // Send as FormData
+      //           token: localStorage.getItem("token"),
+      //         })
+      //       ).unwrap();
+      //     }
+      //   } else {
+      //     // For non-file updates (using imageUrl)
+      //     payload.imageUrl = formData.get('imageUrl');
+
+      //     if (initialData) {
+      //       await dispatch(
+      //         updateExistingCourse({
+      //           id: initialData._id,
+      //           courseData: payload, // Send as regular object
+      //           token: localStorage.getItem("token"),
+      //         })
+      //       ).unwrap();
+      //     } else {
+      //       await dispatch(
+      //         createNewCourse({
+      //           courseData: uploadFormData, // Send as regular object
+      //           token: localStorage.getItem("token"),
+      //         })
+      //       ).unwrap();
+      //     }
+      //   }
+
+      //   toast.success(initialData ? "Course updated successfully!" : "Course created successfully!");
+      //   onClose();
+      // } catch (error) {
+      //   console.error("Submission error:", error);
+      //   toast.error(error.message || "Operation failed");
+      // } finally {
+      //   setIsSubmitting(false);
+      // }
+
+      try {
+        const imageFile = formData.get('imageUrl');
+        const isImageAFile = imageFile instanceof File;
+
+        // 1. Build payload for common fields
+        const payload = {
+          title: formData.get('title'),
+          description: formData.get('description'),
+          category: formData.get('category'),
+          published: formData.get('published') === 'true',
+          isFeatured: formData.get('isFeatured') === 'true',
+          tier: formData.get('tier'),
+          language: formData.get('language'),
+          section: formData.get('section'),
+          instructor: auth?.user?._id,
+        };
+
+        let requestData;
+
+        // 2. If a new file is uploaded, use FormData
+        if (isImageAFile) {
+          const uploadFormData = new FormData();
+          Object.entries(payload).forEach(([key, value]) => {
+            uploadFormData.append(key, value);
+          });
+          uploadFormData.append('image', imageFile); // append file with correct key
+
+          requestData = uploadFormData;
+        } else {
+          // 3. If no file, send as regular JSON object
+          payload.imageUrl = formData.get('imageUrl');
+          requestData = payload;
+        }
+
+        // 4. Dispatch action
+        if (initialData) {
+          await dispatch(
+            updateExistingCourse({
+              id: initialData._id,
+              courseData: requestData,
+              token: localStorage.getItem("token"),
+            })
+          ).unwrap();
+        } else {
+          await dispatch(
+            createNewCourse({
+              courseData: requestData,
+              token: localStorage.getItem("token"),
+            })
+          ).unwrap();
+        }
+
+        toast.success(initialData ? "Course updated successfully!" : "Course created successfully!");
+        onClose();
+
+      } catch (error) {
+        console.error("Submission error:", error);
+        toast.error(error?.message || "Operation failed. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+
     };
-
-    // 2. Handle the image file properly
-    const imageFile = formData.get('imageUrl'); // Note: use 'image' not 'imageUrl'
-    console.log("Image file:", imageFile); // Debug what we're getting
-    
-    if (imageFile instanceof File) {
-      // For file uploads, we need to send as FormData
-      const uploadFormData = new FormData();
-      
-      // Append all regular fields
-      Object.entries(payload).forEach(([key, value]) => {
-        uploadFormData.append(key, value);
-      });
-      
-      // Append the file
-      uploadFormData.append('image', imageFile);
-      
-      console.log("FormData entries:");
-      for (let [key, value] of uploadFormData.entries()) {
-        console.log(key, value);
-      }
-
-      console.log("initialData====================>",initialData)
-
-      if (initialData) {
-        await dispatch(
-          updateExistingCourse({
-            id: initialData._id,
-            courseData: uploadFormData, // Send as FormData
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
-      } else {
-        await dispatch(
-          createNewCourse({
-            courseData: uploadFormData, // Send as FormData
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
-      }
-    } else {
-      // For non-file updates (using imageUrl)
-      payload.imageUrl = formData.get('imageUrl');
-      
-      if (initialData) {
-        await dispatch(
-          updateExistingCourse({
-            id: initialData._id,
-            courseData: payload, // Send as regular object
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
-      } else {
-        await dispatch(
-          createNewCourse({
-            courseData: uploadFormData, // Send as regular object
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
-      }
-    }
-
-    toast.success(initialData ? "Course updated successfully!" : "Course created successfully!");
-    onClose();
-  } catch (error) {
-    console.error("Submission error:", error);
-    toast.error(error.message || "Operation failed");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
     return (
       <Dialog
         open={isOpen}

@@ -1,19 +1,21 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from 'sonner';
-import { useDeleteEducatorMutation } from '../../../../store/api/admin/adminEducatorsApiSlice';
+import { useDeleteAdminCoursesTypesMutation } from '../../../../store/api/admin/adminCoursesTypesApiSlice';
 
 
-const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
-    const [deleteEducator, { isLoading, isSuccess, isError, error }] = useDeleteEducatorMutation();
+const DeleteCoursesTypes = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch, setSelectedRow }, ref) => {
+    const [deleteAdminCoursesTypes, { isLoading }] = useDeleteAdminCoursesTypesMutation();
+    console.log(selectedRow, "selectedRow");
 
     const handleDelete = async () => {
         try {
-            await deleteEducator(selectedRow?._id).unwrap();
+            await deleteAdminCoursesTypes(selectedRow?._id).unwrap();
             refetch();
-            toast.success("educator deleted successfully!");
+            toast.success("Course type deleted successfully!");
             handleDeleteClose();
+            setSelectedRow({});
         } catch (error) {
             toast.error(err.data.message);
         }
@@ -22,13 +24,14 @@ const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRo
     return (
         <Dialog open={isDeleteOpen} onOpenChange={() => {
             handleDeleteClose();
+            setSelectedRow({});
         }}>
             <DialogContent className="p-5 max-w-[500px]" ref={ref}>
                 <VisuallyHidden>
                     <DialogTitle>Hidden Title</DialogTitle>
                 </VisuallyHidden>
                 <div className="text-center">
-                <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+                    <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
 
                 </div>
                 {/* Modal Text */}
@@ -56,4 +59,4 @@ const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRo
     )
 })
 
-export default DeleteEducator;
+export default DeleteCoursesTypes;

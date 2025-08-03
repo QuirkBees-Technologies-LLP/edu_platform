@@ -26,11 +26,13 @@ import {
   MenuSub,
   MenuTitle
 } from '@/components';
-import CreateLanguage from './CreateLanguage';
-import DeleteLanguage from './DeleteLanguage';
 import { toAbsoluteUrl } from '@/utils/Assets';
-import { useLazyGetLanguagesQuery, useUpdateLanguageMutation } from '../../../../store/api/admin/adminLanguagesApiSlice';
+import { useLazyGetLanguagesQuery } from '../../../../store/api/admin/adminLanguagesApiSlice';
+import CreateCoursesTypes from './createCoursesTypes';
+import DeleteCoursesTypes from './DeleteCoursesTypes';
+import { useLazyGetAdminCoursesTypesQuery, useUpdateAdminCoursesTypesMutation } from '../../../../store/api/admin/adminCoursesTypesApiSlice';
 import { Switch } from '../../../../components/ui/switch';
+import { set } from 'date-fns';
 
 
 // ✅ MOVED OUTSIDE COMPONENT
@@ -61,18 +63,14 @@ const ToolbarTable = ({ searchTerm, setSearchTerm, title }) => {
 };
 
 
-const Languages = ({ title = "Languages" }) => {
+const CoursesTypes = ({ title = "Courses Types" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getLanguages, { data, isLoading }] = useLazyGetLanguagesQuery();
-  const [updateLanguage] = useUpdateLanguageMutation();
+  const [getAdminCoursesTypes, { isLoading }] = useLazyGetAdminCoursesTypesQuery();
+  const [updateAdminCoursesTypes] = useUpdateAdminCoursesTypesMutation();
   const [toggleStatusData, setToggleStatusData] = useState([]);
-
-  // const [tableKey, setTableKey] = useState(0);
-  // const reloadTable = () => setTableKey(prev => prev + 1);
 
   const { isRTL } = useLanguage();
 
@@ -102,18 +100,32 @@ const Languages = ({ title = "Languages" }) => {
     reloadTable(); // this triggers setTableKey and remounts the entire DataGrid
   }, [searchTerm]);
 
+  const handleVisibilityToggle = async (typeId, currentVisibility) => {
+    try {
+      const newVisibility = !Boolean(currentVisibility);
+
+      setToggleStatusData(toggleStatusData.map(type => type._id === typeId ? { ...type, status: newVisibility } : type));
+      const payload = toggleStatusData.find(type => type._id === typeId);
+      // Make API call
+      await updateAdminCoursesTypes({ ...payload, id: payload?._id, status: String(newVisibility) }).unwrap();
+      toast.success(`Course type status updated to ${newVisibility ? 'Active' : 'Inactive'}`);
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to update test visibility');
+    }
+  };
 
   const handleFetchData = async ({ pageIndex, pageSize }) => {
     const newPage = pageIndex + 1;
     const newLimit = pageSize;
 
     try {
-      const response = await getLanguages({
+      const response = await getAdminCoursesTypes({
         page: newPage,
         limit: newLimit,
         search: searchTerm,
       }).unwrap();
       setToggleStatusData(response.data);
+
       return {
         data: response.data || [],
         totalCount: response.pagination?.total || 0,
@@ -144,20 +156,7 @@ const Languages = ({ title = "Languages" }) => {
       </MenuItem>
     </MenuSub>
   );
-
-  const handleVisibilityToggle = async (typeId, currentVisibility) => {
-    try {
-      const newVisibility = !Boolean(currentVisibility);
-
-      setToggleStatusData(toggleStatusData.map(type => type._id === typeId ? { ...type, status: newVisibility } : type));
-      const payload = toggleStatusData.find(type => type._id === typeId);
-      // Make API call
-      await updateLanguage({ ...payload, id: payload?._id, status: String(newVisibility) }).unwrap();
-      toast.success(`Language status updated to ${newVisibility ? 'Active' : 'Inactive'}`);
-    } catch (error) {
-      toast.error(error?.data?.message || 'Failed to update test visibility');
-    }
-  };
+  console.log(toggleStatusData, "toggleStatusData");
 
   const columns = useMemo(() => [
     {
@@ -173,6 +172,8 @@ const Languages = ({ title = "Languages" }) => {
       header: () => 'Status',
       enableSorting: false,
       cell: ({ row }) => {
+
+
         return (
           <Switch
             checked={toggleStatusData.find(test => test._id === row?.original?._id)?.status}
@@ -216,17 +217,17 @@ const Languages = ({ title = "Languages" }) => {
     <div className='mt-5'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Languages" />
+          <ToolbarPageTitle text="Courses Types" />
           <ToolbarDescription>
             <ToolbarDescription>
-              Manage platform languages used in courses and academies for multilingual support.
+              Define and manage different types of courses offered on the platform.
             </ToolbarDescription>
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create Language
+              Create Course Types
             </button>
           </div>
         </ToolbarActions>
@@ -251,7 +252,7 @@ const Languages = ({ title = "Languages" }) => {
         onFetchData={handleFetchData}
       />
 
-      <CreateLanguage
+      <CreateCoursesTypes
         setSelectedRow={setSelectedRow}
         handleCloseCreate={handleCloseCreate}
         refetch={reloadTable}
@@ -261,7 +262,7 @@ const Languages = ({ title = "Languages" }) => {
       />
 
       {isDeleteOpen && (
-        <DeleteLanguage
+        <DeleteCoursesTypes
           refetch={reloadTable}
           isDeleteOpen={isDeleteOpen}
           handleDeleteClose={handleDeleteClose}
@@ -273,4 +274,4 @@ const Languages = ({ title = "Languages" }) => {
   );
 };
 
-export default Languages;
+export default CoursesTypes;

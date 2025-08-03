@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import Languages from './languages/Languages';
+import CoursesTypes from './course-type/CoursesTypes';
+import AdminAcademyCategory from '../academy-category/AdminAcademyCategory';
 
 const GeneralSetting = () => {
   const [activeTab, setActiveTab] = useState("Language");
 
-  const tabs = ["Language", "Course Type", "Academy Category"];
+  const tabs = ["Language", "Courses Type", "Academy Category"];
 
   return (
     <div className="container-fluid">
@@ -27,8 +29,8 @@ const GeneralSetting = () => {
 
         {/* Tab Content */}
         {activeTab === "Language" && <Languages />}
-        {activeTab === "Course Type" && <Languages />}
-        {activeTab === "Academy Category" && <Languages />}
+        {activeTab === "Courses Type" && <CoursesTypes />}
+        {activeTab === "Academy Category" && <AdminAcademyCategory />}
       </div>
     </div>
   );
