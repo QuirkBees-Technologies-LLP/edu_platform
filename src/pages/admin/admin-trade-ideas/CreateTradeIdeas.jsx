@@ -48,7 +48,7 @@ const CreateTradeIdeas = forwardRef(
     };
 
     const createSchema = Yup.object().shape({
-      name: Yup.string().required("Name is required"),
+      name: Yup.string().required("Symbol is required"),
       files: Yup.array().min(1, "At least one file is required"),
       type: Yup.string().oneOf(["buy", "sell"]).required("Type is required"),
       status: Yup.string()
@@ -210,7 +210,7 @@ const CreateTradeIdeas = forwardRef(
               <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Name<span className="text-danger">*</span>
+                    Symbol<span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -314,7 +314,7 @@ const CreateTradeIdeas = forwardRef(
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="scalp">Scalp</SelectItem>
+                      <SelectItem value="scalping">Scalping</SelectItem>
                       <SelectItem value="intraday">Intraday</SelectItem>
                       <SelectItem value="swing">Swing</SelectItem>
                     </SelectContent>
