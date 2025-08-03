@@ -222,7 +222,7 @@ const CreateTradeIdeas = forwardRef(
                 <div className="col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
-                      Name<span className="text-danger">*</span>
+                      Symbol<span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"
