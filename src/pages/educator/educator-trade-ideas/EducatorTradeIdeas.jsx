@@ -149,7 +149,7 @@ const EducatorTradeIdeas = ({ title = "Trade Ideas" }) => {
         accessorFn: (row) => row.name,
         id: "name",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Name" column={column} />
+          <DataGridColumnHeader title="Symbol" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (

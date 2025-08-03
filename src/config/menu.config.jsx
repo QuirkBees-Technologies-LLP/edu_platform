@@ -981,12 +981,12 @@ export const sideMenus = {
       path: '/admin/educators'
     },
     {
-      title: 'Ideas',
+      title: 'IQ Ideas',
       icon: <Lightbulb />,
       path: '/admin/ideas'
     },
     {
-      title: 'Trade Analysis',
+      title: 'IQ Insight',
       icon: <ChartCandlestick />,
       path: '/admin/trade-analysis'
     },
@@ -1033,12 +1033,12 @@ export const sideMenus = {
       path: '/'
     },
     {
-      title: 'Ideas',
+      title: 'IQ Ideas',
       icon: <Lightbulb />,
       path: '/educator/ideas'
     },
     {
-      title: 'Trade Analysis',
+      title: 'IQ Insight',
       icon: <ChartCandlestick />,
       path: '/educator/trade-analysis'
     },
@@ -1114,7 +1114,7 @@ export const sideMenus = {
     //   path: '/iq-educators'
     // },
     {
-      title: 'Ideas',
+      title: 'IQ Ideas',
       icon: <Lightbulb />,
       path: '/ideas'
     },

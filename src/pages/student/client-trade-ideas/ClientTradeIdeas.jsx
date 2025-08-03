@@ -106,11 +106,16 @@ const ClientTradeIdeas = () => {
                 </div>
                 <div className="card-border card-rounded-b flex flex-col gap-2 justify-between">
                   <div className="px-5 py-4.5 ">
-                    <div className="flex item-center justify-between  mb-5">
-                      <div className="font-bold mr-3 text-gray-900">{idea?.name}</div>
+                    <div className="flex item-center justify-between  mb-3">
+                      <div className="font-bold mr-3 text-gray-900">{idea?.name.toUpperCase()}/{idea?.type.toUpperCase()}</div>
                       <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}>{LabelMap[idea?.status]}</span>
                     </div>
+                    <div className=" flex gap-10 mb-3 text-gray-800">
+                    {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
+
+                    </div>
                     <div className="flex gap-10 mb-3">
+                      
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
                         <span class="mt-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{idea?.entry}</span>
@@ -124,7 +129,7 @@ const ClientTradeIdeas = () => {
                     </div>
                     <div className="">
                       <div className="text-2sm mb-2   text-gray-800 uppercase ">Exits</div>
-                      <div className="flex items-center flex-wrap gap-2">
+                      <div className="items-center flex-wrap gap-2 mt-2">
                         {idea?.exits?.map((exit, idx) => (
                           <div
                             key={idx}
@@ -142,17 +147,22 @@ const ClientTradeIdeas = () => {
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
                       <EducatorImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
-                      <div>
+                      <div className="">
                         <Link
                           to="/public-profile/profiles/nft"
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
-                          {idea?.educatorDetails?.name}
+                          {idea?.educatorDetails?.first_name} {idea?.educatorDetails?.last_name}
                         </Link>
-                        <div className="text-2sm text-gray-700 mb-px">
-                          {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
-                        </div>
+                        
                       </div>
+                     
+                    </div>
+                    <div className="flex mt-2">
+                      <div className="text-2sm mb-2   text-gray-800 ">Category:-</div>
+                     <div className="text-2sm text-gray-700 mb-px ml-2">
+                          {idea?.category?idea?.category?.name:"Category not assigned"}
+                        </div>
                     </div>
                   </div>
                 </div>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { toAbsoluteUrl } from '@/utils/Assets';
 function EducatorCardImage({ educator, defaultImage }) {
     const [isImageWorking, setIsImageWorking] = useState(null);
+
+    console.log(isImageWorking)
         // Function to check if the image URL is working
         const isImageUrlWorking = async (url) => {
             const img = new Image();
@@ -29,7 +31,7 @@ function EducatorCardImage({ educator, defaultImage }) {
         }
     
         // Use the valid image URL or fallback to the default image
-        const imageUrl = isImageWorking ? educator.image : toAbsoluteUrl(defaultImage);
+        const imageUrl = isImageWorking ? educator?.image : toAbsoluteUrl(defaultImage);
   return (
         <img
             className="rounded-full size-8 me-2"
