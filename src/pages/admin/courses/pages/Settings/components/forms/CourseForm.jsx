@@ -3,7 +3,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
-import { useGetEducatorAcademyCategoryQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetCoursesTypesQuery, useGetEducatorAcademyCategoryQuery, useGetLanguageListQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import {
   Select,
   SelectContent,
@@ -39,12 +39,8 @@ const courseSchema = z.object({
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
-  section: z.enum(["fastStartTraining", "iqAcademy"], {
-    required_error: "Please select a Section",
-  }),
-  language: z.enum(["english", "italian"], {
-    required_error: "Please select a language",
-  }),
+  section: z.string().min(1, "Please select a course type"),
+  language: z.string().min(1, "Please select a course language"),
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
@@ -53,6 +49,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
   const { data } = useGetEducatorAcademyCategoryQuery();
+  const { data: languagesList } = useGetLanguageListQuery();
+  const { data: courseTypesList } = useGetCoursesTypesQuery();
 
   const {
     control,
@@ -71,8 +69,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       category: "",
       published: false,
       isFeatured: false,
-      section:"fastStartTraining",
-      language:"english",
+      section: "",
+      language: "",
       tier: "FREE",
     },
   });
@@ -107,7 +105,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const selectedLanguage = watch("language");
   const submitHandler = async (data) => {
 
-    console.log('data==============>',data)
+    console.log('data==============>', data)
     const formData = new FormData();
 
     // Append all regular fields
@@ -129,7 +127,6 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     for (let [key, value] of formData.entries()) {
       console.log(key, value);
     }
-
     await onSubmit(formData);
   };
 
@@ -216,29 +213,40 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         )}
       </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label
             htmlFor="section"
             className="block text-sm font-medium text-gray-700"
           >
-            Course Section
+            Type of Course
           </label>
-          <Select
-            defaultValue={selectedSection}
-            onValueChange={(value) => setValue("section", value)}
-            className={`form-control input input-md w-full ${errors.section && "border border-danger"}`}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="fastStartTraining">
-                Fast Start Training
-              </SelectItem>
-              <SelectItem value="iqAcademy">IQ Academy</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="section"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                className={`form-control input input-md w-full ${errors.section ? "border border-danger" : ""}`}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courseTypesList?.data?.length > 0 ? (
+                    courseTypesList.data.map((type) => (
+                      <SelectItem key={type._id} value={type.name}>
+                        {type.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem disabled value="null">No types found</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.section && (
             <p className="text-sm text-red-600">{errors.section.message}</p>
           )}
@@ -251,19 +259,32 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           >
             Course Language
           </label>
-          <Select
-            defaultValue={selectedLanguage}
-            onValueChange={(value) => setValue("language", value)}
-            className={`form-control input input-md w-full ${errors.language && "border border-danger"}`}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="italian"> Italian </SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="language"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                className={`form-control input input-md w-full ${errors.language ? "border border-danger" : ""}`}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languagesList?.data?.length > 0 ? (
+                    languagesList.data.map((lang) => (
+                      <SelectItem key={lang._id} value={lang.name}>
+                        {lang.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem disabled value="null">No languages found</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.language && (
             <p className="text-sm text-red-600">{errors.language.message}</p>
           )}
@@ -278,22 +299,28 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           >
             Category
           </label>
-          <Select
-            defaultValue={initialData?.category?._id}
-            onValueChange={(value) => setValue("category", value)}
-            className={`form-control input input-md w-full ${errors.category && "border border-danger"}`}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              {data?.data?.map((item) => (
-                <SelectItem key={item._id} value={item._id}>
-                  {item.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Controller
+            name="category"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                className={`form-control input input-md w-full ${errors.category ? "border border-danger" : ""}`}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {data?.data?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.category && (
             <p className="text-sm text-red-600">{errors.category.message}</p>
           )}
