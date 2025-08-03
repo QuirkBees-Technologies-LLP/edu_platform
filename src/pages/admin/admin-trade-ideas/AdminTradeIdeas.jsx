@@ -79,7 +79,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
     loss: "Loss",
     buy: "Buy",
     sell: "Sell",
-    scalp: "Scalp",
+    scalping: "Scalping",
     intraday: "Intraday",
     swing: "Swing",
   };
@@ -151,7 +151,7 @@ const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
         accessorFn: (row) => row.name,
         id: "name",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Name" column={column} />
+          <DataGridColumnHeader title="Symbol" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (

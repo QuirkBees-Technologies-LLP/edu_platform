@@ -77,7 +77,7 @@ const EducatorTradeIdeas = ({ title = "Trade Ideas" }) => {
     loss: "Loss",
     buy: "Buy",
     sell: "Sell",
-    scalp: "Scalp",
+    scalping: "Scalping",
     intraday: "Intraday",
     swing: "Swing",
   };

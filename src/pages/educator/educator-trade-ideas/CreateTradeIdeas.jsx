@@ -56,7 +56,7 @@ const CreateTradeIdeas = forwardRef(
     };
 
     const createSchema = Yup.object().shape({
-      name: Yup.string().required("Name is required"),
+      name: Yup.string().required("symbol is required"),
       files: Yup.array().min(1, "At least one file is required"),
       type: Yup.string().oneOf(["buy", "sell"]).required("Type is required"),
       status: Yup.string()
@@ -329,7 +329,7 @@ const CreateTradeIdeas = forwardRef(
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="scalp">Scalp</SelectItem>
+                        <SelectItem value="scalping">Scalping</SelectItem>
                         <SelectItem value="intraday">Intraday</SelectItem>
                         <SelectItem value="swing">Swing</SelectItem>
                       </SelectContent>

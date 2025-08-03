@@ -8,6 +8,9 @@ export const adminTradeIdeasApiSlice = createApi({
         getAdminTradeIdeas: builder.query({
             query: ({ page = 1, limit = 10 }) => `/admin/idea/get?page=${page}&limit=${limit}`,
         }),
+        getAdminWithoutTradeIdeas: builder.query({
+            query: ({ isview=true }) => `/admin/idea/get?isview=${isview}`,
+        }),
         getUsers: builder.query({
             query: () => 'users',
         }),
@@ -38,4 +41,4 @@ export const adminTradeIdeasApiSlice = createApi({
     }),
 });
 
-export const { useGetAdminTradeIdeasQuery, useLazyGetAdminTradeIdeasQuery, useGetUsersQuery, useGetCommentsQuery, useCreateTradeIdeasMutation, useUpdateTradeIdeaMutation, useDeleteTradeIdeaMutation } = adminTradeIdeasApiSlice;
+export const { useGetAdminTradeIdeasQuery, useGetAdminWithoutTradeIdeasQuery, useLazyGetAdminTradeIdeasQuery, useGetUsersQuery, useGetCommentsQuery, useCreateTradeIdeasMutation, useUpdateTradeIdeaMutation, useDeleteTradeIdeaMutation } = adminTradeIdeasApiSlice;
