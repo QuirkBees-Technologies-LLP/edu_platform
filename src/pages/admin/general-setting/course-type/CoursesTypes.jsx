@@ -28,7 +28,7 @@ import {
 } from '@/components';
 import { toAbsoluteUrl } from '@/utils/Assets';
 import { useLazyGetLanguagesQuery } from '../../../../store/api/admin/adminLanguagesApiSlice';
-import CreateCoursesTypes from './createCoursesTypes';
+import CreateCoursesTypes from './CreateCoursesTypes';
 import DeleteCoursesTypes from './DeleteCoursesTypes';
 import { useLazyGetAdminCoursesTypesQuery, useUpdateAdminCoursesTypesMutation } from '../../../../store/api/admin/adminCoursesTypesApiSlice';
 import { Switch } from '../../../../components/ui/switch';
