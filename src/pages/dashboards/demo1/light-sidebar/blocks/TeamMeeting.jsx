@@ -7,7 +7,7 @@ const TeamMeeting = () => {
     <div className="card-body lg:p-7.5 lg:pt-6 p-5">
       <div className="flex items-center justify-between flex-wrap gap-5 mb-7.5">
         <div className="flex flex-col gap-1">
-          <span className="text-1.5xl font-semibold text-gray-900">Live Stream</span>
+          <span className="text-1.5xl font-semibold text-gray-900">IQ Academy</span>
           <span className="text-sm font-semibold text-gray-600">Live Market Sessions. <br/> In Real Time.</span>
         </div>
 
@@ -29,7 +29,7 @@ const TeamMeeting = () => {
             </div>
             <div className="flex items-center gap-1.5 text-sm font-normal text-gray-800">
               <Book icon="users" className="text-base text-gray-500" />
-              Courses
+              IQ Vault
             </div>
           </div>
           <div className="flex gap-5 justify-center mt-5">

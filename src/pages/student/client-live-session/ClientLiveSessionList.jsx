@@ -43,7 +43,7 @@ const ClientLiveSessionList = ({ userId, userToken }) => {
 
             setNext(response.next); // Update pagination cursor
         } catch (error) {
-            console.error("Error fetching live streams:", error);
+            console.error("Error fetching IQ Academy:", error);
         }
 
         setLoading(false);

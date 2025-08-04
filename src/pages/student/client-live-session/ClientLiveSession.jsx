@@ -27,7 +27,7 @@ const ClientLiveSession = () => {
         <div className='container-fluid'>
             <div className="popular pb-5 flex items-center justify-between">
                 <div>
-                    <a class="text-lg text-gray-800 mb-px" href="/public-profile/profiles/nft">Live Session</a>
+                    <a class="text-lg text-gray-800 mb-px" href="/public-profile/profiles/nft">IQ Academy</a>
                 </div>
             </div>
             <ClientLiveSessionList userId={userId} userToken={sessionToken}/>

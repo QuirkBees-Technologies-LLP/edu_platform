@@ -7,7 +7,10 @@ import { MessageCircle, ThumbsUp, Megaphone } from 'lucide-react';
 import { Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthContext } from '@/auth';
-
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 const ClientDashboard = () => {
     const { auth } = useAuthContext();
 
@@ -240,6 +243,21 @@ const ClientDashboard = () => {
             avatar: "/media/avatars/300-14.png"
         }
     ];
+
+    const slides = [
+        {
+            title: "RALPH DANQUAH",
+            image: "/media/images/2600x1600/watch_live.jpg",
+        },
+        {
+            title: "JOHN DOE",
+            image: "/media/images/2600x1600/watch_live.jpg",
+        },
+        {
+            title: "JANE SMITH",
+            image: "/media/images/2600x1600/watch_live.jpg",
+        },
+    ];
     const [activeTab, setActiveTab] = useState("feed");
     const data = activeTab === "feed" ? feedData : ideasData;
     return (
@@ -278,9 +296,9 @@ const ClientDashboard = () => {
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                                                 <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
                                                 <Link to="/video-library">
-                                                <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                                                    View Academies
-                                                </button>
+                                                    <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
+                                                        View Academies
+                                                    </button>
                                                 </Link>
                                             </div>
                                         </div>
@@ -304,9 +322,9 @@ const ClientDashboard = () => {
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                                                 <h5 className="font-semibold text-gray-900 text-md">IQ Live</h5>
                                                 <Link to="/iq-live">
-                                                <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                                                    View Live Session
-                                                </button>
+                                                    <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
+                                                        View IQ Academy
+                                                    </button>
                                                 </Link>
                                             </div>
                                         </div>
@@ -364,13 +382,13 @@ const ClientDashboard = () => {
 
                                     {/* Default Content */}
                                     <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11 z-10">
-                                        <h2 className="text-gray-100 text-2xl font-bold tracking-wide">
+                                        <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
                                             FAST START <br /> TRAINING
                                         </h2>
 
                                         <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 text-sm 
                        font-normal btn-lg rounded-2xl border border-white/30 
-                       hover:bg-white/20 transition">
+                       hover:bg-white/20 transition dark:text-gray-900">
                                             Start Here
                                         </button>
                                     </div>
@@ -429,10 +447,8 @@ const ClientDashboard = () => {
                                 </div> */}
 
                                 <div className="card rounded-2xl shadow-md overflow-hidden">
-                                    {/* Header */}
-                                    <div className="bg-[#1A1446] px-5 py-5 flex justify-between items-center rounded-t-2xl">
+                                    <div className="bg-[#1A1446] px-5 py-5 flex justify-between items-center rounded-t-2xl border-none">
                                         <h3 className="text-white font-semibold text-sm">Live Now</h3>
-                                        {/* Dots */}
                                         <div className="flex space-x-2">
                                             <span className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-500"></span>
                                             <span className="w-3 h-3 rounded-full bg-blue-500"></span>
@@ -440,8 +456,40 @@ const ClientDashboard = () => {
                                             <span className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                                         </div>
                                     </div>
+                                    <Swiper
+                                        modules={[Pagination, Autoplay]}
+                                        spaceBetween={20}
+                                        slidesPerView={1}
+                                        pagination={{ clickable: true }}
+                                        autoplay={{ delay: 3000 }}
+                                        className="w-full border-none"
+                                    >
+                                        {slides.map((slide, index) => (
+                                            <SwiperSlide key={index}>
+                                                <div className="card shadow-md rounded-none overflow-hidden">
+                                                    <div className="relative h-96 rounded-none overflow-hidden shadow-lg">
+                                                        <img
+                                                            src={slide.image}
+                                                            alt={slide.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
 
-                                    <div className="relative h-96 rounded-b-2xl overflow-hidden shadow-lg">
+                                                        <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
+                                                            <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
+                                                                {slide.title}
+
+                                                            </h2>
+
+                                                            <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
+                                                                Watch Live
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </SwiperSlide>
+                                        ))}
+                                    </Swiper>
+                                    {/* <div className="relative h-96 rounded-b-2xl overflow-hidden shadow-lg">
                                         <img
                                             src="/media/images/2600x1600/watch_live.jpg"
                                             alt="Fast Start Training"
@@ -456,22 +504,6 @@ const ClientDashboard = () => {
                                             <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
                                                 Watch Live
                                             </button>
-                                        </div>
-                                    </div>
-                                    {/* <div className="p-4 flex items-center space-x-4"> 
-                                       
-                                        <img
-                                            src="/media/avatars/300-14.png"
-                                            alt="Profile"
-                                            className="w-12 h-12 rounded-full"
-                                        />
-                                        <div>
-                                            <h4 className="text-gray-900 font-medium mb-1 text-sm">
-                                                Ralphah Danquah
-                                            </h4>
-                                            <p className="text-gray-700 text-xs">
-                                                Live Now <span className="mx-2">•</span> 190 watching
-                                            </p>
                                         </div>
                                     </div> */}
                                 </div>

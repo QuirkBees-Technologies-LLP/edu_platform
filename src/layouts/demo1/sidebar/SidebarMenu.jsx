@@ -49,7 +49,7 @@ const SidebarMenu = () => {
       </MenuItem>;
     } else {
       return <MenuItem key={index}>
-        <MenuLink path={item.path} className={clsx('border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-dark-imperial-blue-active dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[0], linkPy, linkPl, linkPr)}>
+        <MenuLink path={item.path} className={clsx('border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-gray-200 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-gray-200 dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[0], linkPy, linkPl, linkPr)}>
           <MenuIcon className={clsx('items-start text-gray-400 dark:text-gray-700 dark:menu-item-active:text-gray-900 menu-item-active:text-gray-100', iconWidth)}>
             {item.icon && item.icon}
           </MenuIcon>
@@ -100,13 +100,13 @@ const SidebarMenu = () => {
 
           {buildMenuArrow()}
         </MenuLink>
-        <MenuSub className={clsx(!item.collapse && 'relative before:absolute before:top-0 before:bottom-0 before:border-s before:border-gray-200', itemsGap, !item.collapse && accordionBorderLeft[level], !item.collapse && accordionPl[level], !item.collapse && 'relative before:absolute')}>
+        <MenuSub className={clsx(!item.collapse && 'relative before:absolute before:top-0 before:bottom-0 before:left-1 before:border-s before:border-gray-200', itemsGap, !item.collapse && accordionBorderLeft[level], !item.collapse && accordionPl[level], !item.collapse && 'relative before:absolute')}>
           {buildMenuItemChildren(item.children, index, item.collapse ? level : level + 1)}
         </MenuSub>
       </MenuItem>;
     } else {
       return <MenuItem key={index}>
-        <MenuLink path={item.path} className={clsx('border mt-2 border-transparent items-center grow menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[level], accordionLinkPl, linkPr, subLinkPy)}>
+        <MenuLink path={item.path} className={clsx('border mt-2 border-transparent items-center grow text-gray-100 dark:text-gray-800 menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-gray-200 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg gap-4', accordionLinkGap[level], accordionLinkPl, linkPr, subLinkPy)}>
           {buildMenuBullet()}
           <MenuTitle className="text-2sm font-normal menu-item-active:text-white menu-item-active:font-semibold menu-link-hover:!text-white">
             {item.title}
@@ -138,7 +138,7 @@ const SidebarMenu = () => {
     </MenuArrow>;
   };
   const buildMenuBullet = () => {
-    return <MenuBullet className="flex w-[6px] -start-[3px] rtl:start-0 relative before:absolute before:top-0 before:size-[6px] before:rounded-full rtl:before:translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-dark-light menu-item-hover:before:bg-primary"></MenuBullet>;
+    return <MenuBullet className="flex w-[6px] start-[3px] rtl:start-0 relative before:absolute before:top-0 before:size-[6px] before:rounded-full rtl:before:translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-dark-light dark:menu-item-active:before:bg-gray-900 menu-item-hover:before:bg-primary"></MenuBullet>;
   };
   const buildMenuSoon = () => {
     return <MenuBadge className={rightOffset}>

@@ -124,7 +124,7 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
             <DialogContent className="p-5 max-w-[475px]" ref={ref}>
                 <DialogHeader className="pb-5 pt-0 px-0">
-                    <DialogTitle>{selectedRow?._id ? "Update Live Session" : "Create Live Session"}</DialogTitle>
+                    <DialogTitle>{selectedRow?._id ? "Update IQ Academy" : "Create IQ Academy"}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-5 px-0 py-5">
                     <div className="grid grid-cols-12 gap-4">

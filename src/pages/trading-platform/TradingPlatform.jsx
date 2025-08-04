@@ -91,11 +91,11 @@ export default function TrandingPlatform() {
                             {/* 16:9 aspect ratio for video placeholder */}
                             <img
                               src={`https://placehold.co/400x225/E0E0E0/000000?text=Stream+${id}`}
-                              alt={`Live Stream ${id}`}
+                              alt={`IQ Academy ${id}`}
                               className="absolute inset-0 w-full h-full object-cover rounded"
                             />
                           </div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">Live Stream #{id}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1">IQ Academy #{id}</h3>
                           <p className="text-sm text-gray-700">Streaming now on TradingView</p>
                         </CardContent>
                       </Card>

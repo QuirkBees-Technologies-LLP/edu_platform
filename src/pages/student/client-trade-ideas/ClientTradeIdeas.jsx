@@ -82,7 +82,7 @@ const ClientTradeIdeas = () => {
     <div className="container-fluid">
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Trade Ideas" />
+          <ToolbarPageTitle text="IQ Ideas" />
           <ToolbarDescription>
             Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
           </ToolbarDescription>
@@ -162,7 +162,7 @@ const ClientTradeIdeas = () => {
           </div>
 
           {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && <p className="text-center my-10">No more trade ideas to load.</p>}
+          {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>}
         </div>
 
         <ViewClientTradeIdeas
