@@ -8,7 +8,13 @@ export const educatorAcademyCategoryApiSlice = createApi({
         getEducatorAcademyCategory: builder.query({
             query: () => `/educator/category`,
         }),
+        getLanguageList: builder.query({
+            query: () => `/admin/language/list`,
+        }),
+        getCoursesTypes: builder.query({
+            query: () => `/admin/course-type/list`,
+        }),
     }),
 });
 
-export const { useGetEducatorAcademyCategoryQuery } = educatorAcademyCategoryApiSlice;
+export const { useGetEducatorAcademyCategoryQuery, useGetLanguageListQuery, useGetCoursesTypesQuery } = educatorAcademyCategoryApiSlice;

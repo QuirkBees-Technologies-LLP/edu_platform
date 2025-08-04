@@ -10,13 +10,16 @@ import { MenuIcon, MenuLink, MenuSub, MenuTitle } from '@/components';
 import { TruncatedText } from '../../../lib/utils';
 import CreateAdminAcademyCategory from './CreateAdminAcademyCategory';
 import DeleteAdminAcademyCategory from './DeleteAdminAcademyCategory';
-import { useLazyGetAdminAcademyCategoryQuery } from '../../../store/api/admin/adminAcademyCategoryApiSlice';
+import { useLazyGetAdminAcademyCategoryQuery, useUpdateAdminAcademyCategoryMutation } from '../../../store/api/admin/adminAcademyCategoryApiSlice';
+import { Switch } from '../../../components/ui/switch';
 
 const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [getAdminAcademyCategory, { data, isLoading, refetch }] = useLazyGetAdminAcademyCategoryQuery();
+  const [toggleStatusData, setToggleStatusData] = useState([]);
+  const [updateAdminAcademyCategory] = useUpdateAdminAcademyCategoryMutation();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -65,6 +68,20 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
 
   const truncateText = (text, maxLength) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+  };
+
+  const handleVisibilityToggle = async (typeId, currentVisibility) => {
+    try {
+      const newVisibility = !Boolean(currentVisibility);
+
+      setToggleStatusData(toggleStatusData.map(type => type._id === typeId ? { ...type, status: newVisibility } : type));
+      const payload = toggleStatusData.find(type => type._id === typeId);
+      // Make API call
+      await updateAdminAcademyCategory({ id: payload?._id, data: { status: String(newVisibility), name: payload?.name }}).unwrap();
+      toast.success(`Academy status updated to ${newVisibility ? 'Active' : 'Inactive'}`);
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to update test visibility');
+    }
   };
 
   const columns = useMemo(() => [
@@ -121,12 +138,27 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
       }
     },
     {
+      id: 'status',
+      header: () => 'Status',
+      enableSorting: false,
+      cell: ({ row }) => {
+        console.log(toggleStatusData, "toggleStatusData");
+
+        return (
+          <Switch
+            checked={toggleStatusData.find(test => test._id === row?.original?._id)?.status}
+            onCheckedChange={() => handleVisibilityToggle(row?.original?._id, toggleStatusData.find(type => type._id === row?.original?._id)?.status)}
+          />
+        );
+      },
+    },
+    {
       id: 'click',
       header: () => '',
       enableSorting: false,
       cell: ({ row }) => <Menu className="items-stretch">
         <MenuItem toggle="dropdown"
-          onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+          onClick={() => setSelectedRow(toggleStatusData.find(type => type._id === row?.original?._id))}
           trigger="click" dropdownProps={{
             placement: isRTL() ? 'bottom-start' : 'bottom-end',
             modifiers: [{
@@ -146,7 +178,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
         headerClassName: 'w-[60px]'
       }
     }
-  ], [isRTL]);
+  ], [isRTL, toggleStatusData, handleVisibilityToggle]);
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
@@ -200,7 +232,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
     try {
       // Fetch API Data
       const response = await getAdminAcademyCategory({ page: newPage, limit: newLimit }).unwrap();
-
+      setToggleStatusData(response.data);
       return {
         data: response.data || [],
         totalCount: response.pagination?.totalRecords || 0,
@@ -219,7 +251,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   };
 
   return (
-    <div className='container-fluid'>
+    <div className='container mt-5'>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Academy Category" />
