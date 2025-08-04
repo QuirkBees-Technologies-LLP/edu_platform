@@ -24,6 +24,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
         name: "",
         icon: null,
         image: null,
+        status: "true",
     };
 
     const FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -33,7 +34,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
         name: Yup.string()
             .required("Name is required")
             .max(100, "Name can't be longer than 100 characters"),
-    
+
         icon: Yup.mixed()
             .required("Icon image is required")
             .test("fileTypeOrUrl", "Unsupported icon image format", (value) => {
@@ -44,7 +45,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                 if (typeof value === "string") return true; // skip size check for URLs
                 return value && value.size <= FILE_SIZE;
             }),
-    
+
         image: Yup.mixed()
             .required("Thumbnail image is required")
             .test("fileTypeOrUrl", "Unsupported image format", (value) => {
@@ -56,7 +57,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                 return value && value.size <= FILE_SIZE;
             }),
     });
-    
+
 
     const formik = useFormik({
         initialValues,
@@ -76,12 +77,13 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
 
             const formData = new FormData();
             formData.append('name', values.name);
+            formData.append('status', values.status);
             if (values.icon) formData.append('icon', values.icon);
             if (values.image) formData.append('image', values.image);
 
             try {
                 if (selectedRow?._id) {
-                    await updateAdminAcademyCategory({data: formData, id: selectedRow?._id}).unwrap();
+                    await updateAdminAcademyCategory({ data: formData, id: selectedRow?._id }).unwrap();
                     refetch();
                     toast.success("Academy category updated successfully!");
                 } else {
@@ -106,6 +108,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
                 name: selectedRow?.name,
                 image: selectedRow?.image,
                 icon: selectedRow?.icon,
+                status: String(selectedRow?.status),
             }
             formik.setValues(initData)
         }
