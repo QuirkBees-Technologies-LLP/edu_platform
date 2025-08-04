@@ -100,7 +100,7 @@ const ClientViewLiveSession = () => {
     <>
       {/* {isUpcoming ? (
         <div className="live_center w-full">
-          <p className="text-center font-bold text-xl">Live Session is Upcoming</p>
+          <p className="text-center font-bold text-xl">IQ Academy is Upcoming</p>
           <p className="text-center text-lg pt-10 px-2">
             The event will start on{" "}
             {scheduleData?.data?.datetime 

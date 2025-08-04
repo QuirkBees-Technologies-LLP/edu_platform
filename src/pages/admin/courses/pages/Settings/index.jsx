@@ -33,7 +33,7 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
   // Fetch courses on mount and when token changes
   useEffect(() => {
     if (auth?.token) {
-      console.log("Fetching courses with token:", auth.token);
+      console.log("Fetching IQ Vault with token:", auth.token);
       dispatch(
         fetchCourses({
           params: {
@@ -44,10 +44,10 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
       )
         .unwrap()
         .then((response) => {
-          console.log("Courses fetched successfully:", response);
+          console.log("IQ Vault fetched successfully:", response);
         })
         .catch((error) => {
-          console.error("Error fetching courses:", error);
+          console.error("Error fetching IQ Vault:", error);
         });
     } else {
       console.log("No auth token available");
@@ -93,8 +93,8 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
     if (error) {
       return (
         <ErrorMessages
-         heading={"No Courses Yet"}
-          message={"You haven’t created any courses yet. Let’s get your first one set up and ready to go."}
+         heading={"No IQ Vault Yet"}
+          message={"You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."}
           onRetry={() =>
             dispatch(
               fetchCourses({
@@ -135,7 +135,7 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to Courses 
+                  Back to IQ Vault 
                 </button>
               )}
             </div>
@@ -143,7 +143,7 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
               <span className="text-sm text-gray-500">
                 {selectedCourseId
                   ? courses.find((c) => c._id === selectedCourseId)?.title
-                  : "All Courses"}
+                  : "All IQ Vault"}
               </span>
             </div>
           </div>

@@ -6,13 +6,13 @@ import AdminAcademyCategory from '../academy-category/AdminAcademyCategory';
 const GeneralSetting = () => {
   const [activeTab, setActiveTab] = useState("Language");
 
-  const tabs = ["Language", "Courses Type", "Academy Category"];
+  const tabs = ["Language", "IQ Vault Type", "Academy Category"];
 
   return (
     <div className="container-fluid">
       <div className="items-start">
         {/* Tabs */}
-        <div className="flex space-x-6">
+        <div className="flex gap-6 flex-wrap">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -29,7 +29,7 @@ const GeneralSetting = () => {
 
         {/* Tab Content */}
         {activeTab === "Language" && <Languages />}
-        {activeTab === "Courses Type" && <CoursesTypes />}
+        {activeTab === "IQ Vault Type" && <CoursesTypes />}
         {activeTab === "Academy Category" && <AdminAcademyCategory />}
       </div>
     </div>

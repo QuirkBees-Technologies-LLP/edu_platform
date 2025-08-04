@@ -81,11 +81,11 @@ const CreateTradeAnalysis = forwardRef(
             let a = await updateAdminTradeAnalysis(formData).unwrap();
             console.log("==============================>", a);
             refetch();
-            toast.success("Trade Analysis updated successfully!");
+            toast.success("IQ Insight updated successfully!");
           } else {
             await createAdminTradeAnalysis(formData).unwrap();
             refetch();
-            toast.success("Trade Analysis created successfully!");
+            toast.success("IQ Insight created successfully!");
           }
           formik.resetForm();
           handleCloseCreate();
@@ -160,9 +160,7 @@ const CreateTradeAnalysis = forwardRef(
           <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id
-                  ? "Update Trade Analysis"
-                  : "Create Trade Analysis"}
+                {selectedRow?._id ? "Update IQ Insight" : " Create IQ Insight"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">

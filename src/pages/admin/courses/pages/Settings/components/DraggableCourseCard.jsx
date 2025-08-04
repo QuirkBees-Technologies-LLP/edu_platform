@@ -234,8 +234,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleEdit}
             className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title="Edit course"
-            aria-label="Edit course"
+            title="Edit IQ Vault"
+            aria-label="Edit IQ Vault"
           >
             <Edit2 className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>
@@ -243,8 +243,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleDelete}
             className="p-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title="Delete course"
-            aria-label="Delete course"
+            title="Delete IQ Vault"
+            aria-label="Delete IQ Vault"
           >
             <Trash className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>

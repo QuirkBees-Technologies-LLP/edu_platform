@@ -15,7 +15,7 @@ import DeleteAdminStreamSchedule from './DeleteAdminStreamSchedule';
 import CreateAdminStreamSchedule from './CreateAdminStreamSchedule';
 import { useLazyGetAdminStreamScheduleQuery } from '../../../store/api/admin/adminStreamScheduleApiSlice';
 
-const AdminStreamSchedule = ({ title = "Schedule Stream" }) => {
+const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -215,7 +215,7 @@ const AdminStreamSchedule = ({ title = "Schedule Stream" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching trade ideas:", error);
+      console.error("Error fetching IQ Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -231,14 +231,14 @@ const AdminStreamSchedule = ({ title = "Schedule Stream" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Schedule Stream" />
+          <ToolbarPageTitle text="IQ Academy Schedule" />
           <ToolbarDescription>
-            Track and analyze past live sessions with key insights and performance data.</ToolbarDescription>
+            Track and analyze past IQ Academy with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
-              Schedule a Stream
+              IQ Academy Schedule
             </button>
           </div>
         </ToolbarActions>

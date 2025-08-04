@@ -2,6 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoJS from '../../../components/VideoJS';
+// import VideoJS from '../../../components/VideoJS';
 
 const VideoPlayerModal = ({ open, onOpenChange, videoUrl }) => {
   const playerOptions = {
@@ -25,7 +26,7 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden">
-        <DialogHeader className="p-4 pb-0 bg-white dark:bg-gray-100">
+        <DialogHeader className="p-4 pb-0 bg-white">
           <DialogTitle>Recording Playback</DialogTitle>
           <p className='flex items-center gap-2 text-sm font-normal text-gray-700'>View and access all video recordings uploaded by educators and admins.</p>
         </DialogHeader>

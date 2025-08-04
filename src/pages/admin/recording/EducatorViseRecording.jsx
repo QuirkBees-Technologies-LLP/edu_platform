@@ -35,7 +35,7 @@ const EducatorViseRecording = ({ data, isLoading, isError, error }) => {
     const hasNoData = Array.isArray(data) && data.length === 0;
 
     return (
-        <Container>
+        <div>
             {hasNoData ? (
                 <div className="card w-full h-100 items-center justify-center">
                     <div className="text-center flex items-center gap-3 flex-col py-24">
@@ -80,7 +80,7 @@ const EducatorViseRecording = ({ data, isLoading, isError, error }) => {
                         ))}
                 </div>
             )}
-        </Container>
+        </div>
     );
 };
 

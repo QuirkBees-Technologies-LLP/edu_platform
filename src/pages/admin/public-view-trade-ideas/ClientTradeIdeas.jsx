@@ -135,7 +135,7 @@ const ClientTradeIdeas = () => {
           </div>
 
           {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && <p>No more trade ideas to load.</p>}
+          {page >= totalPages && <p>No more IQ Ideas to load.</p>}
         </div>
 
         <ViewClientTradeIdeas

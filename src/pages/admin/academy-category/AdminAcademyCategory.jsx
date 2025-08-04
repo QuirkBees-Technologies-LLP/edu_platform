@@ -238,7 +238,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching trade ideas:", error);
+      console.error("Error fetching IQ Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -251,12 +251,12 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   };
 
   return (
-    <div className='container mt-5'>
+    <div className='container-fluid mt-5'>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Academy Category" />
           <ToolbarDescription>
-            Learn, Master, and Apply Trading Skills with Expert-Led Courses, Practical Strategies, and Real-World Market Insights.          </ToolbarDescription>
+            Learn, Master, and Apply Trading Skills with Expert-Led IQ Vault, Practical Strategies, and Real-World Market Insights.          </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">

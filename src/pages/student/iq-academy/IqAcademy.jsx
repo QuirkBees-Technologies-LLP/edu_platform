@@ -74,14 +74,16 @@ export default function IqAcademy() {
 
     if (isError) {
         return <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className='col-span-full'>
-                    <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
-                        <div className="text-center">
+            <div className="container-fluid">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className='col-span-full'>
+                        <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
+                            <div className="text-center">
 
-                            <h1 className="text-4xl font-bold tracking-wider pb-2">
-                                No Such category found                                </h1>
-                            <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
+                                <h1 className="text-4xl font-bold tracking-wider pb-2">
+                                    No Such category found                                </h1>
+                                <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
+                            </div>
                         </div>
                     </div>
                 </div>

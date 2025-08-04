@@ -154,13 +154,13 @@ const ClassroomAdmin = () => {
                     className="flex items-center text-gray-500 hover:text-gray-700"
                   >
                     <ChevronLeft className="w-5 h-5 mr-2" />
-                    Back to Courses
+                    Back to IQ Vault
                   </button>
                 )}
               </div>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-500">
-                  {selectedCourse ? selectedCourse.title : "All Courses"}
+                  {selectedCourse ? selectedCourse.title : "All IQ Vault"}
                 </span>
                 {!selectedCourse ? (
                   <button
@@ -176,7 +176,7 @@ const ClassroomAdmin = () => {
                     className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <Edit2 className="w-4 h-4 mr-2" />
-                    Edit Course
+                    Edit IQ Vault
                   </button>
                 )}
               </div>

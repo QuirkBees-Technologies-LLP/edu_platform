@@ -55,7 +55,7 @@ const ClientLiveSessionWrapper = ({ client, callId, token }) => {
           <div class="yellow-bar"></div>
         </div>
         <p className="text-center text-lg pt-10 px-2 text-gray-800">
-          The live session has concluded.
+          The IQ Academy has concluded.
         </p>
       </div>
     )
@@ -79,7 +79,7 @@ const ClientLiveSessionWrapper = ({ client, callId, token }) => {
   if (status === 'upcoming') {
     return (
       <div className="live_center w-full">
-        <p className="text-center font-bold text-xl text-gray-900">Live Session is Upcoming</p>
+        <p className="text-center font-bold text-xl text-gray-900">IQ Academy is Upcoming</p>
         <div class="loading-bar">
           <div class="yellow-bar"></div>
         </div>

@@ -17,7 +17,7 @@ const CourseCreationPage = ({ onCourseCreate }) => {
 
   return (
     <div className="p-4 lg:p-6">
-      <h2 className="text-xl lg:text-2xl font-bold mb-6">Create New Course</h2>
+      <h2 className="text-xl lg:text-2xl font-bold mb-6">Create New IQ Vault</h2>
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

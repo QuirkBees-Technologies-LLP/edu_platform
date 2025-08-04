@@ -370,7 +370,7 @@ const CreateEducator = forwardRef(
                       onChange={formik.handleChange}
                       className="form-checkbox h-5 w-5 text-primary"
                     />
-                    Trade Ideas
+                    IQ Ideas
                   </label>
 
                   <label className="flex items-center gap-2 text-gray-800">
@@ -381,7 +381,7 @@ const CreateEducator = forwardRef(
                       onChange={formik.handleChange}
                       className="form-checkbox h-5 w-5 text-primary"
                     />
-                    Trade Analysis
+                    IQ Insight
                   </label>
                 </div>
               </div>

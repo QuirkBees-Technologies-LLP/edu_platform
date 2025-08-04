@@ -171,7 +171,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
             <DialogContent className="p-5 max-w-[800px]" ref={ref}>
                 <DialogHeader className="pb-5 pt-0 px-0">
-                    <DialogTitle>{selectedRow?._id ? "Update Stream Schedule" : "Create Stream Schedule"}</DialogTitle>
+                    <DialogTitle>{selectedRow?._id ? "Update IQ Academy Schedule" : "Create IQ Academy Schedule"}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-5 px-0">
                     <div className="grid grid-cols-12 gap-4">

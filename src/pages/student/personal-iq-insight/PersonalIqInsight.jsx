@@ -6,10 +6,8 @@ import { format } from "date-fns";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
 import { Container } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
-import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
-import EducatorCardImage from "./EducatorCardImage";
-import { useGetEducatorWithoutTradeIdeasQuery, useLazyGetEducatorTradeIdeasQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
-
+import ViewStudentIqInsight from "./ViewStudentIqInsight";
+// import EducatorCardImage from "./EducatorCardImage";
 
 const TradeUserView = [
   {
@@ -101,25 +99,20 @@ const TradeUserView = [
     "createAt": "2025-07-21T11:40:30.746Z"
   }
 ];
-
-const EducatorTradeCards = () => {
-    const [page, setPage] = useState(1);
+const PersonalIqInsight = () => {
+  const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [tradeIdeas, setTradeIdeas] = useState([]);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [selectedIdea, setSelectedIdea] = useState({});
     const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
 
-    const  { data:ListRecord }=
-    useGetEducatorWithoutTradeIdeasQuery({isview:true});
-
     const observer = useRef();
 
-    const { data, isFetching } = useLazyGetEducatorTradeIdeasQuery({
+    const { data, isFetching } = useGetClientTradeIdeasQuery({
     page: page,
     limit: limit,
     });
-
 
     const totalPages = data?.pagination?.totalPages || 1;
 
@@ -159,12 +152,12 @@ const EducatorTradeCards = () => {
     setIsViewOpen(false);
     };
   return (
-    <div className="container-fluid p-0">
+    <div className="container-fluid">
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Ideas" />
+          <ToolbarPageTitle text="Personal IQ Insight" />
           <ToolbarDescription>
-            Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
+            Oversee student profiles, manage their academy, and ensure quality trade and course content across the platform.
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
@@ -173,7 +166,7 @@ const EducatorTradeCards = () => {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            {ListRecord?.data?.map((idea, index) => (
+            {TradeUserView.map((idea, index) => (
               <div
                 key={idea._id}
                 className="card border-2 hover:bg-gray-200 cursor-pointer overflow-hidden h-fit" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null} >
@@ -186,7 +179,7 @@ const EducatorTradeCards = () => {
                 </div>
                 <div className="card-border card-rounded-b flex flex-col gap-2 justify-between">
                   <div className="px-5 py-4.5 min-h-64 ">
-                    <div className="font-bold mr-3 text-gray-900 mb-3">  {`${idea?.name?.toUpperCase()}/${idea?.type?.toUpperCase()}`}</div>
+                    <div className="font-bold mr-3 text-gray-900 mb-3">{idea?.name}</div>
                     <div className="flex gap-10 mb-3">
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
@@ -218,18 +211,17 @@ const EducatorTradeCards = () => {
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
-                        {/* <img src="/media/avatars/300-6.png" alt="" /> */}
-                         <img   className="rounded-full size-8 me-2" src={idea?.educatorDetails?.image} alt="" />
-                      {/* <EducatorCardImage educator={idea?.educatorDetails?.image} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} /> */}
+                        <img src="/media/avatars/300-6.png" className="rounded-full size-8 me-2" alt="" />
+                      {/* <EducatorCardImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} /> */}
                       <div>
                         <Link
                           to="/public-profile/profiles/nft"
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
-                          {idea?.educatorDetails?.first_name} {idea?.educatorDetails?.last_name}
+                          {idea?.educatorDetails?.name}
                         </Link>
                         <div className="text-2sm text-gray-700 mb-px">
-                          {format(idea?.createdAt, "MMM dd, yyyy, hh:mm a")}
+                          {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
                         </div>
                       </div>
                     </div>
@@ -244,7 +236,7 @@ const EducatorTradeCards = () => {
           {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>}
         </div>
 
-        <ViewEducatorTradeIdeas
+        <ViewStudentIqInsight
           isViewOpen={isViewOpen}
           setIsLightBoxOpen={setIsLightBoxOpen}
           handleCloseView={handleCloseView}
@@ -255,4 +247,4 @@ const EducatorTradeCards = () => {
   );
 }
 
-export default EducatorTradeCards
+export default PersonalIqInsight

@@ -106,7 +106,7 @@ const UserRecordingSession = () => {
                 </div>
                 <Toolbar>
                     <ToolbarHeading>
-                        <ToolbarPageTitle text="Recorded Sessions" />
+                        <ToolbarPageTitle text="Recorded Academy" />
                     </ToolbarHeading>
                 </Toolbar>
                 <div className="grid grid-cols-12 gap-4">
