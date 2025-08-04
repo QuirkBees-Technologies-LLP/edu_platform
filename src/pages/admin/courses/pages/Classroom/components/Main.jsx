@@ -90,7 +90,7 @@ const Main = ({ onSelectCourse }) => {
 
   // Filter courses based on search term and selected category
   const filteredCourses = coursesList.filter((course) => {
-    console.log(course, "course");
+    console.log(course, "IQ Vault");
 
     const matchesSearch =
       !searchTerm ||
@@ -150,7 +150,7 @@ const Main = ({ onSelectCourse }) => {
       <div>
         <h3 className="font-medium text-gray-800">{instructor?.name}</h3>
         <p className="text-sm text-gray-500">
-          {instructor?.courses?.length || "0"} Courses
+          {instructor?.courses?.length || "0"} IQ Vault
         </p>
       </div>
     </motion.div>
@@ -185,7 +185,7 @@ const Main = ({ onSelectCourse }) => {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 border-4 border-primary rounded-full animate-spin"></div>
-          <p className="text-gray-600">Loading courses...</p>
+          <p className="text-gray-600">Loading IQ Vault...</p>
         </div>
       </div>
     );
@@ -200,17 +200,17 @@ const Main = ({ onSelectCourse }) => {
         <div className="absolute left-20 bottom-0 w-40 h-40 bg-primary rounded-full blur-3xl opacity-20 -mb-20"></div>
         <div className="relative max-w-xl">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Explore Our Best Courses
+            Explore Our IQ Vault
           </h1>
           <p className="text-gray-900 mb-6">
             Enhance your skills with our industry-leading instructors and
-            expertly crafted courses.
+            expertly crafted IQ Vault.
           </p>
 
           <div className="relative">
             <input
               type="text"
-              placeholder="Search for courses..."
+              placeholder="Search for IQ Vault..."
               className="w-full backdrop-blur-sm text-gray-800 rounded-lg px-4 py-3 pl-10 input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -224,7 +224,7 @@ const Main = ({ onSelectCourse }) => {
       {featuredCourses.length >= 5 && (
         <FeaturedSection
           courses={featuredCourses}
-          title="Featured Courses"
+          title="Featured IQ Vault"
           subtitle="Recommended by our team and top students"
         />
       )}
@@ -268,7 +268,7 @@ const Main = ({ onSelectCourse }) => {
 
       {/* All Courses */}
       <Section
-        title={selectedCategory ? `${selectedCategory?.name} Courses` : "All Courses"}
+        title={selectedCategory ? `${selectedCategory?.name} IQ Vault` : "All IQ Vault"}
         icon={<BookOpen className="w-5 h-5" />}
       >
         {filteredCourses.length > 0 ? (
@@ -287,12 +287,12 @@ const Main = ({ onSelectCourse }) => {
               <Search className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-700">
-              No courses found
+              No IQ Vault found
             </h3>
             <p className="text-gray-500 mt-2 max-w-md mx-auto">
               {searchTerm
                 ? `No results for "${searchTerm}"`
-                : "No courses available in this category yet"}
+                : "No IQ Vault available in this category yet"}
             </p>
             <button
               className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-active"

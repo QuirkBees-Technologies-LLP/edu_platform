@@ -15,7 +15,7 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange }) => {
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
-          All Courses
+          All IQ Vault
         </button>
         {Object.values(categories).map((category) => (
           <button

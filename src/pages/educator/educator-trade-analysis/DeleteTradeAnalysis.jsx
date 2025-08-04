@@ -15,7 +15,7 @@ const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selec
         try {
             await DeleteTradeAnalysis(selectedRow?._id).unwrap();
             refetch();
-            toast.success("Trade Analysis deleted successfully!");
+            toast.success("IQ Insight deleted successfully!");
             handleDeleteClose();
         } catch (error) {
             toast.error(err.data.message);

@@ -118,7 +118,7 @@ console.log(userId, userToken, callId, "userId, userToken, callId");
           userToken
         );
 
-        // 🔥 Create a unique chat per live stream
+        // 🔥 Create a unique chat per IQ Academy
         const uniqueChannelId = `livestream-${eventName || "default"}`; // Unique per event
 
         const globalChannel = client.channel('livestream', callId, { name: 'Global' });

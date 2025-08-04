@@ -156,7 +156,7 @@ const AdminTradeCards = () => {
     <div className="container-fluid p-0">
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Trade Ideas" />
+          <ToolbarPageTitle text="IQ Ideas" />
           <ToolbarDescription>
             Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
           </ToolbarDescription>
@@ -234,7 +234,7 @@ const AdminTradeCards = () => {
           </div>
 
           {/* {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && <p className="text-center my-10">No more trade ideas to load.</p>} */}
+          {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>} */}
         </div>
 
         <ViewAdminTradeIdeas

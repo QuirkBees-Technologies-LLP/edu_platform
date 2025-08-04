@@ -20,7 +20,7 @@ import EducatorViseRecording from './EducatorViseRecording';
 import { useEffect } from 'react';
 
 
-const AdminRecording = ({ title = "Recorded Sessions" }) => {
+const AdminRecording = ({ title = "Recorded Academy" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});

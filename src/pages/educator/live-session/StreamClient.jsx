@@ -97,7 +97,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                             <div className="card-body py-7 px-5">
                                 <div className="flex flex-col gap-4">
                                     <div className="grid grid-cols-12 gap-5 items-center">
-                                        <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">Live stream ID</label>
+                                        <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">IQ Academy ID</label>
                                         <div className='col-span-9 '>
                                             <DefaultTooltip title="Copied to clipboard!" open={isTooltipOpen?.callId} placement="bottom" className="max-w-48">
                                                 <p onClick={() => handleCopy(callId, "callId")} className="cursor-pointer rounded-full border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3">

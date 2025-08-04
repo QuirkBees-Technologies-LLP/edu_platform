@@ -16,7 +16,7 @@ const StudentLiveSessionCategory = () => {
             <Container>
                 <Toolbar>
                     <ToolbarHeading>
-                        <ToolbarPageTitle text="Live Sessions" />
+                        <ToolbarPageTitle text="IQ Academy" />
                         <ToolbarDescription>
                               Join real-time sessions hosted by top educators to stay updated and interact live.
                         </ToolbarDescription>

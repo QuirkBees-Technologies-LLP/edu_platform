@@ -217,10 +217,10 @@ const CoursesTypes = ({ title = "Courses Types" }) => {
     <div className='mt-5'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Courses Types" />
+          <ToolbarPageTitle text="IQ Vault Types" />
           <ToolbarDescription>
             <ToolbarDescription>
-              Define and manage different types of courses offered on the platform.
+              Define and manage different types of IQ Vault offered on the platform.
             </ToolbarDescription>
           </ToolbarDescription>
         </ToolbarHeading>

@@ -140,11 +140,11 @@ const CreateEducatorStreamSchedule = forwardRef(
             }).unwrap();
             setSelectedRow({});
             refetch();
-            toast.success("Live stream schedule updated successfully!");
+            toast.success("IQ Academy schedule updated successfully!");
           } else {
             await createEducatorStreamSchedule(formData).unwrap();
             refetch();
-            toast.success("Live stream schedule created successfully!");
+            toast.success("IQ Academy schedule created successfully!");
             setSelectedRow({});
           }
           formik.resetForm();
@@ -202,8 +202,8 @@ const CreateEducatorStreamSchedule = forwardRef(
           <DialogHeader className="pb-5 pt-0 px-0">
             <DialogTitle>
               {selectedRow?._id
-                ? "Update Stream Schedule"
-                : "Create Stream Schedule"}
+                ? "Update IQ Academy Schedule"
+                : "IQ Academy Schedule"}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">

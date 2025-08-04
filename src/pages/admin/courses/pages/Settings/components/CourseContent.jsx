@@ -74,7 +74,7 @@ const CourseContent = ({ courseId }) => {
           <div className="flex items-center gap-3">
             <Layers className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-gray-800">
-              Course Structure
+              IQ Vault Structure
             </h1>
           </div>
           {selectedLecture && (
