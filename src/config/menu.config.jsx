@@ -951,7 +951,7 @@ export const ADMIN_MENU = [
     path: '/ideas'
   },
   {
-    title: 'Courses',
+    title: 'IQ Vault',
     icon: 'book-open',
     path: '/courses'
   },
@@ -981,17 +981,17 @@ export const sideMenus = {
       path: '/admin/educators'
     },
     {
-      title: 'Ideas',
+      title: 'IQ Ideas',
       icon: <Lightbulb />,
       path: '/admin/ideas'
     },
     {
-      title: 'Trade Analysis',
+      title: 'IQ Insight',
       icon: <ChartCandlestick />,
       path: '/admin/trade-analysis'
     },
     {
-      title: 'Courses',
+      title: 'IQ Vault',
       icon: <BookOpen />,
       path: '/admin/courses'
     },
@@ -1001,17 +1001,17 @@ export const sideMenus = {
     //   path: '/admin/video-library'
     // },
     {
-      title: 'Live Stream Schedule',
+      title: 'IQ Academy Schedule',
       icon: <CalendarClock />,
       path: '/admin/stream-schedule'
     },
     {
-      title: 'Live Stream',
+      title: 'IQ Academy',
       icon: <PlayCircle />,
       path: '/admin/live-session'
     },
     {
-      title: 'Recorded Sessions',
+      title: 'Recorded Academy',
       icon: <CircleDot />,
       path: '/admin/stream-recording'
     },
@@ -1033,17 +1033,17 @@ export const sideMenus = {
       path: '/'
     },
     {
-      title: 'Ideas',
+      title: 'IQ Ideas',
       icon: <Lightbulb />,
       path: '/educator/ideas'
     },
     {
-      title: 'Trade Analysis',
+      title: 'IQ Insight',
       icon: <ChartCandlestick />,
       path: '/educator/trade-analysis'
     },
     {
-      title: 'Courses Library',
+      title: 'IQ Vault',
       icon: <BookOpen />,
       path: '/educator/courses'
     },
@@ -1053,17 +1053,17 @@ export const sideMenus = {
     //   path: '/educator/video-library'
     // },
     {
-      title: 'Live Stream Schedule',
+      title: 'IQ Academy Schedule',
       icon: <CalendarClock />,
       path: '/educator/stream-schedule'
     },
     {
-      title: 'Live Stream',
+      title: 'IQ Academy',
       icon: <PlayCircle />,
       path: '/educator/live-session'
     },
     {
-      title: 'Recorded Sessions',
+      title: 'Recorded Academy',
       icon: <CircleDot />,
       path: '/educator/stream-recording/list'
     },
@@ -1114,17 +1114,17 @@ export const sideMenus = {
     //   path: '/iq-educators'
     // },
     {
-      title: 'Ideas',
+      title: 'IQ Ideas',
       icon: <Lightbulb />,
       path: '/ideas'
     },
     {
-      title: 'Courses Library',
+      title: 'IQ Vault',
       icon: <Clapperboard />,
       path: '/video-library'
     },
     {
-      title: 'Live Stream',
+      title: 'IQ Academy',
       icon: <PlayCircle />,
       path: '/academy'
     },
@@ -1137,6 +1137,11 @@ export const sideMenus = {
       title: 'Forex Academy',
       icon: <Dot />,
       path: '/forex-academy'
+    },
+    {
+      title: 'Personal IQ Insight',
+      icon: <Dot />,
+      path: '/personal-iq-insight'
     },
   ],
 };

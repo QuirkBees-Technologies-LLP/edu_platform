@@ -91,7 +91,7 @@ console.log(categoryId, "categoryId");
                 {(isLoading || scheduleLoading ) ? <Loader /> :
                     <>
                         <div className='mb-10'>
-                            <h4 className='text-xl font-medium text-primary mb-2'>Live Session Schedule</h4>
+                            <h4 className='text-xl font-medium text-primary mb-2'>IQ Academy Schedule</h4>
                             {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div className='text-center p-4 card mb-5'>
                                 <div className="card-body">
                                     There are no schedule found
@@ -146,7 +146,7 @@ console.log(categoryId, "categoryId");
 
 
                             <Section
-                                title={selectedCategory ? `${selectedCategory?.name} Courses` : "All Courses"}
+                                title={selectedCategory ? `${selectedCategory?.name} IQ Vault` : "All IQ Vault"}
                                 icon={<BookOpen className="w-5 h-5" />}
                             >
                                 {filteredCourses.length > 0 ? (

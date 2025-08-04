@@ -125,6 +125,7 @@
     "styled-components": "^6.1.13",
     "stylis": "^4.3.4",
     "stylis-plugin-rtl": "^2.1.1",
+    "swiper": "^11.2.10",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",

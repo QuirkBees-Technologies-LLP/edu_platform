@@ -28,7 +28,7 @@ import DeleteTradeAnalysis from "./DeleteTradeAnalysis";
 import { useLazyGetAdminTradeAnalysisQuery } from "../../../store/api/admin/adminTradeAnalysisApiSlice";
 import ViewAdminTradeAnalysis from "./ViewAdminTradeAnalysis";
 
-const AdminTradeAnalysis = ({ title = "Trade Analysis" }) => {
+const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -270,7 +270,7 @@ const AdminTradeAnalysis = ({ title = "Trade Analysis" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching trade ideas:", error);
+      console.error("Error fetching IQ Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -288,7 +288,7 @@ const AdminTradeAnalysis = ({ title = "Trade Analysis" }) => {
       <>
         <Toolbar>
           <ToolbarHeading>
-            <ToolbarPageTitle text="Trade Analysis" />
+            <ToolbarPageTitle text="IQ Insight" />
             <ToolbarDescription>
               Generate, analyze, and execute profitable trading opportunities
               with smart insights, market trends, and data-driven strategies
@@ -297,7 +297,7 @@ const AdminTradeAnalysis = ({ title = "Trade Analysis" }) => {
           <ToolbarActions>
             <div className="text-end pb-4">
               <button className="btn btn-primary" onClick={handleClickOpen}>
-                Create Trade Analysis
+                 Create IQ Insight
               </button>
             </div>
           </ToolbarActions>

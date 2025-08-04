@@ -43,7 +43,7 @@ const CoursePage = () => {
                 className="flex items-center gap-2 text-black/80 hover:text-black mb-6 transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
-                <span>Back to Courses</span>
+                <span>Back to IQ Vault</span>
               </button>
               <h2 className="text-lg font-bold text-gray-900 mb-4">
                 {mockCourse.title}

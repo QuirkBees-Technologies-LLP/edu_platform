@@ -56,13 +56,13 @@ const SettingsSection = () => {
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to Courses
+                  Back to IQ Vault
                 </button>
               )}
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">
-                {selectedCourse ? selectedCourse.title : "All Courses"}
+                {selectedCourse ? selectedCourse.title : "All IQ Vault"}
               </span>
             </div>
           </div>

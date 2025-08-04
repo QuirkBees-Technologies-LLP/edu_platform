@@ -14,7 +14,7 @@ import { formatSecondsToHMS } from '../../../lib/utils';
 import { useNavigate } from 'react-router';
 import { useLazyGetLiveSessionListQuery } from '../../../store/api/educator/educatorLiveStreamApiSlice';
 
-const EducatorLiveSession = ({ title = "Live session" }) => {
+const EducatorLiveSession = ({ title = "IQ Academy" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -258,7 +258,7 @@ const EducatorLiveSession = ({ title = "Live session" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching trade ideas:", error);
+      console.error("Error fetching IQ Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -274,14 +274,14 @@ const EducatorLiveSession = ({ title = "Live session" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Live Session" />
+          <ToolbarPageTitle text="IQ Academy" />
           <ToolbarDescription>
-            Track and analyze past live sessions with key insights and performance data.</ToolbarDescription>
+            Track and analyze past IQ Academy with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create Live Session
+              Create IQ Academy
             </button>
           </div>
         </ToolbarActions> */}

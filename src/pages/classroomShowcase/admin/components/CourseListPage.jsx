@@ -120,7 +120,7 @@ const DraggableCourseCard = ({
           onEdit(course);
         }}
         className="absolute top-2 left-2 p-2.5 bg-blue-500 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-blue-600 hover:shadow-xl hover:scale-110 hover:rotate-12"
-        title="Edit course"
+        title="Edit IQ Vault"
       >
         <Edit2 className="w-5 h-5 text-white" />
       </button>
@@ -219,10 +219,10 @@ const CourseListPage = ({ onCreateCourse, onCourseSelect, onUpdateCourse }) => {
             <div className="flex flex-col items-center justify-center h-full">
               <Plus className="w-12 h-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-700">
-                Create New Course
+                Create New IQ Vault
               </h3>
               <p className="text-sm text-gray-500 mt-2">
-                Start building your course
+                Start building your IQ Vault
               </p>
             </div>
           </div>
@@ -234,7 +234,7 @@ const CourseListPage = ({ onCreateCourse, onCourseSelect, onUpdateCourse }) => {
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">
-                  {editingCourse ? "Edit Course" : "Create New Course"}
+                  {editingCourse ? "Edit IQ Vault" : "Create New IQ Vault"}
                 </h2>
                 <button
                   onClick={handleCloseModal}

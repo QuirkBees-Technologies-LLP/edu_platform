@@ -6,8 +6,9 @@ import { format } from "date-fns";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
 import { Container } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
-import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
-import AdminCardImage from "./AdminCardImage";
+import ViewStudentIqInsight from "./ViewStudentIqInsight";
+// import EducatorCardImage from "./EducatorCardImage";
+
 const TradeUserView = [
   {
     "_id": "687e23fae13aa9e329fad8ec",
@@ -98,7 +99,7 @@ const TradeUserView = [
     "createAt": "2025-07-21T11:40:30.746Z"
   }
 ];
-const AdminTradeCards = () => {
+const PersonalIqInsight = () => {
   const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [tradeIdeas, setTradeIdeas] = useState([]);
@@ -151,12 +152,12 @@ const AdminTradeCards = () => {
     setIsViewOpen(false);
     };
   return (
-    <div className="container-fluid p-0">
+    <div className="container-fluid">
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Ideas" />
+          <ToolbarPageTitle text="Personal IQ Insight" />
           <ToolbarDescription>
-            Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
+            Oversee student profiles, manage their academy, and ensure quality trade and course content across the platform.
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
@@ -210,8 +211,8 @@ const AdminTradeCards = () => {
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
-                        {/* <img src="/media/avatars/300-6.png" alt="" /> */}
-                      <AdminCardImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
+                        <img src="/media/avatars/300-6.png" className="rounded-full size-8 me-2" alt="" />
+                      {/* <EducatorCardImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} /> */}
                       <div>
                         <Link
                           to="/public-profile/profiles/nft"
@@ -235,7 +236,7 @@ const AdminTradeCards = () => {
           {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>}
         </div>
 
-        <ViewAdminTradeIdeas
+        <ViewStudentIqInsight
           isViewOpen={isViewOpen}
           setIsLightBoxOpen={setIsLightBoxOpen}
           handleCloseView={handleCloseView}
@@ -243,7 +244,7 @@ const AdminTradeCards = () => {
         />
       </div>
     </div>
-  );    
+  );
 }
 
-export default AdminTradeCards
+export default PersonalIqInsight
