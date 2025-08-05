@@ -52,6 +52,7 @@ const CreateEducator = forwardRef(
       is_create_stream: false,
       is_access_trade_ideas: true,
       is_access_trade_analysis: true,
+      files: null,
     };
 
     const createSchema = Yup.object().shape({
@@ -101,8 +102,8 @@ const CreateEducator = forwardRef(
       //     ),
 
       role: Yup.string().required("Role is required"),
-
       status: Yup.boolean().required("Status is required"),
+      files: Yup.mixed().nullable(),
     });
 
     const formik = useFormik({
@@ -110,34 +111,85 @@ const CreateEducator = forwardRef(
       enableReinitialize: true,
       revalidateOnMount: true,
       validationSchema: createSchema,
+      // onSubmit: async (values, { setStatus, setSubmitting }) => {
+      //   const payload = {
+      //     ...values,
+      //   };
+
+      //   if (selectedRow?._id) {
+      //     payload.id = selectedRow?._id;
+      //     delete payload.password;
+      //   }
+
+      //   try {
+      //     if (selectedRow?._id) {
+      //       await updateEducator(payload).unwrap();
+      //       setSelectedRow({});
+
+      //       refetch();
+      //       toast.success("Educator updated successfully!");
+      //     } else {
+      //       await createEducator(payload).unwrap();
+      //       refetch();
+      //       toast.success("Educator created successfully!");
+      //     }
+      //     formik.resetForm();
+      //     handleCloseCreate();
+      //   } catch (err) {
+      //     console.error("API Error:", err);
+      //     const errorMessage =
+      //       err?.data?.message || "An unexpected error occurred.";
+      //     toast.error(errorMessage);
+      //   }
+      // },
       onSubmit: async (values, { setStatus, setSubmitting }) => {
-        const payload = {
-          ...values,
-        };
-
-        if (selectedRow?._id) {
-          payload.id = selectedRow?._id;
-          delete payload.password;
-        }
-
         try {
-          if (selectedRow?._id) {
-            await updateEducator(payload).unwrap();
-            setSelectedRow({});
+          const payload = { ...values };
 
-            refetch();
+          if (selectedRow?._id) {
+            payload.id = selectedRow._id;
+            delete payload.password;
+          }
+
+          // Convert payload to FormData
+          const formData = new FormData();
+
+          for (const key in payload) {
+            const value = payload[key];
+
+            // If value is an array, append each item
+            if (Array.isArray(value)) {
+              value.forEach((item, index) => {
+                // Handle files specifically
+                if (item instanceof File || item?.file instanceof File) {
+                  formData.append(`${key}[${index}]`, item.file || item);
+                } else {
+                  formData.append(`${key}[${index}]`, item);
+                }
+              });
+            } else if (value instanceof File || value?.file instanceof File) {
+              formData.append(key, value.file || value);
+            } else {
+              formData.append(key, value);
+            }
+          }
+
+          // API call using FormData
+          if (selectedRow?._id) {
+            await updateEducator(formData).unwrap();
             toast.success("Educator updated successfully!");
           } else {
-            await createEducator(payload).unwrap();
-            refetch();
+            await createEducator(formData).unwrap();
             toast.success("Educator created successfully!");
           }
+
           formik.resetForm();
           handleCloseCreate();
+          setSelectedRow({});
+          refetch();
         } catch (err) {
           console.error("API Error:", err);
-          const errorMessage =
-            err?.data?.message || "An unexpected error occurred.";
+          const errorMessage = err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
         }
       },
@@ -155,6 +207,7 @@ const CreateEducator = forwardRef(
           is_create_stream: selectedRow?.is_create_stream,
           is_access_trade_analysis: selectedRow?.is_access_trade_analysis,
           is_access_trade_ideas: selectedRow?.is_access_trade_ideas,
+          files: selectedRow?.image || null,
         };
         formik.setValues(initData);
       }
@@ -185,6 +238,37 @@ const CreateEducator = forwardRef(
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-12">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Profile Photo
+                  </label>
+                  <AvatarUpload
+                    value={
+                      formik.values.files
+                        ? typeof formik.values.files === "string"
+                          ? [{ dataURL: formik.values.files }] // URL from backend
+                          : [
+                            {
+                              dataURL: URL.createObjectURL(
+                                formik.values.files
+                              ),
+                            },
+                          ] // Local file
+                        : []
+                    }
+                    accept="image/*"
+                    onChange={(file) => {
+                      formik.setFieldValue("files", file[0]?.file);
+                    }}
+                  />
+                  {formik.touched.files && formik.errors.files && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.files}
+                    </span>
+                  )}
+                </div>
+              </div>
               <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -194,11 +278,10 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter first name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.first_name && formik.touched.first_name
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.first_name && formik.touched.first_name
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("first_name")}
                   />
                   {formik.touched.first_name && formik.errors.first_name && (
@@ -217,11 +300,10 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter last name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.last_name && formik.touched.last_name
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.last_name && formik.touched.last_name
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("last_name")}
                   />
                   {formik.touched.last_name && formik.errors.last_name && (
@@ -241,11 +323,10 @@ const CreateEducator = forwardRef(
                     placeholder="Enter email"
                     autoComplete="off"
                     {...formik.getFieldProps("email")}
-                    className={`form-control input input-md w-full ${
-                      formik.errors.email && formik.touched.email
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.email && formik.touched.email
+                      ? "border border-danger"
+                      : ""
+                      }`}
                   />
                   {formik.touched.email && formik.errors.email && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -303,11 +384,10 @@ const CreateEducator = forwardRef(
                     onValueChange={(value) =>
                       formik.setFieldValue("status", value)
                     }
-                    className={`form-control input input-md w-full ${
-                      formik.errors.status && formik.touched.status
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
+                      ? "border border-danger"
+                      : ""
+                      }`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
@@ -335,12 +415,11 @@ const CreateEducator = forwardRef(
                       formik.setFieldValue("is_create_stream", value)
                     }
                     className={`form-control input input-md w-full 
-                                ${
-                                  formik.errors.is_create_stream &&
-                                  formik.touched.is_create_stream
-                                    ? "border border-danger"
-                                    : ""
-                                }`}
+                                ${formik.errors.is_create_stream &&
+                        formik.touched.is_create_stream
+                        ? "border border-danger"
+                        : ""
+                      }`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
@@ -386,26 +465,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-              {/* <div className="col-span-6">
-                            <div className="flex flex-col gap-1">
-                                <label className="form-label text-gray-900 gap-1">Profile Image<span className="text-danger">
-                                    *
-                                </span></label>
-                                <AvatarUpload
-                                    value={formik.values.image ? [{ dataURL: URL.createObjectURL(formik.values.image) }] : []}
-                                    accept="image/*"
-                                    onChange={(file) => {
-                                        // file[0].file will be actual image file
-                                        formik.setFieldValue("image", file[0]?.file);
-                                    }}
-                                />
-                                {formik.touched.bio && formik.errors.bio && (
-                                    <span role="alert" className="text-danger text-xs mt-1">
-                                        {formik.errors.bio}
-                                    </span>
-                                )}
-                            </div>
-                        </div> */}
+
             </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3 md:py-5">
