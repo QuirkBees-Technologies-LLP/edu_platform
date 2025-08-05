@@ -465,7 +465,7 @@ const CreateEducatorStreamSchedule = forwardRef(
                           {...dragProps}
                           className={`
         border border-dashed rounded-lg text-center transition-colors 
-        p-5 ${isDragging ? "bg-gray-100" : "bg-white"} border-gray-300 ${formik.touched.files && formik.errors.files
+        p-5 ${isDragging ? "bg-gray-100" : ""} border-gray-300 ${formik.touched.files && formik.errors.files
                               ? "validation-error-border"
                               : ""
                             }`}
