@@ -8,6 +8,12 @@ export const educatorTradeIdeasApiSlice = createApi({
         getEducatorTradeIdeas: builder.query({
             query: ({ page = 1, limit = 10 }) => `/educator/trade-idea/get?page=${page}&limit=${limit}`,
         }),
+        getEducatorWithoutTradeIdeas: builder.query({
+            query: ({isview=true }) => `/educator/trade-idea/get?isview=${isview}`,
+        }),
+        getEducatorTradeCategory: builder.query({
+            query: () => `/educator/category/`,
+        }),
         createEducatorTradeIdeas: builder.mutation({
             query: (data) => ({
                 url: '/educator/trade-idea/create',
@@ -32,4 +38,4 @@ export const educatorTradeIdeasApiSlice = createApi({
     }),
 });
 
-export const { useGetEducatorTradeIdeasQuery, useLazyGetEducatorTradeIdeasQuery, useCreateEducatorTradeIdeasMutation, useUpdateEducatorTradeIdeaMutation, useDeleteEducatorTradeIdeaMutation } = educatorTradeIdeasApiSlice;
+export const { useGetEducatorTradeIdeasQuery, useGetEducatorWithoutTradeIdeasQuery ,useGetEducatorTradeCategoryQuery, useLazyGetEducatorTradeIdeasQuery, useCreateEducatorTradeIdeasMutation, useUpdateEducatorTradeIdeaMutation, useDeleteEducatorTradeIdeaMutation } = educatorTradeIdeasApiSlice;

@@ -77,7 +77,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
     loss: "Loss",
     buy: "Buy",
     sell: "Sell",
-    scalp: "Scalp",
+    scalping: "Scalping",
     intraday: "Intraday",
     swing: "Swing",
   };
@@ -149,7 +149,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         accessorFn: (row) => row.name,
         id: "name",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Name" column={column} />
+          <DataGridColumnHeader title="Symbol" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (

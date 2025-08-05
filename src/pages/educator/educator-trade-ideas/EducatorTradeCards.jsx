@@ -8,6 +8,9 @@ import { Container } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 import EducatorCardImage from "./EducatorCardImage";
+import { useGetEducatorWithoutTradeIdeasQuery, useLazyGetEducatorTradeIdeasQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
+
+
 const TradeUserView = [
   {
     "_id": "687e23fae13aa9e329fad8ec",
@@ -107,12 +110,16 @@ const EducatorTradeCards = () => {
     const [selectedIdea, setSelectedIdea] = useState({});
     const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
 
+    const  { data:ListRecord }=
+    useGetEducatorWithoutTradeIdeasQuery({isview:true});
+
     const observer = useRef();
 
-    const { data, isFetching } = useGetClientTradeIdeasQuery({
+    const { data, isFetching } = useLazyGetEducatorTradeIdeasQuery({
     page: page,
     limit: limit,
     });
+
 
     const totalPages = data?.pagination?.totalPages || 1;
 
@@ -166,7 +173,7 @@ const EducatorTradeCards = () => {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            {TradeUserView.map((idea, index) => (
+            {ListRecord?.data?.map((idea, index) => (
               <div
                 key={idea._id}
                 className="card border-2 hover:bg-gray-200 cursor-pointer overflow-hidden h-fit" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null} >
@@ -179,7 +186,7 @@ const EducatorTradeCards = () => {
                 </div>
                 <div className="card-border card-rounded-b flex flex-col gap-2 justify-between">
                   <div className="px-5 py-4.5 min-h-64 ">
-                    <div className="font-bold mr-3 text-gray-900 mb-3">{idea?.name}</div>
+                    <div className="font-bold mr-3 text-gray-900 mb-3">  {`${idea?.name?.toUpperCase()}/${idea?.type?.toUpperCase()}`}</div>
                     <div className="flex gap-10 mb-3">
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
@@ -212,16 +219,17 @@ const EducatorTradeCards = () => {
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
                         {/* <img src="/media/avatars/300-6.png" alt="" /> */}
-                      <EducatorCardImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
+                         <img   className="rounded-full size-8 me-2" src={idea?.educatorDetails?.image} alt="" />
+                      {/* <EducatorCardImage educator={idea?.educatorDetails?.image} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} /> */}
                       <div>
                         <Link
                           to="/public-profile/profiles/nft"
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
-                          {idea?.educatorDetails?.name}
+                          {idea?.educatorDetails?.first_name} {idea?.educatorDetails?.last_name}
                         </Link>
                         <div className="text-2sm text-gray-700 mb-px">
-                          {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
+                          {format(idea?.createdAt, "MMM dd, yyyy, hh:mm a")}
                         </div>
                       </div>
                     </div>

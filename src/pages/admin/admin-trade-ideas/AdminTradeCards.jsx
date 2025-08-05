@@ -8,6 +8,7 @@ import { Container } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
 import AdminCardImage from "./AdminCardImage";
+import { useGetAdminWithoutTradeIdeasQuery } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 const TradeUserView = [
   {
     "_id": "687e23fae13aa9e329fad8ec",
@@ -108,44 +109,45 @@ const AdminTradeCards = () => {
 
     const observer = useRef();
 
-    const { data, isFetching } = useGetClientTradeIdeasQuery({
-    page: page,
-    limit: limit,
-    });
+    // const { data, isFetching } = useGetClientTradeIdeasQuery({
+    // page: page,
+    // limit: limit,
+    // });
+    const { data:fetchData } = useGetAdminWithoutTradeIdeasQuery({isview:true});
 
-    const totalPages = data?.pagination?.totalPages || 1;
+    // const totalPages = data?.pagination?.totalPages || 1;
 
-    useEffect(() => {
-    if (data?.data) {
-        if (page === 1) {
-        setTradeIdeas(data.data); // replace data if first page
-        } else {
-        // Append new unique items only
-        setTradeIdeas((prevIdeas) => {
-            const newIdeas = data.data.filter(
-            (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
-            );
-            return [...prevIdeas, ...newIdeas];
-        });
-        }
-    }
-    }, [data, page]);
+    // useEffect(() => {
+    // if (data?.data) {
+    //     if (page === 1) {
+    //     setTradeIdeas(data.data); // replace data if first page
+    //     } else {
+    //     // Append new unique items only
+    //     setTradeIdeas((prevIdeas) => {
+    //         const newIdeas = data.data.filter(
+    //         (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
+    //         );
+    //         return [...prevIdeas, ...newIdeas];
+    //     });
+    //     }
+    // }
+    // }, [data, page]);
 
-    const lastTradeIdeaRef = useCallback(
-    (node) => {
-        if (isFetching || page >= totalPages) return;
+    // const lastTradeIdeaRef = useCallback(
+    // (node) => {
+    //     if (isFetching || page >= totalPages) return;
 
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-            setPage((prevPage) => prevPage + 1);
-        }
-        });
+    //     if (observer.current) observer.current.disconnect();
+    //     observer.current = new IntersectionObserver((entries) => {
+    //     if (entries[0].isIntersecting) {
+    //         setPage((prevPage) => prevPage + 1);
+    //     }
+    //     });
 
-        if (node) observer.current.observe(node);
-    },
-    [isFetching, page, totalPages]
-    );
+    //     if (node) observer.current.observe(node);
+    // },
+    // [isFetching, page, totalPages]
+    // );
 
     const handleCloseView = () => {
     setIsViewOpen(false);
@@ -165,7 +167,7 @@ const AdminTradeCards = () => {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            {TradeUserView.map((idea, index) => (
+            {fetchData?.data?.map((idea, index) => (
               <div
                 key={idea._id}
                 className="card border-2 hover:bg-gray-200 cursor-pointer overflow-hidden h-fit" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null} >
@@ -178,7 +180,7 @@ const AdminTradeCards = () => {
                 </div>
                 <div className="card-border card-rounded-b flex flex-col gap-2 justify-between">
                   <div className="px-5 py-4.5 min-h-64 ">
-                    <div className="font-bold mr-3 text-gray-900 mb-3">{idea?.name}</div>
+                    <div className="font-bold mr-3 text-gray-900 mb-3">{idea?.name.toUpperCase()}/{idea?.type.toUpperCase()}</div>
                     <div className="flex gap-10 mb-3">
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
@@ -217,10 +219,10 @@ const AdminTradeCards = () => {
                           to="/public-profile/profiles/nft"
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
-                          {idea?.educatorDetails?.name}
+                          {idea?.educatorDetails?.first_name} {idea?.educatorDetails?.last_name}
                         </Link>
                         <div className="text-2sm text-gray-700 mb-px">
-                          {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
+                          {format(idea?.createdAt, "MMM dd, yyyy, hh:mm a")}
                         </div>
                       </div>
                     </div>
@@ -231,8 +233,8 @@ const AdminTradeCards = () => {
             ))}
           </div>
 
-          {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>}
+          {/* {isFetching && <p>Loading more...</p>}
+          {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>} */}
         </div>
 
         <ViewAdminTradeIdeas
