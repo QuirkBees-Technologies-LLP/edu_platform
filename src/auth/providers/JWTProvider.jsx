@@ -155,6 +155,7 @@ const AuthProvider = ({ children }) => {
           last_name: "User",
           status: "active",
           role: 'student',
+          plan: 'IQ Basic',
           expire_at: new Date("2027-10-29")
         }).unwrap();
 

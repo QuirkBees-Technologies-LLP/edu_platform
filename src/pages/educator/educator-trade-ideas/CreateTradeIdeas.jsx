@@ -101,7 +101,6 @@ const CreateTradeIdeas = forwardRef(
         formData.append("type", values.type);
         formData.append("timeFrame[]", [values.timeFrame]);
         formData.append("educatorId", values.educatorId);
-        formData.append("category", values.category);
         formData.append("status", values.status);
         formData.append("entry", values.entry);
         formData.append("invalidation", values.invalidation);
@@ -154,12 +153,11 @@ const CreateTradeIdeas = forwardRef(
           type: selectedRow?.type,
           timeFrame: selectedRow?.timeFrame[0],
           status: selectedRow?.status,
-          category: selectedRow?.category,
+          category: selectedRow?.category?._id,
           entry: selectedRow?.entry,
           invalidation: selectedRow?.invalidation,
           description: selectedRow?.description,
           exits: selectedRow?.exits,
-          category: selectedRow?.category,
         };
         formik.setValues(initData);
       }
@@ -342,53 +340,6 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-
-                <div className="col-span-6">
-                  <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Category <span className="text-danger">*</span>
-                    </label>
-
-                    <Select
-                      name="category"
-                      value={formik.values.category}
-                      onValueChange={(value) =>
-                        formik.setFieldValue("category", value)
-                      }
-                      onBlur={() => formik.setFieldTouched("category", true)}
-                    >
-                      <SelectTrigger
-                        className={`form-control input input-md w-full ${
-                          formik.errors.category && formik.touched.category
-                            ? "border border-danger"
-                            : ""
-                        }`}
-                      >
-                        {/* 🔽 YAHI PART IMPORTANT HAI */}
-                        <SelectValue>
-                          {data?.category?.find(
-                            (cat) => cat._id === formik.values.category
-                          )?.name || "Select Category"}
-                        </SelectValue>
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        {data?.data?.map((cat) => (
-                          <SelectItem key={cat._id} value={cat._id}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    {formik.touched.category && formik.errors.category && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.category}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
                 <div className="col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">

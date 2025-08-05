@@ -150,7 +150,7 @@ const CreateTradeIdeas = forwardRef(
           entry: selectedRow?.entry,
           invalidation: selectedRow?.invalidation,
           description: selectedRow?.description,
-          category: selectedRow?.category,
+          category: selectedRow?.category?._id,
           exits: selectedRow?.exits,
         };
         formik.setValues(initData);

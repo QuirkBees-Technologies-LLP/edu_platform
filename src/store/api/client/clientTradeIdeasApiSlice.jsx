@@ -8,7 +8,10 @@ export const clientTradeIdeasApiSlice = createApi({
         getClientTradeIdeas: builder.query({
             query: ({ page = 1, limit = 10 }) => `/users/idea/get?page=${page}&limit=${limit}`,
         }),
+        getClientTradeAnalysis: builder.query({
+            query: ({ page = 1, limit = 10 }) => `/users/trade-analysis/get?page=${page}&limit=${limit}`,
+        }),
     }),
 });
 
-export const { useGetClientTradeIdeasQuery } = clientTradeIdeasApiSlice;
+export const { useGetClientTradeIdeasQuery, useGetClientTradeAnalysisQuery } = clientTradeIdeasApiSlice;
