@@ -102,7 +102,7 @@ const ClientLogin = () => {
 
         <div className="text-center">
           <div className="flex justify-start mb-8">
-            <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="text-sm gap-2 text-gray-300 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]">
+            <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="text-sm gap-2 text-gray-300 dark:text-gray-600 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]">
               <KeenIcon icon="black-left" />
             </Link>
           </div>
@@ -110,7 +110,7 @@ const ClientLogin = () => {
             <img src="/media/app/default-logo-dark.png" class="w-100 h-5" alt="" />
             {/* <img src="/media/app/default-logo-dark.png" class="w-100 h-5 dark_mode" alt="" /> */}
           </div>
-          <h3 className="text-xl font-medium text-gray-100 leading-none mb-3 text-center">
+          <h3 className="text-xl font-medium text-gray-100 dark:text-gray-900 leading-none mb-3 text-center">
             Login
           </h3>
         </div>
@@ -118,8 +118,9 @@ const ClientLogin = () => {
 
         <div className="flex flex-col gap-1">
           {/* <label className="form-label text-gray-900">Email</label> */}
-          <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs text-gray-900 font-normal p-0">
+          <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs !text-gray-300 font-normal p-0">
             <input
+            placeholder="Email"
               autoComplete="off"
               {...formik.getFieldProps("email")}
               className={clsx("text-gray-100 form-control", {
@@ -139,8 +140,9 @@ const ClientLogin = () => {
             {/* <label className="form-label text-gray-900">Password</label> */}
 
           </div>
-          <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs text-gray-900 font-normal p-0">
+          <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs !text-gray-300 font-normal p-0">
             <input
+            placeholder="Password"
               type={showPassword ? "text" : "password"}
               autoComplete="off"
               {...formik.getFieldProps("password")}

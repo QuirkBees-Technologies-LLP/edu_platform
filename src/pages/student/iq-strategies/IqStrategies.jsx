@@ -135,11 +135,11 @@ export default function IqStrategies() {
                     {cardData.map((item, idx) => (
                         <div
                             key={idx}
-                            className="border border-gray-200 px-5 xl:px-7 py-7 rounded-xl shadow-sm hover:shadow-md transition"
+                            className="border border-gray-200 px-5 p-5 xl:px-7 xl:py-7 rounded-xl shadow-sm hover:shadow-md transition"
                         >
                             <button className="flex items-center gap-3 w-full">
                                 {/* Initials Box */}
-                                <div className="w-16 h-16 bg-[#13122F] flex items-center justify-center rounded-2xl overflow-hidden">
+                                <div className="w-16 h-16 bg-[#13122F] flex items-center justify-center rounded-2xl overflow-hidden shrink-0">
                                     <span className="text-lg font-bold text-[#C5C6FF]">{item.initials}</span>
                                 </div>
 
@@ -211,7 +211,7 @@ export default function IqStrategies() {
                                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition 
                                         ${following[educator.id]
                                                 ? "bg-[#4F46E5] text-white border-[#4F46E5]"
-                                                : "border-[#C5C6FF] text-[#4F46E5] bg-white"
+                                                : "border-[#C5C6FF] dark:border-[#4F46E5] text-[#4F46E5]"
                                             }`}
                                     >
                                         <CheckCircle size={14} />
@@ -305,7 +305,7 @@ export default function IqStrategies() {
                             {downloads.map((file) => (
                                 <div
                                     key={file.id}
-                                    className="grid grid-cols-[1fr_auto] items-center px-6 py-3 border-b hover:bg-gray-50 transition"
+                                    className="grid grid-cols-[1fr_auto] items-center px-6 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-100 transition"
                                 >
                                     <span className="text-sm text-gray-800">{file.name}</span>
                                     <button className="p-2 rounded-full hover:bg-gray-100 transition">

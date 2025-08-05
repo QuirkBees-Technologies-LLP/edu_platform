@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CheckCircle, UserPlus } from "lucide-react";
+import { AlignJustify, CheckCircle, LayoutGrid, Search, SlidersHorizontal, UserPlus } from "lucide-react";
 
 const educatorsData = [
   {
@@ -29,6 +29,7 @@ const educatorsData = [
 ];
 
 const IqAcademyEducators = () => {
+    const [active, setActive] = useState("list"); 
    const [educators, setEducators] = useState(educatorsData);
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,7 +52,36 @@ const IqAcademyEducators = () => {
   });
    return (
     <div className="container-fluid pb-10">
-      <h2 className="text-lg font-medium text-gray-800 mb-10">36 Educators</h2>
+      <div className="flex items-start justify-between">
+        <h2 className="text-lg font-medium text-gray-800 mb-10">36 Educators</h2>
+        <div className="flex bg-gray-200 p-1 rounded-lg shadow-inner w-fit">
+          <button
+            onClick={() => setActive("grid")}
+            className={`p-2 rounded-lg transition-all ${
+              active === "grid" ? "bg-white shadow-md" : "bg-transparent"
+            }`}
+          >
+            <LayoutGrid
+              className={`w-5 h-5 ${
+                active === "grid" ? "text-gray-700" : "text-gray-400"
+              }`}
+            />
+          </button>
+
+          <button
+            onClick={() => setActive("list")}
+            className={`p-2 rounded-lg transition-all ${
+              active === "list" ? "bg-white shadow-md" : "bg-transparent"
+            }`}
+          >
+            <AlignJustify
+              className={`w-5 h-5 ${
+                active === "list" ? "text-gray-700" : "text-gray-400"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
 
       {/* Tabs + Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
@@ -73,24 +103,29 @@ const IqAcademyEducators = () => {
         </div>
 
         {/* Filters: Language + Search */}
-        <div className="flex flex-wrap gap-3">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="bg-gray-100 border rounded-lg px-3 py-4 text-sm text-gray-600 focus:outline-none"
-          >
-            <option value="All">Language</option>
-            <option value="English">English</option>
-            <option value="Spanish">Spanish</option>
-          </select>
+        {/* <div className="flex flex-wrap gap-3">
 
           <input
             type="text"
             placeholder="Search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none dark:bg-gray-100"
+            className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none dark:bg-gray-100"
           />
+        </div> */}
+        <div className="flex items-center border border-gray-300 rounded-lg px-3 py-3 w-64 shadow-sm">
+          {/* Search Icon */}
+          <Search className="w-5 h-5 text-gray-400" />
+
+          {/* Input */}
+          <input
+            type="text"
+            placeholder="Search"
+            className="flex-1 ml-2 outline-none bg-transparent text-xs text-gray-600 placeholder-gray-400"
+          />
+
+          {/* Filter Icon */}
+          <SlidersHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
         </div>
       </div>
 
@@ -119,10 +154,10 @@ const IqAcademyEducators = () => {
                 {/* Follow Button */}
                 <button
                     onClick={() => toggleFollow(educator.id)}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium ${
+                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${
                     educator.isFollowing
-                        ? "bg-primary text-gray-100 dark:text-gray-900"
-                        : "bg-[#1B84FF] text-gray-100 dark:text-gray-900"
+                        ? "bg-[#4F46E5] text-white border-[#4F46E5]"
+                        : "border-[#C5C6FF] dark:border-[#4F46E5] text-[#4F46E5]"
                     }`}
                 >
                     {educator.isFollowing ? (

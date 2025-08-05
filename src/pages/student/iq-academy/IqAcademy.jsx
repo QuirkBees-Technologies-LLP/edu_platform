@@ -57,7 +57,7 @@ export default function IqAcademy() {
       {/* Category Tabs */}
       {!isCategoryLoading && categoryList.length > 0 && (
         <div className="flex items-center justify-between mb-4 gap-5 flex-col sm:flex-row">
-          <div className="flex space-x-3 sm:space-x-6 text-sm font-normal">
+          <div className="flex gap-3 text-sm font-normal flex-wrap">
             {categoryList.map((cat) => (
               <button
                 key={cat._id}

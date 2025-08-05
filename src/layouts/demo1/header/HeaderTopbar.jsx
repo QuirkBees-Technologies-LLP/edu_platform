@@ -29,10 +29,15 @@ const HeaderTopbar = () => {
   const handleClose = () => {
     setSearchModalOpen(false);
   };
-    const [selected, setSelected] = useState("English");
+    const [selected, setSelected] = useState("ENG");
   const [open, setOpen] = useState(false);
 
-  const languages = ["English", "Hindi", "Gujarati", "Spanish"];
+  const languages = [
+  { name: "English", flag: "ENG" },
+  { name: "Hindi", flag: "Hindi" },
+  { name: "Gujarati", flag: "Guj" },
+  { name: "Spanish", flag: "Span" },
+];
   return<> <div className="flex items-center gap-2 lg:gap-3.5">
     {/* <button onClick={handleOpen} className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary text-gray-500">
         <KeenIcon icon="magnifier" />
@@ -95,7 +100,7 @@ const HeaderTopbar = () => {
         })}
       </MenuItem>
     </Menu>
-    <div className="hidden sm:block relative w-56">
+    <div className="relative sm:w-56">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white dark:bg-gray-100 text-gray-600 shadow-sm hover:border-gray-400 transition"
@@ -119,7 +124,12 @@ const HeaderTopbar = () => {
               }}
               className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-200  text-xs text-gray-700"
             >
-              {lang}
+              <span className='hidden sm:block'>
+                {lang.name}
+              </span>
+              <span className='sm:hidden block'>
+                {lang.flag}
+              </span>
             </li>
           ))}
         </ul>
@@ -145,36 +155,6 @@ const HeaderTopbar = () => {
     </MenuItem>
     </Menu>
 
-  </div>
-  <div className="block sm:hidden absolute top-16 w-56">
-    <button
-      onClick={() => setOpen(!open)}
-      className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white dark:bg-gray-100 text-gray-600 shadow-sm hover:border-gray-400 transition"
-    >
-      {selected}
-      <ChevronDown
-        className={`w-4 h-4 text-gray-400 transition-transform ${
-          open ? "rotate-180" : ""
-        }`}
-      />
-    </button>
-
-    {open && (
-      <ul className="absolute mt-1 w-full bg-white dark:bg-gray-100 border border-gray-200 rounded-lg shadow-md z-10">
-        {languages.map((lang, index) => (
-          <li
-            key={index}
-            onClick={() => {
-              setSelected(lang);
-              setOpen(false);
-            }}
-            className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-200  text-xs text-gray-700"
-          >
-            {lang}
-          </li>
-        ))}
-      </ul>
-    )}
   </div>
   </>
 

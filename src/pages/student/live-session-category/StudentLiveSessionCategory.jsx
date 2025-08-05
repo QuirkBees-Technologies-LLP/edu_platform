@@ -13,7 +13,7 @@ const StudentLiveSessionCategory = () => {
 
     return (
         <div>
-            <Container>
+            <div className='container-fluid'>
                 <Toolbar>
                     <ToolbarHeading>
                         <ToolbarPageTitle text="IQ Academy" />
@@ -22,8 +22,8 @@ const StudentLiveSessionCategory = () => {
                         </ToolbarDescription>
                     </ToolbarHeading>
                 </Toolbar>
-            </Container>
-            <Container>
+            </div>
+            <div className='container-fluid'>
                 {(isLoading || !data) ? <Loader /> :
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {data?.data?.map((category, index) => (
@@ -51,7 +51,7 @@ const StudentLiveSessionCategory = () => {
                             </Link>
                         ))}
                     </div>}
-            </Container>
+            </div>
         </div>
     )
 }

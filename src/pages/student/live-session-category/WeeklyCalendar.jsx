@@ -19,7 +19,7 @@ const WeeklyCalendar = ({ educators }) => {
 
     return (
         <div className="card mb-4 full-calendar">
-        <div className="card-body">
+            <div className="card-body">
                 <div className="">
                     <div className="flex border-b mb-4 space-x-4">
                         <button
