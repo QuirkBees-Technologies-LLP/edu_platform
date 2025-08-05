@@ -30,11 +30,11 @@ const LabelMap = {
 };
 
 const statusColorMap = {
-  active: "bg-green-50 text-green-700 ring-green-600/20",
-  pending: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-  win: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  partialWin: "bg-violet-50 text-violet-700 ring-violet-600/20",
-  loss: "bg-red-50 text-red-700 ring-red-600/20",
+  active: "bg-green-50 text-green-700 dark:bg-green-700 dark:text-green-300 ring-green-600/20",
+  pending: "bg-yellow-50 dark:bg-yellow-700 text-yellow-600 dark:text-yellow-400 ring-yellow-600/20",
+  win: "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300 ring-blue-600/20",
+  partialWin: "bg-violet-50 text-violet-700 dark:bg-violet-900 dark:text-violet-300 ring-violet-600/20",
+  loss: "bg-red-50 text-red-700 dark:bg-red-900 dark:text-red-300 ring-red-600/20",
 };
 
 const ClientTradeIdeas = () => {
@@ -108,7 +108,7 @@ const ClientTradeIdeas = () => {
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
@@ -132,11 +132,11 @@ const ClientTradeIdeas = () => {
                 </div>
                 <div className="h-[405px] card-border card-rounded-b flex flex-col gap-2 justify-between">
                   <div className="px-5 py-4.5 ">
-                    <div className="flex item-center justify-between  mb-3">
-                      <div className="font-bold mr-3 text-gray-900">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 justify-between  mb-3">
+                      <div className="text-sm sm:text-xs md:text-sm font-medium mr-3 text-gray-900">
                         {idea?.name.toUpperCase()}/{idea?.type.toUpperCase()}
                       </div>
-                      <div className="ideas_link flex gap-5">
+                      <div className="ideas_link flex items-center md:gap-5 gap-3">
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}
                         >
@@ -146,7 +146,7 @@ const ClientTradeIdeas = () => {
                         {idea?.url ? (
                           <Link to={idea.url} className="z-9">
                             <div className="link_card bg-primary rounded-lg p-2">
-                              <Link2 className="text-gray-100" />
+                              <Link2 className="text-gray-100 dark:text-gray-900" />
                             </div>
                           </Link>
                         ) : (
@@ -157,7 +157,7 @@ const ClientTradeIdeas = () => {
                             className="z-9 cursor-pointer text-blue-500 underline"
                           >
                             <div className="link_card bg-primary rounded-lg p-2">
-                              <Link2 className="text-gray-100" />
+                              <Link2 className="text-gray-100 dark:text-gray-900" />
                             </div>
                           </span>
                         )}
@@ -171,7 +171,7 @@ const ClientTradeIdeas = () => {
                         <div className="text-2sm text-gray-800 uppercase mb-1">
                           Entry
                         </div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
+                        <span class="mt-1 inline-flex items-center rounded-md bg-green-50 dark:bg-green-700 dark:text-green-300 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
                           {idea?.entry}
                         </span>
                       </div>
@@ -179,7 +179,7 @@ const ClientTradeIdeas = () => {
                         <div className="text-2sm text-gray-800 uppercase mb-1">
                           Invalidation
                         </div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
+                        <span class="mt-1 inline-flex items-center rounded-md bg-red-50 dark:bg-red-700 dark:text-red-300 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
                           {idea?.invalidation}
                         </span>
                       </div>
@@ -237,7 +237,7 @@ const ClientTradeIdeas = () => {
 
           {isFetching && <p>Loading more...</p>}
           {page >= totalPages && (
-            <p className="text-center my-10">No more trade ideas to load.</p>
+            <p className="text-center text-gray-900 my-10">No more trade ideas to load.</p>
           )}
         </div>
 

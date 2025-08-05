@@ -918,7 +918,7 @@ chat */
 @media screen and (max-width : 472.98px) {
 	.forex_calender {
 		overflow: auto;
-		max-width: 255px;
+		max-width: 290px;
         margin-inline: auto;
 	}
 	.forex_calender .calender {
@@ -966,12 +966,18 @@ chat */
   border-radius: 30px;
 }
 
-.input:not(input) input {
+/* .input:not(input) input {
 	color: unset;
-}
+} */
 
 input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
-  box-shadow: 0 0 0px 1000px #fff inset !important;
-  -webkit-text-fill-color: #000 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #191819 inset !important;
+  box-shadow: 0 0 0px 1000px #191819 inset !important;
+  -webkit-text-fill-color: #89808B !important;
+}
+
+input[type="password"]:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #191819 inset !important;
+  box-shadow: 0 0 0px 1000px #171718 inset !important;
+  -webkit-text-fill-color: #89808B !important;
 }

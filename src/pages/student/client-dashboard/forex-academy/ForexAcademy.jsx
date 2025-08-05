@@ -133,7 +133,7 @@ const ForexAcademy = () => {
                         </div>
                     </div>
                     <span
-                        className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                        className={`bg-${trade.statusColor}-100 dark:bg-${trade.statusColor}-700 text-${trade.statusColor}-700 dark:text-${trade.statusColor}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                     >
                         {trade.status}
                     </span>
