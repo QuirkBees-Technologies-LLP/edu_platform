@@ -965,3 +965,13 @@ chat */
   background: #1f1f1f;
   border-radius: 30px;
 }
+
+.input:not(input) input {
+	color: unset;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+  box-shadow: 0 0 0px 1000px #fff inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
