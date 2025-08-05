@@ -25,7 +25,6 @@ import {
 import RichTextEditor from "../../../components/ui/rich-editor";
 import {
   useCreateEducatorTradeIdeasMutation,
-  useGetEducatorTradeCategoryQuery,
   useUpdateEducatorTradeIdeaMutation,
 } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
@@ -38,7 +37,6 @@ const CreateTradeIdeas = forwardRef(
     const { auth } = useAuthContext();
     const [createEducatorTradeIdeas] = useCreateEducatorTradeIdeasMutation();
     const [updateEducatorTradeIdea] = useUpdateEducatorTradeIdeaMutation();
-    const { data } = useGetEducatorTradeCategoryQuery();
 
     const educatorId = auth?.user?._id ?? null;
     const { data } = useGetEducatorAcademyCategoryQuery();
