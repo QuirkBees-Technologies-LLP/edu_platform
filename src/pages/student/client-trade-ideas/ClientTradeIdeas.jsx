@@ -284,19 +284,19 @@ const ClientTradeIdeas = () => {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600 font-normal text-sm">
-                        Invalidation
+                        Stop Loss
                       </span>
                       <span className="font-medium text-gray-800">
                         {trade.invalidation}
                       </span>
                     </div>
-                    {trade?.exits?.map((exit, idx) => (
+                    {[0, 1, 2].map((idx) => (
                       <div key={idx} className="flex justify-between text-sm">
                         <span className="text-gray-600 font-normal text-sm">
                           {`Exit ${idx + 1}`}
                         </span>
                         <span className="font-medium text-gray-800">
-                          {exit?exit:"N/A"}
+                          {trade?.exits?.[idx] ?? "N/A"}
                         </span>
                       </div>
                     ))}
