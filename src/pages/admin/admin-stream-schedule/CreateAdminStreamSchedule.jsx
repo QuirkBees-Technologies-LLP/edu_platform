@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router';
 import { v4 as uuidv4 } from "uuid";
 import TagInput from '../../../components/ui/tagInput';
 import RichTextEditor from '../../../components/ui/rich-editor';
-import { useGetEducatorAcademyCategoryQuery } from '../../../store/api/educator/educatorAcademyCategoryApiSlice';
+import { useGetEducatorAcademyCategoryQuery, useGetLanguageListQuery } from '../../../store/api/educator/educatorAcademyCategoryApiSlice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation } from '../../../store/api/educator/educatorStreamScheduleApiSlice';
 import DateTimePicker from './DateTimePicker';
@@ -22,6 +22,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
     const [updateEducatorStreamSchedule] = useUpdateEducatorStreamScheduleMutation();
     const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
     const { data } = useGetEducatorAcademyCategoryQuery();
+    const { data: languagesList } = useGetLanguageListQuery();
     const educatorId = auth?.user?._id ?? null;
     const navigate = useNavigate();
     const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -34,7 +35,8 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
         category: "",
         thumbnail: null,
         userId: "",
-        educator: ""
+        educator: "",
+        language: ""
     };
 
     const createSchema = Yup.object().shape({
@@ -68,8 +70,8 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
                 if (!file) return true; // skip size check if no new file
                 const maxSize = 2 * 1024 * 1024;
                 return file.size <= maxSize;
-            })
-
+            }),
+        language: Yup.string().required("Language is required"),
     });
 
     const formik = useFormik({
@@ -87,6 +89,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
             formData.append('title', values.title);
             formData.append('category', values.category);
             formData.append('description', values.description);
+            formData.append('language', values.language);
             formData.append('datetime', values.datetime);
             values.tags.forEach((tag) => {
                 formData.append(`tags[]`, tag);
@@ -151,7 +154,8 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
                 category: selectedRow?.category?._id,
                 educator: selectedRow?.educator?._id,
                 thumbnail: [{ file: null, dataURL: selectedRow?.image }],
-                userId: selectedRow?.userId
+                userId: selectedRow?.userId,
+                language: selectedRow?.language
             }
             formik.setValues(initData)
         }
@@ -269,9 +273,42 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
                             </div>
                         </div>
                         <div className="col-span-12">
+                            <div className="flex flex-col w-full gap-1">
+                                <label className="form-label text-gray-900 gap-1">
+                                    Language <span className="text-danger">*</span>
+                                </label>
+                                <Select
+                                    value={formik.values.language}
+                                    onValueChange={(value) => formik.setFieldValue("language", value)}
+                                    className={`form-control input input-md w-full ${formik.errors.language ? "border border-danger" : ""}`}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Array.isArray(languagesList?.data) && languagesList.data.length > 0 ? (
+                                            languagesList.data.map((item) => (
+                                                <SelectItem key={item._id} value={item._id}>
+                                                    {item.name}
+                                                </SelectItem>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+
+                                {formik.touched.language && formik.errors.language && (
+                                    <span role="alert" className="text-danger text-xs mt-1">
+                                        {formik.errors.language}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="col-span-12">
                             <div className="col-span-6">
                                 <div className="flex flex-col gap-1">
-                                    <label className="form-label text-gray-900 gap-1">Academy Category<span className="text-danger">
+                                    <label className="form-label text-gray-900 gap-1">Category<span className="text-danger">
                                         *
                                     </span></label>
                                     <Select

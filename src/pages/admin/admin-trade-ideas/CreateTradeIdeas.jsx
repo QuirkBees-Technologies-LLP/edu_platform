@@ -493,6 +493,11 @@ const CreateTradeIdeas = forwardRef(
                     </SelectContent>
                   </Select>
 
+                  {formik.touched.category && formik.errors.category && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.category}
+                    </span>
+                  )}
                 </div>
               </div>
               {/* <div className="col-span-6">

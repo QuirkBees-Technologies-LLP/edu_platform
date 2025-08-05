@@ -48,6 +48,7 @@ const CreateTradeAnalysis = forwardRef(
       createdBy: "",
       description: "",
       url: "",
+      category: "",
     };
 
     const createSchema = Yup.object().shape({
@@ -57,7 +58,7 @@ const CreateTradeAnalysis = forwardRef(
       description: Yup.string().required("Entry is required"),
 url: Yup.string()
         .url("Please enter a valid URL")
-        .required("URL is required"),
+        .required("URL is required"),      category: Yup.string().required("Category is required"),
     });
 
     const formik = useFormik({
@@ -173,7 +174,7 @@ url: Yup.string()
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id ? "Create IQ Idea" : "Create IQ Idea"}
+                {selectedRow?._id ? "Create IQ Insight" : "Create IQ Insight"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">

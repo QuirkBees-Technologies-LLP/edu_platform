@@ -49,7 +49,7 @@ const CreateTradeAnalysis = forwardRef(
     };
 
     const createSchema = Yup.object().shape({
-      title: Yup.string().required("title is required"),
+      title: Yup.string().required("Title is required"),
       files: Yup.array().min(1, "At least one file is required"),
       createdBy: Yup.string().required("Educator ID is required"),
       description: Yup.string().required("Entry is required"),
