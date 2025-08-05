@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowUp, Send } from "lucide-react"; // For the send iconimport { Link } from 'react-router-dom';
+import { ArrowUp, CirclePlay, Send } from "lucide-react"; // For the send iconimport { Link } from 'react-router-dom';
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
+import VideoPlayerModal from "./VideoPlayerModal";
 
 const IqEducators = () => {
   const { auth } = useAuthContext();
@@ -12,10 +13,9 @@ const IqEducators = () => {
   const userName = auth?.user?.name;
 
   const { id } = useParams();
-  const { data:response} = useGetEducatorWithCoursesQuery(id);
-  
+  const { data: response } = useGetEducatorWithCoursesQuery(id);
 
-  console.log("response",response)
+  console.log("response", response);
 
   const updates = [
     {
@@ -164,6 +164,8 @@ const IqEducators = () => {
 
   // State for the new message input
   const [newMessage, setNewMessage] = useState("");
+  const [open, setOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
 
   // Ref for the messages container to enable auto-scrolling
   const messagesEndRef = useRef(null);
@@ -201,6 +203,13 @@ const IqEducators = () => {
   };
   const [activeTab, setActiveTab] = useState("feed");
   const data = activeTab === "feed" ? feedData : ideasData;
+
+  const handleOpen = (url) => {
+    console.log(url, "urls");
+
+    setVideoUrl(url);
+    setOpen(true);
+  };
   return (
     <div className="container-fluid pb-10">
       <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
@@ -212,7 +221,8 @@ const IqEducators = () => {
           />
           <div className="text-center  sm:text-start">
             <h3 className="text-white font-semibold text-base sm:text-lg mb-1">
-              {response?.data?.educator?.first_name} {response?.data?.educator?.last_name}
+              {response?.data?.educator?.first_name}{" "}
+              {response?.data?.educator?.last_name}
             </h3>
             <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
               Forex Day Trading, Price Action, Risk Management
@@ -253,17 +263,28 @@ const IqEducators = () => {
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               <div className="flex gap-4">
-                {response?.data?.recordings?.map((course) => (  
+                {response?.data?.recordings?.map((course) => (
                   <div
                     key={course.id}
                     className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0"
                   >
                     <div className="rounded-t-xl overflow-hidden">
                       <img
-                        src={course.image}
+                        src={"/media/images/600x400/1.jpg"}
                         alt={course.title}
                         className="w-full h-36 object-cover"
+                        onClick={() => handleOpen(course?.url)}
                       />
+                    
+                      {/* <div className="absolute inset-0 flex items-center justify-center">
+                        <button
+                          type="button"
+                          className="btn btn-icon btn-circle btn-lg"
+                          onClick={() => handleOpen(course?.url)}
+                        >
+                          <CirclePlay size={60} className="text-white" />
+                        </button>
+                      </div> */}
                     </div>
                     <div className="p-4">
                       <h3 className="text-md font-normal mb-2">
@@ -482,6 +503,12 @@ const IqEducators = () => {
           </div>
         </div>
       </div>
+
+      <VideoPlayerModal
+        open={open}
+        onOpenChange={setOpen}
+        videoUrl={videoUrl}
+      />
     </div>
   );
 };
