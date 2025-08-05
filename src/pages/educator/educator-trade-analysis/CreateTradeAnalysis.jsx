@@ -24,6 +24,7 @@ import {
 } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import { useCreateEducatorTradeAnalysisMutation, useUpdateEducatorTradeAnalysisMutation } from "../../../store/api/educator/educatorTradeAnalysisApiSlice";
+import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 
 const CreateTradeAnalysis = forwardRef(
@@ -35,6 +36,7 @@ const CreateTradeAnalysis = forwardRef(
     const [createEducatorTradeAnalysis] = useCreateEducatorTradeAnalysisMutation();
     const [updateEducatorTradeAnalysis] = useUpdateEducatorTradeAnalysisMutation();
     const createdBy = auth?.user?._id ?? null;
+    const { data } = useGetEducatorAcademyCategoryQuery();
 
     const initialValues = {
       title: "",
@@ -66,6 +68,7 @@ const CreateTradeAnalysis = forwardRef(
         );
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
+        formData.append("category", values.category);
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -154,7 +157,7 @@ const CreateTradeAnalysis = forwardRef(
           }}
         >
           {formik.status && <Alert variant="danger">{formik.status}</Alert>}
-          <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
+          <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
                 {selectedRow?._id ? "Create IQ Idea" : "Create IQ Idea"}
