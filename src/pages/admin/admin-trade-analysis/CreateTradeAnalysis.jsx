@@ -24,6 +24,7 @@ import {
 } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import { useCreateAdminTradeAnalysisMutation, useUpdateAdminTradeAnalysisMutation } from "../../../store/api/admin/adminTradeAnalysisApiSlice";
+import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 
 const CreateTradeAnalysis = forwardRef(
@@ -35,12 +36,13 @@ const CreateTradeAnalysis = forwardRef(
     const [createAdminTradeAnalysis] = useCreateAdminTradeAnalysisMutation();
     const [updateAdminTradeAnalysis] = useUpdateAdminTradeAnalysisMutation();
     const createdBy = auth?.user?._id ?? null;
+    const { data } = useGetEducatorAcademyCategoryQuery();
 
     const initialValues = {
       title: "",
       files: [""],
       createdBy: "",
-      description: "",
+      description: "", category: "",
     };
 
     const createSchema = Yup.object().shape({
@@ -48,7 +50,7 @@ const CreateTradeAnalysis = forwardRef(
       files: Yup.array().min(1, "At least one file is required"),
       createdBy: Yup.string().required("Educator ID is required"),
       description: Yup.string().required("Entry is required"),
-      
+      category: Yup.string().required("Category is required"),
     });
 
     const formik = useFormik({
@@ -58,7 +60,7 @@ const CreateTradeAnalysis = forwardRef(
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
         console.log("values", values);
-    
+
         const formData = new FormData();
         formData.append("title", values.title);
         values.files.forEach((file) =>
@@ -66,15 +68,16 @@ const CreateTradeAnalysis = forwardRef(
         );
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
+        formData.append("description", values.category);
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
 
-  
+
         try {
           if (selectedRow?._id) {
             let a = await updateAdminTradeAnalysis(formData).unwrap();
-            console.log("==============================>",a)
+            console.log("==============================>", a)
             refetch();
             toast.success("IQ Insight updated successfully!");
           } else {
@@ -111,16 +114,17 @@ const CreateTradeAnalysis = forwardRef(
           title: selectedRow?.title,
           files: existingImages,
           description: selectedRow?.description,
+          category: selectedRow?.category,
         };
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
 
     // Function to add a new exit input
-    
+
 
     // Function to remove an exit input
-   
+
 
     // Handle multiple image selection
     const handleImageChange = (selectedFiles) => {
@@ -153,7 +157,7 @@ const CreateTradeAnalysis = forwardRef(
           }}
         >
           {formik.status && <Alert variant="danger">{formik.status}</Alert>}
-          <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
+          <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
                 {selectedRow?._id ? "Update IQ Insight" : " Create IQ Insight"}
@@ -170,11 +174,10 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter Title"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.title && formik.touched.title
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("title")}
                     />
                     {formik.touched.title && formik.errors.title && (
@@ -229,6 +232,39 @@ const CreateTradeAnalysis = forwardRef(
                   )}
                 </div>
               </div> */}
+                <div className="col-span-12">
+                  <div className="flex flex-col w-full gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      Category <span className="text-danger">*</span>
+                    </label>
+                    <Select
+                      value={formik.values.category}
+                      onValueChange={(value) => formik.setFieldValue("category", value)}
+                      className={`form-control input input-md w-full ${formik.errors.category ? "border border-danger" : ""}`}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(data?.data) && data.data.length > 0 ? (
+                          data.data.map((item) => (
+                            <SelectItem key={item._id} value={item._id}>
+                              {item.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
+                        )}
+                      </SelectContent>
+                    </Select>
+
+                    {formik.touched.category && formik.errors.category && (
+                      <span role="alert" className="text-danger text-xs mt-1">
+                        {formik.errors.category}
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <div className="col-span-12">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">

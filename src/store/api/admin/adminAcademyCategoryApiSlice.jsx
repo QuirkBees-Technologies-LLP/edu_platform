@@ -16,7 +16,7 @@ export const adminAcademyCategoryApiSlice = createApi({
             }),
         }),
         updateAdminAcademyCategory: builder.mutation({
-            query: ({data, id}) => ({
+            query: ({ data, id }) => ({
                 url: `/admin/category/${id}`,
                 method: 'PUT',
                 body: data,
@@ -25,11 +25,11 @@ export const adminAcademyCategoryApiSlice = createApi({
         }),
         deleteAdminAcademyCategory: builder.mutation({
             query: (id) => ({
-                url: `/admin/category/${id}`,   
+                url: `/admin/category/${id}`,
                 method: 'DELETE',
             }),
         }),
     }),
 });
 
-export const { useLazyGetAdminAcademyCategoryQuery, useCreateAdminAcademyCategoryMutation, useUpdateAdminAcademyCategoryMutation, useDeleteAdminAcademyCategoryMutation} = adminAcademyCategoryApiSlice;
+export const { useLazyGetAdminAcademyCategoryQuery, useCreateAdminAcademyCategoryMutation, useUpdateAdminAcademyCategoryMutation, useDeleteAdminAcademyCategoryMutation } = adminAcademyCategoryApiSlice;
