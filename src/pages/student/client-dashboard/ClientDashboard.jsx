@@ -381,7 +381,7 @@ const ClientDashboard = () => {
                   transition duration-300"></div>
 
                                     {/* Default Content */}
-                                    <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11 z-10">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11 z-1">
                                         <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
                                             FAST START <br /> TRAINING
                                         </h2>
@@ -394,7 +394,7 @@ const ClientDashboard = () => {
                                     </div>
 
                                     {/* Hover Extra Data */}
-                                    <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 rounded-xl">
+                                    <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-1 rounded-xl">
                                         <p className="text-center p-4">
                                             No This feature is under-development
                                         </p>
