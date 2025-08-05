@@ -16,11 +16,14 @@ const studentLanagugeSlice = createSlice({
   reducers: {
     setSelectedLanguage: (state, action) => {
       state.selectedLanguage = action.payload;
+    },
+    setLanguages: (state, action) => {
+      state.languages = action.payload;
     }
   }
 });
 
-export const { setSelectedLanguage } = studentLanagugeSlice.actions;
+export const { setSelectedLanguage,setLanguages } = studentLanagugeSlice.actions;
 
 export const selectLanguages = (state) => state.language.languages;
 export const selectSelectedLanguage = (state) => state.language.selectedLanguage;

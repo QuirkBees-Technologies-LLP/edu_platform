@@ -1,20 +1,39 @@
 import { CirclePlay } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 
 export default function FastStartTraining() {
   const [activeTab, setActiveTab] = useState("");
   const [lecture, setLecture] = useState();
+  const [id, setId] = useState();
+  const [category, setCategory] = useState();
 
+  const handleClick = (id) => {
+    setId(id); // or simply: id, based on your API setup
+  };
+  const selectedLanguage = useSelector(selectSelectedLanguage);
+
+  console.log("selectedLanguage======>", selectedLanguage);
   const {
     data,
     isLoading: isCategoryLoading,
     isError,
+    refetch,
   } = useGetAcademyCategoryByMainSectionQuery({
     mainSection: "fastStartTraining",
-    language: "english",
+    id,
+    category: activeTab,
+    language: category,
   });
+
+  useEffect(() => {
+    if (selectedLanguage) {
+      setCategory(selectedLanguage)
+    }
+  }, [selectedLanguage]);
 
   const categories = data?.category || [];
   const course = data?.course || [];
@@ -77,26 +96,26 @@ export default function FastStartTraining() {
     },
   ];
 
-  if (isError) {
-    return (
-      <>
-        <div className="container-fluid">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="col-span-full">
-              <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold tracking-wider pb-2">
-                    No Such category found{" "}
-                  </h1>
-                  <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
+  // if (isError) {
+  //   return (
+  //     <>
+  //       <div className="container-fluid">
+  //         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+  //           <div className="col-span-full">
+  //             <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
+  //               <div className="text-center">
+  //                 <h1 className="text-4xl font-bold tracking-wider pb-2">
+  //                   No Such category found{" "}
+  //                 </h1>
+  //                 <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </>
+  //   );
+  // }
 
   // console.log(isError)
   return (
@@ -111,11 +130,10 @@ export default function FastStartTraining() {
               <div className="col-span-full">
                 <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
                   <div className="text-center">
-                    {categories.length > 0 && (
-                      <h1 className="text-4xl font-bold tracking-wider pb-2">
-                        {categories[0]?.categoryName}
-                      </h1>
-                    )}
+                    <h1 className="text-4xl font-bold tracking-wider pb-2">
+                      {data?.ActiveCategory[0]?.categoryName}
+                    </h1>
+
                     <p className="text-lg sm:text-xl tracking-widest">
                       TRAINING
                     </p>
@@ -125,11 +143,11 @@ export default function FastStartTraining() {
 
               {/* Sidebar - Course + Lectures */}
 
-              {activeTab === `${categories[0]?.categoryName}` && (
-                <div className="md:col-span-1">
+              {activeTab === `${data?.ActiveCategory[0]?.categoryId}` &&
+                course?.length > 0 && (
                   <div className="max-h-[690px] overflow-y-auto rounded-xl shadow-md">
-                    {course?.map((c, index) => (
-                      <div key={c.id}>
+                    {course.map((c, index) => (
+                      <div key={c._id}>
                         <div className="bg-blue-950 p-5 rounded-t-xl">
                           <h6 className="text-sm text-white font-medium">
                             {index + 1}. {c.title}
@@ -150,26 +168,25 @@ export default function FastStartTraining() {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Tab + Lecture Display */}
               <div className="md:col-span-2">
                 <div className="mb-6">
-                  <div className="flex flex-col sm:flex-row items-start gap-8">
+                  <div className="flex flex-col sm:flex-row items-center gap-8">
                     <h2 className="text-lg font-medium text-gray-900">
                       My Academies
                     </h2>
                     <div className="flex gap-3 sm:gap-6 flex-wrap">
-                      {tabs.map((tab) => (
+                      {data?.categories?.map((tab) => (
                         <button
-                          key={tab.id}
+                          key={tab._id}
                           className={`pb-4 border-b-2 ${
-                            activeTab === tab.id
+                            activeTab === tab._id
                               ? "border-black dark:border-white text-gray-900"
                               : "border-transparent text-gray-500 hover:text-gray-900"
                           }`}
-                          onClick={() => setActiveTab(tab.id)}
+                          onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
                         </button>
@@ -179,13 +196,14 @@ export default function FastStartTraining() {
 
                   {/* Tab Content Area */}
                   <div className="rounded-lg mt-6">
-                    {tabs.map((tab) => (
+                    {data?.categories?.map((tab) => (
                       <div
-                        key={tab.id}
-                        className={`${activeTab === tab.id ? "block" : "hidden"}`}
+                        key={tab._id}
+                        className={`${activeTab === tab._id ? "block" : "hidden"}`}
                       >
                         {/* Dynamic content for "Forex" tab */}
-                        {activeTab === `${categories[0]?.categoryName}` &&
+                        {activeTab ===
+                          `${data?.ActiveCategory[0]?.categoryId}` &&
                         lecture ? (
                           <div className="card">
                             {lecture.type !== "TEXT" && (
@@ -246,6 +264,7 @@ export default function FastStartTraining() {
               </div>
 
               {/* IQ Vault Section */}
+
               <div className="col-span-full">
                 <div className="text-gray-900">
                   <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
@@ -269,14 +288,19 @@ export default function FastStartTraining() {
                   <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
                     <div className="flex gap-4 pb-0">
                       {/* Static Course Cards - Optional, not connected to lecture data */}
-                      {[1, 2, 3].map((i) => (
+                      {data?.upcomingCourse?.map((i) => (
                         <div
                           key={i}
-                          className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0"
+                          className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
+                          onClick={() => handleClick(i?._id)}
                         >
                           <div className="rounded-t-xl overflow-hidden">
                             <img
-                              src="public/media/images/video-thumbail.jpg"
+                              src={
+                                i.imageUrl
+                                  ? i.imageUrl
+                                  : "public/media/images/video-thumbail.jpg"
+                              }
                               alt="Course Title"
                               className="w-full h-36 object-cover"
                               onError={(e) => {
@@ -287,12 +311,17 @@ export default function FastStartTraining() {
                             />
                           </div>
                           <div className="p-5">
-                            <h3 className="text-md text-gray-800 font-medium mb-2">
-                              Course Title
-                            </h3>
-                            <p className="text-xs text-gray-600">
-                              456 Innovation Street, Floor 6, Techland, New York
-                              54321
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-md text-gray-800 font-medium mb-2">
+                                {i?.title}
+                              </h3>
+
+                              {/* <span className="badge badge-sm badge-success badge-outline">
+                                Active
+                              </span> */}
+                            </div>
+                            <p className="text-xs text-gray-600 ">
+                              {i.description}
                             </p>
                           </div>
                         </div>

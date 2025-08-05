@@ -30,6 +30,7 @@ import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // localStorage
 import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
+import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
 
 const languagePersistConfig = {
   key: 'language',
@@ -70,6 +71,7 @@ export const store = configureStore({
     [clientRecordingApiSlice.reducerPath]: clientRecordingApiSlice.reducer,
     [educatorTradeAnalysisApiSlice.reducerPath]: educatorTradeAnalysisApiSlice.reducer,
     [adminTradeAnalysisApiSlice.reducerPath]: adminTradeAnalysisApiSlice.reducer,
+    [clientLanguageApiSlice.reducerPath]: clientLanguageApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -96,7 +98,8 @@ export const store = configureStore({
       adminAcademyCategoryApiSlice.middleware,
       clientRecordingApiSlice.middleware,
       educatorTradeAnalysisApiSlice.middleware,
-      adminTradeAnalysisApiSlice.middleware
+      adminTradeAnalysisApiSlice.middleware,
+      clientLanguageApiSlice.middleware
     ),
 });
 
