@@ -122,16 +122,16 @@ import ViewAdminTradeAnalysis from "../pages/admin/admin-trade-analysis/ViewAdmi
 import AdminTradeAnalysis from "../pages/admin/admin-trade-analysis/AdminTradeAnalysis";
 import ClientDashboard from "../pages/student/client-dashboard/ClientDashboard";
 import FastStartTraining from "../pages/student/fast-start-training/FastStartTraining";
-import IqAcademy from "../pages/student/iq-academy/IqAcademy";  
 import IqStrategies from "../pages/student/iq-strategies/IqStrategies";
  
 
-import IQLive from "../pages/student/iq-live/IQLive";
+import IqAcademy from "../pages/student/iq-academy/IqAcademy";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
-import IqLiveEducators from "../pages/student/iq-live-educators/IqLiveEducators";
+import IqAcademyEducators from "../pages/student/iq-academy-educators/IqAcademyEducators";
 import ForexAcademy from "../pages/student/client-dashboard/forex-academy/ForexAcademy";
 import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
 import PersonalIqInsight from "../pages/student/personal-iq-insight/PersonalIqInsight";
+import IqVault from "../pages/student/iq-vault/IqVault";
 
 const routes = {
   student: [
@@ -150,11 +150,11 @@ const routes = {
     { path: "/recording-session", element: <RecordingSession /> },
     { path: "/educator-recording-session/:id", element: <UserRecordingSession /> },
     { path: "/fast-start-training", element: <FastStartTraining /> },
-    { path: "/iq-academy", element: <IqAcademy /> },
+    { path: "/iq-vault", element: <IqVault /> },
     { path: "/iq-strategies", element: <IqStrategies /> },
-    { path: "/iq-live", element: <IQLive /> },
+    { path: "/iq-academy", element: <IqAcademy /> },
     { path: "/iq-educators/:id", element: <IqEducators /> },
-    { path: "/iq-live-educators", element: <IqLiveEducators /> },
+    { path: "/iq-academy-educators", element: <IqAcademyEducators /> },
     { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
   ],

@@ -1015,11 +1015,11 @@ export const sideMenus = {
       icon: <CircleDot />,
       path: '/admin/stream-recording'
     },
-    {
-      title: 'Academy Category',
-      icon: <Layers />,
-      path: '/admin/academy-category'
-    },
+    // {
+    //   title: 'Academy Category',
+    //   icon: <Layers />,
+    //   path: '/admin/academy-category'
+    // },
     {
       title: 'General Setting',
       icon: <Layers />,
@@ -1092,21 +1092,21 @@ export const sideMenus = {
       ],
     },
     {
-      title: 'IQ Academy',
+      title: 'IQ Vault',
       icon: <School />,
-      path: '/iq-academy'
+      path: '/iq-vault'
     },
 
     {
-      title: 'IQ Live',
+      title: 'IQ Academy',
       icon: <Tv />,
-      path: '/iq-live',
+      path: '/iq-academy',
     },
    
     {
-      title: 'IQ Live Educators',
+      title: 'IQ Academy Educators',
       icon: <Dot />,
-      path: '/iq-live-educators'
+      path: '/iq-academy-educators'
     },
     // {
     //   title: 'IQ Educators',

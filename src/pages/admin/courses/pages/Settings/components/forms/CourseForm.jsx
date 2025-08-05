@@ -86,6 +86,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       }
     }
   }, [initialData, setValue]);
+console.log(initialData.category?._id, "initialData.category?._id");
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

@@ -28,7 +28,7 @@ const educatorsData = [
   },
 ];
 
-const IqLiveEducators = () => {
+const IqAcademyEducators = () => {
    const [educators, setEducators] = useState(educatorsData);
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -155,4 +155,4 @@ const IqLiveEducators = () => {
   );
 }
 
-export default IqLiveEducators
+export default IqAcademyEducators
