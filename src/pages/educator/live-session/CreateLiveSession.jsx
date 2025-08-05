@@ -235,7 +235,7 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                                                 {...dragProps}
                                                 className={`
         border border-dashed rounded-lg text-center transition-colors 
-        p-5 ${isDragging ? 'bg-gray-100' : 'bg-white'} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
+        p-5 ${isDragging ? 'bg-gray-100' : ''} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
                                                         ? "validation-error-border"
                                                         : ""
                                                     }`}

@@ -259,7 +259,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
             <input
               type="text"
               placeholder="Search Members"
-              className="input input-md ps-8"
+              className="input input-md ps-8 h-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} // Update search term
             />
