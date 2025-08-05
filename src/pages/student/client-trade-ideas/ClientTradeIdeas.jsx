@@ -100,8 +100,8 @@ const ClientTradeIdeas = () => {
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Ideas" />
           <ToolbarDescription>
-            Oversee educator profiles, manage their sessions, and ensure quality
-            trade and course content across the platform.
+            {/* Oversee educator profiles, manage their sessions, and ensure quality
+            trade and course content across the platform. */}
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>

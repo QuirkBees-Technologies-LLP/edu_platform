@@ -98,6 +98,46 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
       }
     },
     {
+      accessorFn: (row) => row.name,
+      id: "Language",
+      header: ({ column }) => (
+        <DataGridColumnHeader title="Language" column={column} />
+      ),
+      enableSorting: true,
+      cell: (info) => (
+        <div className="flex items-center gap-2.5">
+          <div className="flex flex-col gap-0.5">
+            <p>
+              {info.row.original.language?.name ?? "NA"}
+            </p>
+          </div>
+        </div>
+      ),
+      meta: {
+        headerClassName: "min-w-[200px]",
+      },
+    },
+    {
+      accessorFn: (row) => row.name,
+      id: "Category",
+      header: ({ column }) => (
+        <DataGridColumnHeader title="Category" column={column} />
+      ),
+      enableSorting: true,
+      cell: (info) => (
+        <div className="flex items-center gap-2.5">
+          <div className="flex flex-col gap-0.5">
+            <p>
+              {info.row.original.category?.name ?? "NA"}
+            </p>
+          </div>
+        </div>
+      ),
+      meta: {
+        headerClassName: "min-w-[200px]",
+      },
+    },
+    {
       accessorFn: row => row.createdAt,
       id: 'createdAt',
       header: ({
