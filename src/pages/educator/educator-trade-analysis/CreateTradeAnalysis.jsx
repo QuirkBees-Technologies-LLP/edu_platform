@@ -44,7 +44,7 @@ const CreateTradeAnalysis = forwardRef(
 
     const initialValues = {
       title: "",
-      files: [""],
+      files: [],
       createdBy: "",
       description: "",
       url: "",
@@ -56,9 +56,9 @@ const CreateTradeAnalysis = forwardRef(
       files: Yup.array().min(1, "At least one file is required"),
       createdBy: Yup.string().required("Educator ID is required"),
       description: Yup.string().required("Entry is required"),
-url: Yup.string()
+      url: Yup.string()
         .url("Please enter a valid URL")
-        .required("URL is required"),      category: Yup.string().required("Category is required"),
+        .required("URL is required"), category: Yup.string().required("Category is required"),
     });
 
     const formik = useFormik({
@@ -86,7 +86,7 @@ url: Yup.string()
         try {
           if (selectedRow?._id) {
             let a = await updateEducatorTradeAnalysis(formData).unwrap();
-            console.log("==============================>",  a);
+            console.log("==============================>", a);
             refetch();
             toast.success("IQ Insight updated successfully!");
           } else {
@@ -159,7 +159,7 @@ url: Yup.string()
         file: null,
         dataURL: img,
       })) || [];
-      
+
     return (
       <>
         <Dialog
@@ -236,11 +236,10 @@ url: Yup.string()
                       type="text"
                       placeholder="Enter url"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.url && formik.touched.url
+                      className={`form-control input input-md w-full ${formik.errors.url && formik.touched.url
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                       {...formik.getFieldProps("url")}
                     />
                     {formik.touched.url && formik.errors.url && (
@@ -304,67 +303,58 @@ url: Yup.string()
                   </div>
                 </div>
                 <div className="col-span-12">
-                  <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Images <span className="text-danger">*</span>
-                    </label>
-                    {formik.values.files.length > 0 && (
-                      <div className="flex flex-wrap gap-5">
-                        {/* Upload Box (always show) */}
-                        <ImageInput
-                          multiple={true}
-                          value={formik.values.files}
-                          onChange={handleImageChange}
+                  <div className="flex flex-wrap gap-5">
+                    {/* Upload Box - always shown */}
+                    <ImageInput
+                      multiple={true}
+                      value={formik.values.files}
+                      onChange={handleImageChange}
+                    >
+                      {({ onImageUpload }) => (
+                        <div
+                          className="cursor-pointer image-input size-24"
+                          onClick={onImageUpload}
                         >
-                          {({ onImageUpload }) => (
-                            <div
-                              className="cursor-pointer image-input size-24"
-                              onClick={onImageUpload}
+                          <div
+                            className={`flex border justify-center rounded-lg image-input-placeholder items-center 
+                              ${formik.touched.files && formik.errors.files
+                                ? "border-danger"
+                                : "border-gray-200"
+                              }`}
+                          >
+                            <i className="ki-filled ki-picture"></i>
+                          </div>
+                        </div>
+                      )}
+                    </ImageInput>
+
+                    {/* Show preview only if there are images */}
+                    {formik.values.files
+                      .filter((file) => !!file?.dataURL)
+                      .map((file, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={file.dataURL}
+                            alt="uploaded"
+                            className="rounded-lg border-2 border-success size-24 object-cover"
+                          />
+                          <div className="absolute -right-4 -top-4">
+                            <button
+                              type="button"
+                              className="btn btn-xs btn-icon rounded-full btn-danger"
+                              onClick={() => handleRemoveImage(index)}
                             >
-                              <div
-                                className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-              ${
-                formik.touched.files && formik.errors.files
-                  ? "border-danger"
-                  : "border-gray-200"
-              }`}
-                              >
-                                <i className="ki-filled ki-picture"></i>
-                              </div>
-                            </div>
-                          )}
-                        </ImageInput>
-
-                        {/* Only show images with a valid dataURL */}
-                        {formik.values.files
-                          .filter((file) => !!file?.dataURL) // ✅ Only if there's a valid dataURL
-                          .map((file, index) => (
-                            <div key={index} className="relative">
-                              <img
-                                src={file.dataURL}
-                                alt="uploaded"
-                                className="rounded-lg border-2 border-success size-24 object-cover"
-                              />
-                              <div className="absolute -right-4 -top-4">
-                                <button
-                                  type="button"
-                                  className="btn btn-xs btn-icon rounded-full btn-danger"
-                                  onClick={() => handleRemoveImage(index)}
-                                >
-                                  <i className="ki-outline ki-cross"></i>
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    )}
-
-                    {formik.touched.files && formik.errors.files && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.files}
-                      </span>
-                    )}
+                              <i className="ki-outline ki-cross"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                   </div>
+                  {formik.touched.files && formik.errors.files && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.files}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
