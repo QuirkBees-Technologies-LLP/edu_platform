@@ -55,7 +55,7 @@ const CreateTradeAnalysis = forwardRef(
       description: Yup.string().required("Entry is required"),
       url: Yup.string()
         .url("Please enter a valid URL")
-        .optional("URL is required"),category: Yup.string().required("Category is required"),
+        .optional("URL is required"), category: Yup.string().required("Category is required"),
     });
 
     const formik = useFormik({
@@ -83,7 +83,7 @@ const CreateTradeAnalysis = forwardRef(
         try {
           if (selectedRow?._id) {
             let a = await updateAdminTradeAnalysis(formData).unwrap();
-            console.log("==============================>",  a);
+            console.log("==============================>", a);
             refetch();
             toast.success("IQ Insight updated successfully!");
           } else {
@@ -120,7 +120,7 @@ const CreateTradeAnalysis = forwardRef(
           title: selectedRow?.title,
           files: existingImages,
           description: selectedRow?.description,
-          category: selectedRow?.category,
+          category: selectedRow?.category?._id,
           url: selectedRow?.url,
         };
         formik.setValues(initData);
@@ -221,17 +221,16 @@ const CreateTradeAnalysis = forwardRef(
                 <div className="col-span-12">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
-                      Url<span className="text-danger">*</span>
+                      Url
                     </label>
                     <input
                       type="text"
                       placeholder="Enter url"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.url && formik.touched.url
+                      className={`form-control input input-md w-full ${formik.errors.url && formik.touched.url
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                       {...formik.getFieldProps("url")}
                     />
                     {formik.touched.url && formik.errors.url && (
@@ -315,11 +314,10 @@ const CreateTradeAnalysis = forwardRef(
                             >
                               <div
                                 className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-              ${
-                formik.touched.files && formik.errors.files
-                  ? "border-danger"
-                  : "border-gray-200"
-              }`}
+              ${formik.touched.files && formik.errors.files
+                                    ? "border-danger"
+                                    : "border-gray-200"
+                                  }`}
                               >
                                 <i className="ki-filled ki-picture"></i>
                               </div>

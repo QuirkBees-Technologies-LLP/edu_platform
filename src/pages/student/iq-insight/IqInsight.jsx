@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
-import { useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { useGetClientTradeAnalysisQuery, useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ImageLightBox from "./ImageLightBox";
 // import EducatorImage from "./EducatorImage";
@@ -9,16 +9,17 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbS
 import { Container } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
+import EducatorImage from "../client-trade-ideas/EducatorImage";
 
 const LabelMap = {
-    active: "Active",
-    pending: "Pending",
-    win: "Win",
-    partialWin: "Partial Win",
-    loss: "Loss",
-  };
+  active: "Active",
+  pending: "Pending",
+  win: "Win",
+  partialWin: "Partial Win",
+  loss: "Loss",
+};
 
- const statusColorMap = {
+const statusColorMap = {
   active: "bg-green-50 text-green-700 ring-green-600/20",
   pending: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
   win: "bg-blue-50 text-blue-700 ring-blue-600/20",
@@ -27,57 +28,57 @@ const LabelMap = {
 };
 
 const IqInsight = () => {
-    const [page, setPage] = useState();
-      const [limit] = useState(10);
-      const [tradeIdeas, setTradeIdeas] = useState([]);
-      const [isViewOpen, setIsViewOpen] = useState(false);
-      const [selectedIdea, setSelectedIdea] = useState({});
-      const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-    
-      const observer = useRef();
-    
-      const { data, isFetching } = useGetClientTradeIdeasQuery({
-        page: page,
-        limit: limit,
-      });
-    
-      const totalPages = data?.pagination?.totalPages || 1;
-    
-      useEffect(() => {
-        if (data?.data) {
-          if (page === 1) {
-            setTradeIdeas(data.data); // replace data if first page
-          } else {
-            // Append new unique items only
-            setTradeIdeas((prevIdeas) => {
-              const newIdeas = data.data.filter(
-                (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
-              );
-              return [...prevIdeas, ...newIdeas];
-            });
-          }
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [tradeIdeas, setTradeIdeas] = useState([]);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState({});
+  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+
+  const observer = useRef();
+
+  const { data, isFetching } = useGetClientTradeAnalysisQuery({
+    page: page,
+    limit: limit,
+  });
+
+  const totalPages = data?.pagination?.totalPages || 1;
+
+  useEffect(() => {
+    if (data?.data) {
+      if (page === 1) {
+        setTradeIdeas(data.data); // replace data if first page
+      } else {
+        // Append new unique items only
+        setTradeIdeas((prevIdeas) => {
+          const newIdeas = data.data.filter(
+            (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
+          );
+          return [...prevIdeas, ...newIdeas];
+        });
+      }
+    }
+  }, [data, page]);
+
+  const lastTradeIdeaRef = useCallback(
+    (node) => {
+      if (isFetching || page >= totalPages) return;
+
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setPage((prevPage) => prevPage + 1);
         }
-      }, [data, page]);
-    
-      const lastTradeIdeaRef = useCallback(
-        (node) => {
-          if (isFetching || page >= totalPages) return;
-    
-          if (observer.current) observer.current.disconnect();
-          observer.current = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-              setPage((prevPage) => prevPage + 1);
-            }
-          });
-    
-          if (node) observer.current.observe(node);
-        },
-        [isFetching, page, totalPages]
-      );
-    
-      const handleCloseView = () => {
-        setIsViewOpen(false);
-      };
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, page, totalPages]
+  );
+
+  const handleCloseView = () => {
+    setIsViewOpen(false);
+  };
   return (
     <div className="container-fluid pb-10">
       <Toolbar>
@@ -142,15 +143,14 @@ const IqInsight = () => {
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
-                        <img src="/media/avatars/300-6.png" className='rounded-full size-8 me-2' alt="" />
-                      {/* <EducatorImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} /> */}
+                      <EducatorImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
                       <div>
                         <Link
                           to="/public-profile/profiles/nft"
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
-                          {idea?.educatorDetails?.name}
-                        </Link>
+                          {idea?.educatorDetails?.first_name}{" "}
+                          {idea?.educatorDetails?.last_name}                        </Link>
                         <div className="text-2sm text-gray-700 mb-px">
                           {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
                         </div>

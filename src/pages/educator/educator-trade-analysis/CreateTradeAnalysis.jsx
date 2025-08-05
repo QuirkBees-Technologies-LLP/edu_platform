@@ -123,7 +123,7 @@ url: Yup.string()
           title: selectedRow?.title,
           files: existingImages,
           description: selectedRow?.description,
-          category: selectedRow?.category,
+          category: selectedRow?.category?._id,
           url: selectedRow?.url,
         };
         formik.setValues(initData);
@@ -230,7 +230,7 @@ url: Yup.string()
                 <div className="col-span-12">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
-                      Url<span className="text-danger">*</span>
+                      Url
                     </label>
                     <input
                       type="text"
