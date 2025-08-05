@@ -68,7 +68,7 @@ const CreateTradeAnalysis = forwardRef(
         );
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
-        formData.append("description", values.category);
+        formData.append("category", values.category);
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }

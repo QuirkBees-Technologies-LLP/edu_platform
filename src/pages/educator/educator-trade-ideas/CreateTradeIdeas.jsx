@@ -27,6 +27,7 @@ import {
   useCreateEducatorTradeIdeasMutation,
   useUpdateEducatorTradeIdeaMutation,
 } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
+import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 const CreateTradeIdeas = forwardRef(
   (
@@ -37,6 +38,7 @@ const CreateTradeIdeas = forwardRef(
     const [createEducatorTradeIdeas] = useCreateEducatorTradeIdeasMutation();
     const [updateEducatorTradeIdea] = useUpdateEducatorTradeIdeaMutation();
     const educatorId = auth?.user?._id ?? null;
+    const { data } = useGetEducatorAcademyCategoryQuery();
 
     const initialValues = {
       name: "",
@@ -521,7 +523,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div> */}
-                <div className="col-span-6">
+                <div className="col-span-12">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Images <span className="text-danger">*</span>
