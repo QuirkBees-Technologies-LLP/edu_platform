@@ -176,7 +176,7 @@ const CreateEducator = forwardRef(
 
           // API call using FormData
           if (selectedRow?._id) {
-            await updateEducator(formData).unwrap();
+            await updateEducator({ formData: formData, id: selectedRow?._id }).unwrap();
             toast.success("Educator updated successfully!");
           } else {
             await createEducator(formData).unwrap();
