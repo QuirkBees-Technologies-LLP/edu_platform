@@ -155,7 +155,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
                 educator: selectedRow?.educator?._id,
                 thumbnail: [{ file: null, dataURL: selectedRow?.image }],
                 userId: selectedRow?.userId,
-                language: selectedRow?.language
+                language: selectedRow?.language?._id
             }
             formik.setValues(initData)
         }
@@ -173,7 +173,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
             handleCloseCreate();
         }}>
             {formik.status && <Alert variant="danger">{formik.status}</Alert>}
-            <DialogContent className="p-5 max-w-[800px]" ref={ref}>
+            <DialogContent className="p-5 max-w-[475px]" ref={ref}>
                 <DialogHeader className="pb-5 pt-0 px-0">
                     <DialogTitle>{selectedRow?._id ? "Update IQ Academy Schedule" : "Create IQ Academy Schedule"}</DialogTitle>
                 </DialogHeader>

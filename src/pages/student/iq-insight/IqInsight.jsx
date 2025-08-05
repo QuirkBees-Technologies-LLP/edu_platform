@@ -10,6 +10,7 @@ import { Container } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
+import ShowMoreLess from "../../../components/ui/showmoreless";
 
 const LabelMap = {
   active: "Active",
@@ -85,7 +86,7 @@ const IqInsight = () => {
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Insight" />
           <ToolbarDescription>
-            Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.
+            {/* Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform. */}
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
@@ -97,11 +98,11 @@ const IqInsight = () => {
             {tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
-                className="card border-2 hover:bg-gray-200 cursor-pointer overflow-hidden h-fit" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null} >
-                <div className="h-52 overflow-hidden">
+                className="card border-2 hover:bg-gray-200 overflow-hidden h-fit"  >
+                <div className="h-52 overflow-hidden cursor-pointer" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}>
                   <img
                     src={idea?.image?.[0]}
-                    className="w-full h-full	 object-cover"
+                    className="w-full h-full object-cover"
                     alt=""
                   />
                 </div>
@@ -111,7 +112,8 @@ const IqInsight = () => {
                       <div className="font-bold mr-3 text-gray-900">{idea?.name}</div>
                       {/* <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}>{LabelMap[idea?.status]}</span> */}
                     </div>
-                    <p className="text-gray-800 line-clamp-3 text-sm font-normal">Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.</p>
+                    {/* <p className="text-gray-800 line-clamp-3 text-sm font-normal">Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.</p> */}
+                    <ShowMoreLess className="text-gray-900 text-xs mt-2" html={idea?.description || 'No description'} maxLength={50} />
                     {/* <div className="flex gap-10 mb-3">
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
