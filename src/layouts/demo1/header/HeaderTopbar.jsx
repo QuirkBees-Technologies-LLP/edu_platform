@@ -1,18 +1,23 @@
-import { useRef, useState } from 'react';
-import { KeenIcon } from '@/components/keenicons';
-import { toAbsoluteUrl } from '@/utils';
-import { Menu, MenuItem, MenuToggle } from '@/components';
-import { DropdownUser } from '@/partials/dropdowns/user';
-import { DropdownNotifications } from '@/partials/dropdowns/notifications';
-import { DropdownApps } from '@/partials/dropdowns/apps';
-import { DropdownChat } from '@/partials/dropdowns/chat';
-import { ModalSearch } from '@/partials/modals/search/ModalSearch';
-import { useLanguage } from '@/i18n';
-import { useAuthContext } from '../../../auth/useAuthContext';
+import { useEffect, useRef, useState } from "react";
+import { KeenIcon } from "@/components/keenicons";
+import { toAbsoluteUrl } from "@/utils";
+import { Menu, MenuItem, MenuToggle } from "@/components";
+import { DropdownUser } from "@/partials/dropdowns/user";
+import { DropdownNotifications } from "@/partials/dropdowns/notifications";
+import { DropdownApps } from "@/partials/dropdowns/apps";
+import { DropdownChat } from "@/partials/dropdowns/chat";
+import { ModalSearch } from "@/partials/modals/search/ModalSearch";
+import { useLanguage } from "@/i18n";
+import { useAuthContext } from "../../../auth/useAuthContext";
 import { ChevronDown } from "lucide-react";
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
-import { selectLanguages, selectSelectedLanguage, setSelectedLanguage } from '../../../store/reducer/studentLanagugeSlice';
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import {
+  selectLanguages,
+  selectSelectedLanguage,
+  setLanguages,
+  setSelectedLanguage,
+} from "../../../store/reducer/studentLanagugeSlice";
 import {
   Select,
   SelectContent,
@@ -20,11 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetLanguageQuery } from "../../../store/api/client/clientLanguageApiSlice";
 
 const HeaderTopbar = () => {
-  const {
-    isRTL
-  } = useLanguage();
+  const { isRTL } = useLanguage();
   const itemChatRef = useRef(null);
   const itemAppsRef = useRef(null);
   const itemUserRef = useRef(null);
@@ -32,7 +36,7 @@ const HeaderTopbar = () => {
   const profilePhoto = auth?.user?.image;
   const itemNotificationsRef = useRef(null);
   const handleShow = () => {
-    window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new Event("resize"));
   };
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const handleOpen = () => setSearchModalOpen(true);
@@ -45,71 +49,106 @@ const HeaderTopbar = () => {
   const dispatch = useDispatch();
   const languages = useSelector(selectLanguages);
   const selectedLanguage = useSelector(selectSelectedLanguage);
+  const { data } = useGetLanguageQuery();
 
-  return <> <div className="flex items-center gap-2 lg:gap-3.5">
-    {/* <button onClick={handleOpen} className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary text-gray-500">
+  useEffect(() => {
+    if(data)
+    {
+      dispatch(setLanguages(data.data))
+    }
+  }, [data]);
+
+
+  console.log("selectedLanguage",selectedLanguage)
+  return (
+    <>
+      {" "}
+      <div className="flex items-center gap-2 lg:gap-3.5">
+        {/* <button onClick={handleOpen} className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary text-gray-500">
         <KeenIcon icon="magnifier" />
       </button> */}
-    {/* <ModalSearch open={searchModalOpen} onOpenChange={handleClose} /> */}
+        {/* <ModalSearch open={searchModalOpen} onOpenChange={handleClose} /> */}
 
-    <Menu>
-      <MenuItem ref={itemChatRef} onShow={handleShow} toggle="dropdown" trigger="click" dropdownProps={{
-        placement: isRTL() ? 'bottom-start' : 'bottom-end',
-        modifiers: [{
-          name: 'offset',
-          options: {
-            offset: isRTL() ? [-170, 10] : [170, 10]
-          }
-        }]
-      }}>
-        {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
+        <Menu>
+          <MenuItem
+            ref={itemChatRef}
+            onShow={handleShow}
+            toggle="dropdown"
+            trigger="click"
+            dropdownProps={{
+              placement: isRTL() ? "bottom-start" : "bottom-end",
+              modifiers: [
+                {
+                  name: "offset",
+                  options: {
+                    offset: isRTL() ? [-170, 10] : [170, 10],
+                  },
+                },
+              ],
+            }}
+          >
+            {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
           <KeenIcon icon="messages" />
         </MenuToggle> */}
 
-        {DropdownChat({
-          menuTtemRef: itemChatRef
-        })}
-      </MenuItem>
-    </Menu>
+            {DropdownChat({
+              menuTtemRef: itemChatRef,
+            })}
+          </MenuItem>
+        </Menu>
 
-    <Menu>
-      <MenuItem ref={itemAppsRef} toggle="dropdown" trigger="click" dropdownProps={{
-        placement: isRTL() ? 'bottom-start' : 'bottom-end',
-        modifiers: [{
-          name: 'offset',
-          options: {
-            offset: isRTL() ? [-10, 10] : [10, 10]
-          }
-        }]
-      }}>
-        {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
+        <Menu>
+          <MenuItem
+            ref={itemAppsRef}
+            toggle="dropdown"
+            trigger="click"
+            dropdownProps={{
+              placement: isRTL() ? "bottom-start" : "bottom-end",
+              modifiers: [
+                {
+                  name: "offset",
+                  options: {
+                    offset: isRTL() ? [-10, 10] : [10, 10],
+                  },
+                },
+              ],
+            }}
+          >
+            {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
           <KeenIcon icon="element-11" />
         </MenuToggle> */}
 
-        {DropdownApps()}
-      </MenuItem>
-    </Menu>
+            {DropdownApps()}
+          </MenuItem>
+        </Menu>
 
-    <Menu>
-      <MenuItem ref={itemNotificationsRef} toggle="dropdown" trigger="click" dropdownProps={{
-        placement: isRTL() ? 'bottom-start' : 'bottom-end',
-        modifiers: [{
-          name: 'offset',
-          options: {
-            offset: isRTL() ? [-70, 10] : [70, 10] // [skid, distance]
-          }
-        }]
-      }}>
-        {/* <MenuToggle className="btn btn-icon btn-icon-lg relative cursor-pointer size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
+        <Menu>
+          <MenuItem
+            ref={itemNotificationsRef}
+            toggle="dropdown"
+            trigger="click"
+            dropdownProps={{
+              placement: isRTL() ? "bottom-start" : "bottom-end",
+              modifiers: [
+                {
+                  name: "offset",
+                  options: {
+                    offset: isRTL() ? [-70, 10] : [70, 10], // [skid, distance]
+                  },
+                },
+              ],
+            }}
+          >
+            {/* <MenuToggle className="btn btn-icon btn-icon-lg relative cursor-pointer size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
           <KeenIcon icon="notification-status" />
         </MenuToggle> */}
-        {DropdownNotifications({
-          menuTtemRef: itemNotificationsRef
-        })}
-      </MenuItem>
-    </Menu>
-    <div className="relative sm:w-56">
-      {/* <button
+            {DropdownNotifications({
+              menuTtemRef: itemNotificationsRef,
+            })}
+          </MenuItem>
+        </Menu>
+        <div className="relative sm:w-56">
+          {/* <button
         onClick={() => setOpen(!open)}
         className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white dark:bg-gray-100 text-gray-600 shadow-sm hover:border-gray-400 transition"
       >
@@ -141,50 +180,67 @@ const HeaderTopbar = () => {
           ))}
         </ul>
       )} */}
-      <Select
-        value={selectedLanguage?.name}
-        onValueChange={(value) => dispatch(setSelectedLanguage(value))}
-        className={`form-control input input-md w-full`}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select" />
-        </SelectTrigger>
-        <SelectContent>
-          {Array.isArray(languages) && languages.length > 0 ? (
-            languages.map((item) => (
-              <SelectItem key={item._id} value={item.name}>
-                {item.name}
-              </SelectItem>
-            ))
-          ) : (
-            <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
-          )}
-        </SelectContent>
-      </Select>
-    </div>
-    <Menu>
-      <MenuItem ref={itemUserRef} toggle="dropdown" trigger="click" dropdownProps={{
-        placement: isRTL() ? 'bottom-start' : 'bottom-end',
-        modifiers: [{
-          name: 'offset',
-          options: {
-            offset: isRTL() ? [-20, 10] : [20, 10]
-          }
-        }]
-      }}>
-        <MenuToggle className="btn rounded-full ps-0">
-          <span class="badge badge-xs badge-primary badge-outline">Premium</span>
-          <img className="size-9 rounded-full border-2 border-success shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
-        </MenuToggle>
-        {DropdownUser({
-          menuItemRef: itemUserRef
-        })}
-      </MenuItem>
-    </Menu>
-
-  </div>
-  </>
-
-
+          <Select
+            value={selectedLanguage?.name}
+            onValueChange={(value) => dispatch(setSelectedLanguage(value))}
+            className={`form-control input input-md w-full`}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.isArray(languages) && languages.length > 0 ? (
+                languages?.map((item) => (
+                  <SelectItem key={item._id} value={item.name}>
+                    {item.name}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-sm text-gray-500">
+                  No options available
+                </div>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+        <Menu>
+          <MenuItem
+            ref={itemUserRef}
+            toggle="dropdown"
+            trigger="click"
+            dropdownProps={{
+              placement: isRTL() ? "bottom-start" : "bottom-end",
+              modifiers: [
+                {
+                  name: "offset",
+                  options: {
+                    offset: isRTL() ? [-20, 10] : [20, 10],
+                  },
+                },
+              ],
+            }}
+          >
+            <MenuToggle className="btn rounded-full ps-0">
+              <span class="badge badge-xs badge-primary badge-outline">
+                Premium
+              </span>
+              <img
+                className="size-9 rounded-full border-2 border-success shrink-0"
+                src={
+                  profilePhoto?.includes("undefined")
+                    ? toAbsoluteUrl("/media/avatars/300-2.png")
+                    : profilePhoto
+                }
+                alt=""
+              />
+            </MenuToggle>
+            {DropdownUser({
+              menuItemRef: itemUserRef,
+            })}
+          </MenuItem>
+        </Menu>
+      </div>
+    </>
+  );
 };
 export { HeaderTopbar };
