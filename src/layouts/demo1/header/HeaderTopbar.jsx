@@ -10,6 +10,16 @@ import { ModalSearch } from '@/partials/modals/search/ModalSearch';
 import { useLanguage } from '@/i18n';
 import { useAuthContext } from '../../../auth/useAuthContext';
 import { ChevronDown } from "lucide-react";
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { selectLanguages, selectSelectedLanguage, setSelectedLanguage } from '../../../store/reducer/studentLanagugeSlice';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const HeaderTopbar = () => {
   const {
@@ -29,16 +39,14 @@ const HeaderTopbar = () => {
   const handleClose = () => {
     setSearchModalOpen(false);
   };
-    const [selected, setSelected] = useState("ENG");
+  const [selected, setSelected] = useState("ENG");
   const [open, setOpen] = useState(false);
 
-  const languages = [
-  { name: "English", flag: "ENG" },
-  { name: "Hindi", flag: "Hindi" },
-  { name: "Gujarati", flag: "Guj" },
-  { name: "Spanish", flag: "Span" },
-];
-  return<> <div className="flex items-center gap-2 lg:gap-3.5">
+  const dispatch = useDispatch();
+  const languages = useSelector(selectLanguages);
+  const selectedLanguage = useSelector(selectSelectedLanguage);
+
+  return <> <div className="flex items-center gap-2 lg:gap-3.5">
     {/* <button onClick={handleOpen} className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary text-gray-500">
         <KeenIcon icon="magnifier" />
       </button> */}
@@ -101,15 +109,14 @@ const HeaderTopbar = () => {
       </MenuItem>
     </Menu>
     <div className="relative sm:w-56">
-      <button
+      {/* <button
         onClick={() => setOpen(!open)}
         className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white dark:bg-gray-100 text-gray-600 shadow-sm hover:border-gray-400 transition"
       >
         {selected}
         <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""
+            }`}
         />
       </button>
 
@@ -133,7 +140,27 @@ const HeaderTopbar = () => {
             </li>
           ))}
         </ul>
-      )}
+      )} */}
+      <Select
+        value={selectedLanguage?.name}
+        onValueChange={(value) => dispatch(setSelectedLanguage(value))}
+        className={`form-control input input-md w-full`}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select" />
+        </SelectTrigger>
+        <SelectContent>
+          {Array.isArray(languages) && languages.length > 0 ? (
+            languages.map((item) => (
+              <SelectItem key={item._id} value={item.name}>
+                {item.name}
+              </SelectItem>
+            ))
+          ) : (
+            <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
+          )}
+        </SelectContent>
+      </Select>
     </div>
     <Menu>
       <MenuItem ref={itemUserRef} toggle="dropdown" trigger="click" dropdownProps={{
@@ -145,19 +172,19 @@ const HeaderTopbar = () => {
           }
         }]
       }}>
-      <MenuToggle className="btn rounded-full ps-0">
-        <span class="badge badge-xs badge-primary badge-outline">Premium</span>
-        <img className="size-9 rounded-full border-2 border-success shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
-      </MenuToggle>
-      {DropdownUser({
-        menuItemRef: itemUserRef
-      })}
-    </MenuItem>
+        <MenuToggle className="btn rounded-full ps-0">
+          <span class="badge badge-xs badge-primary badge-outline">Premium</span>
+          <img className="size-9 rounded-full border-2 border-success shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
+        </MenuToggle>
+        {DropdownUser({
+          menuItemRef: itemUserRef
+        })}
+      </MenuItem>
     </Menu>
 
   </div>
   </>
 
-  
+
 };
 export { HeaderTopbar };
