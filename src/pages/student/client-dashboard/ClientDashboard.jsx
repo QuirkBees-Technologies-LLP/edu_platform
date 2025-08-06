@@ -287,17 +287,17 @@ const ClientDashboard = () => {
                                                 alt=""
                                             />
                                             <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
-                                            <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
+                                            {/* <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
                                                 COURSES
-                                            </span>
+                                            </span> */}
                                         </div>
 
                                         <div className="p-4 md:p-7">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-                                                <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
-                                                <Link to="/video-library">
+                                                <h5 className="font-semibold text-gray-900 text-md">IQ Vault</h5>
+                                                <Link to="/iq-vault">
                                                     <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                                                        View Academies
+                                                        View IQ Vault
                                                     </button>
                                                 </Link>
                                             </div>
@@ -313,15 +313,15 @@ const ClientDashboard = () => {
                                                 alt=""
                                             />
                                             <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
-                                            <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
+                                            {/* <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
                                                 MENTORSHIP
-                                            </span>
+                                            </span> */}
                                         </div>
 
                                         <div className="p-4 md:p-7">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-                                                <h5 className="font-semibold text-gray-900 text-md">IQ Live</h5>
-                                                <Link to="/iq-live">
+                                                <h5 className="font-semibold text-gray-900 text-md">IQ Academy</h5>
+                                                <Link to="/iq-academy">
                                                     <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
                                                         View IQ Academy
                                                     </button>
@@ -333,10 +333,9 @@ const ClientDashboard = () => {
                                 <div className="col-span-12 lg:col-span-12">
                                     <div className="card rounded-none rounded-b-xl relative group overflow-hidden">
                                         {/* Full Overlay */}
-                                        <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 rounded-xl">
-                                            {/* <span className="text-2xl font-semibold tracking-widest">GUIDANCE</span> */}
+                                        {/* <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 rounded-xl">
                                             <p className="mt-2">No This feature is under-development</p>
-                                        </div>
+                                        </div> */}
 
                                         <div className="card-body p-0 relative">
                                             <img
@@ -344,17 +343,19 @@ const ClientDashboard = () => {
                                                 className="w-full h-72 object-cover rounded-t-xl"
                                                 alt=""
                                             />
-                                            <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
+                                            {/* <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">
                                                 GUIDANCE
-                                            </span>
+                                            </span> */}
                                         </div>
 
                                         <div className="p-4 md:p-7 rounded-b-xl relative z-0">
                                             <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                                                 <h5 className="font-semibold text-gray-900 text-md">IQ Strategies</h5>
-                                                <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                                                    View Strategies
-                                                </button>
+                                                <Link to="/iq-strategies">
+                                                    <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
+                                                        View Strategies
+                                                    </button>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
@@ -385,20 +386,21 @@ const ClientDashboard = () => {
                                         <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
                                             FAST START <br /> TRAINING
                                         </h2>
-
-                                        <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 text-sm 
+                                        <Link to="/fast-start-training">
+                                            <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 text-sm 
                        font-normal btn-lg rounded-2xl border border-white/30 
                        hover:bg-white/20 transition dark:text-gray-900">
-                                            Start Here
-                                        </button>
+                                                Start Here
+                                            </button>
+                                        </Link>
                                     </div>
 
                                     {/* Hover Extra Data */}
-                                    <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-1 rounded-xl">
+                                    {/* <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 flex flex-col items-center justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-1 rounded-xl">
                                         <p className="text-center p-4">
                                             No This feature is under-development
                                         </p>
-                                    </div>
+                                    </div> */}
                                 </div>
 
                                 {/* <div className="card rounded-2xl shadow-md p-6 border">

@@ -4,6 +4,7 @@ import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/clie
 import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
+import ShowMoreLess from "../../../components/ui/showmoreless";
 
 export default function FastStartTraining() {
   const [activeTab, setActiveTab] = useState("");
@@ -174,9 +175,9 @@ export default function FastStartTraining() {
               <div className="md:col-span-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <h2 className="text-lg font-medium text-gray-900">
+                    {/* <h2 className="text-lg font-medium text-gray-900">
                       My Academies
-                    </h2>
+                    </h2> */}
                     <div className="flex gap-3 sm:gap-6 flex-wrap">
                       {data?.categories?.map((tab) => (
                         <button
@@ -265,7 +266,7 @@ export default function FastStartTraining() {
 
               {/* IQ Vault Section */}
 
-              <div className="col-span-full">
+              {/* <div className="col-span-full">
                 <div className="text-gray-900">
                   <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -287,7 +288,6 @@ export default function FastStartTraining() {
 
                   <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
                     <div className="flex gap-4 pb-0">
-                      {/* Static Course Cards - Optional, not connected to lecture data */}
                       {data?.upcomingCourse?.map((i) => (
                         <div
                           key={i}
@@ -310,26 +310,20 @@ export default function FastStartTraining() {
                               }}
                             />
                           </div>
-                          <div className="p-5">
+                          <div className="p-5 min-h-[135px]">
                             <div className="flex items-center justify-between">
                               <h3 className="text-md text-gray-800 font-medium mb-2">
                                 {i?.title}
                               </h3>
-
-                              {/* <span className="badge badge-sm badge-success badge-outline">
-                                Active
-                              </span> */}
                             </div>
-                            <p className="text-xs text-gray-600 ">
-                              {i.description}
-                            </p>
+                            <ShowMoreLess className="text-gray-900 text-xs mt-2 leading-relaxed" html={i.description || 'No description'} limit={70} />
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
