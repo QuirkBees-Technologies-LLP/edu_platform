@@ -1110,6 +1110,16 @@ export const sideMenus = {
       ],
     },
     {
+      title: 'IQ Ideas',
+      icon: <Lightbulb />,
+      path: '/ideas'
+    },
+    {
+      title: 'IQ Insight',
+      icon: <ChartLine />,
+      path: '/iq-insight',
+    },
+    {
       title: 'IQ Vault',
       icon: <School />,
       path: '/iq-vault'
@@ -1120,13 +1130,6 @@ export const sideMenus = {
       icon: <Tv />,
       path: '/iq-academy',
     },
-    
-    {
-      title: 'IQ Insight',
-      icon: <ChartLine />,
-      path: '/iq-insight',
-    },
-   
     {
       title: 'IQ Academy Educators',
       icon: <Dot />,
@@ -1137,35 +1140,30 @@ export const sideMenus = {
     //   icon: <Dot />,
     //   path: '/iq-educators'
     // },
-    {
-      title: 'IQ Ideas',
-      icon: <Lightbulb />,
-      path: '/ideas'
-    },
-    {
-      title: 'IQ Vault',
-      icon: <Clapperboard />,
-      path: '/video-library'
-    },
-    {
-      title: 'IQ Academy',
-      icon: <PlayCircle />,
-      path: '/academy'
-    },
+    // {
+    //   title: 'IQ Vault',
+    //   icon: <Clapperboard />,
+    //   path: '/video-library'
+    // },
+    // {
+    //   title: 'IQ Academy',
+    //   icon: <PlayCircle />,
+    //   path: '/academy'
+    // },
     {
       title: 'IQ Strategies',
       icon: <School />,
       path: '/iq-strategies'
     },
-    {
-      title: 'Forex Academy',
-      icon: <Dot />,
-      path: '/forex-academy'
-    },
-    {
-      title: 'Personal IQ Insight',
-      icon: <Dot />,
-      path: '/personal-iq-insight'
-    },
+    // {
+    //   title: 'Forex Academy',
+    //   icon: <Dot />,
+    //   path: '/forex-academy'
+    // },
+    // {
+    //   title: 'Personal IQ Insight',
+    //   icon: <Dot />,
+    //   path: '/personal-iq-insight'
+    // },
   ],
 };

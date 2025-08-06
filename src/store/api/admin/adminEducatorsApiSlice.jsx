@@ -17,10 +17,10 @@ export const adminEducatorsApiSlice = createApi({
             }),
         }),
         updateEducator: builder.mutation({
-            query: (updatedTrade) => ({
-                url: `/admin/educator/update/${updatedTrade.id}`,
+            query: ({formData, id}) => ({
+                url: `/admin/educator/update/${id}`,
                 method: 'PUT',
-                body: updatedTrade,
+                body: formData,
             }),
         }),
         deleteEducator: builder.mutation({

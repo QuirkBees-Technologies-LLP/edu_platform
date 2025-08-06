@@ -64,7 +64,6 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Time frame is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      category: Yup.string().required("Educator ID is required"),
       entry: Yup.string().required("Entry is required"),
       description: Yup.string().required("Entry is required"),
       invalidation: Yup.number()
