@@ -271,11 +271,11 @@ export default function FastStartTraining() {
 
               {/* IQ Vault Section */}
 
-              {/* <div className="col-span-full">
+              <div className="col-span-full">
                 <div className="text-gray-900">
                   <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h2 className="text-xl font-medium">IQ Vault</h2>
+                      <h2 className="text-xl font-medium">Fast Start Training</h2>
                       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
                           <option>Experience</option>
@@ -328,7 +328,7 @@ export default function FastStartTraining() {
                     </div>
                   </div>
                 </div>
-              </div> */}
+              </div>
             </div>
           </div>
         )}
