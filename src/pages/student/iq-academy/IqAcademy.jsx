@@ -72,13 +72,13 @@ export default function IqAcademy() {
               </button>
             ))}
           </div>
-          <div>
+          {/* <div>
             <select className="bg-gray-100 border rounded-lg px-3 py-3 text-sm text-gray-600 focus:outline-none">
               <option>Scalping</option>
               <option>Day Trading</option>
               <option>Swing Trading</option>
             </select>
-          </div>
+          </div> */}
         </div>
       )}
 
