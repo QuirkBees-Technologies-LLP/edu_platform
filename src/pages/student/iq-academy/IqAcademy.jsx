@@ -94,9 +94,9 @@ export default function IqAcademy() {
               <div className="calender">
                 {/* Table Header */}
                 <div className="grid grid-cols-8 text-center table_head">
-                  <div className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal">Educators</div>
+                  <div className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal rounded-tl-2xl">Educators</div>
                   {days.map((day) => (
-                    <div key={day} className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal">
+                    <div key={day} className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal last:rounded-tr-2xl">
                       {day}
                     </div>
                   ))}

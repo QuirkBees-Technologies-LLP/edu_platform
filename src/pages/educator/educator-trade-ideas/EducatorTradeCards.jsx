@@ -241,7 +241,7 @@ const EducatorTradeCards = () => {
           </div>
 
           {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>}
+          {page >= totalPages && <p className="text-center my-10 text-gray-800">No more IQ Ideas to load.</p>}
         </div>
 
         <ViewEducatorTradeIdeas

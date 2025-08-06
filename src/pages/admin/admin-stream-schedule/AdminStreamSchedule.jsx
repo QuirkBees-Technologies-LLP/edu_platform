@@ -268,7 +268,7 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
   };
 
   return (
-    <div className='container-fluid'>
+    <div className='container-fluid pb-5'>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Academy Schedule" />

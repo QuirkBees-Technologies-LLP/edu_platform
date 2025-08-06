@@ -68,7 +68,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
+    <div className="login card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
       <form className="card-body flex flex-col gap-5 p-7" noValidate>
         <div className="text-center mb-2.5">
           <div className="text-center">

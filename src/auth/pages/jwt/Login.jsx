@@ -67,7 +67,7 @@ const Login = () => {
   };
 
   return (
-    <div className="card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
+    <div className="login card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
       <form className="card-body flex flex-col login_card gap-5 p-7" noValidate>
         <div className="flex justify-center mb-5">
           <img src="/media/app/default-logo-dark.png" className="w-100 h-5" alt="" />
@@ -82,7 +82,7 @@ const Login = () => {
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
         <Link
           to="/auth/student/login"
-          className="btn border-1 border-[#35353C] text-gray-300 flex justify-center grow items-center"
+          className="btn border-1 border-[#35353C] text-gray-300 dark:text-gray-800 flex justify-center grow items-center"
         >  <GraduationCap size={16} /> Student Sign In
         </Link>
         <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ const Login = () => {
         </div>
         <Link
           to="/auth/admin/login"
-          className="btn border-1 border-[#35353C] text-gray-300 flex justify-center grow items-center"
+          className="btn border-1 border-[#35353C] text-gray-300 dark:text-gray-800 flex justify-center grow items-center"
         >        <CircleUser size={16} />  Admin/Educator Sign In
         </Link>
       </form>

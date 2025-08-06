@@ -970,14 +970,14 @@ chat */
 	color: unset;
 } */
 
-input:-webkit-autofill {
+.login input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0px 1000px #191819 inset !important;
   box-shadow: 0 0 0px 1000px #191819 inset !important;
-  -webkit-text-fill-color: #89808B !important;
+  -webkit-text-fill-color: #e1e1e1 !important;
 }
 
-input[type="password"]:-webkit-autofill {
+.login input[type="password"]:-webkit-autofill {
   -webkit-box-shadow: 0 0 0px 1000px #191819 inset !important;
   box-shadow: 0 0 0px 1000px #171718 inset !important;
-  -webkit-text-fill-color: #89808B !important;
+  -webkit-text-fill-color: #e1e1e1 !important;
 }
