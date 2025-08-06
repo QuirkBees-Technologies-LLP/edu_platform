@@ -1,5 +1,6 @@
 
 import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User, Dot, School, Tv, ChartLine } from "lucide-react";
+import { useAuthContext } from "../auth/useAuthContext";
 
 
 export const MENU_SIDEBAR = [
@@ -966,6 +967,23 @@ export const ADMIN_MENU = [
     path: '/live-session'
   },
 ];
+
+// utils/filterStudentSidebar.js
+export const filterSidebarByPlan = (sidebarItems = [], allowedPaths = []) => {
+  return sidebarItems
+    .map((item) => {
+      if (item.children) {
+        const filteredChildren = filterSidebarByPlan(item.children, allowedPaths);
+        if (filteredChildren.length > 0) {
+          return { ...item, children: filteredChildren };
+        }
+      } else if (allowedPaths.includes(item.path)) {
+        return item;
+      }
+      return null;
+    })
+    .filter(Boolean);
+};
 
 
 export const sideMenus = {

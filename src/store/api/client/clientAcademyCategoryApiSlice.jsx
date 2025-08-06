@@ -30,6 +30,20 @@ export const clientAcademyCategoryApiSlice = createApi({
         return `/users/course/get?${searchParams.toString()}`;
       },
     }),
+    getFirstStartTrainingSection: builder.query({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+
+        if (params.mainSection)
+          searchParams.append("mainSection", params.mainSection);
+        if (params.language) searchParams.append("language", params.language);
+        if (params.id) searchParams.append("id", params.id);
+        if (params.category) searchParams.append("categoryId", params.category);
+        if (params.language) searchParams.append("language", params.language);
+
+        return `/users/course/first-start-training?${searchParams.toString()}`;
+      },
+    }),
   }),
 });
 
@@ -37,4 +51,5 @@ export const {
   useGetAcademyCategoryQuery,
   useGetAcademySingleCategoryQuery,
   useGetAcademyCategoryByMainSectionQuery,
+  useGetFirstStartTrainingSectionQuery,
 } = clientAcademyCategoryApiSlice;
