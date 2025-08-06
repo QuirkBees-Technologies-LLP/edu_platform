@@ -106,14 +106,14 @@ const IqInsight = () => {
                     alt=""
                   />
                 </div>
-                <div className="card-border card-rounded-b flex flex-col gap-2 justify-between">
+                <div className="card-border card-rounded-b flex flex-col gap-2 justify-between min-h-[210px]">
                   <div className="px-5 py-4.5 ">
                     <div className="flex item-center justify-between  mb-2">
                       <div className="font-bold mr-3 text-gray-900">{idea?.name}</div>
                       {/* <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}>{LabelMap[idea?.status]}</span> */}
                     </div>
                     {/* <p className="text-gray-800 line-clamp-3 text-sm font-normal">Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.</p> */}
-                    <ShowMoreLess className="text-gray-900 text-xs mt-2" html={idea?.description || 'No description'} maxLength={50} />
+                    <ShowMoreLess className="text-gray-900 text-sm mt-2 leading-relaxed" html={idea?.description || 'No description'} limit={100} />
                     {/* <div className="flex gap-10 mb-3">
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
