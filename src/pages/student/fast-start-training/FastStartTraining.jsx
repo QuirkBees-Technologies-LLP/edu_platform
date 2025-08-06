@@ -1,6 +1,9 @@
 import { CirclePlay } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
+import {
+  useGetAcademyCategoryByMainSectionQuery,
+  useGetFirstStartTrainingSectionQuery,
+} from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
@@ -22,18 +25,20 @@ export default function FastStartTraining() {
     isLoading: isCategoryLoading,
     isError,
     refetch,
-  } = useGetAcademyCategoryByMainSectionQuery({
+  } = useGetFirstStartTrainingSectionQuery({
     mainSection: "fastStartTraining",
     id,
     category: activeTab,
     language: category,
+  },{
+    refetchOnMountOrArgChange: true,
   });
 
   useEffect(() => {
-    if (selectedLanguage) {
-      setCategory(selectedLanguage)
+    if (id && activeTab && category) {
+      refetch();
     }
-  }, [selectedLanguage]);
+  }, [id, activeTab, category, refetch]);
 
   const categories = data?.category || [];
   const course = data?.course || [];
