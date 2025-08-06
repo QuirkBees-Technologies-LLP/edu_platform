@@ -152,7 +152,7 @@ const PersonalIqInsight = () => {
     setIsViewOpen(false);
     };
   return (
-    <div className="container-fluid">
+    <div className="container-fluid pb-5">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Personal IQ Insight" />

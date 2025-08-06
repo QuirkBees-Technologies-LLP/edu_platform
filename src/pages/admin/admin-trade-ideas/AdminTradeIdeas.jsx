@@ -380,7 +380,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [activeTab, setActiveTab] = useState('TableView');
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid pb-5">
       <div className="pb-10">
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button

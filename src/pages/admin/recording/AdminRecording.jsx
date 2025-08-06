@@ -285,7 +285,7 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
   }, []);
 
   return (
-    <div className='container-fluid'>
+    <div className='container-fluid pb-5'>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Educator & Admin Recordings" />

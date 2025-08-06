@@ -251,7 +251,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   };
 
   return (
-    <div className='container-fluid mt-5'>
+    <div className='container-fluid p-0 mt-5'>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Academy Category" />

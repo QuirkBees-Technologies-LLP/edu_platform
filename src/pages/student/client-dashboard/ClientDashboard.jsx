@@ -514,12 +514,12 @@ const ClientDashboard = () => {
                                 <div className="card rounded-2xl shadow-md overflow-hidden relative group">
                                     {/* Hover Overlay */}
                                     <div className="absolute inset-0 bg-gray-300 dark:bg-gray-100 opacity-0 group-hover:opacity-100 
-                  transition-opacity duration-300 z-10 flex flex-col items-center justify-center text-center p-4">
+                  transition-opacity duration-300 z-1 flex flex-col items-center justify-center text-center p-4">
                                         <h3 className="">No This feature is under-development</h3>
                                     </div>
 
                                     {/* Header */}
-                                    <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl relative z-20">
+                                    <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl relative z-1">
                                         <h3 className="text-white font-semibold text-sm">Live Updates</h3>
                                         <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
                                             <button
