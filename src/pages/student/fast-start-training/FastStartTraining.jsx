@@ -1,6 +1,9 @@
 import { CirclePlay } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
+import {
+  useGetAcademyCategoryByMainSectionQuery,
+  useGetFirstStartTrainingSectionQuery,
+} from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
@@ -23,18 +26,20 @@ export default function FastStartTraining() {
     isLoading: isCategoryLoading,
     isError,
     refetch,
-  } = useGetAcademyCategoryByMainSectionQuery({
+  } = useGetFirstStartTrainingSectionQuery({
     mainSection: "fastStartTraining",
     id,
     category: activeTab,
     language: category,
+  },{
+    refetchOnMountOrArgChange: true,
   });
 
   useEffect(() => {
-    if (selectedLanguage) {
-      setCategory(selectedLanguage)
+    if (id && activeTab && category) {
+      refetch();
     }
-  }, [selectedLanguage]);
+  }, [id, activeTab, category, refetch]);
 
   const categories = data?.category || [];
   const course = data?.course || [];
@@ -266,11 +271,11 @@ export default function FastStartTraining() {
 
               {/* IQ Vault Section */}
 
-              {/* <div className="col-span-full">
+              <div className="col-span-full">
                 <div className="text-gray-900">
                   <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h2 className="text-xl font-medium">IQ Vault</h2>
+                      <h2 className="text-xl font-medium">Fast Start Training</h2>
                       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
                           <option>Experience</option>
@@ -323,7 +328,7 @@ export default function FastStartTraining() {
                     </div>
                   </div>
                 </div>
-              </div> */}
+              </div>
             </div>
           </div>
         )}
