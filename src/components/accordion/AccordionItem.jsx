@@ -11,7 +11,7 @@ const AccordionItemComponent = ({
 }) => {
   const buildIndicator = () => {
     return indicator || <span className="accordion-indicator">
-          {isOpen ? <KeenIcon icon="down" className="text-gray-600 text-sm" /> : <KeenIcon icon="up" className="text-gray-600 text-sm" />}
+          {isOpen ? <KeenIcon icon="down" className="text-gray-600 text-sm" /> : <KeenIcon icon="right" className="text-gray-600 text-sm" />}
         </span>;
   };
   return <div className={clsx('accordion-item [&:not(:last-child)]:border-b border-b-gray-200', isOpen && 'active')}>

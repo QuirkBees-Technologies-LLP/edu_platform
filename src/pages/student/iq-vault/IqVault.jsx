@@ -9,6 +9,7 @@ export default function IqVault() {
   const [lecture, setLecture] = useState();
   const [id, setId] = useState();
   const [category, setCategory] = useState();
+  const [activeLectureId, setActiveLectureId] = useState(null);
 
   console.log(id);
   const handleClick = (id) => {
@@ -148,16 +149,23 @@ export default function IqVault() {
                       {course.map((c, index) => (
                         <AccordionItem key={c._id} title={`${index + 1}. ${c.title}`}>
                           {c?.lectures?.map((t) => (
-                            <div
-                              key={t._id}
-                              onClick={() => handleBannerClick(t._id)}
-                              className="flex items-center p-4 border-t border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-900 transition"
-                            >
-                              <CirclePlay className="mr-2 text-gray-400" />
-                              <span className="text-gray-800 font-medium text-xs">
-                                {t.title}
-                              </span>
-                            </div>
+                           <div
+                            key={t._id} 
+                            onClick={() => {
+                              handleBannerClick(t._id);
+                              setActiveLectureId(t._id);
+                            }}
+                            className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
+                              ${activeLectureId === t._id 
+                                ? 'bg-gray-300 dark:bg-slate-800' 
+                                : 'hover:bg-gray-50 dark:hover:bg-slate-900'
+                              }`}
+                          >
+                            <CirclePlay className="mr-2 text-gray-400" />
+                            <span className="text-gray-800 font-medium text-xs">
+                              {t.title}
+                            </span>
+                          </div>
                           ))}
                         </AccordionItem>
                       ))}
