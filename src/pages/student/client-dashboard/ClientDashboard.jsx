@@ -20,7 +20,7 @@ import {
 const ClientDashboard = () => {
   const { auth } = useAuthContext();
 
-  const allowedRoutes = auth?.user?.name.plan?.allowedSideBar;
+  const allowedRoutes = auth?.user?.plan?.allowedSideBar;
 
   console.log(auth);
   const userName = auth?.user?.name;
@@ -280,8 +280,8 @@ const ClientDashboard = () => {
   const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   const data = activeTab === "feed" ? feedData : ideasData;
-  const IQAcademy = "/iq-live";
-  const ViewAcademies = "/video-library";
+  const IQAcademy = "/iq-academy";
+  const IQStrategies = "/iq-strategies";
   const IQVault = "/iq-vault";
 
   const handleRouteClick = () => {
@@ -388,8 +388,8 @@ const ClientDashboard = () => {
                         <h5 className="font-semibold text-gray-900 text-md">
                           IQ Academy
                         </h5>
-                        {allowedRoutes?.includes(ViewAcademies) ? (
-                          <Link to={ViewAcademies}>
+                        {allowedRoutes?.includes(IQAcademy) ? (
+                          <Link to={IQAcademy}>
                             <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
                                View IQ Academy
                             </button>
@@ -434,8 +434,8 @@ const ClientDashboard = () => {
                         <h5 className="font-semibold text-gray-900 text-md">
                           IQ Strategies
                         </h5>
-                        {allowedRoutes?.includes(ViewAcademies) ? (
-                          <Link to={ViewAcademies}>
+                        {allowedRoutes?.includes(IQStrategies) ? (
+                          <Link to={IQStrategies}>
                             <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
                                View Strategies
                             </button>
