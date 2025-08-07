@@ -1,45 +1,29 @@
 import { CirclePlay } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import {
-  useGetAcademyCategoryByMainSectionQuery,
-  useGetFirstStartTrainingSectionQuery,
-} from "../../../store/api/client/clientAcademyCategoryApiSlice";
+import React, { useState } from "react";
+import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
-import { useSelector } from "react-redux";
-import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
-import ShowMoreLess from "../../../components/ui/showmoreless";
 
-export default function FastStartTraining() {
-  const [activeTab, setActiveTab] = useState("");
+export default function IqVault() {
+  const [activeTab, setActiveTab] = useState();
   const [lecture, setLecture] = useState();
   const [id, setId] = useState();
   const [category, setCategory] = useState();
 
+  console.log(id);
   const handleClick = (id) => {
     setId(id); // or simply: id, based on your API setup
   };
-  const selectedLanguage = useSelector(selectSelectedLanguage);
 
-  console.log("selectedLanguage======>", selectedLanguage);
   const {
     data,
     isLoading: isCategoryLoading,
     isError,
-    refetch,
-  } = useGetFirstStartTrainingSectionQuery({
-    mainSection: "fastStartTraining",
+  } = useGetAcademyCategoryByMainSectionQuery({
+    mainSection: "IQ Acedemy",
     id,
     category: activeTab,
-    language: category,
-  },{
-    refetchOnMountOrArgChange: true,
+    // language: 'italian',
   });
-
-  useEffect(() => {
-    if (id && activeTab && category) {
-      refetch();
-    }
-  }, [id, activeTab, category, refetch]);
 
   const categories = data?.category || [];
   const course = data?.course || [];
@@ -84,8 +68,8 @@ export default function FastStartTraining() {
 
   const tabs = [
     {
-      id: "Backoffice",
-      name: "Backoffice",
+      id: "Forex",
+      name: "Forex",
       content: "Select the lactures", // Dynamic content rendered based on `lecture`
     },
     {
@@ -102,28 +86,27 @@ export default function FastStartTraining() {
     },
   ];
 
-  // if (isError) {
-  //   return (
-  //     <>
-  //       <div className="container-fluid">
-  //         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-  //           <div className="col-span-full">
-  //             <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
-  //               <div className="text-center">
-  //                 <h1 className="text-4xl font-bold tracking-wider pb-2">
-  //                   No Such category found{" "}
-  //                 </h1>
-  //                 <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
+  //   if (isError) {
+  //     return (
+  //       <>
+  //         <div className="container-fluid">
+  //           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+  //             <div className="col-span-full">
+  //               <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
+  //                 <div className="text-center">
+  //                   <h1 className="text-4xl font-bold tracking-wider pb-2">
+  //                     No Such category found{" "}
+  //                   </h1>
+  //                   <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
+  //                 </div>
   //               </div>
   //             </div>
   //           </div>
   //         </div>
-  //       </div>
-  //     </>
-  //   );
-  // }
+  //       </>
+  //     );
+  //   }
 
-  // console.log(isError)
   return (
     <>
       <div>
@@ -141,7 +124,7 @@ export default function FastStartTraining() {
                     </h1>
 
                     <p className="text-lg sm:text-xl tracking-widest">
-                      TRAINING
+                      ACADEMY
                     </p>
                   </div>
                 </div>
@@ -180,9 +163,9 @@ export default function FastStartTraining() {
               <div className="md:col-span-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    {/* <h2 className="text-lg font-medium text-gray-900">
+                    <h2 className="text-lg font-medium text-gray-900">
                       My Academies
-                    </h2> */}
+                    </h2>
                     <div className="flex gap-3 sm:gap-6 flex-wrap">
                       {data?.categories?.map((tab) => (
                         <button
@@ -275,7 +258,7 @@ export default function FastStartTraining() {
                 <div className="text-gray-900">
                   <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h2 className="text-xl font-medium">Fast Start Training</h2>
+                      <h2 className="text-xl font-medium">IQ Vault</h2>
                       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
                           <option>Experience</option>
@@ -293,13 +276,16 @@ export default function FastStartTraining() {
 
                   <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
                     <div className="flex gap-4 pb-0">
+                      {/* Static Course Cards - Optional, not connected to lecture data */}
                       {data?.upcomingCourse?.map((i) => (
                         <div
                           key={i}
                           className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
-                          onClick={() => handleClick(i?._id)}
                         >
-                          <div className="rounded-t-xl overflow-hidden">
+                          <div
+                            className="rounded-t-xl overflow-hidden"
+                            onClick={() => handleClick(i?._id)}
+                          >
                             <img
                               src={
                                 i.imageUrl
@@ -315,13 +301,19 @@ export default function FastStartTraining() {
                               }}
                             />
                           </div>
-                          <div className="p-5 min-h-[135px]">
+                          <div className="p-5">
                             <div className="flex items-center justify-between">
                               <h3 className="text-md text-gray-800 font-medium mb-2">
                                 {i?.title}
                               </h3>
+                             
+                              {/* <span className="badge badge-sm badge-success badge-outline">
+                                Active
+                              </span> */}
                             </div>
-                            <ShowMoreLess className="text-gray-900 text-xs mt-2 leading-relaxed" html={i.description || 'No description'} limit={70} />
+                            <p className="text-xs text-gray-600">
+                              {i.description}
+                            </p>
                           </div>
                         </div>
                       ))}

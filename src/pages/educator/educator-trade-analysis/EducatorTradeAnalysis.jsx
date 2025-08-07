@@ -164,7 +164,26 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
           headerClassName: "min-w-[200px]",
         },
       },
-
+      {
+        accessorFn: (row) => row.name,
+        id: "Category",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Category" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              <p>
+                {info.row.original.category?.name ?? "NA"}
+              </p>
+            </div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
       {
         id: "click",
         header: () => "",
@@ -240,7 +259,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
             <input
               type="text"
               placeholder="Search Members"
-              className="input input-md ps-8"
+              className="input input-md ps-8 h-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} // Update search term
             />
@@ -298,7 +317,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
           <ToolbarActions>
             <div className="text-end pb-4">
               <button className="btn btn-primary" onClick={handleClickOpen}>
-                 Create IQ Insight
+                Create IQ Insight
               </button>
             </div>
           </ToolbarActions>
@@ -340,7 +359,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
             handleDeleteClose={handleDeleteClose}
             selectedRow={selectedRow}
           />
-        )} 
+        )}
       </>
     </div>
   );

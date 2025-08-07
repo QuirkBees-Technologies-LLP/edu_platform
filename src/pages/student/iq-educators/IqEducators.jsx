@@ -266,7 +266,7 @@ const IqEducators = () => {
                 {response?.data?.recordings?.map((course) => (
                   <div
                     key={course.id}
-                    className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0"
+                    className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
                   >
                     <div className="rounded-t-xl overflow-hidden">
                       <img
@@ -288,7 +288,7 @@ const IqEducators = () => {
                     </div>
                     <div className="p-4">
                       <h3 className="text-md font-normal mb-2">
-                        {course.filename}
+                        {course.call_title}
                       </h3>
                       <p className="text-xs text-gray-600">{course.address}</p>
                     </div>

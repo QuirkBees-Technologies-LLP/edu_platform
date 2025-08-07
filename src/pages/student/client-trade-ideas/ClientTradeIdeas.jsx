@@ -13,7 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../../components/ui/breadcrumb";
-import { Container, Link2, Link2Icon } from "lucide-react";
+import { ArrowDown, ArrowUp, Container, Link2, Link2Icon } from "lucide-react";
 import {
   Toolbar,
   ToolbarActions,
@@ -30,11 +30,11 @@ const LabelMap = {
 };
 
 const statusColorMap = {
-  active: "bg-green-50 text-green-700 ring-green-600/20",
-  pending: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-  win: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  partialWin: "bg-violet-50 text-violet-700 ring-violet-600/20",
-  loss: "bg-red-50 text-red-700 ring-red-600/20",
+  active: "green",
+  pending: "yellow",
+  win: "blue",
+  partialWin: "violet",
+  loss: "red",
 };
 
 const ClientTradeIdeas = () => {
@@ -100,15 +100,15 @@ const ClientTradeIdeas = () => {
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Ideas" />
           <ToolbarDescription>
-            Oversee educator profiles, manage their sessions, and ensure quality
-            trade and course content across the platform.
+            {/* Oversee educator profiles, manage their sessions, and ensure quality
+            trade and course content across the platform. */}
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
@@ -132,11 +132,11 @@ const ClientTradeIdeas = () => {
                 </div>
                 <div className="h-[405px] card-border card-rounded-b flex flex-col gap-2 justify-between">
                   <div className="px-5 py-4.5 ">
-                    <div className="flex item-center justify-between  mb-3">
-                      <div className="font-bold mr-3 text-gray-900">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 justify-between  mb-3">
+                      <div className="text-sm sm:text-xs md:text-sm font-medium mr-3 text-gray-900">
                         {idea?.name.toUpperCase()}/{idea?.type.toUpperCase()}
                       </div>
-                      <div className="ideas_link flex gap-5">
+                      <div className="ideas_link flex items-center md:gap-5 gap-3">
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}
                         >
@@ -146,7 +146,7 @@ const ClientTradeIdeas = () => {
                         {idea?.url ? (
                           <Link to={idea.url} className="z-9">
                             <div className="link_card bg-primary rounded-lg p-2">
-                              <Link2 className="text-gray-100" />
+                              <Link2 className="text-gray-100 dark:text-gray-900" />
                             </div>
                           </Link>
                         ) : (
@@ -157,7 +157,7 @@ const ClientTradeIdeas = () => {
                             className="z-9 cursor-pointer text-blue-500 underline"
                           >
                             <div className="link_card bg-primary rounded-lg p-2">
-                              <Link2 className="text-gray-100" />
+                              <Link2 className="text-gray-100 dark:text-gray-900" />
                             </div>
                           </span>
                         )}
@@ -171,7 +171,7 @@ const ClientTradeIdeas = () => {
                         <div className="text-2sm text-gray-800 uppercase mb-1">
                           Entry
                         </div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
+                        <span class="mt-1 inline-flex items-center rounded-md bg-green-50 dark:bg-green-700 dark:text-green-300 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
                           {idea?.entry}
                         </span>
                       </div>
@@ -179,7 +179,7 @@ const ClientTradeIdeas = () => {
                         <div className="text-2sm text-gray-800 uppercase mb-1">
                           Invalidation
                         </div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
+                        <span class="mt-1 inline-flex items-center rounded-md bg-red-50 dark:bg-red-700 dark:text-red-300 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
                           {idea?.invalidation}
                         </span>
                       </div>
@@ -233,11 +233,115 @@ const ClientTradeIdeas = () => {
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
+          <div className="grid grid-cols-12 gap-5 md:gap-6">
+            {tradeIdeas?.map((trade, index) => (
+              <div
+                key={trade._id}
+                className="col-span-12 sm:col-span-6 lg:col-span-4 card rounded-2xl overflow-hidden"
+              >
+                <img
+                  src={trade?.image[0]}
+                  alt={trade.pair}
+                  className="w-full h-40 object-cover"
+                />
+                <div className="p-4">
+                  <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
+                    <div className="flex items-center gap-2">
+                      {trade?.type === "sell" ? (
+                        <ArrowDown className="text-red-500 w-8 h-8 shrink-0" />
+                      ) : (
+                        <ArrowUp className="text-green-500 w-8 h-8 shrink-0 " />
+                      )}
 
+                      <div>
+                        <h3 className="font-medium text-gray-800 text-sm mb-1">
+                          {trade?.type.toUpperCase()}
+                        </h3>
+                        <h3 className="font-medium text-gray-800 text-sm mb-1">
+                          {trade?.name.toUpperCase()}
+                        </h3>
+                        <p className="text-2xs font-normal text-gray-500 line-clamp-1">
+                          {format(trade?.createAt, "MMM dd, yyyy, hh:mm a")}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                    >
+                      {trade.status.toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div className="mt-6 space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 font-normal text-sm">
+                        Entry
+                      </span>
+                      <span className="font-medium text-gray-800">
+                        {trade.entry}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 font-normal text-sm">
+                        Stop Loss
+                      </span>
+                      <span className="font-medium text-gray-800">
+                        {trade.invalidation}
+                      </span>
+                    </div>
+                    {[0, 1, 2].map((idx) => (
+                      <div key={idx} className="flex justify-between text-sm">
+                        <span className="text-gray-600 font-normal text-sm">
+                          {`Exit ${idx + 1}`}
+                        </span>
+                        <span className="font-medium text-gray-800">
+                          {trade?.exits?.[idx] ?? "N/A"}
+                        </span>
+                      </div>
+                    ))}
+                    {/* <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 font-normal text-sm">
+                          Exit 2
+                        </span>
+                        <span className="font-medium text-gray-800">
+                          {trade.exit2}
+                        </span>
+                      </div> */}
+                  </div>
+                </div>
+                <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
+                  <div className="flex items-center">
+                    <EducatorImage
+                      educator={trade?.educatorDetails}
+                      defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                    />
+                    <div className="">
+                      <Link
+                        to="#"
+                        className="text-2sm text-gray-800 hover:text-primary mb-px"
+                      >
+                        {trade?.educatorDetails?.first_name}{" "}
+                        {trade?.educatorDetails?.last_name}
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="flex mt-2">
+                    <div className="text-2sm text-gray-700 mb-px">
+                      {trade?.category
+                        ? trade?.category?.name
+                        : "Category not assigned"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
           {isFetching && <p>Loading more...</p>}
           {page >= totalPages && (
-            <p className="text-center my-10">No more trade ideas to load.</p>
+            <p className="text-center text-gray-900 my-10">
+              No more trade ideas to load.
+            </p>
           )}
         </div>
 

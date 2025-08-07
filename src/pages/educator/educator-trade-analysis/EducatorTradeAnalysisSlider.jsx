@@ -53,7 +53,7 @@ export default function EducatorTradeSlider({ sliderImages, setIsLightBoxOpen , 
               <div className="chat p-3 border-2 border-b-0 rounded-t-lg">
                 <h3 className="text-lg text-gray-900 font-semibold">Feed</h3>
               </div>
-              <div className="chat_message border-2 border-b-0 overflow-auto h-screen">
+              <div className="chat_message border-2 border-b-0 overflow-auto h-[480px]">
                 <div className="no_data flex items-center justify-center h-full hidden">
                   <div className="text-lg text-gray-900 font-semibold">No Chat</div>
                 </div>

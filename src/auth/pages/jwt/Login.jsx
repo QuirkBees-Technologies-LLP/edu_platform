@@ -67,32 +67,32 @@ const Login = () => {
   };
 
   return (
-    <div className="card max-w-[390px] w-full">
+    <div className="login card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
       <form className="card-body flex flex-col login_card gap-5 p-7" noValidate>
         <div className="flex justify-center mb-5">
-          <img src="/media/app/default-logo.png" className="w-100 h-5 light_mode" alt="" />
-          <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" />
+          <img src="/media/app/default-logo-dark.png" className="w-100 h-5" alt="" />
+          {/* <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" /> */}
         </div>
         <div className="text-center mb-2.5">
-          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
+          <h3 className="text-lg font-semibold text-gray-100 dark:text-gray-900 leading-none mb-2.5">
             Sign in
           </h3>
-          <p>Let's Get Started IQONIC</p>
+          <p className="text-gray-500">Let's Get Started IQONIC</p>
         </div>
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
         <Link
           to="/auth/student/login"
-          className="btn  btn-light flex justify-center grow items-center"
+          className="btn border-1 border-[#35353C] text-gray-300 dark:text-gray-800 flex justify-center grow items-center"
         >  <GraduationCap size={16} /> Student Sign In
         </Link>
         <div className="flex items-center gap-2">
-          <span className="border-t border-gray-200 w-full"></span>
+          <span className="border-t border-[#35353C] w-full"></span>
           <span className="text-2xs text-gray-500 font-medium uppercase">Or</span>
-          <span className="border-t border-gray-200 w-full"></span>
+          <span className="border-t border-[#35353C] w-full"></span>
         </div>
         <Link
           to="/auth/admin/login"
-          className="btn  btn-light flex justify-center grow items-center"
+          className="btn border-1 border-[#35353C] text-gray-300 dark:text-gray-800 flex justify-center grow items-center"
         >        <CircleUser size={16} />  Admin/Educator Sign In
         </Link>
       </form>
