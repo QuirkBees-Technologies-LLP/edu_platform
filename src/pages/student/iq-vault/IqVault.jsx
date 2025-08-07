@@ -26,16 +26,17 @@ export default function IqVault() {
     // language: 'italian',
   });
 
+  const categories = data?.category || [];
+  const course = data?.course || [];
+
   useEffect(() => {
     console.log("data in side ", data);
     if (!activeTab) {
       setActiveTab(data?.ActiveCategory[0]?.categoryId);
+      setLecture(course[0]?.lectures[0]);
       console.log("activeTab", activeTab);
     }
   }, [data]);
-
-  const categories = data?.category || [];
-  const course = data?.course || [];
 
   const handleBannerClick = (id) => {
     const lectureData = course.flatMap((c) => c.lectures || []);
@@ -201,7 +202,7 @@ export default function IqVault() {
                           `${data?.ActiveCategory[0]?.categoryId}` &&
                           lecture ? (
                           <div className="card">
-                            {lecture.type !== "TEXT" && (
+                            {lecture.type === "VIDEO" && (
                               // <iframe
                               //     className="w-full aspect-video rounded-t-md"
                               //     src={lecture.content || lecture.VideoUrl}
@@ -245,12 +246,10 @@ export default function IqVault() {
                               </p>
                             </div>
                           </div>
-                        ) : typeof tab.content === "string" ? (
-                          <p className="text-gray-800 text-base leading-relaxed">
-                            {tab.content}
-                          </p>
                         ) : (
-                          tab.content
+                          <p className="text-gray-800 text-base leading-relaxed">
+                            {"No any Lecture found"}
+                          </p>
                         )}
                       </div>
                     ))}

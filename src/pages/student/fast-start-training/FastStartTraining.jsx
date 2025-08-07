@@ -39,10 +39,8 @@ export default function FastStartTraining() {
     }
   );
   useEffect(() => {
-    
     if (!activeTab) {
       setActiveTab(data?.ActiveCategory[0]?.categoryId);
-      
     }
   }, [data]);
 
