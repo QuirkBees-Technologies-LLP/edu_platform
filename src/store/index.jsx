@@ -27,6 +27,18 @@ import { educatorTradeAnalysisApiSlice } from "./api/educator/educatorTradeAnaly
 import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSlice";
 import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
 import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'; // localStorage
+import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
+import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
+
+const languagePersistConfig = {
+  key: 'language',
+  storage,
+  whitelist: ['selectedLanguage', "languages"],
+};
+
+const persistedLanguageReducer = persistReducer(languagePersistConfig, studentLanagugeSlice);
 
 export const store = configureStore({
   reducer: {
@@ -34,6 +46,7 @@ export const store = configureStore({
     courses: courseReducer,
     sections: sectionReducer,
     lectures: lectureReducer,
+    language: persistedLanguageReducer,
     [adminCoursesTypesApiSlice.reducerPath]: adminCoursesTypesApiSlice.reducer,
     [adminLanguagesApiSlice.reducerPath]: adminLanguagesApiSlice.reducer,
     [clientCreateUpdateApiSlice.reducerPath]: clientCreateUpdateApiSlice.reducer,
@@ -58,6 +71,7 @@ export const store = configureStore({
     [clientRecordingApiSlice.reducerPath]: clientRecordingApiSlice.reducer,
     [educatorTradeAnalysisApiSlice.reducerPath]: educatorTradeAnalysisApiSlice.reducer,
     [adminTradeAnalysisApiSlice.reducerPath]: adminTradeAnalysisApiSlice.reducer,
+    [clientLanguageApiSlice.reducerPath]: clientLanguageApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -84,6 +98,9 @@ export const store = configureStore({
       adminAcademyCategoryApiSlice.middleware,
       clientRecordingApiSlice.middleware,
       educatorTradeAnalysisApiSlice.middleware,
-      adminTradeAnalysisApiSlice.middleware
+      adminTradeAnalysisApiSlice.middleware,
+      clientLanguageApiSlice.middleware
     ),
 });
+
+export const persistor = persistStore(store);

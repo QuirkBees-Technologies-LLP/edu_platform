@@ -17,7 +17,7 @@ const StudentLiveSessionCategoryDetails = () => {
 
     return (
         <div>
-            <Container>
+            <div className='container-fluid'>
                 {isLoading ? <Loader /> :
                     <>
                         {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div className='text-center'>There are no schedule found</div>}
@@ -73,7 +73,7 @@ const StudentLiveSessionCategoryDetails = () => {
                         )
                         }
                     </>}
-            </Container >
+            </div >
         </div >
     )
 }

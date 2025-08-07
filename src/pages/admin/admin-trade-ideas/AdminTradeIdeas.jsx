@@ -125,7 +125,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         accessorFn: (row) => row.image,
         id: "image",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Images" column={column}  />
+          <DataGridColumnHeader title="Images" column={column} />
         ),
         enableSorting: true,
         cell: ({ row }) => (
@@ -188,7 +188,6 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           headerClassName: "min-w-[200px]",
         },
       },
-
       {
         accessorFn: (row) => row.status,
         id: "status",
@@ -230,7 +229,6 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           headerClassName: "min-w-[125px]",
         },
       },
-
       {
         accessorFn: (row) => row.entry,
         id: "entry",
@@ -244,21 +242,23 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
       {
-        accessorFn: (row) => row.exits,
-        id: "exits",
+        accessorFn: (row) => row.name,
+        id: "Category",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Exits" column={column} />
+          <DataGridColumnHeader title="Category" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (
-          <div className="flex flex-col">
-            {info.getValue()?.map((exit, index) => (
-              <span key={index}>{exit}</span>
-            ))}
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              <p>
+                {info.row.original.category?.name ?? "NA"}
+              </p>
+            </div>
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[125px]",
+          headerClassName: "min-w-[200px]",
         },
       },
       {
@@ -336,7 +336,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             <input
               type="text"
               placeholder="Search Members"
-              className="input input-md ps-8"
+              className="input input-md ps-8 h-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} // Update search term
             />
@@ -380,26 +380,24 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [activeTab, setActiveTab] = useState('TableView');
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid pb-5">
       <div className="pb-10">
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab('TableView')}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === 'TableView'
-                ? 'bg-gray-100 text-gray-900 shadow'
-                : 'text-gray-600'
-            }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === 'TableView'
+              ? 'bg-gray-100 text-gray-900 shadow'
+              : 'text-gray-600'
+              }`}
           >
             Table View
           </button>
           <button
             onClick={() => setActiveTab('UserView')}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === 'UserView'
-                ? 'bg-gray-100 text-gray-900 shadow'
-                : 'text-gray-600'
-            }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === 'UserView'
+              ? 'bg-gray-100 text-gray-900 shadow'
+              : 'text-gray-600'
+              }`}
           >
             User View
           </button>
@@ -407,68 +405,68 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
       </div>
       {activeTab === "TableView" && (
         <>
-      <Toolbar>
-        <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Ideas" />
-          <ToolbarDescription>
-            Generate, analyze, and execute profitable trading opportunities with
-            smart insights, market trends, and data-driven strategies
-          </ToolbarDescription>
-        </ToolbarHeading>
-        <ToolbarActions>
-          <div className="text-end pb-4">
-            <button className="btn btn-primary" onClick={handleClickOpen}>
-              Create IQ Idea
-            </button>
-          </div>
-        </ToolbarActions>
-      </Toolbar>
-      <DataGrid
-        key={tableKey}
-        serverSide={true}
-        loading={isLoading}
-        columns={columns}
-        rowSelection={true}
-        onRowSelectionChange={handleRowSelection}
-        pagination={{
-          size: 10,
-        }}
-        toolbar={<ToolbarTable />}
-        layout={{
-          card: true,
-        }}
-        onFetchData={handleFetchData}
-      />
-      {/* <TradeImageSlider
+          <Toolbar>
+            <ToolbarHeading>
+              <ToolbarPageTitle text="IQ Ideas" />
+              <ToolbarDescription>
+                Generate, analyze, and execute profitable trading opportunities with
+                smart insights, market trends, and data-driven strategies
+              </ToolbarDescription>
+            </ToolbarHeading>
+            <ToolbarActions>
+              <div className="text-end pb-4">
+                <button className="btn btn-primary" onClick={handleClickOpen}>
+                  Create IQ Idea
+                </button>
+              </div>
+            </ToolbarActions>
+          </Toolbar>
+          <DataGrid
+            key={tableKey}
+            serverSide={true}
+            loading={isLoading}
+            columns={columns}
+            rowSelection={true}
+            onRowSelectionChange={handleRowSelection}
+            pagination={{
+              size: 10,
+            }}
+            toolbar={<ToolbarTable />}
+            layout={{
+              card: true,
+            }}
+            onFetchData={handleFetchData}
+          />
+          {/* <TradeImageSlider
         isLightBoxOpen={isLightBoxOpen}
         setIsLightBoxOpen={setIsLightBoxOpen}
         selectedRow={selectedRow}
       /> */}
 
-      <ViewAdminTradeIdeas
-        isViewOpen={isLightBoxOpen}
-        setIsLightBoxOpen={setIsLightBoxOpen}
-        handleCloseView={handleCloseView}
-        selectedIdea={selectedRow}
-      />
+          <ViewAdminTradeIdeas
+            isViewOpen={isLightBoxOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            handleCloseView={handleCloseView}
+            selectedIdea={selectedRow}
+          />
 
-      <CreateTradeIdeas
-        setSelectedRow={setSelectedRow}
-        handleCloseCreate={handleCloseCreate}
-        refetch={reloadTable}
-        isCreateOpen={isCreateOpen}
-        setIsCreateOpen={setIsCreateOpen}
-        selectedRow={selectedRow}
-      />
-      {isDeleteOpen && (
-        <DeleteAdminTradeIdeas
-          refetch={reloadTable}
-          isDeleteOpen={isDeleteOpen}
-          handleDeleteClose={handleDeleteClose}
-          selectedRow={selectedRow}
-        />
-      )}
-      </>
+          <CreateTradeIdeas
+            setSelectedRow={setSelectedRow}
+            handleCloseCreate={handleCloseCreate}
+            refetch={reloadTable}
+            isCreateOpen={isCreateOpen}
+            setIsCreateOpen={setIsCreateOpen}
+            selectedRow={selectedRow}
+          />
+          {isDeleteOpen && (
+            <DeleteAdminTradeIdeas
+              refetch={reloadTable}
+              isDeleteOpen={isDeleteOpen}
+              handleDeleteClose={handleDeleteClose}
+              selectedRow={selectedRow}
+            />
+          )}
+        </>
       )}
       {activeTab === "UserView" && (
         <AdminTradeCards />

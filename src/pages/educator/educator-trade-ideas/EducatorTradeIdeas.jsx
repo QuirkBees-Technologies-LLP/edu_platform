@@ -259,6 +259,26 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
       {
+        accessorFn: (row) => row.name,
+        id: "Category",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Category" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              <p>
+                {info.row.original.category?.name ?? "NA"}
+              </p>
+            </div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
+      {
         id: "click",
         header: () => "",
         enableSorting: false,
@@ -333,7 +353,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             <input
               type="text"
               placeholder="Search Members"
-              className="input input-md ps-8"
+              className="input input-md ps-8 h-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} // Update search term
             />
@@ -383,27 +403,25 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab('TableView')}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === 'TableView'
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === 'TableView'
                 ? 'bg-gray-100 text-gray-900 shadow'
                 : 'text-gray-600'
-            }`}
+              }`}
           >
             Table View
           </button>
           <button
             onClick={() => setActiveTab('UserView')}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === 'UserView'
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === 'UserView'
                 ? 'bg-gray-100 text-gray-900 shadow'
                 : 'text-gray-600'
-            }`}
+              }`}
           >
             User View
           </button>
         </div>
       </div>
-      
+
       {activeTab === "TableView" && (
         <>
           <Toolbar>

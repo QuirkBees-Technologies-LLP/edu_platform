@@ -9,7 +9,7 @@ const GeneralSetting = () => {
   const tabs = ["Language", "IQ Vault Type", "Academy Category"];
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid pb-5">
       <div className="items-start">
         {/* Tabs */}
         <div className="flex gap-6 flex-wrap">

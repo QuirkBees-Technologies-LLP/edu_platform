@@ -86,7 +86,7 @@ import LiveSession from "../pages/admin/live-session/LiveSession";
 import ViewLiveSession from "../pages/admin/live-session/AdminLiveSessionView";
 import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionView";
 import Courses from "../pages/admin/courses/Courses";
-import { EducatorDetailPage } from '../pages/educatorDetail';
+import { EducatorDetailPage } from "../pages/educatorDetail";
 import ClientLiveSession from "../pages/student/client-live-session/ClientLiveSession";
 import ClientViewLiveSession from "../pages/student/client-live-session/ClientViewLiveSession";
 import ClientTradeIdeas from "../pages/student/client-trade-ideas/ClientTradeIdeas";
@@ -122,16 +122,16 @@ import ViewAdminTradeAnalysis from "../pages/admin/admin-trade-analysis/ViewAdmi
 import AdminTradeAnalysis from "../pages/admin/admin-trade-analysis/AdminTradeAnalysis";
 import ClientDashboard from "../pages/student/client-dashboard/ClientDashboard";
 import FastStartTraining from "../pages/student/fast-start-training/FastStartTraining";
-import IqAcademy from "../pages/student/iq-academy/IqAcademy";  
 import IqStrategies from "../pages/student/iq-strategies/IqStrategies";
- 
 
-import IQLive from "../pages/student/iq-live/IQLive";
+import IqAcademy from "../pages/student/iq-academy/IqAcademy";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
-import IqLiveEducators from "../pages/student/iq-live-educators/IqLiveEducators";
+import IqAcademyEducators from "../pages/student/iq-academy-educators/IqAcademyEducators";
 import ForexAcademy from "../pages/student/client-dashboard/forex-academy/ForexAcademy";
 import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
 import PersonalIqInsight from "../pages/student/personal-iq-insight/PersonalIqInsight";
+import IqVault from "../pages/student/iq-vault/IqVault";
+import IqInsight from "../pages/student/iq-insight/IqInsight";
 
 const routes = {
   student: [
@@ -148,15 +148,19 @@ const routes = {
     { path: "/tranding-platform", element: <TrandingPlatform /> },
     { path: "/dashboard", element: <ClientDashboard /> },
     { path: "/recording-session", element: <RecordingSession /> },
-    { path: "/educator-recording-session/:id", element: <UserRecordingSession /> },
+    {
+      path: "/educator-recording-session/:id",
+      element: <UserRecordingSession />,
+    },
     { path: "/fast-start-training", element: <FastStartTraining /> },
-    { path: "/iq-academy", element: <IqAcademy /> },
+    { path: "/iq-vault", element: <IqVault /> },
     { path: "/iq-strategies", element: <IqStrategies /> },
-    { path: "/iq-live", element: <IQLive /> },
+    { path: "/iq-academy", element: <IqAcademy /> },
     { path: "/iq-educators/:id", element: <IqEducators /> },
-    { path: "/iq-live-educators", element: <IqLiveEducators /> },
+    { path: "/iq-academy-educators", element: <IqAcademyEducators /> },
     { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
+    { path: "/iq-insight", element: <IqInsight /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
@@ -165,14 +169,23 @@ const routes = {
     { path: "/educator/courses", element: <Courses /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/recordings", element: <EducatorRecording /> },
-    { path: "/educator/recordings/:callId", element: <CreateEducatorRecording /> },
-    { path: "/educator/live-session/:callId", element: <EducatorLiveSessionView /> },
+    {
+      path: "/educator/recordings/:callId",
+      element: <CreateEducatorRecording />,
+    },
+    {
+      path: "/educator/live-session/:callId",
+      element: <EducatorLiveSessionView />,
+    },
     { path: "/educator/dark-sidebar", element: <Demo1DarkSidebarPage /> },
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
     { path: "/educator/profile", element: <EducatorProfile /> },
     { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
     { path: "/educator/stream-recording", element: <EducatorRecording /> },
-    { path: "/educator/stream-recording/list", element: <EducatorRecordingSession /> },
+    {
+      path: "/educator/stream-recording/list",
+      element: <EducatorRecordingSession />,
+    },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
@@ -192,15 +205,38 @@ const routes = {
   ],
 };
 
+const getStudentRoutesByPlan = (plan) => {
+  const allowedPaths = plan?.allowedSideBar || [];
+  return routes.student.filter((route) => allowedPaths.includes(route.path));
+};
+
 const AppRoutingSetup = () => {
   const { auth } = useAuthContext();
-  const userRole = auth?.user?.role ?? 'student';
+  const userRole = auth?.user?.role ?? "student";
+  const plan = auth?.user?.plan;
 
-  const roleRoutes = routes[userRole] || [];
+  console.log("plan", plan);
+  const roleRoutes =
+    userRole === "student"
+      ? getStudentRoutesByPlan(plan)
+      : routes[userRole] || [];
+
+  // const roleRoutes = routes[userRole] || [];
+
+  console.log(roleRoutes, "roleRoutes");
+  
 
   return (
     <Routes>
       <Route element={<RequireAuth />}>
+        {/* {roleRoutes.map((route, index) => (
+          <Route key={index} element={<Demo1Layout />}>
+            <Route path={route.path} element={route.element} />
+          </Route>
+        ))} */}
+
+        {/* ✅ Always force student to dashboard first */}
+
         {/* {!isAdmin ? (
           <Route element={<Demo1Layout />}>
             <Route path="/" element={<DefaultPage />} />
@@ -494,21 +530,32 @@ const AppRoutingSetup = () => {
         )} */}
       </Route>
 
+      {userRole === "student" && (
+        <Route index element={<Navigate to="/dashboard" replace />} />
+      )}
+
       {roleRoutes.map((route, index) => (
+        <Route key={index} element={<Demo1Layout />}>
+          <Route path={route.path} element={route.element} />
+        </Route>
+      ))}
+
+      {/* {roleRoutes.map((route, index) => (
         <Route key={index} element={<RequireAuth />}>
           <Route element={<Demo1Layout />}>
             <Route path={route.path} element={route.element} />
           </Route>
         </Route>
-      ))}
+      ))} */}
 
       <Route path="error/*" element={<ErrorsRouting />} />
       <Route path="auth/*" element={<AuthPage />} />
       {/* <Route path="*" element={<Navigate to="/error/404" />} /> */}
-      <Route path="*" element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />} />
+      <Route
+        path="*"
+        element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />}
+      />
     </Routes>
   );
 };
 export { AppRoutingSetup };
-
-

@@ -6,7 +6,7 @@ export const educatorAcademyCategoryApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getEducatorAcademyCategory: builder.query({
-            query: () => `/educator/category`,
+            query: () => `/admin/category/list`,
         }),
         getLanguageList: builder.query({
             query: () => `/admin/language/list`,

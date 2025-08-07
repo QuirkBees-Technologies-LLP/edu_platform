@@ -1,5 +1,6 @@
 
-import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User, Dot, School, Tv } from "lucide-react";
+import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User, Dot, School, Tv, ChartLine } from "lucide-react";
+import { useAuthContext } from "../auth/useAuthContext";
 
 
 export const MENU_SIDEBAR = [
@@ -967,6 +968,23 @@ export const ADMIN_MENU = [
   },
 ];
 
+// utils/filterStudentSidebar.js
+export const filterSidebarByPlan = (sidebarItems = [], allowedPaths = []) => {
+  return sidebarItems
+    .map((item) => {
+      if (item.children) {
+        const filteredChildren = filterSidebarByPlan(item.children, allowedPaths);
+        if (filteredChildren.length > 0) {
+          return { ...item, children: filteredChildren };
+        }
+      } else if (allowedPaths.includes(item.path)) {
+        return item;
+      }
+      return null;
+    })
+    .filter(Boolean);
+};
+
 
 export const sideMenus = {
   admin: [
@@ -1015,11 +1033,11 @@ export const sideMenus = {
       icon: <CircleDot />,
       path: '/admin/stream-recording'
     },
-    {
-      title: 'Academy Category',
-      icon: <Layers />,
-      path: '/admin/academy-category'
-    },
+    // {
+    //   title: 'Academy Category',
+    //   icon: <Layers />,
+    //   path: '/admin/academy-category'
+    // },
     {
       title: 'General Setting',
       icon: <Layers />,
@@ -1092,56 +1110,60 @@ export const sideMenus = {
       ],
     },
     {
-      title: 'IQ Academy',
+      title: 'IQ Ideas',
+      icon: <Lightbulb />,
+      path: '/ideas'
+    },
+    {
+      title: 'IQ Insight',
+      icon: <ChartLine />,
+      path: '/iq-insight',
+    },
+    {
+      title: 'IQ Vault',
       icon: <School />,
-      path: '/iq-academy'
+      path: '/iq-vault'
     },
 
     {
-      title: 'IQ Live',
+      title: 'IQ Academy',
       icon: <Tv />,
-      path: '/iq-live',
+      path: '/iq-academy',
     },
-   
     {
-      title: 'IQ Live Educators',
+      title: 'IQ Academy Educators',
       icon: <Dot />,
-      path: '/iq-live-educators'
+      path: '/iq-academy-educators'
     },
     // {
     //   title: 'IQ Educators',
     //   icon: <Dot />,
     //   path: '/iq-educators'
     // },
-    {
-      title: 'IQ Ideas',
-      icon: <Lightbulb />,
-      path: '/ideas'
-    },
-    {
-      title: 'IQ Vault',
-      icon: <Clapperboard />,
-      path: '/video-library'
-    },
-    {
-      title: 'IQ Academy',
-      icon: <PlayCircle />,
-      path: '/academy'
-    },
+    // {
+    //   title: 'IQ Vault',
+    //   icon: <Clapperboard />,
+    //   path: '/video-library'
+    // },
+    // {
+    //   title: 'IQ Academy',
+    //   icon: <PlayCircle />,
+    //   path: '/academy'
+    // },
     {
       title: 'IQ Strategies',
       icon: <School />,
       path: '/iq-strategies'
     },
-    {
-      title: 'Forex Academy',
-      icon: <Dot />,
-      path: '/forex-academy'
-    },
-    {
-      title: 'Personal IQ Insight',
-      icon: <Dot />,
-      path: '/personal-iq-insight'
-    },
+    // {
+    //   title: 'Forex Academy',
+    //   icon: <Dot />,
+    //   path: '/forex-academy'
+    // },
+    // {
+    //   title: 'Personal IQ Insight',
+    //   icon: <Dot />,
+    //   path: '/personal-iq-insight'
+    // },
   ],
 };

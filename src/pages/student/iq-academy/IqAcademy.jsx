@@ -1,284 +1,190 @@
-import { CirclePlay } from 'lucide-react';
-import React, { useState } from 'react';
-import { useGetAcademyCategoryByMainSectionQuery } from '../../../store/api/client/clientAcademyCategoryApiSlice';
-import Loader from '../../../components/ui/loader';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  useGetAcademyCategoryQuery,
+  useGetAcademySingleCategoryQuery,
+} from "../../../store/api/client/clientAcademyCategoryApiSlice";
+import Loader from "../../../components/ui/loader";
+
+const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function IqAcademy() {
-    const [activeTab, setActiveTab] = useState('forex');
-    const [lecture, setLecture] = useState();
+  const {
+    data: categoryData,
+    isLoading: isCategoryLoading,
+    isError: isCategoryError,
+  } = useGetAcademyCategoryQuery();
 
-    const { data, isLoading: isCategoryLoading, isError } = useGetAcademyCategoryByMainSectionQuery({
-        mainSection: 'iqAcademy',
-        language: 'italian',
-    });
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
 
-    const categories = data?.category || [];
-    const course = data?.course || [];
-
-    const handleBannerClick = (id) => {
-        const lectureData = course.flatMap((c) => c.lectures || []);
-        const displayLecture = lectureData.find((lecture) => lecture._id === id);
-        setLecture(displayLecture);
-    };
-
-    const getEmbedUrl = (url) => {
-        if (!url) return "";
-
-        if (url.includes("youtube.com/watch?v=")) {
-            const videoId = url.split("v=")[1].split("&")[0];
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
-
-        if (url.includes("youtu.be/")) {
-            const videoId = url.split("youtu.be/")[1].split("?")[0];
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
-
-        if (url.includes("vimeo.com/")) {
-            const videoId = url.split("vimeo.com/")[1].split("?")[0];
-            return `https://player.vimeo.com/video/${videoId}`;
-        }
-
-        if (url.includes("dailymotion.com/video/")) {
-            const videoId = url.split("dailymotion.com/video/")[1].split("?")[0];
-            return `https://www.dailymotion.com/embed/video/${videoId}`;
-        }
-
-        // Loom
-        if (url.includes("loom.com/share/")) {
-            const videoId = url.split("loom.com/share/")[1].split("?")[0];
-            return `https://www.loom.com/embed/${videoId}`;
-        }
-
-        return url;
-    };
-
-
-    const tabs = [
-        {
-            id: 'Forex',
-            name: 'Forex',
-            content: "Select the lactures", // Dynamic content rendered based on `lecture`
-        },
-        {
-            id: 'Crypto',
-            name: 'Crypto',
-            content: 'Explore the world of cryptocurrencies, blockchain technology, and digital asset trading.',
-        },
-        {
-            id: 'Stock-options',
-            name: 'Stock Options',
-            content: 'Understand stock options, strategies, and how to trade them effectively.',
-        },
-    ];
-
-    if (isError) {
-        return <>
-            <div className="container-fluid">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className='col-span-full'>
-                        <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
-                            <div className="text-center">
-
-                                <h1 className="text-4xl font-bold tracking-wider pb-2">
-                                    No Such category found                                </h1>
-                                <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
+  useEffect(() => {
+    if (!isCategoryLoading && categoryData?.data?.length > 0) {
+      setActiveCategoryId(categoryData.data[0]._id);
     }
+  }, [isCategoryLoading, categoryData]);
 
-    return (
+  const {
+    data: singleCategoryData,
+    isLoading: isDetailLoading,
+    isError: isDetailError,
+  } = useGetAcademySingleCategoryQuery(activeCategoryId, {
+    skip: !activeCategoryId,
+  });
+
+  const categoryList = categoryData?.data || [];
+  const educators = singleCategoryData?.data?.category?.educators || [];
+
+  const isInitialLoading =
+    isCategoryLoading || (activeCategoryId && isDetailLoading && educators.length === 0);
+
+  const getDayName = (datetime) =>
+    new Date(datetime).toLocaleDateString("en-US", { weekday: "short" });
+
+  return (
+    <div className="container-fluid">
+      {/* Smart Loader */}
+      {isInitialLoading && (
+        <div className="text-center py-10 text-gray-500">
+          <Loader />
+        </div>
+      )}
+
+      {/* No categories */}
+      {!isCategoryLoading && categoryList.length === 0 && (
+        <div className="text-center py-10 text-red-500">No categories found.</div>
+      )}
+
+      {/* Category Tabs */}
+      {!isCategoryLoading && categoryList.length > 0 && (
+        <div className="flex items-center justify-between mb-4 gap-5 flex-col sm:flex-row">
+          <div className="flex gap-3 text-sm font-normal flex-wrap">
+            {categoryList.map((cat) => (
+              <button
+                key={cat._id}
+                onClick={() => setActiveCategoryId(cat._id)}
+                className={`pb-4 border-b-2 ${
+                  activeCategoryId === cat._id
+                    ? "border-black dark:border-white text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+          {/* <div>
+            <select className="bg-gray-100 border rounded-lg px-3 py-3 text-sm text-gray-600 focus:outline-none">
+              <option>Scalping</option>
+              <option>Day Trading</option>
+              <option>Swing Trading</option>
+            </select>
+          </div> */}
+        </div>
+      )}
+
+      {/* Schedule Table */}
+      {!isInitialLoading && activeCategoryId && (
         <>
-            <div>
-                {(isCategoryLoading) ? <Loader /> :
-                    <div className='container-fluid pb-10'>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {/* Header Banner */}
-                            <div className='col-span-full'>
-                                <div className="bg-[url(../media/images/forex.jpg)] text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full">
-                                    <div className="text-center">
-                                        {categories.length > 0 && (
-                                            <h1 className="text-4xl font-bold tracking-wider pb-2">
-                                                {categories[0]?.categoryName}
-                                            </h1>
-                                        )}
-                                        <p className="text-lg sm:text-xl tracking-widest">ACADEMY</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Sidebar - Course + Lectures */}
-
-                            {activeTab== `${categories[0]?.categoryName}` &&(
-                            <div className="md:col-span-1">
-                                <div className="max-h-[690px] overflow-y-auto rounded-xl shadow-md">
-                                    {course?.map((c, index) => (
-                                        <div key={c.id}>
-                                            <div className="bg-blue-950 p-5 rounded-t-xl">
-                                                <h6 className="text-sm text-white font-medium">
-                                                    {index + 1}. {c.title}
-                                                </h6>
-                                            </div>
-                                            {c?.lectures?.map((t) => (
-                                                <div
-                                                    key={t._id}
-                                                    onClick={() => handleBannerClick(t._id)}
-                                                    className="flex items-center p-4 border-b border-gray-200 cursor-pointer dark:hover:bg-slate-900 hover:bg-gray-50 transition-colors duration-200 ease-in-out"
-                                                >
-                                                    <CirclePlay className="mr-2 text-gray-400" />
-                                                    <span className="text-gray-800 font-medium text-xs">
-                                                        {t.title}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            )}
-
-                            {/* Tab + Lecture Display */}
-                            <div className="md:col-span-2">
-                                <div className="mb-6">
-                                    <div className='flex flex-col sm:flex-row items-center gap-8'>
-                                        <h2 className="text-lg font-medium text-gray-900">My Academies</h2>
-                                        <div className="flex gap-3 sm:gap-6 flex-wrap">
-                                            {tabs.map((tab) => (
-                                                <button
-                                                    key={tab.id}
-                                                    className={`pb-4 border-b-2 ${activeTab === tab.id
-                                                        ? 'border-black dark:border-white text-gray-900'
-                                                        : 'border-transparent text-gray-500 hover:text-gray-900'
-                                                        }`}
-                                                    onClick={() => setActiveTab(tab.id)}
-                                                >
-                                                    {tab.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Tab Content Area */}
-                                    <div className="rounded-lg mt-6">
-                                        {tabs.map((tab) => (
-                                            <div
-                                                key={tab.id}
-                                                className={`${activeTab === tab.id ? 'block' : 'hidden'}`}
-                                            >
-                                                {/* Dynamic content for "Forex" tab */}
-                                                {activeTab === `${categories[0]?.categoryName}` && lecture ? (
-                                                    <div className="card">
-                                                        {lecture.type !== "TEXT" && (
-                                                            // <iframe
-                                                            //     className="w-full aspect-video rounded-t-md"
-                                                            //     src={lecture.content || lecture.VideoUrl}
-                                                            //     title={lecture.title}
-                                                            //     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                            //     allowFullScreen
-                                                            // />
-                                                            <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                                                                <iframe
-                                                                    src={getEmbedUrl(
-                                                                        lecture.content ? lecture.content : lecture.videoUrl
-                                                                    )}
-                                                                    className="w-full h-full rounded-md"
-                                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                    allowFullScreen
-                                                                />
-                                                            </div>
-                                                        )}
-
-                                                        <div className="px-6 py-8 rounded-bl-md rounded-br-md">
-                                                            <h3 className="text-sm tracking-widest font-normal text-gray-600 mb-2">
-                                                                {lecture.title}
-                                                            </h3>
-                                                            <div className="flex flex-col sm:flex-row items-start sm:items-center flex-wrap justify-between mb-3 gap-2">
-                                                                <h4 className="sm:text-2xl font-medium text-gray-900">
-                                                                    {lecture.type}
-                                                                </h4>
-                                                                <button className="bg-gray-100 text-sm flex items-center justify-center gap-2 rotate-0 opacity-100 rounded-2xl border border-gray-300 py-3 px-6 whitespace-nowrap">
-                                                                    Mark as Complete
-                                                                </button>
-                                                            </div>
-                                                            {lecture.type == "TEXT" && (
-                                                                <p className="text-sm text-gray-600 mt-1">
-                                                                    {lecture.content?.replace(/<\/?p>/g, '')}
-                                                                </p>
-                                                            )}
-                                                            <p className="text-sm text-gray-600 mt-1">
-                                                                {lecture.description?.replace(/<\/?p>/g, '')}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                ) : typeof tab.content === 'string' ? (
-                                                    <p className="text-gray-800 text-base leading-relaxed">
-                                                        {tab.content}
-                                                    </p>
-                                                ) : (
-                                                    tab.content
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* IQ Vault Section */}
-                            <div className="col-span-full">
-                                <div className="text-gray-900">
-                                    <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                            <h2 className="text-xl font-medium">IQ Vault</h2>
-                                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                                                <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
-                                                    <option>Experience</option>
-                                                    <option>Beginner</option>
-                                                    <option>Advanced</option>
-                                                </select>
-                                                <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
-                                                    <option>Style</option>
-                                                    <option>Technical</option>
-                                                    <option>Fundamental</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-                                        <div className="flex gap-4 pb-0">
-                                            {/* Static Course Cards - Optional, not connected to lecture data */}
-                                            {[1, 2, 3].map((i) => (
-                                                <div key={i} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0">
-                                                    <div className="rounded-t-xl overflow-hidden">
-                                                        <img
-                                                            src="public/media/images/video-thumbail.jpg"
-                                                            alt="Course Title"
-                                                            className="w-full h-36 object-cover"
-                                                            onError={(e) => {
-                                                                e.target.onerror = null;
-                                                                e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <div className="p-5">
-                                                        <h3 className="text-md text-gray-800 font-medium mb-2">Course Title</h3>
-                                                        <p className="text-xs text-gray-600">456 Innovation Street, Floor 6, Techland, New York 54321</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>}
+          {educators.length === 0 ? (
+            <div className="text-center py-10 text-red-500">
+              No educators found in this category.
             </div>
+          ) : (
+            <div className="card forex_calender rounded-2xl shadow">
+              <div className="calender">
+                {/* Table Header */}
+                <div className="grid grid-cols-8 text-center table_head">
+                  <div className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal rounded-tl-2xl">Educators</div>
+                  {days.map((day) => (
+                    <div key={day} className="bg-[#1A1446] text-gray-100 dark:text-gray-900 py-5 px-4 font-normal last:rounded-tr-2xl">
+                      {day}
+                    </div>
+                  ))}
+                </div>
 
+                {/* Educator Rows */}
+                {educators.map((educator, index) => (
+                  <div key={index} className="grid grid-cols-8 border-t">
+                    {/* Educator Info */}
+                    <div className="flex flex-col items-center justify-center p-4 bg-gray-200 border-r">
+                      <img
+                        src={educator.image}
+                        alt={educator.first_name}
+                        className="w-12 h-12 rounded-full mb-2"
+                      />
+                      <span className="text-xs font-normal text-gray-800 text-center">
+                        {educator.first_name} {educator.last_name}
+                      </span>
+                    </div>
+
+                    {/* Day-wise schedule */}
+                    {days.map((day) => {
+                      const filtered = educator.schedules?.filter(
+                        (s) => getDayName(s.datetime) === day
+                      ) || [];
+
+                      return (
+                        <div
+                          key={day}
+                          className="p-2 min-h-[80px] border-r flex flex-col justify-center gap-2"
+                        >
+                          {filtered.length > 0 ? (
+                            filtered.map((s, i) => (
+                              <div
+                                key={i}
+                                className="bg-[#E5DEFF] text-[#4E34E3] text-xs rounded-lg p-2 text-center"
+                              >
+                                {s.title}
+                                <br />
+                                {new Date(s.datetime).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-xs text-gray-700 text-center">–</div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
-    );
+      )}
+
+      {/* Educator Cards */}
+      {!isInitialLoading && educators.length > 0 && (
+        <div className="py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {educators.map((educator, index) => (
+              <div key={index} className="card rounded-2xl shadow-md overflow-hidden">
+                <div className="relative h-56 flex items-center justify-center">
+                  <img
+                    src={educator.image}
+                    alt={educator.first_name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-5">
+                  <h3 className="text-gray-900 font-medium text-md mb-4">
+                    {educator.first_name} {educator.last_name}
+                  </h3>
+                  <Link
+                    to={`/iq-educators/${educator._id}`}
+                    className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
+                  >
+                    View Profile
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

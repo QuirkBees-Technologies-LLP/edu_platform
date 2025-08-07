@@ -40,7 +40,7 @@ const VideoLibrary = () => {
 }
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid pb-5">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Video Library" />
@@ -68,7 +68,7 @@ const VideoLibrary = () => {
                         defaultImage="/media/avatars/300-6.png"
                       />
                       <div>
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900">
+                        <h2 className="text-md font-semibold text-gray-900 dark:text-gray-900">
                           {featuredVideo?.title}
                         </h2>
                         {featuredVideo?.instructor && (
@@ -174,7 +174,7 @@ const VideoLibrary = () => {
                       defaultImage="/media/images/600x400/1.jpg"
                     />
                     <div className="video-details p-4">
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900">
+                      <h2 className="text-md font-semibold text-gray-900 dark:text-gray-900">
                         {video?.title}
                       </h2>
                       <div className="flex items-center justify-between pt-2">

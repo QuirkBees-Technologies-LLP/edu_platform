@@ -918,7 +918,7 @@ chat */
 @media screen and (max-width : 472.98px) {
 	.forex_calender {
 		overflow: auto;
-		max-width: 255px;
+		max-width: 290px;
         margin-inline: auto;
 	}
 	.forex_calender .calender {
@@ -964,4 +964,20 @@ chat */
 .dark ::-webkit-scrollbar-thumb {
   background: #1f1f1f;
   border-radius: 30px;
+}
+
+/* .input:not(input) input {
+	color: unset;
+} */
+
+.login input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #191819 inset !important;
+  box-shadow: 0 0 0px 1000px #191819 inset !important;
+  -webkit-text-fill-color: #e1e1e1 !important;
+}
+
+.login input[type="password"]:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #191819 inset !important;
+  box-shadow: 0 0 0px 1000px #171718 inset !important;
+  -webkit-text-fill-color: #e1e1e1 !important;
 }

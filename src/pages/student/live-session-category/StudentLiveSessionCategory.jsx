@@ -12,18 +12,16 @@ const StudentLiveSessionCategory = () => {
     const defaultImage = "/media/images/600x400/1.jpg";
 
     return (
-        <div>
-            <Container>
-                <Toolbar>
-                    <ToolbarHeading>
-                        <ToolbarPageTitle text="IQ Academy" />
-                        <ToolbarDescription>
-                              Join real-time sessions hosted by top educators to stay updated and interact live.
-                        </ToolbarDescription>
-                    </ToolbarHeading>
-                </Toolbar>
-            </Container>
-            <Container>
+        <div className='container-fluid pb-5'>
+            <Toolbar>
+                <ToolbarHeading>
+                    <ToolbarPageTitle text="IQ Academy" />
+                    <ToolbarDescription>
+                            Join real-time sessions hosted by top educators to stay updated and interact live.
+                    </ToolbarDescription>
+                </ToolbarHeading>
+            </Toolbar>
+            <div>
                 {(isLoading || !data) ? <Loader /> :
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {data?.data?.map((category, index) => (
@@ -51,7 +49,7 @@ const StudentLiveSessionCategory = () => {
                             </Link>
                         ))}
                     </div>}
-            </Container>
+            </div>
         </div>
     )
 }

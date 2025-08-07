@@ -1,5 +1,5 @@
 
-export default function ClientTradeSlider({ sliderImages, setIsLightBoxOpen , selectedIdea}) {
+export default function StudentIqSlider({ sliderImages, setIsLightBoxOpen , selectedIdea}) {
   const settings = {
     dots: true,
     infinite: false,
@@ -24,7 +24,8 @@ export default function ClientTradeSlider({ sliderImages, setIsLightBoxOpen , se
           </div>
         ))}
           <div className="flex flex-col gap-2 py-4.5">
-              <div className="flex gap-5 sm:gap-10 flex-wrap">
+                <p className="text-gray-800 line-clamp-3 text-sm font-normal">Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.</p>
+              {/* <div className="flex gap-5 sm:gap-10 flex-wrap">
                   <div className='flex items-center gap-3'>
                       <div className="text-xs text-gray-800 uppercase">Entry</div>
                       <span class="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{selectedIdea?.entry ?? "-"}</span>
@@ -33,8 +34,8 @@ export default function ClientTradeSlider({ sliderImages, setIsLightBoxOpen , se
                       <div className="text-2sm text-gray-800 uppercase">Invalidation</div>
                       <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{selectedIdea?.invalidation ?? "-"}</span>
                   </div>
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                   <div className="text-2sm text-gray-800 uppercase mb-3">Exits</div>
                   <div className="flex items-center flex-wrap gap-2">
                       {selectedIdea?.exits?.length > 0 && selectedIdea?.exits?.map((exit, index) => (
@@ -44,7 +45,7 @@ export default function ClientTradeSlider({ sliderImages, setIsLightBoxOpen , se
                           </div>
                       ))}
                   </div>
-              </div>
+              </div> */}
           </div>
         </div>
 
