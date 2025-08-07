@@ -11,6 +11,8 @@ import ShowMoreLess from "../../../components/ui/showmoreless";
 import { Accordion, AccordionItem } from '@/components/accordion';
 
 export default function FastStartTraining() {
+  const [activeLectureId, setActiveLectureId] = useState(null);
+
   const [activeTab, setActiveTab] = useState("");
   const [lecture, setLecture] = useState();
   const [id, setId] = useState();
@@ -168,15 +170,23 @@ export default function FastStartTraining() {
                         <AccordionItem key={c._id} title={`${index + 1}. ${c.title}`}>
                           {c?.lectures?.map((t) => (
                             <div
-                              key={t._id}
-                              onClick={() => handleBannerClick(t._id)}
-                              className="flex items-center p-4 border-t border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-900 transition"
-                            >
-                              <CirclePlay className="mr-2 text-gray-400" />
-                              <span className="text-gray-800 font-medium text-xs">
-                                {t.title}
-                              </span>
-                            </div>
+                            key={t._id}
+                            onClick={() => {
+                              handleBannerClick(t._id);
+                              setActiveLectureId(t._id);
+                            }}
+                            className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
+                              ${activeLectureId === t._id 
+                                ? 'bg-gray-300 dark:bg-slate-800' 
+                                : 'hover:bg-gray-50 dark:hover:bg-slate-900'
+                              }`}
+                          >
+                            <CirclePlay className="mr-2 text-gray-400" />
+                            <span className="text-gray-800 font-medium text-xs">
+                              {t.title}
+                            </span>
+                          </div>
+
                           ))}
                         </AccordionItem>
                       ))}
