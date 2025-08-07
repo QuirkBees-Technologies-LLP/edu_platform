@@ -17,12 +17,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useGetLiveEducatorListQuery } from "../../../store/api/client/clientLiveSessionApiSlice";
+import Loader from "../../../components/ui/loader";
 const ClientDashboard = () => {
   const { auth } = useAuthContext();
 
   const allowedRoutes = auth?.user?.plan?.allowedSideBar;
+  const { data: liveEducator, isLoading: educatorsLoading } = useGetLiveEducatorListQuery();
 
-  console.log(auth);
+  const liveStreams = liveEducator?.streams || [];
+  console.log(liveStreams, "liveStreams");
+
   const userName = auth?.user?.name;
   const categories = [
     {
@@ -349,7 +354,7 @@ const ClientDashboard = () => {
                         {allowedRoutes?.includes(IQVault) ? (
                           <Link to={IQVault}>
                             <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                               View IQ Vault
+                              View IQ Vault
                             </button>
                           </Link>
                         ) : (
@@ -391,7 +396,7 @@ const ClientDashboard = () => {
                         {allowedRoutes?.includes(IQAcademy) ? (
                           <Link to={IQAcademy}>
                             <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                               View IQ Academy
+                              View IQ Academy
                             </button>
                           </Link>
                         ) : (
@@ -399,7 +404,7 @@ const ClientDashboard = () => {
                             className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
                             onClick={handleRouteClick}
                           >
-                             View IQ Academy
+                            View IQ Academy
                           </button>
                         )}
                         {/* <Link to="/iq-academy">
@@ -437,7 +442,7 @@ const ClientDashboard = () => {
                         {allowedRoutes?.includes(IQStrategies) ? (
                           <Link to={IQStrategies}>
                             <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                               View Strategies
+                              View Strategies
                             </button>
                           </Link>
                         ) : (
@@ -445,7 +450,7 @@ const ClientDashboard = () => {
                             className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
                             onClick={handleRouteClick}
                           >
-                             View Strategies
+                            View Strategies
                           </button>
                         )}
                         {/* <Link to="/iq-strategies">
@@ -559,38 +564,50 @@ const ClientDashboard = () => {
                       <span className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                     </div>
                   </div>
-                  <Swiper
-                    modules={[Pagination, Autoplay]}
-                    spaceBetween={20}
-                    slidesPerView={1}
-                    pagination={{ clickable: true }}
-                    autoplay={{ delay: 3000 }}
-                    className="w-full border-none"
-                  >
-                    {slides.map((slide, index) => (
-                      <SwiperSlide key={index}>
-                        <div className="card shadow-md rounded-none overflow-hidden">
-                          <div className="relative h-96 rounded-none overflow-hidden shadow-lg">
-                            <img
-                              src={slide.image}
-                              alt={slide.title}
-                              className="w-full h-full object-cover"
-                            />
+                  {educatorsLoading ? (
+                    <div>
+                      <Loader />
+                    </div>
+                  ) : liveStreams.length > 0 ? (
+                    <Swiper
+                      modules={[Pagination, Autoplay]}
+                      spaceBetween={20}
+                      slidesPerView={1}
+                      pagination={{ clickable: true }}
+                      autoplay={{ delay: 3000 }}
+                      className="w-full border-none"
+                    >
+                      {liveStreams.map((slide, index) => (
+                        <SwiperSlide key={index}>
+                          <div className="card shadow-md rounded-none overflow-hidden">
+                            <div className="relative h-96 rounded-none overflow-hidden shadow-lg">
+                              <img
+                                src={slide?.educator?.image}
+                                alt={slide?.educator?.first_name}
+                                className="w-full h-full object-cover"
+                              />
 
-                            <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
-                              <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
-                                {slide.title}
-                              </h2>
-
-                              <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
-                                Watch Live
-                              </button>
+                              <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
+                                <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
+                                  {slide?.educator?.first_name} {slide?.educator?.last_name}
+                                </h2>
+                                <Link to={`/iq-educators/${slide?.educator?._id}`}>
+                                  <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
+                                    Watch Live
+                                  </button>
+                                </Link>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>) : (
+                    <div className="flex items-center justify-center h-96">
+                      <p className="text-gray-600 dark:text-gray-400">
+                        No Live Educators
+                      </p>
+                    </div>
+                  )}
                   {/* <div className="relative h-96 rounded-b-2xl overflow-hidden shadow-lg">
                                         <img
                                             src="/media/images/2600x1600/watch_live.jpg"
@@ -628,21 +645,19 @@ const ClientDashboard = () => {
                     <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
                       <button
                         onClick={() => setActiveTab("feed")}
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${
-                          activeTab === "feed"
-                            ? "bg-white text-[#1A1446]"
-                            : "text-white"
-                        }`}
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "feed"
+                          ? "bg-white text-[#1A1446]"
+                          : "text-white"
+                          }`}
                       >
                         Feed
                       </button>
                       <button
                         onClick={() => setActiveTab("ideas")}
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${
-                          activeTab === "ideas"
-                            ? "bg-white text-[#1A1446]"
-                            : "text-white"
-                        }`}
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "ideas"
+                          ? "bg-white text-[#1A1446]"
+                          : "text-white"
+                          }`}
                       >
                         Ideas
                       </button>
