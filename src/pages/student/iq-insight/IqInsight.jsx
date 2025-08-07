@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import ImageLightBox from "./ImageLightBox";
 // import EducatorImage from "./EducatorImage";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
-import { Container } from "lucide-react";
+import { Container, ShieldAlert, Videotape } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
@@ -81,7 +81,7 @@ const IqInsight = () => {
     setIsViewOpen(false);
   };
   return (
-    <div className="container-fluid pb-10">
+    <div className="container-fluid pb-5">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Insight" />
@@ -113,7 +113,7 @@ const IqInsight = () => {
                       {/* <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}>{LabelMap[idea?.status]}</span> */}
                     </div>
                     {/* <p className="text-gray-800 line-clamp-3 text-sm font-normal">Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.</p> */}
-                    <ShowMoreLess className="text-gray-900 text-sm mt-2 leading-relaxed" html={idea?.description || 'No description'} limit={100} />
+                    <ShowMoreLess className="text-gray-900 text-sm mt-2 leading-relaxed" html={idea?.description || 'No description'} limit={95} />
                     {/* <div className="flex gap-10 mb-3">
                       <div>
                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
@@ -166,7 +166,7 @@ const IqInsight = () => {
           </div>
 
           {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && <p className="text-center my-10">No more IQ Ideas to load.</p>}
+          {page >= totalPages && <p className="text-center my-10 text-gray-800">No more IQ Ideas to load.</p>}
         </div>
 
         <ViewInsightTradeIdeas

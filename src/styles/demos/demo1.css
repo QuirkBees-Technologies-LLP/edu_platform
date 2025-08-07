@@ -981,3 +981,13 @@ chat */
   box-shadow: 0 0 0px 1000px #171718 inset !important;
   -webkit-text-fill-color: #e1e1e1 !important;
 }
+.language_select button {
+	border-radius: 15px;
+}
+.left_sidebar .accordion-toggle {
+	background-color: #201946;
+	padding-inline: 20px;
+}
+.left_sidebar .accordion-toggle span {
+	color: #fff;
+}

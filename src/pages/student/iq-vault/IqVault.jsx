@@ -2,6 +2,7 @@ import { CirclePlay } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
+import { Accordion, AccordionItem } from '@/components/accordion';
 
 export default function IqVault() {
   const [activeTab, setActiveTab] = useState("");
@@ -142,47 +143,44 @@ export default function IqVault() {
 
               {activeTab === `${data?.ActiveCategory[0]?.categoryId}` &&
                 course?.length > 0 && (
-                  <div className="max-h-[690px] overflow-y-auto rounded-xl shadow-md">
-                    {course.map((c, index) => (
-                      <div key={c._id}>
-                        <div className="bg-blue-950 p-5 rounded-t-xl">
-                          <h6 className="text-sm text-white font-medium">
-                            {index + 1}. {c.title}
-                          </h6>
-                        </div>
-                        {c?.lectures?.map((t) => (
-                          <div
-                            key={t._id}
-                            onClick={() => handleBannerClick(t._id)}
-                            className="flex items-center p-4 border-b border-gray-200 cursor-pointer dark:hover:bg-slate-900 hover:bg-gray-50 transition-colors duration-200 ease-in-out"
-                          >
-                            <CirclePlay className="mr-2 text-gray-400" />
-                            <span className="text-gray-800 font-medium text-xs">
-                              {t.title}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                  <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
+                    <Accordion allowMultiple={false}>
+                      {course.map((c, index) => (
+                        <AccordionItem key={c._id} title={`${index + 1}. ${c.title}`}>
+                          {c?.lectures?.map((t) => (
+                            <div
+                              key={t._id}
+                              onClick={() => handleBannerClick(t._id)}
+                              className="flex items-center p-4 border-t border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-900 transition"
+                            >
+                              <CirclePlay className="mr-2 text-gray-400" />
+                              <span className="text-gray-800 font-medium text-xs">
+                                {t.title}
+                              </span>
+                            </div>
+                          ))}
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
                   </div>
                 )}
+
 
               {/* Tab + Lecture Display */}
               <div className="md:col-span-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <h2 className="text-lg font-medium text-gray-900">
+                    {/* <h2 className="text-lg font-medium text-gray-900">
                       My Academies
-                    </h2>
+                    </h2> */}
                     <div className="flex gap-3 sm:gap-6 flex-wrap">
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}
-                          className={`pb-4 border-b-2 ${
-                            activeTab === tab._id
+                          className={`pb-4 border-b-2 ${activeTab === tab._id
                               ? "border-black dark:border-white text-gray-900"
                               : "border-transparent text-gray-500 hover:text-gray-900"
-                          }`}
+                            }`}
                           onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
@@ -201,7 +199,7 @@ export default function IqVault() {
                         {/* Dynamic content for "Forex" tab */}
                         {activeTab ===
                           `${data?.ActiveCategory[0]?.categoryId}` &&
-                        lecture ? (
+                          lecture ? (
                           <div className="card">
                             {lecture.type !== "TEXT" && (
                               // <iframe
@@ -281,52 +279,54 @@ export default function IqVault() {
                       </div>
                     </div>
                   </div>
+                    <div className="card rounded-t-none">
 
-                  <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-                    <div className="flex gap-4 pb-0">
-                      {/* Static Course Cards - Optional, not connected to lecture data */}
-                      {data?.upcomingCourse?.map((i) => (
-                        <div
-                          key={i}
-                          className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
-                        >
-                          <div
-                            className="rounded-t-xl overflow-hidden"
-                            onClick={() => handleClick(i?._id)}
-                          >
-                            <img
-                              src={
-                                i.imageUrl
-                                  ? i.imageUrl
-                                  : "public/media/images/video-thumbail.jpg"
-                              }
-                              alt="Course Title"
-                              className="w-full h-36 object-cover"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src =
-                                  "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-                              }}
-                            />
-                          </div>
-                          <div className="p-5">
-                            <div className="flex items-center justify-between">
-                              <h3 className="text-md text-gray-800 font-medium mb-2">
-                                {i?.title}
-                              </h3>
+                      <div className="rounded-t-none rounded-b-2xl pb-2 m-6 overflow-x-auto">
+                        <div className="flex gap-4 pb-0">
+                          {/* Static Course Cards - Optional, not connected to lecture data */}
+                          {data?.upcomingCourse?.map((i) => (
+                            <div
+                              key={i}
+                              className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
+                            >
+                              <div
+                                className="rounded-t-xl overflow-hidden"
+                                onClick={() => handleClick(i?._id)}
+                              >
+                                <img
+                                  src={
+                                    i.imageUrl
+                                      ? i.imageUrl
+                                      : "public/media/images/video-thumbail.jpg"
+                                  }
+                                  alt="Course Title"
+                                  className="w-full h-36 object-cover"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src =
+                                      "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
+                                  }}
+                                />
+                              </div>
+                              <div className="p-5">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="text-md text-gray-800 font-medium mb-2">
+                                    {i?.title}
+                                  </h3>
 
-                              {/* <span className="badge badge-sm badge-success badge-outline">
-                                Active
-                              </span> */}
+                                  {/* <span className="badge badge-sm badge-success badge-outline">
+                                    Active
+                                  </span> */}
+                                </div>
+                                <p className="text-xs text-gray-600">
+                                  {i.description}
+                                </p>
+                              </div>
                             </div>
-                            <p className="text-xs text-gray-600">
-                              {i.description}
-                            </p>
-                          </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
