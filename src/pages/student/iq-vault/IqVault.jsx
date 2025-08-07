@@ -1,10 +1,10 @@
 import { CirclePlay } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
 
 export default function IqVault() {
-  const [activeTab, setActiveTab] = useState();
+  const [activeTab, setActiveTab] = useState("");
   const [lecture, setLecture] = useState();
   const [id, setId] = useState();
   const [category, setCategory] = useState();
@@ -24,6 +24,14 @@ export default function IqVault() {
     category: activeTab,
     // language: 'italian',
   });
+
+  useEffect(() => {
+    console.log("data in side ", data);
+    if (!activeTab) {
+      setActiveTab(data?.ActiveCategory[0]?.categoryId);
+      console.log("activeTab", activeTab);
+    }
+  }, [data]);
 
   const categories = data?.category || [];
   const course = data?.course || [];
@@ -306,7 +314,7 @@ export default function IqVault() {
                               <h3 className="text-md text-gray-800 font-medium mb-2">
                                 {i?.title}
                               </h3>
-                             
+
                               {/* <span className="badge badge-sm badge-success badge-outline">
                                 Active
                               </span> */}

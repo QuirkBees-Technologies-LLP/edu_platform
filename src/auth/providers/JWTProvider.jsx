@@ -140,12 +140,13 @@ const AuthProvider = ({ children }) => {
 
   const API_KEY = import.meta.env.VITE_APP_CRM_API_KEY;
 
-  const clientSignin = async (email, password, clientCreateUpdate, dispatch) => {
-
+  const clientSignin = async (
+    email,
+    password,
+    clientCreateUpdate,
+    dispatch
+  ) => {
     if (email === "test.student@yopmail.com" && password === "Password@123") {
-
-
-
       try {
         const res = await clientCreateUpdate({
           name: "Test user",
@@ -154,9 +155,9 @@ const AuthProvider = ({ children }) => {
           first_name: "Test",
           last_name: "User",
           status: "active",
-          role: 'student',
-          plan: 'IQ Forex Pro',
-          expire_at: new Date("2027-10-29")
+          role: "student",
+          plan: "IQ Forex Pro",
+          expire_at: new Date("2027-10-29"),
         }).unwrap();
 
         const auth = {
@@ -177,7 +178,7 @@ const AuthProvider = ({ children }) => {
         const errorMessage =
           apiError?.data?.error?.[0] ||
           apiError?.data?.message ||
-          'User creation failed.';
+          "User creation failed.";
         return { success: false, error: errorMessage };
       }
     } else {
@@ -186,9 +187,9 @@ const AuthProvider = ({ children }) => {
         const loginRes = await fetch(
           `https://api.iqonic.life/api/cb/outbound/iqverse/user/details?email=${email}&password=${password}`,
           {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'api-key': API_KEY,
+              "api-key": API_KEY,
             },
           }
         );
@@ -196,32 +197,37 @@ const AuthProvider = ({ children }) => {
         const loginData = await loginRes.json();
 
         if (!loginData.success || !loginData.data) {
-          return { success: false, error: loginData.message || 'Login failed.' };
+          return {
+            success: false,
+            error: loginData.message || "Login failed.",
+          };
         }
 
-        const { id: userId, name, email: userEmail, expire_at, plan, status } = loginData.data;
+        const { id: userId, name, email: userEmail } = loginData.data;
+        const { expire_at, plan, status } = loginData.data.memberships[0];
 
         // Step 2: Check Plan Expiry
         const isExpired = new Date(expire_at) < new Date();
         // const isExpired = false;
 
-
-
         if (isExpired) {
           // Step 3: Get token and redirect
           const tokenRes = await fetch(
-            `https://icon-api.mlmprotec.com/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
+            `https://api.iqonic.life/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
             {
-              method: 'GET',
+              method: "GET",
               headers: {
-                'api-key': API_KEY,
+                "api-key": API_KEY,
               },
             }
           );
           const tokenData = await tokenRes.json();
           const token = tokenData?.data?.token;
           if (!token) {
-            return { success: false, error: 'Token not received for subscription renewal.' };
+            return {
+              success: false,
+              error: "Token not received for subscription renewal.",
+            };
           }
 
           const redirectUrl = `https://icon-user.mlmprotec.com/login?auto-token-login&&pathName=%2Fmy_account%2Fsubscription&token=${token}`;
@@ -243,7 +249,7 @@ const AuthProvider = ({ children }) => {
               plan,
               status,
               expire_at,
-              role: 'student',
+              role: "student",
             }).unwrap();
 
             const auth = {
@@ -264,17 +270,19 @@ const AuthProvider = ({ children }) => {
             const errorMessage =
               apiError?.data?.error?.[0] ||
               apiError?.data?.message ||
-              'User creation failed.';
+              "User creation failed.";
             return { success: false, error: errorMessage };
           }
         }
       } catch (err) {
-        console.error('Unexpected error:', err);
-        return { success: false, error: err.message || 'Something went wrong.' };
+        console.error("Unexpected error:", err);
+        return {
+          success: false,
+          error: err.message || "Something went wrong.",
+        };
       }
     }
   };
-
 
   return (
     <AuthContext.Provider

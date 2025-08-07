@@ -26,14 +26,24 @@ export default function FastStartTraining() {
     isLoading: isCategoryLoading,
     isError,
     refetch,
-  } = useGetFirstStartTrainingSectionQuery({
-    mainSection: "fastStartTraining",
-    id,
-    category: activeTab,
-    language: category,
-  },{
-    refetchOnMountOrArgChange: true,
-  });
+  } = useGetFirstStartTrainingSectionQuery(
+    {
+      mainSection: "fastStartTraining",
+      id,
+      category: activeTab,
+      language: category,
+    },
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
+  useEffect(() => {
+    
+    if (!activeTab) {
+      setActiveTab(data?.ActiveCategory[0]?.categoryId);
+      
+    }
+  }, [data]);
 
   useEffect(() => {
     if (id && activeTab && category) {
@@ -275,7 +285,9 @@ export default function FastStartTraining() {
                 <div className="text-gray-900">
                   <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <h2 className="text-xl font-medium">Fast Start Training</h2>
+                      <h2 className="text-xl font-medium">
+                        Fast Start Training
+                      </h2>
                       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
                           <option>Experience</option>
@@ -321,7 +333,11 @@ export default function FastStartTraining() {
                                 {i?.title}
                               </h3>
                             </div>
-                            <ShowMoreLess className="text-gray-900 text-xs mt-2 leading-relaxed" html={i.description || 'No description'} limit={70} />
+                            <ShowMoreLess
+                              className="text-gray-900 text-xs mt-2 leading-relaxed"
+                              html={i.description || "No description"}
+                              limit={70}
+                            />
                           </div>
                         </div>
                       ))}
