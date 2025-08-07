@@ -8,6 +8,7 @@ import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import ShowMoreLess from "../../../components/ui/showmoreless";
+import { Accordion, AccordionItem } from '@/components/accordion';
 
 export default function FastStartTraining() {
   const [activeTab, setActiveTab] = useState("");
@@ -33,7 +34,7 @@ export default function FastStartTraining() {
       category: activeTab,
       language: category,
     },
-    {
+     {
       refetchOnMountOrArgChange: true,
     }
   );
@@ -161,30 +162,28 @@ export default function FastStartTraining() {
 
               {activeTab === `${data?.ActiveCategory[0]?.categoryId}` &&
                 course?.length > 0 && (
-                  <div className="max-h-[690px] overflow-y-auto rounded-xl shadow-md">
-                    {course.map((c, index) => (
-                      <div key={c._id}>
-                        <div className="bg-blue-950 p-5 rounded-t-xl">
-                          <h6 className="text-sm text-white font-medium">
-                            {index + 1}. {c.title}
-                          </h6>
-                        </div>
-                        {c?.lectures?.map((t) => (
-                          <div
-                            key={t._id}
-                            onClick={() => handleBannerClick(t._id)}
-                            className="flex items-center p-4 border-b border-gray-200 cursor-pointer dark:hover:bg-slate-900 hover:bg-gray-50 transition-colors duration-200 ease-in-out"
-                          >
-                            <CirclePlay className="mr-2 text-gray-400" />
-                            <span className="text-gray-800 font-medium text-xs">
-                              {t.title}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                  <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
+                    <Accordion allowMultiple={false}>
+                      {course.map((c, index) => (
+                        <AccordionItem key={c._id} title={`${index + 1}. ${c.title}`}>
+                          {c?.lectures?.map((t) => (
+                            <div
+                              key={t._id}
+                              onClick={() => handleBannerClick(t._id)}
+                              className="flex items-center p-4 border-t border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-900 transition"
+                            >
+                              <CirclePlay className="mr-2 text-gray-400" />
+                              <span className="text-gray-800 font-medium text-xs">
+                                {t.title}
+                              </span>
+                            </div>
+                          ))}
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
                   </div>
                 )}
+
 
               {/* Tab + Lecture Display */}
               <div className="md:col-span-2">
@@ -197,11 +196,10 @@ export default function FastStartTraining() {
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}
-                          className={`pb-4 border-b-2 ${
-                            activeTab === tab._id
+                          className={`pb-4 border-b-2 ${activeTab === tab._id
                               ? "border-black dark:border-white text-gray-900"
                               : "border-transparent text-gray-500 hover:text-gray-900"
-                          }`}
+                            }`}
                           onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
@@ -220,7 +218,7 @@ export default function FastStartTraining() {
                         {/* Dynamic content for "Forex" tab */}
                         {activeTab ===
                           `${data?.ActiveCategory[0]?.categoryId}` &&
-                        lecture ? (
+                          lecture ? (
                           <div className="card">
                             {lecture.type !== "TEXT" && (
                               // <iframe

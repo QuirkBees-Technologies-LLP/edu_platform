@@ -132,7 +132,7 @@ export default function IqAcademy() {
                             filtered.map((s, i) => (
                               <div
                                 key={i}
-                                className="bg-[#E5DEFF] text-[#4E34E3] text-xs rounded-lg p-2 text-center"
+                                className="bg-[#E5DEFF] dark:bg-primar-clarity text-[#4E34E3] text-xs rounded-lg p-2 text-center"
                               >
                                 {s.title}
                                 <br />

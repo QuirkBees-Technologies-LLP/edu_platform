@@ -52,6 +52,8 @@ const LectureContent = ({
   const [lectureContent, setLectureContent] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
 
+
+  console.log("videoInputType=============>", videoInputType)
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
     description: lecture?.description || "",
@@ -382,7 +384,7 @@ const LectureContent = ({
               ) : null}
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label className="font-medium text-primary">
                 Select Video Input Type
               </Label>
@@ -390,7 +392,6 @@ const LectureContent = ({
                 value={videoInputType}
                 onChange={(e) => {
                   setVideoInputType(e.target.value);
-                  // reset fields when switching
                   setFormData({ ...formData, content: "" });
                   setVideoFile(null);
                   setShowPreview(false);
@@ -403,7 +404,39 @@ const LectureContent = ({
                 <option value="url">Video URL</option>
                 <option value="upload">Upload File</option>
               </select>
-            </div>
+            </div> */}
+
+            <Select
+              value={videoInputType}
+              onValueChange={(value) => {
+                setVideoInputType(value);
+                // reset fields when switching
+                setFormData({ ...formData, content: "" });
+                setVideoFile(null);
+                setShowPreview(false);
+                setShowPreview1(false);
+                setShowPreviewVideo(null);
+              }}
+            >
+              <SelectTrigger className="border-primary focus:border-primary focus:ring-primary">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="url">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span>Video URL</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="upload">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-4 h-4 text-primary" />
+                    <span>Upload File</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
 
             {/* Video URL Input UI */}
             {videoInputType === "url" && (
@@ -609,9 +642,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lectureContent?.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -658,9 +690,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lectureContent?.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -684,11 +715,10 @@ const LectureContent = ({
           </h3>
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                lecture?.type === "VIDEO"
-                  ? "bg-primary-light text-primary"
-                  : "bg-primary-light text-primary"
-              }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture?.type === "VIDEO"
+                ? "bg-primary-light text-primary"
+                : "bg-primary-light text-primary"
+                }`}
             >
               {lecture?.type === "VIDEO" ? (
                 <>
@@ -917,21 +947,19 @@ const LectureContent = ({
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "content"
-                      ? "text-primary border-b-2 border-primary bg-light"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                    }`}
                 >
                   Content
                 </button>
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "settings"
-                      ? "text-primary border-b-2 border-primary bg-light"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "settings"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                    }`}
                 >
                   Settings
                 </button>
