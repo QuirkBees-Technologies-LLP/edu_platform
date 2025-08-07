@@ -16,7 +16,10 @@ export const clientLiveSessionApiSlice = createApi({
         getClientLiveSchedule: builder.query({
             query: (callID) => `/users/schedule/list/${callID}`,
         }),
+        getLiveEducatorList: builder.query({
+            query: () => `/users/stream/active`,
+        }),
     }),
 });
 
-export const { useGetClientTokenMutation, useGetClientLiveScheduleQuery } = clientLiveSessionApiSlice;
+export const { useGetClientTokenMutation, useGetClientLiveScheduleQuery, useGetLiveEducatorListQuery } = clientLiveSessionApiSlice;
