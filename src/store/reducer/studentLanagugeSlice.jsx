@@ -7,7 +7,7 @@ const initialState = {
     { _id: '3', name: 'Spanish' },
     { _id: '4', name: 'German' }
   ],
-  selectedLanguage: null
+  selectedLanguage: 'English'
 };
 
 const studentLanagugeSlice = createSlice({

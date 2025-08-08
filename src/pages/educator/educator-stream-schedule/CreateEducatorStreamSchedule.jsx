@@ -181,7 +181,7 @@ const CreateEducatorStreamSchedule = forwardRef(
           category: selectedRow?.category?._id,
           files: [{ file: null, dataURL: selectedRow?.image }],
           userId: selectedRow?.userId,
-          language: selectedRow?.language?._id
+          language: selectedRow?.language
           // files: selectedRow?.image
         };
         formik.setValues(initData);
@@ -369,7 +369,7 @@ const CreateEducatorStreamSchedule = forwardRef(
                     <SelectContent>
                       {Array.isArray(languagesList?.data) && languagesList.data.length > 0 ? (
                         languagesList.data.map((item) => (
-                          <SelectItem key={item._id} value={item._id}>
+                          <SelectItem key={item._id} value={item.name}>
                             {item.name}
                           </SelectItem>
                         ))

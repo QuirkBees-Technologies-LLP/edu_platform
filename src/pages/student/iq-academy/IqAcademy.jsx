@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import {
   useGetAcademyCategoryQuery,
   useGetAcademySingleCategoryQuery,
@@ -9,6 +11,8 @@ import Loader from "../../../components/ui/loader";
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function IqAcademy() {
+  const selectedLanguage = useSelector(selectSelectedLanguage);
+
   const {
     data: categoryData,
     isLoading: isCategoryLoading,
@@ -21,24 +25,38 @@ export default function IqAcademy() {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
       setActiveCategoryId(categoryData.data[0]._id);
     }
-  }, [isCategoryLoading, categoryData]);
+  }, [isCategoryLoading, categoryData, selectedLanguage]);
 
   const {
     data: singleCategoryData,
     isLoading: isDetailLoading,
     isError: isDetailError,
-  } = useGetAcademySingleCategoryQuery(activeCategoryId, {
-    skip: !activeCategoryId,
-  });
+  } = useGetAcademySingleCategoryQuery(
+    { 
+      id: activeCategoryId,
+      language: selectedLanguage 
+    },
+    {
+      skip: !activeCategoryId,
+      refetchOnMountOrArgChange: true,
+    }
+  );
 
   const categoryList = categoryData?.data || [];
   const educators = singleCategoryData?.data?.category?.educators || [];
 
   const isInitialLoading =
-    isCategoryLoading || (activeCategoryId && isDetailLoading && educators.length === 0);
+    isCategoryLoading || !activeCategoryId || isDetailLoading;
 
   const getDayName = (datetime) =>
     new Date(datetime).toLocaleDateString("en-US", { weekday: "short" });
+
+  const isToday = (datetime) => {
+    const today = new Date();
+    const scheduleDate = new Date(datetime);
+    return today.toDateString() === scheduleDate.toDateString();
+  };
+console.log(educators, "educators");
 
   return (
     <div className="container-fluid">
@@ -62,11 +80,10 @@ export default function IqAcademy() {
               <button
                 key={cat._id}
                 onClick={() => setActiveCategoryId(cat._id)}
-                className={`pb-4 border-b-2 ${
-                  activeCategoryId === cat._id
-                    ? "border-black dark:border-white text-gray-900"
-                    : "border-transparent text-gray-500 hover:text-gray-900"
-                }`}
+                className={`pb-4 border-b-2 ${activeCategoryId === cat._id
+                  ? "border-black dark:border-white text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-900"
+                  }`}
               >
                 {cat.name}
               </button>
@@ -83,11 +100,15 @@ export default function IqAcademy() {
       )}
 
       {/* Schedule Table */}
-      {!isInitialLoading && activeCategoryId && (
+      {!isInitialLoading && activeCategoryId && singleCategoryData && (
         <>
           {educators.length === 0 ? (
-            <div className="text-center py-10 text-red-500">
-              No educators found in this category.
+            <div className="bg-gray-100 dark:bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
+              <div className="text-center">
+                <p className="text-lg sm:text-xl tracking-widest text-gray-500 dark:text-gray-400">
+                  No educators found in this category.
+                </p>
+              </div>
             </div>
           ) : (
             <div className="card forex_calender rounded-2xl shadow">
@@ -128,20 +149,24 @@ export default function IqAcademy() {
                           key={day}
                           className="p-2 min-h-[80px] border-r flex flex-col justify-center gap-2"
                         >
-                          {filtered.length > 0 ? (
-                            filtered.map((s, i) => (
-                              <div
-                                key={i}
-                                className="bg-[#E5DEFF] dark:bg-primar-clarity text-[#4E34E3] text-xs rounded-lg p-2 text-center"
-                              >
-                                {s.title}
-                                <br />
-                                {new Date(s.datetime).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </div>
-                            ))
+                                                     {filtered.length > 0 ? (
+                             filtered.map((s, i) => (
+                               <div
+                                 key={i}
+                                 className={`text-xs rounded-lg p-2 text-center ${
+                                   isToday(s.datetime)
+                                     ? "bg-[#4E34E3] text-white font-medium shadow-lg"
+                                     : "bg-[#E5DEFF] dark:bg-primar-clarity text-[#4E34E3]"
+                                 }`}
+                               >
+                                 {s.title}
+                                 <br />
+                                 {new Date(s.datetime).toLocaleTimeString([], {
+                                   hour: "2-digit",
+                                   minute: "2-digit",
+                                 })}
+                               </div>
+                             ))
                           ) : (
                             <div className="text-xs text-gray-700 text-center">–</div>
                           )}
@@ -157,7 +182,7 @@ export default function IqAcademy() {
       )}
 
       {/* Educator Cards */}
-      {!isInitialLoading && educators.length > 0 && (
+      {!isInitialLoading && activeCategoryId && singleCategoryData && educators.length > 0 && (
         <div className="py-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {educators.map((educator, index) => (

@@ -108,7 +108,7 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
         <div className="flex items-center gap-2.5">
           <div className="flex flex-col gap-0.5">
             <p>
-              {info.row.original.language?.name ?? "NA"}
+              {info.row.original.language ?? "NA"}
             </p>
           </div>
         </div>
