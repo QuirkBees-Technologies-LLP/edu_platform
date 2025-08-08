@@ -155,7 +155,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
                 educator: selectedRow?.educator?._id,
                 thumbnail: [{ file: null, dataURL: selectedRow?.image }],
                 userId: selectedRow?.userId,
-                language: selectedRow?.language?._id
+                language: selectedRow?.language
             }
             formik.setValues(initData)
         }
@@ -288,7 +288,7 @@ const CreateAdminStreamSchedule = forwardRef(({ isCreateOpen, handleCloseCreate,
                                     <SelectContent>
                                         {Array.isArray(languagesList?.data) && languagesList.data.length > 0 ? (
                                             languagesList.data.map((item) => (
-                                                <SelectItem key={item._id} value={item._id}>
+                                                <SelectItem key={item._id} value={item.name}>
                                                     {item.name}
                                                 </SelectItem>
                                             ))

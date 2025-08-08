@@ -55,8 +55,22 @@ const HeaderTopbar = () => {
     if(data)
     {
       dispatch(setLanguages(data.data))
+      // Set English as default language if no language is selected
+      if (!selectedLanguage) {
+        const englishLanguage = data.data.find(lang => lang.name === 'English');
+        if (englishLanguage) {
+          dispatch(setSelectedLanguage(englishLanguage.name));
+        }
+      }
     }
-  }, [data]);
+  }, [data, selectedLanguage, dispatch]);
+
+  // Fallback: Set English as default if no language is selected and no API data
+  useEffect(() => {
+    if (!selectedLanguage && !data) {
+      dispatch(setSelectedLanguage('English'));
+    }
+  }, [selectedLanguage, data, dispatch]);
 
 
   console.log("selectedLanguage",selectedLanguage)
@@ -181,7 +195,7 @@ const HeaderTopbar = () => {
         </ul>
       )} */}
           <Select
-            value={selectedLanguage?.name}
+            value={selectedLanguage}
             onValueChange={(value) => dispatch(setSelectedLanguage(value))}
             className={`form-control input input-md w-full`}
           >

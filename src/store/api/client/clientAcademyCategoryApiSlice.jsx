@@ -9,7 +9,14 @@ export const clientAcademyCategoryApiSlice = createApi({
       query: () => `/users/category`,
     }),
     getAcademySingleCategory: builder.query({
-      query: (categoryId) => `/users/course/category/${categoryId}`,
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        
+        if (params?.language) searchParams.append("language", params.language);
+        
+        const queryString = searchParams.toString();
+        return `/users/course/category/${params.id}${queryString ? `?${queryString}` : ''}`;
+      },
     }),
     // getAcademyCategoryByMainSection: builder.query({
     //   query: ({ mainSection, language, id }) =>
@@ -25,7 +32,6 @@ export const clientAcademyCategoryApiSlice = createApi({
         if (params.language) searchParams.append("language", params.language);
         if (params.id) searchParams.append("id", params.id);
         if (params.category) searchParams.append("categoryId", params.category);
-        if (params.language) searchParams.append("language", params.language);
 
         return `/users/course/get?${searchParams.toString()}`;
       },
@@ -39,7 +45,6 @@ export const clientAcademyCategoryApiSlice = createApi({
         if (params.language) searchParams.append("language", params.language);
         if (params.id) searchParams.append("id", params.id);
         if (params.category) searchParams.append("categoryId", params.category);
-        if (params.language) searchParams.append("language", params.language);
 
         return `/users/course/first-start-training?${searchParams.toString()}`;
       },
