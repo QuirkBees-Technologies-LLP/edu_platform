@@ -97,7 +97,7 @@ const IqInsight = () => {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            {isLoading ? <Loader /> : tradeIdeas.map((idea, index) => (
+            {isLoading ? <Loader /> : tradeIdeas.length > 0 ? tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
                 className="card border-2 hover:bg-gray-200 overflow-hidden h-fit"  >
@@ -164,11 +164,8 @@ const IqInsight = () => {
                 </div>
 
               </div>
-            ))}
+            )) : <div className="text-center text-gray-900 my-10">No IQ Ideas to load.</div>}
           </div>
-
-          {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && <p className="text-center my-10 text-gray-800">No more IQ Ideas to load.</p>}
         </div>
 
         <ViewInsightTradeIdeas
