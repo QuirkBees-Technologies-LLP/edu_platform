@@ -2,13 +2,15 @@ import React, { forwardRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import StudentIqSlider from './StudentIqSlider';
+import EducatorImage from '../client-trade-ideas/EducatorImage';
+import { Link } from 'react-router-dom';
 
 const ViewInsightTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
     return (
         <Dialog asChild open={isViewOpen} onOpenChange={() => {
             handleCloseView();
         }}>
-            <DialogContent forceMount className="max-w-[800px]" ref={ref}>
+            <DialogContent forceMount className="max-w-[600px]" ref={ref}>
                 <DialogHeader className="sr-only">
                     <DialogTitle className="sr-only">text</DialogTitle>
                 </DialogHeader>
@@ -28,6 +30,29 @@ const ViewInsightTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selecte
                             <div className=''>
                                 <StudentIqSlider sliderImages={selectedIdea?.image} setIsLightBoxOpen={setIsLightBoxOpen} selectedIdea={selectedIdea} />
                             </div>
+
+                            <div className="flex items-center">
+                      <EducatorImage
+                        educator={selectedIdea?.educatorDetails}
+                        // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                      />
+                      <div className="">
+                        <Link
+                          to="#"
+                          className="text-2sm text-gray-800 hover:text-primary mb-px"
+                        >
+                          {selectedIdea?.educatorDetails?.first_name}{" "}
+                          {selectedIdea?.educatorDetails?.last_name}
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="flex mt-2">
+                      <div className="text-2sm text-gray-700 mb-px">
+                        {selectedIdea?.category
+                          ? selectedIdea?.category?.name
+                          : "Category not assigned"}
+                      </div>
+                    </div>
                             <div className="grid gap-5 p-5">
                                 <div className="grid grid-cols-12 gap-4">
                                     {/* <div className="col-span-12">
@@ -55,7 +80,7 @@ const ViewInsightTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selecte
                                             </div>
                                         </div>
                                     </div> */}
-                                    <div className="col-span-12">
+                                    {/* <div className="col-span-12">
                                         <div className="card">
                                             <div className="flex flex-col gap-4 px-5 py-4.5">
                                                 <div className="flex flex-col gap-3">
@@ -63,16 +88,16 @@ const ViewInsightTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selecte
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
-                            <div className="flex items-center p-5">
+                            {/* <div className="flex items-center p-5">
                                 <img src="/media/avatars/300-6.png" className="rounded-full size-7 me-2" alt="" />
                                 <div>
                                     <a className="text-2sm text-gray-800 hover:text-primary mb-px" href="/public-profile/profiles/nft">{selectedIdea?.educatorDetails?.name}</a>
                                     {selectedIdea?.createAt && <div className="text-2sm text-gray-700 mb-px">{format(selectedIdea?.createAt, "MMM dd, yyyy, hh:mm a")}</div>}
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

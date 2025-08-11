@@ -12,7 +12,7 @@ export default function StudentIqSlider({ sliderImages, setIsLightBoxOpen , sele
   return (
     <>
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 md:col-span-7">
+        <div className="col-span-12">
 
         {sliderImages?.map((image, index) => (
           <div
@@ -49,7 +49,7 @@ export default function StudentIqSlider({ sliderImages, setIsLightBoxOpen , sele
           </div>
         </div>
 
-        <div className="col-span-12 md:col-span-5">
+        {/* <div className="col-span-12 md:col-span-5">
           <div className="ideas_message">
             <div className="card-body py-0 px-0">
               <div className="chat p-3 border-2 border-b-0 rounded-t-lg">
@@ -164,7 +164,7 @@ export default function StudentIqSlider({ sliderImages, setIsLightBoxOpen , sele
             </div>
 
           </div>
-        </div> 
+        </div>  */}
       </div>
 
     </>

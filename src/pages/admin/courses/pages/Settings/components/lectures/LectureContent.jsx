@@ -52,8 +52,7 @@ const LectureContent = ({
   const [lectureContent, setLectureContent] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
 
-
-  console.log("videoInputType=============>", videoInputType)
+  console.log("videoInputType=============>", videoInputType);
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
     description: lecture?.description || "",
@@ -78,6 +77,12 @@ const LectureContent = ({
     };
     console.log(lectureContent, "lectureContent");
 
+    if (lecture.content) {
+      setVideoInputType("url");
+    } else {
+      setVideoInputType("upload");
+    }
+
     if (lecture) {
       const sectionId =
         typeof lecture.section === "object"
@@ -94,6 +99,7 @@ const LectureContent = ({
         section: sectionId || "",
         thumbnail: lecture?.thumbnail || null,
       });
+
       // setShowPreview(false);
       // setIsEditing(false);
       // setActiveTab("content");
@@ -437,7 +443,6 @@ const LectureContent = ({
               </SelectContent>
             </Select>
 
-
             {/* Video URL Input UI */}
             {videoInputType === "url" && (
               <div className="space-y-3">
@@ -642,8 +647,9 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
-                }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${
+                lectureContent?.preview ? "text-green-700" : "text-gray-500"
+              }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -690,8 +696,9 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
-                }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${
+                lectureContent?.preview ? "text-green-700" : "text-gray-500"
+              }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -715,10 +722,11 @@ const LectureContent = ({
           </h3>
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture?.type === "VIDEO"
-                ? "bg-primary-light text-primary"
-                : "bg-primary-light text-primary"
-                }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                lecture?.type === "VIDEO"
+                  ? "bg-primary-light text-primary"
+                  : "bg-primary-light text-primary"
+              }`}
             >
               {lecture?.type === "VIDEO" ? (
                 <>
@@ -947,19 +955,21 @@ const LectureContent = ({
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
-                    ? "text-primary border-b-2 border-primary bg-light"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                    }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
+                    activeTab === "content"
+                      ? "text-primary border-b-2 border-primary bg-light"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                  }`}
                 >
                   Content
                 </button>
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "settings"
-                    ? "text-primary border-b-2 border-primary bg-light"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                    }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
+                    activeTab === "settings"
+                      ? "text-primary border-b-2 border-primary bg-light"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                  }`}
                 >
                   Settings
                 </button>

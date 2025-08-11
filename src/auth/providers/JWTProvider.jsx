@@ -204,7 +204,7 @@ const AuthProvider = ({ children }) => {
         }
 
         const { id: userId, name, email: userEmail } = loginData.data;
-        const { expire_at, plan, status } = loginData.data.memberships[0];
+        const { expire_at, plan, status } = loginData.data.memberships;
 
         // Step 2: Check Plan Expiry
         const isExpired = new Date(expire_at) < new Date();
