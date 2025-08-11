@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { AlignJustify, CheckCircle, LayoutGrid, Search, SlidersHorizontal, UserPlus } from "lucide-react";
+import {
+  AlignJustify,
+  CheckCircle,
+  LayoutGrid,
+  Search,
+  SlidersHorizontal,
+  UserPlus,
+} from "lucide-react";
+import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import { useGetEducatorsListQuery } from "../../../store/api/client/clientEductorApiSlice";
+import Loader from "../../../components/ui/loader";
 
 const educatorsData = [
   {
@@ -29,17 +39,19 @@ const educatorsData = [
 ];
 
 const IqAcademyEducators = () => {
-    const [active, setActive] = useState("list"); 
-   const [educators, setEducators] = useState(educatorsData);
+  const [active, setActive] = useState("list");
+  const [educators, setEducators] = useState(educatorsData);
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("All");
 
+  const { data, isLoading } = useGetEducatorsListQuery();
+  console.log("Data", data);
+  console.log("isLoading", isLoading);
+
   const toggleFollow = (id) => {
     setEducators((prev) =>
-      prev.map((e) =>
-        e.id === id ? { ...e, isFollowing: !e.isFollowing } : e
-      )
+      prev.map((e) => (e.id === id ? { ...e, isFollowing: !e.isFollowing } : e))
     );
   };
 
@@ -50,10 +62,12 @@ const IqAcademyEducators = () => {
     const matchLanguage = language === "All" || e.language === language;
     return matchTab && matchSearch && matchLanguage;
   });
-   return (
+  return (
     <div className="container-fluid pb-10">
       <div className="flex items-start justify-between">
-        <h2 className="text-lg font-medium text-gray-800 mb-10">36 Educators</h2>
+        <h2 className="text-lg font-medium text-gray-800 mb-10">
+          {data?.data?.length} Educators
+        </h2>
         <div className="flex bg-gray-200 p-1 rounded-lg shadow-inner w-fit">
           <button
             onClick={() => setActive("grid")}
@@ -87,7 +101,7 @@ const IqAcademyEducators = () => {
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         {/* Tabs */}
         <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
-          {["All", "Forex", "Crypto", "Stock Options"].map((tab) => (
+          {["All"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -130,64 +144,71 @@ const IqAcademyEducators = () => {
       </div>
 
       {/* Educators List */}
-      <div className="flex flex-col gap-4">
-        {filteredEducators.length > 0 ? (
-          filteredEducators.map((educator) => (
-            <div className="card">
+
+      {!isLoading ? (
+        <div className="flex flex-col gap-4">
+          {data?.data?.length > 0 ? (
+            data?.data?.map((educator) => (
+              <div className="card">
                 <div
-                key={educator.id}
-                className="flex items-center justify-between p-8 rounded-xl border flex-col sm:flex-row gap-4"
+                  key={educator._id}
+                  className="flex items-center justify-between p-8 rounded-xl border flex-col sm:flex-row gap-4"
                 >
-                {/* Left Section */}
-                <div className="flex items-center gap-4 flex-col sm:flex-row">
+                  {/* Left Section */}
+                  <div className="flex items-center gap-4 flex-col sm:flex-row">
                     <img
-                    src={educator.avatar}
-                    alt={educator.name}
-                    className="w-20 h-w-20 rounded-full"
+                      src={educator.image}
+                      alt={educator.image}
+                      className="w-20 h-20 object-cover rounded-full"
                     />
                     <div className="text-center sm:text-start">
-                        <h4 className="text-gray-800 font-medium mb-1">{educator.name}</h4>
-                        <p className="text-xs text-gray-500">{educator.skills}</p>
+                      <h4 className="text-gray-800 font-medium mb-1">
+                        {educator.first_name} {educator.last_name}
+                      </h4>
+                      <p className="text-xs text-gray-500">{educator.skills}</p>
                     </div>
-                </div>
+                  </div>
 
-                {/* Follow Button */}
-                <button
-                    onClick={() => toggleFollow(educator.id)}
+                  {/* Follow Button */}
+                  <button
+                    onClick={() => toggleFollow(educator._id)}
                     className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${
-                    educator.isFollowing
+                      educator.is_create_stream
                         ? "bg-[#4F46E5] text-white border-[#4F46E5]"
                         : "border-[#C5C6FF] dark:border-[#4F46E5] text-[#4F46E5]"
                     }`}
-                >
-                    {educator.isFollowing ? (
-                    <>
+                  >
+                    {educator.is_create_stream ? (
+                      <>
                         <CheckCircle size={16} /> Following
-                    </>
+                      </>
                     ) : (
-                    <>
+                      <>
                         <UserPlus size={16} /> Follow
-                    </>
+                      </>
                     )}
-                </button>
+                  </button>
                 </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500 text-sm text-center py-4">
-            No educators found.
-          </p>
-        )}
-      </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm text-center py-4">
+              No educators found.
+            </p>
+          )}
+        </div>
+      ):(
+        <Loader/>
+      )}
 
       {/* Show More */}
-      <div className="text-center mt-4">
+      {/* <div className="text-center mt-4">
         <button className="text-primary pb-3 text-sm border-b-2 border-dashed border-primary">
           Show more Connections
         </button>
-      </div>
+      </div> */}
     </div>
   );
-}
+};
 
-export default IqAcademyEducators
+export default IqAcademyEducators;

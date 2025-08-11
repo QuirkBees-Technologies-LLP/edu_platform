@@ -8,7 +8,7 @@ import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import ShowMoreLess from "../../../components/ui/showmoreless";
-import { Accordion, AccordionItem } from '@/components/accordion';
+import { Accordion, AccordionItem } from "@/components/accordion";
 
 export default function FastStartTraining() {
   const [activeLectureId, setActiveLectureId] = useState(null);

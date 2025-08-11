@@ -69,8 +69,12 @@ const CreateEducator = forwardRef(
         .required("Email is required"),
 
       password: Yup.string()
-        .min(3, "Minimum 3 symbols")
-        .max(50, "Maximum 50 symbols")
+        .min(6, "Minimum 6 characters are required")
+        .max(20, "Maximum 20 characters are required")
+        .matches(
+          /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,20}$/,
+          "Password must contain at least one letter and one number"
+        )
         .when([], {
           is: () => !selectedRow?._id,
           then: (schema) => schema.required("Password is required"),
@@ -176,7 +180,10 @@ const CreateEducator = forwardRef(
 
           // API call using FormData
           if (selectedRow?._id) {
-            await updateEducator({ formData: formData, id: selectedRow?._id }).unwrap();
+            await updateEducator({
+              formData: formData,
+              id: selectedRow?._id,
+            }).unwrap();
             toast.success("Educator updated successfully!");
           } else {
             await createEducator(formData).unwrap();
@@ -189,7 +196,8 @@ const CreateEducator = forwardRef(
           refetch();
         } catch (err) {
           console.error("API Error:", err);
-          const errorMessage = err?.data?.message || "An unexpected error occurred.";
+          const errorMessage =
+            err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
         }
       },
@@ -249,12 +257,12 @@ const CreateEducator = forwardRef(
                         ? typeof formik.values.files === "string"
                           ? [{ dataURL: formik.values.files }] // URL from backend
                           : [
-                            {
-                              dataURL: URL.createObjectURL(
-                                formik.values.files
-                              ),
-                            },
-                          ] // Local file
+                              {
+                                dataURL: URL.createObjectURL(
+                                  formik.values.files
+                                ),
+                              },
+                            ] // Local file
                         : []
                     }
                     accept="image/*"
@@ -278,10 +286,11 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter first name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.first_name && formik.touched.first_name
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.first_name && formik.touched.first_name
+                        ? "border border-danger"
+                        : ""
+                    }`}
                     {...formik.getFieldProps("first_name")}
                   />
                   {formik.touched.first_name && formik.errors.first_name && (
@@ -300,10 +309,11 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter last name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.last_name && formik.touched.last_name
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.last_name && formik.touched.last_name
+                        ? "border border-danger"
+                        : ""
+                    }`}
                     {...formik.getFieldProps("last_name")}
                   />
                   {formik.touched.last_name && formik.errors.last_name && (
@@ -323,10 +333,11 @@ const CreateEducator = forwardRef(
                     placeholder="Enter email"
                     autoComplete="off"
                     {...formik.getFieldProps("email")}
-                    className={`form-control input input-md w-full ${formik.errors.email && formik.touched.email
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.email && formik.touched.email
+                        ? "border border-danger"
+                        : ""
+                    }`}
                   />
                   {formik.touched.email && formik.errors.email && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -366,9 +377,9 @@ const CreateEducator = forwardRef(
                         />
                       </button>
                     </label>
-                    {formik.touched.email && formik.errors.email && (
+                    {formik.touched.password && formik.errors.password && (
                       <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.email}
+                        {formik.errors.password}
                       </span>
                     )}
                   </div>
@@ -384,10 +395,11 @@ const CreateEducator = forwardRef(
                     onValueChange={(value) =>
                       formik.setFieldValue("status", value)
                     }
-                    className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.status && formik.touched.status
+                        ? "border border-danger"
+                        : ""
+                    }`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
@@ -415,11 +427,12 @@ const CreateEducator = forwardRef(
                       formik.setFieldValue("is_create_stream", value)
                     }
                     className={`form-control input input-md w-full 
-                                ${formik.errors.is_create_stream &&
-                        formik.touched.is_create_stream
-                        ? "border border-danger"
-                        : ""
-                      }`}
+                                ${
+                                  formik.errors.is_create_stream &&
+                                  formik.touched.is_create_stream
+                                    ? "border border-danger"
+                                    : ""
+                                }`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
@@ -439,7 +452,7 @@ const CreateEducator = forwardRef(
               </div>
 
               <div className="col-span-6">
-                <label className="form-label text-gray-900">Can access  </label>
+                <label className="form-label text-gray-900">Can access </label>
                 <div className="flex items-center gap-6 mt-1">
                   <label className="flex items-center gap-2 text-gray-800">
                     <input
@@ -464,8 +477,6 @@ const CreateEducator = forwardRef(
                   </label>
                 </div>
               </div>
-
-
             </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3 md:py-5">

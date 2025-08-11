@@ -21,6 +21,7 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
+import Loader from "../../../components/ui/loader";
 const LabelMap = {
   active: "Active",
   pending: "Pending",
@@ -47,7 +48,7 @@ const ClientTradeIdeas = () => {
 
   const observer = useRef();
 
-  const { data, isFetching } = useGetClientTradeIdeasQuery({
+  const { data, isFetching, isLoading } = useGetClientTradeIdeasQuery({
     page: page,
     limit: limit,
   });
@@ -106,9 +107,10 @@ const ClientTradeIdeas = () => {
         </ToolbarHeading>
       </Toolbar>
 
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 text-white">
-          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      {isLoading == false ? (
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 text-white">
+            {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
@@ -234,73 +236,77 @@ const ClientTradeIdeas = () => {
               </div>
             ))}
           </div> */}
-          <div className="grid grid-cols-12 gap-5 md:gap-6">
-            {tradeIdeas?.map((trade, index) => (
-              <div
-                key={trade._id}
-                className="col-span-12 sm:col-span-6 lg:col-span-4 card rounded-2xl overflow-hidden"
-              >
-                <img
-                  src={trade?.image[0]}
-                  alt={trade.pair}
-                  className="w-full h-40 object-cover"
-                />
-                <div className="p-4">
-                  <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
-                    <div className="flex items-center gap-2">
-                      {trade?.type === "sell" ? (
-                        <ArrowDown className="text-red-500 w-8 h-8 shrink-0" />
-                      ) : (
-                        <ArrowUp className="text-green-500 w-8 h-8 shrink-0 " />
-                      )}
+            <div className="grid grid-cols-12 gap-5 md:gap-6">
+              {tradeIdeas?.map((trade, index) => (
+                <div
+                  key={trade._id}
+                  className="col-span-12 sm:col-span-6 lg:col-span-4 card rounded-2xl overflow-hidden"
+                >
+                  <img
+                    src={trade?.image[0]}
+                    alt={trade.pair}
+                    className="w-full h-40 object-cover cursor-pointer"
+                    onClick={() => {
+                      setSelectedIdea(trade);
+                      setIsViewOpen(true);
+                    }}
+                  />
+                  <div className="p-4">
+                    <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
+                      <div className="flex items-center gap-2">
+                        {trade?.type === "sell" ? (
+                          <ArrowDown className="text-red-500 w-8 h-8 shrink-0" />
+                        ) : (
+                          <ArrowUp className="text-green-500 w-8 h-8 shrink-0 " />
+                        )}
 
-                      <div>
-                        <h3 className="font-medium text-gray-800 text-sm mb-1">
-                          {trade?.type.toUpperCase()}
-                        </h3>
-                        <h3 className="font-medium text-gray-800 text-sm mb-1">
-                          {trade?.name.toUpperCase()}
-                        </h3>
-                        <p className="text-2xs font-normal text-gray-500 line-clamp-1">
-                          {format(trade?.createAt, "MMM dd, yyyy, hh:mm a")}
-                        </p>
+                        <div>
+                          <h3 className="font-medium text-gray-800 text-sm mb-1">
+                            {trade?.type.toUpperCase()}
+                          </h3>
+                          <h3 className="font-medium text-gray-800 text-sm mb-1">
+                            {trade?.name.toUpperCase()}
+                          </h3>
+                          <p className="text-2xs font-normal text-gray-500 line-clamp-1">
+                            {format(trade?.createAt, "MMM dd, yyyy, hh:mm a")}
+                          </p>
+                        </div>
                       </div>
+                      <span
+                        className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                      >
+                        {trade.status.toUpperCase()}
+                      </span>
                     </div>
-                    <span
-                      className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                    >
-                      {trade.status.toUpperCase()}
-                    </span>
-                  </div>
 
-                  <div className="mt-6 space-y-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 font-normal text-sm">
-                        Entry
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {trade.entry}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 font-normal text-sm">
-                        Stop Loss
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {trade.invalidation}
-                      </span>
-                    </div>
-                    {[0, 1, 2].map((idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
+                    <div className="mt-6 space-y-4">
+                      <div className="flex justify-between text-sm">
                         <span className="text-gray-600 font-normal text-sm">
-                          {`Exit ${idx + 1}`}
+                          Entry
                         </span>
                         <span className="font-medium text-gray-800">
-                          {trade?.exits?.[idx] ?? "N/A"}
+                          {trade.entry}
                         </span>
                       </div>
-                    ))}
-                    {/* <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 font-normal text-sm">
+                          Stop Loss
+                        </span>
+                        <span className="font-medium text-gray-800">
+                          {trade.invalidation}
+                        </span>
+                      </div>
+                      {[0, 1, 2].map((idx) => (
+                        <div key={idx} className="flex justify-between text-sm">
+                          <span className="text-gray-600 font-normal text-sm">
+                            {`Exit ${idx + 1}`}
+                          </span>
+                          <span className="font-medium text-gray-800">
+                            {trade?.exits?.[idx] ?? "N/A"}
+                          </span>
+                        </div>
+                      ))}
+                      {/* <div className="flex justify-between text-sm">
                         <span className="text-gray-600 font-normal text-sm">
                           Exit 2
                         </span>
@@ -308,55 +314,58 @@ const ClientTradeIdeas = () => {
                           {trade.exit2}
                         </span>
                       </div> */}
-                  </div>
-                </div>
-                <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
-                  <div className="flex items-center">
-                    <EducatorImage
-                      educator={trade?.educatorDetails}
-                      defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
-                    />
-                    <div className="">
-                      <Link
-                        to="#"
-                        className="text-2sm text-gray-800 hover:text-primary mb-px"
-                      >
-                        {trade?.educatorDetails?.first_name}{" "}
-                        {trade?.educatorDetails?.last_name}
-                      </Link>
                     </div>
                   </div>
-                  <div className="flex mt-2">
-                    <div className="text-2sm text-gray-700 mb-px">
-                      {trade?.category
-                        ? trade?.category?.name
-                        : "Category not assigned"}
+                  <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
+                    <div className="flex items-center">
+                      <EducatorImage
+                        educator={trade?.educatorDetails}
+                        // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                      />
+                      <div className="">
+                        <Link
+                          to="#"
+                          className="text-2sm text-gray-800 hover:text-primary mb-px"
+                        >
+                          {trade?.educatorDetails?.first_name}{" "}
+                          {trade?.educatorDetails?.last_name}
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="flex mt-2">
+                      <div className="text-2sm text-gray-700 mb-px">
+                        {trade?.category
+                          ? trade?.category?.name
+                          : "Category not assigned"}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            {isFetching && <p>Loading more...</p>}
+            {page >= totalPages && (
+              <p className="text-center text-gray-900 my-10">
+                No more trade ideas to load.
+              </p>
+            )}
           </div>
-          {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && (
-            <p className="text-center text-gray-900 my-10">
-              No more trade ideas to load.
-            </p>
-          )}
-        </div>
 
-        <ViewClientTradeIdeas
-          isViewOpen={isViewOpen}
-          setIsLightBoxOpen={setIsLightBoxOpen}
-          handleCloseView={handleCloseView}
-          selectedIdea={selectedIdea}
-        />
-        <ImageLightBox
-          isLightBoxOpen={isLightBoxOpen}
-          setIsLightBoxOpen={setIsLightBoxOpen}
-          selectedIdea={selectedIdea}
-        />
-      </div>
+          <ViewClientTradeIdeas
+            isViewOpen={isViewOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            handleCloseView={handleCloseView}
+            selectedIdea={selectedIdea}
+          />
+          <ImageLightBox
+            isLightBoxOpen={isLightBoxOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            selectedIdea={selectedIdea}
+          />
+        </div>
+      ) : (
+        <Loader />
+      )}
     </div>
   );
 };
