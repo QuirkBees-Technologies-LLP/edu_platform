@@ -75,7 +75,9 @@ const Main = ({ onSelectCourse }) => {
 
           // Extract unique categories
           const uniqueCategories = [
-            ...new Map(response.map(c => [c.category?._id, c.category])).values()
+            ...new Map(
+              response.map((c) => [c.category?._id, c.category])
+            ).values(),
           ];
 
           setCategories(uniqueCategories);
@@ -98,7 +100,7 @@ const Main = ({ onSelectCourse }) => {
       course.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory =
-      !selectedCategory || course.category._id === selectedCategory?._id;
+      !selectedCategory || course?.category?._id === selectedCategory?._id;
 
     return matchesSearch && matchesCategory;
   });
@@ -133,7 +135,6 @@ const Main = ({ onSelectCourse }) => {
     </div>
   );
 
-
   // Instructor card component
   const InstructorCard = ({ instructor }) => (
     <motion.div
@@ -143,8 +144,8 @@ const Main = ({ onSelectCourse }) => {
     >
       <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
         <span className="text-white font-bold text-lg">
-          {((instructor?.first_name?.charAt(0) || '').toUpperCase() +
-            (instructor?.last_name?.charAt(0) || '').toUpperCase()) || 'U'}
+          {(instructor?.first_name?.charAt(0) || "").toUpperCase() +
+            (instructor?.last_name?.charAt(0) || "").toUpperCase() || "U"}
         </span>
       </div>
       <div>
@@ -159,10 +160,11 @@ const Main = ({ onSelectCourse }) => {
   // Category badge component
   const CategoryBadge = ({ category, isSelected, onClick }) => (
     <motion.button
-      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${isSelected
-        ? "bg-primary-clarity text-primary border-2 border-primary-light"
-        : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-        }`}
+      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+        isSelected
+          ? "bg-primary-clarity text-primary border-2 border-primary-light"
+          : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
+      }`}
       onClick={() => onClick(category)}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -221,13 +223,14 @@ const Main = ({ onSelectCourse }) => {
       </div>
 
       {/* Featured Courses using FeaturedSection component */}
-      {featuredCourses.length >= 5 && (
+      {/* {featuredCourses.length >= 5 && (
         <FeaturedSection
           courses={featuredCourses}
           title="Featured IQ Vault"
           subtitle="Recommended by our team and top students"
+          onSelectCourse={onSelectCourse}
         />
-      )}
+      )} */}
 
       {/* Categories */}
       <Section
@@ -237,7 +240,7 @@ const Main = ({ onSelectCourse }) => {
         <div className="flex flex-wrap gap-3">
           {categories.map((category) => (
             <CategoryBadge
-              key={category}
+              key={category._id}
               category={category}
               isSelected={selectedCategory?._id === category?._id}
               onClick={handleCategoryClick}
@@ -245,7 +248,8 @@ const Main = ({ onSelectCourse }) => {
           ))}
           {categories.length > 0 && (
             <CategoryBadge
-              category="All Categories"
+              key="all"
+              category={{ name: "All Categories" }}
               isSelected={selectedCategory === null}
               onClick={() => setSelectedCategory(null)}
             />
@@ -268,7 +272,11 @@ const Main = ({ onSelectCourse }) => {
 
       {/* All Courses */}
       <Section
-        title={selectedCategory ? `${selectedCategory?.name} IQ Vault` : "All IQ Vault"}
+        title={
+          selectedCategory
+            ? `${selectedCategory?.name} IQ Vault`
+            : "All IQ Vault"
+        }
         icon={<BookOpen className="w-5 h-5" />}
       >
         {filteredCourses.length > 0 ? (
