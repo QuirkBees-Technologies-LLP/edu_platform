@@ -1093,12 +1093,12 @@ export const sideMenus = {
   ],
   student: [
     {
-      title: 'Home',
+      title: 'Dashboard',
       icon: <LayoutDashboard />,
       // path: '/dashboard',
       children: [
         {
-          title: 'Dashboard',
+          title: 'Home',
           icon: <Dot />,
           path: '/dashboard'
         },
@@ -1110,9 +1110,26 @@ export const sideMenus = {
       ],
     },
     {
-      title: 'IQ Ideas',
-      icon: <Lightbulb />,
-      path: '/ideas'
+      title: 'IQ Vault',
+      icon: <School />,
+      path: '/iq-vault'
+    },
+    {
+      title: 'IQ Academy',
+      icon: <LayoutDashboard />,
+      // path: '/dashboard',
+      children: [
+        {
+          title: 'Live Sessions',
+          icon: <Dot />,
+          path: '/iq-academy'
+        },
+        {
+          title: 'Educators',
+          icon: <Dot />,
+          path: '/iq-academy-educators'
+        },
+      ],
     },
     {
       title: 'IQ Insight',
@@ -1120,21 +1137,20 @@ export const sideMenus = {
       path: '/iq-insight',
     },
     {
-      title: 'IQ Vault',
-      icon: <School />,
-      path: '/iq-vault'
+      title: 'IQ Ideas',
+      icon: <Lightbulb />,
+      path: '/ideas'
     },
-
-    {
-      title: 'IQ Academy',
-      icon: <Tv />,
-      path: '/iq-academy',
-    },
-    {
-      title: 'IQ Academy Educators',
-      icon: <Dot />,
-      path: '/iq-academy-educators'
-    },
+    // {
+    //   title: 'IQ Academy',
+    //   icon: <Tv />,
+    //   path: '/iq-academy',
+    // },
+    // {
+    //   title: 'IQ Academy Educators',
+    //   icon: <Dot />,
+    //   path: '/iq-academy-educators'
+    // },
     // {
     //   title: 'IQ Educators',
     //   icon: <Dot />,
