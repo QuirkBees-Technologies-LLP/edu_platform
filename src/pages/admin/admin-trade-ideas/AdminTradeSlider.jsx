@@ -11,7 +11,7 @@ export default function AdminTradeSlider({ sliderImages,  setIsLightBoxOpen , se
   return (
     <>
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 md:col-span-7">
+        <div className="col-span-12">
           {sliderImages?.map((image, index) => (
             <div
               key={index}
@@ -46,7 +46,7 @@ export default function AdminTradeSlider({ sliderImages,  setIsLightBoxOpen , se
           </div>
         </div>
 
-        <div className="col-span-12 md:col-span-5">
+        {/* <div className="col-span-12 md:col-span-5">
           <div className=" ideas_message">
             <div className="card-body py-0 px-0">
               <div className="chat p-3 border-2 border-b-0 rounded-t-lg">
@@ -95,14 +95,13 @@ export default function AdminTradeSlider({ sliderImages,  setIsLightBoxOpen , se
                   <button
                     className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-sm btn-primary input-ui-send-button flex items-center gap-1"
                   >
-                    {/* <div>Send</div> */}
                     <i className="ki-filled ki-arrow-right"></i>
                   </button>
                 </div>
             </div>
 
           </div>
-      </div>
+      </div> */}
       </div>
 
     </>

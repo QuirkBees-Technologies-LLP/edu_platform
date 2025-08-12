@@ -8,7 +8,7 @@ const ViewStudentIqInsight = forwardRef(({ isViewOpen, handleCloseView, selected
           <Dialog asChild open={isViewOpen} onOpenChange={() => {
               handleCloseView();
           }}>
-              <DialogContent forceMount className="max-w-[800px]" ref={ref}>
+              <DialogContent forceMount className="max-w-[600px]" ref={ref}>
                   <DialogHeader className="sr-only">
                       <DialogTitle className="sr-only">text</DialogTitle>
                   </DialogHeader>
@@ -66,7 +66,7 @@ const ViewStudentIqInsight = forwardRef(({ isViewOpen, handleCloseView, selected
                                       </div>
                                   </div>
                               </div>
-                              <div className="flex items-center p-5">
+                              <div className="flex items-center py-5">
                                   <img src="/media/avatars/300-6.png" className="rounded-full size-7 me-2" alt="" />
                                   <div>
                                       <a className="text-2sm text-gray-800 hover:text-primary mb-px" href="/public-profile/profiles/nft">{selectedIdea?.educatorDetails?.name}</a>

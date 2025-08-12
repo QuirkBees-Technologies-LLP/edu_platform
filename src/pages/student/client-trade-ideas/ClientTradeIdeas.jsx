@@ -261,7 +261,7 @@ const ClientTradeIdeas = () => {
               {tradeIdeas?.map((trade, index) => (
                 <div
                   key={trade._id}
-                  className="col-span-12 sm:col-span-6 lg:col-span-4 card rounded-2xl overflow-hidden"
+                  className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
                 >
                   <img
                     src={trade?.image[0]}
@@ -293,12 +293,12 @@ const ClientTradeIdeas = () => {
                           </p>
                         </div>
                       </div>
-                      <span
+                      {/* <span
                         className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                       >
                         {trade.status.toUpperCase()}
-                      </span>
-                      {copiedId === trade._id ? (
+                      </span> */}
+                      {/* {copiedId === trade._id ? (
                       <span className="text-dark text-sm">
                         Copied!
                       </span>
@@ -309,7 +309,31 @@ const ClientTradeIdeas = () => {
                       >
                        <Copy />
                       </button>
-                    )}
+                    )} */}
+                      <div className="flex sm:flex-col items-end gap-2">
+                        <span
+                            className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                          >
+                            {trade.status.toUpperCase()}
+                          </span>
+                          <span
+                            className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                          >
+                            Scalping
+                          </span>
+                          {/* {copiedId === trade._id ? (
+                      <span className="text-dark text-sm">
+                        Copied!
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleCopy(trade)}
+                        className="text-gray-800 items-center"
+                      >
+                       <Copy />
+                      </button>
+                    )} */}
+                      </div>
                     </div>
 
                     <div className="mt-6 space-y-4">
@@ -318,7 +342,19 @@ const ClientTradeIdeas = () => {
                           Entry
                         </span>
                         <span className="font-medium text-gray-800">
-                          {trade.entry}
+                          {copiedId === trade._id ? (
+                          <span className="text-dark text-sm mr-2">
+                            Copied!
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleCopy(trade)}
+                            className="text-gray-800 items-center mr-2"
+                          >
+                          <Copy size={14}/>
+                          </button>
+                        )}
+                        {trade.entry}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
@@ -326,6 +362,18 @@ const ClientTradeIdeas = () => {
                           Stop Loss
                         </span>
                         <span className="font-medium text-gray-800">
+                          {copiedId === trade._id ? (
+                          <span className="text-dark text-sm mr-2">
+                            Copied!
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleCopy(trade)}
+                            className="text-gray-800 items-center mr-2"
+                          >
+                          <Copy size={14}/>
+                          </button>
+                        )}
                           {trade.invalidation}
                         </span>
                       </div>
@@ -335,6 +383,18 @@ const ClientTradeIdeas = () => {
                             {`Exit ${idx + 1}`}
                           </span>
                           <span className="font-medium text-gray-800">
+                            {copiedId === trade._id ? (
+                          <span className="text-dark text-sm mr-2">
+                            Copied!
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleCopy(trade)}
+                            className="text-gray-800 items-center mr-2"
+                          >
+                          <Copy size={14}/>
+                          </button>
+                        )}
                             {trade?.exits?.[idx] ?? "N/A"}
                           </span>
                         </div>

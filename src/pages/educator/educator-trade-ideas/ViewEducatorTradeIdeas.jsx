@@ -8,7 +8,7 @@ const ViewEducatorTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, select
           <Dialog asChild open={isViewOpen} onOpenChange={() => {
               handleCloseView();
           }}>
-              <DialogContent forceMount className="max-w-[800px]" ref={ref}>
+              <DialogContent forceMount className="max-w-[600px]" ref={ref}>
                   <DialogHeader className="sr-only">
                       <DialogTitle className="sr-only">text</DialogTitle>
                   </DialogHeader>
@@ -66,7 +66,7 @@ const ViewEducatorTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, select
                                       </div> */}
                                   </div>
                               </div>
-                              <div className="flex items-center p-5">
+                              <div className="flex items-center py-5">
                                   <img src={selectedIdea?.educatorDetails?.image} className="rounded-full size-7 me-2" alt="" />
                                   <div>
                                       <a className="text-2sm text-gray-800 hover:text-primary mb-px" href="/public-profile/profiles/nft">{selectedIdea?.educatorDetails?.first_name} {selectedIdea?.educatorDetails?.last_name}</a>
