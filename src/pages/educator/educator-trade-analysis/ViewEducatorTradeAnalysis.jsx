@@ -20,7 +20,7 @@ const ViewEducatorTradeAnalysis = forwardRef(
             handleCloseView();
           }}
         >
-          <DialogContent forceMount className="max-w-[800px]" ref={ref}>
+          <DialogContent forceMount className="max-w-[600px]" ref={ref}>
             <DialogHeader className="sr-only">
               <DialogTitle className="sr-only">text</DialogTitle>
             </DialogHeader>
@@ -88,7 +88,7 @@ const ViewEducatorTradeAnalysis = forwardRef(
                       </div> */}
                     </div>
                   </div>
-                  <div className="flex items-center p-5">
+                  <div className="flex items-center py-5">
                     <img
                       src="/media/avatars/300-6.png"
                       className="rounded-full size-7 me-2"

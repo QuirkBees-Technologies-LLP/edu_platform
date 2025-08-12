@@ -16,7 +16,7 @@ const HeaderLogo = () => {
       <Link to="/" className="shrink-0">
         <img
           src={toAbsoluteUrl("/media/app/mini-logo.svg")}
-          className="max-h-[25px] w-full"
+          className="max-h-[25px] w-[25px]"
           alt="mini-logo"
         />
       </Link>

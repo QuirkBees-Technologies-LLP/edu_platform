@@ -8,11 +8,13 @@ const EntryCallout = ({
   return <Fragment>
       <style>
         {`
-          .entry-callout-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2.png')}');
-          }
-          .dark .entry-callout-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2-dark.png')}');
+          @media screen and (min-width: 767px) {
+            .entry-callout-bg {
+              background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2.png')}');
+            }
+            .dark .entry-callout-bg {
+              background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2-dark.png')}');
+            }
           }
         `}
       </style>

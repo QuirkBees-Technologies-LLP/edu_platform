@@ -16,10 +16,10 @@ const HeaderLogo = () => {
   };
   return <div className="flex gap-3 lg:hidden items-center -ms-1">
       <Link to="/" className="shrink-0 dark:hidden">
-        <img src={toAbsoluteUrl('/media/app/mini-logo.png')} className="max-h-[25px] w-full" alt="mini-logo" />
+        <img src={toAbsoluteUrl('/media/app/mini-logo.png')} className="max-h-[25px] w-[25px]" alt="mini-logo" />
       </Link>
       <Link to="/" className="shrink-0 hidden dark:block">
-        <img src={toAbsoluteUrl('/media/app/mini-logo-dark.png')} className="max-h-[25px] w-full" alt="mini-logo" />
+        <img src={toAbsoluteUrl('/media/app/mini-logo-dark.png')} className="max-h-[25px] w-[25px]" alt="mini-logo" />
       </Link>
 
       <div className="flex items-center">

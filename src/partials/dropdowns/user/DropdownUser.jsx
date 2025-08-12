@@ -44,7 +44,7 @@ const DropdownUser = ({
           </Link> 
           <a
             href={`mailto:${userEmail}`}
-            className="block w-40 line-clamp-1 truncate text-xs text-gray-600 hover:text-primary font-medium leading-none"
+            className="block w-24 md:w-40 line-clamp-1 truncate text-xs text-gray-600 hover:text-primary font-medium leading-none"
             title={userEmail}
           >
             {userEmail}
