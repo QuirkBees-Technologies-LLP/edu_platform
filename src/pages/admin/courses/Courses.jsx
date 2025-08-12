@@ -14,11 +14,12 @@ const Courses = () => {
       className="rounded-full border-3 border-success size-[100px] shrink-0"
     />
   );
-
+  console.log(auth?.user?.name, "auth?.user?.name");
+  
   return (
     <div className="min-h-screen">
       <UserProfileHero
-        name={auth?.user?.name}
+        name={auth?.user?.first_name + " " + auth?.user?.last_name}
         image={image}
         info={[
           { label: `${auth?.user?.first_name} ${auth?.user?.last_name}`, icon: "abstract-41" },
