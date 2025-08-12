@@ -261,32 +261,32 @@ const DraggableCourseCard = ({
   );
 };
 
-DraggableCourseCard.propTypes = {
-  course: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string,
-    imageUrl: PropTypes.string,
-    category: PropTypes.any,
-    published: PropTypes.bool,
-    tier: PropTypes.oneOf(["FREE", "PRO"]),
-    instructor: PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      email: PropTypes.string,
-      role: PropTypes.string,
-      tier: PropTypes.string,
-    }),
-    sections: PropTypes.arrayOf(PropTypes.object),
-    createdAt: PropTypes.string,
-    updatedAt: PropTypes.string,
-  }).isRequired,
-  index: PropTypes.number.isRequired,
-  onEdit: PropTypes.func,
-  onMove: PropTypes.func,
-  onDelete: PropTypes.func,
-  onSelect: PropTypes.func,
-};
+// DraggableCourseCard.propTypes = {
+//   course: PropTypes.shape({
+//     _id: PropTypes.string.isRequired,
+//     title: PropTypes.string.isRequired,
+//     description: PropTypes.string,
+//     imageUrl: PropTypes.string,
+//     category: PropTypes.any,
+//     published: PropTypes.bool,
+//     tier: PropTypes.oneOf(["FREE", "PRO"]),
+//     instructor: PropTypes.shape({
+//       id: PropTypes.string,
+//       name: PropTypes.string,
+//       email: PropTypes.string,
+//       role: PropTypes.string,
+//       tier: PropTypes.string,
+//     }),
+//     sections: PropTypes.arrayOf(PropTypes.object),
+//     createdAt: PropTypes.string,
+//     updatedAt: PropTypes.string,
+//   }).isRequired,
+//   index: PropTypes.number.isRequired,
+//   onEdit: PropTypes.func,
+//   onMove: PropTypes.func,
+//   onDelete: PropTypes.func,
+//   onSelect: PropTypes.func,
+// };
 
 DraggableCourseCard.defaultProps = {
   onEdit: () => {},

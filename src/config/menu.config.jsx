@@ -994,30 +994,10 @@ export const sideMenus = {
       path: '/'
     },
     {
-      title: 'Educators',
-      icon: <User />,
-      path: '/admin/educators'
-    },
-    {
-      title: 'IQ Ideas',
-      icon: <Lightbulb />,
-      path: '/admin/ideas'
-    },
-    {
-      title: 'IQ Insight',
-      icon: <ChartCandlestick />,
-      path: '/admin/trade-analysis'
-    },
-    {
       title: 'IQ Vault',
       icon: <BookOpen />,
       path: '/admin/courses'
     },
-    // {
-    //   title: 'Video Library',
-    //   icon: <Clapperboard />,
-    //   path: '/admin/video-library'
-    // },
     {
       title: 'IQ Academy Schedule',
       icon: <CalendarClock />,
@@ -1033,6 +1013,26 @@ export const sideMenus = {
       icon: <CircleDot />,
       path: '/admin/stream-recording'
     },
+    {
+      title: 'IQ Insight',
+      icon: <ChartCandlestick />,
+      path: '/admin/trade-analysis'
+    },
+    {
+      title: 'IQ Ideas',
+      icon: <Lightbulb />,
+      path: '/admin/ideas'
+    },
+    {
+      title: 'Educators',
+      icon: <User />,
+      path: '/admin/educators'
+    },
+    // {
+    //   title: 'Video Library',
+    //   icon: <Clapperboard />,
+    //   path: '/admin/video-library'
+    // },
     // {
     //   title: 'Academy Category',
     //   icon: <Layers />,
@@ -1051,25 +1051,10 @@ export const sideMenus = {
       path: '/'
     },
     {
-      title: 'IQ Ideas',
-      icon: <Lightbulb />,
-      path: '/educator/ideas'
-    },
-    {
-      title: 'IQ Insight',
-      icon: <ChartCandlestick />,
-      path: '/educator/trade-analysis'
-    },
-    {
       title: 'IQ Vault',
       icon: <BookOpen />,
       path: '/educator/courses'
     },
-    // {
-    //   title: 'Video Library',
-    //   icon: <Clapperboard />,
-    //   path: '/educator/video-library'
-    // },
     {
       title: 'IQ Academy Schedule',
       icon: <CalendarClock />,
@@ -1085,6 +1070,21 @@ export const sideMenus = {
       icon: <CircleDot />,
       path: '/educator/stream-recording/list'
     },
+    {
+      title: 'IQ Insight',
+      icon: <ChartCandlestick />,
+      path: '/educator/trade-analysis'
+    },
+    {
+      title: 'IQ Ideas',
+      icon: <Lightbulb />,
+      path: '/educator/ideas'
+    },
+    // {
+    //   title: 'Video Library',
+    //   icon: <Clapperboard />,
+    //   path: '/educator/video-library'
+    // },
     // {
     //   title: 'Community Feed',
     //   icon: <LayoutDashboard />,
@@ -1093,12 +1093,12 @@ export const sideMenus = {
   ],
   student: [
     {
-      title: 'Home',
+      title: 'Dashboard',
       icon: <LayoutDashboard />,
       // path: '/dashboard',
       children: [
         {
-          title: 'Dashboard',
+          title: 'Home',
           icon: <Dot />,
           path: '/dashboard'
         },
@@ -1110,9 +1110,26 @@ export const sideMenus = {
       ],
     },
     {
-      title: 'IQ Ideas',
-      icon: <Lightbulb />,
-      path: '/ideas'
+      title: 'IQ Vault',
+      icon: <School />,
+      path: '/iq-vault'
+    },
+    {
+      title: 'IQ Academy',
+      icon: <LayoutDashboard />,
+      // path: '/dashboard',
+      children: [
+        {
+          title: 'Live Sessions',
+          icon: <Dot />,
+          path: '/iq-academy'
+        },
+        {
+          title: 'Educators',
+          icon: <Dot />,
+          path: '/iq-academy-educators'
+        },
+      ],
     },
     {
       title: 'IQ Insight',
@@ -1120,21 +1137,20 @@ export const sideMenus = {
       path: '/iq-insight',
     },
     {
-      title: 'IQ Vault',
-      icon: <School />,
-      path: '/iq-vault'
+      title: 'IQ Ideas',
+      icon: <Lightbulb />,
+      path: '/ideas'
     },
-
-    {
-      title: 'IQ Academy',
-      icon: <Tv />,
-      path: '/iq-academy',
-    },
-    {
-      title: 'IQ Academy Educators',
-      icon: <Dot />,
-      path: '/iq-academy-educators'
-    },
+    // {
+    //   title: 'IQ Academy',
+    //   icon: <Tv />,
+    //   path: '/iq-academy',
+    // },
+    // {
+    //   title: 'IQ Academy Educators',
+    //   icon: <Dot />,
+    //   path: '/iq-academy-educators'
+    // },
     // {
     //   title: 'IQ Educators',
     //   icon: <Dot />,
