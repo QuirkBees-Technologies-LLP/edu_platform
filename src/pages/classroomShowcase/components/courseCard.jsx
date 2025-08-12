@@ -15,6 +15,11 @@ const CourseCard = (props) => {
     large,
   } = props;
 
+  const { onSelectCourse } = props;
+
+  console.log("props----------------->",props)
+
+  console.log("onSelectCourse----------------->",onSelectCourse)
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
 
@@ -64,7 +69,8 @@ const CourseCard = (props) => {
           <div className="space-y-3">
             <button
               className="flex items-center gap-2 bg-primary hover:bg-primary-active text-white px-4 py-2 rounded-lg transition-colors"
-              onClick={() => navigate(`/classroom/course/${id}`)}
+              // onClick={() => navigate(`/classroom/course/${id}`)}
+              onClick={() => onSelectCourse(props)}
             >
               <Play className="w-4 h-4" />
               <span>Watch Now</span>

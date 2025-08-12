@@ -47,7 +47,7 @@ const HeroSectionCourse = ({ course }) => {
     sections,
   } = course;
 
-  const amountOfLectures = sections.reduce((acc, section) => {
+  const amountOfLectures = sections?.reduce((acc, section) => {
     return acc + section.lectures.length;
   }, 0);
 

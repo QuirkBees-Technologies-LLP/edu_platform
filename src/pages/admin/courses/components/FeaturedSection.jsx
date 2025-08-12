@@ -7,10 +7,22 @@ const FeaturedSection = ({
   courses,
   title = "Featured IQ Vault",
   subtitle = "Learn from our top-rated instructors",
+  onSelectCourse
 }) => {
   if (!courses || courses.length < 5) {
     return null; // Don't render if we don't have enough courses
   }
+
+  // Sanitize course object so we only pass safe props
+  const sanitizeCourse = (course) => ({
+    id: course._id || course.id,
+    title: course.title || "",
+    description: course.description || "",
+    imageUrl: course.imageUrl || "",
+    instructor: course.instructor || null,
+    category: course.category?.name || "", // ✅ only pass name
+    large: course.large || false,
+  });
 
   const container = {
     hidden: { opacity: 0 },
@@ -75,32 +87,22 @@ const FeaturedSection = ({
         initial="hidden"
         animate="show"
       >
+        {/* Large card (left side) */}
         <motion.div className="lg:row-span-2 relative group" variants={item}>
           <div className="absolute top-4 left-4 z-10 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-indigo-500/30">
             <TrendingUp className="w-3.5 h-3.5" />
             <span>Most Popular</span>
           </div>
-          <CourseCard
-            {...courses[0]}
-            large={true}
-            id={courses[0]._id || courses[0].id}
-          />
+          <CourseCard {...sanitizeCourse(courses[0])} courses={courses[0]} onSelectCourse={onSelectCourse} large={true} />
         </motion.div>
 
         {/* 2x2 Grid of Featured Courses (Right Side) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <motion.div className="col-span-1" variants={item}>
-            <CourseCard {...courses[1]} id={courses[1]._id || courses[1].id} />
-          </motion.div>
-          <motion.div className="col-span-1" variants={item}>
-            <CourseCard {...courses[2]} id={courses[2]._id || courses[2].id} />
-          </motion.div>
-          <motion.div className="col-span-1" variants={item}>
-            <CourseCard {...courses[3]} id={courses[3]._id || courses[3].id} />
-          </motion.div>
-          <motion.div className="col-span-1" variants={item}>
-            <CourseCard {...courses[4]} id={courses[4]._id || courses[4].id} />
-          </motion.div>
+          {courses.slice(1, 5).map((course, idx) => (
+            <motion.div key={course._id || idx} className="col-span-1" variants={item}>
+              <CourseCard {...sanitizeCourse(course)}  courses={course}  onSelectCourse={onSelectCourse} />
+            </motion.div>
+          ))}
         </div>
       </motion.div>
 
