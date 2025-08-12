@@ -174,7 +174,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         accessorFn: (row) => row.type,
         id: "type",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Type" column={column} />
+          <DataGridColumnHeader title="Direction" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -215,7 +215,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         accessorFn: (row) => row.timeFrame,
         id: "timeFrame",
         header: ({ column }) => (
-          <DataGridColumnHeader title="TmeFrame" column={column} />
+          <DataGridColumnHeader title="Type" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (

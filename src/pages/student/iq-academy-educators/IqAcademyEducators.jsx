@@ -10,6 +10,7 @@ import {
 import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
 import { useGetEducatorsListQuery } from "../../../store/api/client/clientEductorApiSlice";
 import Loader from "../../../components/ui/loader";
+import { useNavigate } from "react-router";
 
 const educatorsData = [
   {
@@ -39,6 +40,7 @@ const educatorsData = [
 ];
 
 const IqAcademyEducators = () => {
+  const navigate=useNavigate();
   const [active, setActive] = useState("list");
   const [educators, setEducators] = useState(educatorsData);
   const [activeTab, setActiveTab] = useState("All");
@@ -147,9 +149,9 @@ const IqAcademyEducators = () => {
 
       {!isLoading ? (
         <div className="flex flex-col gap-4">
-          {data?.data?.length > 0 ? (
-            data?.data?.map((educator) => (
-              <div className="card">
+        {data?.data?.length > 0 ? (
+          data?.data?.map((educator) => (
+              <div className="card cursor-pointer" onClick={()=>navigate(`/iq-educators/${educator._id}`)}>
                 <div
                   key={educator._id}
                   className="flex items-center justify-between p-8 rounded-xl border flex-col sm:flex-row gap-4"
@@ -170,7 +172,7 @@ const IqAcademyEducators = () => {
                   </div>
 
                   {/* Follow Button */}
-                  <button
+                  {/* <button
                     onClick={() => toggleFollow(educator._id)}
                     className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${
                       educator.is_create_stream
@@ -187,7 +189,7 @@ const IqAcademyEducators = () => {
                         <UserPlus size={16} /> Follow
                       </>
                     )}
-                  </button>
+                  </button> */}
                 </div>
               </div>
             ))

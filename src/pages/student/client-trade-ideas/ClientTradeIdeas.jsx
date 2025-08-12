@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
 import EducatorImage from "./EducatorImage";
+import { Copy } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,6 +46,7 @@ const ClientTradeIdeas = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
 
   const observer = useRef();
 
@@ -93,6 +95,25 @@ const ClientTradeIdeas = () => {
 
   const call = () => {
     window.alert("Link is not provide..!");
+  };
+
+  const handleCopy = async (trade) => {
+    const textToCopy = [
+      `Entry: ${trade.entry}`,
+      `Stop Loss: ${trade.invalidation}`,
+      `Exit 1: ${trade?.exits?.[0] ?? "N/A"}`,
+      `Exit 2: ${trade?.exits?.[1] ?? "N/A"}`,
+      `Exit 3: ${trade?.exits?.[2] ?? "N/A"}`,
+    ].join("\n"); // newline separated
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopiedId(trade._id); // Mark as copied
+      setTimeout(() => setCopiedId(null), 1200); // Hide after 3s
+    } catch (err) {
+      console.error("Copy failed", err);
+      alert("Failed to copy ❌");
+    }
   };
 
   return (
@@ -277,6 +298,18 @@ const ClientTradeIdeas = () => {
                       >
                         {trade.status.toUpperCase()}
                       </span>
+                      {copiedId === trade._id ? (
+                      <span className="text-dark text-sm">
+                        Copied!
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleCopy(trade)}
+                        className="text-gray-800 items-center"
+                      >
+                       <Copy />
+                      </button>
+                    )}
                     </div>
 
                     <div className="mt-6 space-y-4">
@@ -315,6 +348,8 @@ const ClientTradeIdeas = () => {
                         </span>
                       </div> */}
                     </div>
+
+                    
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">

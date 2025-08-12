@@ -62,7 +62,7 @@ const CreateTradeIdeas = forwardRef(
       status: Yup.string()
         .oneOf(["active", "pending", "win", "partialWin", "loss"])
         .required("Status is required"),
-      timeFrame: Yup.string().required("Time frame is required"),
+      timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
       entry: Yup.string().required("Entry is required"),
       description: Yup.string().required("Entry is required"),
@@ -226,7 +226,7 @@ const CreateTradeIdeas = forwardRef(
                     </label>
                     <input
                       type="text"
-                      placeholder="Enter name"
+                      placeholder="Enter symbol"
                       autoComplete="off"
                       className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
                         ? "border border-danger"
@@ -306,7 +306,7 @@ const CreateTradeIdeas = forwardRef(
                 <div className="col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
-                      Time Frame <span className="text-danger">*</span>
+                      Type <span className="text-danger">*</span>
                     </label>
 
                     <Select
