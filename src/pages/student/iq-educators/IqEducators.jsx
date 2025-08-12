@@ -6,6 +6,7 @@ import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
+import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 
 const IqEducators = () => {
   const { auth } = useAuthContext();
@@ -234,11 +235,14 @@ const IqEducators = () => {
           <span>✓</span> Follow
         </button>
       </div>
-
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
-        {/* Main Content */}
+        <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
+          <ClientViewLiveSession bannerImage={response?.data?.educator?.bannerImage}/>
+        </div>
+      </div>
+      <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">
-          <div className="">
+          {/* <div className="">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-y-8 lg:gap-x-8 md:gap-y-8">
               <div className="col-span-12 lg:col-span-12">
                 <div className="card rounded-none rounded-b-xl">
@@ -250,8 +254,9 @@ const IqEducators = () => {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="text-gray-900 mb-28">
+          </div> */}
+          {/* <ClientViewLiveSession /> */}
+          <div className="text-gray-900 mb-2">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Recordings</h2>
@@ -275,7 +280,7 @@ const IqEducators = () => {
                         className="w-full h-36 object-cover"
                         onClick={() => handleOpen(course?.url)}
                       />
-                    
+
                       {/* <div className="absolute inset-0 flex items-center justify-center">
                         <button
                           type="button"
@@ -337,14 +342,12 @@ const IqEducators = () => {
         {/* Sidebar */}
         <div className="col-span-12 xl:col-span-4">
           <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-12 md:col-span-6 xl:col-span-12 space-y-6">
+            {/* <div className="col-span-12 md:col-span-6 xl:col-span-12 space-y-6">
               <div className="card rounded-2xl shadow-md overflow-hidden">
-                {/* Chatbox Header */}
                 <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
                   <h3 className="text-white font-semibold text-sm">Chatbox</h3>
                 </div>
 
-                {/* Messages Area */}
                 <div className="p-4 overflow-y-auto flex flex-col space-y-4 relative group">
                   {messages.map((message) => (
                     <div key={message.id} className="flex flex-col gap-2">
@@ -362,7 +365,6 @@ const IqEducators = () => {
 
                   <div ref={messagesEndRef} />
 
-                  {/* Hover Overlay */}
                   <div className="absolute inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
                     No This feature is under-development
                   </div>
@@ -390,7 +392,7 @@ const IqEducators = () => {
                   </div>
                 </form>
               </div>
-            </div>
+            </div> */}
             <div className="col-span-12 md:col-span-6 xl:col-span-12">
               <div className="card rounded-2xl shadow-md overflow-hidden">
                 {/* Header */}
@@ -401,21 +403,19 @@ const IqEducators = () => {
                   <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
                     <button
                       onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "feed"
+                        ? "bg-white text-[#1A1446]"
+                        : "text-white"
+                        }`}
                     >
                       Feed
                     </button>
                     <button
                       onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "ideas"
+                        ? "bg-white text-[#1A1446]"
+                        : "text-white"
+                        }`}
                     >
                       Ideas
                     </button>

@@ -223,7 +223,7 @@ export default function IqStrategies() {
                     </div>
                 </div>
 
-                {/* <div className="text-gray-900 mb-28">
+                {/* <div className="text-gray-900 mb-2">
                     <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                         <div className="flex justify-between items-center">
                             <h2 className="text-2xl font-bold ">Tutorials</h2>

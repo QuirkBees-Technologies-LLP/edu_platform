@@ -5,6 +5,7 @@ import { ChatAutoComplete, CooldownTimer, useMessageInputContext } from 'stream-
 // import { EmojiPicker } from './EmojiPicker';
 import { useEventContext } from '../context/EventContext';
 import { useGiphyContext } from '../context/GiphyContext';
+import { Send } from 'lucide-react';
 
 export const MessageInputUI = () => {
   const {
@@ -60,10 +61,10 @@ export const MessageInputUI = () => {
   };
 
   return (
-    <div className='input-ui-container '>
+    <div className='live_chat input-ui-container relative'>
       <div className={`input-ui-input ${giphyState ? 'giphy' : ''}`}>
         {/* {giphyState && !numberOfUploads && <GiphyIcon />} */}
-        <ChatAutoComplete className="form-control input input-sm" onChange={onChange} placeholder='Say something' />
+        <ChatAutoComplete className="form-control input input-sm" onChange={onChange} placeholder='Your Comment...' />
         {chatType !== 'qa' && (
           <>
             <div
@@ -78,7 +79,7 @@ export const MessageInputUI = () => {
         )}
       </div>
       <button
-        className={`btn btn-sm btn-primary mt-3 input-ui-send-button ${text ? 'text' : ''} ${cooldownRemaining ? 'cooldown' : ''}`}
+        className={`btn btn-sm input-ui-send-button ${text ? 'text' : ''} ${cooldownRemaining ? 'cooldown' : ''}`}
         disabled={!text}
         onClick={handleSubmit}
       >
@@ -95,8 +96,9 @@ export const MessageInputUI = () => {
         ) : (
           <>
             {/* <SendArrow /> */}
-            <i class="ki-filled ki-arrow-right"></i>
-            <div>{269 - text.length}</div>
+            <Send size={22} />
+            {/* <i class="ki-filled ki-arrow-right"></i> */}
+            {/* <div>{269 - text.length}</div> */}
           </>
         )}
       </button>

@@ -101,57 +101,58 @@ const TradeUserView = [
 ];
 const AdminTradeCards = () => {
   const [page, setPage] = useState(1);
-    const [limit] = useState(10);
-    const [tradeIdeas, setTradeIdeas] = useState([]);
-    const [isViewOpen, setIsViewOpen] = useState(false);
-    const [selectedIdea, setSelectedIdea] = useState({});
-    const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [limit] = useState(10);
+  const [tradeIdeas, setTradeIdeas] = useState([]);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState({});
+  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
 
-    const observer = useRef();
+  const observer = useRef();
 
-    // const { data, isFetching } = useGetClientTradeIdeasQuery({
-    // page: page,
-    // limit: limit,
-    // });
-    const { data:fetchData } = useGetAdminWithoutTradeIdeasQuery({isview:true});
+  // const { data, isFetching } = useGetClientTradeIdeasQuery({
+  // page: page,
+  // limit: limit,
+  // });
+  const { data: fetchData } = useGetAdminWithoutTradeIdeasQuery({ isview: true });
 
-    // const totalPages = data?.pagination?.totalPages || 1;
+  // const totalPages = data?.pagination?.totalPages || 1;
 
-    // useEffect(() => {
-    // if (data?.data) {
-    //     if (page === 1) {
-    //     setTradeIdeas(data.data); // replace data if first page
-    //     } else {
-    //     // Append new unique items only
-    //     setTradeIdeas((prevIdeas) => {
-    //         const newIdeas = data.data.filter(
-    //         (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
-    //         );
-    //         return [...prevIdeas, ...newIdeas];
-    //     });
-    //     }
-    // }
-    // }, [data, page]);
+  // useEffect(() => {
+  // if (data?.data) {
+  //     if (page === 1) {
+  //     setTradeIdeas(data.data); // replace data if first page
+  //     } else {
+  //     // Append new unique items only
+  //     setTradeIdeas((prevIdeas) => {
+  //         const newIdeas = data.data.filter(
+  //         (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
+  //         );
+  //         return [...prevIdeas, ...newIdeas];
+  //     });
+  //     }
+  // }
+  // }, [data, page]);
 
-    // const lastTradeIdeaRef = useCallback(
-    // (node) => {
-    //     if (isFetching || page >= totalPages) return;
+  // const lastTradeIdeaRef = useCallback(
+  // (node) => {
+  //     if (isFetching || page >= totalPages) return;
 
-    //     if (observer.current) observer.current.disconnect();
-    //     observer.current = new IntersectionObserver((entries) => {
-    //     if (entries[0].isIntersecting) {
-    //         setPage((prevPage) => prevPage + 1);
-    //     }
-    //     });
+  //     if (observer.current) observer.current.disconnect();
+  //     observer.current = new IntersectionObserver((entries) => {
+  //     if (entries[0].isIntersecting) {
+  //         setPage((prevPage) => prevPage + 1);
+  //     }
+  //     });
 
-    //     if (node) observer.current.observe(node);
-    // },
-    // [isFetching, page, totalPages]
-    // );
+  //     if (node) observer.current.observe(node);
+  // },
+  // [isFetching, page, totalPages]
+  // );
 
-    const handleCloseView = () => {
+  const handleCloseView = () => {
     setIsViewOpen(false);
-    };
+  };
+
   return (
     <div className="container-fluid p-0">
       <Toolbar>
@@ -212,7 +213,7 @@ const AdminTradeCards = () => {
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
-                        {/* <img src="/media/avatars/300-6.png" alt="" /> */}
+                      {/* <img src="/media/avatars/300-6.png" alt="" /> */}
                       <AdminCardImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
                       <div>
                         <Link
@@ -245,7 +246,7 @@ const AdminTradeCards = () => {
         />
       </div>
     </div>
-  );    
+  );
 }
 
 export default AdminTradeCards

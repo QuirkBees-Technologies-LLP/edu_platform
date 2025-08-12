@@ -11,7 +11,7 @@ import { format } from "date-fns";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
-const ClientViewLiveSession = () => {
+const ClientViewLiveSession = ({bannerImage}) => {
   const [client, setClient] = useState(null);
   const [call, setCall] = useState(null);
   const isInitializing = useRef(false); // Track initialization attempts
@@ -112,7 +112,7 @@ const ClientViewLiveSession = () => {
         <EventProvider>
           <StreamWrapper call={call} callId={callId}>
             <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
-              {client && <ClientLiveSessionWrapper client={client} callId={callId} token={token}/>}
+              {client && <ClientLiveSessionWrapper bannerImage={bannerImage} client={client} callId={callId} token={token}/>}
             </StreamTheme>
           </StreamWrapper>
         </EventProvider>
