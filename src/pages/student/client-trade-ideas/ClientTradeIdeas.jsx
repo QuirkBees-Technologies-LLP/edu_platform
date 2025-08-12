@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
 import EducatorImage from "./EducatorImage";
-import { Copy } from 'lucide-react';
+import { Copy } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -97,22 +97,35 @@ const ClientTradeIdeas = () => {
     window.alert("Link is not provide..!");
   };
 
-  const handleCopy = async (trade) => {
-    const textToCopy = [
-      `Entry: ${trade.entry}`,
-      `Stop Loss: ${trade.invalidation}`,
-      `Exit 1: ${trade?.exits?.[0] ?? "N/A"}`,
-      `Exit 2: ${trade?.exits?.[1] ?? "N/A"}`,
-      `Exit 3: ${trade?.exits?.[2] ?? "N/A"}`,
-    ].join("\n"); // newline separated
+  // const handleCopy = async (trade) => {
+  //   const textToCopy = [
+  //     `Entry: ${trade.entry}`,
+  //     `Stop Loss: ${trade.invalidation}`,
+  //     `Exit 1: ${trade?.exits?.[0] ?? "N/A"}`,
+  //     `Exit 2: ${trade?.exits?.[1] ?? "N/A"}`,
+  //     `Exit 3: ${trade?.exits?.[2] ?? "N/A"}`,
+  //   ].join("\n"); // newline separated
 
+  //   try {
+  //     await navigator.clipboard.writeText(textToCopy);
+  //     setCopiedId(trade._id); // Mark as copied
+  //     setTimeout(() => setCopiedId(null), 1200); // Hide after 3s
+  //   } catch (err) {
+  //     console.error("Copy failed", err);
+  //     alert("Failed to copy ❌");
+  //   }
+  // };
+
+  const [copiedField, setCopiedField] = useState({ id: null, field: null });
+
+  const handleCopyField = async (tradeId, fieldName, value) => {
+    console.log("called.....", tradeId, fieldName, value);
     try {
-      await navigator.clipboard.writeText(textToCopy);
-      setCopiedId(trade._id); // Mark as copied
-      setTimeout(() => setCopiedId(null), 1200); // Hide after 3s
+      await navigator.clipboard.writeText(value ?? "N/A");
+      setCopiedField({ id: tradeId, field: fieldName });
+      setTimeout(() => setCopiedField({ id: null, field: null }), 1200);
     } catch (err) {
       console.error("Copy failed", err);
-      alert("Failed to copy ❌");
     }
   };
 
@@ -312,16 +325,17 @@ const ClientTradeIdeas = () => {
                     )} */}
                       <div className="flex sm:flex-col items-end gap-2">
                         <span
-                            className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                          >
-                            {trade.status.toUpperCase()}
-                          </span>
-                          <span
-                            className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                          >
-                            Scalping
-                          </span>
-                          {/* {copiedId === trade._id ? (
+                          className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                        >
+                          {trade.status.toUpperCase()}
+                        </span>
+                        <span
+                          className={`bg-gray-100 text-${statusColorMap[trade.status]}-700 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                          // className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                        >
+                          {trade.timeFrame}
+                        </span>
+                        {/* {copiedId === trade._id ? (
                       <span className="text-dark text-sm">
                         Copied!
                       </span>
@@ -342,19 +356,22 @@ const ClientTradeIdeas = () => {
                           Entry
                         </span>
                         <span className="font-medium text-gray-800">
-                          {copiedId === trade._id ? (
-                          <span className="text-dark text-sm mr-2">
-                            Copied!
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleCopy(trade)}
-                            className="text-gray-800 items-center mr-2"
-                          >
-                          <Copy size={14}/>
-                          </button>
-                        )}
-                        {trade.entry}
+                          {copiedField.id === trade._id &&
+                          copiedField.field === "Entry" ? (
+                            <span className="text-dark text-sm mr-2">
+                              Copied!
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() =>
+                                handleCopyField(trade._id, "Entry", trade.entry)
+                              }
+                              className="text-gray-800 items-center mr-2"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          )}
+                          {trade.entry}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
@@ -362,43 +379,97 @@ const ClientTradeIdeas = () => {
                           Stop Loss
                         </span>
                         <span className="font-medium text-gray-800">
-                          {copiedId === trade._id ? (
-                          <span className="text-dark text-sm mr-2">
-                            Copied!
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleCopy(trade)}
-                            className="text-gray-800 items-center mr-2"
-                          >
-                          <Copy size={14}/>
-                          </button>
-                        )}
+                          {copiedField.id === trade._id &&
+                          copiedField.field === "Stop Loss" ? (
+                            <span className="text-dark text-sm mr-2">
+                              Copied!
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() =>
+                                handleCopyField(
+                                  trade._id,
+                                  "Stop Loss",
+                                  trade.invalidation
+                                )
+                              }
+                              className="text-gray-800 items-center mr-2"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          )}
                           {trade.invalidation}
                         </span>
                       </div>
-                      {[0, 1, 2].map((idx) => (
+                      {[0, 1, 2].map((idx) => {
+                        const exitValue = trade?.exits?.[idx] ?? "N/A";
+                        const fieldName = `Exit ${idx + 1}`;
+
+                        return (
+                          <div
+                            key={idx}
+                            className="flex justify-between text-sm"
+                          >
+                            <span className="text-gray-600 font-normal text-sm">
+                              {fieldName}
+                            </span>
+                            <span className="font-medium text-gray-800 flex items-center">
+                              {copiedField.id === trade._id &&
+                              copiedField.field === fieldName ? (
+                                <span className="text-dark text-sm mr-2">
+                                  Copied!
+                                </span>
+                              ) : (
+                                exitValue !== "N/A" && (
+                                  <button
+                                    onClick={() =>
+                                      handleCopyField(
+                                        trade._id,
+                                        fieldName,
+                                        exitValue
+                                      )
+                                    }
+                                    className="text-gray-800 items-center mr-2"
+                                  >
+                                    <Copy size={14} />
+                                  </button>
+                                )
+                              )}
+                              {exitValue}
+                            </span>
+                          </div>
+                        );
+                      })}
+
+                      {/* {[0, 1, 2].map((idx) => (
                         <div key={idx} className="flex justify-between text-sm">
                           <span className="text-gray-600 font-normal text-sm">
                             {`Exit ${idx + 1}`}
                           </span>
                           <span className="font-medium text-gray-800">
-                            {copiedId === trade._id ? (
-                          <span className="text-dark text-sm mr-2">
-                            Copied!
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleCopy(trade)}
-                            className="text-gray-800 items-center mr-2"
-                          >
-                          <Copy size={14}/>
-                          </button>
-                        )}
+                            {copiedField.id === trade._id &&
+                            copiedField.field === `Exit ${idx + 1}` ? (
+                              <span className="text-dark text-sm mr-2">
+                                Copied!
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  handleCopyField(
+                                    trade._id,
+                                    `Exit ${idx + 1}`,
+                                    trade?.exits?.[idx] ?? "N/A"
+                                  )
+                                }
+                                className="text-gray-800 items-center mr-2"
+                              >
+                                <Copy size={14} />
+                              </button>
+                            )}
                             {trade?.exits?.[idx] ?? "N/A"}
                           </span>
                         </div>
-                      ))}
+                      ))} */}
                       {/* <div className="flex justify-between text-sm">
                         <span className="text-gray-600 font-normal text-sm">
                           Exit 2
@@ -408,8 +479,6 @@ const ClientTradeIdeas = () => {
                         </span>
                       </div> */}
                     </div>
-
-                    
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
