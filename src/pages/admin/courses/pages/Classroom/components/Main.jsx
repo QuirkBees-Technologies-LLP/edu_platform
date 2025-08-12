@@ -58,7 +58,7 @@ const Main = ({ onSelectCourse }) => {
           setCoursesList(response);
 
           const instructorsWithCourses = Object.values(
-            response.reduce((acc, course) => {
+            response?.reduce((acc, course) => {
               const instructor = course.instructor;
               if (!instructor?._id) return acc;
 

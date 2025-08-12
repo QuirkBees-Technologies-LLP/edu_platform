@@ -31,6 +31,7 @@ import {
 } from "../../../store/api/admin/adminEducatorsApiSlice";
 import clsx from "clsx";
 import { KeenIcon } from "@/components";
+import { icon } from "leaflet";
 
 const CreateEducator = forwardRef(
   (
@@ -52,7 +53,8 @@ const CreateEducator = forwardRef(
       is_create_stream: false,
       is_access_trade_ideas: true,
       is_access_trade_analysis: true,
-      files: null,
+      image: null,
+      icon: null,
     };
 
     const createSchema = Yup.object().shape({
@@ -107,7 +109,8 @@ const CreateEducator = forwardRef(
 
       role: Yup.string().required("Role is required"),
       status: Yup.boolean().required("Status is required"),
-      files: Yup.mixed().nullable(),
+      image: Yup.mixed().nullable(),
+      icon: Yup.mixed().nullable(),
     });
 
     const formik = useFormik({
@@ -154,6 +157,12 @@ const CreateEducator = forwardRef(
             payload.id = selectedRow._id;
             delete payload.password;
           }
+          if(typeof(payload.icon) === "string"){
+            delete payload.icon
+          }
+          if(typeof(payload.image) === "string"){
+            delete payload.image
+          }
 
           // Convert payload to FormData
           const formData = new FormData();
@@ -178,6 +187,9 @@ const CreateEducator = forwardRef(
             }
           }
 
+          console.log("formData", formData);
+         
+
           // API call using FormData
           if (selectedRow?._id) {
             await updateEducator({
@@ -191,6 +203,7 @@ const CreateEducator = forwardRef(
           }
 
           formik.resetForm();
+          
           handleCloseCreate();
           setSelectedRow({});
           refetch();
@@ -215,7 +228,8 @@ const CreateEducator = forwardRef(
           is_create_stream: selectedRow?.is_create_stream,
           is_access_trade_analysis: selectedRow?.is_access_trade_analysis,
           is_access_trade_ideas: selectedRow?.is_access_trade_ideas,
-          files: selectedRow?.image || null,
+          image: selectedRow?.image || null,
+          icon: selectedRow?.bannerImage || null,
         };
         formik.setValues(initData);
       }
@@ -246,20 +260,20 @@ const CreateEducator = forwardRef(
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
-              <div className="col-span-12">
+              <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Profile Photo
                   </label>
                   <AvatarUpload
                     value={
-                      formik.values.files
-                        ? typeof formik.values.files === "string"
-                          ? [{ dataURL: formik.values.files }] // URL from backend
+                      formik.values.image
+                        ? typeof formik.values.image === "string"
+                          ? [{ dataURL: formik.values.image }] // URL from backend
                           : [
                               {
                                 dataURL: URL.createObjectURL(
-                                  formik.values.files
+                                  formik.values.image
                                 ),
                               },
                             ] // Local file
@@ -267,16 +281,55 @@ const CreateEducator = forwardRef(
                     }
                     accept="image/*"
                     onChange={(file) => {
-                      formik.setFieldValue("files", file[0]?.file);
+                      formik.setFieldValue("image", file[0]?.file);
                     }}
                   />
-                  {formik.touched.files && formik.errors.files && (
+                  {formik.touched.image && formik.errors.image && (
                     <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors.files}
+                      {formik.errors.image}
                     </span>
                   )}
                 </div>
               </div>
+              <div className="col-span-6">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Banner Photo
+                  </label>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => {
+                      const file = event.currentTarget.files[0];
+                      formik.setFieldValue("icon", file);
+                    }}
+                    className="border border-gray-300 rounded px-3 py-2 text-sm"
+                  />
+
+                  {/* Preview */}
+                  {formik.values.icon && (
+                    <div className="mt-2">
+                      <img
+                        src={
+                          typeof formik.values.icon === "string"
+                            ? formik.values.icon // Backend se URL
+                            : URL.createObjectURL(formik.values.icon) // Local file preview
+                        }
+                        alt="Preview"
+                        className="w-full max-w-xs rounded border"
+                      />
+                    </div>
+                  )}
+
+                  {formik.touched.icon && formik.errors.icon && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.icon}
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">

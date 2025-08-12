@@ -27,7 +27,7 @@ export default function IqVault() {
     refetch,
   } = useGetAcademyCategoryByMainSectionQuery(
     {
-      mainSection: "IQ Acedemy",
+      mainSection: "IQ Academy",
       id,
       category: activeTab,
       language: selectedLanguage,
