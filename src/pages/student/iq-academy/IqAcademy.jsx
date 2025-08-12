@@ -54,44 +54,7 @@ export default function IqAcademy() {
   const isToday = (datetime) => {
     const today = new Date();
     const scheduleDate = new Date(datetime);
-    
-    // Normalize both dates to local date (removing time component)
-    const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const scheduleLocal = new Date(scheduleDate.getFullYear(), scheduleDate.getMonth(), scheduleDate.getDate());
-    
-    return todayLocal.getTime() === scheduleLocal.getTime();
-  };
-
-  // Helper function to get redirect URL for educator
-  const getEducatorRedirectUrl = (educator) => {
-    if (!educator.schedules || educator.schedules.length === 0) {
-      return `/iq-educators/${educator._id}`;
-    }
-
-    // Check if there's a schedule today
-    const today = new Date();
-    const todaySchedule = educator.schedules.find(schedule => {
-      const scheduleDate = new Date(schedule.datetime);
-      
-      // Normalize both dates to local date (removing time component)
-      const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const scheduleLocal = new Date(scheduleDate.getFullYear(), scheduleDate.getMonth(), scheduleDate.getDate());
-      
-      return todayLocal.getTime() === scheduleLocal.getTime();
-    });
-
-    if (todaySchedule && todaySchedule.callId) {
-      return `/iq-educators/${educator._id}/${todaySchedule.callId}`;
-    }
-
-    // If no today schedule, redirect to first available schedule with callId
-    const firstScheduleWithCallId = educator.schedules.find(schedule => schedule.callId);
-    if (firstScheduleWithCallId) {
-      return `/iq-educators/${educator._id}/${firstScheduleWithCallId.callId}`;
-    }
-
-    // Fallback to educator profile
-    return `/iq-educators/${educator._id}`;
+    return today.toDateString() === scheduleDate.toDateString();
   };
 console.log(educators, "educators");
 
@@ -236,7 +199,7 @@ console.log(educators, "educators");
                     {educator.first_name} {educator.last_name}
                   </h3>
                   <Link
-                    to={getEducatorRedirectUrl(educator)}
+                    to={`/iq-educators/${educator._id}`}
                     className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
                   >
                     View Profile

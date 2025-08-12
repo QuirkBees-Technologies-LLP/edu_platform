@@ -11,16 +11,18 @@ import { format } from "date-fns";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
-const ClientViewLiveSession = ({bannerImage}) => {
+const ClientViewLiveSession = ({bannerImage, callId}) => {
   const [client, setClient] = useState(null);
+  console.log(callId, "callId");
+  
   const [call, setCall] = useState(null);
   const isInitializing = useRef(false); // Track initialization attempts
-  const { callId } = useParams();
+  // const { callId } = useParams();
   const { auth } = useAuthContext();
   const userId = auth?.user?._id ?? null;
 
   console.log("userId",auth)
-  console.log("callId",callId)
+  console.log("callId----->",callId)
   const [recordings, setRecordings] = useState([]);
 
   // 1. Fetch token and schedule data (uncomment schedule logic)
@@ -43,7 +45,7 @@ const ClientViewLiveSession = ({bannerImage}) => {
   // 2. Initialize Stream client
   useEffect(() => {
     const initClient = async () => {
-      if (!token || client || isInitializing.current) return;
+      if (!token || client || isInitializing.current || !callId) return;
       isInitializing.current = true;
 
       let newClient;
@@ -89,10 +91,10 @@ const ClientViewLiveSession = ({bannerImage}) => {
         }
       };
     
-      useEffect(() => {
-        // Fetch recordings when the component mounts
-        fetchRecordings();
-      }, [call]);
+      // useEffect(() => {
+      //   // Fetch recordings when the component mounts
+      //   fetchRecordings();
+      // }, [call]);
 
       console.log(call, "call");
       
@@ -110,9 +112,9 @@ const ClientViewLiveSession = ({bannerImage}) => {
         </div>
       ) : ( */}
         <EventProvider>
-          <StreamWrapper call={call} callId={callId}>
+          <StreamWrapper call={call} callId={callId} bannerImage={bannerImage}>
             <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
-              {client && <ClientLiveSessionWrapper bannerImage={bannerImage} client={client} callId={callId} token={token}/>}
+              {<ClientLiveSessionWrapper bannerImage={bannerImage} client={client} callId={callId} token={token}/>}
             </StreamTheme>
           </StreamWrapper>
         </EventProvider>

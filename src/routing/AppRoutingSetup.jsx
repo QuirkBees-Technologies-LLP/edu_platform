@@ -156,7 +156,7 @@ const routes = {
     { path: "/iq-vault", element: <IqVault /> },
     { path: "/iq-strategies", element: <IqStrategies /> },
     { path: "/iq-academy", element: <IqAcademy /> },
-    { path: "/iq-educators/:id/:callId", element: <IqEducators /> },
+    { path: "/iq-educators/:id", element: <IqEducators /> },
     { path: "/iq-academy-educators", element: <IqAcademyEducators /> },
     { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },

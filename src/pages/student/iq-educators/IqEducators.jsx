@@ -15,8 +15,16 @@ const IqEducators = () => {
 
   const { id } = useParams();
   const { data: response } = useGetEducatorWithCoursesQuery(id);
+  const [callId, setCallId] = useState(null);
+
+  useEffect(() => {
+    if (response?.data?.schedules && response.data.schedules.length > 0) {
+      setCallId(response.data.schedules[0].callId);
+    }
+  }, [response]);
 
   console.log("response", response);
+  console.log("callId", callId);
 
   const updates = [
     {
@@ -237,7 +245,7 @@ const IqEducators = () => {
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
-          <ClientViewLiveSession bannerImage={response?.data?.educator?.bannerImage}/>
+          <ClientViewLiveSession bannerImage={response?.data?.educator?.bannerImage} callId={callId}/>
         </div>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
