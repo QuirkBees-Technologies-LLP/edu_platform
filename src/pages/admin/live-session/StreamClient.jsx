@@ -62,11 +62,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
                                     {client && call && (
                                         <StreamVideo client={client}>
                                             <StreamCall initialDeviceSettings={{ mic: false, camera: false }} call={call}>
-                                                <LiveSessionPlayer client={client} callId={callId}
-
-                                                    call={call} token={token} rtmp_stream_key={rtmp_stream_key} rtmp_url={rtmp_url} setIsTooltipOpen={setIsTooltipOpen} isTooltipOpen={isTooltipOpen}
-
-                                                />
+                                                <LiveSessionPlayer client={client} callId={callId} call={call} token={token} rtmp_stream_key={rtmp_stream_key} rtmp_url={rtmp_url} setIsTooltipOpen={setIsTooltipOpen} isTooltipOpen={isTooltipOpen}/>
                                             </StreamCall>
                                         </StreamVideo>
                                     )}
