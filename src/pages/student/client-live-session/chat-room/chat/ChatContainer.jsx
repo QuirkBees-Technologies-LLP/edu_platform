@@ -13,7 +13,7 @@ import { MessageInputUI } from "./MessageInput";
 import { ChatHeader } from "./ChatHeader";
 import { ChatSidebar } from "./ChatSidebar";
 
-const ChatContainer = ({ sessionToken }) => {
+const ChatContainer = ({ sessionToken, callId }) => {
   const {
     actionsModalOpen,
     isFullScreen,
@@ -31,7 +31,7 @@ const ChatContainer = ({ sessionToken }) => {
 
   const location = useLocation();
   const sessionData = location.state;
-  const { callId } = useParams(); // Get callId from URL
+  // const { callId } = useParams(); // Get callId from URL
   // const { address: rtmp_url, token: rtmp_stream_key } = sessionData;
   // const token = rtmp_stream_key;
   const [call, setCall] = useState(null);
