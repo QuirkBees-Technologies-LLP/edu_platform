@@ -1,8 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useEventContext } from '../context/EventContext';
 import { ArrowBigLeft, ArrowBigRight, UserRound } from 'lucide-react';
+import { useResponsive } from '../../../../../hooks';
 
 export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) => {
     const {
@@ -13,6 +14,12 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
         setShowChannelList,
         isFullScreen, setIsFullScreen
     } = useEventContext();
+    const isMdUp = useResponsive('down', 'sm'); // matches Tailwind's md: 768px+
+    useEffect(() => {
+        if (isMdUp) {
+            setIsFullScreen(true);
+        }
+    }, [isMdUp]);
 
     const handleGlobalClick = useCallback(() => {
         setChatType('global-ve2');
@@ -37,15 +44,16 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
 
     return (
         <>
-            {!isFullScreen && <div className='chat-components-header p-2 border border-b-0'>
-                <div className='chat-components-header-top flex justify-between align-center'>
+            {!isFullScreen && <div className='bg-[#1A1446] px-4 py-3 chat-components-header border border-b-0'>
+                <div className='chat-components-header-top flex gap-3 items-center'>
                     <button onClick={() => setIsFullScreen((prev) => !prev)} class="btn btn-xs btn-icon btn-primary btn-outline ">
-                        <ArrowBigRight size={18}/>
+                        <ArrowBigRight size={18} />
                     </button>
-                    <button class="btn btn-xs btn-primary btn-outline">
+                    <h3 class="text-white font-semibold text-sm pb-0">ChatBox</h3>
+                    {/* <button class="btn btn-xs btn-primary btn-outline">
                     <UserRound size={16}/>
                         12354
-                    </button>
+                    </button> */}
                 </div>
             </div>
             }

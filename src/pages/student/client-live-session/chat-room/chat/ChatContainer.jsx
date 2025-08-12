@@ -58,7 +58,7 @@ const ChatContainer = ({ sessionToken }) => {
   if (!chatClient) return null;
 
   return (
-    <div className={`chat str-chat`}>
+    <div className={`chat str-chat h-full`}>
       {isFullScreen && (
         <ChatSidebar
           isFullScreen={isFullScreen}
