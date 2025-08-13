@@ -68,9 +68,9 @@ export default function IqAcademy() {
         </div>
       )}
 
-      {educators && educators.length > 0 ? null : (
+      {/* {educators && educators.length > 0 ? null : (
         <div className="text-center">There are no schedule found</div>
-      )}
+      )} */}
 
       {!isCategoryLoading && categoryList.length === 0 && (
         <div className="text-center py-10 text-red-500">
