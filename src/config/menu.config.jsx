@@ -1,5 +1,5 @@
 
-import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User, Dot, School, Tv, ChartLine } from "lucide-react";
+import { BookOpen, CalendarClock, ChartCandlestick, CircleDot, Clapperboard, Layers, LayoutDashboard, Lightbulb, PlayCircle, User, Dot, School, Tv, ChartLine, ChartNoAxesCombined } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
 
@@ -1170,6 +1170,11 @@ export const sideMenus = {
       title: 'IQ Strategies',
       icon: <School />,
       path: '/iq-strategies'
+    },
+    {
+      title: 'IQ Charts',
+      icon: <ChartNoAxesCombined />,
+      path: 'https://www.iqcharts.com/'
     },
     // {
     //   title: 'Forex Academy',
