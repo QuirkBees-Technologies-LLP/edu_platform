@@ -346,7 +346,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
 
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative">
-            <KeenIcon
+            {/* <KeenIcon
               icon="magnifier"
               className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
             />
@@ -356,7 +356,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
               className="input input-md ps-8 h-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-            />
+            /> */}
           </div>
           <DataGridColumnVisibility table={table} />
         </div>

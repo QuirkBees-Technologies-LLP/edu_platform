@@ -431,6 +431,9 @@ chat */
 .chat-components {
 	font-family: 'Termina', sans-serif;
 }
+.chatbox_chat {
+	font-family: 'Termina', sans-serif;
+}
 
 .dark .rta__textarea {
 	background: #111217;
