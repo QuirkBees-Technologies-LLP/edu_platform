@@ -32,6 +32,7 @@ jobs:
           VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
           VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
+          npm install express
           npm ci
           npm run build
           zip -r site.zip dist
@@ -49,3 +50,4 @@ jobs:
           app-name: 'edu'
           slot-name: 'Production'
           package: site.zip
+
