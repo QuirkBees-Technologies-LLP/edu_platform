@@ -257,7 +257,7 @@ export default function IqVault() {
                 {data?.ActiveCategory && data.ActiveCategory.length > 0 ? (
                   <div
                     style={{
-                      backgroundImage: `url(/media/images/${data?.ActiveCategory[0]?.categoryName.replace(/\s+/g, "-")}.jpg)`,
+                      backgroundImage: `url(/media/banners/${data?.ActiveCategory[0]?.categoryName.replace(/\s+/g, "-")}.jpg)`,
                     }}
                     className="text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full"
                   >
