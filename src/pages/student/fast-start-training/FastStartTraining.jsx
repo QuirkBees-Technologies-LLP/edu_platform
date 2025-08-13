@@ -263,7 +263,7 @@ export default function FastStartTraining() {
                 {data?.ActiveCategory && data.ActiveCategory.length > 0 ? (
                   <div
                     style={{
-                      backgroundImage: `url(/media/images/Backoffice.jpg)`,
+                      backgroundImage: `url(/media/banners/Backoffice.jpg)`,
                     }}
                     className="text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full"
                   >
