@@ -147,7 +147,7 @@ const IqInsight = () => {
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
-                      <EducatorImage educator={idea?.educatorDetails} defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)} />
+                      <EducatorImage educator={idea?.educatorDetails}  />
                       <div>
                         <Link
                           to="/public-profile/profiles/nft"
