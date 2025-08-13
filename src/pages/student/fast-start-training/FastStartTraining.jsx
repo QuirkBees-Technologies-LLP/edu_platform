@@ -228,6 +228,8 @@ export default function FastStartTraining() {
     },
   ];
 
+// Added the image 
+
   return (
     <>
       <div>
