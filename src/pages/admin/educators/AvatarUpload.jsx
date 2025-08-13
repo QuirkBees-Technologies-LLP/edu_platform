@@ -43,9 +43,9 @@ const AvatarUpload = ({ value, onChange }) => {
             {avatar.length > 0 && <img src={avatar[0].dataURL} className='h-full w-full object-cover' alt="avatar" />}
           </div>
         </div>
-        <small className="">
+        {/* <small className="">
           Recommended size: 1920×1080 pixels (16:9 aspect ratio)
-        </small>
+        </small> */}
         </>
       )}
     </ImageInput>

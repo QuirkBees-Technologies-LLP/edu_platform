@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom';
 import WeeklyCalendar from './WeeklyCalendar';
 import EducatorImage from './EducatorImage';
 import Loader from '../../../components/ui/loader';
+import WeeklyCalendarIQAcademy from './WeeklyCalendarIQAcademy';
 
 const StudentLiveSessionCategoryDetails = () => {
     const { id } = useParams();
@@ -20,7 +21,7 @@ const StudentLiveSessionCategoryDetails = () => {
             <div className='container-fluid'>
                 {isLoading ? <Loader /> :
                     <>
-                        {educators && educators.length > 0 ? <WeeklyCalendar educators={educators} /> : <div className='text-center'>There are no schedule found</div>}
+                        {educators && educators.length > 0 ? <WeeklyCalendarIQAcademy educators={educators} /> : <div className='text-center'>There are no schedule found</div>}
                         {educators && educators.length > 0 ? (
                             <div className="grid xl:grid-cols-3 sm:grid-cols-2 gap-4">
                                 {educators.map((educator, index) => (
