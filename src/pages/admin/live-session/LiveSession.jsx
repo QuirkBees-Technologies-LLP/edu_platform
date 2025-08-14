@@ -99,6 +99,22 @@ const LiveSession = ({ title = "IQ Academy" }) => {
       </span>,
     },
     {
+      accessorFn: row => row.educatorDetails,
+      id: 'educator',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Educator' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.educatorDetails?.first_name + " " + info.row.original.educatorDetails?.last_name}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
       accessorFn: row => row.callId,
       id: 'callId',
       header: ({
@@ -138,7 +154,7 @@ const LiveSession = ({ title = "IQ Academy" }) => {
               id: 'datetime',
               header: ({
                 column
-              }) => <DataGridColumnHeader title='Start Time' column={column} />,
+              }) => <DataGridColumnHeader title='Schedule At' column={column} />,
               enableSorting: true,
               cell: info => <div className="flex items-center gap-2.5">
                 <span className="leading-none text-gray-800 font-normal">
@@ -279,11 +295,11 @@ const LiveSession = ({ title = "IQ Academy" }) => {
             Track and analyze past IQ Academy with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
-          <div className="text-end pb-4">
+          {/* <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
               Create IQ Academy
             </button>
-          </div>
+          </div> */}
         </ToolbarActions>
       </Toolbar>
       <DataGrid serverSide={true}

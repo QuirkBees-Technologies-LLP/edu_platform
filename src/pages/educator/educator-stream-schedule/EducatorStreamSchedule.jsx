@@ -82,22 +82,6 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
       </span>,
     },
     {
-      accessorFn: row => row.callId,
-      id: 'callId',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Call Id' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.callId}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
       accessorFn: (row) => row.name,
       id: "Language",
       header: ({ column }) => (
@@ -138,6 +122,38 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
       },
     },
     {
+      accessorFn: row => row.educator,
+      id: 'educator',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Educator' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.educator?.first_name + " " + info.row.original.educator?.last_name}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      accessorFn: row => row.create_by,
+      id: 'schedule_time',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Schedule At' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
       accessorFn: row => row.createdAt,
       id: 'createdAt',
       header: ({
@@ -163,6 +179,22 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
       cell: info => <div className="flex items-center gap-2.5">
         <span className="leading-none text-gray-800 font-normal">
           {info.row.original.create_by?.first_name + " " + info.row.original.create_by?.last_name}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      accessorFn: row => row.callId,
+      id: 'callId',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Call Id' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.callId}
         </span>
       </div>,
       meta: {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowUp, CirclePlay, Send } from "lucide-react"; // For the send iconimport { Link } from 'react-router-dom';
+import { ArrowUp, CirclePlay, Send, Share2 } from "lucide-react"; // For the send iconimport { Link } from 'react-router-dom';
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
@@ -219,6 +219,18 @@ const IqEducators = () => {
     setVideoUrl(url);
     setOpen(true);
   };
+
+  function handleShare() {
+    const currentUrl = window.location.href;
+    navigator.clipboard.writeText(currentUrl)
+      .then(() => {
+        console.log("URL copied to clipboard:", currentUrl);
+      })
+      .catch(err => {
+        console.error("Failed to copy URL:", err);
+      });
+  }
+
   return (
     <div className="container-fluid pb-10">
       <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
@@ -239,8 +251,8 @@ const IqEducators = () => {
           </div>
         </div>
 
-        <button className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1">
-          <span>✓</span> Follow
+        <button onClick={() => handleShare()} className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1">
+          <span><Share2 size={16} /></span> Share
         </button>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
