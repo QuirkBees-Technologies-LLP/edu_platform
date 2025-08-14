@@ -287,8 +287,8 @@ export default function IqVault() {
 
               {/* Sidebar - Course + Lectures */}
               {data?.ActiveCategory &&
-              data.ActiveCategory.length > 0 &&
-              activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
+                data.ActiveCategory.length > 0 &&
+                activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
                 <>
                   {currentCourse?.length > 0 ? (
                     <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
@@ -306,11 +306,10 @@ export default function IqVault() {
                                 key={t._id}
                                 onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
                                 className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
-                                   ${
-                                     activeLectureId === t._id
-                                       ? "bg-gray-300 dark:bg-slate-800"
-                                       : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                   }`}
+                                   ${activeLectureId === t._id
+                                    ? "bg-gray-300 dark:bg-slate-800"
+                                    : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                  }`}
                               >
                                 <CirclePlay className="mr-2 text-gray-400" />
                                 <span className="text-gray-800 font-medium text-xs">
@@ -328,10 +327,10 @@ export default function IqVault() {
                         <div className="text-center">
                           <div className="text-4xl mb-4">📚</div>
                           <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            No Courses Available
+                            Coming Soon
                           </h3>
                           <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            Course not available in this category
+                            Coming Soon
                           </p>
                         </div>
                       </div>
@@ -344,10 +343,10 @@ export default function IqVault() {
                     <div className="text-center">
                       <div className="text-4xl mb-4">📚</div>
                       <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        No Courses Available
+                        Coming Soon
                       </h3>
                       <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        Course not available in this category
+                        Coming Soon
                       </p>
                     </div>
                   </div>
@@ -362,11 +361,10 @@ export default function IqVault() {
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}
-                          className={`pb-4 border-b-2 ${
-                            activeTab === tab._id
-                              ? "border-black dark:border-white text-gray-900"
-                              : "border-transparent text-gray-500 hover:text-gray-900"
-                          }`}
+                          className={`pb-4 border-b-2 ${activeTab === tab._id
+                            ? "border-black dark:border-white text-gray-900"
+                            : "border-transparent text-gray-500 hover:text-gray-900"
+                            }`}
                           onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
@@ -384,8 +382,8 @@ export default function IqVault() {
                       >
                         {/* Dynamic content for active tab */}
                         {data?.ActiveCategory &&
-                        data.ActiveCategory.length > 0 &&
-                        activeTab ===
+                          data.ActiveCategory.length > 0 &&
+                          activeTab ===
                           `${data.ActiveCategory[0]?.categoryId}` ? (
                           currentCourse?.length > 0 && lecture ? (
                             <div className="card">
@@ -432,10 +430,10 @@ export default function IqVault() {
                                 <div className="text-center">
                                   <div className="text-6xl mb-4">📚</div>
                                   <h3 className="text-xl font-medium text-gray-700 mb-2">
-                                    No Course Available
+                                    Coming Soon
                                   </h3>
                                   <p className="text-gray-500">
-                                    Course not available in this category
+                                    Coming Soon
                                   </p>
                                 </div>
                               </div>
@@ -447,10 +445,10 @@ export default function IqVault() {
                               <div className="text-center">
                                 <div className="text-6xl mb-4">📚</div>
                                 <h3 className="text-xl font-medium text-gray-700 mb-2">
-                                  No Course Available
+                                  Coming Soon
                                 </h3>
                                 <p className="text-gray-500">
-                                  Course not available in this category
+                                  Coming Soon
                                 </p>
                               </div>
                             </div>
