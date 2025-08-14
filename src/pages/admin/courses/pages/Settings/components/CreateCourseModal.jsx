@@ -102,7 +102,6 @@ const CreateCourseModal = forwardRef(
     //   }
     // };
 
-
     const handleSubmit = async (formData) => {
       setIsSubmitting(true);
       // try {
@@ -190,19 +189,19 @@ const CreateCourseModal = forwardRef(
       // }
 
       try {
-        const imageFile = formData.get('imageUrl');
+        const imageFile = formData.get("imageUrl");
         const isImageAFile = imageFile instanceof File;
 
         // 1. Build payload for common fields
         const payload = {
-          title: formData.get('title'),
-          description: formData.get('description'),
-          category: formData.get('category'),
-          published: formData.get('published') === 'true',
-          isFeatured: formData.get('isFeatured') === 'true',
-          tier: formData.get('tier'),
-          language: formData.get('language'),
-          section: formData.get('section'),
+          title: formData.get("title"),
+          description: formData.get("description"),
+          category: formData.get("category"),
+          published: formData.get("published") === "true",
+          isFeatured: formData.get("isFeatured") === "true",
+          tier: formData.get("tier"),
+          language: formData.get("language"),
+          section: formData.get("section"),
           instructor: auth?.user?._id,
         };
 
@@ -214,12 +213,12 @@ const CreateCourseModal = forwardRef(
           Object.entries(payload).forEach(([key, value]) => {
             uploadFormData.append(key, value);
           });
-          uploadFormData.append('image', imageFile); // append file with correct key
+          uploadFormData.append("image", imageFile); // append file with correct key
 
           requestData = uploadFormData;
         } else {
           // 3. If no file, send as regular JSON object
-          payload.imageUrl = formData.get('imageUrl');
+          payload.imageUrl = formData.get("imageUrl");
           requestData = payload;
         }
 
@@ -241,16 +240,25 @@ const CreateCourseModal = forwardRef(
           ).unwrap();
         }
 
-        toast.success(initialData ? "Course updated successfully!" : "Course created successfully!");
+        toast.success(
+          initialData
+            ? "Course updated successfully!"
+            : "Course created successfully!"
+        );
+        // ✅ Only close if the above succeeded
         onClose();
 
+        // ✅ Refresh list
+        await fetchAllCourses();
       } catch (error) {
         console.error("Submission error:", error);
-        toast.error(error?.message || "Operation failed. Please try again.");
+        toast.error(
+          error ? error : error.essage || "Operation failed. Please try again."
+        );
+        setIsSubmitting(true);
       } finally {
         setIsSubmitting(false);
       }
-
     };
     return (
       <Dialog
