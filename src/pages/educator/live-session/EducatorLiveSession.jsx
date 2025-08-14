@@ -99,6 +99,22 @@ const EducatorLiveSession = ({ title = "IQ Academy" }) => {
       </span>,
     },
     {
+      accessorFn: row => row.educatorDetails,
+      id: 'educator',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Educator' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.educatorDetails?.first_name + " " + info.row.original.educatorDetails?.last_name}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
       accessorFn: row => row.callId,
       id: 'callId',
       header: ({
@@ -134,21 +150,21 @@ const EducatorLiveSession = ({ title = "IQ Academy" }) => {
       }
     },
     {
-          accessorFn: row => row.datetime,
-          id: 'datetime',
-          header: ({
-            column
-          }) => <DataGridColumnHeader title='Start Time' column={column} />,
-          enableSorting: true,
-          cell: info => <div className="flex items-center gap-2.5">
-            <span className="leading-none text-gray-800 font-normal">
-             { info.row.original.datetime ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a") : "N/A"}
-            </span>
-          </div>,
-          meta: {
-            headerClassName: 'min-w-[200px]'
-          }
-        },
+      accessorFn: row => row.datetime,
+      id: 'datetime',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Schedule At' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.datetime ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a") : "N/A"}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
     // {
     //   accessorFn: row => row.createdAt,
     //   id: 'createdAt',

@@ -27,7 +27,6 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
   };
 
   const handleDeleteOpen = () => {
-    console.log("handleDeleteOpen");
     setIsDeleteOpen(true);
   };
 
@@ -45,7 +44,7 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
     return <Input placeholder="Filter..." value={column.getFilterValue() ?? ''} onChange={event => column.setFilterValue(event.target.value)} className="h-9 w-full max-w-40" />;
   };
 
-  const ActionMenu = () => {
+  const ActionMenu = useMemo(() => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
         <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
@@ -66,8 +65,7 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
         </MenuItem>
       </MenuSub>
     )
-  }
-  console.log(selectedRow, "selectedrow");
+  }, [isCreateOpen]);
 
   const columns = useMemo(() => [
     {
@@ -80,22 +78,6 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
       cell: info => <span >
         {info.row.original.title}
       </span>,
-    },
-    {
-      accessorFn: row => row.callId,
-      id: 'callId',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Call Id' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.callId}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
     },
     {
       accessorFn: (row) => row.name,
@@ -138,6 +120,38 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
       },
     },
     {
+      accessorFn: row => row.educator,
+      id: 'educator',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Educator' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.educator?.first_name + " " + info.row.original.educator?.last_name}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      accessorFn: row => row.create_by,
+      id: 'schedule_time',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Schedule At' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
       accessorFn: row => row.createdAt,
       id: 'createdAt',
       header: ({
@@ -170,6 +184,22 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
       }
     },
     {
+      accessorFn: row => row.callId,
+      id: 'callId',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Call Id' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span className="leading-none text-gray-800 font-normal">
+          {info.row.original.callId}
+        </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
       id: 'click',
       header: () => '',
       enableSorting: false,
@@ -188,14 +218,14 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
           <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
             <KeenIcon icon="dots-vertical" />
           </MenuToggle>
-          {ActionMenu()}
+          {ActionMenu}
         </MenuItem>
       </Menu>,
       meta: {
         headerClassName: 'w-[60px]'
       }
     }
-  ], [isRTL]);
+  ], []);
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
@@ -221,28 +251,30 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
       });
     }
   };
-  const ToolbarTable = () => {
-    const {
-      table
-    } = useDataGrid();
+
+  const ToolbarTableContent = ({ table }) => {
     return <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
       <h3 className="card-title">{title}</h3>
       <div className="flex flex-wrap items-center gap-2.5">
         {/* <div className="relative">
           <KeenIcon icon="magnifier" className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3" />
           <input type="text" placeholder="Search Members" className="input input-md ps-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} // Update search term
-          />
-        </div> */}
+          </div> */}
         <DataGridColumnVisibility table={table} />
       </div>
     </div>;
+  };
+
+  const ToolbarTable = () => {
+    const { table } = useDataGrid();
+    return <ToolbarTableContent table={table} />;
   };
 
   const handleCloseCreate = () => {
     setIsCreateOpen(false);
   };
 
-  const handleFetchData = async ({ pageIndex, pageSize }) => {
+  const handleFetchData = useMemo(() => async ({ pageIndex, pageSize }) => {
     const newPage = pageIndex + 1;
     const newLimit = pageSize;
 
@@ -258,7 +290,7 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
       console.error("Error fetching IQ Ideas:", error);
       return { data: [], totalCount: 0 };
     }
-  };
+  }, [getAdminStreamSchedule]);
 
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
 
@@ -293,8 +325,8 @@ const AdminStreamSchedule = ({ title = "Schedule IQ Academy" }) => {
         onFetchData={handleFetchData}
       />
 
-      <CreateAdminStreamSchedule setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
-      {isDeleteOpen && <DeleteAdminStreamSchedule refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
+      {isCreateOpen && <CreateAdminStreamSchedule setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
+      }      {isDeleteOpen && <DeleteAdminStreamSchedule refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
     </div>
   )
 }

@@ -1043,6 +1043,11 @@ export const sideMenus = {
       icon: <Layers />,
       path: '/admin/general-setting'
     },
+    {
+      title: 'IQ Charts',
+      icon: <ChartNoAxesCombined />,
+      path: 'https://www.iqcharts.com/'
+    },
   ],
   educator: [
     {
@@ -1079,6 +1084,11 @@ export const sideMenus = {
       title: 'IQ Ideas',
       icon: <Lightbulb />,
       path: '/educator/ideas'
+    },
+    {
+      title: 'IQ Charts',
+      icon: <ChartNoAxesCombined />,
+      path: 'https://www.iqcharts.com/'
     },
     // {
     //   title: 'Video Library',
