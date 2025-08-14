@@ -239,7 +239,7 @@ const HeaderTopbar = () => {
                 Premium
               </span>
               <img
-                className="size-9 rounded-full border-2 border-success shrink-0"
+                className="size-9 rounded-full border-2 border-success shrink-0 object-cover object-top"
                 src={
                   profilePhoto?.includes("undefined")
                     ? toAbsoluteUrl("/media/avatars/300-2.png")

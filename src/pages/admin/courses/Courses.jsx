@@ -11,7 +11,7 @@ const Courses = () => {
   const image = (
     <img
       src={toAbsoluteUrl(auth?.user?.image)}
-      className="rounded-full border-3 border-success size-[100px] shrink-0"
+      className="rounded-full border-3 border-success size-[100px] shrink-0 object-cover object-top"
     />
   );
   console.log(auth?.user?.name, "auth?.user?.name");
