@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowUp, CirclePlay, Send, Share2 } from "lucide-react"; // For the send iconimport { Link } from 'react-router-dom';
+import { ArrowUp, CirclePlay, Send, Share2, Check } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
@@ -16,6 +16,7 @@ const IqEducators = () => {
   const { id } = useParams();
   const { data: response } = useGetEducatorWithCoursesQuery(id);
   const [callId, setCallId] = useState(null);
+  const [showShareToast, setShowShareToast] = useState(false); // Add toast state
 
  useEffect(() => {
   if (response?.data?.schedules?.length > 0) {
@@ -244,14 +245,33 @@ const IqEducators = () => {
     navigator.clipboard.writeText(currentUrl)
       .then(() => {
         console.log("URL copied to clipboard:", currentUrl);
+        // Show toast notification
+        setShowShareToast(true);
+        // Hide toast after 3 seconds
+        setTimeout(() => {
+          setShowShareToast(false);
+        }, 3000);
       })
       .catch(err => {
         console.error("Failed to copy URL:", err);
+        // Show error toast
+        setShowShareToast(true);
+        setTimeout(() => {
+          setShowShareToast(false);
+        }, 3000);
       });
   }
 
   return (
     <div className="container-fluid pb-10">
+      {/* Share Toast Notification */}
+      {showShareToast && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transform transition-all duration-300 ease-in-out animate-bounce">
+          <Check size={20} className="animate-pulse" />
+          <span className="font-medium">Link copied to clipboard!</span>
+        </div>
+      )}
+
       <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
         <div className="flex items-center gap-4 sm:flex-row flex-col sm:justify-start justify-center">
           <img
@@ -270,7 +290,7 @@ const IqEducators = () => {
           </div>
         </div>
 
-        <button onClick={() => handleShare()} className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1">
+        <button onClick={() => handleShare()} className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors">
           <span><Share2 size={16} /></span> Share
         </button>
       </div>
