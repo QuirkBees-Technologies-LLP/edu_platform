@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import {
   AlignJustify,
+  ArrowRight,
   CheckCircle,
+  EyeIcon,
   LayoutGrid,
   Search,
   SlidersHorizontal,
@@ -158,6 +160,7 @@ const IqAcademyEducators = () => {
                 >
                   {/* Left Section */}
                   <div className="flex items-center gap-4 flex-col sm:flex-row">
+                  
                     <img
                       src={educator.image}
                       alt={educator.image}
@@ -172,24 +175,12 @@ const IqAcademyEducators = () => {
                   </div>
 
                   {/* Follow Button */}
-                  {/* <button
+                  <button
                     onClick={() => toggleFollow(educator._id)}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${
-                      educator.is_create_stream
-                        ? "bg-[#4F46E5] text-white border-[#4F46E5]"
-                        : "border-[#C5C6FF] dark:border-[#4F46E5] text-[#4F46E5]"
-                    }`}
-                  >
-                    {educator.is_create_stream ? (
-                      <>
-                        <CheckCircle size={16} /> Following
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus size={16} /> Follow
-                      </>
-                    )}
-                  </button> */}
+                    className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border bg-[#4F46E5] text-white border-[#4F46E5]"> 
+                        <EyeIcon size={16} /> 
+                        View Profile
+                  </button>
                 </div>
               </div>
             ))
