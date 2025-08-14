@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import EducatorTradeAnalysisSlider from "./AdminTradeAnalysisSlider";
+import ShowMoreLess from "../../../components/ui/showmoreless";
 
 const ViewAdminTradeAnalysis = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
@@ -74,37 +75,39 @@ const ViewAdminTradeAnalysis = forwardRef(
                                           </div> */}
                       </div>
                       <div className="col-span-12">
-                        <div className="card">
+                        {/* <div className="card">
                           <div className="flex flex-col gap-4 px-5 py-4.5">
                             <div className="flex flex-col gap-3">
                               <div
                                 dangerouslySetInnerHTML={{
-                                  __html: selectedIdea?.message ?? "-",
+                                  __html: selectedIdea?.description ?? "-",
                                 }}
                               />
                             </div>
                           </div>
-                        </div>
+                        </div> */}
+                      <ShowMoreLess className="text-gray-900 text-sm mt-2 leading-relaxed" html={selectedIdea?.description || 'No description'} limit={95} />
                       </div>
+
                     </div>
                   </div>
                   <div className="flex items-center p-5">
                     <img
-                      src="/media/avatars/300-6.png"
+                      src={selectedIdea.image}
                       className="rounded-full size-7 me-2"
                       alt=""
                     />
                     <div>
                       <a
                         className="text-2sm text-gray-800 hover:text-primary mb-px"
-                        href="/public-profile/profiles/nft"
+                        href="#"
                       >
-                        {selectedIdea?.educatorDetails?.name}
+                       {selectedIdea?.createdBy?.first_name} {selectedIdea?.createdBy?.last_name}
                       </a>
-                      {selectedIdea?.createAt && (
+                      {selectedIdea?.createdAt && (
                         <div className="text-2sm text-gray-700 mb-px">
                           {format(
-                            selectedIdea?.createAt,
+                            selectedIdea?.createdAt,
                             "MMM dd, yyyy, hh:mm a"
                           )}
                         </div>
