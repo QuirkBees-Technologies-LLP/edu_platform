@@ -284,9 +284,9 @@ const IqEducators = () => {
               {response?.data?.educator?.first_name}{" "}
               {response?.data?.educator?.last_name}
             </h3>
-            <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
+            {/* <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
               Forex Day Trading, Price Action, Risk Management
-            </p>
+            </p> */}
           </div>
         </div>
 

@@ -55,7 +55,7 @@ const ViewAdminTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selectedI
                                               </div>
                                           </div> */}
                                       </div>
-                                      <div className="col-span-12">
+                                      {/* <div className="col-span-12">
                                           <div className="card">
                                               <div className="flex flex-col gap-4 px-5 py-4.5">
                                                   <div className="flex flex-col gap-3">
@@ -63,14 +63,14 @@ const ViewAdminTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selectedI
                                                   </div>
                                               </div>
                                           </div>
-                                      </div>
+                                      </div> */}
                                   </div>
                               </div>
                               <div className="flex items-center py-5">
-                                  <img src="/media/avatars/300-6.png" className="rounded-full size-7 me-2" alt="" />
+                                  <img src={selectedIdea?.educatorDetails?.image} className="rounded-full size-7 me-2" alt="" />
                                   <div>
-                                      <a className="text-2sm text-gray-800 hover:text-primary mb-px" href="/public-profile/profiles/nft">{selectedIdea?.educatorDetails?.name}</a>
-                                      {selectedIdea?.createAt && <div className="text-2sm text-gray-700 mb-px">{format(selectedIdea?.createAt, "MMM dd, yyyy, hh:mm a")}</div>}
+                                      <a className="text-2sm text-gray-800 hover:text-primary mb-px" href="#">{selectedIdea?.educatorDetails?.first_name} {selectedIdea?.educatorDetails?.last_name}</a>
+                                      {selectedIdea?.createdAt && <div className="text-2sm text-gray-700 mb-px">{format(selectedIdea?.createdAt, "MMM dd, yyyy, hh:mm a")}</div>}
                                   </div>
                               </div>
                           </div>
