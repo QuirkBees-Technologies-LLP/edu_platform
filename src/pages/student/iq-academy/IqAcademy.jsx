@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import {
@@ -17,7 +17,7 @@ function toEST(date) {
 
 export default function IqAcademy() {
   const selectedLanguage = useSelector(selectSelectedLanguage);
-
+  const navigate = useNavigate();
   const [weekOffset, setWeekOffset] = useState(0);
   const startOfCurrentWeek = startOfWeek(toEST(new Date()), {
     weekStartsOn: 0,
@@ -182,7 +182,8 @@ export default function IqAcademy() {
                             filtered.map((s, i) => (
                               <div
                                 key={i}
-                                className={`text-xs rounded-lg p-2 text-center ${
+                                onClick={()=>navigate(`/iq-educators/${educator._id}`)}
+                                className={`text-xs rounded-lg p-2 text-center cursor-pointer ${
                                   isToday(s.datetime)
                                     ? "bg-[#4E34E3] text-white font-medium shadow-lg"
                                     : "bg-[#E5DEFF] text-[#4E34E3]"
