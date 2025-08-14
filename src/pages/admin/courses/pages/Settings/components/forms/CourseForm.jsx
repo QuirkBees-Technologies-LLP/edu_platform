@@ -29,10 +29,33 @@ const COURSE_CATEGORIES = [
 ];
 
 // Schema for course validation
-const courseSchema = z.object({
+const createCourseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  imageFile: z.instanceof(File).optional(),
+  imageFile: z.instanceof(File, { message: "Course thumbnail is required" }).refine((file) => file && file.size > 0, {
+    message: "Please select a valid course thumbnail image"
+  }),
+  category: z.string().min(1, "Please select a category"),
+  published: z.boolean().default(false),
+  isFeatured: z.boolean().default(false),
+  tier: z.enum(["FREE", "PREMIUM"], {
+    required_error: "Please select a tier",
+  }),
+  section: z.string().min(1, "Please select a course type"),
+  language: z.string().min(1, "Please select a course language"),
+});
+
+const editCourseSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  imageFile: z.instanceof(File, { message: "Course thumbnail is required" }).optional().refine((file) => {
+    // If no file is provided, it's valid (for edit mode with existing image)
+    if (!file) return true;
+    // If file is provided, it must have content
+    return file.size > 0;
+  }, {
+    message: "Please select a valid course thumbnail image"
+  }),
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
@@ -51,6 +74,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const { data } = useGetEducatorAcademyCategoryQuery();
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetCoursesTypesQuery();
+
+  // Choose schema based on whether we're editing or creating
+  const courseSchema = initialData ? editCourseSchema : createCourseSchema;
 
   const {
     control,
@@ -119,10 +145,15 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     formData.append("section", data.section);
     formData.append("language", data.language);
 
-    // Handle image file
-    if (data.imageFile instanceof File) {
+    // Handle image file - required for new courses, optional for edits with existing image
+    if (data.imageFile instanceof File && data.imageFile.size > 0) {
       formData.append("imageUrl", data.imageFile);
+    } else if (!initialData?.imageUrl) {
+      // Only require image for new courses
+      console.error("No valid image file provided for new course");
+      return;
     }
+    // If editing and no new image selected, keep existing image
 
     // For debugging
     for (let [key, value] of formData.entries()) {
@@ -142,7 +173,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           htmlFor="title"
           className="block text-sm font-medium text-gray-700"
         >
-          Course Title
+          Course Title <span className="text-red-500 font-bold">*</span>
         </label>
         <input
           id="title"
@@ -161,7 +192,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           htmlFor="description"
           className="block text-sm font-medium text-gray-700"
         >
-          Description
+          Description <span className="text-red-500 font-bold">*</span>
         </label>
         <textarea
           id="description"
@@ -176,7 +207,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 
       <div className="space-y-4">
         <label className="block text-sm font-medium text-gray-700">
-          Course Thumbnail
+          Course Thumbnail <span className="text-red-500 font-bold">*</span>
         </label>
 
         <div className="flex flex-col space-y-2">
@@ -212,6 +243,11 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             />
           </div>
         )}
+        
+        {/* Error message for thumbnail */}
+        {errors.imageFile && (
+          <p className="text-sm text-red-600 mt-2">{errors.imageFile.message}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -220,7 +256,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             htmlFor="section"
             className="block text-sm font-medium text-gray-700"
           >
-            Type of Course
+            Type of Course <span className="text-red-500 font-bold">*</span>
           </label>
           <Controller
             name="section"
@@ -258,7 +294,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             htmlFor="language"
             className="block text-sm font-medium text-gray-700"
           >
-            Course Language
+            Course Language <span className="text-red-500 font-bold">*</span>
           </label>
           <Controller
             name="language"
@@ -298,7 +334,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             htmlFor="category"
             className="block text-sm font-medium text-gray-700"
           >
-            Category
+            Category <span className="text-red-500 font-bold">*</span>
           </label>
           <Controller
             name="category"
@@ -332,7 +368,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             htmlFor="tier"
             className="block text-sm font-medium text-gray-700"
           >
-            Course Tier
+            Course Tier <span className="text-red-500 font-bold">*</span>
           </label>
           <Select
             defaultValue={selectedTier}
