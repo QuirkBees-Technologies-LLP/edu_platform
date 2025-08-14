@@ -159,7 +159,7 @@ export default function IqAcademy() {
                       <img
                         src={educator.image}
                         alt={educator.first_name}
-                        className="w-12 h-12 rounded-full mb-2"
+                        className="w-12 h-12 rounded-full mb-2 object-cover object-top"
                       />
                       <span className="text-xs font-normal text-gray-800 text-center">
                         {educator.first_name} {educator.last_name}
@@ -228,11 +228,11 @@ export default function IqAcademy() {
                   key={index}
                   className="card rounded-2xl shadow-md overflow-hidden"
                 >
-                  <div className="relative h-56 flex items-center justify-center">
+                  <div className="relative h-80 flex items-center justify-center">
                     <img
                       src={educator.image}
                       alt={educator.first_name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                   </div>
                   <div className="p-5">
