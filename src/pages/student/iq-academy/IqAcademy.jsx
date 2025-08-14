@@ -25,7 +25,7 @@ export default function IqAcademy() {
   const displayedWeekStart = addDays(startOfCurrentWeek, weekOffset * 7);
 
   const days = Array.from({ length: 7 }).map((_, i) =>
-    toEST(addDays(displayedWeekStart, i))
+   addDays(displayedWeekStart, i)
   );
 
   const { data: categoryData, isLoading: isCategoryLoading } =
@@ -58,7 +58,7 @@ export default function IqAcademy() {
     isCategoryLoading || !activeCategoryId || isDetailLoading;
 
   const isToday = (datetime) =>
-    isSameDay(toEST(new Date()), toEST(new Date(datetime)));
+    isSameDay(new Date(), new Date(datetime));
 
   return (
     <div className="container-fluid">
@@ -170,7 +170,7 @@ export default function IqAcademy() {
                     {days.map((day) => {
                       const filtered =
                         educator.schedules?.filter((s) =>
-                          isSameDay(toEST(new Date(s.datetime)), day)
+                          isSameDay(new Date(s.datetime), day)
                         ) || [];
 
                       return (
@@ -190,7 +190,7 @@ export default function IqAcademy() {
                               >
                                 {s.title}
                                 <br />
-                                {toEST(new Date(s.datetime)).toLocaleTimeString(
+                                {new Date(s.datetime).toLocaleTimeString(
                                   [],
                                   {
                                     hour: "2-digit",
