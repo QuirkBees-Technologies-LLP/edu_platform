@@ -18,31 +18,38 @@ const IqEducators = () => {
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
 
- useEffect(() => {
-  if (response?.data?.schedules?.length > 0) {
-    const now = new Date();
+  //  useEffect(() => {
+  //   if (response?.data?.schedules?.length > 0) {
+  //     const now = new Date();
 
-    // Pehle sirf aaj ke schedules filter karo
-    const todaySchedules = response.data.schedules.filter((item) => {
-      const scheduleDate = new Date(item.date);
-      return scheduleDate.toDateString() === now.toDateString();
-    });
+  //     // Pehle sirf aaj ke schedules filter karo
+  //     const todaySchedules = response.data.schedules.filter((item) => {
+  //       const scheduleDate = new Date(item.date);
+  //       return scheduleDate.toDateString() === now.toDateString();
+  //     });
 
-    if (todaySchedules.length > 0) {
-      // Time ke according sort karo
-      const sorted = todaySchedules.sort((a, b) => {
-        return new Date(a.date) - new Date(b.date);
-      });
+  //     if (todaySchedules.length > 0) {
+  //       // Time ke according sort karo
+  //       const sorted = todaySchedules.sort((a, b) => {
+  //         return new Date(a.date) - new Date(b.date);
+  //       });
 
-      // Abhi ke baad ka first schedule lo (upcoming)
-      const upcoming = sorted.find((item) => new Date(item.date) > now);
+  //       // Abhi ke baad ka first schedule lo (upcoming)
+  //       const upcoming = sorted.find((item) => new Date(item.date) > now);
 
-      // Agar upcoming mila to use set karo, nahi to latest past ka set karo
-      setCallId(upcoming ? upcoming.callId : sorted[sorted.length - 1].callId);
+  //       // Agar upcoming mila to use set karo, nahi to latest past ka set karo
+  //       setCallId(upcoming ? upcoming.callId : sorted[sorted.length - 1].callId);
+  //     }
+  //   }
+  // }, [response]);
+
+  useEffect(() => {
+    if (response?.data?.schedules && response.data.schedules.length > 0) {
+      setCallId(response.data.schedules[0].callId);
     }
-  }
-}, [response]);
+  }, [response]);
 
+  
   console.log("response", response);
   console.log("callId", callId);
 
@@ -242,7 +249,8 @@ const IqEducators = () => {
 
   function handleShare() {
     const currentUrl = window.location.href;
-    navigator.clipboard.writeText(currentUrl)
+    navigator.clipboard
+      .writeText(currentUrl)
       .then(() => {
         console.log("URL copied to clipboard:", currentUrl);
         // Show toast notification
@@ -252,7 +260,7 @@ const IqEducators = () => {
           setShowShareToast(false);
         }, 3000);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to copy URL:", err);
         // Show error toast
         setShowShareToast(true);
@@ -277,7 +285,7 @@ const IqEducators = () => {
           <img
             src={response?.data?.educator?.image}
             alt="Ralph Danquah"
-            className="w-20 h-20 object-cover rounded-full border-2 border-white object-top"
+            className="w-20 h-20 object-cover rounded-full border-2 border-white"
           />
           <div className="text-center  sm:text-start">
             <h3 className="text-white font-semibold text-base sm:text-lg mb-1">
@@ -290,13 +298,22 @@ const IqEducators = () => {
           </div>
         </div>
 
-        <button onClick={() => handleShare()} className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors">
-          <span><Share2 size={16} /></span> Share
+        <button
+          onClick={() => handleShare()}
+          className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+        >
+          <span>
+            <Share2 size={16} />
+          </span>{" "}
+          Share
         </button>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
-          <ClientViewLiveSession bannerImage={response?.data?.educator?.bannerImage} callId={callId}/>
+          <ClientViewLiveSession
+            bannerImage={response?.data?.educator?.bannerImage}
+            callId={callId}
+          />
         </div>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
@@ -462,19 +479,21 @@ const IqEducators = () => {
                   <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
                     <button
                       onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "feed"
-                        ? "bg-white text-[#1A1446]"
-                        : "text-white"
-                        }`}
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        activeTab === "feed"
+                          ? "bg-white text-[#1A1446]"
+                          : "text-white"
+                      }`}
                     >
                       Feed
                     </button>
                     <button
                       onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "ideas"
-                        ? "bg-white text-[#1A1446]"
-                        : "text-white"
-                        }`}
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        activeTab === "ideas"
+                          ? "bg-white text-[#1A1446]"
+                          : "text-white"
+                      }`}
                     >
                       Ideas
                     </button>
