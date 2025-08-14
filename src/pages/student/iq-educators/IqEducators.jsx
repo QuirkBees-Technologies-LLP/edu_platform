@@ -17,11 +17,30 @@ const IqEducators = () => {
   const { data: response } = useGetEducatorWithCoursesQuery(id);
   const [callId, setCallId] = useState(null);
 
-  useEffect(() => {
-    if (response?.data?.schedules && response.data.schedules.length > 0) {
-      setCallId(response.data.schedules[0].callId);
+ useEffect(() => {
+  if (response?.data?.schedules?.length > 0) {
+    const now = new Date();
+
+    // Pehle sirf aaj ke schedules filter karo
+    const todaySchedules = response.data.schedules.filter((item) => {
+      const scheduleDate = new Date(item.date);
+      return scheduleDate.toDateString() === now.toDateString();
+    });
+
+    if (todaySchedules.length > 0) {
+      // Time ke according sort karo
+      const sorted = todaySchedules.sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+      });
+
+      // Abhi ke baad ka first schedule lo (upcoming)
+      const upcoming = sorted.find((item) => new Date(item.date) > now);
+
+      // Agar upcoming mila to use set karo, nahi to latest past ka set karo
+      setCallId(upcoming ? upcoming.callId : sorted[sorted.length - 1].callId);
     }
-  }, [response]);
+  }
+}, [response]);
 
   console.log("response", response);
   console.log("callId", callId);
