@@ -164,7 +164,7 @@ const IqAcademyEducators = () => {
                     <img
                       src={educator.image}
                       alt={educator.image}
-                      className="w-20 h-20 object-cover rounded-full"
+                      className="w-20 h-20 object-cover rounded-full object-top"
                     />
                     <div className="text-center sm:text-start">
                       <h4 className="text-gray-800 font-medium mb-1">
