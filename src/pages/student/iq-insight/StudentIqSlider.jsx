@@ -1,3 +1,4 @@
+import ShowMoreLess from "../../../components/ui/showmoreless";
 
 export default function StudentIqSlider({ sliderImages, setIsLightBoxOpen , selectedIdea}) {
   const settings = {
@@ -24,7 +25,7 @@ export default function StudentIqSlider({ sliderImages, setIsLightBoxOpen , sele
           </div>
         ))}
           <div className="flex flex-col gap-2 py-4.5">
-                <p className="text-gray-800 line-clamp-3 text-sm font-normal">Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.</p>
+                <ShowMoreLess className="text-gray-900 text-sm mt-2 leading-relaxed" html={selectedIdea?.description || 'No description'} limit={95} />
               {/* <div className="flex gap-5 sm:gap-10 flex-wrap">
                   <div className='flex items-center gap-3'>
                       <div className="text-xs text-gray-800 uppercase">Entry</div>
