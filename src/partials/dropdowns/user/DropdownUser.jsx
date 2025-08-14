@@ -37,7 +37,7 @@ const DropdownUser = ({
   const buildHeader = () => {
     return <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
       <div className="flex items-center gap-2">
-        <img className="size-9 rounded-full border-2 border-success flex-shrink-0" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
+        <img className="size-9 rounded-full border-2 border-success flex-shrink-0 object-cover object-top" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
         <div className="flex flex-col">
           <Link to="/account/hoteme/get-stard" className="text-sm text-gray-800 hover:text-primary font-semibold leading-none">
           {auth?.user.first_name}{" "}{auth?.user.last_name}
