@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
+const RecordingThumbnail = ({ videoUrl, seekTime = 1 }) => {
     const videoRef = useRef(null);
     const [thumbnail, setThumbnail] = useState(null);
     console.log(videoUrl,"videoUrl")
@@ -84,4 +84,4 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
     );
 };
 
-export default VideoThumbnail;
+export default RecordingThumbnail;

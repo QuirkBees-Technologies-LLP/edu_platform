@@ -64,17 +64,18 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      entry: Yup.string().required("Entry is required"),
+      entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
       description: Yup.string().required("Entry is required"),
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
-        .required("Invalidation is required"),
+        .required("Invalidation is required")
+        .positive("Invalidation must be a positive number"),
       exits: Yup.array()
         .of(
           Yup.number()
             .typeError("Exit must be a number")
-            .integer("Exit must be an integer")
             .required("Exit is required")
+            .positive("Exit must be a positive number")
         )
         .min(1, "At least one exit is required"),
       category: Yup.string().required("Category is required"),
