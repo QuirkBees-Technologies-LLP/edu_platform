@@ -7,6 +7,7 @@ import { Link, useParams } from "react-router-dom";
 import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
+import RecordingThumbnail from "./RecordingThumbnail";
 
 const IqEducators = () => {
   const { auth } = useAuthContext();
@@ -339,11 +340,16 @@ useEffect(() => {
                     className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
                   >
                     <div className="rounded-t-xl overflow-hidden">
-                      <img
+                      {/* <img
                         src={"/media/images/600x400/1.jpg"}
                         alt={course.title}
                         className="w-full h-36 object-cover"
                         onClick={() => handleOpen(course?.url)}
+                      /> */}
+
+                      <RecordingThumbnail
+                        videoUrl={course?.url}
+                        seekTime={2}
                       />
 
                       {/* <div className="absolute inset-0 flex items-center justify-center">
