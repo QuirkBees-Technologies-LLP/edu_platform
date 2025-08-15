@@ -3,12 +3,12 @@ import React, { useEffect, useRef, useState } from 'react';
 const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
     const videoRef = useRef(null);
     const [thumbnail, setThumbnail] = useState(null);
-    console.log(videoUrl,"videoUrl")
+    console.log(videoUrl, "videoUrl")
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        video.crossOrigin = 'anonymous';
+        video.crossOrigin = 'anonymous'; // Enable this after configuring CORS on Azure
         video.preload = 'auto';
 
         const handleLoadedData = () => {
@@ -16,21 +16,44 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
         };
 
         const handleSeeked = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/png');
-            setThumbnail(imageData);
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 320;
+                canvas.height = video.videoHeight || 240;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                setThumbnail(imageData);
+                console.log("Thumbnail generated successfully");
+            } catch (err) {
+                console.log("Thumbnail generation failed:", err.message);
+                
+                // Check if it's a CORS issue
+                if (err.message.includes('tainted')) {
+                    console.log("CORS issue detected. To fix this:");
+                    console.log("1. Configure CORS on Azure Blob Storage");
+                    console.log("2. Allow origins: http://localhost:5173, https://iqonic.vip");
+                    console.log("3. Methods: GET, HEAD");
+                }
+                
+                // Continue without thumbnail - video still works
+            }
         };
 
         video.addEventListener('loadeddata', handleLoadedData);
         video.addEventListener('seeked', handleSeeked);
+        video.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+            console.error('Video error details:', video.error);
+        });
 
         return () => {
             video.removeEventListener('loadeddata', handleLoadedData);
             video.removeEventListener('seeked', handleSeeked);
+            video.removeEventListener('error', (e) => {
+                console.error('Video error:', e);
+                console.error('Video error details:', video.error);
+            });
         };
     }, [videoUrl, seekTime]);
 
@@ -49,7 +72,6 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
                 style={{ display: 'none' }}
                 muted
                 playsInline
-                crossOrigin="anonymous"
             />
             {thumbnail ? (
                 <>
@@ -76,7 +98,22 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
                 </>
             ) : (
                 <div className='rounded-lg w-full h-full flex justify-center items-center bg-light'>
-                    <span>Loading thumbnail...</span>
+                    <div className="flex flex-col items-center">
+                        <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="gray"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <polygon points="10 8 16 12 10 16 10 8" />
+                        </svg>
+                        <span className="text-gray-500 mt-2">Click to play video</span>
+                    </div>
                 </div>
             )
             }
