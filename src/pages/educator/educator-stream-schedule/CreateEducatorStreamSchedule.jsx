@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
+import moment from "moment-timezone";
 import * as Yup from "yup";
 import {
   Dialog,
@@ -29,12 +30,25 @@ import {
 } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
 import DateTimePicker from "./DateTimePicker";
 import { set } from "date-fns";
-
+const EST_ZONE = "America/New_York";
 const CreateEducatorStreamSchedule = forwardRef(
   (
     { isCreateOpen, handleCloseCreate, selectedRow, setSelectedRow, refetch },
     ref
   ) => {
+ const [time, setTime] = useState({
+      date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
+      clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+    });
+     useEffect(() => {
+          const interval = setInterval(() => {
+            setTime({
+              date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
+              clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+            });
+          }, 1000);
+          return () => clearInterval(interval);
+        }, []);
     const { auth } = useAuthContext();
     const [createEducatorStreamSchedule] =
       useCreateEducatorStreamScheduleMutation();
@@ -325,6 +339,20 @@ const CreateEducatorStreamSchedule = forwardRef(
                     </span>
                   )}
                 </div>
+              </div>
+
+               <div className="col-span-12">
+                <div className="flex items-center justify-between">
+                <p className="text-xs font-medium tracking-wide">
+                EASTERN TIME (EST)
+              </p>
+              <p className="text-xs font-medium tracking-wide">
+                {time.date}
+              </p>
+              <p className="text-xs font-medium tracking-wide">
+                {time.clock}
+              </p>
+              </div>
               </div>
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">

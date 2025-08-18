@@ -26,7 +26,7 @@ const DateTimePicker = ({
       open={isPickerOpen} // Control open / close state
       showTimeSelect
       timeFormat="HH:mm"
-      timeIntervals={2}
+      timeIntervals={5}
       timeCaption="Time"
       dateFormat="MMMM d, yyyy h:mm aa"
       placeholderText={placeholder}
