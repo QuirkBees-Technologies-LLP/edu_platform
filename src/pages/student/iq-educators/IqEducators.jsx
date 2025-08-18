@@ -3,13 +3,14 @@ import { ArrowUp, CirclePlay, Send, Share2, Check } from "lucide-react"; // Adde
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
 
 const IqEducators = () => {
+  const navigate=useNavigate()
   const { auth } = useAuthContext();
   console.log(auth);
   const userName = auth?.user?.name;
@@ -398,7 +399,8 @@ useEffect(() => {
                 {response?.data?.courses?.map((course) => (
                   <div
                     key={course.id}
-                    className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0"
+                    className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                    onClick={()=>navigate(`/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`)}
                   >
                     <div className="rounded-t-xl overflow-hidden">
                       <img
