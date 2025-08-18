@@ -10,7 +10,7 @@ import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession"
 import RecordingThumbnail from "./RecordingThumbnail";
 
 const IqEducators = () => {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const { auth } = useAuthContext();
   console.log(auth);
   const userName = auth?.user?.name;
@@ -20,33 +20,32 @@ const IqEducators = () => {
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
 
-//  useEffect(() => {
-//   if (response?.data?.schedules?.length > 0) {
-//     const now = new Date();
+  //  useEffect(() => {
+  //   if (response?.data?.schedules?.length > 0) {
+  //     const now = new Date();
 
-//     // Pehle sirf aaj ke schedules filter karo
-//     const todaySchedules = response.data.schedules.filter((item) => {
-//       const scheduleDate = new Date(item.date);
-//       return scheduleDate.toDateString() === now.toDateString();
-//     });
+  //     // Pehle sirf aaj ke schedules filter karo
+  //     const todaySchedules = response.data.schedules.filter((item) => {
+  //       const scheduleDate = new Date(item.date);
+  //       return scheduleDate.toDateString() === now.toDateString();
+  //     });
 
-//     if (todaySchedules.length > 0) {
-//       // Time ke according sort karo
-//       const sorted = todaySchedules.sort((a, b) => {
-//         return new Date(a.date) - new Date(b.date);
-//       });
+  //     if (todaySchedules.length > 0) {
+  //       // Time ke according sort karo
+  //       const sorted = todaySchedules.sort((a, b) => {
+  //         return new Date(a.date) - new Date(b.date);
+  //       });
 
-//       // Abhi ke baad ka first schedule lo (upcoming)
-//       const upcoming = sorted.find((item) => new Date(item.date) > now);
+  //       // Abhi ke baad ka first schedule lo (upcoming)
+  //       const upcoming = sorted.find((item) => new Date(item.date) > now);
 
-//       // Agar upcoming mila to use set karo, nahi to latest past ka set karo
-//       setCallId(upcoming ? upcoming.callId : sorted[sorted.length - 1].callId);
-//     }
-//   }
-// }, [response]);
+  //       // Agar upcoming mila to use set karo, nahi to latest past ka set karo
+  //       setCallId(upcoming ? upcoming.callId : sorted[sorted.length - 1].callId);
+  //     }
+  //   }
+  // }, [response]);
 
-
-useEffect(() => {
+  useEffect(() => {
     if (response?.data?.schedules && response.data.schedules.length > 0) {
       setCallId(response.data.schedules[0].callId);
     }
@@ -361,6 +360,7 @@ useEffect(() => {
                       <RecordingThumbnail
                         videoUrl={course?.url}
                         seekTime={2}
+                        image={course?.thumbnail}
                       />
 
                       {/* <div className="absolute inset-0 flex items-center justify-center">
@@ -400,7 +400,11 @@ useEffect(() => {
                   <div
                     key={course.id}
                     className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                    onClick={()=>navigate(`/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`)}
+                    onClick={() =>
+                      navigate(
+                        `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      )
+                    }
                   >
                     <div className="rounded-t-xl overflow-hidden">
                       <img
