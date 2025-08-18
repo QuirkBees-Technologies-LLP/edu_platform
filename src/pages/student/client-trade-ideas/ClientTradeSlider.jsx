@@ -20,7 +20,7 @@ export default function ClientTradeSlider({ sliderImages, setIsLightBoxOpen , se
             onClick={() => setIsLightBoxOpen(true)}
             className="cursor-pointer"
           >
-            <img className="w-full h-96 object-cover rounded-lg" src={image} alt={`Trade image ${index}`} />
+            <img className="w-full rounded-lg" src={image} alt={`Trade image ${index}`} />
           </div>
         ))}
           {/* <div className="flex flex-col gap-2 py-4.5"> */}

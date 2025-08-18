@@ -329,11 +329,11 @@ export default function FastStartTraining() {
                       </Accordion>
                     </div>
                   ) : (
-                    <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-800">
+                    <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
                       <div className="flex flex-col items-center justify-center py-12 px-6">
                         <div className="text-center">
                           <div className="text-4xl mb-4">📚</div>
-                          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
                             No Courses Available
                           </h3>
                           <p className="text-gray-500 dark:text-gray-400 text-sm">
@@ -345,11 +345,11 @@ export default function FastStartTraining() {
                   )}
                 </>
               ) : (
-                <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-800">
+                <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
                   <div className="flex flex-col items-center justify-center py-12 px-6">
                     <div className="text-center">
                       <div className="text-4xl mb-4">📚</div>
-                      <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
                         No Courses Available
                       </h3>
                       <p className="text-gray-500 dark:text-gray-400 text-sm">

@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
 import EducatorImage from "./EducatorImage";
-import { Copy } from "lucide-react";
+import { Copy, Eye } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -276,15 +276,24 @@ const ClientTradeIdeas = () => {
                   key={trade._id}
                   className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
                 >
-                  <img
-                    src={trade?.image[0]}
-                    alt={trade.pair}
-                    className="w-full h-40 object-cover cursor-pointer"
-                    onClick={() => {
-                      setSelectedIdea(trade);
-                      setIsViewOpen(true);
-                    }}
-                  />
+                  <div className="relative w-full h-40">
+                    <img
+                      src={trade?.image[0]}
+                      alt={trade.pair}
+                      className="w-full h-40 object-cover cursor-pointer"
+                      onClick={() => {
+                        setSelectedIdea(trade);
+                        setIsViewOpen(true);
+                      }}
+                    />
+
+                      <div className="absolute inset-0 bg-black bg-opacity-10"></div>
+
+                    <Link className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow">
+                      <Eye size={20} />
+                    </Link>
+                  </div>
+
                   <div className="p-4">
                     <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
                       <div className="flex items-center gap-2">
@@ -440,7 +449,12 @@ const ClientTradeIdeas = () => {
                           </div>
                         );
                       })}
-
+                      <Link
+                        to={''}
+                        className="btn btn-light btn-sm rounded-lg bg-gray-200 text-xs text-gray-800 font-medium"
+                      >
+                        Read More...
+                      </Link>
                       {/* {[0, 1, 2].map((idx) => (
                         <div key={idx} className="flex justify-between text-sm">
                           <span className="text-gray-600 font-normal text-sm">
