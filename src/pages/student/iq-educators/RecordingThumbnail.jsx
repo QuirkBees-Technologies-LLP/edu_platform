@@ -1,12 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-<<<<<<< Updated upstream
-const RecordingThumbnail = ({ videoUrl, seekTime = 1, image }) => {
-=======
-const RecordingThumbnail = ({ videoUrl, seekTime = 1, onRecordingClick }) => {
->>>>>>> Stashed changes
+const RecordingThumbnail = ({ videoUrl, seekTime = 1, image, onRecordingClick }) => {
     const videoRef = useRef(null);
-    const [thumbnail, setThumbnail] = useState(image);
+    const [thumbnail, setThumbnail] = useState();
     console.log(videoUrl, "videoUrl")
     
     useEffect(() => {
@@ -92,10 +88,10 @@ const RecordingThumbnail = ({ videoUrl, seekTime = 1, onRecordingClick }) => {
                 muted
                 playsInline
             />
-            {thumbnail ? (
+            {image || thumbnail ? (
                 <>
                     <div className="w-full h-full relative">
-                        <img src={thumbnail} alt="Thumbnail"
+                        <img src={image || thumbnail} alt="Thumbnail"
                             className='rounded-lg w-full h-full object-cover'
                         />
                         <div className='rounded-lg absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-black bg-opacity-20'>
