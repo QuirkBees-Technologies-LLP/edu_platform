@@ -1,30 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
+const RecordingThumbnail = ({ videoUrl, seekTime = 1 }) => {
     const videoRef = useRef(null);
     const [thumbnail, setThumbnail] = useState(null);
     console.log(videoUrl, "videoUrl")
+    
     useEffect(() => {
         const video = videoRef.current;
-        if (!video) return;
+        if (!video || !videoUrl) return;
 
         video.crossOrigin = 'anonymous'; // Enable this after configuring CORS on Azure
         video.preload = 'auto';
 
         const handleLoadedData = () => {
-            video.currentTime = seekTime;
+            console.log("Video loaded, duration:", video.duration, "currentTime:", video.currentTime);
+            if (video.duration > 0) {
+                video.currentTime = Math.min(seekTime, video.duration);
+            }
         };
 
         const handleSeeked = () => {
+            console.log("Video seeked to:", video.currentTime, "dimensions:", video.videoWidth, "x", video.videoHeight);
             try {
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth || 320;
                 canvas.height = video.videoHeight || 240;
+                
                 const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    throw new Error('Could not get canvas context');
+                }
+
+                // Draw the video frame to canvas
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Convert to data URL
                 const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                console.log("Thumbnail generated successfully, size:", imageData.length);
                 setThumbnail(imageData);
-                console.log("Thumbnail generated successfully");
             } catch (err) {
                 console.log("Thumbnail generation failed:", err.message);
                 
@@ -58,7 +71,9 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
     }, [videoUrl, seekTime]);
 
     const handleThumbnailClick = () => {
-        window.open(videoUrl, '_blank');
+        if (videoUrl) {
+            window.open(videoUrl, '_blank');
+        }
     };
 
     return (
@@ -79,7 +94,7 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
                         <img src={thumbnail} alt="Thumbnail"
                             className='rounded-lg w-full h-full object-cover'
                         />
-                        <div className='rounded-lg absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center'>
+                        <div className='rounded-lg absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-black bg-opacity-20'>
                             <svg
                                 width="48"
                                 height="48"
@@ -115,10 +130,9 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
                         <span className="text-gray-500 mt-2">Click to play video</span>
                     </div>
                 </div>
-            )
-            }
-        </div >
+            )}
+        </div>
     );
 };
 
-export default VideoThumbnail;
+export default RecordingThumbnail;

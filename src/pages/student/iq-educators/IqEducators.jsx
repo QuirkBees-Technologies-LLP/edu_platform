@@ -7,6 +7,7 @@ import { Link, useParams } from "react-router-dom";
 import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
+import RecordingThumbnail from "./RecordingThumbnail";
 
 const IqEducators = () => {
   const { auth } = useAuthContext();
@@ -18,38 +19,37 @@ const IqEducators = () => {
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
 
-  //  useEffect(() => {
-  //   if (response?.data?.schedules?.length > 0) {
-  //     const now = new Date();
+//  useEffect(() => {
+//   if (response?.data?.schedules?.length > 0) {
+//     const now = new Date();
 
-  //     // Pehle sirf aaj ke schedules filter karo
-  //     const todaySchedules = response.data.schedules.filter((item) => {
-  //       const scheduleDate = new Date(item.date);
-  //       return scheduleDate.toDateString() === now.toDateString();
-  //     });
+//     // Pehle sirf aaj ke schedules filter karo
+//     const todaySchedules = response.data.schedules.filter((item) => {
+//       const scheduleDate = new Date(item.date);
+//       return scheduleDate.toDateString() === now.toDateString();
+//     });
 
-  //     if (todaySchedules.length > 0) {
-  //       // Time ke according sort karo
-  //       const sorted = todaySchedules.sort((a, b) => {
-  //         return new Date(a.date) - new Date(b.date);
-  //       });
+//     if (todaySchedules.length > 0) {
+//       // Time ke according sort karo
+//       const sorted = todaySchedules.sort((a, b) => {
+//         return new Date(a.date) - new Date(b.date);
+//       });
 
-  //       // Abhi ke baad ka first schedule lo (upcoming)
-  //       const upcoming = sorted.find((item) => new Date(item.date) > now);
+//       // Abhi ke baad ka first schedule lo (upcoming)
+//       const upcoming = sorted.find((item) => new Date(item.date) > now);
 
-  //       // Agar upcoming mila to use set karo, nahi to latest past ka set karo
-  //       setCallId(upcoming ? upcoming.callId : sorted[sorted.length - 1].callId);
-  //     }
-  //   }
-  // }, [response]);
+//       // Agar upcoming mila to use set karo, nahi to latest past ka set karo
+//       setCallId(upcoming ? upcoming.callId : sorted[sorted.length - 1].callId);
+//     }
+//   }
+// }, [response]);
 
-  useEffect(() => {
+
+useEffect(() => {
     if (response?.data?.schedules && response.data.schedules.length > 0) {
       setCallId(response.data.schedules[0].callId);
     }
   }, [response]);
-
-  
   console.log("response", response);
   console.log("callId", callId);
 
@@ -350,11 +350,16 @@ const IqEducators = () => {
                     className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
                   >
                     <div className="rounded-t-xl overflow-hidden">
-                      <img
+                      {/* <img
                         src={"/media/images/600x400/1.jpg"}
                         alt={course.title}
                         className="w-full h-36 object-cover"
                         onClick={() => handleOpen(course?.url)}
+                      /> */}
+
+                      <RecordingThumbnail
+                        videoUrl={course?.url}
+                        seekTime={2}
                       />
 
                       {/* <div className="absolute inset-0 flex items-center justify-center">
