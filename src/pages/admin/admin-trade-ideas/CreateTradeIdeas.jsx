@@ -45,7 +45,7 @@ const CreateTradeIdeas = forwardRef(
       status: "",
       entry: "",
       invalidation: "",
-      exits: [],
+      exits: [""],
       description: "",
       category: "",
     };

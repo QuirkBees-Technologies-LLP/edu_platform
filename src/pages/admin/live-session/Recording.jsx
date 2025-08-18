@@ -111,7 +111,7 @@ const Recording = () => {
                     {/* Stream Recordings Section */}
                     <div>
                         <h4 className="text-lg font-semibold mb-4 text-gray-800">Available Recordings</h4>
-                        <p className="text-sm font-semibold mb-4 text-primary">Note: This recording will be available for the next 2 weeks. Please make sure to save it if you wish to retain access.</p>
+                        {/* <p className="text-sm font-semibold mb-4 text-primary">Note: This recording will be available for the next 2 weeks. Please make sure to save it if you wish to retain access.</p> */}
                         <div className="grid grid-cols-1  gap-4">
                             {streamRecordings.map((rec, index) => {
                                 // Check if this recording is already saved
@@ -163,7 +163,7 @@ const Recording = () => {
                     <div className="mb-8">
                         <h4 className="text-lg font-semibold mb-4 text-gray-800">Saved Recordings</h4>
                         <div className="grid grid-cols-1 gap-4">
-                            {backendRecordings?.data?.map((rec, index) => (
+                            {backendRecordings?.data?.length > 0 && backendRecordings?.data?.map((rec, index) => (
                                 <div key={rec._id} className="border rounded-lg p-4 hover:shadow-md">
                                     <div className="w-full mb-3">
                                         <div>

@@ -1,4 +1,6 @@
 
+import ShowMoreLess from "../../../components/ui/showmoreless";
+
 export default function ClientTradeSlider({ sliderImages, setIsLightBoxOpen , selectedIdea}) {
   const settings = {
     dots: true,
@@ -74,6 +76,7 @@ export default function ClientTradeSlider({ sliderImages, setIsLightBoxOpen , se
                           </span>
                         </div>
                       ))}
+                      <ShowMoreLess html={selectedIdea?.description || 'No description'} limit={95} />
               </div>
           </div>
         {/* </div> */}

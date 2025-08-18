@@ -15,11 +15,14 @@ import Spinner from "@/components/common/LoadingSpinner"; // Optional loader com
 import { it } from "@faker-js/faker";
 import VideoPlayerModal from "./VideoPlayerModal";
 import { useGetEducatorRecordingDataQuery } from "../../../store/api/educator/educatorRecordingApiSlice";
+import VideoThumbnail from "../live-session/VideoThumbnail";
+import RecordingThumbnail from "../../student/iq-educators/RecordingThumbnail";
 
 const EducatorRecordingSession = () => {
   const { data, isFetching, isError, error } =
     useGetEducatorRecordingDataQuery();
   const [showAllTags, setShowAllTags] = useState({});
+  const [recording, setRecording] = useState(null);
   const [open, setOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
 
@@ -137,8 +140,15 @@ const EducatorRecordingSession = () => {
               >
                 <div className="card">
                   {/* Image with Play Button */}
-                  <div className="relative w-full h-52 rounded-2xl overflow-hidden">
-                    <img
+                  <div className="relative w-full h-52 rounded-2xl overflow-hidden"  onClick={() => setRecording(item)}>
+                    <RecordingThumbnail
+                      videoUrl={item?.url}
+                      seekTime={2}
+                      recordingThumbnail={item?.thumbnail}
+                      onRecordingClick={() => handleOpen(item?.url)}
+                      data={recording}
+                    />
+                    {/* <img
                       className="w-full h-full object-cover"
                       src="/media/images/600x400/1.jpg"
                       alt=""
@@ -152,7 +162,7 @@ const EducatorRecordingSession = () => {
                       >
                         <CirclePlay size={60} className="text-white" />
                       </button>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Card Body */}
@@ -220,6 +230,7 @@ const EducatorRecordingSession = () => {
         open={open}
         onOpenChange={setOpen}
         videoUrl={videoUrl}
+        data={recording}
       />
     </div>
   );

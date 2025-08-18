@@ -21,6 +21,7 @@ const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, sele
     const initialValues = {
         title: "",
         description: "",
+        thumbnail: null,
     };
 
     const createSchema = Yup.object().shape({
@@ -32,23 +33,23 @@ const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, sele
             .required("Description is required")
             .min(2, "Description must be at least 2 characters"),
 
-        // image: Yup.mixed()
-        //     .required("Image is required")
-        //     .test(
-        //         "fileSize",
-        //         "Image size too large (max 2MB)",
-        //         (value) => !value || (value && value.size <= 2000000)
-        //     )
-        //     .test(
-        //         "fileType",
-        //         "Unsupported file format",
-        //         (value) =>
-        //             !value ||
-        //             (value &&
-        //                 ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
-        //                     value.type
-        //                 ))
-        //     ),
+        thumbnail: Yup.mixed()
+            .required("Thumbnail is required")
+            .test(
+                "fileSize",
+                "Thumbnail size too large (max 20MB)",
+                (value) => !value || (value && value.size <= 20000000)
+            )
+            .test(
+                "fileType",
+                "Unsupported file format. Please use JPEG, PNG, JPG, or WebP",
+                (value) =>
+                    !value ||
+                    (value &&
+                        ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
+                            value.type
+                        ))
+            ),
     });
 
     const formik = useFormik({
@@ -57,22 +58,51 @@ const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, sele
         revalidateOnMount: true,
         validationSchema: createSchema,
         onSubmit: async (values, { setStatus, setSubmitting }) => {
-
-            const payload = {};
-
-            if (selectedRow?._id) {
-                payload.id = selectedRow?._id;
-                payload.call_title = values?.title;
-                payload.call_description = values?.description;
-            }
-
             try {
+                const payload = { ...values };
+
                 if (selectedRow?._id) {
-                    await updateEducatorRecording(payload).unwrap();
+                    // Update mode
+                    payload.id = selectedRow._id;
+                    payload.call_title = values?.title;
+                    payload.call_description = values?.description;
+                    
+                    // Check if thumbnail is a new file or existing string
+                    const hasNewThumbnail = values.thumbnail && typeof values.thumbnail !== "string";
+                    
+                    if (hasNewThumbnail) {
+                        // New thumbnail uploaded - use FormData
+                        const formData = new FormData();
+                        formData.append('id', payload.id);
+                        formData.append('call_title', payload.call_title);
+                        formData.append('call_description', payload.call_description);
+                        formData.append('thumbnail', values.thumbnail);
+                        
+                        await updateEducatorRecording({
+                            formData: formData,
+                            id: selectedRow._id,
+                        }).unwrap();
+                    } else {
+                        // No new thumbnail - send regular payload
+                        delete payload.thumbnail; // Remove thumbnail field
+                        await updateEducatorRecording(payload).unwrap();
+                    }
+                    
                     setSelectedRow({});
                     refetch();
                     toast.success("Recording updated successfully!");
+                } else {
+                    // Create mode - always use FormData for new thumbnail
+                    const formData = new FormData();
+                    formData.append('title', values?.title);
+                    formData.append('description', values?.description);
+                    formData.append('thumbnail', values?.thumbnail);
+                    
+                    // Call create API here if you have one
+                    // await createAdminRecording(formData).unwrap();
+                    toast.success("Recording created successfully!");
                 }
+                
                 formik.resetForm();
                 handleCloseCreate();
             } catch (err) {
@@ -80,7 +110,6 @@ const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, sele
                 const errorMessage = err?.data?.message || "An unexpected error occurred.";
                 toast.error(errorMessage);
             }
-
         },
     });
 
@@ -90,8 +119,9 @@ const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, sele
                 title: selectedRow?.call_title,
                 description: selectedRow?.call_description,
                 id: selectedRow?._id,
+                thumbnail: selectedRow?.thumbnail || null,
             }
-            formik.setValues(initData)
+            formik.setValues(initData);
         }
     }, [selectedRow?._id, isCreateOpen]);
 
@@ -134,6 +164,56 @@ const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, sele
                                 )}
                             </div>
                         </div>
+
+                        {/* Thumbnail Upload Section */}
+                        <div className="col-span-12">
+                            <div className="flex flex-col gap-1">
+                                <label className="form-label text-gray-900 gap-1">Thumbnail<span className="text-danger">
+                                    *
+                                </span></label>
+                                
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(event) => {
+                                        const file = event.currentTarget.files[0];
+                                        formik.setFieldValue("thumbnail", file);
+                                    }}
+                                    className={`form-control input input-md w-full h-full p-3 ${formik.errors.thumbnail && formik.touched.thumbnail
+                                        ? "border border-danger"
+                                        : ""
+                                        }`}
+                                />
+
+                                {/* Preview */}
+                                {formik.values.thumbnail && (
+                                    <div className="mt-2">
+                                        <img
+                                            src={
+                                                typeof formik.values.thumbnail === "string"
+                                                    ? formik.values.thumbnail // Backend URL
+                                                    : URL.createObjectURL(formik.values.thumbnail) // Local file preview
+                                            }
+                                            alt="Thumbnail preview"
+                                            className="w-40 h-40 rounded-lg border border-gray-200"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Thumbnail Validation Error */}
+                                {formik.touched.thumbnail && formik.errors.thumbnail && (
+                                    <span role="alert" className="text-danger text-xs mt-1">
+                                        {formik.errors.thumbnail}
+                                    </span>
+                                )}
+                                
+                                {/* Help Text */}
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Supported formats: JPEG, PNG, JPG, WebP. Maximum size: 20MB
+                                </p>
+                            </div>
+                        </div>
+
                         <div className="col-span-12">
                             <div className="flex flex-col gap-1">
                                 <label className="form-label text-gray-900 gap-1">Description<span className="text-danger">

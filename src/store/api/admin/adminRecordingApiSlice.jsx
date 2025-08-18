@@ -23,11 +23,11 @@ export const adminRecordingApiSlice = createApi({
             }),
         }),
         updateAdminRecording: builder.mutation({
-            query: (data) => ({
-                url: `/admin/recording/${data?.id}`,
+            query: ({formData, id}) => ({
+                url: `/admin/recording/${id}`,
                 method: 'PUT',
-                body: data,
-                // formData: true
+                body: formData,
+                formData: true
             }),
         }),
         deleteAdminRecording: builder.mutation({

@@ -50,7 +50,7 @@ const CreateTradeIdeas = forwardRef(
       status: "",
       entry: "",
       invalidation: "",
-      exits: [],
+      exits: [""],
       description: "",
       category: "",
     };
@@ -65,11 +65,10 @@ const CreateTradeIdeas = forwardRef(
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
       entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
-      description: Yup.string().required("Entry is required"),
+      description: Yup.string().required("Description is required"),
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
-        .required("Invalidation is required")
-        .positive("Invalidation must be a positive number"),
+        .required("Invalidation is required"),
       exits: Yup.array()
         .of(
           Yup.number()

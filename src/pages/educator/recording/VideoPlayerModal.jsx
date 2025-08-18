@@ -2,8 +2,9 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoJS from '../../../components/VideoJS';
+import ShowMoreLess from '../../../components/ui/showmoreless';
 
-const VideoPlayerModal = ({ open, onOpenChange, videoUrl }) => {
+const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
   const playerOptions = {
     autoplay: true,
     controls: true,
@@ -26,8 +27,8 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden">
         <DialogHeader className="p-4 pb-0">
-          <DialogTitle>Recording Playback</DialogTitle>
-          <p className='flex items-center gap-2 text-sm font-normal text-gray-700'>View and access all video recordings uploaded by educators and admins.</p>
+          <DialogTitle>{data?.call_title || 'Recording Playback'}</DialogTitle>
+          <ShowMoreLess html={data?.call_description || 'View and access all video recordings uploaded by educators and admins.'} limit={100} />
         </DialogHeader>
         <div className="p-4">
           {/* ✅ Only render the video when modal is open */}
