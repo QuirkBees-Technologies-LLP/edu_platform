@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const RecordingThumbnail = ({ videoUrl, seekTime = 1 }) => {
+const RecordingThumbnail = ({ videoUrl, seekTime = 1, image }) => {
     const videoRef = useRef(null);
-    const [thumbnail, setThumbnail] = useState(null);
+    const [thumbnail, setThumbnail] = useState(image);
     console.log(videoUrl, "videoUrl")
     
     useEffect(() => {
