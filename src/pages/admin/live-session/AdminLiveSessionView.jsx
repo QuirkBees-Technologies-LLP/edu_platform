@@ -94,7 +94,7 @@ const AdminLiveSessionView = () => {
   return (
     <EventProvider>
       <StreamWrapper call={call}>
-        <StreamClient
+        {call && client && <StreamClient
           sessionToken={sessionToken}
           call={call}
           client={client}
@@ -102,7 +102,7 @@ const AdminLiveSessionView = () => {
           token={rtmp_stream_key}
           rtmp_stream_key={rtmp_stream_key}
           rtmp_url={rtmp_url}
-        />
+        />}
       </StreamWrapper>
     </EventProvider>
   );

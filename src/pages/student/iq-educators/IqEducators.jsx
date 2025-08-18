@@ -202,7 +202,7 @@ const IqEducators = () => {
   const [newMessage, setNewMessage] = useState("");
   const [open, setOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
-
+  const [recording, setRecording] = useState(null);
   // Ref for the messages container to enable auto-scrolling
   const messagesEndRef = useRef(null);
 
@@ -349,7 +349,7 @@ const IqEducators = () => {
                     key={course.id}
                     className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
                   >
-                    <div className="rounded-t-xl overflow-hidden">
+                    <div className="rounded-t-xl overflow-hidden" onClick={() => setRecording(course)}>
                       {/* <img
                         src={"/media/images/600x400/1.jpg"}
                         alt={course.title}
@@ -361,6 +361,7 @@ const IqEducators = () => {
                         videoUrl={course?.url}
                         seekTime={2}
                         image={course?.thumbnail}
+                        onRecordingClick={() => handleOpen(course?.url)}
                       />
 
                       {/* <div className="absolute inset-0 flex items-center justify-center">
@@ -597,6 +598,7 @@ const IqEducators = () => {
         open={open}
         onOpenChange={setOpen}
         videoUrl={videoUrl}
+        data={recording}
       />
     </div>
   );

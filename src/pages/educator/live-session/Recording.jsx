@@ -15,7 +15,7 @@ const Recording = () => {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState({});
     const [streamRecordings, setStreamRecordings] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [savingRecordings, setSavingRecordings] = useState(new Set()); // Track loading state for each recording
 
     const { auth } = useAuthContext();
     const educator_id = auth?.user?._id ?? '';
@@ -36,7 +36,12 @@ const Recording = () => {
 
     // Handle saving a Stream recording to backend
     const handleSaveRecording = async (recording) => {
-        setIsLoading(true);
+        const recordingKey = recording.filename || recording.id || `recording-${Date.now()}`;
+        console.log("Starting to save recording with key:", recordingKey);
+        console.log("Current savingRecordings:", Array.from(savingRecordings));
+        
+        setSavingRecordings(prev => new Set([...prev, recordingKey]));
+        
         try {
             const payload = {
                 ...recording,
@@ -52,7 +57,13 @@ const Recording = () => {
         } catch (err) {
             console.error('Failed to save recording:', err);
         } finally {
-            setIsLoading(false);
+            console.log("Finishing save for recording with key:", recordingKey);
+            setSavingRecordings(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(recordingKey);
+                console.log("Updated savingRecordings:", Array.from(newSet));
+                return newSet;
+            });
         }
     };
 
@@ -113,11 +124,15 @@ const Recording = () => {
                     {/* Stream Recordings Section */}
                     <div>
                         <h4 className="text-lg font-semibold mb-4 text-gray-800">Available Recordings</h4>
-                        <p className="text-sm mb-4 text-danger">Note: This recording will be available for the next 2 weeks. Please make sure to save it if you wish to retain access.</p>
+                        {/* <p className="text-sm mb-4 text-danger">Note: This recording will be available for the next 2 weeks. Please make sure to save it if you wish to retain access.</p> */}
                         <div className="grid grid-cols-1  gap-4">
                             {streamRecordings?.map((rec, index) => {
 
-                                console.log(rec,"rec")
+                                console.log("Recording object:", rec);
+                                console.log("Recording filename:", rec.filename);
+                                console.log("Recording id:", rec.id);
+                                console.log("Is saving:", savingRecordings.has(rec.filename || rec.id));
+                                
                                 // Check if this recording is already saved
                                 const isSaved = backendRecordings?.data?.recordings?.some(
                                     backendRec => backendRec.streamio_filename === rec.filename
@@ -135,13 +150,13 @@ const Recording = () => {
                                         </div>
                                         <button
                                             onClick={() => handleSaveRecording(rec)}
-                                            disabled={isSaved || isLoading}
+                                            disabled={isSaved || savingRecordings.has(rec.filename || rec.id)}
                                             className={`w-full py-2 px-4 rounded-md flex items-center justify-center ${isSaved
                                                 ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
                                                 : 'bg-primary hover:bg-primary-dark text-white'
                                                 }`}
                                         >
-                                            {isLoading ? (
+                                            {savingRecordings.has(rec.filename || rec.id) ? (
                                                 'Saving...'
                                             ) : (
                                                 <>
@@ -171,7 +186,7 @@ const Recording = () => {
                                 <div key={rec._id} className="border rounded-lg p-4 hover:shadow-md">
                                     <div className="w-full mb-3">
                                         <div>
-                                            <VideoThumbnail key={index} videoUrl={rec.url} />
+                                            <VideoThumbnail key={index} videoUrl={rec.url} recordingThumbnail={rec.thumbnail} />
                                             <p className="text-gray-900 text-xs mt-2">{rec.call_title || 'No title'}</p>
                                             <ShowMoreLess isHtml={true} className="text-gray-900 text-xs mt-2" html={rec.call_description || 'No description'} maxLength={100} />
                                             <p className="text-gray-900 text-xs mt-2">{format(rec.start_time, "MMM dd, yyyy, hh:mm a")} -- {format(rec.end_time, "MMM dd, yyyy, hh:mm a")}</p>

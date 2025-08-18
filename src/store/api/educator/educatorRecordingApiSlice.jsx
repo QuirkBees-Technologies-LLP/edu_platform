@@ -23,11 +23,11 @@ export const educatorRecordingApiSlice = createApi({
             }),
         }),
         updateEducatorRecording: builder.mutation({
-            query: (data) => ({
-                url: `/educator/recording/${data?.id}`,
+            query: ({formData, id}) => ({
+                url: `/educator/recording/${id}`,
                 method: 'PUT',
-                body: data,
-                // formData: true
+                body: formData,
+                formData: true
             }),
         }),
         deleteEducatorRecording: builder.mutation({

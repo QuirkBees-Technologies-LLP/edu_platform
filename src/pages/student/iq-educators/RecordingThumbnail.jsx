@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+<<<<<<< Updated upstream
 const RecordingThumbnail = ({ videoUrl, seekTime = 1, image }) => {
+=======
+const RecordingThumbnail = ({ videoUrl, seekTime = 1, onRecordingClick }) => {
+>>>>>>> Stashed changes
     const videoRef = useRef(null);
     const [thumbnail, setThumbnail] = useState(image);
     console.log(videoUrl, "videoUrl")
@@ -78,7 +82,7 @@ const RecordingThumbnail = ({ videoUrl, seekTime = 1, image }) => {
 
     return (
         <div
-            onClick={handleThumbnailClick}
+            onClick={onRecordingClick}
             className='w-full h-44 cursor-pointer bg-light d-flex justify-center align-items-center rounded-lg'
         >
             <video

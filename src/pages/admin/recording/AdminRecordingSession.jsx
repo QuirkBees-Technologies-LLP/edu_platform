@@ -9,13 +9,14 @@ import { useLazyGetAdminRecordingByUserIDQuery } from '../../../store/api/admin/
 import Spinner from '@/components/common/LoadingSpinner'; // Optional loader component
 import { it } from '@faker-js/faker';
 import VideoPlayerModal from './VideoPlayerModal';
+import RecordingThumbnail from '../../student/iq-educators/RecordingThumbnail';
 
 const AdminRecordingSession = () => {
     const [trigger, { data, isFetching, isError, error }] = useLazyGetAdminRecordingByUserIDQuery();
     const [showAllTags, setShowAllTags] = useState({});
     const [open, setOpen] = useState(false);
     const [videoUrl, setVideoUrl] = useState('');
-
+    const [recording, setRecording] = useState(null);
     const {
         getThemeMode
     } = useSettings();
@@ -69,10 +70,10 @@ const AdminRecordingSession = () => {
 
     const handleOpen = (url) => {
         console.log(url, "urls");
-        
-    setVideoUrl(url);
-    setOpen(true);
-  };
+
+        setVideoUrl(url);
+        setOpen(true);
+    };
 
     return (
         <div>
@@ -116,14 +117,19 @@ const AdminRecordingSession = () => {
                             <div className="recorded_card col-span-12 sm:col-span-6 xl:col-span-4" key={index}>
                                 <div className="card">
                                     {/* Image with Play Button */}
-                                    <div className="relative w-full h-52 rounded-2xl overflow-hidden">
-                                        <img className="w-full h-full object-cover" src="/media/images/600x400/1.jpg" alt="" />
+                                    <div className="relative w-full h-52 rounded-2xl overflow-hidden" onClick={() => setRecording(item)}>
+                                        {/* <img className="w-full h-full object-cover" src="/media/images/600x400/1.jpg" alt="" />
                                         <div className="absolute inset-0 bg-black/50" />
                                         <div className="absolute inset-0 flex items-center justify-center">
                                             <button type="button" className="btn btn-icon btn-circle btn-lg" onClick={() => handleOpen(item?.url)}>
                                                 <CirclePlay size={60} className="text-white" />
                                             </button>
-                                        </div>
+                                        </div> */}
+                                        <RecordingThumbnail
+                                            videoUrl={item?.url}
+                                            seekTime={2}
+                                            onRecordingClick={() => handleOpen(item?.url)}
+                                        />
                                     </div>
 
                                     {/* Card Body */}
@@ -181,7 +187,7 @@ const AdminRecordingSession = () => {
                     })}
                 </div>
             </Container>
-            <VideoPlayerModal open={open} onOpenChange={setOpen} videoUrl={videoUrl} />
+            <VideoPlayerModal data={recording} open={open} onOpenChange={setOpen} videoUrl={videoUrl} />
         </div>
     )
 }

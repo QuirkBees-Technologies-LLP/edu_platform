@@ -34,7 +34,7 @@ const SidebarMenu = () => {
       }} {...item.trigger && {
         trigger: item.trigger
       }}>
-        <MenuLink className={clsx('flex items-center grow cursor-pointer border border-transparent', accordionLinkGap[0], linkPl, linkPr, linkPy)}>
+        <MenuLink externalLink={item.externalLink} newTab={item.newTab} path={item.path} className={clsx('flex items-center grow cursor-pointer border border-transparent', accordionLinkGap[0], linkPl, linkPr, linkPy)}>
           <MenuIcon className={clsx('items-start text-gray-400 dark:text-gray-700 ', iconWidth)}>
             {item.icon && item.icon}
           </MenuIcon>
@@ -49,7 +49,7 @@ const SidebarMenu = () => {
       </MenuItem>;
     } else {
       return <MenuItem key={index}>
-        <MenuLink path={item.path} className={clsx('border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-gray-200 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-gray-200 dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[0], linkPy, linkPl, linkPr)}>
+        <MenuLink externalLink={item.externalLink} newTab={item.newTab} path={item.path} className={clsx('border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-gray-200 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-gray-200 dark:hover:border-gray-100 hover:rounded-lg', accordionLinkGap[0], linkPy, linkPl, linkPr)}>
           <MenuIcon className={clsx('items-start text-gray-400 dark:text-gray-700 dark:menu-item-active:text-gray-900 menu-item-active:text-gray-100', iconWidth)}>
             {item.icon && item.icon}
           </MenuIcon>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
+const VideoThumbnail = ({ videoUrl, seekTime = 1, recordingThumbnail, data }) => {
     const videoRef = useRef(null);
     const [thumbnail, setThumbnail] = useState(null);
     console.log(videoUrl, "videoUrl")
@@ -73,10 +73,10 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1 }) => {
                 muted
                 playsInline
             />
-            {thumbnail ? (
+            {recordingThumbnail ? (
                 <>
                     <div className="w-full h-full relative">
-                        <img src={thumbnail} alt="Thumbnail"
+                        <img src={recordingThumbnail || thumbnail} alt="Thumbnail"
                             className='rounded-lg w-full h-full object-cover'
                         />
                         <div className='rounded-lg absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center'>

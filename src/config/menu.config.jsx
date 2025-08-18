@@ -1380,7 +1380,9 @@ export const sideMenus = {
     {
       title: "IQ Charts",
       icon: <ChartNoAxesCombined />,
-      path: "https://www.iqcharts.com/",
+      path: 'https://www.iqcharts.com/',
+      externalLink: true,
+      newTab: true
     },
   ],
   educator: [
@@ -1422,7 +1424,9 @@ export const sideMenus = {
     {
       title: "IQ Charts",
       icon: <ChartNoAxesCombined />,
-      path: "https://www.iqcharts.com/",
+      path: 'https://www.iqcharts.com/',
+      externalLink: true,
+      newTab: true
     },
     // {
     //   title: 'Video Library',
@@ -1518,8 +1522,9 @@ export const sideMenus = {
     {
       title: "IQ Charts",
       icon: <ChartNoAxesCombined />,
-      external: true,
-      path: "https://www.iqcharts.com/",
+      path: 'https://www.iqcharts.com/',
+      externalLink: true,
+      newTab: true
     },
     // {
     //   title: 'Forex Academy',

@@ -283,11 +283,14 @@ const ClientTradeIdeas = () => {
                       className="w-full h-40 object-cover cursor-pointer"
                       onClick={() => {
                         setSelectedIdea(trade);
-                        setIsViewOpen(true);
+                        setIsLightBoxOpen(true);
                       }}
                     />
-                    <button className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow">
-                      <Eye size={20} />
+                    <button onClick={() => {
+                      setSelectedIdea(trade);
+                      setIsViewOpen(true);
+                    }} className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow">
+                      <Eye  size={20} />
                     </button>
                   </div>
 
@@ -447,6 +450,10 @@ const ClientTradeIdeas = () => {
                         );
                       })}
                       <button
+                        onClick={() => {
+                          setSelectedIdea(trade);
+                          setIsViewOpen(true);
+                        }}
                         className="btn btn-light btn-sm rounded-lg bg-gray-200 text-xs text-gray-800 font-medium"
                       >
                         Read More...
