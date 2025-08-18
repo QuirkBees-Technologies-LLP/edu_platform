@@ -11,7 +11,7 @@ const StreamWrapper = ({ call, children, bannerImage }) => {
         <div className="col-span-12 lg:col-span-8">
           <div className="card rounded-none rounded-b-xl">
             <img
-              src={bannerImage ? bannerImage : toAbsoluteUrl("/media/images/2600x1600/iq_educators.jpg")}
+              src={bannerImage ? bannerImage : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg")}
               alt=""
               className="w-full h-full rounded-xl object-cover"
             />
