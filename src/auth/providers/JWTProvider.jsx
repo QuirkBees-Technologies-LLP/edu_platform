@@ -184,27 +184,32 @@ const AuthProvider = ({ children }) => {
     } else {
       try {
         // Step 1: External Login
-        const loginRes = await fetch(
-          `https://api.iqonic.life/api/cb/outbound/iqverse/user/details?email=${email}&password=${password}`,
+        const loginRes = await axios.get(
+          "https://api.iqonic.life/api/cb/outbound/iqverse/user/details",
           {
-            method: "GET",
+            params: {
+              email: email,
+              password: password,
+            },
             headers: {
               "api-key": API_KEY,
             },
           }
         );
 
-        const loginData = await loginRes.json();
+        console.log("loginRes",loginRes.data)
 
-        if (!loginData.success || !loginData.data) {
+        // const loginData = await loginRes.json();
+
+        if (!loginRes?.data?.success || !loginRes?.data?.data) {
           return {
             success: false,
-            error: loginData.message || "Login failed.",
+            error: loginRes.data.message || "Login failed.",
           };
         }
 
-        const { id: userId, name, email: userEmail } = loginData.data;
-        const { expire_at, plan, status } = loginData.data.memberships;
+        const { id: userId, name, email: userEmail } = loginRes?.data?.data;
+        const { expire_at, plan, status } = loginRes?.data?.data?.memberships;
 
         // Step 2: Check Plan Expiry
         const isExpired = new Date(expire_at) < new Date();
@@ -212,17 +217,31 @@ const AuthProvider = ({ children }) => {
 
         if (isExpired) {
           // Step 3: Get token and redirect
-          const tokenRes = await fetch(
-            `https://api.iqonic.life/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
+          // const tokenRes = await fetch(
+          //   `https://api.iqonic.life/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
+          //   {
+          //     method: "GET",
+          //     headers: {
+          //       "api-key": API_KEY,
+          //     },
+          //   }
+          // );
+
+          const tokenRes = await axios.get(
+            "https://api.iqonic.life/api/cb/outbound/iqverse/user/token",
             {
-              method: "GET",
+              params: {
+                user_id: userId,
+              },
               headers: {
                 "api-key": API_KEY,
               },
             }
           );
-          const tokenData = await tokenRes.json();
-          const token = tokenData?.data?.token;
+          // const tokenData = await tokenRes.json();
+
+          console.log("tokenRes",tokenRes)
+          const token = tokenRes?.data?.data?.token;
           if (!token) {
             return {
               success: false,
