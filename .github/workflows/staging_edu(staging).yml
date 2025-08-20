@@ -1,9 +1,6 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Vite app to Azure Web App - edu (Staging)
 
 on:
@@ -13,17 +10,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      id-token: write
+      contents: read # Required for actions/checkout
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
@@ -39,18 +34,37 @@ jobs:
           VITE_APP_STREAM_API_KEY: ${{ secrets.STAGING_VITE_APP_STREAM_API_KEY }}
         run: |
           npm ci
-          npm install express
           npm run build
           zip -r site.zip dist
 
-      - name: Azure Login
+      - name: Upload artifact for deployment job (short retention)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-app
+          path: site.zip
+          retention-days: 5
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write # Required for requesting the JWT
+      contents: read  # Required for actions/checkout
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: vite-app
+
+      - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_7418B2132FDB474CA49D0B809C085439 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F6B61FEDF7C24ADFB93495C2F3F8D674 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_1E708C7368B54B6EA3BCD1696261A5F9 }}
 
-      - name: Deploy static content to Azure Web App (Staging)
+      - name: Deploy to Azure Web App (Staging)
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'edu'
