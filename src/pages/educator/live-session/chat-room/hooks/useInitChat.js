@@ -234,7 +234,7 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
               id: userId,
               name: userName,
               image: `https://getstream.io/random_svg/?name=${userName}`,
-              title: userId === 'daddy' ? 'Admin' : getRandomTitle(),
+              // title: userId === 'daddy' ? 'Admin' : getRandomTitle(),
             },
             userToken
           );
