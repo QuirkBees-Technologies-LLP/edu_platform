@@ -177,7 +177,6 @@ const routes = {
       path: "/educator/live-session/:callId",
       element: <EducatorLiveSessionView />,
     },
-    //test comment
     { path: "/educator/dark-sidebar", element: <Demo1DarkSidebarPage /> },
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
     { path: "/educator/profile", element: <EducatorProfile /> },
