@@ -37,7 +37,17 @@ const ClientLiveSessionContent = ({ client, callId, token, bannerImage }) => {
 
   const {
     isFullScreen,
+    setIsFullScreen
   } = useEventContext();
+
+  useEffect(() => {
+    if (!isMdUp) {
+      setIsFullScreen(false);
+    }
+  }, [isMdUp]);
+
+  console.log(isFullScreen, "isFullScreen");
+  
 
   // Handler for toggling
   const handleToggle = (e) => {

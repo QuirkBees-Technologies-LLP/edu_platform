@@ -236,7 +236,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
       <div className='message-ui-content'>
         <div className='message-ui-content-top'>
           <div className='message-ui-content-top-name'>{message.user.name || message.user.id}</div>
-          {showTitle && <div className='message-ui-content-top-title'>{message.user.title}</div>}
+          {/* {showTitle && <div className='message-ui-content-top-title'>{message.user.title}</div>} */}
           <div className='message-ui-content-top-time'>{getTimeSinceMessage()}</div>
         </div>
         <div className='message-ui-content-bottom'>{message.text}</div>
