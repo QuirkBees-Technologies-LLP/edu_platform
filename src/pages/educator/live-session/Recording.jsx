@@ -8,6 +8,7 @@ import CreateEducatorRecording from '../../educator/recording/CreateEducatorReco
 import DeleteEducatorRecording from '../../educator/recording/DeleteEducatorRecording';
 import VideoThumbnail from './VideoThumbnail';
 import { format } from 'date-fns';
+import Loader from '../../../components/ui/loader';
 
 const Recording = () => {
     const call = useCall();

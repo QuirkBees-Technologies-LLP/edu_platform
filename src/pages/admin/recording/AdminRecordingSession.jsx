@@ -1,6 +1,6 @@
 import { Container } from '@/components/container';
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
-import { Calendar, CirclePlay, Timer, Videotape } from 'lucide-react';
+import { Calendar, CirclePlay, Clock3, Timer, Videotape } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom';
 import { useSettings } from '@/providers';
@@ -127,6 +127,7 @@ const AdminRecordingSession = () => {
                                         </div> */}
                                         <RecordingThumbnail
                                             videoUrl={item?.url}
+                                            image={item?.thumbnail}
                                             seekTime={2}
                                             onRecordingClick={() => handleOpen(item?.url)}
                                         />
@@ -174,9 +175,10 @@ const AdminRecordingSession = () => {
                                                 <Calendar size={16} /> {new Date(item?.start_time).toLocaleDateString()}
                                             </p>
                                             <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                                                <Timer size={18} /> {new Date(item?.start_time).toLocaleTimeString([], {
+                                                <Clock3 size={18} /> {new Date(item?.start_time).toLocaleTimeString([], {
                                                     hour: "2-digit",
                                                     minute: "2-digit",
+                                                    hour12: true
                                                 })}
                                             </p>
                                         </div>

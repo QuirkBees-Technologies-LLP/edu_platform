@@ -297,7 +297,7 @@ const AuthProvider = ({ children }) => {
         console.error("Unexpected error:", err);
         return {
           success: false,
-          error: err.message || "Something went wrong.",
+         error: err.response?.data?.message || err.message || "Something went wrong.",
         };
       }
     }
