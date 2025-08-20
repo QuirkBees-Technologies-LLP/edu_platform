@@ -13,7 +13,7 @@ import { MessageInputUI } from "./MessageInput";
 import { ChatHeader } from "./ChatHeader";
 import { ChatSidebar } from "./ChatSidebar";
 
-const ChatContainer = ({ sessionToken, callId }) => {
+const   ChatContainer = ({ sessionToken, callId }) => {
   const {
     actionsModalOpen,
     isFullScreen,

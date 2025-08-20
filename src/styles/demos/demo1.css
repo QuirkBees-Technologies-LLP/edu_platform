@@ -819,9 +819,9 @@ chat */
 .dark iframe .mce-content-body  {
 	color: #fff !important;
 }
-.live-stream-videos {
+/* .live-stream-videos {
 	height: calc(100vh - 128px);
-}
+} */
 .dark_mode {
 	display: none;
 }
@@ -1017,6 +1017,28 @@ chat */
 	height: 100%;
 }
 .chatbox_chat .str-chat__main-panel  {
+	height: 100%;
+}
+
+.educator_chatbox_chat .str-chat__main-panel-inner {
+	height: calc(100% - 130px);
+}
+.educator_chatbox_chat .chat-sidebar {
+	height: 100%;
+}
+.educator_chatbox_chat .chat-sidebar .card {
+	height: 100%;
+}
+.educator_chatbox_chat .chat-components  {
+	height: 100%;
+}
+.educator_chatbox_chat .str-chat  {
+	height: 100%;
+}
+.educator_chatbox_chat .str-chat__container  {
+	height: 100%;
+}
+.educator_chatbox_chat .str-chat__main-panel  {
 	height: 100%;
 }
 .live_chat .input-ui-input textarea {
