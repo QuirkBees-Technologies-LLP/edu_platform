@@ -47,9 +47,11 @@
 
 
 // components/VideoJS.jsx
+import { CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import React from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
+import ReactDOM from "react-dom";
 
 export const VideoJS = ({ options, onReady }) => {
   const videoRef = React.useRef(null);
@@ -73,9 +75,9 @@ export const VideoJS = ({ options, onReady }) => {
             super(player, options);
             this.addClass("vjs-rewind-button");
             this.controlText("Rewind 10s");
-            this.el().innerHTML = "⏪";
+            ReactDOM.render(<CircleChevronLeft size={18} />, this.el());
           }
-          handleClick() {
+        handleClick() {
             player.currentTime(Math.max(0, player.currentTime() - 10));
           }
         }
@@ -86,7 +88,7 @@ export const VideoJS = ({ options, onReady }) => {
             super(player, options);
             this.addClass("vjs-forward-button");
             this.controlText("Forward 10s");
-            this.el().innerHTML = "⏩";
+            ReactDOM.render(<CircleChevronRight size={18} />, this.el());
           }
           handleClick() {
             player.currentTime(
@@ -121,7 +123,7 @@ export const VideoJS = ({ options, onReady }) => {
   return (
     <div data-vjs-player>
       <div ref={videoRef} />
-      <style>{`
+      {/* <style>{`
         .vjs-rewind-button, .vjs-forward-button {
           background: none !important;
           color: white !important;
@@ -131,7 +133,7 @@ export const VideoJS = ({ options, onReady }) => {
         .vjs-rewind-button:hover, .vjs-forward-button:hover {
           color: #ccc !important;
         }
-      `}</style>
+      `}</style> */}
     </div>
   );
 };

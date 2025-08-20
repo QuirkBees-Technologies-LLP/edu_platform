@@ -1068,3 +1068,18 @@ box-shadow: 0 0 0 1px #6366F1 !important;
 	transition-duration: 200ms;
 	outline: none;	  
 }
+
+.vjs-control.vjs-button.vjs-rewind-button {
+	font-size: 15px;
+	width: 40px;
+}
+.vjs-control.vjs-button.vjs-rewind-button:active {
+	color: var(--tw-gray-900);
+}
+.vjs-control.vjs-button.vjs-forward-button {
+	font-size: 15px;
+	width: 40px;
+}
+.vjs-control.vjs-button.vjs-forward-button:active {
+	color: var(--tw-gray-900);
+}

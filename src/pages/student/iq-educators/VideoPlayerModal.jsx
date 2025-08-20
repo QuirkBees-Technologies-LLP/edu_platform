@@ -70,6 +70,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoJS from '../../../components/VideoJS';
 import ShowMoreLess from "../../../components/ui/showmoreless";
+import CustomVideoPlayer from './CustomVideoPlayer';
 
 const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
   const playerOptions = {
@@ -78,6 +79,8 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
     responsive: true,
     fluid: true,
     muted: true,
+      preload: "metadata",   // ✅ Important for skipping
+        crossOrigin: "anonymous",
     sources: [
       {
         src: videoUrl,
@@ -105,6 +108,7 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
               options={playerOptions}
               onReady={handlePlayerReady}
             />
+            // <CustomVideoPlayer videoUrl={videoUrl}/>
           )}
         </div>
       </DialogContent>
