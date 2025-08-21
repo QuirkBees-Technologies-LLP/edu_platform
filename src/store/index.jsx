@@ -3,6 +3,7 @@ import authReducer from "./reducer/authSlice"; // Import auth slice
 import courseReducer from "./reducer/courseSlice";
 import sectionReducer from "./reducer/sectionSlice";
 import lectureReducer from "./reducer/lectureSlice";
+import educatorPostReducer from "./reducer/postSlice";
 import { adminTradeIdeasApiSlice } from "./api/admin/adminTradeIdeasApiSlice";
 import { clientTradeIdeasApiSlice } from "./api/client/clientTradeIdeasApiSlice";
 import { adminLiveSessionApiSlice } from "./api/admin/adminLiveSessionApiSlice";
@@ -47,6 +48,7 @@ export const store = configureStore({
     courses: courseReducer,
     sections: sectionReducer,
     lectures: lectureReducer,
+    educatorPosts: educatorPostReducer,
     language: persistedLanguageReducer,
     [adminCoursesTypesApiSlice.reducerPath]: adminCoursesTypesApiSlice.reducer,
     [adminLanguagesApiSlice.reducerPath]: adminLanguagesApiSlice.reducer,
