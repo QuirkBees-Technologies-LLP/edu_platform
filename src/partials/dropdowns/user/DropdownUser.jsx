@@ -40,7 +40,7 @@ const DropdownUser = ({
         <img className="size-9 rounded-full border-2 border-success flex-shrink-0 object-cover object-top" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
         <div className="flex flex-col">
           <Link to="/account/hoteme/get-stard" className="text-sm text-gray-800 hover:text-primary font-semibold leading-none">
-          {auth?.user.first_name}{" "}{auth?.user.last_name}
+          {auth?.user.first_name}{" "}{auth?.user.last_name} 
           </Link> 
           <a
             href={`mailto:${userEmail}`}
@@ -214,7 +214,7 @@ const DropdownUser = ({
   };
   const buildFooter = () => {
     return <div className="flex flex-col">
-      <div className="menu-item mb-0.5">
+      {/* <div className="menu-item mb-0.5">
         <div className="menu-link">
           <span className="menu-icon">
             <KeenIcon icon="moon" />
@@ -226,7 +226,7 @@ const DropdownUser = ({
             <input name="theme" type="checkbox" checked={settings.themeMode === 'dark'} onChange={handleThemeMode} value="1" />
           </label>
         </div>
-      </div>
+      </div> */}
 
       <div className="menu-item px-4 py-1.5">
         <a onClick={() => logout(dispatch)} className="btn btn-sm btn-light justify-center">

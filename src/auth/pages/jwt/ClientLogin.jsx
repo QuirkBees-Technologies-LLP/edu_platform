@@ -191,7 +191,7 @@ const ClientLogin = () => {
         </button>
         
         <div className="font-normal text-center">
-          <Link
+          {/* <Link
             to={
               currentLayout?.name === "auth-branded"
                 ? "/auth/reset-password"
@@ -200,7 +200,7 @@ const ClientLogin = () => {
             className="text-xs text-[#8D79FF] link shrink-0"
           >
             Forgot Password?
-          </Link>
+          </Link> */}
           {/* <span className="text-2sm text-gray-600 me-1.5">
             Need an account ?
           </span>
