@@ -9,3 +9,7 @@ export * from './tabs';
 export * from './drawer';
 export * from './tooltip';
 export * from './alert';
+
+// Feed Components
+export { default as PostCard } from './PostCard';
+export { default as CreatePostModal } from './CreatePostModal';
