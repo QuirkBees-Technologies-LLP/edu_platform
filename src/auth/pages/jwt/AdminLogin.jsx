@@ -201,7 +201,7 @@ const AdminLogin = () => {
         >
           {loading ? "Please wait..." : "Login"}
         </button>
-        <div className="font-normal text-center">
+        {/* <div className="font-normal text-center">
           <Link
             to={
               currentLayout?.name === "auth-branded"
@@ -212,7 +212,7 @@ const AdminLogin = () => {
           >
             Forgot Password?
           </Link>
-          </div>
+          </div> */}
       </form>
     </div>
   );
