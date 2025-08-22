@@ -11,7 +11,7 @@ export const ChannelInner = () => {
     <>
       <Window>
         <VirtualizedMessageList
-          additionalVirtuosoProps={{ alignToBottom: true }}
+          additionalVirtuosoProps={{ alignToBottom: true , followOutput: true }}
           hideDeletedMessages
           separateGiphyPreview
         />
