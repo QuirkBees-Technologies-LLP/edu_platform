@@ -53,8 +53,24 @@ const ClientViewLiveSession = ({bannerImage, callId}) => {
         newClient = new StreamVideoClient({ apiKey });
         await newClient.connectUser({ id: userId }, token); // Authenticate FIRST
         const newCall = newClient.call("livestream", callId);
-        await newCall.get(); // Verify call exists
-
+        // await newCall.get(); // Verify call exists
+        await newCall.getOrCreate({
+          data: {
+            settings: {
+              recording: {
+                mode: "available", // recording available
+                audio_only: false,
+                quality: "1080p",
+                layout: {
+                  name: "single_participant",
+                  options: {
+                    "video_border_radius": "0",
+                  },
+                },
+              },
+            },
+          },
+        });
         setClient(newClient);
         setCall(newCall);
       } catch (err) {
