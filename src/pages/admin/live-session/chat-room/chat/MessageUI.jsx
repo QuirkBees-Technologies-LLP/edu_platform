@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Attachment,
   Avatar,
@@ -9,12 +9,12 @@ import {
   useChannelStateContext,
   useChatContext,
   useMessageContext,
-} from 'stream-chat-react';
+} from "stream-chat-react";
 
-import { customReactions, getFormattedTime } from './utils';
-import { useEventContext } from '../context/EventContext';
-import { useOnClickOutside } from '../hooks/useOnClickOutside';
-import { useBoolState } from '../hooks/useBoolState';
+import { customReactions, getFormattedTime } from "./utils";
+import { useEventContext } from "../context/EventContext";
+import { useOnClickOutside } from "../hooks/useOnClickOutside";
+import { useBoolState } from "../hooks/useBoolState";
 
 const MessageOptions = ({
   dropdownOpen,
@@ -28,14 +28,16 @@ const MessageOptions = ({
   const { thread } = useChannelStateContext();
   const { handleOpenThread, isMyMessage, message } = useMessageContext();
 
-  const hideActions = (thread && isMyMessage()) || (!thread && message.show_in_channel);
+  const hideActions =
+    (thread && isMyMessage()) || (!thread && message.show_in_channel);
 
   const { toggle: toggleOpenDropdown, off: closeDropdown } = useBoolState({
     setState: setDropdownOpen,
   });
-  const { toggle: toggleOpenReactionSelector, off: closeReactionSelector } = useBoolState({
-    setState: setShowReactionSelector,
-  });
+  const { toggle: toggleOpenReactionSelector, off: closeReactionSelector } =
+    useBoolState({
+      setState: setShowReactionSelector,
+    });
 
   const [selectorRoot, setSelectorRoot] = useState(null);
   const [reactButton, setReactButton] = useState(null);
@@ -45,7 +47,7 @@ const MessageOptions = ({
   });
 
   return (
-    <div className='message-ui-options'>
+    <div className="message-ui-options">
       {/* <span onClick={toggleOpenReactionSelector} ref={setReactButton}>
         <ReactionSmiley />
       </span> */}
@@ -60,25 +62,31 @@ const MessageOptions = ({
   );
 };
 
-const ReactionSelector = React.forwardRef(({ isTopMessage, closeReactionSelector }, ref) => {
-  const { handleReaction } = useMessageContext();
+const ReactionSelector = React.forwardRef(
+  ({ isTopMessage, closeReactionSelector }, ref) => {
+    const { handleReaction } = useMessageContext();
 
-  return (
-    <div className={`message-ui-reaction-selector ${isTopMessage ? 'top' : ''}`} ref={ref}>
-      {customReactions.map(({ Component, type }) => (
-        <div key={type} onClick={(event) => handleReaction(type, event)}>
-          <Component />
-        </div>
-      ))}
-    </div>
-  );
-});
+    return (
+      <div
+        className={`message-ui-reaction-selector ${isTopMessage ? "top" : ""}`}
+        ref={ref}
+      >
+        {customReactions.map(({ Component, type }) => (
+          <div key={type} onClick={(event) => handleReaction(type, event)}>
+            <Component />
+          </div>
+        ))}
+      </div>
+    );
+  }
+);
 
 const UpvoteButton = () => {
   const { client } = useChatContext();
   const { message } = useMessageContext();
 
-  const userUpVoted = client.userID && message.up_votes?.includes(client.userID);
+  const userUpVoted =
+    client.userID && message.up_votes?.includes(client.userID);
 
   const handleClick = useCallback(
     async (event) => {
@@ -94,7 +102,9 @@ const UpvoteButton = () => {
           up_votes: [client.userID],
         });
       } else if (client.userID && message.up_votes.includes(client.userID)) {
-        updatedUpVotes = message.up_votes.filter((userID) => userID !== client.userID);
+        updatedUpVotes = message.up_votes.filter(
+          (userID) => userID !== client.userID
+        );
       } else {
         updatedUpVotes = [...message.up_votes, client.userID];
       }
@@ -110,17 +120,23 @@ const UpvoteButton = () => {
 
   return (
     <div
-      className={`message-ui-upvote-button ${userUpVoted ? 'up-voted' : ''}`}
+      className={`message-ui-upvote-button ${userUpVoted ? "up-voted" : ""}`}
       onClick={handleClick}
     >
-      <div className='message-ui-upvote-button-text'>{message.up_votes?.length || 0}</div>
+      <div className="message-ui-upvote-button-text">
+        {message.up_votes?.length || 0}
+      </div>
     </div>
   );
 };
 
 const OpenInThreadButton = (props) => (
-  <div className='str-chat__message-replies-count-button-wrapper'>
-    <button className='str-chat__message-replies-count-button' data-testid='replies-count-button' {...props}>
+  <div className="str-chat__message-replies-count-button-wrapper">
+    <button
+      className="str-chat__message-replies-count-button"
+      data-testid="replies-count-button"
+      {...props}
+    >
       Show in thread
     </button>
   </div>
@@ -136,17 +152,21 @@ const OpenThreadButton = () => {
 
   const customOpenThread = useCallback(
     (event) => {
-      return threadParent ? openThread(threadParent, event) : handleOpenThread(event);
+      return threadParent
+        ? openThread(threadParent, event)
+        : handleOpenThread(event);
     },
     [threadParent, openThread, handleOpenThread]
   );
 
   useEffect(() => {
     const getMessage = async () => {
-      if (threadParent || (thread && message.type === 'reply')) return;
+      if (threadParent || (thread && message.type === "reply")) return;
 
       try {
-        const { results } = await channel.search({ id: { $eq: message.parent_id || '' } });
+        const { results } = await channel.search({
+          id: { $eq: message.parent_id || "" },
+        });
         const foundMessage = results[0]?.message;
 
         if (foundMessage) {
@@ -173,7 +193,10 @@ const OpenThreadButton = () => {
   return message.show_in_channel ? (
     <OpenInThreadButton onClick={customOpenThread} />
   ) : (
-    <MessageRepliesCountButton onClick={customOpenThread} reply_count={message.reply_count} />
+    <MessageRepliesCountButton
+      onClick={customOpenThread}
+      reply_count={message.reply_count}
+    />
   );
 };
 
@@ -181,7 +204,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
   const { messages } = useChannelStateContext();
   const { chatType, themeModalOpen } = useEventContext();
   const { message } = useMessageContext();
-  
+  const messageRef = useRef(null);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -203,22 +226,31 @@ export const MessageUI = ({ setMessageActionUser }) => {
     return getFormattedTime(secondsSinceLastMessage);
   }, [message]);
 
-  const isRecentMessage =
-    messages?.[messages.length - 1].id === message.id ||
-    messages?.[messages.length - 2]?.id === message.id;
+  const isRecentMessage = messages?.[messages.length - 1].id === message.id;
+
+  useEffect(() => {
+    if (isRecentMessage && messageRef.current) {
+      messageRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest", // 👈 ye important hai
+        inline: "nearest", // 👈 page scroll nahi hoga, sirf container ke andar hoga
+      });
+    }
+  }, [isRecentMessage,messages.length]);
 
   const isTopMessage = messages?.[0].id === message.id;
 
-  const showTitle = message.user?.title === 'Admin' || message.user?.title === 'Moderator';
+  const showTitle =
+    message.user?.title === "Admin" || message.user?.title === "Moderator";
 
-  const isQA = chatType === 'qa';
+  const isQA = chatType === "qa";
   console.log(message.user?.name, "message.user.name");
-  
 
   if (!message.user) return null;
   return (
     <div
-      className={`message-ui p-4 ${themeModalOpen ? 'theme-open' : ''}`}
+      ref={messageRef}
+      className={`message-ui p-4 ${themeModalOpen ? "theme-open" : ""}`}
       onMouseEnter={() => setShowOptions(true)}
       onMouseLeave={clearModals}
     >
@@ -233,15 +265,25 @@ export const MessageUI = ({ setMessageActionUser }) => {
           showReactionSelector={showReactionSelector}
         />
       )} */}
-      <Avatar className='size-10 avatar_img' image={message.user.image} name={message.user.name || message.user.id} />
-      <div className='message-ui-content'>
-        <div className='message-ui-content-top'>
-          <div className='message-ui-content-top-name'>{message.user.name || message.user.id}</div>
+      <Avatar
+        className="size-10 avatar_img"
+        image={message.user.image}
+        name={message.user.name || message.user.id}
+      />
+      <div className="message-ui-content">
+        <div className="message-ui-content-top">
+          <div className="message-ui-content-top-name">
+            {message.user.name || message.user.id}
+          </div>
           {/* {showTitle && <div className='message-ui-content-top-title'>{message.user.title}</div>} */}
-          <div className='message-ui-content-top-time'>{getTimeSinceMessage()}</div>
+          <div className="message-ui-content-top-time">
+            {getTimeSinceMessage()}
+          </div>
         </div>
-        <div className='message-ui-content-bottom'>{message.text}</div>
-        {!!message.attachments?.length && <Attachment attachments={message.attachments} />}
+        <div className="message-ui-content-bottom">{message.text}</div>
+        {!!message.attachments?.length && (
+          <Attachment attachments={message.attachments} />
+        )}
         <OpenThreadButton />
         <SimpleReactionsList reactionOptions={customReactions} />
       </div>

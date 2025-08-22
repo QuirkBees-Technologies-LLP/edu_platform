@@ -5,13 +5,15 @@ import { useOverrideSubmit } from '../hooks/useOverrideSubmit';
 
 
 export const ChannelInner = () => {
+  
   const overrideSubmitHandler = useOverrideSubmit();
 
   return (
     <>
       <Window>
         <VirtualizedMessageList
-          additionalVirtuosoProps={{ alignToBottom: true }}
+        style={{ flex: 1, overflowY: "auto" }}
+          additionalVirtuosoProps={{ alignToBottom: true, followOutput: true }}
           hideDeletedMessages
           separateGiphyPreview
         />
