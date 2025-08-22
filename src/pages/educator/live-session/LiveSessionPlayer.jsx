@@ -9,8 +9,12 @@ import RecordingControls from './RecordingControls';
 const LiveSessionPlayer = ({ client, callId, token, rtmp_stream_key, rtmp_url, setIsTooltipOpen, isTooltipOpen }) => {
     const [isCallEnd, setIsCallEnd] = useState(null);
     const [isCallStarted, setIsCallStarted] = useState(null);
+    const [isLoadingRecordings, setIsLoadingRecordings] = useState(false);
+    const [streamRecordings, setStreamRecordings] = useState([]);
     const call = useCall();
     const navigate = useNavigate();
+    const { useIsCallRecordingInProgress } = useCallStateHooks();
+    const isRecording = useIsCallRecordingInProgress();
 
     const {
         useIsCallLive,
@@ -22,56 +26,56 @@ const LiveSessionPlayer = ({ client, callId, token, rtmp_stream_key, rtmp_url, s
 
     useEffect(() => {
         if (!call) return;
-      
+
         let subscriptions = [];
-      
+
         const checkCallStatus = async () => {
-          try {
-            await call.get();
-      
-            // 🔥 Call start state
-            const startedSub = call.state.startedAt$.subscribe((startedAt) => {
-              console.log("Stream started at:", startedAt);
-              setIsCallStarted(!!startedAt);
-            });
-      
-            // 👥 Participants
-            const participantsSub = call.state.participants$.subscribe((participants) => {
-              console.log("Participants List:", participants);
-            });
-      
-            // 📞 Call status
-            const callingStateSub = call.state.callingState$.subscribe((state) => {
-              console.log("Call state:", state);
-            });
-      
-            // 🎬 Backstage status
-            const backstageSub = call.state.backstage$.subscribe((isBackstage) => {
-              console.log("🎭 isBackstage:", isBackstage);
-            });
-      
-            // 🎥 RTMP Broadcast Event
-            call.on("rtmp_broadcast_started", (event) => {
-              console.log("🎥 RTMP Stream Started:", event);
-            });
-      
-            // Save all subscriptions for cleanup
-            subscriptions = [startedSub, participantsSub, callingStateSub, backstageSub];
-      
-            // Call End State
-            setIsCallEnd(call.state.endedAt);
-          } catch (error) {
-            console.error("❌ Error checking call status:", error);
-          }
+            try {
+                await call.get();
+
+                // 🔥 Call start state
+                const startedSub = call.state.startedAt$.subscribe((startedAt) => {
+                    console.log("Stream started at:", startedAt);
+                    setIsCallStarted(!!startedAt);
+                });
+
+                // 👥 Participants
+                const participantsSub = call.state.participants$.subscribe((participants) => {
+                    console.log("Participants List:", participants);
+                });
+
+                // 📞 Call status
+                const callingStateSub = call.state.callingState$.subscribe((state) => {
+                    console.log("Call state:", state);
+                });
+
+                // 🎬 Backstage status
+                const backstageSub = call.state.backstage$.subscribe((isBackstage) => {
+                    console.log("🎭 isBackstage:", isBackstage);
+                });
+
+                // 🎥 RTMP Broadcast Event
+                call.on("rtmp_broadcast_started", (event) => {
+                    console.log("🎥 RTMP Stream Started:", event);
+                });
+
+                // Save all subscriptions for cleanup
+                subscriptions = [startedSub, participantsSub, callingStateSub, backstageSub];
+
+                // Call End State
+                setIsCallEnd(call.state.endedAt);
+            } catch (error) {
+                console.error("❌ Error checking call status:", error);
+            }
         };
-      
+
         checkCallStatus();
-      
+
         return () => {
-          subscriptions.forEach((sub) => sub.unsubscribe());
+            subscriptions.forEach((sub) => sub.unsubscribe());
         };
-      }, [call]);
-      
+    }, [call]);
+
 
     const handleCopy = async (text, key) => {
         try {
@@ -92,7 +96,49 @@ const LiveSessionPlayer = ({ client, callId, token, rtmp_stream_key, rtmp_url, s
         }
     };
 
-console.log(call?.state?.backstage, "call1234");
+    console.log(call?.state?.backstage, "call1234");
+
+    useEffect(() => {
+        const handleStart = async () => {
+            try {
+                await call.startRecording();
+                console.log('Recording started');
+            } catch (err) {
+                console.error('Failed to start recording:', err);
+            }
+        };
+        !isRecording && handleStart();
+    }, [call, isRecording]);
+
+    const fetchStreamRecordings = async () => {
+        setIsLoadingRecordings(true);
+        try {
+            const response = await call.queryRecordings();
+            console.log('Recordings response:', response);
+            if (response && response.recordings) {
+                setStreamRecordings(response.recordings);
+            } else {
+                setStreamRecordings([]);
+            }
+        } catch (err) {
+            console.error('Failed to fetch stream recordings:', err);
+            setStreamRecordings([]);
+        } finally {
+            setIsLoadingRecordings(false);
+        }
+    };
+
+    // Fetch recordings when live stream stops
+    useEffect(() => {
+        if (!isLive && call) {
+            // Add a small delay to ensure the server has processed the stop request
+            const timer = setTimeout(() => {
+                fetchStreamRecordings();
+            }, 2000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [isLive, call]);
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "unset" }}>
@@ -169,7 +215,7 @@ console.log(call?.state?.backstage, "call1234");
                             </div>
                         </div>}
                         <div className="flex justify-center gap-3 mt-10">
-                            <RecordingControls call={call}/>
+                            {/* <RecordingControls call={call} /> */}
                             <button type="button" onClick={async () => {
                                 try {
                                     await call.endCall();
@@ -180,8 +226,40 @@ console.log(call?.state?.backstage, "call1234");
                                 }
                             }} className="btn btn-md btn-danger"><PhoneOff size={16}
                                 />End Call</button>
-                            < button type="button" className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`} onClick={() => (isLive ? call.stopLive() : call.goLive())}>{isLive ? <RouteOff size={16} /> : <Route size={16} />}{isLive ? "Stop Live" : "Go Live"}</button>
+                            <button 
+                                type="button" 
+                                className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`} 
+                                onClick={() => {
+                                    if (isLive) {
+                                        call.stopLive();
+                                        // Trigger recording refresh in Recording component
+                                        setTimeout(() => {
+                                            if (window.refreshRecordings) {
+                                                window.refreshRecordings();
+                                            }
+                                        }, 1000);
+                                    } else {
+                                        call.goLive();
+                                    }
+                                }}
+                                disabled={isLoadingRecordings}
+                            >
+                                {isLive ? <RouteOff size={16} /> : <Route size={16} />}
+                                {isLive ? "Stop Live" : "Go Live"}
+                            </button>
                         </div>
+                        
+                        {/* Loading indicator for recordings */}
+                        {isLoadingRecordings && (
+                            <div className="text-center mt-3">
+                                <div className="spinner-border text-primary" role="status">
+                                    <span className="visually-hidden">Loading recordings...</span>
+                                </div>
+                                <p className="mt-2">Fetching recordings...</p>
+                            </div>
+                        )}
+                        
+
                     </>
             }
         </div >
