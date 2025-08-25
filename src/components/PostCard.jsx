@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Edit, Trash2, Play, X, FileText } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { likePost, unlikePost, deleteEducatorPost, setSelectedPost } from '@/store/reducer/postSlice';
+import DeletePostDialog from './DeletePostDialog';
 
-const PostCard = ({ post, onEdit, isOwnPost = false }) => {
+const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     const dispatch = useDispatch();
     const [isLiked, setIsLiked] = useState(post.isLiked || false);
     const [showOptions, setShowOptions] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
     const [isContentExpanded, setIsContentExpanded] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const deleteDialogRef = useRef(null);
 
     const handleLike = () => {
         if (isLiked) {
@@ -24,18 +26,13 @@ const PostCard = ({ post, onEdit, isOwnPost = false }) => {
         setIsContentExpanded(!isContentExpanded);
     };
 
-    const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this post?')) {
-            setIsDeleting(true);
-                try {
-        await dispatch(deleteEducatorPost(post.id)).unwrap();
-    } catch (error) {
-        console.error('Failed to delete educator post:', error);
-    } finally {
-        setIsDeleting(false);
+    const handleDelete = () => {
+        setIsDeleteOpen(true);
         setShowOptions(false);
-    }
-        }
+    };
+
+    const handleDeleteClose = () => {
+        setIsDeleteOpen(false);
     };
 
     const handleEdit = () => {
@@ -197,11 +194,10 @@ const PostCard = ({ post, onEdit, isOwnPost = false }) => {
                                         </button>
                                         <button
                                             onClick={handleDelete}
-                                            disabled={isDeleting}
                                             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                         >
                                             <Trash2 size={14} />
-                                            {isDeleting ? 'Deleting...' : 'Delete'}
+                                            Delete
                                         </button>
                                     </div>
                                 )}
@@ -242,8 +238,8 @@ const PostCard = ({ post, onEdit, isOwnPost = false }) => {
             {/* Post Media */}
             {renderMedia()}
 
-            {/* Post Actions */}
-            <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
+            {/* Post Actions - Commented out */}
+            {/* <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
                 <div className="flex items-center gap-6">
                     <button 
                         onClick={handleLike}
@@ -267,7 +263,16 @@ const PostCard = ({ post, onEdit, isOwnPost = false }) => {
                         <span className="font-termina">{post.shareCount || 0}</span>
                     </button>
                 </div>
-            </div>
+            </div> */}
+
+            {/* Delete Post Dialog */}
+            <DeletePostDialog
+                isDeleteOpen={isDeleteOpen}
+                handleDeleteClose={handleDeleteClose}
+                selectedPost={post}
+                refetch={refetch}
+                ref={deleteDialogRef}
+            />
         </div>
     );
 };

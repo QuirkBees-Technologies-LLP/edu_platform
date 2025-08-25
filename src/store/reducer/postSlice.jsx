@@ -14,6 +14,12 @@ export const fetchEducatorPosts = createAsyncThunk(
       const response = await getEducatorPosts({ page, limit });
       return response.data;
     } catch (error) {
+      // Check for JWT expired error
+      if (error.response?.data?.error === 'jwt expired' || error.response?.data?.message?.includes('jwt expired')) {
+        // Return the full error object so we can handle it in the component
+        return rejectWithValue(error.response.data);
+      }
+      
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch educator posts"
       );
@@ -26,8 +32,17 @@ export const createEducatorPost = createAsyncThunk(
   async (postData, { rejectWithValue }) => {
     try {
       const response = await createEducatorPostAPI(postData);
+      console.log('API Response:', response); // Debug log
       return response.data;
     } catch (error) {
+      console.error('Create post error:', error); // Debug log
+      
+      // Check for JWT expired error
+      if (error.response?.data?.error === 'jwt expired' || error.response?.data?.message?.includes('jwt expired')) {
+        // Return the full error object so we can handle it in the component
+        return rejectWithValue(error.response.data);
+      }
+      
       return rejectWithValue(
         error.response?.data?.message || "Failed to create educator post"
       );
@@ -42,6 +57,12 @@ export const updateEducatorPost = createAsyncThunk(
       const response = await updateEducatorPostAPI(id, postData);
       return response.data;
     } catch (error) {
+      // Check for JWT expired error
+      if (error.response?.data?.error === 'jwt expired' || error.response?.data?.message?.includes('jwt expired')) {
+        // Return the full error object so we can handle it in the component
+        return rejectWithValue(error.response.data);
+      }
+      
       return rejectWithValue(
         error.response?.data?.message || "Failed to update educator post"
       );
@@ -56,6 +77,12 @@ export const deleteEducatorPost = createAsyncThunk(
       await deleteEducatorPostAPI(id);
       return id;
     } catch (error) {
+      // Check for JWT expired error
+      if (error.response?.data?.error === 'jwt expired' || error.response?.data?.message?.includes('jwt expired')) {
+        // Return the full error object so we can handle it in the component
+        return rejectWithValue(error.response.data);
+      }
+      
       return rejectWithValue(
         error.response?.data?.message || "Failed to delete educator post"
       );
@@ -91,6 +118,10 @@ const educatorPostSlice = createSlice({
     clearCreatePostStatus: (state) => {
       state.createPostStatus = "idle";
       state.createPostError = null;
+    },
+    clearEducatorPostsStatus: (state) => {
+      state.status = "idle";
+      state.error = null;
     },
     addLocalPost: (state, action) => {
       state.posts.unshift(action.payload);
@@ -182,39 +213,44 @@ const educatorPostSlice = createSlice({
       })
       .addCase(createEducatorPost.fulfilled, (state, action) => {
         state.createPostStatus = "succeeded";
+        console.log('Create post fulfilled payload:', action.payload); // Debug log
         // Map backend response to frontend structure
+        // Handle both old and new API response formats
+        const postData = action.payload.post || action.payload;
+        console.log('Post data to process:', postData); // Debug log
         const newPost = {
-          id: action.payload._id,
-          content: action.payload.content,
+          id: postData._id || postData.id,
+          content: postData.content,
           author: {
-            id: action.payload.author._id,
-            name: `${action.payload.author.first_name || ''} ${action.payload.author.last_name || ''}`.trim() || 'Anonymous User',
-            first_name: action.payload.author.first_name,
-            last_name: action.payload.author.last_name,
-            role: action.payload.author.role,
-            bio: action.payload.author.bio,
-            image: action.payload.author.image
+            id: postData.author._id || postData.author.id,
+            name: `${postData.author.first_name || ''} ${postData.author.last_name || ''}`.trim() || 'Anonymous User',
+            first_name: postData.author.first_name,
+            last_name: postData.author.last_name,
+            role: postData.author.role,
+            bio: postData.author.bio,
+            image: postData.author.image
           },
-          images: action.payload.images?.map(img => img.url) || [],
-          videos: action.payload.videos?.map(video => video.url) || [],
-          documents: action.payload.documents?.map(doc => doc.url) || [],
-          hashtags: action.payload.hashtags || [],
-          mentions: action.payload.mentions || [],
-          visibility: action.payload.visibility,
-          category: action.payload.category || 'general',
-          likes: action.payload.likes || [],
-          comments: action.payload.comments || [],
-          shares: action.payload.shares || [],
-          isEdited: action.payload.isEdited || false,
-          isPinned: action.payload.isPinned || false,
-          isArchived: action.payload.isArchived || false,
-          createdAt: action.payload.createdAt,
-          updatedAt: action.payload.updatedAt,
-          isLiked: action.payload.isLiked || false,
-          likeCount: action.payload.likeCount || 0,
-          commentCount: action.payload.commentCount || 0,
-          shareCount: action.payload.shareCount || 0
+          images: postData.images?.map(img => img.url || img) || [],
+          videos: postData.videos?.map(video => video.url || video) || [],
+          documents: postData.documents?.map(doc => doc.url || doc) || [],
+          hashtags: postData.hashtags || [],
+          mentions: postData.mentions || [],
+          visibility: postData.visibility,
+          category: postData.category || 'general',
+          likes: postData.likes || [],
+          comments: postData.comments || [],
+          shares: postData.shares || [],
+          isEdited: postData.isEdited || false,
+          isPinned: postData.isPinned || false,
+          isArchived: postData.isArchived || false,
+          createdAt: postData.createdAt,
+          updatedAt: postData.updatedAt,
+          isLiked: postData.isLiked || false,
+          likeCount: postData.likeCount || 0,
+          commentCount: postData.commentCount || 0,
+          shareCount: postData.shareCount || 0
         };
+        console.log('New post created:', newPost); // Debug log
         state.posts.unshift(newPost);
         state.createPostError = null;
       })
@@ -229,37 +265,39 @@ const educatorPostSlice = createSlice({
       .addCase(updateEducatorPost.fulfilled, (state, action) => {
         state.status = "succeeded";
         // Map backend response to frontend structure
+        // Handle both old and new API response formats
+        const postData = action.payload.post || action.payload;
         const updatedPost = {
-          id: action.payload._id,
-          content: action.payload.content,
+          id: postData._id || postData.id,
+          content: postData.content,
           author: {
-            id: action.payload.author._id,
-            name: `${action.payload.author.first_name || ''} ${action.payload.author.last_name || ''}`.trim() || 'Anonymous User',
-            first_name: action.payload.author.first_name,
-            last_name: action.payload.author.last_name,
-            role: action.payload.author.role,
-            bio: action.payload.author.bio,
-            image: action.payload.author.image
+            id: postData.author._id || postData.author.id,
+            name: `${postData.author.first_name || ''} ${postData.author.last_name || ''}`.trim() || 'Anonymous User',
+            first_name: postData.author.first_name,
+            last_name: postData.author.last_name,
+            role: postData.author.role,
+            bio: postData.author.bio,
+            image: postData.author.image
           },
-          images: action.payload.images?.map(img => img.url) || [],
-          videos: action.payload.videos?.map(video => video.url) || [],
-          documents: action.payload.documents?.map(doc => doc.url) || [],
-          hashtags: action.payload.hashtags || [],
-          mentions: action.payload.mentions || [],
-          visibility: action.payload.visibility,
-          category: action.payload.category || 'general',
-          likes: action.payload.likes || [],
-          comments: action.payload.comments || [],
-          shares: action.payload.shares || [],
-          isEdited: action.payload.isEdited || false,
-          isPinned: action.payload.isPinned || false,
-          isArchived: action.payload.isArchived || false,
-          createdAt: action.payload.createdAt,
-          updatedAt: action.payload.updatedAt,
-          isLiked: action.payload.isLiked || false,
-          likeCount: action.payload.likeCount || 0,
-          commentCount: action.payload.commentCount || 0,
-          shareCount: action.payload.shareCount || 0
+          images: postData.images?.map(img => img.url || img) || [],
+          videos: postData.videos?.map(video => video.url || video) || [],
+          documents: postData.documents?.map(doc => doc.url || doc) || [],
+          hashtags: postData.hashtags || [],
+          mentions: postData.mentions || [],
+          visibility: postData.visibility,
+          category: postData.category || 'general',
+          likes: postData.likes || [],
+          comments: postData.comments || [],
+          shares: postData.shares || [],
+          isEdited: postData.isEdited || false,
+          isPinned: postData.isPinned || false,
+          isArchived: postData.isArchived || false,
+          createdAt: postData.createdAt,
+          updatedAt: postData.updatedAt,
+          isLiked: postData.isLiked || false,
+          likeCount: postData.likeCount || 0,
+          commentCount: postData.commentCount || 0,
+          shareCount: postData.shareCount || 0
         };
         const index = state.posts.findIndex(post => post.id === updatedPost.id);
         if (index !== -1) {
@@ -292,6 +330,7 @@ export const {
   setSelectedPost,
   clearSelectedPost,
   clearCreatePostStatus,
+  clearEducatorPostsStatus,
   addLocalPost,
   updateLocalPost,
   removeLocalPost,
