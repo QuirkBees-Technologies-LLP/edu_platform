@@ -64,7 +64,7 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
+      // entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
       description: Yup.string().required("Description is required"),
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
@@ -385,7 +385,7 @@ const CreateTradeIdeas = forwardRef(
                     </label>
                     <input
                       {...formik.getFieldProps("entry")}
-                      type="number"
+                      type="string"
                       placeholder="Enter entry"
                       autoComplete="off"
                       className={`form-control input input-md w-full ${formik.errors.entry && formik.touched.entry
