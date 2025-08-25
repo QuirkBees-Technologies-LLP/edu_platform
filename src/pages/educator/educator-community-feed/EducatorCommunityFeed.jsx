@@ -62,8 +62,8 @@ const EducatorCommunityFeed = () => {
     return (
         <Container>
             <div className="min-h-screen font-sans">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    <div className="md:col-span-1 lg:col-span-1 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    <div className="md:col-span-12 lg:col-span-2 xl:col-span-1 space-y-4">
                         <div className="card rounded-lg shadow-md overflow-hidden">
                             <div className="relative">
                                 <img src="https://i.ibb.co/gLV2tfjF/forex-banner.png" alt="Cover" className="w-full h-20 object-cover" />
@@ -92,7 +92,7 @@ const EducatorCommunityFeed = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="md:col-span-4 lg:col-span-4 space-y-4">
+                    <div className="md:col-span-12 lg:col-span-3 xl:col-span-4 space-y-4 mb-5">
                         <div className="card rounded-lg shadow-md p-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full overflow-hidden">
@@ -112,28 +112,47 @@ const EducatorCommunityFeed = () => {
                                     Start a post
                                 </button>
                             </div>
-                            <div className="mt-4 flex justify-between">
-                                <button 
-                                    onClick={handleCreatePost}
-                                    className="flex items-center gap-2 text-gray-600 hover:text-blue-600 p-2 rounded-md transition-colors"
-                                >
-                                    <Video size={20} className="text-red-500" />
-                                    <span className="text-sm hidden md:inline font-termina">Video</span>
-                                </button>
-                                <button 
-                                    onClick={handleCreatePost}
-                                    className="flex items-center gap-2 text-gray-600 hover:text-blue-600 p-2 rounded-md transition-colors"
-                                >
-                                    <Image size={20} className="text-green-500" />
-                                    <span className="text-sm hidden md:inline font-termina">Photo</span>
-                                </button>
-                                <button 
-                                    onClick={handleCreatePost}
-                                    className="flex items-center gap-2 text-gray-600 hover:text-blue-600 p-2 rounded-md transition-colors"
-                                >
-                                    <FileText size={20} className="text-purple-500" />
-                                    <span className="text-sm hidden md:inline font-termina">Document</span>
-                                </button>
+                            {/* Media Upload Buttons */}
+                            <div className="mt-4">
+                                <div className="flex items-center justify-center gap-6">
+                                    {/* Video Upload Button */}
+                                    <button 
+                                        onClick={handleCreatePost}
+                                        className="group flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-red-50 hover:scale-105"
+                                    >
+                                        <div className="p-2 rounded-full bg-red-100 group-hover:bg-red-200 transition-colors">
+                                            <Video size={20} className="text-red-600" />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700 font-termina">Video</span>
+                                        <span className="text-xs text-gray-500">MP4, MOV</span>
+                                    </button>
+                                    
+                                    {/* Photo Upload Button */}
+                                    <button 
+                                        onClick={handleCreatePost}
+                                        className="group flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-green-50 hover:scale-105"
+                                    >
+                                        <div className="p-2 rounded-full bg-green-100 group-hover:bg-green-200 transition-colors">
+                                            <Image size={20} className="text-green-600" />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 font-termina">Photo</span>
+                                        <span className="text-xs text-gray-500">JPG, PNG</span>
+                                    </button>
+                                    
+                                    {/* Document Upload Button - Commented out */}
+                                    {/* <button 
+                                        onClick={handleCreatePost}
+                                        className="group flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-purple-50 hover:scale-105"
+                                    >
+                                        <div className="p-2 rounded-full bg-purple-100 group-hover:bg-purple-200 transition-colors">
+                                            <FileText size={20} className="text-purple-600" />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700 group-hover:text-purple-700 font-termina">Document</span>
+                                        <span className="text-xs text-gray-500">PDF, DOC</span>
+                                    </button> */}
+                                </div>
+                                
+
                             </div>
                         </div>
                         {/* Posts Feed */}
@@ -165,12 +184,11 @@ const EducatorCommunityFeed = () => {
                                     post={post}
                                     onEdit={handleEditPost}
                                     isOwnPost={true} // TODO: Compare with actual user ID
+                                    refetch={() => dispatch(fetchEducatorPosts({ page: 1, limit: 10 }))}
                                 />
                             ))
                         )}
                     </div>
-
-
                 </div>
 
                 {/* Create/Edit Post Modal */}

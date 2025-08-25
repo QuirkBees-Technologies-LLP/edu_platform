@@ -285,7 +285,7 @@ const IqEducators = () => {
           <img
             src={response?.data?.educator?.image}
             alt="Ralph Danquah"
-            className="w-20 h-20 object-cover rounded-full border-2 border-white"
+            className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
           />
           <div className="text-center  sm:text-start">
             <h3 className="text-white font-semibold text-base sm:text-lg mb-1">

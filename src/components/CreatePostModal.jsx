@@ -1,18 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Image, Video, FileText, Globe, Users, Lock, FolderOpen } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createEducatorPost, updateEducatorPost, clearCreatePostStatus, selectCreateEducatorPostStatus, selectCreateEducatorPostError } from '@/store/reducer/postSlice';
+import { createEducatorPost, updateEducatorPost, clearCreatePostStatus, clearEducatorPostsStatus, selectCreateEducatorPostStatus, selectCreateEducatorPostError, selectEducatorPostsStatus } from '@/store/reducer/postSlice';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert } from '@/components/alert/Alert';
 import { toast } from 'sonner';
 import { useAuthContext } from '@/auth/useAuthContext';
+import { isJwtExpiredError, handleJwtExpired } from '@/utils/authUtils';
 
 const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     const dispatch = useDispatch();
     const { auth } = useAuthContext();
     const createStatus = useSelector(selectCreateEducatorPostStatus);
     const createError = useSelector(selectCreateEducatorPostError);
+    const generalStatus = useSelector(selectEducatorPostsStatus);
     
     const [content, setContent] = useState('');
     const [images, setImages] = useState([]);
@@ -21,31 +23,82 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     const [visibility, setVisibility] = useState('public');
     const [category, setCategory] = useState('general');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [hasInitialized, setHasInitialized] = useState(false);
     
     const imageInputRef = useRef(null);
     const videoInputRef = useRef(null);
     const documentInputRef = useRef(null);
 
+    // Reset all statuses when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            // Clear any previous statuses to prevent immediate closure
+            dispatch(clearCreatePostStatus());
+            dispatch(clearEducatorPostsStatus());
+            setHasInitialized(false);
+        }
+    }, [isOpen, dispatch]);
+
     useEffect(() => {
         if (editingPost) {
+            setIsEditing(true);
             setContent(editingPost.content || '');
+            // For editing, images/videos/documents might be URLs, not File objects
+            // We'll keep them as is for display, but new uploads will be File objects
             setImages(editingPost.images || []);
             setVideos(editingPost.videos || []);
             setDocuments(editingPost.documents || []);
             setVisibility(editingPost.visibility || 'public');
             setCategory(editingPost.category || 'general');
+            
+            // Set initialization flag after a short delay to prevent immediate closure
+            setTimeout(() => {
+                setHasInitialized(true);
+            }, 100);
+        } else {
+            setIsEditing(false);
+            // For new posts, set hasInitialized to true immediately
+            setHasInitialized(true);
         }
     }, [editingPost]);
 
     useEffect(() => {
-        if (createStatus === 'succeeded') {
-            // Success toast is already shown in handleSubmit
+        // Only handle success after component has properly initialized
+        if (!hasInitialized) return;
+        
+        console.log('Status check:', { createStatus, generalStatus, isEditing, hasInitialized });
+        
+        // Handle create post success (only when not editing)
+        if (createStatus === 'succeeded' && !isEditing) {
+            console.log('Create post succeeded, closing modal');
             handleClose();
             dispatch(clearCreatePostStatus());
         }
-    }, [createStatus, dispatch]);
+        
+        // Handle update post success (only when actively editing)
+        if (generalStatus === 'succeeded' && isEditing) {
+            console.log('Update post succeeded, closing modal');
+            handleClose();
+            // Note: We don't clear createPostStatus here as it's for create operations
+        }
+    }, [createStatus, generalStatus, dispatch, isEditing, hasInitialized]);
+
+    // Cleanup object URLs when component unmounts or files change
+    useEffect(() => {
+        return () => {
+            // Clean up any object URLs to prevent memory leaks
+            images.forEach(file => {
+                if (file instanceof File) {
+                    // Note: URL.revokeObjectURL is not needed here as the URL will be garbage collected
+                    // when the component unmounts, but we could add it if needed
+                }
+            });
+        };
+    }, [images, videos, documents]);
 
     const handleClose = () => {
+        console.log('handleClose called');
         setContent('');
         setImages([]);
         setVideos([]);
@@ -53,6 +106,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         setVisibility('public');
         setCategory('general');
         setIsSubmitting(false);
+        setIsEditing(false);
+        setHasInitialized(false);
         // Clear any Redux errors when closing
         dispatch(clearCreatePostStatus());
         onClose();
@@ -62,8 +117,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         const files = Array.from(event.target.files);
         
         files.forEach(file => {
-            if (file.size > 10 * 1024 * 1024) {
-                toast.error(`File ${file.name} must be less than 10MB`);
+            if (file.size > 100 * 1024 * 1024) {
+                toast.error(`File ${file.name} must be less than 100MB`);
                 return;
             }
 
@@ -100,6 +155,18 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         }
     };
 
+    // Helper function to get the display source for files
+    const getFileSource = (file) => {
+        if (file instanceof File) {
+            return URL.createObjectURL(file);
+        } else if (typeof file === 'string') {
+            return file; // URL string
+        } else if (file && file.url) {
+            return file.url; // Object with url property
+        }
+        return ''; // Fallback
+    };
+
     const clearAllFiles = () => {
         setImages([]);
         setVideos([]);
@@ -107,6 +174,30 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         if (imageInputRef.current) imageInputRef.current.value = '';
         if (videoInputRef.current) videoInputRef.current.value = '';
         if (documentInputRef.current) documentInputRef.current.value = '';
+    };
+    
+    // Helper function to detect if files have changed during editing
+    const hasFilesChanged = () => {
+        if (!editingPost) return true; // Always true for new posts
+        
+        // Check if any new files were added
+        const hasNewImages = images.some(file => file instanceof File);
+        const hasNewVideos = videos.some(file => file instanceof File);
+        const hasNewDocuments = documents.some(file => file instanceof File);
+        
+        // Check if any existing files were removed
+        const originalImageCount = editingPost.images?.length || 0;
+        const originalVideoCount = editingPost.videos?.length || 0;
+        const originalDocumentCount = editingPost.documents?.length || 0;
+        
+        const currentImageCount = images.filter(file => !(file instanceof File)).length;
+        const currentVideoCount = videos.filter(file => !(file instanceof File)).length;
+        const currentDocumentCount = documents.filter(file => !(file instanceof File)).length;
+        
+        return hasNewImages || hasNewVideos || hasNewDocuments || 
+               originalImageCount !== currentImageCount ||
+               originalVideoCount !== currentVideoCount ||
+               originalDocumentCount !== currentDocumentCount;
     };
 
     const handleSubmit = async (e) => {
@@ -120,24 +211,67 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         setIsSubmitting(true);
 
         try {
+            // When editing, we need to separate existing files (URLs) from new files (File objects)
+            const processFiles = (files) => {
+                if (!files || files.length === 0) return undefined;
+                
+                return files.map(file => {
+                    if (file instanceof File) {
+                        // New file - keep as is for FormData
+                        return file;
+                    } else if (typeof file === 'string') {
+                        // Existing file URL - convert to object with url property
+                        return { url: file };
+                    } else if (file && file.url) {
+                        // Already in correct format
+                        return file;
+                    } else {
+                        // Fallback - keep as is
+                        return file;
+                    }
+                });
+            };
+
             const postData = {
                 content: content.trim(),
                 visibility,
                 category,
-                images: images.length > 0 ? images : undefined,
-                videos: videos.length > 0 ? videos : undefined,
-                documents: documents.length > 0 ? documents : undefined
             };
+            
+            // Only include files in the API call if they've actually changed
+            if (hasFilesChanged()) {
+                postData.images = processFiles(images);
+                postData.videos = processFiles(videos);
+                postData.documents = processFiles(documents);
+            }
 
             if (editingPost) {
                 await dispatch(updateEducatorPost({ id: editingPost.id, postData })).unwrap();
                 toast.success('Post updated successfully!');
+                // Close modal after a short delay so user can see the success message
+                setTimeout(() => {
+                    handleClose();
+                }, 1000);
             } else {
-                await dispatch(createEducatorPost(postData)).unwrap();
+                const result = await dispatch(createEducatorPost(postData)).unwrap();
+                console.log('Create post result:', result);
                 toast.success('Post created successfully!');
+                // Close modal immediately and also after a delay as backup
+                handleClose();
+                // Additional backup close after delay
+                setTimeout(() => {
+                    onClose();
+                }, 1000);
             }
         } catch (error) {
             console.error('Failed to submit post:', error);
+            
+            // Check for JWT expired error
+            if (isJwtExpiredError(error)) {
+                handleJwtExpired(handleClose, '/auth/login', 1500);
+                return;
+            }
+            
             const errorMessage = error?.message || 'Failed to submit post. Please try again.';
             toast.error(errorMessage);
         } finally {
@@ -267,152 +401,209 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                             </div>
                         </div>
 
-                        {/* Selected Files Preview */}
-                        {(images.length > 0 || videos.length > 0 || documents.length > 0) && (
-                            <div className="space-y-3">
-                                {/* Images */}
-                                {images.length > 0 && (
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Images ({images.length})</h4>
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                            {images.map((image, index) => (
-                                                <div key={index} className="relative group">
-                                                    <img 
-                                                        src={URL.createObjectURL(image)} 
-                                                        alt={`Preview ${index + 1}`} 
-                                                        className="w-full h-24 object-cover rounded-lg"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeFile(image, 'image')}
-                                                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
-                                                        <X size={12} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                                 {/* Selected Files Preview */}
+                         {(images.length > 0 || videos.length > 0 /* || documents.length > 0 */) && (
+                             <div className="space-y-3">
+                                 {/* Images */}
+                                 {images.length > 0 && (
+                                     <div>
+                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Images ({images.length})</h4>
+                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                             {images.map((image, index) => (
+                                                 <div key={index} className="relative group">
+                                                     <img 
+                                                         src={getFileSource(image)} 
+                                                         alt={`Image ${index + 1}`} 
+                                                         className="w-full h-24 object-cover rounded-lg"
+                                                     />
+                                                     {/* Only show remove button when not editing OR when editing but no existing images */}
+                                                     {(!editingPost || (editingPost && !editingPost.images?.length)) && (
+                                                         <button
+                                                             type="button"
+                                                             onClick={() => removeFile(image, 'image')}
+                                                             className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                         >
+                                                             <X size={12} />
+                                                         </button>
+                                                     )}
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )}
 
-                                {/* Videos */}
-                                {videos.length > 0 && (
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Videos ({videos.length})</h4>
-                                        <div className="space-y-2">
-                                            {videos.map((video, index) => (
-                                                <div key={index} className="relative group">
-                                                    <video 
-                                                        src={URL.createObjectURL(video)} 
-                                                        controls 
-                                                        className="w-full max-h-48 object-cover rounded-lg"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeFile(video, 'video')}
-                                                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
-                                                        <X size={12} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                                                 {/* Videos */}
+                                 {videos.length > 0 && (
+                                     <div>
+                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Videos ({videos.length})</h4>
+                                         <div className="space-y-2">
+                                             {videos.map((video, index) => (
+                                                 <div key={index} className="relative group">
+                                                     <video 
+                                                         src={getFileSource(video)} 
+                                                         controls 
+                                                         className="w-full max-h-48 object-cover rounded-lg"
+                                                     />
+                                                     {/* Only show remove button when not editing OR when editing but no existing videos */}
+                                                     {(!editingPost || (editingPost && !editingPost.videos?.length)) && (
+                                                         <button
+                                                             type="button"
+                                                             onClick={() => removeFile(video, 'video')}
+                                                             className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                         >
+                                                             <X size={12} />
+                                                         </button>
+                                                     )}
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )}
 
-                                {/* Documents */}
-                                {documents.length > 0 && (
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Documents ({documents.length})</h4>
-                                        <div className="space-y-2">
-                                            {documents.map((doc, index) => (
-                                                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg group">
-                                                    <div className="flex items-center gap-2">
-                                                        <FileText size={20} className="text-blue-500" />
-                                                        <span className="text-sm text-gray-700">{doc.name}</span>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeFile(doc, 'document')}
-                                                        className="p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                                                 {/* Documents - Button commented out but functionality remains */}
+                                 {/* {documents.length > 0 && (
+                                     <div>
+                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Documents ({documents.length})</h4>
+                                         <div className="space-y-2">
+                                             {documents.map((doc, index) => (
+                                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg group">
+                                                     <div className="flex items-center gap-2">
+                                                         <FileText size={20} className="text-blue-500" />
+                                                         <span className="text-sm text-gray-700">{doc.name}</span>
+                                                     </div>
+                                                     {(!editingPost || (editingPost && !editingPost.documents?.length)) && (
+                                                         <button
+                                                             type="button"
+                                                             onClick={() => removeFile(doc, 'document')}
+                                                             className="p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                         >
+                                                             <X size={16} />
+                                                         </button>
+                                                     )}
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )} */}
 
-                                {/* Clear All Button */}
-                                <button
-                                    type="button"
-                                    onClick={clearAllFiles}
-                                    className="text-sm text-red-600 hover:text-red-800 hover:underline"
-                                >
-                                    Clear all files
-                                </button>
+                                                                 {/* Clear All Button - Only show when not editing OR when editing but no existing files */}
+                                 {(!editingPost || (editingPost && !editingPost.images?.length && !editingPost.videos?.length && !editingPost.documents?.length)) && (
+                                     <button
+                                         type="button"
+                                         onClick={clearAllFiles}
+                                         className="text-sm text-red-600 hover:text-red-800 hover:underline"
+                                     >
+                                         Clear all files
+                                     </button>
+                                 )}
                             </div>
                         )}
 
-                        {/* Media Upload Buttons */}
-                        <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="file"
-                                    ref={imageInputRef}
-                                    onChange={(e) => handleFileChange(e, 'image')}
-                                    className="hidden"
-                                    accept="image/*"
-                                    multiple
-                                />
-                                <button 
-                                    type="button"
-                                    onClick={() => imageInputRef.current?.click()} 
-                                    className="flex items-center gap-2 text-gray-600 hover:text-blue-600 p-2 rounded-md hover:bg-blue-50 transition-colors"
-                                >
-                                    <Image size={20} />
-                                    <span>Images</span>
-                                </button>
-                            </div>
+                                                 {/* Media Upload Buttons */}
+                         <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
+                             {/* File Change Indicator - Removed read-only message */}
+                                                                                          <div className="flex items-center gap-2">
+                                     <input
+                                         type="file"
+                                         ref={imageInputRef}
+                                         onChange={(e) => handleFileChange(e, 'image')}
+                                         className="hidden"
+                                         accept="image/*"
+                                         multiple
+                                         disabled={editingPost && (editingPost.images?.length > 0)}
+                                     />
+                                     <button 
+                                         type="button"
+                                         onClick={() => {
+                                             if (!editingPost || (editingPost && !editingPost.images?.length)) {
+                                                 imageInputRef.current?.click();
+                                             }
+                                         }} 
+                                         disabled={editingPost && (editingPost.images?.length > 0)}
+                                         className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+                                             editingPost && (editingPost.images?.length > 0)
+                                                 ? 'text-gray-400 cursor-not-allowed' 
+                                                 : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                         }`}
+                                     >
+                                         <Image size={20} />
+                                         <span>
+                                             {editingPost 
+                                                 ? 'Images'
+                                                 : 'Images'
+                                             }
+                                         </span>
+                                     </button>
+                                 </div>
                             
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="file"
-                                    ref={videoInputRef}
-                                    onChange={(e) => handleFileChange(e, 'video')}
-                                    className="hidden"
-                                    accept="video/*"
-                                    multiple
-                                />
-                                <button 
-                                    type="button"
-                                    onClick={() => videoInputRef.current?.click()} 
-                                    className="flex items-center gap-2 text-gray-600 hover:text-red-600 p-2 rounded-md hover:bg-red-50 transition-colors"
-                                >
-                                    <Video size={20} />
-                                    <span>Videos</span>
-                                </button>
-                            </div>
+                                                                                          <div className="flex items-center gap-2">
+                                     <input
+                                         type="file"
+                                         ref={videoInputRef}
+                                         onChange={(e) => handleFileChange(e, 'video')}
+                                         className="hidden"
+                                         accept="video/*"
+                                         multiple
+                                         disabled={editingPost && (editingPost.videos?.length > 0)}
+                                     />
+                                     <button 
+                                         type="button"
+                                         onClick={() => {
+                                             if (!editingPost || (editingPost && !editingPost.videos?.length)) {
+                                                 videoInputRef.current?.click();
+                                             }
+                                         }} 
+                                         disabled={editingPost && (editingPost.videos?.length > 0)}
+                                         className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+                                             editingPost && (editingPost.videos?.length > 0)
+                                                 ? 'text-gray-400 cursor-not-allowed' 
+                                                 : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                                         }`}
+                                     >
+                                         <Video size={20} />
+                                         <span>
+                                             {editingPost 
+                                                 ? 'Videos'
+                                                 : 'Videos'
+                                             }
+                                         </span>
+                                     </button>
+                                 </div>
 
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="file"
-                                    ref={documentInputRef}
-                                    onChange={(e) => handleFileChange(e, 'document')}
-                                    className="hidden"
-                                    accept=".pdf,.doc,.docx,.txt"
-                                    multiple
-                                />
-                                <button 
-                                    type="button"
-                                    onClick={() => documentInputRef.current?.click()} 
-                                    className="flex items-center gap-2 text-gray-600 hover:text-green-600 p-2 rounded-md hover:bg-green-50 transition-colors"
-                                >
-                                    <FileText size={20} />
-                                    <span>Documents</span>
-                                </button>
-                            </div>
+                                                                                          {/* Document upload button - Commented out but functionality remains */}
+                                 {/* <div className="flex items-center gap-2">
+                                     <input
+                                         type="file"
+                                         ref={documentInputRef}
+                                         onChange={(e) => handleFileChange(e, 'document')}
+                                         className="hidden"
+                                         accept=".pdf,.doc,.docx,.txt"
+                                         multiple
+                                         disabled={editingPost && (editingPost.documents?.length > 0)}
+                                     />
+                                     <button 
+                                         type="button"
+                                         onClick={() => {
+                                             if (!editingPost || (editingPost && !editingPost.documents?.length)) {
+                                                 documentInputRef.current?.click();
+                                             }
+                                         }} 
+                                         disabled={editingPost && (editingPost.documents?.length > 0)}
+                                         className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+                                             editingPost && (editingPost.documents?.length > 0)
+                                                 ? 'text-gray-400 cursor-not-allowed' 
+                                                 : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
+                                         }`}
+                                     >
+                                         <FileText size={20} />
+                                         <span>
+                                             {editingPost 
+                                                 ? 'Documents'
+                                                 : 'Documents'
+                                             }
+                                         </span>
+                                     </button>
+                                 </div> */}
                         </div>
                     </div>
 
@@ -426,19 +617,19 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                             >
                                 Cancel
                             </button>
-                            <button 
-                                type="submit"
-                                disabled={isSubmitting || (!content.trim() && images.length === 0 && videos.length === 0 && documents.length === 0)}
-                                className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isSubmitting ? (
-                                    'Posting...'
-                                ) : editingPost ? (
-                                    'Update Post'
-                                ) : (
-                                    'Post'
-                                )}
-                            </button>
+                                                         <button 
+                                 type="submit"
+                                 disabled={isSubmitting || (!content.trim() && images.length === 0 && videos.length === 0 && documents.length === 0)}
+                                 className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                             >
+                                 {isSubmitting ? (
+                                     'Posting...'
+                                 ) : editingPost ? (
+                                     'Update Content'
+                                 ) : (
+                                     'Post'
+                                 )}
+                             </button>
                         </div>
                     </div>
                 </form>
