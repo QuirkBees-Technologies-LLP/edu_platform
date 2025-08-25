@@ -1,3 +1,4 @@
+import ShowMoreLess from "../../../components/ui/showmoreless";
 
 export default function AdminTradeSlider({ sliderImages,  setIsLightBoxOpen , selectedIdea }) {
     const settings = {
@@ -21,7 +22,7 @@ export default function AdminTradeSlider({ sliderImages,  setIsLightBoxOpen , se
               <img className="w-full h-96 object-cover rounded-lg" src={image} alt={`Trade image ${index}`} />
             </div>
           ))}
-          <div className="flex flex-col gap-2 py-4.5">
+          {/* <div className="flex flex-col gap-2 py-4.5">
               <div className="flex gap-5 sm:gap-10 flex-wrap">
                   <div className='flex items-center gap-3'>
                       <div className="text-xs text-gray-800 uppercase">Entry</div>
@@ -43,6 +44,48 @@ export default function AdminTradeSlider({ sliderImages,  setIsLightBoxOpen , se
                       ))}
                   </div>
               </div>
+          </div> */}
+          <div className="mt-6 space-y-4">
+            {/* <div className="text-2sm text-gray-800 uppercase mb-3">Exits</div>
+                  <div className="flex items-center flex-wrap gap-2">
+                      {selectedIdea?.exits?.length > 0 && selectedIdea?.exits?.map((exit, index) => (
+                          <div key={index} className="flex items-center gap-2 mt-1">
+                              <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">{index + 1}</div>
+                              <div className="text-sm text-gray-900 font-semibold">{exit}</div>
+                          </div>
+                      ))}
+
+                  </div> */}
+
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 font-normal text-sm">Entry</span>
+              <span className="font-medium text-gray-800">
+                {selectedIdea?.entry}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 font-normal text-sm">
+                Stop Loss
+              </span>
+              <span className="font-medium text-gray-800">
+                {selectedIdea?.invalidation}
+              </span>
+            </div>
+
+            {[0, 1, 2].map((idx) => (
+              <div key={idx} className="flex justify-between text-sm">
+                <span className="text-gray-600 font-normal text-sm">
+                  {`Exit ${idx + 1}`}
+                </span>
+                <span className="font-medium text-gray-800">
+                  {selectedIdea?.exits?.[idx] ?? "N/A"}
+                </span>
+              </div>
+            ))}
+            <ShowMoreLess
+              html={selectedIdea?.description || "No description"}
+              limit={95}
+            />
           </div>
         </div>
 
