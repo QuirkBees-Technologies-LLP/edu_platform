@@ -14,6 +14,7 @@ import {
   Tv,
   ChartLine,
   ChartNoAxesCombined,
+  MessageCircleMore,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1384,6 +1385,11 @@ export const sideMenus = {
       externalLink: true,
       newTab: true
     },
+    {
+      title: "IQ Social",
+      icon: <MessageCircleMore />,
+      path: '/admin/iq-social',
+    },
   ],
   educator: [
     {
@@ -1427,6 +1433,11 @@ export const sideMenus = {
       path: 'https://www.iqcharts.com/',
       externalLink: true,
       newTab: true
+    },
+    {
+      title: "IQ Social",
+      icon: <MessageCircleMore />,
+      path: '/educator/iq-social',
     },
     // {
     //   title: 'Video Library',
@@ -1526,6 +1537,11 @@ export const sideMenus = {
       externalLink: true,
       newTab: true
     },
+    // {
+    //   title: "IQ Social",
+    //   icon: <MessageCircleMore />,
+    //   path: '/iq-social',
+    // },
     // {
     //   title: 'Forex Academy',
     //   icon: <Dot />,
