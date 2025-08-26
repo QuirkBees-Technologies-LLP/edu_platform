@@ -169,7 +169,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                             <h3 className="font-semibold text-gray-800 font-termina">
                                 {post.author?.name || "Anonymous User"}
                             </h3>
-                            <p className="text-gray-500 text-xs font-termina">
+                            <p className="text-gray-500 text-xs font-termina capitalize">
                                 {post.author?.role && `${post.author.role} • `}
                                 {formatDate(post.createdAt)}
                             </p>
@@ -210,7 +210,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
             {/* Post Content */}
             {post.content && (
                 <div className="mb-3">
-                    <p className="text-sm text-gray-700 leading-relaxed font-termina">
+                    <p className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words">
                         {post.content.length > 200 && !isContentExpanded 
                             ? (
                                 <>

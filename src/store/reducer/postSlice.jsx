@@ -9,17 +9,35 @@ import {
 // Async thunks for API operations
 export const fetchEducatorPosts = createAsyncThunk(
   "educatorPosts/fetchAll",
-  async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10, append = false }, { rejectWithValue }) => {
     try {
       const response = await getEducatorPosts({ page, limit });
-      return response.data;
+      return { ...response.data, append };
     } catch (error) {
+      console.error('Fetch posts error:', error); // Debug log
+      
       // Check for JWT expired error
       if (error.response?.data?.error === 'jwt expired' || error.response?.data?.message?.includes('jwt expired')) {
         // Return the full error object so we can handle it in the component
         return rejectWithValue(error.response.data);
       }
       
+      // Handle API error responses with custom structure
+      if (error.response?.data) {
+        const apiError = error.response.data;
+        
+        // If the API returns a structured error response
+        if (apiError.message && typeof apiError.message === 'string') {
+          return rejectWithValue(apiError.message);
+        }
+        
+        // If the API returns a simple message string
+        if (typeof apiError === 'string') {
+          return rejectWithValue(apiError);
+        }
+      }
+      
+      // Fallback error message
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch educator posts"
       );
@@ -43,6 +61,22 @@ export const createEducatorPost = createAsyncThunk(
         return rejectWithValue(error.response.data);
       }
       
+      // Handle API error responses with custom structure
+      if (error.response?.data) {
+        const apiError = error.response.data;
+        
+        // If the API returns a structured error response
+        if (apiError.message && typeof apiError.message === 'string') {
+          return rejectWithValue(apiError.message);
+        }
+        
+        // If the API returns a simple message string
+        if (typeof apiError === 'string') {
+          return rejectWithValue(apiError);
+        }
+      }
+      
+      // Fallback error message
       return rejectWithValue(
         error.response?.data?.message || "Failed to create educator post"
       );
@@ -57,12 +91,30 @@ export const updateEducatorPost = createAsyncThunk(
       const response = await updateEducatorPostAPI(id, postData);
       return response.data;
     } catch (error) {
+      console.error('Update post error:', error); // Debug log
+      
       // Check for JWT expired error
       if (error.response?.data?.error === 'jwt expired' || error.response?.data?.message?.includes('jwt expired')) {
         // Return the full error object so we can handle it in the component
         return rejectWithValue(error.response.data);
       }
       
+      // Handle API error responses with custom structure
+      if (error.response?.data) {
+        const apiError = error.response.data;
+        
+        // If the API returns a structured error response
+        if (apiError.message && typeof apiError.message === 'string') {
+          return rejectWithValue(apiError.message);
+        }
+        
+        // If the API returns a simple message string
+        if (typeof apiError === 'string') {
+          return rejectWithValue(apiError);
+        }
+      }
+      
+      // Fallback error message
       return rejectWithValue(
         error.response?.data?.message || "Failed to update educator post"
       );
@@ -77,12 +129,30 @@ export const deleteEducatorPost = createAsyncThunk(
       await deleteEducatorPostAPI(id);
       return id;
     } catch (error) {
+      console.error('Delete post error:', error); // Debug log
+      
       // Check for JWT expired error
       if (error.response?.data?.error === 'jwt expired' || error.response?.data?.message?.includes('jwt expired')) {
         // Return the full error object so we can handle it in the component
         return rejectWithValue(error.response.data);
       }
       
+      // Handle API error responses with custom structure
+      if (error.response?.data) {
+        const apiError = error.response.data;
+        
+        // If the API returns a structured error response
+        if (apiError.message && typeof apiError.message === 'string') {
+          return rejectWithValue(apiError.message);
+        }
+        
+        // If the API returns a simple message string
+        if (typeof apiError === 'string') {
+          return rejectWithValue(apiError);
+        }
+      }
+      
+      // Fallback error message
       return rejectWithValue(
         error.response?.data?.message || "Failed to delete educator post"
       );
@@ -103,6 +173,8 @@ const initialState = {
   },
   createPostStatus: "idle",
   createPostError: null,
+  hasMorePosts: true,
+  loadingMore: false,
 };
 
 const educatorPostSlice = createSlice({
@@ -153,13 +225,19 @@ const educatorPostSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Fetch educator posts
-      .addCase(fetchEducatorPosts.pending, (state) => {
-        state.status = "loading";
+      .addCase(fetchEducatorPosts.pending, (state, action) => {
+        const isAppend = action.meta?.arg?.append;
+        if (isAppend) {
+          state.loadingMore = true;
+        } else {
+          state.status = "loading";
+        }
       })
       .addCase(fetchEducatorPosts.fulfilled, (state, action) => {
         state.status = "succeeded";
+        state.loadingMore = false;
         // Map backend response to frontend structure
-        const mappedPosts = action.payload.posts.map(post => ({
+        const postsToAdd = action.payload.posts.map(post => ({
           id: post._id,
           content: post.content,
           author: {
@@ -191,7 +269,11 @@ const educatorPostSlice = createSlice({
           commentCount: post.commentCount || 0,
           shareCount: post.shareCount || 0
         }));
-        state.posts = mappedPosts;
+        if (action.payload.append) {
+          state.posts = [...state.posts, ...postsToAdd];
+        } else {
+          state.posts = postsToAdd;
+        }
         
         // Map pagination structure
         state.pagination = {
@@ -200,9 +282,11 @@ const educatorPostSlice = createSlice({
           totalPages: action.payload.pagination.totalPages,
           totalRecords: action.payload.pagination.totalPosts
         };
+        state.hasMorePosts = state.pagination.currentPage < state.pagination.totalPages;
         state.error = null;
       })
       .addCase(fetchEducatorPosts.rejected, (state, action) => {
+        state.loadingMore = false;
         state.status = "failed";
         state.error = action.payload;
       })
@@ -348,5 +432,7 @@ export const selectEducatorPostsError = (state) => state.educatorPosts.error;
 export const selectCreateEducatorPostStatus = (state) => state.educatorPosts.createPostStatus;
 export const selectCreateEducatorPostError = (state) => state.educatorPosts.createPostError;
 export const selectEducatorPostsPagination = (state) => state.educatorPosts.pagination;
+export const selectHasMoreEducatorPosts = (state) => state.educatorPosts.hasMorePosts;
+export const selectIsLoadingMoreEducatorPosts = (state) => state.educatorPosts.loadingMore;
 
 export default educatorPostSlice.reducer;

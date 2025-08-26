@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Image, Video, FileText, Globe, Users, Lock, FolderOpen } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createEducatorPost, updateEducatorPost, clearCreatePostStatus, clearEducatorPostsStatus, selectCreateEducatorPostStatus, selectCreateEducatorPostError, selectEducatorPostsStatus } from '@/store/reducer/postSlice';
+import { createEducatorPost, updateEducatorPost, clearCreatePostStatus, clearEducatorPostsStatus, selectCreateEducatorPostStatus, selectCreateEducatorPostError, selectEducatorPostsStatus, selectEducatorPostsError } from '@/store/reducer/postSlice';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert } from '@/components/alert/Alert';
@@ -15,6 +15,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     const createStatus = useSelector(selectCreateEducatorPostStatus);
     const createError = useSelector(selectCreateEducatorPostError);
     const generalStatus = useSelector(selectEducatorPostsStatus);
+    const generalError = useSelector(selectEducatorPostsError);
     
     const [content, setContent] = useState('');
     const [images, setImages] = useState([]);
@@ -80,7 +81,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         if (generalStatus === 'succeeded' && isEditing) {
             console.log('Update post succeeded, closing modal');
             handleClose();
-            // Note: We don't clear createPostStatus here as it's for create operations
+            // Clear the general error state when update succeeds
+            dispatch(clearEducatorPostsStatus());
         }
     }, [createStatus, generalStatus, dispatch, isEditing, hasInitialized]);
 
@@ -110,6 +112,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         setHasInitialized(false);
         // Clear any Redux errors when closing
         dispatch(clearCreatePostStatus());
+        dispatch(clearEducatorPostsStatus());
         onClose();
     };
 
@@ -272,8 +275,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                 return;
             }
             
-            const errorMessage = error?.message || 'Failed to submit post. Please try again.';
-            toast.error(errorMessage);
+            // Don't show toast here - let the Redux error state handle it
+            // The error will be displayed in the Alert component above the form
         } finally {
             setIsSubmitting(false);
         }
@@ -330,6 +333,13 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                     <div className="px-5">
                         <Alert variant="danger" icon="shield-cross">
                             {createError}
+                        </Alert>
+                    </div>
+                )}
+                {generalError && (
+                    <div className="px-5">
+                        <Alert variant="danger" icon="shield-cross">
+                            {generalError}
                         </Alert>
                     </div>
                 )}

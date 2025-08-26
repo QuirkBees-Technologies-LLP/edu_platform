@@ -132,6 +132,8 @@ import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
 import PersonalIqInsight from "../pages/student/personal-iq-insight/PersonalIqInsight";
 import IqVault from "../pages/student/iq-vault/IqVault";
 import IqInsight from "../pages/student/iq-insight/IqInsight";
+import EducatorCommunityFeed from "../pages/educator/educator-community-feed/EducatorCommunityFeed";
+import AdminCommunityFeed from "../pages/admin/admin-community-feed/AdminCommunityFeed";
 
 const routes = {
   student: [
@@ -186,6 +188,10 @@ const routes = {
       path: "/educator/stream-recording/list",
       element: <EducatorRecordingSession />,
     },
+    {
+      path: "/educator/iq-social",
+      element: <EducatorCommunityFeed />,
+    },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
@@ -202,6 +208,7 @@ const routes = {
     { path: "/admin/stream-recording", element: <AdminRecording /> },
     { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
     { path: "admin/general-setting", element: <GeneralSetting /> },
+    { path: "/admin/iq-social", element: <AdminCommunityFeed /> },
   ],
 };
 

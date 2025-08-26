@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { Container } from '@/components/container';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchEducatorPosts, selectAllEducatorPosts, selectEducatorPostsStatus } from '@/store/reducer/postSlice';
+import { fetchEducatorPosts, selectAllEducatorPosts, selectEducatorPostsStatus, selectEducatorPostsPagination, selectHasMoreEducatorPosts } from '@/store/reducer/postSlice';
 import PostCard from '@/components/PostCard';
 import CreatePostModal from '@/components/CreatePostModal';
 import { useAuthContext } from '@/auth/useAuthContext';
@@ -18,23 +19,47 @@ import {
     Video,
     Image,
     FileText,
-  } from 'lucide-react';
+} from 'lucide-react';
 
 const EducatorCommunityFeed = () => {
     const dispatch = useDispatch();
     const { auth } = useAuthContext();
     const posts = useSelector(selectAllEducatorPosts);
     const postsStatus = useSelector(selectEducatorPostsStatus);
+    const pagination = useSelector(selectEducatorPostsPagination);
+    const hasMore = useSelector(selectHasMoreEducatorPosts);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPost, setEditingPost] = useState(null);
     const [isPostExpanded, setIsPostExpanded] = useState(false);
     const fileInputRef = useRef(null);
 
-    // Fetch posts on component mount
+    // Fetch posts on component mount (StrictMode-safe, run once)
+    const didInitRef = useRef(false);
     useEffect(() => {
-        dispatch(fetchEducatorPosts({ page: 1, limit: 10 }));
-    }, [dispatch]);
+        if (didInitRef.current) return;
+        didInitRef.current = true;
+        if (posts.length === 0) {
+            dispatch(fetchEducatorPosts({ page: 1, limit: 10 }));
+        }
+    }, [dispatch, posts.length]);
+
+    // Loader for react-infinite-scroll-component
+    const loader = (
+        <div className="card rounded-lg shadow-md p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-2 text-gray-600 font-termina">Loading more...</p>
+        </div>
+    );
+
+    const loadMore = () => {
+        const nextPage = (pagination.currentPage || 1) + 1;
+        if (hasMore) {
+            setTimeout(() => {
+                dispatch(fetchEducatorPosts({ page: nextPage, limit: pagination.limit || 10, append: true }));
+            }, 1500);
+        }
+    };
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -58,7 +83,7 @@ const EducatorCommunityFeed = () => {
         setIsModalOpen(false);
         setEditingPost(null);
     };
-    
+
     return (
         <Container>
             <div className="min-h-screen font-sans">
@@ -70,9 +95,9 @@ const EducatorCommunityFeed = () => {
                                 <div className='relative'>
                                     <div className="absolute left-1/2 -translate-x-1/2 top-[-40px] h-[80px] w-[80px]">
                                         <div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden">
-                                            <img 
-                                                src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'User')}&background=random&color=fff&size=80`} 
-                                                alt="Profile" 
+                                            <img
+                                                src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'User')}&background=random&color=fff&size=80`}
+                                                alt="Profile"
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
                                                     e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'User')}&background=random&color=fff&size=80`;
@@ -84,8 +109,8 @@ const EducatorCommunityFeed = () => {
                             </div>
                             <div className="text-center pt-8 pb-4 border-b border-gray-200 mt-3">
                                 <h2 className="text-lg font-semibold font-termina">
-                                    {auth?.user?.first_name && auth?.user?.last_name 
-                                        ? `${auth.user.first_name} ${auth.user.last_name}` 
+                                    {auth?.user?.first_name && auth?.user?.last_name
+                                        ? `${auth.user.first_name} ${auth.user.last_name}`
                                         : auth?.user?.name || 'User'
                                     }
                                 </h2>
@@ -96,9 +121,9 @@ const EducatorCommunityFeed = () => {
                         <div className="card rounded-lg shadow-md p-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full overflow-hidden">
-                                    <img 
-                                        src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'User')}&background=random&color=fff&size=48`} 
-                                        alt="User" 
+                                    <img
+                                        src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'User')}&background=random&color=fff&size=48`}
+                                        alt="User"
                                         className="w-full h-full object-cover"
                                         onError={(e) => {
                                             e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'User')}&background=random&color=fff&size=48`;
@@ -116,7 +141,7 @@ const EducatorCommunityFeed = () => {
                             <div className="mt-4">
                                 <div className="flex items-center justify-center gap-6">
                                     {/* Video Upload Button */}
-                                    <button 
+                                    <button
                                         onClick={handleCreatePost}
                                         className="group flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-red-50 hover:scale-105"
                                     >
@@ -126,9 +151,9 @@ const EducatorCommunityFeed = () => {
                                         <span className="text-sm font-medium text-gray-700 group-hover:text-red-700 font-termina">Video</span>
                                         <span className="text-xs text-gray-500">MP4, MOV</span>
                                     </button>
-                                    
+
                                     {/* Photo Upload Button */}
-                                    <button 
+                                    <button
                                         onClick={handleCreatePost}
                                         className="group flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-green-50 hover:scale-105"
                                     >
@@ -138,7 +163,7 @@ const EducatorCommunityFeed = () => {
                                         <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 font-termina">Photo</span>
                                         <span className="text-xs text-gray-500">JPG, PNG</span>
                                     </button>
-                                    
+
                                     {/* Document Upload Button - Commented out */}
                                     {/* <button 
                                         onClick={handleCreatePost}
@@ -151,7 +176,7 @@ const EducatorCommunityFeed = () => {
                                         <span className="text-xs text-gray-500">PDF, DOC</span>
                                     </button> */}
                                 </div>
-                                
+
 
                             </div>
                         </div>
@@ -178,15 +203,25 @@ const EducatorCommunityFeed = () => {
                                 </div>
                             </div>
                         ) : (
-                            posts.map((post) => (
-                                <PostCard
-                                    key={post.id}
-                                    post={post}
-                                    onEdit={handleEditPost}
-                                    isOwnPost={true} // TODO: Compare with actual user ID
-                                    refetch={() => dispatch(fetchEducatorPosts({ page: 1, limit: 10 }))}
-                                />
-                            ))
+                            <InfiniteScroll
+                                dataLength={posts.length}
+                                next={loadMore}
+                                hasMore={hasMore}
+                                loader={loader}
+                                endMessage={posts.length > 0 ? (
+                                    <div className="text-center text-sm text-gray-400 py-4 font-termina">No more posts</div>
+                                ) : null}
+                            >
+                                {posts.map((post) => (
+                                    <PostCard
+                                        key={post.id}
+                                        post={post}
+                                        onEdit={handleEditPost}
+                                        isOwnPost={true} // TODO: Compare with actual user ID
+                                        refetch={() => dispatch(fetchEducatorPosts({ page: 1, limit: 10 }))}
+                                    />
+                                ))}
+                            </InfiniteScroll>
                         )}
                     </div>
                 </div>
