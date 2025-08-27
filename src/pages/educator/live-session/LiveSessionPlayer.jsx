@@ -2,6 +2,8 @@ import { LivestreamPlayer, ParticipantView, useCall, useCallStateHooks } from '@
 import { Copy, PhoneOff, Podcast, Radio, Route, RouteOff } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { DefaultTooltip } from '@/components';
+import { toast } from 'sonner';
+import { useEndCallMutation } from '../../../store/api/educator/educatorLiveStreamApiSlice';
 import { useNavigate } from 'react-router';
 import RecordingControls from './RecordingControls';
 
@@ -15,6 +17,7 @@ const LiveSessionPlayer = ({ client, callId, token, rtmp_stream_key, rtmp_url, s
     const navigate = useNavigate();
     const { useIsCallRecordingInProgress } = useCallStateHooks();
     const isRecording = useIsCallRecordingInProgress();
+    const [endCall, { isLoading: isEnding }] = useEndCallMutation();
 
     const {
         useIsCallLive,
@@ -218,13 +221,19 @@ const LiveSessionPlayer = ({ client, callId, token, rtmp_stream_key, rtmp_url, s
                             {/* <RecordingControls call={call} /> */}
                             <button type="button" onClick={async () => {
                                 try {
-                                    await call.endCall();
+                                    if (!callId) {
+                                        toast.error('Missing callId');
+                                        return;
+                                    }
+                                    await endCall({ callId }).unwrap();
                                     setIsCallEnd(true);
-                                    console.log("Stream has ended completely!");
+                                    toast.success('Call ended successfully');
                                 } catch (error) {
-                                    console.error("Failed to end stream", error);
+                                    console.error('Failed to end stream', error);
+                                    const message = error?.data?.message || 'Failed to end call';
+                                    toast.error(message);
                                 }
-                            }} className="btn btn-md btn-danger"><PhoneOff size={16}
+                            }} disabled={isEnding} className="btn btn-md btn-danger"><PhoneOff size={16}
                                 />End Call</button>
                             <button 
                                 type="button" 

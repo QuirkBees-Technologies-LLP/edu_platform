@@ -14,6 +14,9 @@ import { formatSecondsToHMS } from '../../../lib/utils';
 import CreateEducatorStreamSchedule from './CreateEducatorStreamSchedule';
 import { useLazyGetEducatorStreamScheduleQuery } from '../../../store/api/educator/educatorStreamScheduleApiSlice';
 import DeleteEducatorStreamSchedule from './DeleteEducatorStreamSchedule';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useEndCallMutation } from '../../../store/api/educator/educatorLiveStreamApiSlice';
 
 const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -21,6 +24,15 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [getEducatorStreamSchedule, { data, isLoading }] = useLazyGetEducatorStreamScheduleQuery();
+  const [endCall, { isLoading: isEnding }] = useEndCallMutation();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
+
+
+  const reloadTable = () => {
+    setTableKey(prevKey => prevKey + 1); // ✅ Change key to force re-fetch
+  };
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -33,6 +45,29 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
 
   const handleDeleteClose = () => {
     setIsDeleteOpen(false);
+  }
+
+  const handleEndCall = async (rowData) => {
+    try {
+      const callId = rowData?.callId;
+      if (!callId) {
+        toast.error('Missing callId');
+        return;
+      }
+      await endCall({ callId }).unwrap();
+      setSelectedRow({});
+      reloadTable && reloadTable();
+      toast.success('Call ended successfully');
+    } catch (error) {
+      console.error('Failed to end call', error);
+      const message = error?.data?.message || 'Failed to end call';
+      toast.error(message);
+    }
+  }
+
+  const openConfirmEnd = (row) => {
+    setSelectedRow(row);
+    setIsConfirmOpen(true);
   }
 
   const {
@@ -148,6 +183,37 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
         <span className="leading-none text-gray-800 font-normal">
           {format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")}
         </span>
+      </div>,
+      meta: {
+        headerClassName: 'min-w-[200px]'
+      }
+    },
+    {
+      accessorFn: row => row.status,
+      id: 'status',
+      header: ({
+        column
+      }) => <DataGridColumnHeader title='Status' column={column} />,
+      enableSorting: true,
+      cell: info => <div className="flex items-center gap-2.5">
+        <span
+          className={`badge capitalize badge-outline ${info.row.original.status === "active"
+            ? "badge-primary"
+            : info.row.original.status === "pending"
+              ? "badge-warning"
+              : "badge-danger"
+            }`}
+        >
+          {info.row.original.status}
+        </span>
+        {info.row.original.status === "active" && (
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={() => openConfirmEnd(info.row.original)}
+          >
+            End Call
+          </button>
+        )}
       </div>,
       meta: {
         headerClassName: 'min-w-[200px]'
@@ -292,13 +358,6 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
     }
   };
 
-  const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
-
-
-  const reloadTable = () => {
-    setTableKey(prevKey => prevKey + 1); // ✅ Change key to force re-fetch
-  };
-
   return (
     <div className='container-fluid'>
       <Toolbar>
@@ -327,6 +386,30 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
 
       <CreateEducatorStreamSchedule setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
       {isDeleteOpen && <DeleteEducatorStreamSchedule refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
+      <Dialog open={isConfirmOpen} onOpenChange={() => setIsConfirmOpen(false)}>
+        <DialogContent className="p-5 max-w-[500px]">
+          <VisuallyHidden>
+            <DialogTitle>Hidden Title</DialogTitle>
+          </VisuallyHidden>
+          <div className="text-center">
+            <i className="ki-filled text-3xl ki-alert text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+          </div>
+          <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
+            Are you sure you want to end this livestream for everyone?
+          </p>
+          <div className="flex justify-center items-center space-x-4">
+            <button className='btn btn-light' onClick={() => setIsConfirmOpen(false)} disabled={isEnding}>Cancel</button>
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={async () => { await handleEndCall(selectedRow); setIsConfirmOpen(false); }}
+              disabled={isEnding}
+            >
+              {isEnding ? "Ending..." : "Yes, End Call"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
