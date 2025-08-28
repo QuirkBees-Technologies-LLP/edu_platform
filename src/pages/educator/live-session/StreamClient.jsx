@@ -55,9 +55,9 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
         <div className='container-fluid'>
             <div className='grid grid-cols-12 gap-y-8 md:gap-x-8 educator_chatbox_chat mb-8'>
                 <div className={`${isFullScreen ? isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10" : isMdUp ? "col-span-12 md:col-span-7 xl:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}>
-                    <div className="grid gap-5">
-                        <div className="flex flex-col rounded-lg items-center justify-start text-white ">
-                            <div className="live-stream-videos flex flex-col justify-center gap-12 bg-black rounded-xl text-center pb-6 w-full">
+                    <div className="grid gap-5 h-full">
+                        <div className="flex flex-col rounded-lg items-center justify-start text-white h-full">
+                            <div className="live-stream-videos flex flex-col justify-center gap-12 bg-black rounded-xl text-center pb-6 w-full h-full">
                                 <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
                                     {client && call && (
                                         <StreamVideo client={client}>
