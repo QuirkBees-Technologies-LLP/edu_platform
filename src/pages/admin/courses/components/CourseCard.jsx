@@ -45,8 +45,7 @@ const CourseCard = (props) => {
 
   return (
     <motion.div
-      className={`relative group overflow-hidden rounded-2xl h-full shadow-lg ${large ? "aspect-square" : "aspect-square"
-        }`}
+      className={`relative group overflow-hidden rounded-2xl h-[400px] shadow-lg `}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}

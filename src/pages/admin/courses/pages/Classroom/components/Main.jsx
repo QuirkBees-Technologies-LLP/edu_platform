@@ -114,12 +114,12 @@ const Main = ({ onSelectCourse }) => {
   // Section component for consistent styling
   const Section = ({ title, icon, children, viewAllLink }) => (
     <div className="mb-10">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap gap-3 justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-primary-light text-primary rounded-lg">
             {icon}
           </div>
-          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+          <h2 className="xs:text-sm sm:text-xl font-bold text-gray-800">{title}</h2>
         </div>
         {viewAllLink && (
           <a
@@ -195,7 +195,7 @@ const Main = ({ onSelectCourse }) => {
   console.log(categories, "categories");
 
   return (
-    <div className="py-6">
+    <div className="">
       {/* Hero Banner */}
       <div className="relative bg-gray-200 rounded-2xl p-8 mb-10 overflow-hidden">
         <div className="absolute right-0 top-0 w-64 h-64 bg-primary rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
@@ -280,7 +280,7 @@ const Main = ({ onSelectCourse }) => {
         icon={<BookOpen className="w-5 h-5" />}
       >
         {filteredCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
               <CourseCard
                 key={course._id}

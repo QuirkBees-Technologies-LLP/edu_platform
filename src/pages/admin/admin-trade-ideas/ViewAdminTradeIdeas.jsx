@@ -15,7 +15,7 @@ const ViewAdminTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selectedI
                   <div className="grid gap-5 px-0">
                       <div className="grid grid-cols-12 gap-4">
                           <div className="col-span-12">
-                              <div className="flex items-center px-4 pb-3 pt-3">
+                              <div className="flex items-center pb-3">
                                   <div className="mr-2 text-lg text-gray-900 font-semibold">{selectedIdea?.name}</div>
                               </div>
                               {/* <div className="flex px-4">
@@ -66,7 +66,7 @@ const ViewAdminTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selectedI
                                       </div> */}
                                   </div>
                               </div>
-                              <div className="flex items-center py-5">
+                              <div className="flex items-center pt-5">
                                   <img src={selectedIdea?.educatorDetails?.image} className="rounded-full size-7 me-2" alt="" />
                                   <div>
                                       <a className="text-2sm text-gray-800 hover:text-primary mb-px" href="#">{selectedIdea?.educatorDetails?.first_name} {selectedIdea?.educatorDetails?.last_name}</a>

@@ -159,12 +159,12 @@ const CreateTradeAnalysis = forwardRef(
         >
           {formik.status && <Alert variant="danger">{formik.status}</Alert>}
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
-            <DialogHeader>
+            <DialogHeader className="pb-5 pt-0 px-0">
               <DialogTitle>
                 {selectedRow?._id ? "Update IQ Insight" : " Create IQ Insight"}
               </DialogTitle>
             </DialogHeader>
-            <div className="grid gap-5 px-0 py-5">
+            <div className="grid gap-5 px-0 pb-5">
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12">
                   <div className="flex flex-col gap-1">
@@ -346,7 +346,7 @@ const CreateTradeAnalysis = forwardRef(
                 </div>
               </div>
             </div>
-            <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3 md:py-5">
+            <div className="flex border-gray-200 border-t justify-end py-5 pb-0 rounded-b dark:border-gray-200 gap-3">
               <button
                 className="btn btn-light"
                 onClick={() => {
