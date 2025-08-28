@@ -1340,14 +1340,14 @@ export const sideMenus = {
       // path: "/admin/stream-schedule",
       children: [
         {
-          title: "Live Session",
-          icon: <PlayCircle />,
-          path: "/admin/live-session",
-        },
-        {
           title: "Live Schedule",
           icon: <CalendarClock />,
           path: "/admin/stream-schedule",
+        },
+        {
+          title: "Live Session",
+          icon: <PlayCircle />,
+          path: "/admin/live-session",
         },
       ],
     },
@@ -1400,7 +1400,7 @@ export const sideMenus = {
       icon: <Layers />,
       path: "/admin/general-setting",
     },
-    
+
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,
@@ -1419,20 +1419,20 @@ export const sideMenus = {
       path: "/educator/courses",
     },
 
-     {
+    {
       title: "IQ Live",
       icon: <CalendarClock />,
       // path: "/admin/stream-schedule",
       children: [
         {
-          title: "Live Session",
-          icon: <PlayCircle />,
-          path: "/educator/live-session",
-        },
-        {
           title: "Live Schedule",
           icon: <CalendarClock />,
           path: "/educator/stream-schedule",
+        },
+        {
+          title: "Live Session",
+          icon: <PlayCircle />,
+          path: "/educator/live-session",
         },
       ],
     },
