@@ -223,13 +223,13 @@ export default function IqAcademy() {
         singleCategoryData &&
         educators.length > 0 && (
           <div className="py-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-3 max-sm:grid-cols-1 max-md:grid-cols-3 max-lg:grid-cols-3 max-xl:grid-cols-4 max-2xl:grid-cols-5 gap-6">
               {educators.map((educator, index) => (
                 <div
                   key={index}
                   className="card rounded-2xl shadow-md overflow-hidden"
                 >
-                  <div className="relative h-80 flex items-center justify-center">
+                  <div className="relative flex items-center justify-center">
                     <img
                       src={educator.image}
                       alt={educator.first_name}
