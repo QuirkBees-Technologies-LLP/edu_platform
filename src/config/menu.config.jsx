@@ -1329,22 +1329,31 @@ export const sideMenus = {
       path: "/",
     },
     {
-      title: "IQ Vault",
+      title: "Academy",
       icon: <BookOpen />,
       path: "/admin/courses",
     },
+
     {
-      title: "IQ Academy Schedule",
+      title: "IQ Live",
       icon: <CalendarClock />,
-      path: "/admin/stream-schedule",
+      // path: "/admin/stream-schedule",
+      children: [
+        {
+          title: "Live Session",
+          icon: <PlayCircle />,
+          path: "/admin/live-session",
+        },
+        {
+          title: "Live Schedule",
+          icon: <CalendarClock />,
+          path: "/admin/stream-schedule",
+        },
+      ],
     },
+
     {
-      title: "IQ Academy",
-      icon: <PlayCircle />,
-      path: "/admin/live-session",
-    },
-    {
-      title: "Recorded Academy",
+      title: "Recorded Live",
       icon: <CircleDot />,
       path: "/admin/stream-recording",
     },
@@ -1357,6 +1366,19 @@ export const sideMenus = {
       title: "IQ Ideas",
       icon: <Lightbulb />,
       path: "/admin/ideas",
+    },
+    {
+      title: "IQ Strategies",
+      icon: <ChartNoAxesCombined />,
+      children: [
+        {
+          title: "IQ Charts",
+          icon: <Dot />,
+          path: "https://www.iqcharts.com/",
+          externalLink: true,
+          newTab: true,
+        },
+      ],
     },
     {
       title: "Educators",
@@ -1378,17 +1400,11 @@ export const sideMenus = {
       icon: <Layers />,
       path: "/admin/general-setting",
     },
-    {
-      title: "IQ Charts",
-      icon: <ChartNoAxesCombined />,
-      path: 'https://www.iqcharts.com/',
-      externalLink: true,
-      newTab: true
-    },
+    
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,
-      path: '/admin/iq-social',
+      path: "/admin/iq-social",
     },
   ],
   educator: [
@@ -1398,22 +1414,30 @@ export const sideMenus = {
       path: "/",
     },
     {
-      title: "IQ Vault",
+      title: "Academy",
       icon: <BookOpen />,
       path: "/educator/courses",
     },
-    {
-      title: "IQ Academy Schedule",
+
+     {
+      title: "IQ Live",
       icon: <CalendarClock />,
-      path: "/educator/stream-schedule",
+      // path: "/admin/stream-schedule",
+      children: [
+        {
+          title: "Live Session",
+          icon: <PlayCircle />,
+          path: "/educator/live-session",
+        },
+        {
+          title: "Live Schedule",
+          icon: <CalendarClock />,
+          path: "/educator/stream-schedule",
+        },
+      ],
     },
     {
-      title: "IQ Academy",
-      icon: <PlayCircle />,
-      path: "/educator/live-session",
-    },
-    {
-      title: "Recorded Academy",
+      title: "Recorded Live",
       icon: <CircleDot />,
       path: "/educator/stream-recording/list",
     },
@@ -1428,16 +1452,22 @@ export const sideMenus = {
       path: "/educator/ideas",
     },
     {
-      title: "IQ Charts",
+      title: "IQ Strategies",
       icon: <ChartNoAxesCombined />,
-      path: 'https://www.iqcharts.com/',
-      externalLink: true,
-      newTab: true
+      children: [
+        {
+          title: "IQ Charts",
+          icon: <Dot />,
+          path: "https://www.iqcharts.com/",
+          externalLink: true,
+          newTab: true,
+        },
+      ],
     },
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,
-      path: '/educator/iq-social',
+      path: "/educator/iq-social",
     },
     // {
     //   title: 'Video Library',
@@ -1469,12 +1499,12 @@ export const sideMenus = {
       ],
     },
     {
-      title: "IQ Vault",
+      title: "Academy",
       icon: <School />,
       path: "/iq-vault",
     },
     {
-      title: "IQ Academy",
+      title: "IQ Live",
       icon: <LayoutDashboard />,
       // path: '/dashboard',
       children: [
@@ -1525,17 +1555,23 @@ export const sideMenus = {
     //   icon: <PlayCircle />,
     //   path: '/academy'
     // },
+    // {
+    //   title: "IQ Strategies",
+    //   icon: <School />,
+    //   path: "/iq-strategies",
+    // },
     {
       title: "IQ Strategies",
-      icon: <School />,
-      path: "/iq-strategies",
-    },
-    {
-      title: "IQ Charts",
       icon: <ChartNoAxesCombined />,
-      path: 'https://www.iqcharts.com/',
-      externalLink: true,
-      newTab: true
+      children: [
+        {
+          title: "IQ Charts",
+          icon: <Dot />,
+          path: "https://www.iqcharts.com/",
+          externalLink: true,
+          newTab: true,
+        },
+      ],
     },
     // {
     //   title: "IQ Social",

@@ -114,6 +114,8 @@ const SectionList = ({
     setIsAddingSection(false);
   };
 
+  console.log("sections",sections)
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="space-y-4">
