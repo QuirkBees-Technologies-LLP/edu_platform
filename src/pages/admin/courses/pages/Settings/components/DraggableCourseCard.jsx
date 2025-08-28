@@ -46,6 +46,7 @@ const DraggableCourseCard = ({
     published,
     tier,
     instructor,
+    section
   } = course;
   console.log(course, "course");
   
@@ -202,9 +203,15 @@ const DraggableCourseCard = ({
 
         {/** Content Section */}
         <div className="p-5">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">
+          <div className="flex items-start justify-between">
+          <h3 className="text-lg w-[200px] font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">
             {title}
           </h3>
+          <span className="text-xs badge font-medium text-gray-900 rounded-2xl transition-colors duration-200">
+            {section}
+          </span>
+
+          </div>
           <p className="text-sm text-gray-600 mb-4 line-clamp-2">
             {description}
           </p>
