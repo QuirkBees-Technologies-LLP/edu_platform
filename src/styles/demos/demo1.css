@@ -925,7 +925,7 @@ chat */
 @media screen and (max-width : 472.98px) {
 	.forex_calender {
 		overflow: auto;
-		max-width: 290px;
+		max-width: 260px;
         margin-inline: auto;
 	}
 	.forex_calender .calender {
