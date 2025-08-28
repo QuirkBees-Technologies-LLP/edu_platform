@@ -285,9 +285,9 @@ const ClientDashboard = () => {
   const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   const data = activeTab === "feed" ? feedData : ideasData;
-  const IQAcademy = "/iq-academy";
+  const IQLive = "/iq-academy";
   const IQStrategies = "/iq-strategies";
-  const IQVault = "/iq-vault";
+  const IQAcademy = "/iq-vault";
 
   const handleRouteClick = () => {
     setUpgradeModalOpen(true);
@@ -349,12 +349,12 @@ const ClientDashboard = () => {
                     <div className="p-4 md:p-7">
                       <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                         <h5 className="font-semibold text-gray-900 text-md">
-                          IQ Vault
+                          IQ Academy
                         </h5>
-                        {allowedRoutes?.includes(IQVault) ? (
-                          <Link to={IQVault}>
+                        {allowedRoutes?.includes(IQAcademy) ? (
+                          <Link to={IQAcademy}>
                             <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                              View IQ Vault
+                              View IQ Academy
                             </button>
                           </Link>
                         ) : (
@@ -362,7 +362,7 @@ const ClientDashboard = () => {
                             className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
                             onClick={handleRouteClick}
                           >
-                            View IQ Vault
+                            View IQ Academy
                           </button>
                         )}
                         {/* <Link to="/iq-vault">
@@ -391,12 +391,12 @@ const ClientDashboard = () => {
                     <div className="p-4 md:p-7">
                       <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
                         <h5 className="font-semibold text-gray-900 text-md">
-                          IQ Academy
+                          IQ Live
                         </h5>
-                        {allowedRoutes?.includes(IQAcademy) ? (
-                          <Link to={IQAcademy}>
+                        {allowedRoutes?.includes(IQLive) ? (
+                          <Link to={IQLive}>
                             <button className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium">
-                              View IQ Academy
+                              View IQ Live
                             </button>
                           </Link>
                         ) : (
@@ -404,7 +404,7 @@ const ClientDashboard = () => {
                             className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
                             onClick={handleRouteClick}
                           >
-                            View IQ Academy
+                            View IQ Live
                           </button>
                         )}
                         {/* <Link to="/iq-academy">
@@ -448,7 +448,7 @@ const ClientDashboard = () => {
                         ) : (
                           <button
                             className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
-                            onClick={handleRouteClick}
+                            // onClick={handleRouteClick}
                           >
                             View Strategies
                           </button>
