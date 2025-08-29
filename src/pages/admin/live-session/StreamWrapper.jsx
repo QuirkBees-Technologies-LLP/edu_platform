@@ -6,7 +6,7 @@ import { toAbsoluteUrl } from "@/utils/Assets";
 const StreamWrapper = ({ call, children, bannerImage }) => {
   if (!call)
     return (
-      <div className="container-fluid">
+      <div className="">
         <div className="grid grid-cols-12 gap-6">
           {/* Image Section */}
           <div className="col-span-12 lg:col-span-8">
