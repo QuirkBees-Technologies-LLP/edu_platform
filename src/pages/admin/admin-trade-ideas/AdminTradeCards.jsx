@@ -115,31 +115,32 @@ const AdminTradeCards = () => {
 
   const observer = useRef();
 
-  const { data, isFetching } = useGetClientTradeIdeasQuery({
-    page: page,
-    limit: limit,
-  });
-  const { data: fetchData } = useGetAdminWithoutTradeIdeasQuery({
-    isview: true,
+  // const { data, isFetching } = useGetClientTradeIdeasQuery({
+  //   page: page,
+  //   limit: limit,
+  // });
+  
+  const { data: fetchData, isFetching } = useGetAdminWithoutTradeIdeasQuery({
+    isview: false,
   });
 
-  const totalPages = data?.pagination?.totalPages || 1;
+  // const totalPages = fetchData?.pagination?.totalPages || 1;
 
-  useEffect(() => {
-    if (data?.data) {
-      if (page === 1) {
-        setTradeIdeas(data.data); // replace data if first page
-      } else {
-        // Append new unique items only
-        setTradeIdeas((prevIdeas) => {
-          const newIdeas = data.data.filter(
-            (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
-          );
-          return [...prevIdeas, ...newIdeas];
-        });
-      }
-    }
-  }, [data, page]);
+  // useEffect(() => {
+  //   if (fetchData?.data) {
+  //     if (page === 1) {
+  //       setTradeIdeas(fetchData.data); // replace data if first page
+  //     } else {
+  //       // Append new unique items only
+  //       setTradeIdeas((prevIdeas) => {
+  //         const newIdeas = fetchData.data.filter(
+  //           (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
+  //         );
+  //         return [...prevIdeas, ...newIdeas];
+  //       });
+  //     }
+  //   }
+  // }, [fetchData, page]);
 
   // const lastTradeIdeaRef = useCallback(
   // (node) => {
@@ -434,9 +435,9 @@ const AdminTradeCards = () => {
           </div>
 
           {isFetching && <p>Loading more...</p>}
-          {page >= totalPages && (
+          {/* {page >= totalPages && (
             <p className="text-center my-10">No more IQ Ideas to load.</p>
-          )}
+          )} */}
         </div>
 
         <ViewAdminTradeIdeas

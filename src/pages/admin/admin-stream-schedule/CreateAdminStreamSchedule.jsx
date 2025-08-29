@@ -161,11 +161,11 @@ const CreateAdminStreamSchedule = forwardRef(
             }).unwrap();
             setSelectedRow({});
             refetch();
-            toast.success("Educator updated successfully!");
+            toast.success("Live schedule updated successfully!");
           } else {
             await createEducatorStreamSchedule(formData).unwrap();
             refetch();
-            toast.success("Educator created successfully!");
+            toast.success("Live schedule created successfully!");
             setSelectedRow({});
           }
           formik.resetForm();
