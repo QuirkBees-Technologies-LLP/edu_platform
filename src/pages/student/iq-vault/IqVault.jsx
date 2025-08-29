@@ -413,12 +413,12 @@ export default function IqVault() {
                               )}
 
                               <div className="px-6 py-8 rounded-bl-md rounded-br-md">
-                                <h3 className="text-sm tracking-widest font-normal text-gray-600 mb-2">
+                                {/* <h3 className="text-sm tracking-widest font-normal text-gray-600 mb-2">
                                   {lecture.title}
-                                </h3>
+                                </h3> */}
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center flex-wrap justify-between mb-3 gap-2">
                                   <h4 className="sm:text-2xl font-medium text-gray-900">
-                                    {lecture.type}
+                                    {lecture.title}
                                   </h4>
                                   <button className="bg-gray-100 text-sm flex items-center justify-center gap-2 rotate-0 opacity-100 rounded-2xl border border-gray-300 py-3 px-6 whitespace-nowrap">
                                     Mark as Complete

@@ -17,7 +17,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useEndCallMutation } from '../../../store/api/educator/educatorLiveStreamApiSlice';
 
-const LiveSession = ({ title = "IQ Academy" }) => {
+const LiveSession = ({ title = "Live Session" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -333,7 +333,7 @@ const LiveSession = ({ title = "IQ Academy" }) => {
     <div className='container-fluid pb-5'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Academy" />
+          <ToolbarPageTitle text="Live Session" />
           <ToolbarDescription>
             Track and analyze past IQ Academy with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
