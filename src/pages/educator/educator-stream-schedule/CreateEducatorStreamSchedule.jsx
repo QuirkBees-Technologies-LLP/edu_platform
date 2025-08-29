@@ -158,11 +158,11 @@ const CreateEducatorStreamSchedule = forwardRef(
             }).unwrap();
             setSelectedRow({});
             refetch();
-            toast.success("IQ Academy schedule updated successfully!");
+            toast.success("Live schedule updated successfully!");
           } else {
             await createEducatorStreamSchedule(formData).unwrap();
             refetch();
-            toast.success("IQ Academy schedule created successfully!");
+            toast.success("Live schedule created successfully!");
             setSelectedRow({});
           }
           formik.resetForm();

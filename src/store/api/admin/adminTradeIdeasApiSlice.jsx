@@ -2,43 +2,53 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithReauth from "../apiSlice";
 
 export const adminTradeIdeasApiSlice = createApi({
-    reducerPath: 'adminTradeIdeas',
-    baseQuery: baseQueryWithReauth,
-    endpoints: (builder) => ({
-        getAdminTradeIdeas: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/admin/idea/get?page=${page}&limit=${limit}`,
-        }),
-        getAdminWithoutTradeIdeas: builder.query({
-            query: ({ isview=true }) => `/admin/idea/get?isview=${isview}`,
-        }),
-        getUsers: builder.query({
-            query: () => 'users',
-        }),
-        getComments: builder.query({
-            query: () => 'comments',
-        }),
-        createTradeIdeas: builder.mutation({
-            query: (data) => ({
-                url: '/admin/idea/create',
-                method: 'POST',
-                body: data,
-            }),
-        }),
-        updateTradeIdea: builder.mutation({
-            query: (updatedTrade) => ({
-                url: `/admin/idea/updated/${updatedTrade.get("id")}`,
-                method: 'PUT',
-                body: updatedTrade,
-                formData: true
-            }),
-        }),
-        deleteTradeIdea: builder.mutation({
-            query: (id) => ({
-                url: `/admin/idea/remove/${id}`,
-                method: 'DELETE',
-            }),
-        }),
+  reducerPath: "adminTradeIdeas",
+  baseQuery: baseQueryWithReauth,
+  endpoints: (builder) => ({
+    getAdminTradeIdeas: builder.query({
+      query: ({ page = 1, limit = 10, isview = true }) =>
+        `/admin/idea/get?page=${page}&limit=${limit}&isview=${isview}`,
     }),
+    getAdminWithoutTradeIdeas: builder.query({
+      query: ({ isview = true }) => `/admin/idea/get?isview=${isview}`,
+    }),
+    getUsers: builder.query({
+      query: () => "users",
+    }),
+    getComments: builder.query({
+      query: () => "comments",
+    }),
+    createTradeIdeas: builder.mutation({
+      query: (data) => ({
+        url: "/admin/idea/create",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    updateTradeIdea: builder.mutation({
+      query: (updatedTrade) => ({
+        url: `/admin/idea/updated/${updatedTrade.get("id")}`,
+        method: "PUT",
+        body: updatedTrade,
+        formData: true,
+      }),
+    }),
+    deleteTradeIdea: builder.mutation({
+      query: (id) => ({
+        url: `/admin/idea/remove/${id}`,
+        method: "DELETE",
+      }),
+    }),
+  }),
 });
 
-export const { useGetAdminTradeIdeasQuery, useGetAdminWithoutTradeIdeasQuery, useLazyGetAdminTradeIdeasQuery, useGetUsersQuery, useGetCommentsQuery, useCreateTradeIdeasMutation, useUpdateTradeIdeaMutation, useDeleteTradeIdeaMutation } = adminTradeIdeasApiSlice;
+export const {
+  useGetAdminTradeIdeasQuery,
+  useGetAdminWithoutTradeIdeasQuery,
+  useLazyGetAdminTradeIdeasQuery,
+  useGetUsersQuery,
+  useGetCommentsQuery,
+  useCreateTradeIdeasMutation,
+  useUpdateTradeIdeaMutation,
+  useDeleteTradeIdeaMutation,
+} = adminTradeIdeasApiSlice;
