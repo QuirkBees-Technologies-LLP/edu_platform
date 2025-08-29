@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useEndCallMutation } from '../../../store/api/educator/educatorLiveStreamApiSlice';
 
-const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
+const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -362,14 +362,14 @@ const EducatorStreamSchedule = ({ title = "IQ Academy Schedule" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Academy Schedule" />
+          <ToolbarPageTitle text="Live Schedule" />
           <ToolbarDescription>
             Track and analyze past IQ Academy with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
-              IQ Academy Schedule
+              Create Live Schedule
             </button>
           </div>
         </ToolbarActions>

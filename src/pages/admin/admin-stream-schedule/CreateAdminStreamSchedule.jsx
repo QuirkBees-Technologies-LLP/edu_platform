@@ -222,8 +222,8 @@ const CreateAdminStreamSchedule = forwardRef(
           <DialogHeader className="pb-5 pt-0 px-0">
             <DialogTitle>
               {selectedRow?._id
-                ? "Update IQ Academy Schedule"
-                : "Create IQ Academy Schedule"}
+                ? "Update Live Schedule"
+                : "Create Live Schedule"}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-5 px-0">

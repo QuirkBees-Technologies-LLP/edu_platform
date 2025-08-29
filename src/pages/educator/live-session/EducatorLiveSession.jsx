@@ -16,7 +16,7 @@ import { useLazyGetLiveSessionListQuery, useEndCallMutation } from '../../../sto
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-const EducatorLiveSession = ({ title = "IQ Academy" }) => {
+const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -334,7 +334,7 @@ const EducatorLiveSession = ({ title = "IQ Academy" }) => {
     <div className='container-fluid'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Academy" />
+          <ToolbarPageTitle text="Live Session" />
           <ToolbarDescription>
             Track and analyze past IQ Academy with key insights and performance data.</ToolbarDescription>
         </ToolbarHeading>
