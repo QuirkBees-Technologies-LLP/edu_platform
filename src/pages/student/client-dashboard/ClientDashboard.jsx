@@ -448,7 +448,7 @@ const ClientDashboard = () => {
                         ) : (
                           <button
                             className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
-                            // onClick={handleRouteClick}
+                          // onClick={handleRouteClick}
                           >
                             View Strategies
                           </button>
@@ -627,6 +627,75 @@ const ClientDashboard = () => {
                                     </div> */}
                 </div>
               </div>
+              <div className="col-span-12">
+
+
+                {/* start */}
+                <div className="flex items-center justify-center">
+                  <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
+                    {/* Top accent */}
+                    <div className="h-1 w-full bg-gradient-to-r from-primary via-primary-500 to-primary-500" />
+
+                    <div className="p-6 md:p-5 grid md:grid-cols-1 gap-8">
+                      {/* Text / CTA */}
+                      <div className="flex flex-col">
+                        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Beta Invite
+                        </span>
+
+                        <h1 className="mt-4 text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
+                          Be part of our beta testers.
+                        </h1>
+
+                        <p className="mt-2 text-slate-600">
+                          New iOS and Android <span className="font-medium text-slate-800">Iqonic</span> App
+                        </p>
+
+                        <div className="mt-6 space-y-3 text-sm text-slate-600">
+                          <div className="flex items-center gap-2">
+                            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden className="h-4 w-4 text-emerald-600"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z" clipRule="evenodd" /></svg>
+                            Early access to new features
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden className="h-4 w-4 text-emerald-600"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z" clipRule="evenodd" /></svg>
+                            Help shape the final release
+                          </div>
+                        </div>
+
+                        <div className="mt-8">
+                          <h4 className="w-full md:w-auto text-base rounded-xl font-medium text-primary cursor-pointer">
+                            Request the link to your leader!
+                          </h4>
+                          <p className="mt-3 text-xs text-slate-500">Your leader will share the private download links.</p>
+                        </div>
+                      </div>
+
+                      {/* App Store & Play Store */}
+                      <div className="relative flex items-center justify-center gap-6">
+                        <div className="absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-tr from-violet-200 via-fuchsia-200 to-rose-200 blur-2xl opacity-60" />
+                        <a href="#" className="block w-auto h-9">
+                          <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/6/67/App_Store_%28iOS%29.svg"
+                            alt="Download on the App Store"
+                            className="w-auto h-full"
+                          />
+                        </a>
+                        <a href="#" className="block w-40">
+                          <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                            alt="Get it on Google Play"
+                            className="w-full h-auto"
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* end */}
+
+
+              </div>
               <div className="col-span-12 md:col-span-6 xl:col-span-12">
                 <div className="card rounded-2xl shadow-md overflow-hidden relative group">
                   {/* Hover Overlay */}
@@ -708,6 +777,9 @@ const ClientDashboard = () => {
               </div>
             </div>
           </div>
+
+
+
         </div>
       </div>
     </>
