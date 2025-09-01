@@ -150,7 +150,7 @@ const IqInsight = () => {
                       <EducatorImage educator={idea?.educatorDetails}  />
                       <div>
                         <Link
-                          to="/public-profile/profiles/nft"
+                          to={`/iq-educators/${idea?.educatorDetails?._id}`}
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
                           {idea?.educatorDetails?.first_name}{" "}
