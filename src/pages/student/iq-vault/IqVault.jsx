@@ -36,7 +36,7 @@ export default function IqVault() {
   } = useGetAcademyCategoryByMainSectionQuery(
     {
       mainSection: mainSection ? mainSection : "IQ Academy",
-      id:courseId?courseId:id,
+      id: courseId ? courseId : id,
       category: categoryName ? categoryName : activeTab,
       language: language ? language : selectedLanguage,
     },
@@ -46,6 +46,27 @@ export default function IqVault() {
       refetchOnReconnect: true,
     }
   );
+
+  useEffect(() => {
+    const activeCategoryId = data?.ActiveCategory?.[0]?.categoryId;
+    const hasValidCourseData =
+      Array.isArray(data?.course) && data.course.length > 0;
+    const tabMatches = activeTab === `${activeCategoryId}`;
+
+    if (hasValidCourseData && tabMatches) {
+      setCurrentCourse(data.course);
+
+      // 🟢 Also auto select first lecture whenever data changes
+      const firstCourse = data.course[0];
+      if (firstCourse?.lectures?.length > 0) {
+        const firstLecture = firstCourse.lectures[0];
+        setActiveLectureId(firstLecture._id);
+        setLecture(firstLecture);
+      }
+    } else {
+      setCurrentCourse([]);
+    }
+  }, [data, activeTab]);
 
   const categories = data?.category || [];
   const course = data?.course || [];
@@ -121,12 +142,12 @@ export default function IqVault() {
   }, [data, activeTab, selectedLanguage]);
 
   // Reset state when language changes
-  useEffect(() => {
-    setActiveTab("");
-    setActiveLectureId(null);
-    setLecture({});
-    setCurrentCourse([]); // Also reset course data when language changes
-  }, [selectedLanguage]);
+  // useEffect(() => {
+  //   setActiveTab("");
+  //   setActiveLectureId(null);
+  //   setLecture({});
+  //   setCurrentCourse([]); // Also reset course data when language changes
+  // }, [selectedLanguage]);
 
   // Refetch data when component mounts or when returning to page
   useEffect(() => {
@@ -168,6 +189,17 @@ export default function IqVault() {
       }
     }
   }, [data, activeTab]);
+
+  // Reset everything when categoryName (URL param) changes
+  useEffect(() => {
+    if (categoryName) {
+      // Force UI to pick the category from URL
+      setActiveTab(categoryName);
+      setCurrentCourse([]); // reset previous course
+      setLecture({}); // reset previous lecture
+      setActiveLectureId(null); // reset active lecture
+    }
+  }, [categoryName]);
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);
@@ -446,16 +478,30 @@ export default function IqVault() {
                                 </div>
                               </div>
                             </div>
+                            // <div className="card">
+                            //   <div className="flex flex-col items-center justify-center py-20 px-6">
+                            //     <div className="justify-center">
+                            //       <Loader />
+                            //     </div>
+                            //   </div>
+                            // </div>
                           )
                         ) : (
+                          // <div className="card">
+                          //   <div className="flex flex-col items-center justify-center py-20 px-6">
+                          //     <div className="text-center">
+                          //       <div className="text-6xl mb-4">📚</div>
+                          //       <h3 className="text-xl font-medium text-gray-700 mb-2">
+                          //         Coming Soon
+                          //       </h3>
+                          //       <p className="text-gray-500">Coming Soon</p>
+                          //     </div>
+                          //   </div>
+                          // </div>
                           <div className="card">
                             <div className="flex flex-col items-center justify-center py-20 px-6">
-                              <div className="text-center">
-                                <div className="text-6xl mb-4">📚</div>
-                                <h3 className="text-xl font-medium text-gray-700 mb-2">
-                                  Coming Soon
-                                </h3>
-                                <p className="text-gray-500">Coming Soon</p>
+                              <div className="justify-center">
+                                <Loader />
                               </div>
                             </div>
                           </div>

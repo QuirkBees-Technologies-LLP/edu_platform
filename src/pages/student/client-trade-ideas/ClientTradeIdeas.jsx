@@ -505,7 +505,8 @@ const ClientTradeIdeas = () => {
                       />
                       <div className="">
                         <Link
-                          to="#"
+                          to={`/iq-educators/${trade?.educatorDetails?._id}`}
+                          // to="#"
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
                           {trade?.educatorDetails?.first_name}{" "}
