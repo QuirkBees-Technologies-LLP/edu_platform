@@ -212,7 +212,9 @@ const AuthProvider = ({ children }) => {
         const { expire_at, plan, status } = loginRes?.data?.data?.memberships;
 
         // Step 2: Check Plan Expiry
-        const isExpired = new Date(expire_at) < new Date();
+        // const isExpired = new Date(expire_at) < new Date();
+        const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
+
         // const isExpired = false;
 
         if (isExpired) {
