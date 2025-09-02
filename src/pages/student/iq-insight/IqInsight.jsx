@@ -100,8 +100,8 @@ const IqInsight = () => {
             {isLoading ? <Loader /> : tradeIdeas.length > 0 ? tradeIdeas.map((idea, index) => (
               <div
                 key={idea._id}
-                className="card border-2 hover:bg-gray-200 overflow-hidden h-fit"  >
-                <div className="h-52 overflow-hidden cursor-pointer" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}>
+                className="card border-2 hover:bg-gray-200 overflow-hidden h-fit">
+                <div className="overflow-hidden cursor-pointer" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}>
                   <img
                     src={idea?.image?.[0]}
                     className="w-full h-full object-cover"
@@ -162,7 +162,6 @@ const IqInsight = () => {
                     </div>
                   </div>
                 </div>
-
               </div>
             )) : <div className="text-center text-gray-900 my-10">No IQ Ideas to load.</div>}
           </div>

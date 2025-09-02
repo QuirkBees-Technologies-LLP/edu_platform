@@ -337,7 +337,7 @@ const ClientDashboard = () => {
                     <div className="card-body p-0 relative">
                       <img
                         src="/media/images/2600x1600/banner_1.jpg"
-                        className="w-full h-72 object-cover rounded-t-xl"
+                        className="w-full object-cover rounded-t-xl"
                         alt=""
                       />
                       <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
@@ -379,7 +379,7 @@ const ClientDashboard = () => {
                     <div className="card-body p-0 relative">
                       <img
                         src="/media/images/2600x1600/banner_2.jpg"
-                        className="w-full h-72 object-cover rounded-t-xl"
+                        className="w-full object-cover rounded-t-xl"
                         alt=""
                       />
                       <div className="xl:hidden rounded-xl absolute inset-0 bg-black/40"></div>
@@ -426,7 +426,7 @@ const ClientDashboard = () => {
                     <div className="card-body p-0 relative">
                       <img
                         src="/media/images/2600x1600/banner_3.jpg"
-                        className="w-full h-72 object-cover rounded-t-xl"
+                        className="w-full object-cover rounded-t-xl"
                         alt=""
                       />
                       {/* <span className="absolute inset-0 flex items-center justify-center md:justify-start md:pl-11 text-2xl text-gray-50 font-medium tracking-widest">

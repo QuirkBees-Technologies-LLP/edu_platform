@@ -511,7 +511,7 @@ export default function FastStartTraining() {
                                         : "public/media/images/video-thumbail.jpg"
                                     }
                                     alt="Course Title"
-                                    className="w-full h-36 object-cover"
+                                    className="w-full object-cover"
                                     onError={(e) => {
                                       e.target.onerror = null;
                                       e.target.src =
