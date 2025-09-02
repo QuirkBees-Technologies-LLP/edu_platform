@@ -1,18 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
-import { useGetClientTradeAnalysisQuery, useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import {
+  useGetClientTradeAnalysisQuery,
+  useGetClientTradeIdeasQuery,
+} from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ImageLightBox from "./ImageLightBox";
 // import EducatorImage from "./EducatorImage";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../../../components/ui/breadcrumb";
 import { Container, ShieldAlert, Videotape } from "lucide-react";
-import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
+import {
+  Toolbar,
+  ToolbarActions,
+  ToolbarDescription,
+  ToolbarHeading,
+  ToolbarPageTitle,
+} from "@/partials/toolbar";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import Loader from "../../../components/ui/loader";
-
 
 const LabelMap = {
   active: "Active",
@@ -93,77 +107,129 @@ const IqInsight = () => {
         </ToolbarHeading>
       </Toolbar>
 
-
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            {isLoading ? <Loader /> : tradeIdeas.length > 0 ? tradeIdeas.map((idea, index) => (
-              <div
-                key={idea._id}
-                className="card border-2 hover:bg-gray-200 overflow-hidden h-fit">
-                <div className="overflow-hidden cursor-pointer" onClick={() => { setSelectedIdea(idea); setIsViewOpen(true); }} ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}>
-                  <img
-                    src={idea?.image?.[0]}
-                    className="w-full h-full object-cover"
-                    alt=""
-                  />
-                </div>
-                <div className="card-border card-rounded-b flex flex-col gap-2 justify-between min-h-[210px]">
-                  <div className="px-5 py-4.5 ">
-                    <div className="flex item-center justify-between  mb-2">
-                      <div className="font-bold mr-3 text-gray-900">{idea?.name}</div>
-                      {/* <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}>{LabelMap[idea?.status]}</span> */}
-                    </div>
-                    {/* <p className="text-gray-800 line-clamp-3 text-sm font-normal">Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform.</p> */}
-                    <ShowMoreLess className="text-gray-900 text-sm mt-2 leading-relaxed" html={idea?.description || 'No description'} limit={95} />
-                    {/* <div className="flex gap-10 mb-3">
-                      <div>
-                        <div className="text-2sm text-gray-800 uppercase">Entry</div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{idea?.entry}</span>
-                      </div>
-                      <div>
-                        <div className="text-2sm text-gray-800 uppercase">
-                          Invalidation
+            {isLoading ? (
+              <Loader />
+            ) : tradeIdeas.length > 0 ? (
+              tradeIdeas.map((idea, index) => (
+                // <div
+                //   key={idea._id}
+                //   className="card border-2 hover:bg-gray-200 overflow-hidden h-fit"
+                // >
+                //   <div
+                //     className="overflow-hidden cursor-pointer"
+                //     onClick={() => {
+                //       setSelectedIdea(idea);
+                //       setIsViewOpen(true);
+                //     }}
+                //     ref={
+                //       index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
+                //     }
+                //   >
+                //     <img
+                //       src={idea?.image?.[0]}
+                //       className="w-full h-[220px] object-cover "
+                //       alt=""
+                //     />
+                //   </div>
+                //   <div className="card-border card-rounded-b flex flex-col gap-2 justify-between min-h-[210px]">
+                //     <div className="px-5 py-4.5 ">
+                //       <div className="flex item-center justify-between  mb-2">
+                //         <div className="font-bold mr-3 text-gray-900">
+                //           {idea?.name}
+                //         </div>
+                //       </div>
+                //       <ShowMoreLess
+                //         className="text-gray-900 text-sm mt-2 leading-relaxed"
+                //         html={idea?.description || "No description"}
+                //         limit={65}
+                //       />
+                //     </div>
+                //     <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
+                //       <div className="flex items-center">
+                //         <EducatorImage educator={idea?.educatorDetails} />
+                //         <div>
+                //           <Link
+                //             to={`/iq-educators/${idea?.educatorDetails?._id}`}
+                //             className="text-2sm text-gray-800 hover:text-primary mb-px"
+                //           >
+                //             {idea?.educatorDetails?.first_name}{" "}
+                //             {idea?.educatorDetails?.last_name}{" "}
+                //           </Link>
+                //           <div className="text-2sm text-gray-700 mb-px">
+                //             {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
+                //           </div>
+                //         </div>
+                //       </div>
+                //     </div>
+                //   </div>
+                // </div>
+                <div
+                  key={idea._id}
+                  className="card border-2 hover:bg-gray-200 overflow-hidden flex flex-col h-full"
+                >
+                  {/* Image */}
+                  <div
+                    className="overflow-hidden cursor-pointer"
+                    onClick={() => {
+                      setSelectedIdea(idea);
+                      setIsViewOpen(true);
+                    }}
+                    ref={
+                      index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
+                    }
+                  >
+                    <img
+                      src={idea?.image?.[0]}
+                      className="w-full h-[220px] object-cover"
+                      alt=""
+                    />
+                  </div>
+
+                  {/* Body + Footer */}
+                  <div className="card-border card-rounded-b flex flex-col gap-2 justify-between min-h-[210px]">
+                    {/* Body */}
+                    <div className="px-5 py-4.5 flex-grow">
+                      <div className="flex item-center justify-between mb-2">
+                        <div className="font-bold mr-3 text-gray-900">
+                          {idea?.name}
                         </div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{idea?.invalidation}</span>
                       </div>
-                    </div> */}
-                    {/* <div className="">
-                      <div className="text-2sm mb-2   text-gray-800 uppercase ">Exits</div>
-                      <div className="flex items-center flex-wrap gap-2">
-                        {idea?.exits?.map((exit, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2 mt-1"
+                      <ShowMoreLess
+                        className="text-gray-900 text-sm mt-2 leading-relaxed"
+                        html={idea?.description || "No description"}
+                        limit={65}
+                      />
+                    </div>
+
+                    {/* Footer */}
+                    <div className="border-t bg-gray-100 px-5 py-3">
+                      <div className="flex items-center">
+                        <EducatorImage educator={idea?.educatorDetails} />
+                        <div>
+                          <Link
+                            to={`/iq-educators/${idea?.educatorDetails?._id}`}
+                            className="text-2sm text-gray-800 hover:text-primary mb-px"
                           >
-                            <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
-                              {idx + 1}
-                            </div>
-                            <div className="text-sm text-gray-900">{exit}</div>
+                            {idea?.educatorDetails?.first_name}{" "}
+                            {idea?.educatorDetails?.last_name}
+                          </Link>
+                          <div className="text-2sm text-gray-700 mb-px">
+                            {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
                           </div>
-                        ))}
-                      </div>
-                    </div> */}
-                  </div>
-                  <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
-                    <div className="flex items-center">
-                      <EducatorImage educator={idea?.educatorDetails}  />
-                      <div>
-                        <Link
-                          to={`/iq-educators/${idea?.educatorDetails?._id}`}
-                          className="text-2sm text-gray-800 hover:text-primary mb-px"
-                        >
-                          {idea?.educatorDetails?.first_name}{" "}
-                          {idea?.educatorDetails?.last_name}                        </Link>
-                        <div className="text-2sm text-gray-700 mb-px">
-                          {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-900 my-10">
+                No IQ Ideas to load.
               </div>
-            )) : <div className="text-center text-gray-900 my-10">No IQ Ideas to load.</div>}
+            )}
           </div>
         </div>
 
@@ -180,7 +246,7 @@ const IqInsight = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default IqInsight
+export default IqInsight;
