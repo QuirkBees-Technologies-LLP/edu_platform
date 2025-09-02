@@ -572,7 +572,7 @@ const IqEducators = () => {
                         <h3 className="text-md font-normal mb-2">
                           {course.name}
                         </h3>
-                       <ShowMoreLess
+                        <ShowMoreLess
                           className="text-xs text-gray-600"
                           html={course?.description || "No description"}
                           limit={65}
@@ -671,82 +671,7 @@ const IqEducators = () => {
             </div>
           </div>
 
-          {/* Recording  */}
-          <div className="text-gray-900 mb-2">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => setShowAll((prev) => !prev)}
-                >
-                  {showAll ? "Show Less" : "View All"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {showAll ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {response?.data?.recordings?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full cursor-pointer border rounded-xl shadow-sm"
-                    >
-                      <div
-                        className="rounded-t-xl overflow-hidden"
-                        onClick={() => setRecording(course)}
-                      >
-                        <RecordingThumbnail
-                          videoUrl={course?.url}
-                          seekTime={2}
-                          image={course?.thumbnail}
-                          onRecordingClick={() => handleOpen(course?.url)}
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.call_title}
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          {course.address}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex gap-4">
-                  {response?.data?.recordings?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                    >
-                      <div
-                        className="rounded-t-xl overflow-hidden"
-                        onClick={() => setRecording(course)}
-                      >
-                        <RecordingThumbnail
-                          videoUrl={course?.url}
-                          seekTime={2}
-                          image={course?.thumbnail}
-                          onRecordingClick={() => handleOpen(course?.url)}
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.call_title}
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          {course.address}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          
         </div>
 
         {/* Sidebar */}
@@ -914,6 +839,85 @@ const IqEducators = () => {
             </div>
           </div>
         </div>
+
+        {/* Recording  */}
+         <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
+           <div className="text-gray-900 mb-2">
+            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Recordings</h2>
+                <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => setShowAll((prev) => !prev)}
+                >
+                  {showAll ? "Show Less" : "View All"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {showAll ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {response?.data?.recordings?.map((course) => (
+                    <div
+                      key={course.id}
+                      className="w-full cursor-pointer border rounded-xl shadow-sm"
+                    >
+                      <div
+                        className="rounded-t-xl overflow-hidden"
+                        onClick={() => setRecording(course)}
+                      >
+                        <RecordingThumbnail
+                          videoUrl={course?.url}
+                          seekTime={2}
+                          image={course?.thumbnail}
+                          onRecordingClick={() => handleOpen(course?.url)}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {course.call_title}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {course.address}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-4">
+                  {response?.data?.recordings?.map((course) => (
+                    <div
+                      key={course.id}
+                      className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
+                    >
+                      <div
+                        className="rounded-t-xl overflow-hidden"
+                        onClick={() => setRecording(course)}
+                      >
+                        <RecordingThumbnail
+                          videoUrl={course?.url}
+                          seekTime={2}
+                          image={course?.thumbnail}
+                          onRecordingClick={() => handleOpen(course?.url)}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {course.call_title}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {course.address}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+         </div>
       </div>
 
       <VideoPlayerModal
