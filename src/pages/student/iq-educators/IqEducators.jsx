@@ -411,7 +411,7 @@ const IqEducators = () => {
                       <img
                         src={course.imageUrl}
                         alt={course.title}
-                        className="w-full h-36 object-cover"
+                        className="w-full object-cover"
                       />
                     </div>
                     <div className="p-4">

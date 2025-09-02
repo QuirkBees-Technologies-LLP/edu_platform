@@ -238,7 +238,7 @@ export default function CryptoAcademy() {
                                                 <img
                                                     src={course.image}
                                                     alt={course.title}
-                                                    className="w-full h-36 object-cover"
+                                                    className="w-full object-cover"
                                                 />
                                             </div>
                                             <div className="p-4">

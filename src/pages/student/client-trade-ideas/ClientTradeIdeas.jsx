@@ -276,11 +276,11 @@ const ClientTradeIdeas = () => {
                   key={trade._id}
                   className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
                 >
-                  <div className="relative w-full h-40">
+                  <div className="relative w-full">
                     <img
                       src={trade?.image[0]}
                       alt={trade.pair}
-                      className="w-full h-40 object-cover cursor-pointer"
+                      className="w-full object-cover cursor-pointer"
                       onClick={() => {
                         setSelectedIdea(trade);
                         setIsLightBoxOpen(true);
