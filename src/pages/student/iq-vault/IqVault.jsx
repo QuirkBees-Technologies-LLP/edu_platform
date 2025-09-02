@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import { Accordion, AccordionItem } from "@/components/accordion";
 import { useLocation } from "react-router";
+import ShowMoreLess from "../../../components/ui/showmoreless";
 
 export default function IqVault() {
   const [activeTab, setActiveTab] = useState("");
@@ -555,7 +556,7 @@ export default function IqVault() {
                                         : "public/media/images/video-thumbail.jpg"
                                     }
                                     alt="Course Title"
-                                    className="w-full object-cover"
+                                    className="w-full object-cover h-44 rounded-t-xl "
                                     onError={(e) => {
                                       e.target.onerror = null;
                                       e.target.src =
@@ -569,9 +570,12 @@ export default function IqVault() {
                                       {i?.title}
                                     </h3>
                                   </div>
-                                  <p className="text-xs text-gray-600">
-                                    {i.description}
-                                  </p>
+                                  <ShowMoreLess
+                                    className="text-gray-900 text-sm mt-2 leading-relaxed"
+                                    html={i?.description || "No description"}
+                                    limit={60}
+                                  />
+                                  
                                 </div>
                               </div>
                             ))}
