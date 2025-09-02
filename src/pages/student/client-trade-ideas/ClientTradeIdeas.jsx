@@ -280,7 +280,7 @@ const ClientTradeIdeas = () => {
                     <img
                       src={trade?.image[0]}
                       alt={trade.pair}
-                      className="w-full object-cover cursor-pointer"
+                      className="w-full object-cover cursor-pointer  h-[380px]"
                       onClick={() => {
                         setSelectedIdea(trade);
                         setIsLightBoxOpen(true);
