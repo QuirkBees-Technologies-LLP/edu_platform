@@ -19,6 +19,8 @@ const IqEducators = () => {
   const { data: response } = useGetEducatorWithCoursesQuery(id);
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
+  const [showAll, setShowAll] = useState(false);
+  const [courseAll, setCourseAll] = useState(false);
 
   //  useEffect(() => {
   //   if (response?.data?.schedules?.length > 0) {
@@ -332,7 +334,8 @@ const IqEducators = () => {
             </div>
           </div> */}
           {/* <ClientViewLiveSession /> */}
-          <div className="text-gray-900 mb-2">
+
+          {/* <div className="text-gray-900 mb-2">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Recordings</h2>
@@ -350,13 +353,7 @@ const IqEducators = () => {
                     className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
                   >
                     <div className="rounded-t-xl overflow-hidden" onClick={() => setRecording(course)}>
-                      {/* <img
-                        src={"/media/images/600x400/1.jpg"}
-                        alt={course.title}
-                        className="w-full h-36 object-cover"
-                        onClick={() => handleOpen(course?.url)}
-                      /> */}
-
+                      
                       <RecordingThumbnail
                         videoUrl={course?.url}
                         seekTime={2}
@@ -364,15 +361,7 @@ const IqEducators = () => {
                         onRecordingClick={() => handleOpen(course?.url)}
                       />
 
-                      {/* <div className="absolute inset-0 flex items-center justify-center">
-                        <button
-                          type="button"
-                          className="btn btn-icon btn-circle btn-lg"
-                          onClick={() => handleOpen(course?.url)}
-                        >
-                          <CirclePlay size={60} className="text-white" />
-                        </button>
-                      </div> */}
+                  
                     </div>
                     <div className="p-4">
                       <h3 className="text-md font-normal mb-2">
@@ -384,8 +373,85 @@ const IqEducators = () => {
                 ))}
               </div>
             </div>
+          </div> */}
+
+          <div className="text-gray-900 mb-2">
+            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Recordings</h2>
+                <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => setShowAll((prev) => !prev)}
+                >
+                  {showAll ? "Show Less" : "View All"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {showAll ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {response?.data?.recordings?.map((course) => (
+                    <div
+                      key={course.id}
+                      className="w-full cursor-pointer border rounded-xl shadow-sm"
+                    >
+                      <div
+                        className="rounded-t-xl overflow-hidden"
+                        onClick={() => setRecording(course)}
+                      >
+                        <RecordingThumbnail
+                          videoUrl={course?.url}
+                          seekTime={2}
+                          image={course?.thumbnail}
+                          onRecordingClick={() => handleOpen(course?.url)}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {course.call_title}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {course.address}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-4">
+                  {response?.data?.recordings?.map((course) => (
+                    <div
+                      key={course.id}
+                      className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
+                    >
+                      <div
+                        className="rounded-t-xl overflow-hidden"
+                        onClick={() => setRecording(course)}
+                      >
+                        <RecordingThumbnail
+                          videoUrl={course?.url}
+                          seekTime={2}
+                          image={course?.thumbnail}
+                          onRecordingClick={() => handleOpen(course?.url)}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {course.call_title}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {course.address}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-gray-900 mb-28">
+
+          {/* <div className="text-gray-900 mb-28">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Courses</h2>
@@ -423,6 +489,86 @@ const IqEducators = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          </div> */}
+
+          <div className="text-gray-900 mb-28">
+            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Courses</h2>
+                <button
+                  onClick={() => setCourseAll((prev) => !prev)}
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                >
+                  {courseAll ? "Show Less" : "View All"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {courseAll ? (
+                // GRID VIEW (sabhi courses ek sath)
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {response?.data?.courses?.map((course) => (
+                    <div
+                      key={course.id}
+                      className="w-full border rounded-xl shadow-sm cursor-pointer"
+                      onClick={() =>
+                        navigate(
+                          `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        )
+                      }
+                    >
+                      <div className="rounded-t-xl overflow-hidden">
+                        <img
+                          src={course.imageUrl}
+                          alt={course.title}
+                          className="w-full h-36 object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {course.title}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {course.address}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // SLIDER VIEW (default horizontal scroll)
+                <div className="flex gap-4">
+                  {response?.data?.courses?.map((course) => (
+                    <div
+                      key={course.id}
+                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                      onClick={() =>
+                        navigate(
+                          `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        )
+                      }
+                    >
+                      <div className="rounded-t-xl overflow-hidden">
+                        <img
+                          src={course.imageUrl}
+                          alt={course.title}
+                          className="w-full h-36 object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {course.title}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {course.address}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
