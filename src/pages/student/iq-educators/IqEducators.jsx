@@ -9,6 +9,9 @@ import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
 import ShowMoreLess from "../../../components/ui/showmoreless";
+import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
+import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
+
 
 const IqEducators = () => {
   const navigate = useNavigate();
@@ -26,6 +29,19 @@ const IqEducators = () => {
   const [idea, setIdea] = useState(null);
   const [insight, setInsight] = useState(null);
 
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState({});
+  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [isViewOpen1, setIsViewOpen1] = useState(false);
+  const [selectedInsight, setSelectedInsight] = useState({});
+  const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
+
+  const handleCloseView = () => {
+    setIsViewOpen(false);
+  };
+  const handleCloseView1 = () => {
+    setIsViewOpen1(false);
+  };
   //  useEffect(() => {
   //   if (response?.data?.schedules?.length > 0) {
   //     const now = new Date();
@@ -522,6 +538,10 @@ const IqEducators = () => {
                     <div
                       key={course.id}
                       className="w-full border rounded-xl shadow-sm cursor-pointer"
+                      onClick={() => {
+                        setSelectedIdea(course);
+                        setIsViewOpen(true);
+                      }}
                       // onClick={() =>
                       //   navigate(
                       //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
@@ -555,6 +575,10 @@ const IqEducators = () => {
                     <div
                       key={course.id}
                       className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                      onClick={() => {
+                        setSelectedIdea(course);
+                        setIsViewOpen(true);
+                      }}
                       // onClick={() =>
                       //   navigate(
                       //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
@@ -608,6 +632,10 @@ const IqEducators = () => {
                     <div
                       key={course.id}
                       className="w-full border rounded-xl shadow-sm cursor-pointer"
+                      onClick={() => {
+                        setSelectedInsight(course);
+                        setIsViewOpen1(true);
+                      }}
                       // onClick={() =>
                       //   navigate(
                       //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
@@ -641,6 +669,10 @@ const IqEducators = () => {
                     <div
                       key={course.id}
                       className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                      onClick={() => {
+                        setSelectedInsight(course);
+                        setIsViewOpen1(true);
+                      }}
                       // onClick={() =>
                       //   navigate(
                       //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
@@ -925,6 +957,20 @@ const IqEducators = () => {
         onOpenChange={setOpen}
         videoUrl={videoUrl}
         data={recording}
+      />
+
+      <ViewClientTradeIdeas
+        isViewOpen={isViewOpen}
+        setIsLightBoxOpen={setIsLightBoxOpen}
+        handleCloseView={handleCloseView}
+        selectedIdea={selectedIdea}
+      />
+
+      <ViewInsightTradeIdeas
+        isViewOpen={isViewOpen1}
+        setIsLightBoxOpen={setIsLightBoxOpen1}
+        handleCloseView={handleCloseView1}
+        selectedIdea={selectedInsight}
       />
     </div>
   );

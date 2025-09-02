@@ -283,14 +283,17 @@ const ClientTradeIdeas = () => {
                       className="w-full object-cover cursor-pointer h-[220px]"
                       onClick={() => {
                         setSelectedIdea(trade);
-                        setIsLightBoxOpen(true);
+                        setIsViewOpen(true);
                       }}
                     />
-                    <button onClick={() => {
-                      setSelectedIdea(trade);
-                      setIsViewOpen(true);
-                    }} className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow">
-                      <Eye  size={20} />
+                    <button
+                      onClick={() => {
+                        setSelectedIdea(trade);
+                        setIsLightBoxOpen(true);
+                      }}
+                      className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
+                    >
+                      <Eye size={20} />
                     </button>
                   </div>
 
