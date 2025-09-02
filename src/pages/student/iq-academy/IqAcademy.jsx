@@ -23,6 +23,8 @@ export default function IqAcademy() {
     weekStartsOn: 0,
   });
   const displayedWeekStart = addDays(startOfCurrentWeek, weekOffset * 7);
+  const displayedWeekEnd = addDays(displayedWeekStart, 6); // ✅ sirf ek week
+
 
   const days = Array.from({ length: 7 }).map((_, i) =>
    addDays(displayedWeekStart, i)
@@ -44,6 +46,8 @@ export default function IqAcademy() {
       {
         id: activeCategoryId,
         language: selectedLanguage,
+         startDate: displayedWeekStart.toISOString(),
+      endDate: displayedWeekEnd.toISOString(),
       },
       {
         skip: !activeCategoryId,
@@ -126,7 +130,7 @@ export default function IqAcademy() {
             <div className="bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
               <div className="text-center">
                 <p className="text-lg sm:text-xl tracking-widest text-gray-500">
-                  No educators found in this category.
+                  No Schedule Found 
                 </p>
               </div>
             </div>

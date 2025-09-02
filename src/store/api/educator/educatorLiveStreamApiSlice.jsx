@@ -25,7 +25,14 @@ export const educatorLiveStreamApiSlice = createApi({
                 body: { callId: callId },
             }),
         }),
+        educatorLiveStreamStatusUpdate : builder.mutation({
+            query: ({ callId ,status  }) => ({
+                url: `/educator/live-stream/${callId}/status`,
+                method: 'PUT',
+                body: { status },
+            }),
+        }),
     }),
 });
 
-export const { useGetEducatorAcademyCategoryQuery, useLazyGetLiveSessionListQuery, useUpdateStreamStatusMutation, useEndCallMutation } = educatorLiveStreamApiSlice;
+export const { useGetEducatorAcademyCategoryQuery, useLazyGetLiveSessionListQuery, useUpdateStreamStatusMutation, useEndCallMutation , useEducatorLiveStreamStatusUpdateMutation } = educatorLiveStreamApiSlice;
