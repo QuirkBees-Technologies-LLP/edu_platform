@@ -13,7 +13,8 @@ export const clientAcademyCategoryApiSlice = createApi({
         const searchParams = new URLSearchParams();
         
         if (params?.language) searchParams.append("language", params.language);
-        
+        if (params?.startDate) searchParams.append("startDate", params.startDate);
+        if (params?.endDate) searchParams.append("endDate", params.endDate);
         const queryString = searchParams.toString();
         return `/users/course/category/${params.id}${queryString ? `?${queryString}` : ''}`;
       },
