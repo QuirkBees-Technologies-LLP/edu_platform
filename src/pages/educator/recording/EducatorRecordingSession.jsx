@@ -92,7 +92,7 @@ const EducatorRecordingSession = () => {
                   ? data?.data?.recorder?.thumbnail
                   : "/media/avatars/300-1.png"
               }
-              class="rounded-full border-3 border-success size-[100px] shrink-0"
+              class="rounded-full border-3 border-success size-[100px] shrink-0 object-cover"
             />
             <div class="flex items-center gap-1.5">
               <div class="text-lg leading-5 font-semibold text-gray-900"></div>

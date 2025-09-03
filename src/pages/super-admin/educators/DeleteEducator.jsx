@@ -22,7 +22,7 @@ const DeleteEducator = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRo
     return (
         <Dialog open={isDeleteOpen} onOpenChange={() => {
             handleDeleteClose();
-        }}>
+        }}> 
             <DialogContent className="p-5 max-w-[500px]" ref={ref}>
                 <VisuallyHidden>
                     <DialogTitle>Hidden Title</DialogTitle>

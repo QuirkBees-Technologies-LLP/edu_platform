@@ -75,7 +75,7 @@ const VideoThumbnail = ({ videoUrl, seekTime = 1, recordingThumbnail, data }) =>
             />
             {recordingThumbnail ? (
                 <>
-                    <div className="w-full h-full relative">
+                    <div className="w-full h-[28vh] relative">
                         <img src={recordingThumbnail || thumbnail} alt="Thumbnail"
                             className='rounded-lg w-full h-full object-cover'
                         />
