@@ -22,7 +22,7 @@ const RecordingSession = () => {
                     backgroundImage: getThemeMode() === 'dark' ? `url('${toAbsoluteUrl('/media/images/2600x1200/bg-1-dark.png')}')` : `url('${toAbsoluteUrl('/media/images/2600x1200/bg-1.png')}')`
                 }}>
                     <div class="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10">
-                        <img src="/media/avatars/300-1.png" class="rounded-full border-3 border-success size-[100px] shrink-0" />
+                        <img src="/media/avatars/300-1.png" class="rounded-full border-3 border-success size-[100px] shrink-0 object-cover" />
                         <div class="flex items-center gap-1.5">
                             <div class="text-lg leading-5 font-semibold text-gray-900">
                             </div>

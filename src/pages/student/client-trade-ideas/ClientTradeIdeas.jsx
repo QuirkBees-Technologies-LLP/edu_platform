@@ -276,11 +276,11 @@ const ClientTradeIdeas = () => {
                   key={trade._id}
                   className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
                 >
-                  <div className="relative w-full">
+                  <div className="relative h-[28vh] w-full">
                     <img
                       src={trade?.image[0]}
                       alt={trade.pair}
-                      className="w-full object-cover cursor-pointer h-[220px]"
+                      className="w-full object-cover h-full cursor-pointer"
                       onClick={() => {
                         setSelectedIdea(trade);
                         setIsViewOpen(true);

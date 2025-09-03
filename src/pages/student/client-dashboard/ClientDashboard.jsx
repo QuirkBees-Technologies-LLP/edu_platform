@@ -627,17 +627,11 @@ const ClientDashboard = () => {
                                     </div> */}
                 </div>
               </div>
-              <div className="col-span-12">
-
-
-                {/* start */}
+              {/* <div className="col-span-12">
                 <div className="flex items-center justify-center">
                   <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
-                    {/* Top accent */}
                     <div className="h-1 w-full bg-gradient-to-r from-primary via-primary-500 to-primary-500" />
-
                     <div className="p-6 md:p-5 grid md:grid-cols-1 gap-8">
-                      {/* Text / CTA */}
                       <div className="flex flex-col">
                         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200">
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -671,7 +665,7 @@ const ClientDashboard = () => {
                         </div>
                       </div>
 
-                      {/* App Store & Play Store */}
+
                       <div className="relative flex items-center justify-center gap-6">
                         <div className="absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-tr from-violet-200 via-fuchsia-200 to-rose-200 blur-2xl opacity-60" />
                         <a href="#" className="block w-auto h-9">
@@ -692,10 +686,7 @@ const ClientDashboard = () => {
                     </div>
                   </div>
                 </div>
-                {/* end */}
-
-
-              </div>
+              </div> */}
               <div className="col-span-12 md:col-span-6 xl:col-span-12">
                 <div className="card rounded-2xl shadow-md overflow-hidden relative group">
                   {/* Hover Overlay */}
@@ -777,9 +768,6 @@ const ClientDashboard = () => {
               </div>
             </div>
           </div>
-
-
-
         </div>
       </div>
     </>
