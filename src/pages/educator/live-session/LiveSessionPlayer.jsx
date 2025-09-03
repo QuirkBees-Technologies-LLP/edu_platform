@@ -316,134 +316,106 @@ const LiveSessionPlayer = ({
               <PhoneOff size={16} />
               End Call
             </button> */}
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  if (!callId) {
-                    toast.error("Missing callId");
-                    return;
-                  }
-
-                  if (isRecording) {
-                    console.log(
-                      "👉 Stopping last recording before ending call..."
-                    );
-                    await call.stopRecording();
-                  }
-
-                  await endCall({ callId }).unwrap();
-                  setIsCallEnd(true);
-
-                  // ✅ Get only last Go Live recording
-                  const res = await call.queryRecordings();
-                  if (res?.recordings?.length) {
-                    let filtered = res.recordings;
-
-                    if (goLiveStartedAt) {
-                      filtered = res.recordings.filter((rec) => {
-                        const recStart = new Date(rec.start_time);
-                        return recStart >= goLiveStartedAt;
-                      });
+            <div className="flex justify-center gap-3 mt-10">
+              {/* ✅ End Call */}
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    if (!callId) {
+                      toast.error("Missing callId");
+                      return;
                     }
 
-                    const lastRecording = filtered[filtered.length - 1];
-                    console.log("✅ Last session recording:", lastRecording);
-                    setStreamRecordings(lastRecording ? [lastRecording] : []);
+                    if (isRecording) {
+                      console.log(
+                        "👉 Stopping last recording before ending call..."
+                      );
+                      await call.stopRecording();
+                    }
+
+                    await endCall({ callId }).unwrap();
+                    setIsCallEnd(true);
+
+                    // ✅ Fetch ALL recordings instead of last only
+                    await fetchStreamRecordings();
+
+                    toast.success("Call ended successfully");
+                  } catch (error) {
+                    console.error("Failed to end stream", error);
+                    const message =
+                      error?.data?.message || "Failed to end call";
+                    toast.error(message);
                   }
+                }}
+                disabled={isEnding}
+                className="btn btn-md btn-danger"
+              >
+                <PhoneOff size={16} />
+                End Call
+              </button>
 
-                  toast.success("Call ended successfully");
-                } catch (error) {
-                  console.error("Failed to end stream", error);
-                  const message = error?.data?.message || "Failed to end call";
-                  toast.error(message);
-                }
-              }}
-              disabled={isEnding}
-              className="btn btn-md btn-danger"
-            >
-              <PhoneOff size={16} />
-              End Call
-            </button>
+              {/* ✅ Go Live / Stop Live */}
+              <button
+                type="button"
+                className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`}
+                onClick={async () => {
+                  try {
+                    if (isLive) {
+                      console.log("👉 Stopping live for:", callId);
 
-           <button
-  type="button"
-  className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`}
-  onClick={async () => {
-    try {
-      if (isLive) {
-        console.log("👉 Stopping live for:", callId);
+                      if (isRecording) {
+                        try {
+                          await call.stopRecording();
+                        } catch (err) {
+                          console.warn("⚠ stopRecording failed:", err);
+                        }
+                      }
 
-        // ✅ Stop recording if active
-        if (isRecording) {
-          console.log("👉 Stopping recording...");
-          try {
-            await call.stopRecording();
-          } catch (err) {
-            console.warn("⚠ stopRecording failed or already stopped:", err);
-          }
-        } else {
-          console.log("⚠ No active recording, skipping stopRecording()");
-        }
+                      await call.stopLive();
+                      await updateLiveStatus({
+                        callId,
+                        status: "pending",
+                      }).unwrap();
 
-        await call.stopLive();
+                      // ✅ Fetch ALL recordings
+                      await fetchStreamRecordings();
 
-        await updateLiveStatus({
-          callId,
-          status: "pending",
-        }).unwrap();
+                      toast.success("Stream stopped successfully");
+                    } else {
+                      console.log("👉 Going live for:", callId);
+                      await call.goLive();
+                      setGoLiveStartedAt(new Date());
 
-        // ✅ Fetch last recording after stop
-        const res = await call.queryRecordings();
-        if (res?.recordings?.length) {
-          const lastRecording = res.recordings[res.recordings.length - 1];
-          console.log("✅ Recording for this session:", lastRecording);
-        }
+                      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        toast.success("Stream stopped successfully");
-      } else {
-        console.log("👉 Going live for:", callId);
+                      if (!isRecording) {
+                        try {
+                          await call.startRecording();
+                        } catch (err) {
+                          console.warn("⚠ startRecording failed:", err);
+                        }
+                      }
 
-        await call.goLive();
-        setGoLiveStartedAt(new Date());
-
-        // ✅ Wait for stream to settle
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        // ✅ Start recording only if not already recording
-        try {
-          if (!isRecording) {
-            console.log("👉 Starting new recording session...");
-            await call.startRecording();
-          } else {
-            console.log("⚠ Recording already in progress, skipping startRecording()");
-          }
-        } catch (err) {
-          if (err?.message?.includes("already being recorded")) {
-            console.warn("⚠ Recording already running, ignoring...");
-          } else {
-            throw err;
-          }
-        }
-
-        await updateLiveStatus({
-          callId,
-          status: "active",
-        }).unwrap();
-
-        toast.success("Stream started successfully");
-      }
-    } catch (err) {
-      console.error("❌ Error updating live status:", err);
-      toast.error(err?.data?.message || "Failed to update live status");
-    }
-  }}
-  disabled={isLoadingRecordings || isUpdating}
->
-  {isLive ? <RouteOff size={16} /> : <Route size={16} />}
-  {isLive ? "Stop Live" : "Go Live"}
-</button>
-
+                      await updateLiveStatus({
+                        callId,
+                        status: "active",
+                      }).unwrap();
+                      toast.success("Stream started successfully");
+                    }
+                  } catch (err) {
+                    console.error("❌ Error updating live status:", err);
+                    toast.error(
+                      err?.data?.message || "Failed to update live status"
+                    );
+                  }
+                }}
+                disabled={isLoadingRecordings || isUpdating}
+              >
+                {isLive ? <RouteOff size={16} /> : <Route size={16} />}
+                {isLive ? "Stop Live" : "Go Live"}
+              </button>
+            </div>
           </div>
 
           {/* Loading indicator for recordings */}
