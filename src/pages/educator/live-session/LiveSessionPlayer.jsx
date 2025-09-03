@@ -35,6 +35,7 @@ const LiveSessionPlayer = ({
     useEducatorLiveStreamStatusUpdateMutation();
 
   const { useIsCallLive, useCallMembers } = useCallStateHooks();
+  const [goLiveStartedAt, setGoLiveStartedAt] = useState(null);
 
   const isLive = useIsCallLive();
   const members = useCallMembers(); // List of participants in the call
@@ -85,7 +86,7 @@ const LiveSessionPlayer = ({
         ];
 
         // Call End State
-        setIsCallEnd(call.state.endedAt);
+        setIsCallEnd(!!call.state.endedAt);
       } catch (error) {
         console.error("❌ Error checking call status:", error);
       }
@@ -119,17 +120,34 @@ const LiveSessionPlayer = ({
 
   console.log(call?.state?.backstage, "call1234");
 
-  useEffect(() => {
-    const handleStart = async () => {
-      try {
-        await call.startRecording();
-        console.log("Recording started");
-      } catch (err) {
-        console.error("Failed to start recording:", err);
-      }
-    };
-    !isRecording && handleStart();
-  }, [call, isRecording]);
+  // useEffect(() => {
+  //   const handleStart = async () => {
+  //     try {
+  //       await call.startRecording();
+  //       console.log("Recording started");
+  //     } catch (err) {
+  //       console.error("Failed to start recording:", err);
+  //     }
+  //   };
+  //   !isRecording && handleStart();
+  // }, [call, isRecording]);
+
+  // useEffect(() => {
+  //   if (!call) return;
+
+  //   const autoStartRecording = async () => {
+  //     try {
+  //       if (!isRecording && isLive) {
+  //         await call.startRecording();
+  //         console.log("✅ Auto recording started as stream went live");
+  //       }
+  //     } catch (err) {
+  //       console.error("❌ Failed to start recording:", err);
+  //     }
+  //   };
+
+  //   autoStartRecording();
+  // }, [call, isRecording, isLive]);
 
   const fetchStreamRecordings = async () => {
     setIsLoadingRecordings(true);
@@ -275,7 +293,7 @@ const LiveSessionPlayer = ({
           )}
           <div className="flex justify-center gap-3 mt-10">
             {/* <RecordingControls call={call} /> */}
-            <button
+            {/* <button
               type="button"
               onClick={async () => {
                 try {
@@ -297,33 +315,123 @@ const LiveSessionPlayer = ({
             >
               <PhoneOff size={16} />
               End Call
+            </button> */}
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  if (!callId) {
+                    toast.error("Missing callId");
+                    return;
+                  }
+
+                  if (isRecording) {
+                    console.log(
+                      "👉 Stopping last recording before ending call..."
+                    );
+                    await call.stopRecording();
+                  }
+
+                  await endCall({ callId }).unwrap();
+                  setIsCallEnd(true);
+
+                  // ✅ Get only last Go Live recording
+                  const res = await call.queryRecordings();
+                  if (res?.recordings?.length) {
+                    let filtered = res.recordings;
+
+                    if (goLiveStartedAt) {
+                      filtered = res.recordings.filter((rec) => {
+                        const recStart = new Date(rec.start_time);
+                        return recStart >= goLiveStartedAt;
+                      });
+                    }
+
+                    const lastRecording = filtered[filtered.length - 1];
+                    console.log("✅ Last session recording:", lastRecording);
+                    setStreamRecordings(lastRecording ? [lastRecording] : []);
+                  }
+
+                  toast.success("Call ended successfully");
+                } catch (error) {
+                  console.error("Failed to end stream", error);
+                  const message = error?.data?.message || "Failed to end call";
+                  toast.error(message);
+                }
+              }}
+              disabled={isEnding}
+              className="btn btn-md btn-danger"
+            >
+              <PhoneOff size={16} />
+              End Call
             </button>
+
             <button
               type="button"
               className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`}
               onClick={async () => {
                 try {
                   if (isLive) {
+                    console.log("👉 Stopping live for:", callId);
+
+                    // ✅ Stop recording if active
+                    if (isRecording) {
+                      console.log("👉 Stopping recording...");
+                      await call.stopRecording();
+                    }
+
                     await call.stopLive();
                     await updateLiveStatus({
                       callId,
                       status: "pending",
                     }).unwrap();
-                    setTimeout(() => {
-                      if (window.refreshRecordings) {
-                        window.refreshRecordings();
-                      }
-                    }, 1000);
+
+                    // ✅ Fetch last recording after stop
+                    const res = await call.queryRecordings();
+                    if (res?.recordings?.length) {
+                      const lastRecording =
+                        res.recordings[res.recordings.length - 1];
+                      console.log(
+                        "✅ Recording for this session:",
+                        lastRecording
+                      );
+                    }
+
+                    toast.success("Stream stopped successfully");
                   } else {
+                    console.log("👉 Going live for:", callId);
+
                     await call.goLive();
+                    setGoLiveStartedAt(new Date()); // ✅ mark start time
+
+                    // Wait until isLive is true
+                    await new Promise((resolve) => {
+                      const check = setInterval(() => {
+                        if (call.state?.isLive) {
+                          clearInterval(check);
+                          resolve();
+                        }
+                      }, 500);
+                    });
+
+                    // ✅ Start recording fresh session
+                    if (!isRecording) {
+                      console.log("👉 Starting new recording session...");
+                      await call.startRecording();
+                    }
+
                     await updateLiveStatus({
                       callId,
                       status: "active",
                     }).unwrap();
+
+                    toast.success("Stream started successfully");
                   }
                 } catch (err) {
-                  console.error("Error updating live status:", err);
-                  toast.error("Failed to update live status");
+                  console.error("❌ Error updating live status:", err);
+                  toast.error(
+                    err?.data?.message || "Failed to update live status"
+                  );
                 }
               }}
               disabled={isLoadingRecordings || isUpdating}

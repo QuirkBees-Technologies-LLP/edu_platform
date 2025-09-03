@@ -133,7 +133,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         </div>
       ),
       meta: {
-        headerClassName: "min-w-[200px]",
+        headerClassName: "min-w-[150px]",
       },
     },
     {
@@ -219,54 +219,54 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         headerClassName: 'min-w-[200px]'
       }
     },
-    {
-      accessorFn: row => row.createdAt,
-      id: 'createdAt',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Created At' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.create_by,
-      id: 'create_by',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Created By' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.create_by?.first_name + " " + info.row.original.create_by?.last_name}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      accessorFn: row => row.callId,
-      id: 'callId',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Call Id' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <span className="leading-none text-gray-800 font-normal">
-          {info.row.original.callId}
-        </span>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
+    // {
+    //   accessorFn: row => row.createdAt,
+    //   id: 'createdAt',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Created At' column={column} />,
+    //   enableSorting: true,
+    //   cell: info => <div className="flex items-center gap-2.5">
+    //     <span className="leading-none text-gray-800 font-normal">
+    //       {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
+    //     </span>
+    //   </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[200px]'
+    //   }
+    // },
+    // {
+    //   accessorFn: row => row.create_by,
+    //   id: 'create_by',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Created By' column={column} />,
+    //   enableSorting: true,
+    //   cell: info => <div className="flex items-center gap-2.5">
+    //     <span className="leading-none text-gray-800 font-normal">
+    //       {info.row.original.create_by?.first_name + " " + info.row.original.create_by?.last_name}
+    //     </span>
+    //   </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[200px]'
+    //   }
+    // },
+    // {
+    //   accessorFn: row => row.callId,
+    //   id: 'callId',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Call Id' column={column} />,
+    //   enableSorting: true,
+    //   cell: info => <div className="flex items-center gap-2.5">
+    //     <span className="leading-none text-gray-800 font-normal">
+    //       {info.row.original.callId}
+    //     </span>
+    //   </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[200px]'
+    //   }
+    // },
     {
       id: 'click',
       header: () => '',
