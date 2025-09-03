@@ -167,17 +167,17 @@ const LiveSessionPlayer = ({
     }
   };
 
-  // Fetch recordings when live stream stops
-  useEffect(() => {
-    if (!isLive && call) {
-      // Add a small delay to ensure the server has processed the stop request
-      const timer = setTimeout(() => {
-        fetchStreamRecordings();
-      }, 2000);
+  // // Fetch recordings when live stream stops
+  // useEffect(() => {
+  //   if (!isLive && call) {
+  //     // Add a small delay to ensure the server has processed the stop request
+  //     const timer = setTimeout(() => {
+  //       fetchStreamRecordings();
+  //     }, 2000);
 
-      return () => clearTimeout(timer);
-    }
-  }, [isLive, call]);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [isLive, call]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "unset" }}>
@@ -366,79 +366,84 @@ const LiveSessionPlayer = ({
               End Call
             </button>
 
-            <button
-              type="button"
-              className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`}
-              onClick={async () => {
-                try {
-                  if (isLive) {
-                    console.log("👉 Stopping live for:", callId);
+           <button
+  type="button"
+  className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`}
+  onClick={async () => {
+    try {
+      if (isLive) {
+        console.log("👉 Stopping live for:", callId);
 
-                    // ✅ Stop recording if active
-                    if (isRecording) {
-                      console.log("👉 Stopping recording...");
-                      await call.stopRecording();
-                    }
+        // ✅ Stop recording if active
+        if (isRecording) {
+          console.log("👉 Stopping recording...");
+          try {
+            await call.stopRecording();
+          } catch (err) {
+            console.warn("⚠ stopRecording failed or already stopped:", err);
+          }
+        } else {
+          console.log("⚠ No active recording, skipping stopRecording()");
+        }
 
-                    await call.stopLive();
-                    await updateLiveStatus({
-                      callId,
-                      status: "pending",
-                    }).unwrap();
+        await call.stopLive();
 
-                    // ✅ Fetch last recording after stop
-                    const res = await call.queryRecordings();
-                    if (res?.recordings?.length) {
-                      const lastRecording =
-                        res.recordings[res.recordings.length - 1];
-                      console.log(
-                        "✅ Recording for this session:",
-                        lastRecording
-                      );
-                    }
+        await updateLiveStatus({
+          callId,
+          status: "pending",
+        }).unwrap();
 
-                    toast.success("Stream stopped successfully");
-                  } else {
-                    console.log("👉 Going live for:", callId);
+        // ✅ Fetch last recording after stop
+        const res = await call.queryRecordings();
+        if (res?.recordings?.length) {
+          const lastRecording = res.recordings[res.recordings.length - 1];
+          console.log("✅ Recording for this session:", lastRecording);
+        }
 
-                    await call.goLive();
-                    setGoLiveStartedAt(new Date()); // ✅ mark start time
+        toast.success("Stream stopped successfully");
+      } else {
+        console.log("👉 Going live for:", callId);
 
-                    // Wait until isLive is true
-                    await new Promise((resolve) => {
-                      const check = setInterval(() => {
-                        if (call.state?.isLive) {
-                          clearInterval(check);
-                          resolve();
-                        }
-                      }, 500);
-                    });
+        await call.goLive();
+        setGoLiveStartedAt(new Date());
 
-                    // ✅ Start recording fresh session
-                    if (!isRecording) {
-                      console.log("👉 Starting new recording session...");
-                      await call.startRecording();
-                    }
+        // ✅ Wait for stream to settle
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
-                    await updateLiveStatus({
-                      callId,
-                      status: "active",
-                    }).unwrap();
+        // ✅ Start recording only if not already recording
+        try {
+          if (!isRecording) {
+            console.log("👉 Starting new recording session...");
+            await call.startRecording();
+          } else {
+            console.log("⚠ Recording already in progress, skipping startRecording()");
+          }
+        } catch (err) {
+          if (err?.message?.includes("already being recorded")) {
+            console.warn("⚠ Recording already running, ignoring...");
+          } else {
+            throw err;
+          }
+        }
 
-                    toast.success("Stream started successfully");
-                  }
-                } catch (err) {
-                  console.error("❌ Error updating live status:", err);
-                  toast.error(
-                    err?.data?.message || "Failed to update live status"
-                  );
-                }
-              }}
-              disabled={isLoadingRecordings || isUpdating}
-            >
-              {isLive ? <RouteOff size={16} /> : <Route size={16} />}
-              {isLive ? "Stop Live" : "Go Live"}
-            </button>
+        await updateLiveStatus({
+          callId,
+          status: "active",
+        }).unwrap();
+
+        toast.success("Stream started successfully");
+      }
+    } catch (err) {
+      console.error("❌ Error updating live status:", err);
+      toast.error(err?.data?.message || "Failed to update live status");
+    }
+  }}
+  disabled={isLoadingRecordings || isUpdating}
+>
+  {isLive ? <RouteOff size={16} /> : <Route size={16} />}
+  {isLive ? "Stop Live" : "Go Live"}
+</button>
+
           </div>
 
           {/* Loading indicator for recordings */}
