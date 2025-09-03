@@ -209,7 +209,14 @@ const AuthProvider = ({ children }) => {
         }
 
         const { id: userId, name, email: userEmail } = loginRes?.data?.data;
+        if(!loginRes?.data?.data?.memberships){
+          return{
+             success: false,
+            error: loginRes.data.message || "Login failed.",
+          }
+        }
         const { expire_at, plan, status } = loginRes?.data?.data?.memberships;
+
 
         // Step 2: Check Plan Expiry
         // const isExpired = new Date(expire_at) < new Date();

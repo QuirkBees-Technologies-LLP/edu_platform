@@ -9,8 +9,8 @@ import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
 import ShowMoreLess from "../../../components/ui/showmoreless";
-import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
+import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 
 
 const IqEducators = () => {
