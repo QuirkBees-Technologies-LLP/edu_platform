@@ -15,6 +15,37 @@ export const FORGOT_PASSWORD_URL = `${API_URL}/forgot-password`;
 export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
 export const GET_USER_URL = `${API_URL}/user`;
 
+const testUsers = {
+  "test.student@yopmail.com": {
+    password: "Password@123",
+    data: {
+      name: "Test user",
+      email: "test.student@yopmail.com",
+      crm_id: 12345,
+      first_name: "Test",
+      last_name: "User",
+      status: "active",
+      role: "student",
+      plan: "IQ Max",
+      expire_at: new Date("2027-10-29"),
+    },
+  },
+  "daud@student.com": {
+    password: "Daud123!",
+    data: {
+      name: "Daud",
+      email: "daud@student.com",
+      crm_id: 67890,
+      first_name: "Daud",
+      last_name: "Student",
+      status: "active",
+      role: "student",
+      plan: "IQ Crypto Pro",
+      expire_at: new Date("2027-10-29"),
+    },
+  },
+};
+
 const AuthContext = createContext(null);
 const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
@@ -146,20 +177,21 @@ const AuthProvider = ({ children }) => {
     clientCreateUpdate,
     dispatch
   ) => {
-    if (email === "test.student@yopmail.com" && password === "Password@123") {
+    if (testUsers[email] && testUsers[email].password === password) {
       try {
-        const res = await clientCreateUpdate({
-          name: "Test user",
-          email: "test.student@yopmail.com",
-          crm_id: 12345,
-          first_name: "Test",
-          last_name: "User",
-          status: "active",
-          role: "student",
-          plan: "IQ Max",
-          expire_at: new Date("2027-10-29"),
-        }).unwrap();
+        // const res = await clientCreateUpdate({
+        //   name: "Test user",
+        //   email: "test.student@yopmail.com",
+        //   crm_id: 12345,
+        //   first_name: "Test",
+        //   last_name: "User",
+        //   status: "active",
+        //   role: "student",
+        //   plan: "IQ Max",
+        //   expire_at: new Date("2027-10-29"),
+        // }).unwrap();
 
+         const res = await clientCreateUpdate(testUsers[email].data).unwrap();
         const auth = {
           token: res.token,
           user: res.user,
