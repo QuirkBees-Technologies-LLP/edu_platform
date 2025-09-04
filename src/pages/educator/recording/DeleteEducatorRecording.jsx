@@ -9,14 +9,16 @@ import { useDeleteEducatorRecordingMutation } from '../../../store/api/educator/
 const DeleteEducatorRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
     const [deleteEducatorRecording, { isLoading, isSuccess, isError, error }] = useDeleteEducatorRecordingMutation();
 
+  
+
     const handleDelete = async () => {
         try {
             await deleteEducatorRecording(selectedRow?._id).unwrap();
-            refetch();
             toast.success("Recording deleted successfully!");
             handleDeleteClose();
+            refetch();
         } catch (error) {
-            toast.error(err.data.message);
+              toast.error(err?.data?.message || "Failed to delete recording!");
         }
     };
 

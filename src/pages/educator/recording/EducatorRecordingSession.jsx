@@ -17,15 +17,31 @@ import VideoPlayerModal from "./VideoPlayerModal";
 import { useGetEducatorRecordingDataQuery } from "../../../store/api/educator/educatorRecordingApiSlice";
 import VideoThumbnail from "../live-session/VideoThumbnail";
 import RecordingThumbnail from "../../student/iq-educators/RecordingThumbnail";
+import {
+  KeenIcon,
+  MenuIcon,
+  MenuLink,
+  MenuSub,
+  MenuTitle,
+  Menu,
+  MenuItem,
+  MenuToggle,
+} from "@/components";
+import DeleteEducatorRecording from "./DeleteEducatorRecording";
+import CreateEducatorRecording from "./CreateEducatorRecording";
 
 const EducatorRecordingSession = () => {
-  const { data, isFetching, isError, error } =
+  const { data, isFetching, isError, error, refetch } =
     useGetEducatorRecordingDataQuery();
   const [showAllTags, setShowAllTags] = useState({});
   const [recording, setRecording] = useState(null);
   const [open, setOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
-
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [updateDeleteRecording, setUpdateDeleteRecording] = useState(null); // state to hold selected recording for edit/delete
+  const [selectedRow, setSelectedRow] = useState(null);
+  console.log("updateDeleteRecording: ", updateDeleteRecording);
   const { getThemeMode } = useSettings();
 
   if (isFetching) {
@@ -71,6 +87,56 @@ const EducatorRecordingSession = () => {
 
     setVideoUrl(url);
     setOpen(true);
+  };
+
+  const handleDeleteOpen = () => {
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setIsDeleteOpen(false);
+  };
+  const handleActionClick = (item) => {
+    setUpdateDeleteRecording(item);
+    // selected recording ko state me store kar lo
+  };
+
+  const handleCloseCreate = () => {
+    setIsDeleteOpen(false);
+    setIsCreateOpen(false);
+  };
+
+  const ActionMenu = (item) => {
+    return (
+      <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
+        <MenuItem
+          onClick={() => {
+            handleActionClick(item); // store selected recording
+            setIsCreateOpen(true); // edit modal open
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="notepad-edit" />
+            </MenuIcon>
+            <MenuTitle>update</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleActionClick(item); // store selected recording
+            handleDeleteOpen(); // delete modal open
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="trash" />
+            </MenuIcon>
+            <MenuTitle>Delete</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+      </MenuSub>
+    );
   };
 
   return (
@@ -140,7 +206,10 @@ const EducatorRecordingSession = () => {
               >
                 <div className="card">
                   {/* Image with Play Button */}
-                  <div className="relative w-full h-52 rounded-2xl overflow-hidden"  onClick={() => setRecording(item)}>
+                  <div
+                    className="relative w-full h-52 rounded-2xl overflow-hidden"
+                    onClick={() => setRecording(item)}
+                  >
                     <RecordingThumbnail
                       videoUrl={item?.url}
                       seekTime={2}
@@ -169,9 +238,11 @@ const EducatorRecordingSession = () => {
                   <div className="card-body p-4 rounded-2xl">
                     <div className="flex justify-between">
                       <div className="recorded_details">
-                        <h6 className="text-xl font-medium text-gray-900 mb-1">
-                          {item?.call_title}
-                        </h6>
+                        
+                            <h6 className="text-xl font-medium text-gray-900 mb-1">
+                              {item?.call_title}
+                            </h6>
+                          
                         <p
                           className="text-2sm text-gray-900 dark:text-gray-900 mb-3"
                           dangerouslySetInnerHTML={{
@@ -203,6 +274,21 @@ const EducatorRecordingSession = () => {
                           )}
                         </div>
                       </div>
+                      <div className="ml-2">
+                            <Menu className="items-stretch">
+                              <MenuItem
+                                toggle="dropdown"
+                                trigger="click"
+                                placement="bottom-end"
+                                className="p-0"
+                              >
+                                <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+                                  <KeenIcon icon="dots-vertical" />
+                                </MenuToggle>
+                                {ActionMenu(item)}
+                              </MenuItem>
+                            </Menu>
+                          </div>
                     </div>
 
                     {/* Footer */}
@@ -216,7 +302,7 @@ const EducatorRecordingSession = () => {
                         {new Date(item?.start_time).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
-                          hour12: true
+                          hour12: true,
                         })}
                       </p>
                     </div>
@@ -232,6 +318,23 @@ const EducatorRecordingSession = () => {
         onOpenChange={setOpen}
         videoUrl={videoUrl}
         data={recording}
+      />
+      {isDeleteOpen && (
+        <DeleteEducatorRecording
+          refetch={refetch}
+          onClose={handleDeleteClose}
+          isDeleteOpen={isDeleteOpen}
+          handleDeleteClose={handleDeleteClose}
+          selectedRow={updateDeleteRecording}
+        />
+      )}
+      <CreateEducatorRecording
+        setSelectedRow={setSelectedRow}
+        handleCloseCreate={handleCloseCreate}
+        isCreateOpen={isCreateOpen}
+        setIsCreateOpen={setIsCreateOpen}
+        refetch={refetch}
+        selectedRow={updateDeleteRecording}
       />
     </div>
   );
