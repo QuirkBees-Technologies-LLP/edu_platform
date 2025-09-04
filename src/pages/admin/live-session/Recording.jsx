@@ -196,6 +196,8 @@ const Recording = () => {
                 setIsCreateOpen={setIsCreateOpen}
                 refetch={refetch}
                 selectedRow={selectedRow}
+                  onUpdateSuccess={() => {}}
+
             />
             {isDeleteOpen && (
                 <DeleteAdminRecording
@@ -203,6 +205,8 @@ const Recording = () => {
                     isDeleteOpen={isDeleteOpen}
                     handleDeleteClose={handleDeleteClose}
                     selectedRow={selectedRow}
+                    onDeleteSuccess= {() => {}}
+
                 />
             )}
         </div>

@@ -305,8 +305,8 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
         onFetchData={handleFetchData}
       /> */}
       <EducatorViseRecording data={data?.data} isLoading={isLoading} error={error} isError={isError} isFetching={isFetching} />
-      <CreateAdminRecording setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
-      {isDeleteOpen && <DeleteAdminRecording refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
+      <CreateAdminRecording setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow}     onUpdateSuccess={() => {}} />
+      {isDeleteOpen && <DeleteAdminRecording refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow}  onDeleteSuccess= {() => {}}/>}
     </div>
   )
 };

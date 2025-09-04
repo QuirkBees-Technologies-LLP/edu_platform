@@ -5,15 +5,18 @@ import { toast } from 'sonner';
 import { useDeleteAdminRecordingMutation } from '../../../store/api/admin/adminRecordingApiSlice';
 
 
-const DeleteAdminRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
+const DeleteAdminRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch , onDeleteSuccess}, ref) => {
     const [deleteEducatorRecording, { isLoading, isSuccess, isError, error }] = useDeleteAdminRecordingMutation();
 
     const handleDelete = async () => {
         try {
             await deleteEducatorRecording(selectedRow?._id).unwrap();
-            refetch();
+
+         onDeleteSuccess();
+
             toast.success("Recording deleted successfully!");
             handleDeleteClose();
+            refetch();
         } catch (error) {
             toast.error(err.data.message);
         }

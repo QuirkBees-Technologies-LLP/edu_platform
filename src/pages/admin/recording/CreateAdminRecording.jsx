@@ -15,7 +15,7 @@ import clsx from "clsx";
 import { KeenIcon } from "@/components";
 import { useUpdateAdminRecordingMutation } from '../../../store/api/admin/adminRecordingApiSlice';
 
-const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch, setSelectedRow }, ref) => {
+const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRow, refetch, setSelectedRow , onUpdateSuccess}, ref) => {
     const [updateEducatorRecording] = useUpdateAdminRecordingMutation();
 
     const initialValues = {
@@ -89,6 +89,7 @@ const CreateAdminRecording = forwardRef(({ isCreateOpen, handleCloseCreate, sele
                     }
                     
                     setSelectedRow({});
+                    onUpdateSuccess();
                     refetch();
                     toast.success("Recording updated successfully!");
                 } else {
