@@ -592,10 +592,14 @@ const IqEducators = () => {
                           className="w-full h-36 object-cover"
                         />
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
+                      <div className="p-4 d-flex">
+                       <div className="justify-between">
+                         <h3 className="text-md font-normal mb-2">
                           {course.name}
                         </h3>
+                       
+                       </div>
+                       
                         <ShowMoreLess
                           className="text-xs text-gray-600"
                           html={course?.description || "No description"}
