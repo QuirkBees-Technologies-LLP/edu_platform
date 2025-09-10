@@ -12,7 +12,13 @@ const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 const EducatorLiveSessionView = () => {
   const { state: sessionData } = useLocation();
   const { callId } = useParams();
-  const { rtmp_URl: rtmp_url, token: rtmp_stream_key } = sessionData || {};
+  const {
+    rtmp_URl: rtmp_url,
+    token: rtmp_stream_key,
+    _id: _id,
+  } = sessionData || {};
+
+  console.log(sessionData._id,"sessionData")
 
   const { auth } = useAuthContext();
   const userId = auth?.user?._id;
@@ -35,14 +41,14 @@ const EducatorLiveSessionView = () => {
       const newClient = new StreamVideoClient({
         apiKey,
         token,
-        user: { 
-          id: userId, 
-          name: auth?.user?.first_name + " " + auth?.user?.last_name 
+        user: {
+          id: userId,
+          name: auth?.user?.first_name + " " + auth?.user?.last_name,
         },
       });
 
       const newCall = newClient.call("livestream", callId);
-      
+
       // Check if already joined before joining
       if (!newCall.state.joined) {
         await newCall.join();
@@ -78,7 +84,7 @@ const EducatorLiveSessionView = () => {
 
     return () => {
       effectRan.current = false;
-      if (typeof cleanupFn === 'function') {
+      if (typeof cleanupFn === "function") {
         cleanupFn();
       }
       // Cleanup existing client and call on unmount
@@ -102,6 +108,7 @@ const EducatorLiveSessionView = () => {
           token={rtmp_stream_key}
           rtmp_stream_key={rtmp_stream_key}
           rtmp_url={rtmp_url}
+          id={_id}
         />
       </StreamWrapper>
     </EventProvider>
