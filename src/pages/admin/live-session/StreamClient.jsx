@@ -44,6 +44,7 @@ const StreamClient = ({ client, callId, sessionToken, token, rtmp_stream_key, rt
     const isLive = !!call?.state?.startedAt && !call?.state?.endedAt;
 
     const maskAndTruncateText = (text, maxLength = 50) => {
+        if (!text) return "";
         const masked = "•".repeat(text.length);
         if (masked.length > maxLength) {
             return masked.substring(0, maxLength) + "...";

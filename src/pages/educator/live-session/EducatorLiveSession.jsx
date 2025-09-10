@@ -49,11 +49,13 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const handleEndCall = async (rowData) => {
     try {
       const callId = rowData?.callId;
+      const Id = rowData?._id;
+      console.log(Id,"Id")
       if (!callId) {
         toast.error('Missing callId');
         return;
       }
-      await endCall({ callId }).unwrap();
+      await endCall({ callId, Id}).unwrap();
       setSelectedRow({});
       reloadTable && reloadTable();
       toast.success('Call ended successfully');
