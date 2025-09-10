@@ -28,12 +28,12 @@ const StreamClient = ({
   rtmp_url,
   setIsTooltipOpen,
   isTooltipOpen,
+  id,
 }) => {
   const call = useCall();
 
-
-  console.log("isTooltipOpen",isTooltipOpen)
-  console.log("rtmp_url",isTooltipOpen)
+  console.log("isTooltipOpen", isTooltipOpen);
+  console.log("rtmp_url", isTooltipOpen);
 
   const truncateText = (text, maxLength) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -98,6 +98,7 @@ const StreamClient = ({
                           rtmp_url={rtmp_url}
                           setIsTooltipOpen={setIsTooltipOpen}
                           isTooltipOpen={isTooltipOpen}
+                          id={id}
                         />
                       </StreamCall>
                     </StreamVideo>
