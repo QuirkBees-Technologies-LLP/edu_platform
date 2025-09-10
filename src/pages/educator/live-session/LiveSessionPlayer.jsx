@@ -8,7 +8,10 @@ import { Copy, PhoneOff, Podcast, Radio, Route, RouteOff } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { DefaultTooltip } from "@/components";
 import { toast } from "sonner";
-import { useEndCallMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
+import {
+  useEducatorChangeLiveStreamStatusUpdateMutation,
+  useEndCallMutation,
+} from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { useNavigate } from "react-router";
 import RecordingControls from "./RecordingControls";
 import { useEducatorLiveStreamStatusUpdateMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
@@ -21,6 +24,7 @@ const LiveSessionPlayer = ({
   rtmp_url,
   setIsTooltipOpen,
   isTooltipOpen,
+  id,
 }) => {
   const [isCallEnd, setIsCallEnd] = useState(null);
   const [isCallStarted, setIsCallStarted] = useState(null);
@@ -33,6 +37,8 @@ const LiveSessionPlayer = ({
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
   const [updateLiveStatus, { isLoading: isUpdating }] =
     useEducatorLiveStreamStatusUpdateMutation();
+  const [updateChangeLiveStatus, { isLoading: isLoading }] =
+    useEducatorChangeLiveStreamStatusUpdateMutation();
 
   const { useIsCallLive, useCallMembers } = useCallStateHooks();
   const [goLiveStartedAt, setGoLiveStartedAt] = useState(null);
@@ -86,7 +92,7 @@ const LiveSessionPlayer = ({
         ];
 
         // Call End State
-        setIsCallEnd(!!call.state.endedAt);
+        setIsCallEnd(false);
       } catch (error) {
         console.error("❌ Error checking call status:", error);
       }
@@ -334,7 +340,11 @@ const LiveSessionPlayer = ({
                       await call.stopRecording();
                     }
 
-                    await endCall({ callId }).unwrap();
+                    await endCall({ callId, Id: id }).unwrap();
+                    await updateLiveStatus({
+                        id,
+                        status: "ended",
+                      }).unwrap();
                     setIsCallEnd(true);
 
                     // ✅ Fetch ALL recordings instead of last only
@@ -374,7 +384,7 @@ const LiveSessionPlayer = ({
 
                       await call.stopLive();
                       await updateLiveStatus({
-                        callId,
+                        id,
                         status: "pending",
                       }).unwrap();
 
@@ -398,7 +408,7 @@ const LiveSessionPlayer = ({
                       }
 
                       await updateLiveStatus({
-                        callId,
+                        id,
                         status: "active",
                       }).unwrap();
                       toast.success("Stream started successfully");
