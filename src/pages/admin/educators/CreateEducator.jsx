@@ -383,6 +383,7 @@ const CreateEducator = forwardRef(
                   </label>
                   <input
                     type="email"
+                    readOnly={selectedRow?._id}
                     placeholder="Enter email"
                     autoComplete="off"
                     {...formik.getFieldProps("email")}
