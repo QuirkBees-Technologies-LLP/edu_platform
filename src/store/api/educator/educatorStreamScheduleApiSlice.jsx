@@ -30,7 +30,14 @@ export const educatorStreamScheduleApiSlice = createApi({
                 method: 'DELETE',
             }),
         }),
+        createRecurrenceSchedule: builder.mutation({
+      query: (formData) => ({
+        url: "/educator/schedule/recurrence",
+        method: "POST",
+        body: formData,
+      }),
+    }),
     }),
 });
 
-export const { useGetEducatorStreamScheduleQuery, useLazyGetEducatorStreamScheduleQuery, useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation, useDeleteEducatorStreamScheduleMutation } = educatorStreamScheduleApiSlice;
+export const { useGetEducatorStreamScheduleQuery, useLazyGetEducatorStreamScheduleQuery, useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation, useDeleteEducatorStreamScheduleMutation , useCreateRecurrenceScheduleMutation } = educatorStreamScheduleApiSlice;
