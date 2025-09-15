@@ -92,7 +92,7 @@ const LiveSessionPlayer = ({
         ];
 
         // Call End State
-        setIsCallEnd(false);
+        setIsCallEnd(!!call.state.endedAt);
       } catch (error) {
         console.error("❌ Error checking call status:", error);
       }
@@ -340,9 +340,9 @@ const LiveSessionPlayer = ({
                       await call.stopRecording();
                     }
 
-                    await endCall({ callId, Id: id }).unwrap();
+                    await endCall({ callId}).unwrap();
                     await updateLiveStatus({
-                        id,
+                        callId,
                         status: "ended",
                       }).unwrap();
                     setIsCallEnd(true);
@@ -384,7 +384,7 @@ const LiveSessionPlayer = ({
 
                       await call.stopLive();
                       await updateLiveStatus({
-                        id,
+                       callId,
                         status: "pending",
                       }).unwrap();
 
@@ -408,7 +408,8 @@ const LiveSessionPlayer = ({
                       }
 
                       await updateLiveStatus({
-                        id,
+                        
+                       callId,
                         status: "active",
                       }).unwrap();
                       toast.success("Stream started successfully");
