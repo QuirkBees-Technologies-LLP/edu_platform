@@ -251,10 +251,8 @@ const AuthProvider = ({ children }) => {
 
 
         // Step 2: Check Plan Expiry
-        // const isExpired = new Date(expire_at) < new Date();
-        const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
-
-        // const isExpired = false;
+        const isExpired = new Date(expire_at) < new Date();
+        // const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
 
         if (isExpired) {
           // Step 3: Get token and redirect

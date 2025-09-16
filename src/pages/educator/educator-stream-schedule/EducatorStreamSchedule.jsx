@@ -433,7 +433,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
               className="btn btn-primary"
               onClick={handleClickOpenReccurenceSchedule}
             >
-              Create Recurrence Schedule
+              Create Recurring Schedule
             </button>
           </div>
         </ToolbarActions>
