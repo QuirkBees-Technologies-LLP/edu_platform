@@ -70,7 +70,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
       datetime: "",
       tags: [],
       category: "",
-      files: null,
+      // files: null,
       userId: "",
       streamType: "",
       language: "",
@@ -108,37 +108,36 @@ const CreateRecurrenceScheduleModel = forwardRef(
           .min(1, "At least one day is required")
           .of(Yup.string().required("Day cannot be empty")),
       }),
-      files: Yup.array()
-        .required("Thumbnail is required")
-        .min(1, "Thumbnail is required")
-        .test("fileOrUrl", "Thumbnail is required", (value) => {
-          if (!value || value.length === 0) return false;
-          const file = value[0]?.file;
-          const dataURL = value[0]?.dataURL;
-          return !!file || !!dataURL; // allow either new file or existing URL
-        })
-        .test("fileType", "Unsupported file type", (value) => {
-          const file = value?.[0]?.file;
-          if (!file) return true; // skip type check if no new file
-          const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-          return allowedTypes.includes(file.type);
-        })
-        .test("fileSize", "File size too large (max 2MB)", (value) => {
-          const file = value?.[0]?.file;
-          if (!file) return true; // skip size check if no new file
-          const maxSize = 2 * 1024 * 1024;
-          return file.size <= maxSize;
-        }),
+      // files: Yup.array()
+      //   .required("Thumbnail is required")
+      //   .min(1, "Thumbnail is required")
+      //   .test("fileOrUrl", "Thumbnail is required", (value) => {
+      //     if (!value || value.length === 0) return false;
+      //     const file = value[0]?.file;
+      //     const dataURL = value[0]?.dataURL;
+      //     return !!file || !!dataURL; // allow either new file or existing URL
+      //   })
+      //   .test("fileType", "Unsupported file type", (value) => {
+      //     const file = value?.[0]?.file;
+      //     if (!file) return true; // skip type check if no new file
+      //     const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      //     return allowedTypes.includes(file.type);
+      //   })
+      //   .test("fileSize", "File size too large (max 2MB)", (value) => {
+      //     const file = value?.[0]?.file;
+      //     if (!file) return true; // skip size check if no new file
+      //     const maxSize = 2 * 1024 * 1024;
+      //     return file.size <= maxSize;
+      //   }),
       language: Yup.string().required("Language is required"),
     });
- 
 
     const formik = useFormik({
       initialValues,
       enableReinitialize: true,
       revalidateOnMount: true,
       validationSchema: createSchema,
-       context: { datetime: initialValues.datetime },
+      context: { datetime: initialValues.datetime },
       onSubmit: async (values) => {
         try {
           if (!values.datetime) {
@@ -158,15 +157,19 @@ const CreateRecurrenceScheduleModel = forwardRef(
               ? moment(values.recurrenceRule.endDateTime).toISOString()
               : null,
             freq: values.recurrenceRule.frequency || "WEEKLY",
-            byDay: values.recurrenceRule.byDay || [], 
+            byDay: values.recurrenceRule.byDay || [],
             tags: values.tags,
-            files: values.files,
+            // files: values.files,
             streamType: values.streamType,
           };
 
           const res = await createRecurrenceSchedule(payload).unwrap();
           if (res) {
             toast.success("Stream schedule created successfully");
+            refetch();
+            formik.resetForm();
+            setSelectedRow({});
+            
             handleCloseCreate();
           }
         } catch (error) {
@@ -174,18 +177,18 @@ const CreateRecurrenceScheduleModel = forwardRef(
         }
       },
     });
-       useEffect(() => {
-  formik.setFormikState((prev) => ({
-    ...prev,
-    context: { datetime: formik.values.datetime },
-  }));
-}, [formik.values.datetime]);
+    useEffect(() => {
+      formik.setFormikState((prev) => ({
+        ...prev,
+        context: { datetime: formik.values.datetime },
+      }));
+    }, [formik.values.datetime]);
     return (
       <Dialog
         open={isOpen}
         onOpenChange={() => {
           formik.resetForm();
-             setSelectedRow({});
+          setSelectedRow({});
           handleCloseCreate();
         }}
       >
@@ -194,8 +197,8 @@ const CreateRecurrenceScheduleModel = forwardRef(
           <DialogHeader className="pb-5 pt-0 px-0">
             <DialogTitle>
               {selectedRow?._id
-                ? "Update Live Schedule"
-                : "Create Live Schedule"}
+                ? "Update recurring Schedule"
+                : "Create recurring Schedule"}
             </DialogTitle>
           </DialogHeader>
 
@@ -246,7 +249,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium tracking-wide">
                     EASTERN TIME (EST)
@@ -258,7 +261,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     {time.clock}
                   </p>
                 </div>
-              </div>
+              </div> */}
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -442,7 +445,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                   </div>
                 </div>
               </div>
-              <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium tracking-wide">
                     EASTERN TIME (EST)
@@ -454,7 +457,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     {time.clock}
                   </p>
                 </div>
-              </div>
+              </div> */}
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -466,10 +469,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                       setIsPickerOpen={setIsEndDatePickerOpen}
                       value={formik.values.recurrenceRule.endDateTime}
                       onChange={(date) =>
-                        formik.setFieldValue(
-                          "recurrenceRule.endDateTime",
-                          date
-                        )
+                        formik.setFieldValue("recurrenceRule.endDateTime", date)
                       }
                       className={
                         formik.errors.recurrenceRule?.endDateTime &&
@@ -487,14 +487,15 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     )}
                 </div>
               </div>
-              <div className="col-span-12">
+
+              {/* <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Thumbnail<span className="text-danger">*</span>
                   </label>
                   <div className="flex-wrap gap-5">
                     {/* Image Input */}
-                    <ImageInput
+              {/* <ImageInput
                       value={formik.values.files}
                       onChange={handleImageChange}
                       acceptType={["jpg", "jpeg", "png"]}
@@ -561,16 +562,16 @@ const CreateRecurrenceScheduleModel = forwardRef(
                           )}
                         </div>
                       )}
-                    </ImageInput>
-                  </div>
+                    </ImageInput> */}
+              {/* </div>
                   {formik.touched.files && formik.errors.files && (
                     <span role="alert" className="text-danger text-xs mt-1">
                       {formik.errors.files}
                     </span>
-                  )}
-                </div>
-              </div>
-            </div>  
+                  )} */}
+              {/* </div> */}
+              {/* </div> */}
+            </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end pt-5 rounded-b dark:border-gray-200 gap-3">
             <button
