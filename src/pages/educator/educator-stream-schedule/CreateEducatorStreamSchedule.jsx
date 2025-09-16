@@ -67,7 +67,7 @@ const CreateEducatorStreamSchedule = forwardRef(
       datetime: "",
       tags: [],
       category: "",
-      files: null,
+      // files: null,
       userId: "",
       streamType: "",
       language: "",
@@ -86,27 +86,27 @@ const CreateEducatorStreamSchedule = forwardRef(
       tags: Yup.array()
         .min(1, "At least one tag is required")
         .of(Yup.string().required("Tag cannot be empty")),
-      files: Yup.array()
-        .required("Thumbnail is required")
-        .min(1, "Thumbnail is required")
-        .test("fileOrUrl", "Thumbnail is required", (value) => {
-          if (!value || value.length === 0) return false;
-          const file = value[0]?.file;
-          const dataURL = value[0]?.dataURL;
-          return !!file || !!dataURL; // allow either new file or existing URL
-        })
-        .test("fileType", "Unsupported file type", (value) => {
-          const file = value?.[0]?.file;
-          if (!file) return true; // skip type check if no new file
-          const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-          return allowedTypes.includes(file.type);
-        })
-        .test("fileSize", "File size too large (max 2MB)", (value) => {
-          const file = value?.[0]?.file;
-          if (!file) return true; // skip size check if no new file
-          const maxSize = 2 * 1024 * 1024;
-          return file.size <= maxSize;
-        }),
+      // files: Yup.array()
+      //   .required("Thumbnail is required")
+      //   .min(1, "Thumbnail is required")
+      //   .test("fileOrUrl", "Thumbnail is required", (value) => {
+      //     if (!value || value.length === 0) return false;
+      //     const file = value[0]?.file;
+      //     const dataURL = value[0]?.dataURL;
+      //     return !!file || !!dataURL; // allow either new file or existing URL
+      //   })
+      //   .test("fileType", "Unsupported file type", (value) => {
+      //     const file = value?.[0]?.file;
+      //     if (!file) return true; // skip type check if no new file
+      //     const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      //     return allowedTypes.includes(file.type);
+      //   })
+      //   .test("fileSize", "File size too large (max 2MB)", (value) => {
+      //     const file = value?.[0]?.file;
+      //     if (!file) return true; // skip size check if no new file
+      //     const maxSize = 2 * 1024 * 1024;
+      //     return file.size <= maxSize;
+      //   }),
       language: Yup.string().required("Language is required"),
     });
 
@@ -134,9 +134,9 @@ const CreateEducatorStreamSchedule = forwardRef(
         // formData.append('userId', values?.userId);
         formData.append("educator", values?.userId);
 
-        if (files) {
-          formData.append("files", files); // key must match your backend field
-        }
+        // if (files) {
+        //   formData.append("files", files); // key must match your backend field
+        // }
 
         if (selectedRow?._id) {
           formData.append("id", selectedRow._id); // key must match your backend field
@@ -193,7 +193,7 @@ const CreateEducatorStreamSchedule = forwardRef(
             : null,
           tags: selectedRow?.tags,
           category: selectedRow?.category?._id,
-          files: [{ file: null, dataURL: selectedRow?.image }],
+          // files: [{ file: null, dataURL: selectedRow?.image }],
           userId: selectedRow?.userId,
           language: selectedRow?.language
           // files: selectedRow?.image
@@ -468,14 +468,14 @@ const CreateEducatorStreamSchedule = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Thumbnail<span className="text-danger">*</span>
                   </label>
                   <div className="flex-wrap gap-5">
                     {/* Image Input */}
-                    <ImageInput
+                    {/* <ImageInput
                       value={formik.values.files}
                       onChange={handleImageChange}
                       acceptType={["jpg", "jpeg", "png"]}
@@ -548,8 +548,8 @@ const CreateEducatorStreamSchedule = forwardRef(
                       {formik.errors.files}
                     </span>
                   )}
-                </div>
-              </div>
+                </div> */}
+              {/* </div> */}
             </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end pt-5 rounded-b dark:border-gray-200 gap-3">
