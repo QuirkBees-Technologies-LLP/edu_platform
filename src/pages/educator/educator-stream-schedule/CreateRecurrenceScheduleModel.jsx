@@ -41,20 +41,20 @@ const CreateRecurrenceScheduleModel = forwardRef(
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
 
-    const [time, setTime] = useState({
-      date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-      clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
-    });
+    // const [time, setTime] = useState({
+    //   date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
+    //   clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+    // });
 
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setTime({
-          date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-          clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }, []);
+    // useEffect(() => {
+    //   const interval = setInterval(() => {
+    //     setTime({
+    //       date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
+    //       clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+    //     });
+    //   }, 1000);
+    //   return () => clearInterval(interval);
+    // }, []);
 
     const { data } = useGetEducatorAcademyCategoryQuery();
     const { data: languagesList } = useGetLanguageListQuery();
@@ -77,7 +77,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
       recurrenceRule: {
         frequency: "",
         endDateTime: "",
-        byDay: [],
+        byWeekday: [],
       },
 
       // files: ""
@@ -104,7 +104,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
             Yup.ref("$datetime"),
             "End date & time must be after start date & time"
           ),
-        byDay: Yup.array()
+        byWeekday: Yup.array()
           .min(1, "At least one day is required")
           .of(Yup.string().required("Day cannot be empty")),
       }),
@@ -145,31 +145,72 @@ const CreateRecurrenceScheduleModel = forwardRef(
             return;
           }
 
-          const payload = {
-            title: values.title,
-            description: values.description,
-            category: values.category, // category _id
-            language: values.language,
-            educator: educatorId, // logged-in educator _id
-            time: moment(values.datetime).format("HH:mm"), // time only
-            datetime: moment(values.datetime).toISOString(),
-            endDate: values.recurrenceRule.endDateTime
-              ? moment(values.recurrenceRule.endDateTime).toISOString()
-              : null,
-            freq: values.recurrenceRule.frequency || "WEEKLY",
-            byDay: values.recurrenceRule.byDay || [],
-            tags: values.tags,
-            // files: values.files,
-            streamType: values.streamType,
-          };
+          // const payload = {
+          //   title: values.title,
+          //   description: values.description,
+          //   category: values.category, // category _id
+          //   language: values.language,
+          //   educator: educatorId, // logged-in educator _id
+          //   time: moment(values.datetime).format("HH:mm"), // time only
+          //   datetime: moment(values.datetime).toISOString(),
+          //   endDate: values.recurrenceRule.endDateTime
+          //     ? moment(values.recurrenceRule.endDateTime).toISOString()
+          //     : null,
+          //   freq: values.recurrenceRule.frequency || "WEEKLY",
+          //   byWeekday: values.recurrenceRule.byWeekday || [],
+          //   tags: values.tags,
+          //   // files: values.files,
+          //   streamType: values.streamType,
+          // };
 
-          const res = await createRecurrenceSchedule(payload).unwrap();
+          const formData = new FormData();
+          formData.append("title", values.title);
+          formData.append("description", values.description);
+          formData.append("category", values.category);
+          formData.append("language", values.language);
+          formData.append("educator", educatorId);
+
+          // ✅ only HH:mm
+          formData.append("time", moment(values.datetime).format("HH:mm"));
+
+          // full datetime
+          formData.append("datetime", moment(values.datetime).toISOString());
+
+          // endDate if available
+          if (values.recurrenceRule?.endDateTime) {
+            formData.append(
+              "endDate",
+              moment(values.recurrenceRule.endDateTime).toISOString()
+            );
+          }
+
+          // ✅ correct freq
+          formData.append("freq", values.recurrenceRule?.frequency || "WEEKLY");
+
+          // weekdays array
+          (values.recurrenceRule?.byWeekday || []).forEach((day) =>
+            formData.append("byWeekday[]", day)
+          );
+
+          // tags array
+          (values.tags || []).forEach((tag) => formData.append("tags[]", tag));
+
+          // optional
+          if (values.streamType)
+            formData.append("streamType", values.streamType);
+
+          // files (if needed)
+          // if (values.files?.[0]?.file) {
+          //   formData.append("files", values.files[0].file);
+          // }
+
+          const res = await createRecurrenceSchedule(formData).unwrap();
           if (res) {
             toast.success("Stream schedule created successfully");
             refetch();
             formik.resetForm();
             setSelectedRow({});
-            
+
             handleCloseCreate();
           }
         } catch (error) {
@@ -417,9 +458,9 @@ const CreateRecurrenceScheduleModel = forwardRef(
                         Day
                       </label>
                       <Select
-                        value={formik.values.recurrenceRule.byDay[0]}
+                        value={formik.values.recurrenceRule.byWeekday[0]}
                         onValueChange={(v) =>
-                          formik.setFieldValue("recurrenceRule.byDay", [v])
+                          formik.setFieldValue("recurrenceRule.byWeekday", [v])
                         }
                       >
                         <SelectTrigger>
@@ -435,10 +476,10 @@ const CreateRecurrenceScheduleModel = forwardRef(
                           <SelectItem value="SU">Sunday</SelectItem>
                         </SelectContent>
                       </Select>
-                      {formik.touched.recurrenceRule?.byDay &&
-                        formik.errors.recurrenceRule?.byDay && (
+                      {formik.touched.recurrenceRule?.byWeekday &&
+                        formik.errors.recurrenceRule?.byWeekday && (
                           <span className="text-danger text-xs">
-                            {formik.errors.recurrenceRule?.byDay}
+                            {formik.errors.recurrenceRule?.byWeekday}
                           </span>
                         )}
                     </div>
