@@ -123,6 +123,7 @@ import AdminTradeAnalysis from "../pages/admin/admin-trade-analysis/AdminTradeAn
 import ClientDashboard from "../pages/student/client-dashboard/ClientDashboard";
 import FastStartTraining from "../pages/student/fast-start-training/FastStartTraining";
 import IqStrategies from "../pages/student/iq-strategies/IqStrategies";
+import CommunityFeed from "../pages/student/iq-social/CommunityFeed";
 
 import IqAcademy from "../pages/student/iq-academy/IqAcademy";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
@@ -163,6 +164,7 @@ const routes = {
     { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
     { path: "/iq-insight", element: <IqInsight /> },
+    { path: "/iq-social", element: <CommunityFeed /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
@@ -231,7 +233,6 @@ const AppRoutingSetup = () => {
   // const roleRoutes = routes[userRole] || [];
 
   console.log(roleRoutes, "roleRoutes");
-  
 
   return (
     <Routes>
