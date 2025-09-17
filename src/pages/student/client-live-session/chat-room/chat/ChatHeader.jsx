@@ -17,7 +17,7 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
     const isMdUp = useResponsive('down', 'sm'); // matches Tailwind's md: 768px+
     useEffect(() => {
         if (isMdUp) {
-            setIsFullScreen(prev => !prev);
+            setIsFullScreen(false);
         }
     }, [isMdUp]);
 
