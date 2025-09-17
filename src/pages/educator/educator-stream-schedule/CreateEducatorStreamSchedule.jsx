@@ -340,8 +340,7 @@ const CreateEducatorStreamSchedule = forwardRef(
                   )}
                 </div>
               </div>
-
-               <div className="col-span-12">
+               {/* <div className="col-span-12">
                 <div className="flex items-center justify-between">
                 <p className="text-xs font-medium tracking-wide">
                 EASTERN TIME (EST)
@@ -353,7 +352,7 @@ const CreateEducatorStreamSchedule = forwardRef(
                 {time.clock}
               </p>
               </div>
-              </div>
+              </div> */}
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
