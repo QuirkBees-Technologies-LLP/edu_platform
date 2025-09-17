@@ -117,7 +117,7 @@ const CreateEducatorStreamSchedule = forwardRef(
       validationSchema: createSchema,
       onSubmit: async (values) => {
         // const callId = uuidv4();
-        const files = values.files?.[0]?.file; // Get the actual File object
+        // const files = values.files?.[0]?.file; // Get the actual File object
 
         const formData = new FormData();
         // formData.append('callId', callId);

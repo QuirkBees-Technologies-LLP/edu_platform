@@ -50,7 +50,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getLiveSessionList, { data, isLoading , refetch}] =
+  const [getLiveSessionList, { data, isLoading, refetch }] =
     useLazyGetLiveSessionListQuery();
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
   const [startCall, { isLoading: isStarting }] = useStartCallMutation();
@@ -98,8 +98,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
 
   const handleStartCall = async (rowData) => {
     try {
-    
-      
       const callId = rowData?.callId;
       const Id = rowData?._id;
 
@@ -197,17 +195,17 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         cell: (info) => {
           const { title, callId, status } = info.row.original;
           const isEnded = status === "ended";
+          const isClickable = status !== "pending";
 
           return (
             <span>
               <p
-                className={`cursor-pointer ${true ? "hover:text-primary" : "text-gray-400 cursor-default"}`}
-                // onClick={
-                //   !isEnded
-                //     ? () => handleRedirect(callId, info.row.original)
-                //     : undefined
-                // }
-                onClick={() => handleRedirect(callId, info.row.original)}
+                className={isClickable ? "cursor-pointer hover:text-primary" : ""}
+                onClick={
+                  isClickable
+                    ? () => handleRedirect(callId, info.row.original)
+                    : undefined
+                }
               >
                 {title}
               </p>
@@ -297,8 +295,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
                   End Call
                 </button>
               )}
-
-            
             </div>
           );
         },
@@ -455,17 +451,13 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
             data.
           </ToolbarDescription>
         </ToolbarHeading>
-          <ToolbarActions>
-                  <div className="text-end pb-4">
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleClickOpen}
-                 
-                    >
-                     Go Live
-                    </button>
-                  </div>
-                </ToolbarActions>
+        <ToolbarActions>
+          <div className="text-end pb-4">
+            <button className="btn btn-primary" onClick={handleClickOpen}>
+              Go Live
+            </button>
+          </div>
+        </ToolbarActions>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
@@ -474,7 +466,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </div>
         </ToolbarActions> */}
       </Toolbar>
-      
+
       <DataGrid
         serverSide={true}
         key={tableKey}
@@ -538,22 +530,18 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         </Dialog>
       )}
 
-        {isCreateOpen && (
-             <CreateLiveStream
-               setSelectedRow={setSelectedRow}
-               handleCloseCreate={handleCloseCreate}
-               refetch={reloadTable}
-               isOpen={isCreateOpen}
-               setIsOpen={setIsCreateOpen}
-               selectedRow={selectedRow}
-              
-             />
-           )}
-      
+      {isCreateOpen && (
+        <CreateLiveStream
+          setSelectedRow={setSelectedRow}
+          handleCloseCreate={handleCloseCreate}
+          refetch={reloadTable}
+          isOpen={isCreateOpen}
+          setIsOpen={setIsCreateOpen}
+          selectedRow={selectedRow}
+        />
+      )}
     </div>
   );
 };
 
 export default EducatorLiveSession;
-
-     
