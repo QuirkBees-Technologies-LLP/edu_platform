@@ -428,7 +428,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
             </button>
           </div>
         </ToolbarActions>
-        <ToolbarActions>
+        {/* <ToolbarActions>
           <div className="text-end">
             <button
               className="btn btn-primary"
@@ -437,7 +437,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
               Create Recurring Schedule
             </button>
           </div>
-        </ToolbarActions>
+        </ToolbarActions> */}
         </div>
       </Toolbar>
       <DataGrid
