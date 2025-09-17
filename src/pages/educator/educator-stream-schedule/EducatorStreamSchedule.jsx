@@ -420,15 +420,16 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
             data.
           </ToolbarDescription>
         </ToolbarHeading>
-        <ToolbarActions>
-          <div className="text-end pb-4">
+        <div className="flex gap-2 flex-wrap">
+          <ToolbarActions>
+          <div className="text-end">
             <button className="btn btn-primary" onClick={handleClickOpen}>
               Create Live Schedule
             </button>
           </div>
         </ToolbarActions>
-        <ToolbarActions>
-          <div className="text-end pb-4">
+        {/* <ToolbarActions>
+          <div className="text-end">
             <button
               className="btn btn-primary"
               onClick={handleClickOpenReccurenceSchedule}
@@ -436,7 +437,8 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
               Create Recurring Schedule
             </button>
           </div>
-        </ToolbarActions>
+        </ToolbarActions> */}
+        </div>
       </Toolbar>
       <DataGrid
         serverSide={true}
