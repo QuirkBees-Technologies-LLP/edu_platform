@@ -214,7 +214,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         },
       },
       {
-        accessorFn: (row) => row.educatorDetails,
+        accessorFn: (row) => row.educator,
         id: "educator",
         header: ({ column }) => (
           <DataGridColumnHeader title="Educator" column={column} />
@@ -223,9 +223,9 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.educatorDetails?.first_name +
+              {info.row.original.educator?.first_name +
                 " " +
-                info.row.original.educatorDetails?.last_name}
+                info.row.original.educator?.last_name}
             </span>
           </div>
         ),

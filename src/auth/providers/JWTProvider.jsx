@@ -16,11 +16,11 @@ export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
 export const GET_USER_URL = `${API_URL}/user`;
 
 const testUsers = {
-  "test.student@yopmail.com": {
-    password: "Password@123",
+  "test@iqonic.vip": {
+    password: "Test$iqonic",
     data: {
       name: "Test user",
-      email: "test.student@yopmail.com",
+      email: "test@iqonic.vip",
       crm_id: 12345,
       first_name: "Test",
       last_name: "User",
