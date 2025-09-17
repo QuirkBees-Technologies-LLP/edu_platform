@@ -10,9 +10,13 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
-import { useGetEducatorsListQuery } from "../../../store/api/client/clientEductorApiSlice";
+import {
+  useGetEducatorsListQuery,
+  useToggleFollowMutation,
+} from "../../../store/api/client/clientEductorApiSlice";
 import Loader from "../../../components/ui/loader";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 const educatorsData = [
   {
@@ -42,14 +46,18 @@ const educatorsData = [
 ];
 
 const IqAcademyEducators = () => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [active, setActive] = useState("list");
   const [educators, setEducators] = useState(educatorsData);
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("All");
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { data, isLoading } = useGetEducatorsListQuery();
+  const [toggleFollowData, { isLoading: followLoading }] =
+    useToggleFollowMutation();
   console.log("Data", data);
   console.log("isLoading", isLoading);
 
@@ -57,6 +65,23 @@ const IqAcademyEducators = () => {
     setEducators((prev) =>
       prev.map((e) => (e.id === id ? { ...e, isFollowing: !e.isFollowing } : e))
     );
+  };
+
+  const handleToggle = async (educator) => {
+    try {
+      let res = await toggleFollowData(educator._id).unwrap();
+      if (res.isFollowing === true) {
+        toast.success(
+          `You are now following ${educator.first_name} ${educator.last_name}`
+        );
+      } else if (res.isFollowing === false) {
+        toast.info(
+          `You have unfollowed ${educator.first_name} ${educator.last_name}`
+        );
+      }
+    } catch (error) {
+      console.error("Follow toggle failed:", error);
+    }
   };
 
   // Filter educators based on tab, search, and language
@@ -151,16 +176,18 @@ const IqAcademyEducators = () => {
 
       {!isLoading ? (
         <div className="flex flex-col gap-4">
-        {data?.data?.length > 0 ? (
-          data?.data?.map((educator) => (
-              <div className="card cursor-pointer" onClick={()=>navigate(`/iq-educators/${educator._id}`)}>
+          {data?.data?.length > 0 ? (
+            data?.data?.map((educator) => (
+              <div
+                className="card cursor-pointer"
+                // onClick={() => navigate(`/iq-educators/${educator._id}`)}
+              >
                 <div
                   key={educator._id}
                   className="flex items-center justify-between p-8 rounded-xl border flex-col sm:flex-row gap-4"
                 >
                   {/* Left Section */}
                   <div className="flex items-center gap-4 flex-col sm:flex-row">
-                  
                     <img
                       src={educator.image}
                       alt={educator.image}
@@ -174,13 +201,28 @@ const IqAcademyEducators = () => {
                     </div>
                   </div>
 
-                  {/* Follow Button */}
-                  <button
-                    onClick={() => toggleFollow(educator._id)}
-                    className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border bg-[#4F46E5] text-white border-[#4F46E5]"> 
-                        <EyeIcon size={16} /> 
-                        View Profile
-                  </button>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => handleToggle(educator)}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${
+                        educator?.isFollowing
+                          ? "bg-[#4F46E5] text-white border-[#4F46E5]"
+                          : "bg-transparent text-[#4F46E5] border-[#4F46E5]"
+                      }`}
+                    >
+                      <EyeIcon size={16} />
+                      {educator?.isFollowing ? "Following" : "Follow"}
+                    </button>
+
+                    {/* Follow Button */}
+                    <button
+                      onClick={() => navigate(`/iq-educators/${educator._id}`)}
+                      className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border bg-[#4F46E5] text-white border-[#4F46E5]"
+                    >
+                      <EyeIcon size={16} />
+                      View Profile
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -190,8 +232,8 @@ const IqAcademyEducators = () => {
             </p>
           )}
         </div>
-      ):(
-        <Loader/>
+      ) : (
+        <Loader />
       )}
 
       {/* Show More */}
