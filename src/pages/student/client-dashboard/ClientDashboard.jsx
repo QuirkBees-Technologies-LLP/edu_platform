@@ -330,7 +330,7 @@ const ClientDashboard = () => {
             <QRCodeCanvas
               value={qrType === "android"
                 ? "https://drive.google.com/drive/folders/1s9bCLuFn6lRv9BSBSfoFj78oE0Dvk0dQ?usp=sharing"
-                : "https://forms.gle/gc3KXyTp4DyNZPT58"
+                : "https://testflight.apple.com/join/qynfgnna"
               }
               size={200}
               bgColor="#ffffff"
