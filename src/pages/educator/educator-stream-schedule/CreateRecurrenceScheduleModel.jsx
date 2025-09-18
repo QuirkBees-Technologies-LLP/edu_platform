@@ -170,17 +170,17 @@ const CreateRecurrenceScheduleModel = forwardRef(
           formData.append("language", values.language);
           formData.append("educator", educatorId);
 
-          // ✅ only HH:mm
+          
           formData.append("time", moment(values.datetime).format("HH:mm"));
 
           // full datetime
-          formData.append("datetime", moment(values.datetime).toISOString());
+          formData.append("datetime", values.datetime);
 
           // endDate if available
           if (values.recurrenceRule?.endDateTime) {
             formData.append(
               "endDate",
-              moment(values.recurrenceRule.endDateTime).toISOString()
+              values.recurrenceRule.endDateTime
             );
           }
 
