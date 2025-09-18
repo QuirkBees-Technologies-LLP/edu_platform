@@ -696,13 +696,13 @@ const ClientDashboard = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-4">
-                            <a href="https://forms.gle/gc3KXyTp4DyNZPT58" target="_blank" className="btn btn-light btn-lg p-2 rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium w-[80%]">
+                            <a href="https://testflight.apple.com/join/qynfgnna" target="_blank" className="btn btn-light btn-lg p-2 rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium w-[80%]">
                               <img
                                 src="/media/images/apple.png"
                                 alt="Enroll for iOS Beta"
                                 className="w-auto h-full"
                               />
-                              Enroll for iOS Beta
+                              Download for iOS Beta
                             </a>
                             <button
                               className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
