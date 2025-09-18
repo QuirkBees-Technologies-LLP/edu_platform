@@ -14,19 +14,19 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
   } = post;
 
   return (
-    <div className="card rounded-xl shadow-md bg-white dark:bg-gray-900 p-4 mb-6">
+    <div className="card rounded-xl shadow-lg bg-white dark:bg-gray-800 p-5 mb-6 transition-all hover:shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700">
       {/* Author Info */}
-      <div className="flex items-center mb-3">
+      <div className="flex items-center mb-4">
         <img
           src={author?.image}
           alt={author?.first_name}
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 dark:border-gray-700"
         />
         <div className="ml-3">
           <p className="font-semibold text-gray-800 dark:text-gray-100">
             {author?.first_name} {author?.last_name}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
           </p>
         </div>
@@ -34,18 +34,18 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
 
       {/* Post Content */}
       {content && (
-        <p className="text-gray-800 dark:text-gray-200 mb-3">{content}</p>
+        <p className="text-gray-800 dark:text-gray-200 mb-4">{content}</p>
       )}
 
       {/* Images */}
       {images.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           {images.map((img) => (
             <img
               key={img._id || img.url}
               src={img.url}
               alt="post"
-              className="w-full rounded-lg object-cover"
+              className="w-full rounded-lg object-cover shadow-md hover:scale-105 transition-all duration-300"
             />
           ))}
         </div>
@@ -53,23 +53,23 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
 
       {/* Actions */}
       <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3 text-sm text-gray-600 dark:text-gray-300">
-        <button className="flex items-center gap-1 hover:text-red-500">
+        <button className="flex items-center gap-1 hover:text-red-500 transition-all duration-300">
           <Heart size={18} /> {likeCount}
         </button>
-        <button className="flex items-center gap-1 hover:text-blue-500">
+        <button className="flex items-center gap-1 hover:text-blue-500 transition-all duration-300">
           <MessageSquare size={18} /> {commentCount}
         </button>
-        <button className="flex items-center gap-1 hover:text-green-500">
+        <button className="flex items-center gap-1 hover:text-green-500 transition-all duration-300">
           <Share2 size={18} /> Share
         </button>
       </div>
 
       {/* Optional Edit Button */}
       {onEdit && (
-        <div className="text-right mt-2">
+        <div className="text-right mt-3">
           <button
             onClick={() => onEdit(post)}
-            className="text-xs text-blue-500 hover:underline"
+            className="text-xs text-blue-500 hover:underline transition-all duration-300"
           >
             Edit
           </button>

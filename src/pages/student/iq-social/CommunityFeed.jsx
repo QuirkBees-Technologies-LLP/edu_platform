@@ -16,47 +16,34 @@ const CommunityFeed = () => {
   const limit = 10;
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, isLoading, isFetching, isError } = usePostQuery({
-    page,
-    limit,
-    // optionally: timestamp: Date.now()
-  });
+  const { data, isLoading, isFetching, isError } = usePostQuery(
+    { page, limit },
+    { refetchOnMountOrArgChange: true }
+  );
 
   useEffect(() => {
-    // console.log to debug
-    console.log("New data", data, "page", page);
-
     if (data?.posts) {
-      if (page === 1) {
-        // first page, fresh
-        setPosts(data.posts);
-      } else {
-        // append new pages
-        setPosts(prev => {
-          // avoid duplicate items (if backend sends repeats)
-          const existingIds = new Set(prev.map(p => p._id));
-          const newOnes = data.posts.filter(p => !existingIds.has(p._id));
-          return [...prev, ...newOnes];
-        });
-      }
+      setPosts((prev) => {
+        const existingIds = new Set(prev.map((p) => p._id));
+        const newPosts = data.posts.filter((p) => !existingIds.has(p._id));
+        return [...prev, ...newPosts];
+      });
 
       if (data.posts.length < limit) {
         setHasMore(false);
       }
-    } else {
-      setHasMore(false);
     }
   }, [data]);
 
   const loadMore = () => {
-    console.log("loadMore called", { page, hasMore, isFetching });
+   
     if (!isFetching && hasMore) {
-      setPage(prev => prev + 1);
+      setPage((prev) => prev + 1);
     }
   };
 
   return (
-    <div className="container-fluid pb-8">
+    <div className="container mx-auto pb-8 px-4">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Social" />
@@ -64,15 +51,17 @@ const CommunityFeed = () => {
         </ToolbarHeading>
       </Toolbar>
 
-      <div className="grid grid-cols-18 gap-4 mt-6">
-        <div className="col-span-18 lg:col-span-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <div className="col-span-1 sm:col-span-2 lg:col-span-3">
           {isLoading && posts.length === 0 ? (
             <div className="card rounded-lg shadow-md p-8 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto" />
               <p className="mt-4 text-gray-600">Loading posts…</p>
             </div>
           ) : isError ? (
-            <div className="text-center text-red-500">Error loading posts</div>
+            <div className="text-center text-red-500">
+              Error loading posts
+            </div>
           ) : posts.length === 0 ? (
             <div className="card rounded-lg shadow-md p-8 text-center">
               <Rss size={48} className="mx-auto text-gray-400 mb-4" />
@@ -87,13 +76,14 @@ const CommunityFeed = () => {
               hasMore={hasMore}
               loader={
                 <div className="text-center py-4 text-gray-500 animate-pulse">
-                  Loading more…
+                  Loading more… 
                 </div>
               }
-              scrollThreshold={0.8}
+              scrollableTarget="scrollableDiv"
+              scrollThreshold={0.9}
             >
-              {posts.map(post => (
-                <SocialPostCard key={post._id} post={post} showActions={false} />
+              {posts.map((post) => (
+                <SocialPostCard key={post._id} post={post} />
               ))}
             </InfiniteScroll>
           )}
