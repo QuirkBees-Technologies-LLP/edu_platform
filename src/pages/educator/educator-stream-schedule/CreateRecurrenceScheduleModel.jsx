@@ -163,6 +163,10 @@ const CreateRecurrenceScheduleModel = forwardRef(
           //   streamType: values.streamType,
           // };
 
+          const dateObj = new Date(values.datetime);
+          const hours = dateObj.getHours();
+          const minutes = dateObj.getMinutes();
+
           const formData = new FormData();
           formData.append("title", values.title);
           formData.append("description", values.description);
@@ -170,18 +174,18 @@ const CreateRecurrenceScheduleModel = forwardRef(
           formData.append("language", values.language);
           formData.append("educator", educatorId);
 
-          
-          formData.append("time", moment(values.datetime).format("HH:mm"));
+          // formData.append("time", moment(values.datetime).format("HH:mm"));
+          formData.append(
+            "time",
+            `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+          );
 
           // full datetime
           formData.append("datetime", values.datetime);
 
           // endDate if available
           if (values.recurrenceRule?.endDateTime) {
-            formData.append(
-              "endDate",
-              values.recurrenceRule.endDateTime
-            );
+            formData.append("endDate", values.recurrenceRule.endDateTime);
           }
 
           // ✅ correct freq
