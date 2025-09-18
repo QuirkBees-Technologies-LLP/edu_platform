@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { OctagonAlert, Sparkles, TrendingUpDown } from "lucide-react";
+import { OctagonAlert, QrCode, Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Calendar, Target, Users, Trophy, Clock } from "lucide-react";
 import { Zap, Lightbulb } from "lucide-react";
@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import { useGetLiveEducatorListQuery } from "../../../store/api/client/clientLiveSessionApiSlice";
 import Loader from "../../../components/ui/loader";
+import { QRCodeCanvas } from "qrcode.react";
+
 const ClientDashboard = () => {
   const { auth } = useAuthContext();
 
@@ -283,6 +285,8 @@ const ClientDashboard = () => {
   ];
   const [activeTab, setActiveTab] = useState("feed");
   const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [isQRModalOpen, setQRModalOpen] = useState(false);
+  const [qrType, setQrType] = useState("android"); // "android" or "ios"
 
   const data = activeTab === "feed" ? feedData : ideasData;
   const IQLive = "/iq-academy";
@@ -314,6 +318,35 @@ const ClientDashboard = () => {
           </p>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isQRModalOpen} onOpenChange={setQRModalOpen}>
+        <DialogContent className="p-5 max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-semibold text-gray-800">
+              {qrType === "android" ? "Download Android Beta" : "Enroll for iOS Beta"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center items-center p-6">
+            <QRCodeCanvas
+              value={qrType === "android"
+                ? "https://drive.google.com/drive/folders/1s9bCLuFn6lRv9BSBSfoFj78oE0Dvk0dQ?usp=sharing"
+                : "https://forms.gle/gc3KXyTp4DyNZPT58"
+              }
+              size={200}
+              bgColor="#ffffff"
+              fgColor="#000000"
+              level="H"
+              includeMargin={true}
+            />
+          </div>
+          <p className="text-center text-sm text-gray-600 mb-4">
+            {qrType === "android"
+              ? "Scan this QR code to download the Android Beta app"
+              : "Scan this QR code to enroll for iOS Beta testing"
+            }
+          </p>
+        </DialogContent>
+      </Dialog>
       <div className="container-fluid pb-8">
         <div className="relative welcome_banner w-full mb-10 rounded-xl overflow-hidden">
           <div className="relative z-1 flex items-center justify-center md:justify-end h-full p-4">
@@ -328,8 +361,7 @@ const ClientDashboard = () => {
           </div>
         </div>
         <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
-          {/* Main Content */}
-          <div className="col-span-12 xl:col-span-8">
+          <div className="col-span-12 md:col-span-8 xl:col-span-8 ">
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-y-8 lg:gap-x-8 md:gap-y-8">
                 <div className="col-span-12 lg:col-span-12">
@@ -466,10 +498,9 @@ const ClientDashboard = () => {
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="col-span-12 xl:col-span-4">
+          <div className="col-span-12 md:col-span-4 xl:col-span-4">
             <div className="grid grid-cols-12 gap-6">
-              <div className="col-span-12 md:col-span-6 xl:col-span-12 space-y-6">
+              <div className="col-span-12 space-y-6">
                 <div className="relative rounded-2xl overflow-hidden shadow-lg group">
                   <img
                     src="/media/images/2600x1600/fast_start.jpg"
@@ -608,26 +639,9 @@ const ClientDashboard = () => {
                       </p>
                     </div>
                   )}
-                  {/* <div className="relative h-96 rounded-b-2xl overflow-hidden shadow-lg">
-                                        <img
-                                            src="/media/images/2600x1600/watch_live.jpg"
-                                            alt="Fast Start Training"
-                                            className="w-full h-full object-cover"
-                                        />
-
-                                        <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
-                                            <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
-                                                RALPH  <br /> DANQUAH
-                                            </h2>
-
-                                            <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
-                                                Watch Live
-                                            </button>
-                                        </div>
-                                    </div> */}
                 </div>
               </div>
-              {/* <div className="col-span-12">
+              <div className="col-span-12">
                 <div className="flex items-center justify-center">
                   <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
                     <div className="h-1 w-full bg-gradient-to-r from-primary via-primary-500 to-primary-500" />
@@ -637,15 +651,12 @@ const ClientDashboard = () => {
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           Beta Invite
                         </span>
-
                         <h1 className="mt-4 text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
                           Be part of our beta testers.
                         </h1>
-
                         <p className="mt-2 text-slate-600">
                           New iOS and Android <span className="font-medium text-slate-800">Iqonic</span> App
                         </p>
-
                         <div className="mt-6 space-y-3 text-sm text-slate-600">
                           <div className="flex items-center gap-2">
                             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden className="h-4 w-4 text-emerald-600"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z" clipRule="evenodd" /></svg>
@@ -656,38 +667,60 @@ const ClientDashboard = () => {
                             Help shape the final release
                           </div>
                         </div>
-
                         <div className="mt-8">
                           <h4 className="w-full md:w-auto text-base rounded-xl font-medium text-primary cursor-pointer">
-                            Request the link to your leader!
+                            Click to join our Beta Tester Program.
                           </h4>
                           <p className="mt-3 text-xs text-slate-500">Your leader will share the private download links.</p>
                         </div>
                       </div>
-
-
-                      <div className="relative flex items-center justify-center gap-6">
-                        <div className="absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-tr from-violet-200 via-fuchsia-200 to-rose-200 blur-2xl opacity-60" />
-                        <a href="#" className="block w-auto h-9">
-                          <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/6/67/App_Store_%28iOS%29.svg"
-                            alt="Download on the App Store"
-                            className="w-auto h-full"
-                          />
-                        </a>
-                        <a href="#" className="block w-40">
-                          <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                            alt="Get it on Google Play"
-                            className="w-full h-auto"
-                          />
-                        </a>
+                      <div className="flex gap-4 flex-col">
+                        <div className="flex items-center gap-4">
+                          <a href="https://drive.google.com/drive/folders/1s9bCLuFn6lRv9BSBSfoFj78oE0Dvk0dQ?usp=sharing" target="_blank" className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs p-2 text-gray-800 font-medium w-[80%] md:w-[80%]">
+                            <img
+                              src="/media/images/android.png"
+                              alt="Download Android Beta"
+                              className="w-auto h-full"
+                            />
+                            Download Android Beta
+                          </a>
+                          <button
+                            className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
+                            onClick={() => {
+                              setQrType("android");
+                              setQRModalOpen(true);
+                            }}
+                          >
+                            <QrCode />
+                          </button>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-4">
+                            <a href="https://forms.gle/gc3KXyTp4DyNZPT58" target="_blank" className="btn btn-light btn-lg p-2 rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium w-[80%]">
+                              <img
+                                src="/media/images/apple.png"
+                                alt="Enroll for iOS Beta"
+                                className="w-auto h-full"
+                              />
+                              Enroll for iOS Beta
+                            </a>
+                            <button
+                              className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
+                              onClick={() => {
+                                setQrType("ios");
+                                setQRModalOpen(true);
+                              }}
+                            >
+                              <QrCode />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div> */}
-              <div className="col-span-12 md:col-span-6 xl:col-span-12">
+              </div>
+              <div className="col-span-12">
                 <div className="card rounded-2xl shadow-md overflow-hidden relative group">
                   {/* Hover Overlay */}
                   <div
