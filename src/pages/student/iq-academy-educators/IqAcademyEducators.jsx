@@ -80,6 +80,10 @@ const IqAcademyEducators = () => {
         );
       }
     } catch (error) {
+      if (error.status == 400) {
+        toast.error(error.data.message);
+      }
+
       console.error("Follow toggle failed:", error);
     }
   };

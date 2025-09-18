@@ -19,12 +19,25 @@ import {
 } from "@/components/ui/dialog";
 import { useGetLiveEducatorListQuery } from "../../../store/api/client/clientLiveSessionApiSlice";
 import Loader from "../../../components/ui/loader";
+import {
+  useCorporatePostQuery,
+  usePostQuery,
+} from "../../../store/api/client/clientSocialApiSlilce";
+import { formatDistanceToNow } from "date-fns";
 const ClientDashboard = () => {
   const { auth } = useAuthContext();
 
   const allowedRoutes = auth?.user?.plan?.allowedSideBar;
-  const { data: liveEducator, isLoading: educatorsLoading } = useGetLiveEducatorListQuery();
+  const { data: liveEducator, isLoading: educatorsLoading } =
+    useGetLiveEducatorListQuery();
+  const {
+    data: corporatePost,
+    isLoading,
+    isFetching,
+    isError,
+  } = useCorporatePostQuery();
 
+  console.log(corporatePost);
   const liveStreams = liveEducator?.streams || [];
   console.log(liveStreams, "liveStreams");
 
@@ -293,7 +306,6 @@ const ClientDashboard = () => {
     setUpgradeModalOpen(true);
   };
 
-
   return (
     <>
       <Dialog open={isUpgradeModalOpen} onOpenChange={setUpgradeModalOpen}>
@@ -448,7 +460,7 @@ const ClientDashboard = () => {
                         ) : (
                           <button
                             className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium"
-                          // onClick={handleRouteClick}
+                            // onClick={handleRouteClick}
                           >
                             View Strategies
                           </button>
@@ -589,9 +601,12 @@ const ClientDashboard = () => {
 
                               <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 pb-11">
                                 <h2 className="text-gray-100 dark:text-gray-900 text-2xl font-bold tracking-wide">
-                                  {slide?.educator?.first_name} {slide?.educator?.last_name}
+                                  {slide?.educator?.first_name}{" "}
+                                  {slide?.educator?.last_name}
                                 </h2>
-                                <Link to={`/iq-educators/${slide?.educator?._id}`}>
+                                <Link
+                                  to={`/iq-educators/${slide?.educator?._id}`}
+                                >
                                   <button className="mt-4 px-6 py-2 bg-white/10 backdrop-blur-sm text-gray-100 dark:text-gray-900 text-sm font-normal btn-lg  rounded-2xl border border-white/30 hover:bg-white/20 transition">
                                     Watch Live
                                   </button>
@@ -601,7 +616,8 @@ const ClientDashboard = () => {
                           </div>
                         </SwiperSlide>
                       ))}
-                    </Swiper>) : (
+                    </Swiper>
+                  ) : (
                     <div className="flex items-center justify-center h-96">
                       <p className="text-gray-600 dark:text-gray-400">
                         No Live Educators
@@ -690,12 +706,12 @@ const ClientDashboard = () => {
               <div className="col-span-12 md:col-span-6 xl:col-span-12">
                 <div className="card rounded-2xl shadow-md overflow-hidden relative group">
                   {/* Hover Overlay */}
-                  <div
+                  {/* <div
                     className="absolute inset-0 bg-gray-300 dark:bg-gray-100 opacity-0 group-hover:opacity-100 
                   transition-opacity duration-300 z-1 flex flex-col items-center justify-center text-center p-4"
                   >
                     <h3 className="">No This feature is under-development</h3>
-                  </div>
+                  </div> */}
 
                   {/* Header */}
                   <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl relative z-1">
@@ -705,19 +721,21 @@ const ClientDashboard = () => {
                     <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
                       <button
                         onClick={() => setActiveTab("feed")}
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                          }`}
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${
+                          activeTab === "feed"
+                            ? "bg-white text-[#1A1446]"
+                            : "text-white"
+                        }`}
                       >
                         Feed
                       </button>
                       <button
                         onClick={() => setActiveTab("ideas")}
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                          }`}
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${
+                          activeTab === "ideas"
+                            ? "bg-white text-[#1A1446]"
+                            : "text-white"
+                        }`}
                       >
                         Ideas
                       </button>
@@ -726,28 +744,31 @@ const ClientDashboard = () => {
 
                   {/* Updates */}
                   <div className="p-4 space-y-3 live_updates overflow-auto relative">
-                    {updates.map((update) => (
+                    {corporatePost?.posts?.map((update) => (
                       <div
                         key={update.id}
                         className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
                       >
                         <div className="flex flex-col gap-4 mb-4">
                           <img
-                            src={update.avatar}
-                            alt={update.name}
+                            src={update.author.image}
+                            alt={update.author.name}
                             className="w-12 h-12 rounded-full"
                           />
                           <div>
                             <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update.name}
+                              {update.author.first_name} {"  "}
+                              {update.author.last_name}
                             </h4>
                             <p className="text-xs font-normal text-gray-600">
-                              {update.time}
+                              {formatDistanceToNow(new Date(update.createdAt), {
+                                addSuffix: true,
+                              })}
                             </p>
                           </div>
                         </div>
                         <p className="text-sm font-normal text-gray-700">
-                          {update.message}
+                          {update.content}
                         </p>
                       </div>
                     ))}
