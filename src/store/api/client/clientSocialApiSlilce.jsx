@@ -8,8 +8,11 @@ export const clientSocialApiSlice = createApi({
         post: builder.query({
             query:({ page = 1, limit = 10 }) => `/users/post?page=${page}&limit=${limit}`,
         }),
+        corporatePost: builder.query({
+            query:() => `/users/post/corporate-post`,
+        }),
     
     }),
 });
 
-export const {  usePostQuery } = clientSocialApiSlice;
+export const {  usePostQuery,useCorporatePostQuery } = clientSocialApiSlice;

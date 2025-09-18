@@ -40,7 +40,7 @@ const testUsers = {
       last_name: "Student",
       status: "active",
       role: "student",
-      plan: "IQ Crypto Pro",
+      plan: "IQ Max",
       expire_at: new Date("2027-10-29"),
     },
   },
