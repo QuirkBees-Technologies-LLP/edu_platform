@@ -29,7 +29,10 @@ export const adminEducatorsApiSlice = createApi({
                 method: 'DELETE',
             }),
         }),
+        educatorKpis: builder.query({
+            query: (callId) => `/educator/kpi/${callId}`,
+        }),
     }),
 });
 
-export const { useGetEducatorsQuery, useLazyGetEducatorsQuery, useCreateEducatorMutation, useUpdateEducatorMutation, useDeleteEducatorMutation } = adminEducatorsApiSlice;
+export const { useGetEducatorsQuery, useLazyGetEducatorsQuery, useCreateEducatorMutation, useUpdateEducatorMutation, useDeleteEducatorMutation , useEducatorKpisQuery } = adminEducatorsApiSlice;
