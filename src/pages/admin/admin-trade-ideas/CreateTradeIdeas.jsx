@@ -55,7 +55,7 @@ const CreateTradeIdeas = forwardRef(
       files: Yup.array().min(1, "At least one file is required"),
       type: Yup.string().oneOf(["buy", "sell"]).required("Type is required"),
       status: Yup.string()
-        .oneOf(["active", "pending", "win", "partialWin", "loss"])
+        .oneOf(["active", "pending", "win", "partialWin", "loss", "breakEven"])
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
@@ -355,10 +355,11 @@ const CreateTradeIdeas = forwardRef(
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="win">Win</SelectItem>
                       <SelectItem value="partialWin">Partial Win</SelectItem>
+                      <SelectItem value="breakEven">Break Even</SelectItem>
                       <SelectItem value="loss">Loss</SelectItem>
                     </SelectContent>
                   </Select>

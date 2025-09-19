@@ -37,6 +37,7 @@ const statusColorMap = {
   win: "blue",
   partialWin: "violet",
   loss: "red",
+  breakEven: "gray"  
 };
 
 const ClientTradeIdeas = () => {
