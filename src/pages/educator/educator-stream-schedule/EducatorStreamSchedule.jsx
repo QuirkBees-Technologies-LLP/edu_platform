@@ -69,6 +69,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const handleClickCloseReccurenceSchedule = () => {
+    setSelectedRow({});
     setIsReccurenceScheduleOpen(false);
   };
 
@@ -117,10 +118,21 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     );
   };
 
-  const ActionMenu = () => {
+  const handleEdit = (raw) => {
+    if (raw.isRecurent) {
+      setIsReccurenceScheduleOpen(true);
+      setSelectedRow(raw);
+    } else {
+      setSelectedRow(raw);
+      setIsCreateOpen(true);
+    }
+  };
+
+  const ActionMenu = (raw) => {
+    console.log("raw", raw);
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem onClick={() => handleEdit(raw)}>
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
@@ -223,7 +235,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[180px]",
         },
       },
       {
@@ -257,7 +269,30 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[120px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.recurrent,
+        id: "Recurrent",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Recurrent" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <span
+              className={`badge capitalize badge-outline ml-9 ${
+                info.row.original.isRecurent ? "badge-success" : "badge-danger"
+              }`}
+            >
+              {console.log("isRecurent", info.row.original.isRecurent)}
+              {info.row.original.isRecurent ? "Yes" : "No"}
+            </span>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[120px]",
         },
       },
       // {
@@ -333,7 +368,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {ActionMenu()}
+              {ActionMenu(row.original)}
             </MenuItem>
           </Menu>
         ),
@@ -386,6 +421,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const handleCloseCreate = () => {
+    setSelectedRow({});
     setIsCreateOpen(false);
   };
 
@@ -421,23 +457,23 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <div className="flex gap-2 flex-wrap">
+          {/* <ToolbarActions>
+            <div className="text-end">
+              <button className="btn btn-primary" onClick={handleClickOpen}>
+                Create Live Schedule
+              </button>
+            </div>
+          </ToolbarActions> */}
           <ToolbarActions>
-          <div className="text-end">
-            <button className="btn btn-primary" onClick={handleClickOpen}>
-              Create Live Schedule
-            </button>
-          </div>
-        </ToolbarActions>
-        <ToolbarActions>
-          <div className="text-end">
-            <button
-              className="btn btn-primary"
-              onClick={handleClickOpenReccurenceSchedule}
-            >
-              Create Recurring Schedule
-            </button>
-          </div>
-        </ToolbarActions>
+            <div className="text-end">
+              <button
+                className="btn btn-primary"
+                onClick={handleClickOpenReccurenceSchedule}
+              >
+                Create Recurring Schedule
+              </button>
+            </div>
+          </ToolbarActions>
         </div>
       </Toolbar>
       <DataGrid

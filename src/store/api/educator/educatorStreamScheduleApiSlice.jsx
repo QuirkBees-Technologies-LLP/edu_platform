@@ -38,6 +38,15 @@ export const educatorStreamScheduleApiSlice = createApi({
         body: formData,
       }),
     }),
+    updateRecurrenceSchedule: builder.mutation({
+      query: ({ data, id }) => ({
+        url: `/educator/schedule/recurrence/${id}`,
+        method: "PUT",
+        body: data,
+        formData: true,
+      }),
+    }),
+
     createLiveStream: builder.mutation({
       query: (formData) => ({
         url: "/educator/live-stream/create",
@@ -56,4 +65,5 @@ export const {
   useDeleteEducatorStreamScheduleMutation,
   useCreateRecurrenceScheduleMutation,
   useCreateLiveStreamMutation,
+  useUpdateRecurrenceScheduleMutation,
 } = educatorStreamScheduleApiSlice;
