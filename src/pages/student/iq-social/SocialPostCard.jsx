@@ -52,7 +52,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       )}
 
       {/* Actions */}
-      <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3 text-sm text-gray-600 dark:text-gray-300">
+      {/* <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3 text-sm text-gray-600 dark:text-gray-300">
         <button className="flex items-center gap-1 hover:text-red-500 transition-all duration-300">
           <Heart size={18} /> {likeCount}
         </button>
@@ -62,7 +62,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
         <button className="flex items-center gap-1 hover:text-green-500 transition-all duration-300">
           <Share2 size={18} /> Share
         </button>
-      </div>
+      </div> */}
 
       {/* Optional Edit Button */}
       {onEdit && (
