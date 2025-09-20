@@ -16,11 +16,11 @@ export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
 export const GET_USER_URL = `${API_URL}/user`;
 
 const testUsers = {
-  "test.student@yopmail.com": {
-    password: "Password@123",
+  "test@iqonic.vip": {
+    password: "Test$iqonic",
     data: {
       name: "Test user",
-      email: "test.student@yopmail.com",
+      email: "test@iqonic.vip",
       crm_id: 12345,
       first_name: "Test",
       last_name: "User",
@@ -40,7 +40,7 @@ const testUsers = {
       last_name: "Student",
       status: "active",
       role: "student",
-      plan: "IQ Crypto Pro",
+      plan: "IQ Max",
       expire_at: new Date("2027-10-29"),
     },
   },
@@ -251,10 +251,8 @@ const AuthProvider = ({ children }) => {
 
 
         // Step 2: Check Plan Expiry
-        // const isExpired = new Date(expire_at) < new Date();
-        const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
-
-        // const isExpired = false;
+        const isExpired = new Date(expire_at) < new Date();
+        // const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
 
         if (isExpired) {
           // Step 3: Get token and redirect

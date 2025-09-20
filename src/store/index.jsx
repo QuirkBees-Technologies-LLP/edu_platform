@@ -33,6 +33,7 @@ import storage from 'redux-persist/lib/storage'; // localStorage
 import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
 import { clientEducatorApiSlice } from "./api/client/clientEductorApiSlice";
+import { clientSocialApiSlice } from "./api/client/clientSocialApiSlilce";
 
 const languagePersistConfig = {
   key: 'language',
@@ -76,6 +77,7 @@ export const store = configureStore({
     [adminTradeAnalysisApiSlice.reducerPath]: adminTradeAnalysisApiSlice.reducer,
     [clientLanguageApiSlice.reducerPath]: clientLanguageApiSlice.reducer,
     [clientEducatorApiSlice.reducerPath]: clientEducatorApiSlice.reducer,
+    [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -104,7 +106,8 @@ export const store = configureStore({
       educatorTradeAnalysisApiSlice.middleware,
       adminTradeAnalysisApiSlice.middleware,
       clientLanguageApiSlice.middleware,
-      clientEducatorApiSlice.middleware
+      clientEducatorApiSlice.middleware,
+      clientSocialApiSlice.middleware
     ),
 });
 

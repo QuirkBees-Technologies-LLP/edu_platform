@@ -12,7 +12,6 @@ import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 
-
 const IqEducators = () => {
   const navigate = useNavigate();
   const { auth } = useAuthContext();
@@ -409,67 +408,75 @@ const IqEducators = () => {
             </div>
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {courseAll ? (
-                // GRID VIEW (sabhi courses ek sath)
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {response?.data?.courses?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full border rounded-xl shadow-sm cursor-pointer"
-                      onClick={() =>
-                        navigate(
-                          `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        )
-                      }
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={course.imageUrl}
-                          alt={course.title}
-                          className="w-full h-36 object-cover"
-                        />
+              {response?.data?.courses?.length > 0 ? (
+                courseAll ? (
+                  // GRID VIEW (sabhi courses ek sath)
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.courses?.map((course) => (
+                      <div
+                        key={course.id}
+                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        onClick={() =>
+                          navigate(
+                            `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                          )
+                        }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course.imageUrl}
+                            alt={course.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course.title}
+                          </h3>
+                          <p className="text-xs text-gray-600">
+                            {course.address}
+                          </p>
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.title}
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          {course.address}
-                        </p>
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.courses?.map((course) => (
+                      <div
+                        key={course.id}
+                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        onClick={() =>
+                          navigate(
+                            `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                          )
+                        }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course.imageUrl}
+                            alt={course.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course.title}
+                          </h3>
+                          <p className="text-xs text-gray-600">
+                            {course.address}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )
               ) : (
-                // SLIDER VIEW (default horizontal scroll)
-                <div className="flex gap-4">
-                  {response?.data?.courses?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                      onClick={() =>
-                        navigate(
-                          `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        )
-                      }
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={course.imageUrl}
-                          alt={course.title}
-                          className="w-full h-36 object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.title}
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          {course.address}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">
+                    No Courses Found
+                  </span>
                 </div>
               )}
             </div>
@@ -531,79 +538,87 @@ const IqEducators = () => {
             </div>
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {idea ? (
-                // GRID VIEW (sabhi courses ek sath)
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {response?.data?.idea?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full border rounded-xl shadow-sm cursor-pointer"
-                      onClick={() => {
-                        setSelectedIdea(course);
-                        setIsViewOpen(true);
-                      }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={course.image[0]}
-                          alt={course.name}
-                          className="w-full h-36 object-cover"
-                        />
+              {response?.data?.idea?.length > 0 ? (
+                idea ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.idea?.map((course) => (
+                      <div
+                        key={course.id}
+                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedIdea(course);
+                          setIsViewOpen(true);
+                        }}
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course.image[0]}
+                            alt={course.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course.name}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.name}
-                        </h3>
-                        <ShowMoreLess
-                          className="text-xs text-gray-600"
-                          html={course?.description || "No description"}
-                          limit={65}
-                        />
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.idea?.map((course) => (
+                      <div
+                        key={course.id}
+                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        onClick={() => {
+                          setSelectedIdea(course);
+                          setIsViewOpen(true);
+                        }}
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course.image[0]}
+                            alt={course.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4 d-flex">
+                          <div className="justify-between">
+                            <h3 className="text-md font-normal mb-2">
+                              {course.name}
+                            </h3>
+                          </div>
+
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )
               ) : (
-                // SLIDER VIEW (default horizontal scroll)
-                <div className="flex gap-4">
-                  {response?.data?.idea?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                      onClick={() => {
-                        setSelectedIdea(course);
-                        setIsViewOpen(true);
-                      }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={course.image[0]}
-                          alt={course.name}
-                          className="w-full h-36 object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.name}
-                        </h3>
-                        <ShowMoreLess
-                          className="text-xs text-gray-600"
-                          html={course?.description || "No description"}
-                          limit={65}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Idea Found</span>
                 </div>
               )}
             </div>
@@ -625,85 +640,91 @@ const IqEducators = () => {
             </div>
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {insight ? (
-                // GRID VIEW (sabhi courses ek sath)
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {response?.data?.insight?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full border rounded-xl shadow-sm cursor-pointer"
-                      onClick={() => {
-                        setSelectedInsight(course);
-                        setIsViewOpen1(true);
-                      }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={course?.photos[0]}
-                          alt={course?.title}
-                          className="w-full h-36 object-cover"
-                        />
+              {response?.data?.insight?.length > 0 ? (
+                insight ? (
+                  // GRID VIEW (sabhi courses ek sath)
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.insight?.map((course) => (
+                      <div
+                        key={course.id}
+                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedInsight(course);
+                          setIsViewOpen1(true);
+                        }}
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.photos[0]}
+                            alt={course?.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.title}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course?.title}
-                        </h3>
-                        <ShowMoreLess
-                          className="text-xs text-gray-600"
-                          html={course?.description || "No description"}
-                          limit={65}
-                        />
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.insight?.map((course) => (
+                      <div
+                        key={course.id}
+                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        onClick={() => {
+                          setSelectedInsight(course);
+                          setIsViewOpen1(true);
+                        }}
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.photos[0]}
+                            alt={course?.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.title}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )
               ) : (
-                // SLIDER VIEW (default horizontal scroll)
-                <div className="flex gap-4">
-                  {response?.data?.insight?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                      onClick={() => {
-                        setSelectedInsight(course);
-                        setIsViewOpen1(true);
-                      }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={course?.photos[0]}
-                          alt={course?.title}
-                          className="w-full h-36 object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course?.title}
-                        </h3>
-                        <ShowMoreLess
-                          className="text-xs text-gray-600"
-                          html={course?.description || "No description"}
-                          limit={65}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">
+                    No insight Found
+                  </span>
                 </div>
               )}
             </div>
           </div>
-
-          
         </div>
 
         {/* Sidebar */}
@@ -873,8 +894,8 @@ const IqEducators = () => {
         </div>
 
         {/* Recording  */}
-         <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
-           <div className="text-gray-900 mb-2">
+        <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
+          <div className="text-gray-900 mb-2">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Recordings</h2>
@@ -888,68 +909,76 @@ const IqEducators = () => {
             </div>
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {showAll ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {response?.data?.recordings?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full cursor-pointer border rounded-xl shadow-sm"
-                    >
+              {response?.data?.recordings?.length > 0 ? (
+                showAll ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.recordings?.map((course) => (
                       <div
-                        className="rounded-t-xl overflow-hidden"
-                        onClick={() => setRecording(course)}
+                        key={course.id}
+                        className="w-full cursor-pointer border rounded-xl shadow-sm"
                       >
-                        <RecordingThumbnail
-                          videoUrl={course?.url}
-                          seekTime={2}
-                          image={course?.thumbnail}
-                          onRecordingClick={() => handleOpen(course?.url)}
-                        />
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course.call_title}
+                          </h3>
+                          <p className="text-xs text-gray-600">
+                            {course.address}
+                          </p>
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.call_title}
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          {course.address}
-                        </p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex gap-4">
+                    {response?.data?.recordings?.map((course) => (
+                      <div
+                        key={course.id}
+                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
+                      >
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course.call_title}
+                          </h3>
+                          <p className="text-xs text-gray-600">
+                            {course.address}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )
               ) : (
-                <div className="flex gap-4">
-                  {response?.data?.recordings?.map((course) => (
-                    <div
-                      key={course.id}
-                      className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                    >
-                      <div
-                        className="rounded-t-xl overflow-hidden"
-                        onClick={() => setRecording(course)}
-                      >
-                        <RecordingThumbnail
-                          videoUrl={course?.url}
-                          seekTime={2}
-                          image={course?.thumbnail}
-                          onRecordingClick={() => handleOpen(course?.url)}
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {course.call_title}
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          {course.address}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">
+                    No Recordings Found
+                  </span>
                 </div>
               )}
             </div>
           </div>
-         </div>
+        </div>
       </div>
 
       <VideoPlayerModal

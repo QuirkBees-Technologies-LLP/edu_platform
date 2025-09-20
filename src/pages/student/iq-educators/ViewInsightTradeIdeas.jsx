@@ -1,61 +1,104 @@
-import React, { forwardRef } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { format } from 'date-fns';
-import StudentIqSlider from '.././iq-insight/StudentIqSlider';
-import EducatorImage from '../client-trade-ideas/EducatorImage';
-import { Link } from 'react-router-dom';
+import React, { forwardRef } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { format } from "date-fns";
+import StudentIqSlider from ".././iq-insight/StudentIqSlider";
+import EducatorImage from "../client-trade-ideas/EducatorImage";
+import { Link } from "react-router-dom";
 
-const ViewInsightTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
+const ViewInsightTradeIdeas = forwardRef(
+  ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
     return (
-        <Dialog asChild open={isViewOpen} onOpenChange={() => {
-            handleCloseView();
-        }}>
-            <DialogContent forceMount className="max-w-[600px]" ref={ref}>
-                <DialogHeader className="sr-only">
-                    <DialogTitle className="sr-only">text</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-5 px-0">
-                    <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-12">
-                            <div className="flex items-center px-4 pb-3 pt-3">
-                                <div className="mr-2 text-lg text-gray-900 font-semibold">{selectedIdea?.name}</div>
-                            </div>
-                            {/* <div className="flex px-4">
+      <Dialog
+        asChild
+        open={isViewOpen}
+        onOpenChange={() => {
+          handleCloseView();
+        }}
+      >
+        <DialogContent forceMount className="max-w-[600px]" ref={ref}>
+          <DialogHeader className="sr-only">
+            <DialogTitle className="sr-only">text</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-5 px-0">
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-12">
+                <div className="flex items-center px-4 pb-3 pt-3">
+                  <div className="mr-2 text-lg text-gray-900 font-semibold">
+                    {selectedIdea?.name}
+                  </div>
+                </div>
+                {/* <div className="flex px-4">
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Buy</div>
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">5m</div>
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
                                 <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Scalp</div>
                             </div> */}
-                            <div className=''>
-                                <StudentIqSlider sliderImages={selectedIdea?.photos} setIsLightBoxOpen={setIsLightBoxOpen} selectedIdea={selectedIdea} />
-                            </div>
+                <div className="">
+                  <StudentIqSlider
+                    sliderImages={selectedIdea?.photos}
+                    setIsLightBoxOpen={setIsLightBoxOpen}
+                    selectedIdea={selectedIdea}
+                  />
+                </div>
 
-                            <div className="flex items-center">
-                      <EducatorImage
-                        educator={selectedIdea?.createdBy?.image}
-                        // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
-                      />
-                      <div className="">
-                        <Link
-                          to="#"
-                          className="text-2sm text-gray-800 hover:text-primary mb-px"
-                        >
-                          {selectedIdea?.createdBy?.first_name}{" "}
-                          {selectedIdea?.createdBy?.last_name}
-                        </Link>
-                      </div>
+                {/* <div className="flex items-center">
+                  <EducatorImage
+                    educator={selectedIdea?.createdBy?.image}
+                    // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                  />
+                  <div className="">
+                    <Link
+                      to="#"
+                      className="text-2sm text-gray-800 hover:text-primary mb-px"
+                    >
+                      {selectedIdea?.createdBy?.first_name}{" "}
+                      {selectedIdea?.createdBy?.last_name}
+                    </Link>
+                  </div>
+                </div> */}
+
+                  <div className="flex items-center justify-between py-2">
+                  {/* Left side: Image + Name */}
+                  <div className="flex items-center">
+                    <img
+                      src={selectedIdea?.createdBy?.image}
+                      className="rounded-full size-7 me-2"
+                      alt=""
+                    />
+                    <div className="text-2sm text-gray-800 mb-px">
+                      {selectedIdea?.createdBy?.first_name}{" "}
+                      {selectedIdea?.createdBy?.last_name}
                     </div>
-                    <div className="flex mt-2">
-                      <div className="text-2sm text-gray-700 mb-px">
-                        {selectedIdea?.category
-                          ? selectedIdea?.category?.name
-                          : "Category not assigned"}
-                      </div>
+                  </div>
+
+                  {/* Right side: Category Name */}
+                  {/* <div className="text-2sm text-gray-800">
+                    {selectedIdea?.category?.name}
+                  </div> */}
+                </div>
+                {/* <div>
+                  {selectedIdea?.createdAt && (
+                    <div className="text-2sm text-gray-700 mb-px">
+                      {format(selectedIdea?.createdAt, "MMM dd, yyyy, hh:mm a")}
                     </div>
-                            <div className="grid gap-5 p-5">
-                                <div className="grid grid-cols-12 gap-4">
-                                    {/* <div className="col-span-12">
+                  )}
+                </div> */}
+                <div className="flex mt-2">
+                  <div className="text-2sm text-gray-700 mb-px">
+                    {selectedIdea?.category
+                      ? selectedIdea?.category?.name
+                      : "Category not assigned"}
+                  </div>
+                </div>
+                <div className="grid gap-5 p-5">
+                  <div className="grid grid-cols-12 gap-4">
+                    {/* <div className="col-span-12">
                                         <div className="flex flex-col gap-2 py-4.5">
                                             <div className="flex gap-5 sm:gap-10 flex-wrap">
                                                 <div className='flex items-center gap-3'>
@@ -80,7 +123,7 @@ const ViewInsightTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selecte
                                             </div>
                                         </div>
                                     </div> */}
-                                    {/* <div className="col-span-12">
+                    {/* <div className="col-span-12">
                                         <div className="card">
                                             <div className="flex flex-col gap-4 px-5 py-4.5">
                                                 <div className="flex flex-col gap-3">
@@ -89,21 +132,22 @@ const ViewInsightTradeIdeas = forwardRef(({ isViewOpen, handleCloseView, selecte
                                             </div>
                                         </div>
                                     </div> */}
-                                </div>
-                            </div>
-                            {/* <div className="flex items-center p-5">
+                  </div>
+                </div>
+                {/* <div className="flex items-center p-5">
                                 <img src="/media/avatars/300-6.png" className="rounded-full size-7 me-2" alt="" />
                                 <div>
                                     <a className="text-2sm text-gray-800 hover:text-primary mb-px" href="/public-profile/profiles/nft">{selectedIdea?.educatorDetails?.name}</a>
                                     {selectedIdea?.createAt && <div className="text-2sm text-gray-700 mb-px">{format(selectedIdea?.createAt, "MMM dd, yyyy, hh:mm a")}</div>}
                                 </div>
                             </div> */}
-                        </div>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
-})
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+);
 
-export default ViewInsightTradeIdeas
+export default ViewInsightTradeIdeas;
