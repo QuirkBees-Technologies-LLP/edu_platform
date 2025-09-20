@@ -123,6 +123,10 @@ const CreateRecurrenceScheduleModel = forwardRef(
       enableReinitialize: true,
       validationSchema: createSchema,
       validateOnMount: true,
+      context: {
+        datetime: initialValues.datetime,
+      },
+
       onSubmit: async (values) => {
         try {
           const { recurrenceRule } = values;
