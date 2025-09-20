@@ -32,9 +32,10 @@ import {
   useCreateRecurrenceScheduleMutation,
   useUpdateRecurrenceScheduleMutation,
 } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
+import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
 const EST_ZONE = "America/New_York";
 
-const CreateRecurrenceScheduleModel = forwardRef(
+const CreateAdminRecurrenceScheduleModel = forwardRef(
   (
     { isOpen, handleCloseCreate, refetch, selectedRow, setSelectedRow },
     ref
@@ -47,7 +48,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
 
     const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
     const { data: languagesList } = useGetLanguageListQuery();
-
+    const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
     const [createRecurrenceSchedule] = useCreateRecurrenceScheduleMutation();
     const [updateRecurrenceSchedule] = useUpdateRecurrenceScheduleMutation();
 
@@ -58,6 +59,8 @@ const CreateRecurrenceScheduleModel = forwardRef(
       tags: [],
       category: "",
       language: "",
+
+      educator: "",
       recurrenceRule: {
         frequency: "NONE",
         interval: 1,
@@ -123,9 +126,14 @@ const CreateRecurrenceScheduleModel = forwardRef(
       enableReinitialize: true,
       validationSchema: createSchema,
       validateOnMount: true,
+      context: {
+        datetime: initialValues.datetime,
+      },
+
       onSubmit: async (values) => {
         try {
           const { recurrenceRule } = values;
+          console.log(recurrenceRule, "recurrenceRule");
 
           let frequency = recurrenceRule.frequency;
           let interval = recurrenceRule.interval || 1;
@@ -158,7 +166,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
           formData.append("datetime", values.datetime);
           formData.append("category", values.category);
           formData.append("language", values.language);
-          formData.append("educator", educatorId);
+         formData.append("educator", values?.educator);
 
           values.tags.forEach((tag) => {
             formData.append("tags[]", tag);
@@ -190,6 +198,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
 
           if (selectedRow?._id) {
             formData.append("id", selectedRow._id);
+            console.log(formData, "formdata");
             await updateRecurrenceSchedule({
               id: selectedRow._id,
               data: formData,
@@ -227,6 +236,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
           tags: selectedRow?.tags || [],
           category: selectedRow?.category?._id,
           language: selectedRow?.language,
+           educator: selectedRow?.educator?._id,
           recurrenceRule: {
             frequency: selectedRow?.recurrenceRuleId?.frequency || "NONE",
             interval: selectedRow?.recurrenceRuleId?.interval || 1,
@@ -339,6 +349,42 @@ const CreateRecurrenceScheduleModel = forwardRef(
                       {formik.errors.datetime}
                     </span>
                   )}
+                </div>
+              </div>
+              <div className="col-span-12">
+                <div className="col-span-6">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      Assign to Educator<span className="text-danger">*</span>
+                    </label>
+                    <Select
+                      defaultValue={formik.values.educator}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("educator", value)
+                      }
+                      className={`form-control input input-md w-full ${
+                        formik.errors.educator && formik.touched.educator
+                          ? "border border-danger"
+                          : ""
+                      }`}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {educators?.data?.map((item) => (
+                          <SelectItem key={item._id} value={item._id}>
+                            {item.first_name + " " + item.last_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {formik.touched.educator && formik.errors.educator && (
+                      <span role="alert" className="text-danger text-xs mt-1">
+                        {formik.errors.educator}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="col-span-12">
@@ -511,7 +557,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                                 <SelectItem value={5}>5 Days</SelectItem>
                               </SelectContent>
                             </Select>
-                            {/* {formik.touched.recurrenceRule?.interval &&
+                            {formik.touched.recurrenceRule?.interval &&
                               formik.errors.recurrenceRule?.interval && (
                                 <span
                                   role="alert"
@@ -519,7 +565,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                                 >
                                   {formik.errors.recurrenceRule.interval}
                                 </span>
-                              )} */}
+                              )}
                           </div>
                         </div>
                       </div>
@@ -561,7 +607,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                                   <SelectItem value={5}>5 Weeks</SelectItem>
                                 </SelectContent>
                               </Select>
-                              {/* {formik.touched.recurrenceRule?.interval &&
+                              {formik.touched.recurrenceRule?.interval &&
                                 formik.errors.recurrenceRule?.interval && (
                                   <span
                                     role="alert"
@@ -569,7 +615,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                                   >
                                     {formik.errors.recurrenceRule.interval}
                                   </span>
-                                )} */}
+                                )}
                             </div>
                           </div>
                         </div>
@@ -790,4 +836,4 @@ const CreateRecurrenceScheduleModel = forwardRef(
   }
 );
 
-export default CreateRecurrenceScheduleModel;
+export default CreateAdminRecurrenceScheduleModel;
