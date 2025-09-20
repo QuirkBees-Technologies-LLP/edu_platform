@@ -24,6 +24,7 @@ import {
   usePostQuery,
 } from "../../../store/api/client/clientSocialApiSlilce";
 import { formatDistanceToNow } from "date-fns";
+import {QRCodeCanvas} from 'qrcode.react';
 const ClientDashboard = () => {
   const { auth } = useAuthContext();
 
