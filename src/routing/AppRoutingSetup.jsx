@@ -123,6 +123,7 @@ import AdminTradeAnalysis from "../pages/admin/admin-trade-analysis/AdminTradeAn
 import ClientDashboard from "../pages/student/client-dashboard/ClientDashboard";
 import FastStartTraining from "../pages/student/fast-start-training/FastStartTraining";
 import IqStrategies from "../pages/student/iq-strategies/IqStrategies";
+import CommunityFeed from "../pages/student/iq-social/CommunityFeed";
 
 import IqAcademy from "../pages/student/iq-academy/IqAcademy";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
@@ -134,6 +135,7 @@ import IqVault from "../pages/student/iq-vault/IqVault";
 import IqInsight from "../pages/student/iq-insight/IqInsight";
 import EducatorCommunityFeed from "../pages/educator/educator-community-feed/EducatorCommunityFeed";
 import AdminCommunityFeed from "../pages/admin/admin-community-feed/AdminCommunityFeed";
+import KpisDashboard from "../pages/admin/KPIs Page/Kpis";
 
 const routes = {
   student: [
@@ -163,6 +165,7 @@ const routes = {
     { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
     { path: "/iq-insight", element: <IqInsight /> },
+    { path: "/iq-social", element: <CommunityFeed /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
@@ -209,6 +212,7 @@ const routes = {
     { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
     { path: "admin/general-setting", element: <GeneralSetting /> },
     { path: "/admin/iq-social", element: <AdminCommunityFeed /> },
+    { path: "/admin/kpis" , element: <KpisDashboard /> },
   ],
 };
 
@@ -231,7 +235,6 @@ const AppRoutingSetup = () => {
   // const roleRoutes = routes[userRole] || [];
 
   console.log(roleRoutes, "roleRoutes");
-  
 
   return (
     <Routes>

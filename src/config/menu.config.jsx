@@ -1530,6 +1530,7 @@ export const sideMenus = {
       icon: <Lightbulb />,
       path: "/ideas",
     },
+  
     // {
     //   title: 'IQ Academy',
     //   icon: <Tv />,
@@ -1572,6 +1573,11 @@ export const sideMenus = {
           newTab: true,
         },
       ],
+    },
+      {
+      title: "IQ Social",
+      icon: <MessageCircleMore />,
+      path: "/iq-social",
     },
     // {
     //   title: "IQ Social",

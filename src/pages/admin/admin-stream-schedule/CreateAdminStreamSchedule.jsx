@@ -135,6 +135,7 @@ const CreateAdminStreamSchedule = forwardRef(
 
         formData.append("userId", values?.userId);
         formData.append("educator", values?.educator);
+       
 
         if (thumbnailFile) {
           formData.append("files", thumbnailFile); // key must match your backend field
@@ -155,6 +156,7 @@ const CreateAdminStreamSchedule = forwardRef(
 
         try {
           if (selectedRow?._id) {
+           
             await updateEducatorStreamSchedule({
               data: formData,
               id: selectedRow._id,
@@ -181,7 +183,7 @@ const CreateAdminStreamSchedule = forwardRef(
 
     useEffect(() => {
       if (educatorId && formik.values) {
-        formik.setFieldValue("userId", educatorId);
+        // formik.setFieldValue("userId", educatorId);
       }
     }, [educatorId, formik.values]);
     console.log(selectedRow, "selectedRow");
@@ -199,6 +201,7 @@ const CreateAdminStreamSchedule = forwardRef(
           userId: selectedRow?.userId,
           language: selectedRow?.language,
         };
+      
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
@@ -273,7 +276,7 @@ const CreateAdminStreamSchedule = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <div className="flex items-center justify-between">
                 <p className="text-xs font-medium tracking-wide">
                 EASTERN TIME (EST)
@@ -285,7 +288,7 @@ const CreateAdminStreamSchedule = forwardRef(
                 {time.clock}
               </p>
               </div>
-              </div>
+              </div> */}
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">

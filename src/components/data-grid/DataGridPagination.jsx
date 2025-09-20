@@ -76,7 +76,7 @@ const DataGridPagination = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex items-center gap-2 order-1 md:order-2 pt-2 md:pt-0">
+      <div className="flex items-center gap-2 order-1 md:order-2 pt-2 md:pt-0 flex-wrap">
         <div className="text-sm text-muted-foreground">{paginationInfo}</div>
         <div className="flex items-center space-x-1">
           <Button variant="ghost" className={btnArrowClasses} onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
