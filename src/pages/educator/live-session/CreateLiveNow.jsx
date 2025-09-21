@@ -209,10 +209,13 @@ const CreateLiveStream = forwardRef(
           <DialogHeader className="pb-5 pt-0 px-0">
             <DialogTitle>
               {selectedRow?._id
-                ? "Update Live Stream"
-                : "Create Live Stream"}
+                ? "Update Live Schedule"
+                : "Create Live Schedule"}
             </DialogTitle>
           </DialogHeader>
+          <div className="grid gap-2 px-0 py-0 pt-0 pb-0 ">
+            <h2>It won't appear in the schedule</h2>
+          </div>
 
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
@@ -374,7 +377,7 @@ const CreateLiveStream = forwardRef(
               onClick={formik.handleSubmit}
               className="btn btn-primary"
             >
-              Go Live
+              Submit
             </button>
           </div>
         </DialogContent>
