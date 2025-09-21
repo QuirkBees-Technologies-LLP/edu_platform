@@ -35,6 +35,9 @@ import { useLazyGetAdminTradeIdeasQuery } from "../../../store/api/admin/adminTr
 import CreateLiveSession from "./CreateLiveSession";
 import { formatSecondsToHMS } from "../../../lib/utils";
 import { useNavigate } from "react-router";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+
 import {
   useLazyGetLiveSessionListQuery,
   useEndCallMutation,
@@ -299,14 +302,14 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           );
         },
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[120px]",
         },
       },
       {
         accessorFn: (row) => row.datetime,
         id: "datetime",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Schedule At" column={column} />
+          <DataGridColumnHeader title="Scheduled from this date" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -452,11 +455,15 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
-          <div className="text-end pb-4">
-            <button className="btn btn-primary" onClick={handleClickOpen}>
-              Go Live
-            </button>
-          </div>
+           <div className="text-end pb-4 relative group inline-block">
+        <button className="btn btn-primary" onClick={handleClickOpen}>
+        Create a New Live Session
+        </button>
+        {/* Tooltip */}
+        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
+       It won't appear in the schedule
+        </div>
+      </div>
         </ToolbarActions>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
