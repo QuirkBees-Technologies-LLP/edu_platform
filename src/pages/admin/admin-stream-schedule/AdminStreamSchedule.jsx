@@ -159,7 +159,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[120px]",
+          headerClassName: "min-w-[110px]",
         },
       },
       {
@@ -197,14 +197,14 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[160px]",
+          headerClassName: "min-w-[140px]",
         },
       },
       {
         accessorFn: (row) => row.datetime,
         id: "schedule_time",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Schedule At" column={column} />
+          <DataGridColumnHeader title="Scheduled from this date" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -215,7 +215,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[140px]",
+          headerClassName: "min-w-[120px]",
         },
       },
       {
@@ -252,7 +252,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[150px]",
+          headerClassName: "min-w-[90px]",
         },
       },
           {
@@ -275,7 +275,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[120px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       // {

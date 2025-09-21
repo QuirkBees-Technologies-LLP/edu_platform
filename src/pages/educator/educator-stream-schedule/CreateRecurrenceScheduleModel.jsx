@@ -266,8 +266,8 @@ const CreateRecurrenceScheduleModel = forwardRef(
           <DialogHeader className="pb-5 pt-0 px-0">
             <DialogTitle>
               {selectedRow?._id
-                ? "Update recurring Schedule"
-                : "Create recurring Schedule"}
+                ? "Update Recurring Schedule"
+                : "Create Recurring Schedule"}
             </DialogTitle>
           </DialogHeader>
 
@@ -321,7 +321,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Date Time<span className="text-danger">*</span>
+                    Date Onwards<span className="text-danger">*</span>
                   </label>
                   <div className="custom_datepicket">
                     <DateTimePicker
