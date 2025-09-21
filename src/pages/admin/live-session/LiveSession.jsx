@@ -197,7 +197,7 @@ const LiveSession = ({ title = "Live Session" }) => {
       id: 'datetime',
       header: ({
         column
-      }) => <DataGridColumnHeader title='Schedule At' column={column} />,
+      }) => <DataGridColumnHeader title='Scheduled from this date' column={column} />,
       enableSorting: true,
       cell: info => <div className="flex items-center gap-2.5">
         <span className="leading-none text-gray-800 font-normal">

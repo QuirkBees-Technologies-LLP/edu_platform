@@ -35,6 +35,9 @@ import { useLazyGetAdminTradeIdeasQuery } from "../../../store/api/admin/adminTr
 import CreateLiveSession from "./CreateLiveSession";
 import { formatSecondsToHMS } from "../../../lib/utils";
 import { useNavigate } from "react-router";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+
 import {
   useLazyGetLiveSessionListQuery,
   useEndCallMutation,
@@ -299,14 +302,14 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           );
         },
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[120px]",
         },
       },
       {
         accessorFn: (row) => row.datetime,
         id: "datetime",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Schedule At" column={column} />
+          <DataGridColumnHeader title="Scheduled from this date" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -453,9 +456,23 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
-            <button className="btn btn-primary" onClick={handleClickOpen}>
+            {/* <button className="btn btn-primary" onClick={handleClickOpen}>
               Go Live
-            </button>
+            </button> */}
+            <OverlayTrigger
+              placement="bottom"
+              overlay={
+                <Tooltip id="tooltip-bottom">It won't appear in the schedule</Tooltip>
+              }
+            >
+              <button
+                className="btn btn-primary"
+                onClick={handleClickOpen}
+                // disabled={isCreateOpen}
+              >
+                Create a New Live Session
+              </button>
+            </OverlayTrigger>
           </div>
         </ToolbarActions>
         {/* <ToolbarActions>

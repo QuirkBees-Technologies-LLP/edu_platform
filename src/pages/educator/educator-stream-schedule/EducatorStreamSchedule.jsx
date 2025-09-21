@@ -197,7 +197,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[150px]",
         },
       },
       {
@@ -217,14 +217,14 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[140px]",
         },
       },
       {
         accessorFn: (row) => row.create_by,
         id: "schedule_time",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Schedule At" column={column} />
+          <DataGridColumnHeader title="Scheduled from this date" column={column} />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -235,7 +235,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[180px]",
+          headerClassName: "min-w-[150px]",
         },
       },
       {
@@ -292,7 +292,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[120px]",
+          headerClassName: "min-w-[90px]",
         },
       },
       // {
