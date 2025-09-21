@@ -455,25 +455,15 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
-          <div className="text-end pb-4">
-            {/* <button className="btn btn-primary" onClick={handleClickOpen}>
-              Go Live
-            </button> */}
-            <OverlayTrigger
-              placement="bottom"
-              overlay={
-                <Tooltip id="tooltip-bottom">It won't appear in the schedule</Tooltip>
-              }
-            >
-              <button
-                className="btn btn-primary"
-                onClick={handleClickOpen}
-                // disabled={isCreateOpen}
-              >
-                Create a New Live Session
-              </button>
-            </OverlayTrigger>
-          </div>
+           <div className="text-end pb-4 relative group inline-block">
+        <button className="btn btn-primary" onClick={handleClickOpen}>
+        Create a New Live Session
+        </button>
+        {/* Tooltip */}
+        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
+       It won't appear in the schedule
+        </div>
+      </div>
         </ToolbarActions>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
