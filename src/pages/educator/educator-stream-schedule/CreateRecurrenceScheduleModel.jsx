@@ -126,7 +126,6 @@ const CreateRecurrenceScheduleModel = forwardRef(
       context: {
         datetime: initialValues.datetime,
       },
-
       onSubmit: async (values) => {
         try {
           const { recurrenceRule } = values;
@@ -321,7 +320,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Date Onwards<span className="text-danger">*</span>
+                   From this date onwards it will be schedule<span className="text-danger">*</span>
                   </label>
                   <div className="custom_datepicket">
                     <DateTimePicker
