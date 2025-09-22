@@ -136,6 +136,9 @@ import IqInsight from "../pages/student/iq-insight/IqInsight";
 import EducatorCommunityFeed from "../pages/educator/educator-community-feed/EducatorCommunityFeed";
 import AdminCommunityFeed from "../pages/admin/admin-community-feed/AdminCommunityFeed";
 import KpisDashboard from "../pages/admin/KPIs Page/Kpis";
+import PrivacyPolicy from "../auth/pages/PrivacyPolicy";
+import TermsOfService from "../auth/pages/TermsOfService";
+import Support from "../auth/pages/Support";
 
 const routes = {
   student: [
@@ -558,6 +561,9 @@ const AppRoutingSetup = () => {
         </Route>
       ))} */}
 
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/support" element={<Support />} />
       <Route path="error/*" element={<ErrorsRouting />} />
       <Route path="auth/*" element={<AuthPage />} />
       {/* <Route path="*" element={<Navigate to="/error/404" />} /> */}
