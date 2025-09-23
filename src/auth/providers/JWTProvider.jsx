@@ -17,7 +17,7 @@ export const GET_USER_URL = `${API_URL}/user`;
 
 const testUsers = {
   "test@iqonic.vip": {
-    password: "Test$iqonic",
+    password: "sX^c^VYpZu",
     data: {
       name: "Test user",
       email: "test@iqonic.vip",
