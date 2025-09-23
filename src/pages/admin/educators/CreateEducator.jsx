@@ -74,8 +74,8 @@ const CreateEducator = forwardRef(
         .min(6, "Minimum 6 characters are required")
         .max(20, "Maximum 20 characters are required")
         .matches(
-          /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,20}$/,
-          "Password must contain at least one letter and one number"
+          /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@#$%^&*()_+=\-]{6,20}$/,
+          "Password must contain at least one letter, one number, and may include special characters"
         )
         .when([], {
           is: () => !selectedRow?._id,
@@ -157,11 +157,11 @@ const CreateEducator = forwardRef(
             payload.id = selectedRow._id;
             delete payload.password;
           }
-          if(typeof(payload.icon) === "string"){
-            delete payload.icon
+          if (typeof payload.icon === "string") {
+            delete payload.icon;
           }
-          if(typeof(payload.image) === "string"){
-            delete payload.image
+          if (typeof payload.image === "string") {
+            delete payload.image;
           }
 
           // Convert payload to FormData
@@ -188,7 +188,6 @@ const CreateEducator = forwardRef(
           }
 
           console.log("formData", formData);
-         
 
           // API call using FormData
           if (selectedRow?._id) {
@@ -203,7 +202,7 @@ const CreateEducator = forwardRef(
           }
 
           formik.resetForm();
-          
+
           handleCloseCreate();
           setSelectedRow({});
           refetch();
@@ -379,7 +378,7 @@ const CreateEducator = forwardRef(
               <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Email {selectedRow?._id ? "" : "<span className='text-danger'>*</span>"}
+                    Email <span className="text-danger">*</span>
                   </label>
                   <input
                     type="email"
