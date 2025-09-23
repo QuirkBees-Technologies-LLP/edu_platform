@@ -10,11 +10,14 @@ import { DefaultTooltip } from "@/components";
 import { toast } from "sonner";
 import {
   useEducatorChangeLiveStreamStatusUpdateMutation,
+  useEndAndCreateMutation,
   useEndCallMutation,
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { useNavigate } from "react-router";
 import RecordingControls from "./RecordingControls";
 import { useEducatorLiveStreamStatusUpdateMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const LiveSessionPlayer = ({
   client,
@@ -24,6 +27,8 @@ const LiveSessionPlayer = ({
   rtmp_url,
   setIsTooltipOpen,
   isTooltipOpen,
+  checkLastRecurrence,
+  isRecurent,
   id,
 }) => {
   const [isCallEnd, setIsCallEnd] = useState(null);
@@ -45,8 +50,15 @@ const LiveSessionPlayer = ({
 
   const isLive = useIsCallLive();
   const members = useCallMembers(); // List of participants in the call
+  const [isEndOpen, setIsEndOpen] = useState(false);
+  const [lastRecurrence, setLastRecurrence] = useState(true);
+  const [ endAndCreate, { isLoading: isEndingAndCreating }] = useEndAndCreateMutation();
 
   useEffect(() => {
+    console.log(
+      "hellllllllllllllllllllllllllllllllllllllllll",
+      checkLastRecurrence
+    );
     if (!call) return;
 
     let subscriptions = [];
@@ -184,6 +196,78 @@ const LiveSessionPlayer = ({
   //     return () => clearTimeout(timer);
   //   }
   // }, [isLive, call]);
+  const handleEndCall = async (callId) => {
+    try {
+      if (!callId) {
+        toast.error("Missing callId");
+        return;
+      }
+
+      if (isRecording) {
+        console.log("👉 Stopping last recording before ending call...");
+        await call.stopRecording();
+      }
+
+      await endCall({ callId }).unwrap();
+      await updateLiveStatus({
+        callId,
+        status: "ended",
+      }).unwrap();
+      setIsCallEnd(true);
+
+      // ✅ Fetch ALL recordings instead of last only
+      await fetchStreamRecordings();
+
+      toast.success("Call ended successfully");
+    } catch (error) {
+      console.error("Failed to end stream", error);
+      const message = error?.data?.message || "Failed to end call";
+      toast.error(message);
+    }
+  };
+
+  const handleEndAndcreate = async (callId) => {
+    try {
+      if (!callId) {
+        toast.error("Missing callId");
+        return;
+      }
+
+      if (isRecording) {
+        console.log("👉 Stopping last recording before ending call...");
+        await call.stopRecording();
+      }
+
+      await endAndCreate({ callId }).unwrap();
+      await updateLiveStatus({
+        callId,
+        status: "ended",
+      }).unwrap();
+      setIsCallEnd(true);
+
+      // ✅ Fetch ALL recordings instead of last only
+      await fetchStreamRecordings();
+
+      toast.success("Call ended successfully");
+    } catch (error) {
+      console.error("Failed to end stream", error);
+      const message = error?.data?.message || "Failed to end call";
+      toast.error(message);
+    }
+  };
+
+  const handleEndCallModel = () => {
+    setIsEndOpen(true);
+    if (!!isRecurent) {
+      if (!!checkLastRecurrence) {
+        setLastRecurrence(false);
+      } else {
+        setLastRecurrence(true);
+      }
+    } else {
+      setLastRecurrence(false);
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "unset" }}>
@@ -326,40 +410,8 @@ const LiveSessionPlayer = ({
               {/* ✅ End Call */}
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    if (!callId) {
-                      toast.error("Missing callId");
-                      return;
-                    }
-
-                    if (isRecording) {
-                      console.log(
-                        "👉 Stopping last recording before ending call..."
-                      );
-                      await call.stopRecording();
-                    }
-
-                    await endCall({ callId}).unwrap();
-                    await updateLiveStatus({
-                        callId,
-                        status: "ended",
-                      }).unwrap();
-                    setIsCallEnd(true);
-
-                    // ✅ Fetch ALL recordings instead of last only
-                    await fetchStreamRecordings();
-
-                    toast.success("Call ended successfully");
-                  } catch (error) {
-                    console.error("Failed to end stream", error);
-                    const message =
-                      error?.data?.message || "Failed to end call";
-                    toast.error(message);
-                  }
-                }}
-                disabled={isEnding}
                 className="btn btn-md btn-danger"
+                onClick={ handleEndCallModel}
               >
                 <PhoneOff size={16} />
                 End Call
@@ -384,7 +436,7 @@ const LiveSessionPlayer = ({
 
                       await call.stopLive();
                       await updateLiveStatus({
-                       callId,
+                        callId,
                         status: "pending",
                       }).unwrap();
 
@@ -408,8 +460,7 @@ const LiveSessionPlayer = ({
                       }
 
                       await updateLiveStatus({
-                        
-                       callId,
+                        callId,
                         status: "active",
                       }).unwrap();
                       toast.success("Stream started successfully");
@@ -439,6 +490,54 @@ const LiveSessionPlayer = ({
             </div>
           )}
         </>
+      )}
+      {isEndOpen && (
+        <Dialog open={isEndOpen} onOpenChange={() => setIsEndOpen(false)}>
+          <DialogContent className="p-5 max-w-[500px]">
+            <VisuallyHidden>
+              <DialogTitle>Hidden Title</DialogTitle>
+            </VisuallyHidden>
+            <div className="text-center">
+              <i className="ki-filled text-3xl ki-alert text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+            </div>
+            <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
+              Are you sure you want to end this livestream for everyone?
+            </p>
+            <div className="flex justify-center items-center space-x-4">
+              <button
+                className="btn btn-light"
+                onClick={() => setIsEndOpen(false)}
+                disabled={isEnding}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={async () => {
+                  await handleEndCall(callId);
+                  setIsEndOpen(false);
+                }}
+                disabled={isEnding}
+              >
+                {isEnding ? "Ending..." : "Yes, End Call"}
+              </button>
+              {lastRecurrence && (
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={async () => {
+                    await handleEndAndcreate(callId);
+                    setIsEndOpen(false);
+                  }}
+                  disabled={isEndingAndCreating}
+                >
+                  {isEndingAndCreating ? "Creating..." : "End & Create"}
+                </button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

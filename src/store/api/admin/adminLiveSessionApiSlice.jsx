@@ -13,7 +13,7 @@ export const adminLiveSessionApiSlice = createApi({
             }),
         }),
         getLiveSessionList: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/admin/stream/list?page=${page}&limit=${limit}`,
+            query: ({ page = 1, limit = 10 , status = "" }) => `/admin/stream/list?page=${page}&limit=${limit}&status=${status}`,
         }),
     }),
 });
