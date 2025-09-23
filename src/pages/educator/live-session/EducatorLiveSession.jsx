@@ -42,10 +42,11 @@ import {
   useLazyGetLiveSessionListQuery,
   useEndCallMutation,
   useStartCallMutation,
+  useEndAndCreateMutation,
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { ro } from "@faker-js/faker";
+import { ro, tr } from "@faker-js/faker";
 import CreateLiveStream from "./CreateLiveNow";
 
 const EducatorLiveSession = ({ title = "Live Session" }) => {
@@ -59,6 +60,9 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [startCall, { isLoading: isStarting }] = useStartCallMutation();
   const navigate = useNavigate();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [lastRecurrence, setLastRecurrence] = useState(false);
+  const [endAndCreate, { isLoading: isEndingAndCreating }] =
+    useEndAndCreateMutation();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -99,6 +103,26 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     }
   };
 
+  const handleEndAndcreate = async (rowData) => {
+    try {
+      const callId = rowData?.callId;
+      const Id = rowData?._id;
+      console.log(Id, "Id");
+      if (!callId) {
+        toast.error("Missing callId");
+        return;
+      }
+      await endAndCreate({ callId, Id }).unwrap();
+      setSelectedRow({});
+      reloadTable && reloadTable();
+      toast.success("Call ended successfully");
+    } catch (error) {
+      console.error("Failed to end call", error);
+      const message = error?.data?.message || "Failed to end call";
+      toast.error(message);
+    }
+  };
+
   const handleStartCall = async (rowData) => {
     try {
       const callId = rowData?.callId;
@@ -122,6 +146,15 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const openConfirmEnd = (row) => {
     setSelectedRow(row);
     setIsConfirmOpen(true);
+    if (row?.schedule?.isRecurent) {
+      if (row?.checkLastRecurrence) {
+        setLastRecurrence(false);
+      } else {
+        setLastRecurrence(true);
+      }
+    } else {
+      setLastRecurrence(false);
+    }
   };
 
   const { isRTL } = useLanguage();
@@ -203,7 +236,9 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           return (
             <span>
               <p
-                className={isClickable ? "cursor-pointer hover:text-primary" : ""}
+                className={
+                  isClickable ? "cursor-pointer hover:text-primary" : ""
+                }
                 onClick={
                   isClickable
                     ? () => handleRedirect(callId, info.row.original)
@@ -309,7 +344,10 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         accessorFn: (row) => row.datetime,
         id: "datetime",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Scheduled from this date" column={column} />
+          <DataGridColumnHeader
+            title="Scheduled from this date"
+            column={column}
+          />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -455,15 +493,15 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
-           <div className="text-end pb-4 relative group inline-block">
-        <button className="btn btn-primary" onClick={handleClickOpen}>
-        Create a New Live Session
-        </button>
-        {/* Tooltip */}
-        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
-       It won't appear in the schedule
-        </div>
-      </div>
+          <div className="text-end pb-4 relative group inline-block">
+            <button className="btn btn-primary" onClick={handleClickOpen}>
+              Create a New Live Session
+            </button>
+            {/* Tooltip */}
+            <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
+              It won't appear in the schedule
+            </div>
+          </div>
         </ToolbarActions>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
@@ -532,6 +570,19 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
               >
                 {isEnding ? "Ending..." : "Yes, End Call"}
               </button>
+              {lastRecurrence && (
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={async () => {
+                    await handleEndAndcreate(selectedRow);
+                    setIsConfirmOpen(false);
+                  }}
+                  disabled={isEndingAndCreating}
+                >
+                  {isEndingAndCreating ? "Creating..." : "End & Create"}
+                </button>
+              )}
             </div>
           </DialogContent>
         </Dialog>

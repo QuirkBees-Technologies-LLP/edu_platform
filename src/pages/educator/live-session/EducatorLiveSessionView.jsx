@@ -16,6 +16,8 @@ const EducatorLiveSessionView = () => {
     rtmp_URl: rtmp_url,
     token: rtmp_stream_key,
     _id: _id,
+    schedule: { isRecurent } = {},
+    checkLastRecurrence: checkLastRecurrence 
   } = sessionData || {};
 
   console.log(sessionData._id,"sessionData")
@@ -109,6 +111,8 @@ const EducatorLiveSessionView = () => {
           rtmp_stream_key={rtmp_stream_key}
           rtmp_url={rtmp_url}
           id={_id}
+          checkLastRecurrence={checkLastRecurrence}
+          isRecurent={isRecurent}
         />
       </StreamWrapper>
     </EventProvider>

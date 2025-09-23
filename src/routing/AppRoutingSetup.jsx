@@ -139,6 +139,8 @@ import KpisDashboard from "../pages/admin/KPIs Page/Kpis";
 import PrivacyPolicy from "../auth/pages/PrivacyPolicy";
 import TermsOfService from "../auth/pages/TermsOfService";
 import Support from "../auth/pages/Support";
+import EducatorEndSchedule from "../pages/educator/educator-endSchedule/EducatorEndSchedule";
+import AdminEndSchedule from "../pages/admin/admin-ednSchedule/AdminEndSchedule";
 
 const routes = {
   student: [
@@ -189,6 +191,7 @@ const routes = {
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
     { path: "/educator/profile", element: <EducatorProfile /> },
     { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
+    { path: "/educator/ended-live-sessions", element: <EducatorEndSchedule />},
     { path: "/educator/stream-recording", element: <EducatorRecording /> },
     {
       path: "/educator/stream-recording/list",
@@ -216,6 +219,7 @@ const routes = {
     { path: "admin/general-setting", element: <GeneralSetting /> },
     { path: "/admin/iq-social", element: <AdminCommunityFeed /> },
     { path: "/admin/kpis" , element: <KpisDashboard /> },
+    { path: "/admin/ended-live-sessions", element: <AdminEndSchedule /> },
   ],
 };
 

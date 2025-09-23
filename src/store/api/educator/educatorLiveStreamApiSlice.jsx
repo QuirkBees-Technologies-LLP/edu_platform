@@ -9,8 +9,8 @@ export const educatorLiveStreamApiSlice = createApi({
       query: () => `/educator/category`,
     }),
     getLiveSessionList: builder.query({
-      query: ({ page = 1, limit = 10 }) =>
-        `/educator/live-stream/list?page=${page}&limit=${limit}`,
+      query: ({ page = 1, limit = 10 , status = ""}) =>
+        `/educator/live-stream/list?page=${page}&limit=${limit}&status=${status}`,
     }),
     updateStreamStatus: builder.mutation({
       query: ({ id, status }) => ({
@@ -24,6 +24,13 @@ export const educatorLiveStreamApiSlice = createApi({
         url: `/educator/live-stream/`,
         method: "POST",
         body: { callId: callId,  },
+      }),
+    }),
+    endAndCreate: builder.mutation({
+      query: ({ callId, Id }) => ({
+        url: `/educator/live-stream/end-and-create`,
+        method: "POST",
+        body: { callId: callId, Id: Id },
       }),
     }),
     startCall: builder.mutation({
@@ -58,4 +65,5 @@ export const {
   useEducatorLiveStreamStatusUpdateMutation,
   useEducatorChangeLiveStreamStatusUpdateMutation,
   useStartCallMutation,
+  useEndAndCreateMutation,
 } = educatorLiveStreamApiSlice;

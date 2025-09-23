@@ -29,6 +29,8 @@ const StreamClient = ({
   setIsTooltipOpen,
   isTooltipOpen,
   id,
+  checkLastRecurrence ,
+  isRecurent
 }) => {
   const call = useCall();
 
@@ -99,6 +101,8 @@ const StreamClient = ({
                           setIsTooltipOpen={setIsTooltipOpen}
                           isTooltipOpen={isTooltipOpen}
                           id={id}
+                          checkLastRecurrence={checkLastRecurrence}
+                          isRecurent={isRecurent}
                         />
                       </StreamCall>
                     </StreamVideo>

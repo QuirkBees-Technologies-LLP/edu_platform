@@ -1349,6 +1349,11 @@ export const sideMenus = {
           icon: <PlayCircle />,
           path: "/admin/live-session",
         },
+        {
+          title: "Ended Live ",
+          icon: <PlayCircle />,
+          path: "/admin/ended-live-sessions",
+        },
       ],
     },
 
@@ -1434,6 +1439,11 @@ export const sideMenus = {
           icon: <PlayCircle />,
           path: "/educator/live-session",
         },
+        {
+          title: "Ended Live ",
+          icon: <PlayCircle />,
+          path: "/educator/ended-live-sessions",
+        }
       ],
     },
     {
