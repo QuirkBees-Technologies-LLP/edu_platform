@@ -1350,7 +1350,7 @@ export const sideMenus = {
           path: "/admin/live-session",
         },
         {
-          title: "Ended Live ",
+          title: "Ended Session ",
           icon: <PlayCircle />,
           path: "/admin/ended-live-sessions",
         },
@@ -1440,7 +1440,7 @@ export const sideMenus = {
           path: "/educator/live-session",
         },
         {
-          title: "Ended Live ",
+          title: "Ended Session ",
           icon: <PlayCircle />,
           path: "/educator/ended-live-sessions",
         }
