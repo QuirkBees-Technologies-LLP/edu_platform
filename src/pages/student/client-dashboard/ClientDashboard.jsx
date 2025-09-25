@@ -751,7 +751,7 @@ const ClientDashboard = () => {
                       Live Updates
                     </h3>
                     <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                      <button
+                      {/* <button
                         onClick={() => setActiveTab("feed")}
                         className={`px-3 py-1 text-xs font-medium rounded-full ${
                           activeTab === "feed"
@@ -770,7 +770,7 @@ const ClientDashboard = () => {
                         }`}
                       >
                         Ideas
-                      </button>
+                      </button> */}
                     </div>
                   </div>
 
