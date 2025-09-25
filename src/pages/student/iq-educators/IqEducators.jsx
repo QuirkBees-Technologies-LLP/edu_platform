@@ -851,11 +851,11 @@ const IqEducators = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="flex justify-center items-center py-10">
-                      <p className="text-gray-600 text-sm text-center">
+                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
+                      <div className="text-sm text-gray-900 font-medium text-center">
                         🚀 No updates available right now. Stay tuned for fresh
                         content!
-                      </p>
+                      </div>
                     </div>
                   )}
 
