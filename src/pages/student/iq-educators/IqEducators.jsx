@@ -11,6 +11,7 @@ import RecordingThumbnail from "./RecordingThumbnail";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
+import { formatDistanceToNow } from "date-fns";
 
 const IqEducators = () => {
   const navigate = useNavigate();
@@ -786,10 +787,10 @@ const IqEducators = () => {
                 {/* Header */}
                 <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
                   <h3 className="text-white font-semibold text-sm">
-                    Live Updates
+                    Live Feed
                   </h3>
                   <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                    <button
+                    {/* <button
                       onClick={() => setActiveTab("feed")}
                       className={`px-3 py-1 text-xs font-medium rounded-full ${
                         activeTab === "feed"
@@ -808,43 +809,55 @@ const IqEducators = () => {
                       }`}
                     >
                       Ideas
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 
                 {/* Updates */}
                 <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
                   {/* Hover Overlay */}
-                  <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
+                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
                     No This feature is under-development
-                  </div>
+                  </div> */}
 
                   {/* Messages */}
-                  {updates.map((update) => (
-                    <div
-                      key={update.id}
-                      className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-                    >
-                      <div className="flex flex-col gap-4 mb-4">
-                        <img
-                          src={update.avatar}
-                          alt={update.name}
-                          className="w-12 h-12 rounded-full"
-                        />
-                        <div>
-                          <h4 className="text-sm font-normal mb-1 text-gray-900">
-                            {update.name}
-                          </h4>
-                          <p className="text-xs font-normal text-gray-600">
-                            {update.time}
-                          </p>
+                  {response?.data?.PostData?.length > 0 ? (
+                    response.data.PostData.map((update) => (
+                      <div
+                        key={update.id}
+                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
+                      >
+                        <div className="flex flex-col gap-4 mb-4">
+                          <img
+                            src={update.author.image}
+                            alt={update.author.name}
+                            className="w-12 h-12 rounded-full"
+                          />
+                          <div>
+                            <h4 className="text-sm font-normal mb-1 text-gray-900">
+                              {update.author.first_name}{" "}
+                              {update.author.last_name}
+                            </h4>
+                            <p className="text-xs font-normal text-gray-600">
+                              {formatDistanceToNow(new Date(update.createdAt), {
+                                addSuffix: true,
+                              })}
+                            </p>
+                          </div>
                         </div>
+                        <p className="text-sm font-normal text-gray-700">
+                          {update.content}
+                        </p>
                       </div>
-                      <p className="text-sm font-normal text-gray-700">
-                        {update.message}
+                    ))
+                  ) : (
+                    <div className="flex justify-center items-center py-10">
+                      <p className="text-gray-600 text-sm text-center">
+                        🚀 No updates available right now. Stay tuned for fresh
+                        content!
                       </p>
                     </div>
-                  ))}
+                  )}
 
                   {/* Cards */}
                   {/* {trades.map((trade) => (
