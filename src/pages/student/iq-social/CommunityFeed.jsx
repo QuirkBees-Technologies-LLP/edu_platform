@@ -51,7 +51,7 @@ const CommunityFeed = () => {
         </ToolbarHeading>
       </Toolbar>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
         <div className="col-span-1 sm:col-span-2 lg:col-span-3">
           {isLoading && posts.length === 0 ? (
             <div className="card rounded-lg shadow-md p-8 text-center">

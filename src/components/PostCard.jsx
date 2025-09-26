@@ -227,7 +227,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                                 </button>
 
                                 {showOptions && (
-                                    <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-10 min-w-[120px]">
+                                    <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-999 min-w-[120px]">
                                         <button
                                             onClick={handleEdit}
                                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
