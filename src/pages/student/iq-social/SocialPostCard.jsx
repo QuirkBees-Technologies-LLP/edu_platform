@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageSquare, Share2 } from "lucide-react";
 
 const SocialPostCard = ({ post, onEdit, refetch }) => {
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    if (selectedImage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedImage]);
+
   const {
-    _id,
     content,
     images = [],
     author,
@@ -15,6 +29,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
 
   return (
     <div className="card rounded-xl bg-white dark:bg-gray-800 p-5 mb-6 transition-all">
+      {/* Author */}
       <div className="flex items-center mb-4">
         <img
           src={author?.image}
@@ -38,30 +53,43 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
 
       {/* Images */}
       {images.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 mt-4">
+        <div className="grid grid-cols-1 gap-4 mt-4">
           {images.map((img) => (
             <img
               key={img._id || img.url}
               src={img.url}
               alt="post"
-              className="w-full h-60 rounded-lg object-cover shadow-md hover:scale-105 transition-all duration-300"
+              className="w-full h-60 rounded-lg object-cover shadow-md transition-all duration-300 cursor-pointer"
+              onClick={() => setSelectedImage(img.url)} // 🔑 Open modal on click
             />
           ))}
         </div>
       )}
 
-      {/* Actions */}
-      {/* <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3 text-sm text-gray-600 dark:text-gray-300">
-      <button className="flex items-center gap-1 hover:text-red-500 transition-all duration-300">
-        <Heart size={18} /> {likeCount}
-      </button>
-      <button className="flex items-center gap-1 hover:text-blue-500 transition-all duration-300">
-        <MessageSquare size={18} /> {commentCount}
-      </button>
-      <button className="flex items-center gap-1 hover:text-green-500 transition-all duration-300">
-        <Share2 size={18} /> Share
-      </button>
-    </div> */}
+      {/* Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div
+            className="relative flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()} // prevent close on inside click
+          >
+            <img
+              src={selectedImage}
+              alt="post"
+              className="rounded-2xl max-w-full max-h-[90vh]"
+            />
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-2 right-2 bg-white text-black px-3 py-1 rounded-lg shadow"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Optional Edit Button */}
       {onEdit && (
