@@ -33,18 +33,18 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
 
       {/* Post Content */}
       {content && (
-        <p className="text-gray-800 dark:text-gray-200 mb-4">{content}</p>
+        <p className="text-gray-800 dark:text-gray-200">{content}</p>
       )}
 
       {/* Images */}
       {images.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 mt-4">
           {images.map((img) => (
             <img
               key={img._id || img.url}
               src={img.url}
               alt="post"
-              className="w-full rounded-lg object-cover shadow-md hover:scale-105 transition-all duration-300"
+              className="w-full h-60 rounded-lg object-cover shadow-md hover:scale-105 transition-all duration-300"
             />
           ))}
         </div>
@@ -52,16 +52,16 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
 
       {/* Actions */}
       {/* <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-3 text-sm text-gray-600 dark:text-gray-300">
-        <button className="flex items-center gap-1 hover:text-red-500 transition-all duration-300">
-          <Heart size={18} /> {likeCount}
-        </button>
-        <button className="flex items-center gap-1 hover:text-blue-500 transition-all duration-300">
-          <MessageSquare size={18} /> {commentCount}
-        </button>
-        <button className="flex items-center gap-1 hover:text-green-500 transition-all duration-300">
-          <Share2 size={18} /> Share
-        </button>
-      </div> */}
+      <button className="flex items-center gap-1 hover:text-red-500 transition-all duration-300">
+        <Heart size={18} /> {likeCount}
+      </button>
+      <button className="flex items-center gap-1 hover:text-blue-500 transition-all duration-300">
+        <MessageSquare size={18} /> {commentCount}
+      </button>
+      <button className="flex items-center gap-1 hover:text-green-500 transition-all duration-300">
+        <Share2 size={18} /> Share
+      </button>
+    </div> */}
 
       {/* Optional Edit Button */}
       {onEdit && (

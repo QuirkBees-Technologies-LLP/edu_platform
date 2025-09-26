@@ -36,7 +36,7 @@ const CommunityFeed = () => {
   }, [data]);
 
   const loadMore = () => {
-   
+
     if (!isFetching && hasMore) {
       setPage((prev) => prev + 1);
     }
@@ -76,15 +76,17 @@ const CommunityFeed = () => {
               hasMore={hasMore}
               loader={
                 <div className="text-center py-4 text-gray-500 animate-pulse">
-                  Loading more… 
+                  Loading more…
                 </div>
               }
               scrollableTarget="scrollableDiv"
               scrollThreshold={0.9}
             >
-              {posts.map((post) => (
-                <SocialPostCard key={post._id} post={post} />
-              ))}
+              <div className="container max-w-full sm:max-w-2xl mx-auto pb-8">
+                  {posts.map((post) => (
+                    <SocialPostCard key={post._id} post={post} />
+                  ))}
+              </div>
             </InfiniteScroll>
           )}
         </div>
