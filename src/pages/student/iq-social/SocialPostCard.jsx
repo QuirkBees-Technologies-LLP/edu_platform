@@ -14,8 +14,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
   } = post;
 
   return (
-    <div className="card rounded-xl shadow-lg bg-white dark:bg-gray-800 p-5 mb-6 transition-all hover:shadow-xl hover:bg-gray-50 dark:hover:bg-gray-700">
-      {/* Author Info */}
+    <div className="card rounded-xl bg-white dark:bg-gray-800 p-5 mb-6 transition-all">
       <div className="flex items-center mb-4">
         <img
           src={author?.image}
