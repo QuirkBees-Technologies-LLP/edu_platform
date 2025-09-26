@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowUp, CirclePlay, Send, Share2, Check } from "lucide-react"; // Added Check icon
+import {
+  ArrowUp,
+  CirclePlay,
+  Send,
+  Share2,
+  Check,
+  Volume2,
+} from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
@@ -35,6 +42,7 @@ const IqEducators = () => {
   const [isViewOpen1, setIsViewOpen1] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState({});
   const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleCloseView = () => {
     setIsViewOpen(false);
@@ -303,33 +311,74 @@ const IqEducators = () => {
       )}
 
       <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
+        {/* Image + Name */}
         <div className="flex items-center gap-4 sm:flex-row flex-col sm:justify-start justify-center">
           <img
             src={response?.data?.educator?.image}
-            alt="Ralph Danquah"
+            alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
             className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
           />
-          <div className="text-center  sm:text-start">
+          <div className="text-center sm:text-start">
             <h3 className="text-white font-semibold text-base sm:text-lg mb-1">
               {response?.data?.educator?.first_name}{" "}
               {response?.data?.educator?.last_name}
             </h3>
             {/* <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
-              Forex Day Trading, Price Action, Risk Management
-            </p> */}
+        Forex Day Trading, Price Action, Risk Management
+      </p> */}
           </div>
         </div>
 
-        <button
-          onClick={() => handleShare()}
-          className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+        {/* Buttons side by side */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsOpen(true)}
+            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+          >
+            <Volume2 size={18} />
+          </button>
+
+          {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+          onClick={() => setIsOpen(false)}
         >
-          <span>
+          <div
+            className="relative w-full sm:w-[500px] bg-white rounded-2xl p-6 shadow-lg"
+            onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
+          >
+            <h2 className="text-lg font-semibold mb-2">Educator Info</h2>
+            <p className="text-gray-700 mb-1">
+              <strong>Name:</strong> {response?.data?.educator?.first_name}{" "}
+              {response?.data?.educator?.last_name}
+            </p>
+            <p className="text-gray-700 mb-1">
+              <strong>Specialization:</strong> Forex Day Trading, Price Action
+            </p>
+            {/* <p className="text-gray-700 mb-4">
+              <strong>Experience:</strong> 5+ Years
+            </p> */}
+
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+          <button
+            onClick={() => handleShare()}
+            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+          >
             <Share2 size={16} />
-          </span>{" "}
-          Share
-        </button>
+            Share
+          </button>
+        </div>
       </div>
+
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
           <ClientViewLiveSession
