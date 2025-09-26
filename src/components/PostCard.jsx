@@ -113,11 +113,11 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                                         className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
                                         onClick={() => setIsOpen(false)}
                                     >
-                                        <div className="relative w-full sm:w-[800px] h-full flex items-center justify-center">
+                                        <div className="relative flex items-center justify-center">
                                             <img
                                                 src={post.images[0]}
                                                 alt="Post enlarged"
-                                                className="w-full h-full rounded-2xl"
+                                                className="max-w-full max-h-[90vh] rounded-2xl"
                                             />
                                             <button
                                                 onClick={() => setIsOpen(false)}
