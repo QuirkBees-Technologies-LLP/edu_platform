@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Edit, Trash2, Play, X, Fi
 import { useDispatch, useSelector } from 'react-redux';
 import { likePost, unlikePost, deleteEducatorPost, setSelectedPost } from '@/store/reducer/postSlice';
 import DeletePostDialog from './DeletePostDialog';
+import { useEffect } from "react";
 
 const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     const dispatch = useDispatch();
@@ -11,6 +12,21 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     const [isContentExpanded, setIsContentExpanded] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const deleteDialogRef = useRef(null);
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Prevent background scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        // Cleanup (jab component unmount ya modal close thaye)
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [isOpen]);
 
     const handleLike = () => {
         if (isLiked) {
@@ -49,7 +65,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
         const diffMinutes = Math.floor(diffTime / (1000 * 60));
         const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        
+
         if (diffSeconds < 60) {
             return `${diffSeconds} sec ago`;
         } else if (diffMinutes < 60) {
@@ -83,23 +99,50 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                 {hasImages && (
                     <div>
                         {post.images.length === 1 ? (
-                            <img 
-                                src={post.images[0]} 
-                                alt="Post content" 
-                                className="w-full rounded-lg"
-                            />
+                            <>
+                                <img
+                                    src={post.images[0]}
+                                    alt="Post content"
+                                    className="w-[650px] rounded-lg h-96 object-cover cursor-pointer"
+                                    onClick={() => setIsOpen(true)}
+                                />
+
+                                {/* Modal */}
+                                {isOpen && (
+                                    <div
+                                        className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        <div className="relative w-full sm:w-[800px] h-full flex items-center justify-center">
+                                            <img
+                                                src={post.images[0]}
+                                                alt="Post enlarged"
+                                                className="w-full h-full rounded-2xl"
+                                            />
+                                            <button
+                                                onClick={() => setIsOpen(false)}
+                                                className="absolute top-2 right-2 bg-white text-black px-3 py-1 rounded-lg shadow"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="grid grid-cols-2 gap-2">
                                 {post.images.slice(0, 4).map((image, index) => (
                                     <div key={index} className="relative">
-                                        <img 
-                                            src={image} 
-                                            alt={`Post content ${index + 1}`} 
+                                        <img
+                                            src={image}
+                                            alt={`Post content ${index + 1}`}
                                             className="w-full h-32 object-cover rounded-lg"
                                         />
                                         {index === 3 && post.images.length > 4 && (
                                             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                                                <span className="text-white font-semibold">+{post.images.length - 4}</span>
+                                                <span className="text-white font-semibold">
+                                                    +{post.images.length - 4}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
@@ -113,9 +156,9 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                 {hasVideos && (
                     <div className="space-y-2">
                         {post.videos.map((video, index) => (
-                            <video 
+                            <video
                                 key={index}
-                                src={video} 
+                                src={video}
                                 className="w-full rounded-lg"
                                 controls
                             />
@@ -133,9 +176,9 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                                     <p className="text-sm font-medium text-gray-700">{doc.name || `Document ${index + 1}`}</p>
                                     <p className="text-xs text-gray-500">{doc.type || 'Document'}</p>
                                 </div>
-                                <a 
-                                    href={doc.url || doc} 
-                                    target="_blank" 
+                                <a
+                                    href={doc.url || doc}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-600 hover:text-blue-800 text-sm"
                                 >
@@ -154,9 +197,9 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
             {/* Post Header */}
             <div className="flex items-start gap-3 mb-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                    <img 
-                        src={post.author?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || 'User')}&background=random&color=fff&size=48`} 
-                        alt={post.author?.name || "User"} 
+                    <img
+                        src={post.author?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || 'User')}&background=random&color=fff&size=48`}
+                        alt={post.author?.name || "User"}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                             e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || 'User')}&background=random&color=fff&size=48`;
@@ -176,13 +219,13 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                         </div>
                         {isOwnPost && (
                             <div className="relative">
-                                <button 
+                                <button
                                     onClick={() => setShowOptions(!showOptions)}
                                     className="text-gray-500 hover:text-gray-900 p-1 rounded-full hover:bg-gray-100"
                                 >
                                     <MoreHorizontal size={16} />
                                 </button>
-                                
+
                                 {showOptions && (
                                     <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-10 min-w-[120px]">
                                         <button
@@ -211,7 +254,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
             {post.content && (
                 <div className="mb-3">
                     <p className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words">
-                        {post.content.length > 200 && !isContentExpanded 
+                        {post.content.length > 200 && !isContentExpanded
                             ? (
                                 <>
                                     {post.content.substring(0, 200)}
