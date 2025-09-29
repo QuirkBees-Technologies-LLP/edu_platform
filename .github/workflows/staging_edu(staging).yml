@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Vite app to Azure Web App - edu (Staging)
 
 on:
@@ -14,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read # Required for actions/checkout
+
+    outputs:
+      site-path: ${{ steps.zip-site.outputs.site-path }}
 
     steps:
       - uses: actions/checkout@v4
@@ -37,12 +37,9 @@ jobs:
           npm run build
           zip -r site.zip dist
 
-      - name: Upload artifact for deployment job (short retention)
-        uses: actions/upload-artifact@v4
-        with:
-          name: vite-app
-          path: site.zip
-          retention-days: 5
+      - name: Save zip path for next job
+        id: zip-site
+        run: echo "site-path=$(pwd)/site.zip" >> $GITHUB_OUTPUT
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,11 +49,6 @@ jobs:
       contents: read  # Required for actions/checkout
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: vite-app
-
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -69,4 +61,4 @@ jobs:
         with:
           app-name: 'edu'
           slot-name: 'staging'
-          package: site.zip
+          package: ${{ needs.build.outputs.site-path }}
