@@ -141,6 +141,7 @@ import TermsOfService from "../auth/pages/TermsOfService";
 import Support from "../auth/pages/Support";
 import EducatorEndSchedule from "../pages/educator/educator-endSchedule/EducatorEndSchedule";
 import AdminEndSchedule from "../pages/admin/admin-ednSchedule/AdminEndSchedule";
+import EducatorKpi from "../pages/admin/KPIs Page/EducatorKpi";
 
 const routes = {
   student: [
@@ -218,7 +219,8 @@ const routes = {
     { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
     { path: "admin/general-setting", element: <GeneralSetting /> },
     { path: "/admin/iq-social", element: <AdminCommunityFeed /> },
-    { path: "/admin/kpis" , element: <KpisDashboard /> },
+    {path : "/admin/kpis" , element : <EducatorKpi/>},
+    { path: "/admin/kpis/:callId" , element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSchedule /> },
   ],
 };

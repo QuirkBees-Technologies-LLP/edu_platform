@@ -15,6 +15,7 @@ import {
   ChartLine,
   ChartNoAxesCombined,
   MessageCircleMore,
+  ChartSpline 
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1400,6 +1401,11 @@ export const sideMenus = {
     //   icon: <Layers />,
     //   path: '/admin/academy-category'
     // },
+    {
+      title: "KPIs",
+      icon: <ChartSpline />,
+      path: "/admin/kpis",
+    },
     {
       title: "General Setting",
       icon: <Layers />,

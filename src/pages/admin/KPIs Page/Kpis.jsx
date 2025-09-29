@@ -1,4 +1,5 @@
 import React from "react";
+  import { Archive } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -22,10 +23,19 @@ import {
 } from "@/partials/toolbar";
 import { Users, Eye, Clock, UserCheck, UserPlus, Star } from "lucide-react";
 import { useEducatorKpisQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import { useNavigate, useParams } from "react-router";
 
 const KpisDashboard = () => {
-  const { data } = useEducatorKpisQuery(
-    "call-e29fce41-4080-47d9-aa20-1f4b0ccbc9da"
+  const navigate = useNavigate(); 
+
+  const { callId } = useParams();
+  
+
+  const { data, isLoading, isError } = useEducatorKpisQuery(
+    { callId },
+    {
+      refetchOnMountOrArgChange: true,
+    }
   );
 
   //     callId: "call-e29fce41-4080-47d9-aa20-1f4b0ccbc9da",
@@ -553,7 +563,41 @@ const KpisDashboard = () => {
         </div>
       </div>
     );
-  }
+  };
+  if (isLoading) {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-gray-500 text-sm">Loading KPIs...</p>
+    </div>
+  );
+}
+
+
+
+if (isError || !data) {
+  return (
+    <div className="flex flex-col items-center justify-center h-64 text-center">
+      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 max-w-md shadow-sm">
+        <Archive className="w-10 h-10 text-gray-400 mb-3" />
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+          Archived Session
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          This session is from an earlier date, so KPI insights are not
+          available. You can still view other session details.
+        </p>
+      </div>
+      <div>
+        <button
+          onClick={() => navigate(`/admin/kpis`)}
+          className="mt-4 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded"
+        >
+          View Session Details
+        </button>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="container-fluid pb-8">
@@ -649,7 +693,7 @@ const KpisDashboard = () => {
       {/* Timeline Chart */}
       <div className="bg-white rounded-lg shadow-sm border p-6 mb-8 mt-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
-         👥 Concurrent Users Timeline
+          👥 Concurrent Users Timeline
         </h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -718,7 +762,7 @@ const KpisDashboard = () => {
         {/* Geographic Distribution */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-           🌍 Geographic Distribution
+            🌍 Geographic Distribution
           </h2>
           <div className="h-64 mb-4">
             <ResponsiveContainer width="100%" height="100%">
@@ -766,7 +810,7 @@ const KpisDashboard = () => {
         {/* Browser Distribution */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          🖥️  Browser Distribution
+            🖥️ Browser Distribution
           </h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
