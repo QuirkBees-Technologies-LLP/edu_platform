@@ -1,18 +1,19 @@
 name: Delete Old Artifacts
 
 on:
+  schedule:
+    - cron: "0 0 * * *" # रोज रात 12 बजे cleanup
   workflow_dispatch:
 
 permissions:
-  actions: write  # 👈 REQUIRED to delete artifacts
+  actions: write
   contents: read
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-
     steps:
       - name: Delete all artifacts
         uses: c-hive/gha-remove-artifacts@v1
         with:
-          age: '0'  # delete all artifacts
+          age: '0'
