@@ -63,6 +63,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [lastRecurrence, setLastRecurrence] = useState(false);
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
+    const [lastNote , setLastNote] = useState(false)
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -149,6 +150,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     if (row?.schedule?.isRecurent) {
       if (row?.checkLastRecurrence) {
         setLastRecurrence(false);
+        setLastNote(true)
       } else {
         setLastRecurrence(true);
       }
@@ -551,7 +553,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
             <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
               Are you sure you want to end this livestream for everyone?
             </p>
-            {lastRecurrence === false && (
+            {lastRecurrence === false && lastNote === true && (
               <p className="mb-4 text-red-600 dark:text-red-500 text-center">
                 This is your last recurrence. After ending, you will need to
                 create a new recurrence.

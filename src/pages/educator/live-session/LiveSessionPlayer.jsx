@@ -54,6 +54,7 @@ const LiveSessionPlayer = ({
   const [lastRecurrence, setLastRecurrence] = useState(true);
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
+    const [lastNote , setLastNote] = useState(false)
 
   useEffect(() => {
     console.log(checkLastRecurrence);
@@ -259,6 +260,7 @@ const LiveSessionPlayer = ({
     if (!!isRecurent) {
       if (!!checkLastRecurrence) {
         setLastRecurrence(false);
+          setLastNote(true);
       } else {
         setLastRecurrence(true);
       }
@@ -501,7 +503,7 @@ const LiveSessionPlayer = ({
             <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
               Are you sure you want to end this livestream for everyone?
             </p>
-            {lastRecurrence === false && (
+              {lastRecurrence === false && lastNote === true && (
               <p className="mb-4 text-red-600 dark:text-red-500 text-center">
                 This is your last recurrence. After ending, you will need to
                 create a new recurrence.
