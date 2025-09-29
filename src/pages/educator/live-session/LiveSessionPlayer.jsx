@@ -52,13 +52,11 @@ const LiveSessionPlayer = ({
   const members = useCallMembers(); // List of participants in the call
   const [isEndOpen, setIsEndOpen] = useState(false);
   const [lastRecurrence, setLastRecurrence] = useState(true);
-  const [ endAndCreate, { isLoading: isEndingAndCreating }] = useEndAndCreateMutation();
+  const [endAndCreate, { isLoading: isEndingAndCreating }] =
+    useEndAndCreateMutation();
 
   useEffect(() => {
-    console.log(
-      "hellllllllllllllllllllllllllllllllllllllllll",
-      checkLastRecurrence
-    );
+    console.log(checkLastRecurrence);
     if (!call) return;
 
     let subscriptions = [];
@@ -411,7 +409,7 @@ const LiveSessionPlayer = ({
               <button
                 type="button"
                 className="btn btn-md btn-danger"
-                onClick={ handleEndCallModel}
+                onClick={handleEndCallModel}
               >
                 <PhoneOff size={16} />
                 End Call
@@ -503,6 +501,12 @@ const LiveSessionPlayer = ({
             <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
               Are you sure you want to end this livestream for everyone?
             </p>
+            {lastRecurrence === false && (
+              <p className="mb-4 text-red-600 dark:text-red-500 text-center">
+                This is your last recurrence. After ending, you will need to
+                create a new recurrence.
+              </p>
+            )}
             <div className="flex justify-center items-center space-x-4">
               <button
                 className="btn btn-light"
@@ -511,7 +515,7 @@ const LiveSessionPlayer = ({
               >
                 Cancel
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-danger"
                 onClick={async () => {
@@ -521,11 +525,11 @@ const LiveSessionPlayer = ({
                 disabled={isEnding}
               >
                 {isEnding ? "Ending..." : "Yes, End Call"}
-              </button>
-              {lastRecurrence && (
+              </button> */}
+              {lastRecurrence ? (
                 <button
                   type="button"
-                  className="btn btn-success"
+                  className="btn btn-danger"
                   onClick={async () => {
                     await handleEndAndcreate(callId);
                     setIsEndOpen(false);
@@ -533,6 +537,18 @@ const LiveSessionPlayer = ({
                   disabled={isEndingAndCreating}
                 >
                   {isEndingAndCreating ? "Creating..." : "End & Create"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={async () => {
+                    await handleEndCall(callId);
+                    setIsEndOpen(false);
+                  }}
+                  disabled={isEnding}
+                >
+                  {isEnding ? "Ending..." : "Yes, End Call"}
                 </button>
               )}
             </div>

@@ -518,7 +518,7 @@ const LiveSession = ({ title = "Live Session" }) => {
               >
                 Cancel
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-danger"
                 onClick={async () => {
@@ -528,11 +528,11 @@ const LiveSession = ({ title = "Live Session" }) => {
                 disabled={isEnding}
               >
                 {isEnding ? "Ending..." : "Yes, End Call"}
-              </button>
-              {lastRecurrence && (
+              </button> */}
+              {lastRecurrence ? (
                 <button
                   type="button"
-                  className="btn btn-success"
+                  className="btn btn-danger"
                   onClick={async () => {
                     await handleEndAndcreate(selectedRow);
                     setIsConfirmOpen(false);
@@ -540,6 +540,18 @@ const LiveSession = ({ title = "Live Session" }) => {
                   disabled={isEndingAndCreating}
                 >
                   {isEndingAndCreating ? "Creating..." : "End & Create"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={async () => {
+                    await handleEndCall(selectedRow);
+                    setIsConfirmOpen(false);
+                  }}
+                  disabled={isEnding}
+                >
+                  {isEnding ? "Ending..." : "Yes, End Call"}
                 </button>
               )}
             </div>
