@@ -7,13 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Required for actions/checkout
-
-    outputs:
-      site-path: ${{ steps.zip-site.outputs.site-path }}
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -37,18 +35,6 @@ jobs:
           npm run build
           zip -r site.zip dist
 
-      - name: Save zip path for next job
-        id: zip-site
-        run: echo "site-path=$(pwd)/site.zip" >> $GITHUB_OUTPUT
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write # Required for requesting the JWT
-      contents: read  # Required for actions/checkout
-
-    steps:
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -61,4 +47,4 @@ jobs:
         with:
           app-name: 'edu'
           slot-name: 'staging'
-          package: ${{ needs.build.outputs.site-path }}
+          package: site.zip
