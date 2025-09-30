@@ -34,13 +34,32 @@ export const adminEducatorsApiSlice = createApi({
       query: ({ callId }) => `/educator/kpi/${callId}`,
     }),
     kpis: builder.query({
-      query: ({ page = 1, limit = 10, educatorId }) => {
+      query: ({ page = 1, limit = 10, educatorId, startDate, endDate }) => {
         let url = `/admin/kpi?page=${page}&limit=${limit}`;
         if (educatorId) {
           url += `&educatorId=${educatorId}`;
         }
+        if (startDate) {
+          url += `&startDate=${startDate}`;
+        }
+
+        if (endDate) {
+          url += `&endDate=${endDate}`;
+        }
         return url;
       },
+    }),
+
+    kpisExport: builder.mutation({
+      query: (payload) => ({
+        url: "/educator/kpi/", // backend endpoint
+        method: "POST",
+        body: payload,
+        responseHandler: async (response) => {
+          const blob = await response.blob();
+          return blob;
+        },
+      }),
     }),
   }),
 });
@@ -53,4 +72,5 @@ export const {
   useDeleteEducatorMutation,
   useEducatorKpisQuery,
   useLazyKpisQuery,
+  useKpisExportMutation,
 } = adminEducatorsApiSlice;

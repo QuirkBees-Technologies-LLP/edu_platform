@@ -28,6 +28,7 @@ import { format } from "date-fns";
 import { useLazyGetLiveSessionListQuery } from "../../../store/api/admin/adminLiveSessionApiSlice";
 import {
   useGetEducatorsQuery,
+  useKpisExportMutation,
   useLazyKpisQuery,
 } from "../../../store/api/admin/adminEducatorsApiSlice";
 
@@ -37,10 +38,13 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
     useLazyGetLiveSessionListQuery();
   const [getKpiList, { data: kpiData, isLoading: kpiLoading }] =
     useLazyKpisQuery();
+  const [exportKpis] = useKpisExportMutation();
   const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const navigate = useNavigate();
   const [tableKey, setTableKey] = useState(0);
   const [selectedEducator, setSelectedEducator] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1);
@@ -232,8 +236,11 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
         page: newPage,
         limit: newLimit,
         ...(selectedEducator ? { educatorId: selectedEducator } : {}),
+        ...(startDate ? { startDate } : {}),
+        ...(endDate ? { endDate } : {}),
       }).unwrap();
       console.log("response", response);
+
       return {
         data: response.data || [],
         totalCount: response.pagination?.totalRecords || 0,
@@ -241,6 +248,34 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
     } catch (error) {
       console.error("Error fetching KPIs:", error);
       return { data: [], totalCount: 0 };
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const payload = kpiData?.data?.map((row) => ({
+        title: row.title,
+        educatorName: row.educator?.first_name + " " + row.educator?.last_name,
+        callIds: row.callId,
+      }));
+
+      console.log("payload------------->", payload);
+
+      const blob = await exportKpis(payload).unwrap();
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "kpi_report.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast("Export successful");
+    } catch (err) {
+      console.error(err);
+      toast("Export failed", { type: "error" });
     }
   };
 
@@ -292,6 +327,45 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
                 </button>
               )}
             </div>
+            <div className="flex items-center gap-2">
+              <div>
+                <label className="form-label text-gray-900 text-sm">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  className="border rounded-md px-2 py-1"
+                  value={startDate || ""}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    reloadTable();
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="form-label text-gray-900 text-sm">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  className="border rounded-md px-2 py-1"
+                  value={endDate || ""}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    reloadTable();
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="px-2 py-2 bg-green-500 text-white rounded"
+              onClick={handleExport}
+            >
+              Export Selected
+            </button>
           </ToolbarActions>
         </div>
       </Toolbar>
