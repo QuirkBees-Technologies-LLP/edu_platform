@@ -31,6 +31,8 @@ import {
   useKpisExportMutation,
   useLazyKpisQuery,
 } from "../../../store/api/admin/adminEducatorsApiSlice";
+import Loader from "../../../components/ui/loader";
+import { Loader2 } from "lucide-react";
 
 const EducatorKpi = ({ title = "Educator KPIs" }) => {
   const { isRTL } = useLanguage();
@@ -45,6 +47,8 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
   const [selectedEducator, setSelectedEducator] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [loading, setLoading] = useState(false);
+
 
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1);
@@ -253,6 +257,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
 
   const handleExport = async () => {
     try {
+      setLoading(true);
       const payload = kpiData?.data?.map((row) => ({
         title: row.title,
         educatorName: row.educator?.first_name + " " + row.educator?.last_name,
@@ -273,9 +278,12 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
       window.URL.revokeObjectURL(url);
 
       toast("Export successful");
+
     } catch (err) {
       console.error(err);
       toast("Export failed", { type: "error" });
+    } finally {
+      setLoading(false); // loader stop
     }
   };
 
@@ -364,7 +372,11 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
               className="px-2 py-2 bg-green-500 text-white rounded"
               onClick={handleExport}
             >
-              Export Selected
+              {loading ? (
+               <Loader2/>
+              ) : (
+                "Export KPI   "
+              )}
             </button>
           </ToolbarActions>
         </div>
