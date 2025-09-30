@@ -546,7 +546,7 @@ const [lastNote , setLastNote] = useState(false)
                   }}
                   disabled={isEndingAndCreating}
                 >
-                  {isEndingAndCreating ? "Creating..." : "End & Create"}
+                  {isEndingAndCreating ? "Creating..." : "End Call"}
                 </button>
               ) : (
                 <button

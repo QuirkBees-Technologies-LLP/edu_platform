@@ -24,9 +24,9 @@ const testUsers = {
       crm_id: 12345,
       first_name: "Test",
       last_name: "User",
-      status: "active",
+      status: "Active",
       role: "student",
-      plan: "IQ Max",
+      plan: "iq-max",
       expire_at: new Date("2027-10-29"),
     },
   },
@@ -38,9 +38,9 @@ const testUsers = {
       crm_id: 67890,
       first_name: "Daud",
       last_name: "Student",
-      status: "active",
+      status: "Active",
       role: "student",
-      plan: "IQ Max",
+      plan: "iq-max",
       expire_at: new Date("2027-10-29"),
     },
   },
@@ -191,7 +191,7 @@ const AuthProvider = ({ children }) => {
         //   expire_at: new Date("2027-10-29"),
         // }).unwrap();
 
-         const res = await clientCreateUpdate(testUsers[email].data).unwrap();
+        const res = await clientCreateUpdate(testUsers[email].data).unwrap();
         const auth = {
           token: res.token,
           user: res.user,
@@ -217,44 +217,50 @@ const AuthProvider = ({ children }) => {
       try {
         // Step 1: External Login
         const loginRes = await axios.get(
-          "https://api.iqonic.life/api/cb/outbound/iqverse/user/details",
+          "https://shield.iqonic.life/outerinfo.dhtml",
           {
             params: {
-              email: email,
+              webhook: "ite5r9Qtin82q",
+              action: "verifylogin",
+              distid: email,
               password: password,
             },
-            headers: {
-              "api-key": API_KEY,
-            },
+            // headers: {
+            //   "api-key": API_KEY,
+            // },
           }
         );
 
-        console.log("loginRes",loginRes.data)
+        console.log("loginRes", loginRes.data);
 
         // const loginData = await loginRes.json();
 
-        if (!loginRes?.data?.success || !loginRes?.data?.data) {
+        if (!loginRes?.data || !loginRes?.data) {
           return {
             success: false,
             error: loginRes.data.message || "Login failed.",
           };
         }
 
-        const { id: userId, name, email: userEmail } = loginRes?.data?.data;
-        if(!loginRes?.data?.data?.memberships){
-          return{
-             success: false,
-            error: loginRes.data.message || "Login failed.",
-          }
-        }
-        const { expire_at, plan, status } = loginRes?.data?.data?.memberships;
+        let  {
+          // userid,
+          username,
+          first,
+          last,
+          uuid,
+          expiration,
+          active,
+          plan,
+        } = loginRes?.data[0];
 
+      
+        // const {  } = loginRes?.data?.data;
 
         // Step 2: Check Plan Expiry
-        const isExpired = new Date(expire_at) < new Date();
+        // const isExpired = new Date(expiration) < new Date();
         // const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
 
-        if (isExpired) {
+        if (active === "Inactive") {
           // Step 3: Get token and redirect
           // const tokenRes = await fetch(
           //   `https://api.iqonic.life/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
@@ -266,49 +272,54 @@ const AuthProvider = ({ children }) => {
           //   }
           // );
 
-          const tokenRes = await axios.get(
-            "https://api.iqonic.life/api/cb/outbound/iqverse/user/token",
-            {
-              params: {
-                user_id: userId,
-              },
-              headers: {
-                "api-key": API_KEY,
-              },
-            }
-          );
+          // const tokenRes = await axios.get(
+          //   "https://api.iqonic.life/api/cb/outbound/iqverse/user/token",
+          //   {
+          //     params: {
+          //       user_id: userId,
+          //     },
+          //     headers: {
+          //       "api-key": API_KEY,
+          //     },
+          //   }
+          // );
           // const tokenData = await tokenRes.json();
 
-          console.log("tokenRes",tokenRes)
-          const token = tokenRes?.data?.data?.token;
-          if (!token) {
-            return {
-              success: false,
-              error: "Token not received for subscription renewal.",
-            };
-          }
+          // console.log("tokenRes", tokenRes);
+          // const token = tokenRes?.data?.data?.token;
+          // if (!token) {
+          //   return {
+          //     success: false,
+          //     error: "Token not received for subscription renewal.",
+          //   };
+          // }
+          const{email}=loginRes?.data[0];
 
-          const redirectUrl = `https://icon-user.mlmprotec.com/login?auto-token-login&&pathName=%2Fmy_account%2Fsubscription&token=${token}`;
+          const redirectUrl = `https://shield.iqonic.life/qiqonic/orderproducts.dhtml?alzq=1&username=${email}&site=iqonic&language=EN&setform=ordering.html&thisform=ordering.html&shipto=base&scountry=US&products=PLAN`;
           window.location.href = redirectUrl;
 
           return { success: true, redirect: true }; // Optional success response before redirect
         } else {
           // ✅ Step 4: Plan active — create educator
-          const [firstName, ...rest] = name.trim().split(" ");
-          const lastName = rest.join(" ");
+          // const [, ...rest] = name.trim().split(" ");
+          // const lastName = rest.join(" ");
 
           try {
+          const {email}= loginRes?.data[0];
+            console.log(email, uuid, first, last, active, plan, expiration);
             const res = await clientCreateUpdate({
-              name,
-              email: userEmail,
-              crm_id: userId,
-              first_name: firstName,
-              last_name: lastName,
+              name: username,
+              email,
+              crm_id: uuid,
+              first_name: first,
+              last_name: last,
               plan,
-              status,
-              expire_at,
+              status: active,
+              expire_at: expiration,
               role: "student",
             }).unwrap();
+
+            console.log("res-------------->", res);
 
             const auth = {
               token: res.token,
@@ -336,7 +347,10 @@ const AuthProvider = ({ children }) => {
         console.error("Unexpected error:", err);
         return {
           success: false,
-         error: err.response?.data?.message || err.message || "Something went wrong.",
+          error:
+            err.response?.data?.message ||
+            err.message ||
+            "Something went wrong.",
         };
       }
     }

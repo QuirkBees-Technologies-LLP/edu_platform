@@ -588,7 +588,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
                   }}
                   disabled={isEndingAndCreating}
                 >
-                  {isEndingAndCreating ? "Creating..." : "End & Create"}
+                  {isEndingAndCreating ? "Creating..." : "End Call"}
                 </button>
               ) : (
                 <button
