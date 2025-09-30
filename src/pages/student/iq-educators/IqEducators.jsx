@@ -19,6 +19,7 @@ import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import { formatDistanceToNow } from "date-fns";
+import InfoImage from '../../../../public/media/images/info.jpg';
 
 const IqEducators = () => {
   const navigate = useNavigate();
@@ -339,35 +340,41 @@ const IqEducators = () => {
           </button>
 
           {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-          onClick={() => setIsOpen(false)}
-        >
-          <div
-            className="relative w-full sm:w-[500px] bg-white rounded-2xl p-6 shadow-lg"
-            onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
-          >
-            <h2 className="text-lg font-semibold mb-2">Educator Info</h2>
-            <p className="text-gray-700 mb-1">
-              <strong>Name:</strong> {response?.data?.educator?.first_name}{" "}
-              {response?.data?.educator?.last_name}
-            </p>
-            <p className="text-gray-700 mb-1">
-              <strong>Specialization:</strong> Forex Day Trading, Price Action
-            </p>
-            {/* <p className="text-gray-700 mb-4">
+            <div
+              className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+              onClick={() => setIsOpen(false)}
+            >
+              <div
+                className="relative w-full sm:w-[800px] bg-white rounded-2xl p-6 shadow-lg"
+                onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
+              >
+                
+                <span className="text-gray-700 mb-1">
+                  Change in Sound Option from Automatic (Default) to Allow, like
+                  in the Image
+                </span>
+                <img src={InfoImage} alt="" />
+                <span className="text-gray-700 mb-1">
+                   Or follow the video tutorial
+                  (INSERT VIDEO TUTORIAL HERE)
+                </span>
+                {/* <p className="text-gray-700 mb-1">
+                  <strong>Specialization:</strong> Forex Day Trading, Price
+                  Action
+                </p> */}
+                {/* <p className="text-gray-700 mb-4">
               <strong>Experience:</strong> 5+ Years
             </p> */}
 
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
 
           <button
             onClick={() => handleShare()}
