@@ -235,7 +235,7 @@ const AuthProvider = ({ children }) => {
 
         // const loginData = await loginRes.json();
 
-        if (!loginRes?.data || !loginRes?.data) {
+        if (!loginRes?.error) {
           return {
             success: false,
             error: loginRes.data.message || "Login failed.",
