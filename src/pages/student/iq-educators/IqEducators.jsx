@@ -20,10 +20,14 @@ import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import { formatDistanceToNow } from "date-fns";
 import InfoImage from '../../../../public/media/images/info.jpg';
+import videotutorial from '../../../../public/media/videos/videotutorial.mp4';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 const IqEducators = () => {
   const navigate = useNavigate();
   const { auth } = useAuthContext();
+
   console.log(auth);
   const userName = auth?.user?.name;
 
@@ -348,15 +352,24 @@ const IqEducators = () => {
                 className="relative w-full sm:w-[800px] bg-white rounded-2xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
               >
-                
-                <span className="text-gray-700 mb-1">
-                  Change in Sound Option from Automatic (Default) to Allow, like
+
+                <span className="text-gray-700 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+
+">
+                  Change in Sound Option from Automatic (Default) to Allow, <br /> like
                   in the Image
                 </span>
-                <img src={InfoImage} alt="" />
-                <span className="text-gray-700 mb-1">
-                   Or follow the video tutorial
-                  (INSERT VIDEO TUTORIAL HERE)
+                <div
+                  className="overflow-hidden rounded-lg cursor-pointer"
+                  onClick={() => setOpen(true)}
+                >
+                  <img src={InfoImage} alt="Info" />
+                </div>
+                
+                <span className="mb-1 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+
+">
+                  Or follow the video tutorial
                 </span>
                 {/* <p className="text-gray-700 mb-1">
                   <strong>Specialization:</strong> Forex Day Trading, Price
@@ -365,6 +378,12 @@ const IqEducators = () => {
                 {/* <p className="text-gray-700 mb-4">
               <strong>Experience:</strong> 5+ Years
             </p> */}
+                <div className="overflow-hidden rounded-lg mx-auto block w-fit">
+                  <video width="500" height="240" muted loop controls>
+                    <source src={videotutorial} type="video/mp4" />
+                  </video>
+                </div>
+
 
                 <button
                   onClick={() => setIsOpen(false)}
@@ -606,11 +625,11 @@ const IqEducators = () => {
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -643,11 +662,11 @@ const IqEducators = () => {
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -709,11 +728,11 @@ const IqEducators = () => {
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -746,11 +765,11 @@ const IqEducators = () => {
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -1069,6 +1088,13 @@ const IqEducators = () => {
         setIsLightBoxOpen={setIsLightBoxOpen1}
         handleCloseView={handleCloseView1}
         selectedIdea={selectedInsight}
+      />
+        <Lightbox
+        open={open}
+        close={() => setOpen(false)}
+        slides={[
+          { src: InfoImage }
+        ]}
       />
     </div>
   );

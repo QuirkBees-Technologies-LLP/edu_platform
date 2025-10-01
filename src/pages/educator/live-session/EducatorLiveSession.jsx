@@ -342,29 +342,29 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           headerClassName: "min-w-[120px]",
         },
       },
-      {
-        accessorFn: (row) => row.datetime,
-        id: "datetime",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Scheduled from this date"
-            column={column}
-          />
-        ),
-        enableSorting: true,
-        cell: (info) => (
-          <div className="flex items-center gap-2.5">
-            <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.datetime
-                ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")
-                : "N/A"}
-            </span>
-          </div>
-        ),
-        meta: {
-          headerClassName: "min-w-[200px]",
-        },
-      },
+      // {
+      //   accessorFn: (row) => row.datetime,
+      //   id: "datetime",
+      //   header: ({ column }) => (
+      //     <DataGridColumnHeader
+      //       title="Scheduled from this date"
+      //       column={column}
+      //     />
+      //   ),
+      //   enableSorting: true,
+      //   cell: (info) => (
+      //     <div className="flex items-center gap-2.5">
+      //       <span className="leading-none text-gray-800 font-normal">
+      //         {info.row.original.datetime
+      //           ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")
+      //           : "N/A"}
+      //       </span>
+      //     </div>
+      //   ),
+      //   meta: {
+      //     headerClassName: "min-w-[200px]",
+      //   },
+      // },
       // {
       //   accessorFn: row => row.createdAt,
       //   id: 'createdAt',
