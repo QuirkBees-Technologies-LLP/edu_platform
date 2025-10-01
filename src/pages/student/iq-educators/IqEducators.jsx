@@ -19,8 +19,8 @@ import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import { formatDistanceToNow } from "date-fns";
-import InfoImage from '../../../../public/media/images/info.jpg';
-import videotutorial from '../../../../public/media/videos/videotutorial.mp4';
+import InfoImage from "../../../../public/media/images/info.jpg";
+import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
@@ -48,6 +48,7 @@ const IqEducators = () => {
   const [selectedInsight, setSelectedInsight] = useState({});
   const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isVolumeOpen, setIsVolumeOpen] = useState(false);
 
   const handleCloseView = () => {
     setIsViewOpen(false);
@@ -179,45 +180,6 @@ const IqEducators = () => {
     },
   ];
 
-  const courses = [
-    {
-      id: 1,
-      title: "Market Outlook",
-      address: "WED, FEB 16, 12:30 CET",
-      image: "public/media/images/2600x1600/recordings.jpg",
-    },
-    {
-      id: 2,
-      title: "Market Outlook",
-      address: "WED, FEB 16, 12:30 CET",
-      image: "public/media/images/2600x1600/recordings.jpg",
-    },
-    {
-      id: 3,
-      title: "Market Outlook",
-      address: "WED, FEB 16, 12:30 CET",
-      image: "public/media/images/2600x1600/recordings.jpg",
-    },
-    {
-      id: 4,
-      title: "Market Outlook",
-      address: "WED, FEB 16, 12:30 CET",
-      image: "public/media/images/2600x1600/recordings.jpg",
-    },
-    {
-      id: 5,
-      title: "Market Outlook",
-      address: "WED, FEB 16, 12:30 CET",
-      image: "public/media/images/2600x1600/recordings.jpg",
-    },
-    {
-      id: 6,
-      title: "Market Outlook",
-      address: "WED, FEB 16, 12:30 CET",
-      image: "public/media/images/2600x1600/recordings.jpg",
-    },
-  ];
-
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -280,6 +242,7 @@ const IqEducators = () => {
 
     setVideoUrl(url);
     setOpen(true);
+  
   };
 
   function handleShare() {
@@ -352,23 +315,24 @@ const IqEducators = () => {
                 className="relative w-full sm:w-[800px] bg-white rounded-2xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
               >
-
-                <span className="text-gray-700 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
-
-">
-                  Change in Sound Option from Automatic (Default) to Allow, <br /> like
-                  in the Image
+                <span
+                  className="text-gray-700 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center"
+                >
+                  Change in Sound Option from Automatic (Default) to Allow,{" "}
+                  <br /> like in the Image
                 </span>
                 <div
                   className="overflow-hidden rounded-lg cursor-pointer"
-                  onClick={() => setOpen(true)}
+                  onClick={() => isVolumeOpen(true)}
                 >
                   <img src={InfoImage} alt="Info" />
                 </div>
-                
-                <span className="mb-1 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
 
-">
+                <span
+                  className="mb-1 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+
+"
+                >
                   Or follow the video tutorial
                 </span>
                 {/* <p className="text-gray-700 mb-1">
@@ -383,7 +347,6 @@ const IqEducators = () => {
                     <source src={videotutorial} type="video/mp4" />
                   </video>
                 </div>
-
 
                 <button
                   onClick={() => setIsOpen(false)}
@@ -625,11 +588,11 @@ const IqEducators = () => {
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -662,11 +625,11 @@ const IqEducators = () => {
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -728,11 +691,11 @@ const IqEducators = () => {
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -765,11 +728,11 @@ const IqEducators = () => {
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
+                        // onClick={() =>
+                        //   navigate(
+                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                        //   )
+                        // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -1089,12 +1052,10 @@ const IqEducators = () => {
         handleCloseView={handleCloseView1}
         selectedIdea={selectedInsight}
       />
-        <Lightbox
-        open={open}
-        close={() => setOpen(false)}
-        slides={[
-          { src: InfoImage }
-        ]}
+      <Lightbox
+        open={isVolumeOpen}
+        close={() => setIsVolumeOpen(false)}
+        slides={[{ src: InfoImage }]}
       />
     </div>
   );
