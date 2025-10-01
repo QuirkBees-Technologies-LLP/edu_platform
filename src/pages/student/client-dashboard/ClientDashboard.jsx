@@ -748,7 +748,7 @@ const ClientDashboard = () => {
                   {/* Header */}
                   <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl relative z-1">
                     <h3 className="text-white font-semibold text-sm">
-                      Live Updates
+                      General Updates
                     </h3>
                     <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
                       {/* <button
