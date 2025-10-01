@@ -22,7 +22,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     const [videos, setVideos] = useState([]);
     const [documents, setDocuments] = useState([]);
     const [visibility, setVisibility] = useState('public');
-    const [category, setCategory] = useState('general');
+    const [category, setCategory] = useState('General Updates');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [hasInitialized, setHasInitialized] = useState(false);
@@ -309,14 +309,16 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     };
 
     const categories = [
-        'general',
-        'education',
-        'trading',
-        'technology',
-        'business',
-        'lifestyle',
-        'news',
-        'other'
+        "General Updates",
+        "Analysis Updates",
+        // 'general',
+        // 'education',
+        // 'trading',
+        // 'technology',
+        // 'business',
+        // 'lifestyle',
+        // 'news',
+        // 'other'
     ];
 
     return (
@@ -380,7 +382,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                             {/* Category Selection */}
                             <div className="flex items-center gap-2">
                                 <FolderOpen size={16} className="text-gray-500" />
-                                <Select onValueChange={(value) => setCategory(value)} defaultValue={category}>
+                                <Select onValueChange={(value) => 
+                                    (value)} defaultValue={category}>
                                     <SelectTrigger className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
                                         <SelectValue placeholder="Select a category" />
                                     </SelectTrigger>
