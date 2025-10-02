@@ -941,6 +941,127 @@ const IqEducators = () => {
                 </div>
               </div>
             </div>
+            <div className="col-span-12 md:col-span-6 xl:col-span-12">
+              <div className="card rounded-2xl shadow-md overflow-hidden">
+                {/* Header */}
+                <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+                  <h3 className="text-white font-semibold text-sm">
+                    Analysis Updates
+                  </h3>
+                  <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
+                    {/* <button
+                      onClick={() => setActiveTab("feed")}
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        activeTab === "feed"
+                          ? "bg-white text-[#1A1446]"
+                          : "text-white"
+                      }`}
+                    >
+                      Feed
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("ideas")}
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        activeTab === "ideas"
+                          ? "bg-white text-[#1A1446]"
+                          : "text-white"
+                      }`}
+                    >
+                      Ideas
+                    </button> */}
+                  </div>
+                </div>
+
+                {/* Updates */}
+                <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
+                  {/* Hover Overlay */}
+                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
+                    No This feature is under-development
+                  </div> */}
+
+                  {/* Messages */}
+                  {response?.data?.analysisData?.length > 0 ? (
+                    response.data.analysisData.map((update) => (
+                      <div
+                        key={update.id}
+                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
+                      >
+                        <div className="flex flex-col gap-4 mb-4">
+                          <img
+                            src={update.author.image}
+                            alt={update.author.name}
+                            className="w-12 h-12 rounded-full"
+                          />
+                          <div>
+                            <h4 className="text-sm font-normal mb-1 text-gray-900">
+                              {update.author.first_name}{" "}
+                              {update.author.last_name}
+                            </h4>
+                            <p className="text-xs font-normal text-gray-600">
+                              {formatDistanceToNow(new Date(update.createdAt), {
+                                addSuffix: true,
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-sm font-normal text-gray-700">
+                          {update.content}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
+                      <div className="text-sm text-gray-900 font-medium text-center">
+                        🚀 No updates available right now. Stay tuned for fresh
+                        content!
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Cards */}
+                  {/* {trades.map((trade) => (
+                                        <div key={trade.id} className="card rounded-2xl overflow-hidden w-full relative z-0">
+                                        <img src={trade.image} alt={trade.pair} className="w-full h-40 object-cover" />
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
+                                            <div className="flex items-center gap-2">
+                                                <ArrowUp className="text-green-500 w-8 h-8 shrink-0" />
+                                                <div>
+                                                <h3 className="font-medium text-gray-800 text-sm mb-1">{trade.pair}</h3>
+                                                <p className="text-2xs font-normal text-gray-500 line-clamp-1">{trade.date}</p>
+                                                </div>
+                                            </div>
+                                            <span
+                                                className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                                            >
+                                                {trade.status}
+                                            </span>
+                                            </div>
+
+                                            <div className="mt-6 space-y-4">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600 font-normal text-sm">Entry</span>
+                                                <span className="font-medium text-gray-800">{trade.entry}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
+                                                <span className="font-medium text-gray-800">{trade.stopLoss}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600 font-normal text-sm">Exit 1</span>
+                                                <span className="font-medium text-gray-800">{trade.exit1}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600 font-normal text-sm">Exit 2</span>
+                                                <span className="font-medium text-gray-800">{trade.exit2}</span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    ))} */}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
