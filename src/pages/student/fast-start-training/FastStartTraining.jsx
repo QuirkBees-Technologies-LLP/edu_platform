@@ -194,8 +194,7 @@ export default function FastStartTraining() {
     //   return `https://player.vimeo.com/video/${videoId}`;
     // }
 
-
-     if (url.includes("vimeo.com/")) {
+    if (url.includes("vimeo.com/")) {
       const parts = url.split("vimeo.com/")[1].split("/");
       const videoId = parts[0].split("?")[0];
       const hash = parts[1] ? parts[1].split("?")[0] : null;
@@ -216,8 +215,9 @@ export default function FastStartTraining() {
     }
     // Dyntube
     if (url.includes("dyntube.com/v/")) {
-      const videoId = url.split("dyntube.com/v/")[1].split("?")[0];
-      return `https://dyntube.com/embed/${videoId}`;
+      let videoId = url.split("dyntube.com/v/")[1].split("?")[0];
+      videoId = videoId.replace(/\/$/, "");
+      return `https://player.dyntube.com/iframes/${videoId}`;
     }
 
     return url;
