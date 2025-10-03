@@ -251,6 +251,12 @@ export default function IqVault() {
       return `https://www.loom.com/embed/${videoId}`;
     }
 
+    // Dyntube
+    if (url.includes("dyntube.com/v/")) {
+      const videoId = url.split("dyntube.com/v/")[1].split("?")[0];
+      return `https://dyntube.com/embed/${videoId}`;
+    }
+
     return url;
   };
 
