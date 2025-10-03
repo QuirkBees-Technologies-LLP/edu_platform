@@ -204,6 +204,11 @@ export default function FastStartTraining() {
       const videoId = url.split("loom.com/share/")[1].split("?")[0];
       return `https://www.loom.com/embed/${videoId}`;
     }
+    // Dyntube
+    if (url.includes("dyntube.com/v/")) {
+      const videoId = url.split("dyntube.com/v/")[1].split("?")[0];
+      return `https://dyntube.com/embed/${videoId}`;
+    }
 
     return url;
   };
@@ -228,7 +233,7 @@ export default function FastStartTraining() {
     },
   ];
 
-// Added the image 
+  // Added the image
 
   return (
     <>
@@ -476,7 +481,9 @@ export default function FastStartTraining() {
                     <div className="text-gray-900">
                       <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                          <h2 className="text-xl font-medium">Fast Start Training</h2>
+                          <h2 className="text-xl font-medium">
+                            Fast Start Training
+                          </h2>
                           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                             <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
                               <option>Experience</option>
