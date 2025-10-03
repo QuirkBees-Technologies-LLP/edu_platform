@@ -185,9 +185,18 @@ const LectureContent = ({
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    if (url.includes("vimeo.com/")) {
-      const videoId = url.split("vimeo.com/")[1].split("?")[0];
-      return `https://player.vimeo.com/video/${videoId}`;
+    // if (url.includes("vimeo.com/")) {
+    //   const videoId = url.split("vimeo.com/")[1].split("?")[0];
+    //   return `https://player.vimeo.com/video/${videoId}`;
+    // }
+
+     if (url.includes("vimeo.com/")) {
+      const parts = url.split("vimeo.com/")[1].split("/");
+      const videoId = parts[0].split("?")[0];
+      const hash = parts[1] ? parts[1].split("?")[0] : null;
+      return hash
+        ? `https://player.vimeo.com/video/${videoId}?h=${hash}`
+        : `https://player.vimeo.com/video/${videoId}`;
     }
 
     if (url.includes("dailymotion.com/video/")) {
