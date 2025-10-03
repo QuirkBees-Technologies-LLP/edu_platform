@@ -253,8 +253,9 @@ export default function IqVault() {
 
     // Dyntube
     if (url.includes("dyntube.com/v/")) {
-      const videoId = url.split("dyntube.com/v/")[1].split("?")[0];
-      return `https://dyntube.com/embed/${videoId}`;
+      let videoId = url.split("dyntube.com/v/")[1].split("?")[0];
+      videoId = videoId.replace(/\/$/, "");
+      return `https://player.dyntube.com/iframes/${videoId}`;
     }
 
     return url;
