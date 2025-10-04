@@ -58,7 +58,8 @@ const CreateTradeAnalysis = forwardRef(
       description: Yup.string().required("Entry is required"),
       url: Yup.string()
         .url("Please enter a valid URL")
-        .required("URL is required"), category: Yup.string().required("Category is required"),
+        .required("URL is required"),
+      category: Yup.string().required("Category is required"),
     });
 
     const formik = useFormik({
@@ -82,19 +83,20 @@ const CreateTradeAnalysis = forwardRef(
           formData.append("id", selectedRow?._id);
         }
 
-
         try {
           if (selectedRow?._id) {
             let a = await updateEducatorTradeAnalysis(formData).unwrap();
             console.log("==============================>", a);
-            refetch();
+
             toast.success("IQ Insight updated successfully!");
           } else {
             await createEducatorTradeAnalysis(formData).unwrap();
-            refetch();
+           
             toast.success("IQ Insight created successfully!");
           }
           formik.resetForm();
+          setSelectedRow({});
+          refetch();
           handleCloseCreate();
         } catch (err) {
           console.log(err);
@@ -114,7 +116,7 @@ const CreateTradeAnalysis = forwardRef(
     useEffect(() => {
       if (selectedRow?._id) {
         const existingImages =
-          selectedRow.image?.map((img) => ({
+          selectedRow?.image?.map((img) => ({
             file: null,
             dataURL: img,
           })) || [];
@@ -154,8 +156,14 @@ const CreateTradeAnalysis = forwardRef(
       formik.setFieldValue("files", newFiles);
     };
 
+    useEffect(() => {
+  if (!selectedRow) {
+    formik.resetForm(); 
+  }
+}, [selectedRow]);
+
     const existingImages =
-      selectedRow.image?.map((img) => ({
+      selectedRow?.image?.map((img) => ({
         file: null,
         dataURL: img,
       })) || [];
@@ -165,8 +173,9 @@ const CreateTradeAnalysis = forwardRef(
         <Dialog
           open={isCreateOpen}
           onOpenChange={() => {
-            setSelectedRow({});
             formik.resetForm();
+            setSelectedRow({});
+
             handleCloseCreate();
           }}
         >
@@ -188,10 +197,11 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter Title"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
-                        ? "border border-danger"
-                        : ""
-                        }`}
+                      className={`form-control input input-md w-full ${
+                        formik.errors.title && formik.touched.title
+                          ? "border border-danger"
+                          : ""
+                      }`}
                       {...formik.getFieldProps("title")}
                     />
                     {formik.touched.title && formik.errors.title && (
@@ -236,10 +246,11 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter url"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${formik.errors.url && formik.touched.url
+                      className={`form-control input input-md w-full ${
+                        formik.errors.url && formik.touched.url
                           ? "border border-danger"
                           : ""
-                        }`}
+                      }`}
                       {...formik.getFieldProps("url")}
                     />
                     {formik.touched.url && formik.errors.url && (
@@ -276,7 +287,9 @@ const CreateTradeAnalysis = forwardRef(
                     </label>
                     <Select
                       value={formik.values.category}
-                      onValueChange={(value) => formik.setFieldValue("category", value)}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("category", value)
+                      }
                       className={`form-control input input-md w-full ${formik.errors.category ? "border border-danger" : ""}`}
                     >
                       <SelectTrigger>
@@ -290,7 +303,9 @@ const CreateTradeAnalysis = forwardRef(
                             </SelectItem>
                           ))
                         ) : (
-                          <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
+                          <div className="px-4 py-2 text-sm text-gray-500">
+                            No options available
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -317,9 +332,10 @@ const CreateTradeAnalysis = forwardRef(
                         >
                           <div
                             className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-                              ${formik.touched.files && formik.errors.files
-                                ? "border-danger"
-                                : "border-gray-200"
+                              ${
+                                formik.touched.files && formik.errors.files
+                                  ? "border-danger"
+                                  : "border-gray-200"
                               }`}
                           >
                             <i className="ki-filled ki-picture"></i>
@@ -362,7 +378,7 @@ const CreateTradeAnalysis = forwardRef(
               <button
                 className="btn btn-light"
                 onClick={() => {
-                  setSelectedRow({});
+                  setSelectedRow(null);
                   formik.resetForm();
                   handleCloseCreate();
                 }}

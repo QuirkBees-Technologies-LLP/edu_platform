@@ -206,7 +206,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
 
           refetch();
           formik.resetForm();
-          setSelectedRow({});
+          setSelectedRow(null);
           handleCloseCreate();
         } catch (err) {
           console.error("API Error:", err);
@@ -250,7 +250,11 @@ const CreateRecurrenceScheduleModel = forwardRef(
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isOpen]);
-
+    useEffect(() => {
+      if (!selectedRow) {
+        formik.resetForm();
+      }
+    }, [selectedRow]);
     return (
       <Dialog
         open={isOpen}
@@ -320,7 +324,8 @@ const CreateRecurrenceScheduleModel = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                   From this date onwards it will be schedule<span className="text-danger">*</span>
+                    From this date onwards it will be schedule
+                    <span className="text-danger">*</span>
                   </label>
                   <div className="custom_datepicket">
                     <DateTimePicker
@@ -773,6 +778,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     },
                   },
                 });
+                setSelectedRow(null);
                 handleCloseCreate();
               }}
             >
