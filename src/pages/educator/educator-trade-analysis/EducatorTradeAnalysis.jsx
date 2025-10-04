@@ -49,6 +49,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
   };
 
   const handleDeleteClose = () => {
+    setSelectedRow(null);
     setIsDeleteOpen(false);
   };
 
@@ -86,10 +87,12 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
     loss: "badge-danger",
   };
 
-  const ActionMenu = () => {
+  const ActionMenu = (row) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem onClick={() =>{ 
+          setSelectedRow(row);
+          setIsCreateOpen(!isCreateOpen)}}>
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
@@ -97,7 +100,9 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
             <MenuTitle>Edit</MenuTitle>
           </MenuLink>
         </MenuItem>
-        <MenuItem onClick={handleDeleteOpen}>
+        <MenuItem onClick={() => {
+          setIsDeleteOpen(true);
+          setSelectedRow(row)}}>
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="trash" />
@@ -192,7 +197,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
           <Menu className="items-stretch">
             <MenuItem
               toggle="dropdown"
-              onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+              // onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
               trigger="click"
               dropdownProps={{
                 placement: isRTL() ? "bottom-start" : "bottom-end",
@@ -209,7 +214,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {ActionMenu()}
+             {ActionMenu(row.original)}
             </MenuItem>
           </Menu>
         ),
@@ -271,6 +276,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
   };
 
   const handleCloseCreate = () => {
+    setSelectedRow(null);
     setIsCreateOpen(false);
   };
 
@@ -358,6 +364,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
             isDeleteOpen={isDeleteOpen}
             handleDeleteClose={handleDeleteClose}
             selectedRow={selectedRow}
+            setSelectedRow={setSelectedRow}
           />
         )}
       </>

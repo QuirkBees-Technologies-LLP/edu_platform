@@ -29,6 +29,7 @@ import { TruncatedText } from "../../../lib/utils";
 import { useLazyGetEducatorTradeIdeasQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
 import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 import EducatorTradeCards from "./EducatorTradeCards";
+import { set } from "date-fns";
 
 const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -45,14 +46,16 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
     setIsLightBoxOpen(false);
   };
   const handleClickOpen = () => {
+
     setIsCreateOpen(true);
   };
 
-  const handleDeleteOpen = () => {
-    setIsDeleteOpen(true);
-  };
+  // const handleDeleteOpen = () => {
+  //   setIsDeleteOpen(true);
+  // };
 
   const handleDeleteClose = () => {
+    setSelectedRow(null);
     setIsDeleteOpen(false);
   };
 
@@ -90,10 +93,12 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
     loss: "badge-danger",
   };
 
-  const ActionMenu = () => {
+  const ActionMenu = (raw) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem onClick={() => {
+          setSelectedRow(raw);
+          setIsCreateOpen(!isCreateOpen)}}>
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
@@ -101,7 +106,10 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             <MenuTitle>Edit</MenuTitle>
           </MenuLink>
         </MenuItem>
-        <MenuItem onClick={handleDeleteOpen}>
+        <MenuItem onClick={()=>{
+          setSelectedRow(raw);
+          setIsDeleteOpen(true)
+        }}>
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="trash" />
@@ -286,7 +294,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           <Menu className="items-stretch">
             <MenuItem
               toggle="dropdown"
-              onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+              // onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
               trigger="click"
               dropdownProps={{
                 placement: isRTL() ? "bottom-start" : "bottom-end",
@@ -303,7 +311,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {ActionMenu()}
+              {ActionMenu(row.original)}
             </MenuItem>
           </Menu>
         ),
@@ -365,6 +373,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   };
 
   const handleCloseCreate = () => {
+    setSelectedRow(null);
     setIsCreateOpen(false);
   };
 
@@ -476,6 +485,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
               isDeleteOpen={isDeleteOpen}
               handleDeleteClose={handleDeleteClose}
               selectedRow={selectedRow}
+              setSelectedRow={setSelectedRow}
             />
           )}
         </>

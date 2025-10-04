@@ -7,13 +7,14 @@ import { useDeleteEducatorTradeIdeaMutation } from '../../../store/api/educator/
 
 // Delete eductor trade idea
 
-const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
+const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, setSelectedRow, refetch}, ref) => {
     const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] = useDeleteEducatorTradeIdeaMutation();
 
     const handleDelete = async () => {
         try {
             await deleteTradeIdea(selectedRow?._id).unwrap();
             refetch();
+            setSelectedRow(null);
             toast.success("Trade idea deleted successfully!");
             handleDeleteClose();
         } catch (error) {

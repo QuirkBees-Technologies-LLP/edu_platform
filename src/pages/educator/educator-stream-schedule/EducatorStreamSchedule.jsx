@@ -69,7 +69,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const handleClickCloseReccurenceSchedule = () => {
-    setSelectedRow({});
+    setSelectedRow(null);
     setIsReccurenceScheduleOpen(false);
   };
 
@@ -79,6 +79,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const handleDeleteClose = () => {
+    setSelectedRow(null);
     setIsDeleteOpen(false);
   };
 

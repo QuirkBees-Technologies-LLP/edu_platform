@@ -5,10 +5,11 @@ import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeI
 import { toast } from 'sonner';
 import { useDeleteEducatorTradeIdeaMutation } from '../../../store/api/educator/educatorTradeIdeasApiSlice';
 import { useDeleteEducatorTradeAnalysisMutation } from '../../../store/api/educator/educatorTradeAnalysisApiSlice';
+import { set } from 'date-fns';
 
 // Delete eductor trade idea
 
-const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
+const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, setSelectedRow, refetch}, ref) => {
     const [DeleteTradeAnalysis, { isLoading, isSuccess, isError, error }] = useDeleteEducatorTradeAnalysisMutation();
 
     const handleDelete = async () => {
@@ -16,7 +17,9 @@ const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selec
             await DeleteTradeAnalysis(selectedRow?._id).unwrap();
             refetch();
             toast.success("IQ Insight deleted successfully!");
+            setSelectedRow(null);
             handleDeleteClose();
+            
         } catch (error) {
             toast.error(err.data.message);
         }
