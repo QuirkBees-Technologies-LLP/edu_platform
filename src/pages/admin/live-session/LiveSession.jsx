@@ -24,6 +24,7 @@ import {
   ToolbarPageTitle,
 } from "@/partials/toolbar";
 import { format, set } from "date-fns";
+import debounce from "lodash.debounce";
 import {
   MenuIcon,
   MenuLink,
@@ -39,10 +40,19 @@ import { useNavigate } from "react-router";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   useEndCallMutation,
   useStartCallMutation,
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { useEndAndCreateMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
+import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import SearchFilterInput from "../../../components/SearchFilterInput";
 
 const LiveSession = ({ title = "Live Session" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -53,13 +63,17 @@ const LiveSession = ({ title = "Live Session" }) => {
 
   const [getLiveSessionList, { data, isLoading }] =
     useLazyGetLiveSessionListQuery();
+  const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const navigate = useNavigate();
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [lastRecurrence, setLastRecurrence] = useState(false);
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
-const [lastNote , setLastNote] = useState(false)
+  const [lastNote, setLastNote] = useState(false);
+   const [selectedEducator, setSelectedEducator] = useState(null);
+     const [searchText, setSearchText] = useState("");
+     const [searchTextInput,setSearchTextInput] = useState("");
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
@@ -127,7 +141,7 @@ const [lastNote , setLastNote] = useState(false)
     if (row?.schedule?.isRecurent) {
       if (row?.checkLastRecurrence) {
         setLastRecurrence(false);
-          setLastNote(true);
+        setLastNote(true);
       } else {
         setLastRecurrence(true);
       }
@@ -436,6 +450,8 @@ const [lastNote , setLastNote] = useState(false)
       const response = await getLiveSessionList({
         page: newPage,
         limit: newLimit,
+        educator :selectedEducator?._id || "",
+        search : searchTextInput || "",
       }).unwrap();
 
       return {
@@ -453,6 +469,22 @@ const [lastNote , setLastNote] = useState(false)
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
+  
+   const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchTextInput(value); 
+        reloadTable(); 
+      }, 500),
+    []
+  );
+    const handleSearchChange = (event) => {
+    
+      const value = event.target.value;
+      setSearchText(value);
+      debouncedSearch(value);
+    };
+  
 
   return (
     <div className="container-fluid pb-5">
@@ -464,13 +496,74 @@ const [lastNote , setLastNote] = useState(false)
             data.
           </ToolbarDescription>
         </ToolbarHeading>
-        <ToolbarActions>
-          {/* <div className="text-end pb-4">
-            <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create IQ Academy
-            </button>
-          </div> */}
-        </ToolbarActions>
+
+        <div className="flex gap-1 flex-wrap">
+          {/* <ToolbarActions>
+                           <div className="text-end">
+                             <button className="btn btn-primary" onClick={handleClickOpen}>
+                               Create Live Schedule
+                             </button>
+                           </div>
+                         </ToolbarActions> */}
+          <ToolbarActions>
+            <div className="relative w-full md:w-80">
+                          <SearchFilterInput
+                            searchText={searchText}
+                            handleSearchChange={handleSearchChange}
+                          />
+                        </div>
+            <div className="relative w-72">
+              <Select
+                value={selectedEducator?._id || ""}
+                onValueChange={(value) => {
+                  const selected = educators?.data?.find(
+                    (item) => item._id === value
+                  );
+                  if (selected) {
+                    setSelectedEducator({
+                      _id: selected._id,
+                      name: `${selected.first_name} ${selected.last_name}`,
+                    });
+                    reloadTable();
+                  }
+                }}
+              >
+                <SelectTrigger className="pr-8">
+                  <SelectValue
+                    placeholder="Select Educator"
+                    value={selectedEducator?._id || ""}
+                  >
+                    {selectedEducator
+                      ? selectedEducator.name
+                      : "Select Educator"}
+                  </SelectValue>
+                </SelectTrigger>
+
+                <SelectContent>
+                  {educators?.data?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.first_name + " " + item.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {selectedEducator && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedEducator(null);
+                    reloadTable();
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+            
+          </ToolbarActions>
+        </div>
       </Toolbar>
       <DataGrid
         serverSide={true}
@@ -511,7 +604,7 @@ const [lastNote , setLastNote] = useState(false)
             <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
               Are you sure you want to end this livestream for everyone?
             </p>
-              {lastRecurrence === false && lastNote === true && (
+            {lastRecurrence === false && lastNote === true && (
               <p className="mb-4 text-red-600 dark:text-red-500 text-center">
                 This is your last recurrence. After ending, you will need to
                 create a new recurrence.

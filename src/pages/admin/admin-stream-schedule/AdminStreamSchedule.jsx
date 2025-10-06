@@ -25,6 +25,14 @@ import {
 } from "@/partials/toolbar";
 import { format, set } from "date-fns";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
   MenuIcon,
   MenuLink,
   MenuSeparator,
@@ -41,6 +49,9 @@ import { useEndCallMutation } from "../../../store/api/educator/educatorLiveStre
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import CreateAdminRecurrenceScheduleModel from "./CreateAdminRecurrenceScheduleModel";
+import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import debounce from "lodash.debounce";
+import SearchFilterInput from "../../../components/SearchFilterInput";
 
 const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -49,10 +60,14 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [getAdminStreamSchedule, { data, isLoading }] =
     useLazyGetAdminStreamScheduleQuery();
+  const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isReccurenceScheduleOpen, setIsReccurenceScheduleOpen] =
     useState(false);
+  const [selectedEducator, setSelectedEducator] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -79,15 +94,14 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
     );
   };
 
-   const handleEdit = () => {
-     setIsReccurenceScheduleOpen(true);
-      
+  const handleEdit = () => {
+    setIsReccurenceScheduleOpen(true);
   };
 
   const ActionMenu = useMemo(() => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem  onClick={() => handleEdit()}>
+        <MenuItem onClick={() => handleEdit()}>
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
@@ -204,7 +218,10 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
         accessorFn: (row) => row.datetime,
         id: "schedule_time",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Scheduled from this date" column={column} />
+          <DataGridColumnHeader
+            title="Scheduled from this date"
+            column={column}
+          />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -255,7 +272,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           headerClassName: "min-w-[90px]",
         },
       },
-          {
+      {
         accessorFn: (row) => row.recurrent,
         id: "Recurrent",
         header: ({ column }) => (
@@ -351,7 +368,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-             {ActionMenu}
+              {ActionMenu}
             </MenuItem>
           </Menu>
         ),
@@ -423,6 +440,8 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           const response = await getAdminStreamSchedule({
             page: newPage,
             limit: newLimit,
+            educator: selectedEducator?._id || "",
+            search: searchTextInput || "",
           }).unwrap();
 
           return {
@@ -434,7 +453,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           return { data: [], totalCount: 0 };
         }
       },
-    [getAdminStreamSchedule]
+    [getAdminStreamSchedule, selectedEducator , searchTextInput]
   );
 
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
@@ -451,6 +470,21 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
     setIsReccurenceScheduleOpen(false);
   };
 
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        // console.log("value", value);
+        setSearchTextInput(value);
+        reloadTable();
+      }, 500),
+    []
+  );
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
+
   return (
     <div className="container-fluid pb-5">
       <Toolbar>
@@ -461,16 +495,65 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
             data.
           </ToolbarDescription>
         </ToolbarHeading>
-        <div className="flex gap-2 flex-wrap">
-          {/* <ToolbarActions>
-                   <div className="text-end">
-                     <button className="btn btn-primary" onClick={handleClickOpen}>
-                       Create Live Schedule
-                     </button>
-                   </div>
-                 </ToolbarActions> */}
+        <div className="flex flex-wrap items-center gap-2">
           <ToolbarActions>
-            <div className="text-end">
+            <div className="flex-1 min-w-[200px] md:min-w-[300px]">
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+              />
+            </div>
+
+            <div className="flex-1 min-w-[200px] md:min-w-[250px] relative">
+              <Select
+                value={selectedEducator?._id || ""}
+                onValueChange={(value) => {
+                  const selected = educators?.data?.find(
+                    (item) => item._id === value
+                  );
+                  if (selected) {
+                    setSelectedEducator({
+                      _id: selected._id,
+                      name: `${selected.first_name} ${selected.last_name}`,
+                    });
+                    reloadTable();
+                  }
+                }}
+              >
+                <SelectTrigger className="pr-8">
+                  <SelectValue
+                    placeholder="Select Educator"
+                    value={selectedEducator?._id || ""}
+                  >
+                    {selectedEducator
+                      ? selectedEducator.name
+                      : "Select Educator"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {educators?.data?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.first_name + " " + item.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {selectedEducator && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedEducator(null);
+                    reloadTable();
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+
+            <div>
               <button
                 className="btn btn-primary"
                 onClick={handleClickOpenReccurenceSchedule}

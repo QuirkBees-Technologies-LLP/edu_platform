@@ -6,8 +6,8 @@ export const educatorStreamScheduleApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getEducatorStreamSchedule: builder.query({
-      query: ({ page = 1, limit = 10 }) =>
-        `/educator/schedule?page=${page}&limit=${limit}`,
+      query: ({ page = 1, limit = 10 , search = ""}) =>
+        `/educator/schedule?page=${page}&limit=${limit}&search=${search}`,
     }),
     createEducatorStreamSchedule: builder.mutation({
       query: (data) => ({

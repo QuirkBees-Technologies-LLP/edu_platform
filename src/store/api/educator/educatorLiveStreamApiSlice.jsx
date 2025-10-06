@@ -9,8 +9,8 @@ export const educatorLiveStreamApiSlice = createApi({
       query: () => `/educator/category`,
     }),
     getLiveSessionList: builder.query({
-      query: ({ page = 1, limit = 10 , status = ""}) =>
-        `/educator/live-stream/list?page=${page}&limit=${limit}&status=${status}`,
+      query: ({ page = 1, limit = 10 , status = "" ,search=""}) =>
+        `/educator/live-stream/list?page=${page}&limit=${limit}&status=${status}&search=${search}`,
     }),
     updateStreamStatus: builder.mutation({
       query: ({ id, status }) => ({
