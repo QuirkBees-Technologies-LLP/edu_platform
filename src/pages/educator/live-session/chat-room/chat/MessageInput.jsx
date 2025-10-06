@@ -267,131 +267,117 @@ export const MessageInputUI = () => {
     setShowEmojiPicker(false);
   };
 
-  return (
+ return (
+  <div
+    style={{
+      position: "relative",
+      display: "flex",
+      flexDirection: "column",
+      width: "100%",
+    }}
+  >
+    {/* Input Row */}
     <div
       style={{
-        position: "relative",
         display: "flex",
-        flexDirection: "column",
-        width: "100%",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "8px", // optional spacing
       }}
     >
-      {/* Input Row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent:"space-between"
-          // position: "relative",
-        }}
-      >
-        {/* Chat Input */}
-        <ChatAutoComplete
-          className="form-control input input-sm w-full sm:w-[396px] md:w-[500px] lg:w-[600px]"
-          onChange={onChange}
-          value={text}
-          placeholder="Say something..."
-
-        />
-
-        {/* Buttons */}
-        {chatType !== "qa" && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              marginLeft: "8px",
-            }}
-          >
-            {/* Emoji Button */}
-            <div
-              onClick={() => setShowEmojiPicker((prev) => !prev)}
-              style={{
-                fontSize: "22px",
-                cursor: "pointer",
-                transition: "transform 0.2s",
-                userSelect: "none",
-              }}
-              onMouseOver={(e) => (e.target.style.transform = "scale(1.2)")}
-              onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-            >
-              😊
-            </div>
-
-            {/* Command Button */}
-            {/* <div
-              onClick={cooldownRemaining ? undefined : handleCommandsClick}
-              role="button"
-              style={{
-                fontSize: "18px",
-                cursor: cooldownRemaining ? "not-allowed" : "pointer",
-                opacity: cooldownRemaining ? 0.5 : 1,
-                transition: "transform 0.2s",
-                userSelect: "none",
-              }}
-              onMouseOver={(e) => (e.target.style.transform = "scale(1.2)")}
-              onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-            >
-              ⚡
-            </div> */}
-          </div>
-        )}
-      </div>
-
-      {/* Emoji Picker Popup */}
-      {showEmojiPicker && (
+      {/* Buttons */}
+      {chatType !== "qa" && (
         <div
           style={{
-            position: "absolute",
-            bottom: "60px",
-            left: "0",
-            zIndex: 50,
-            boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
-          <EmojiPicker
-            onEmojiClick={onEmojiClick}
-            theme="light"
-            height={350}
-            width={300}
-          />
+          {/* Emoji Button */}
+          <div
+            onClick={() => setShowEmojiPicker((prev) => !prev)}
+            style={{
+              fontSize: "22px",
+              cursor: "pointer",
+              transition: "transform 0.2s",
+              userSelect: "none",
+            }}
+            onMouseOver={(e) => (e.target.style.transform = "scale(1.2)")}
+            onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
+          >
+            😊
+          </div>
         </div>
       )}
 
-      {/* Send Button */}
-      <button
-        className={`btn btn-sm btn-primary mt-3 input-ui-send-button ${
-          text ? "text" : ""
-        } ${cooldownRemaining ? "cooldown" : ""}`}
-        disabled={!text}
-        onClick={handleSend}
+      {/* Chat Input */}
+      <div style={{ flex: 1 }}>
+        <ChatAutoComplete
+          style={{
+            width: "100%",
+          }}
+          onChange={onChange}
+          value={text}
+          placeholder="Say something..."
+        />
+      </div>
+    </div>
+
+    {/* Emoji Picker Popup */}
+    {showEmojiPicker && (
+      <div
         style={{
-          alignSelf: "flex-end",
-          marginTop: "10px",
-          opacity: !text ? 0.6 : 1,
-          cursor: !text ? "not-allowed" : "pointer",
-          transition: "opacity 0.3s",
+          position: "absolute",
+          bottom: "60px",
+          left: "0",
+          zIndex: 50,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+          borderRadius: "10px",
         }}
       >
-        {giphyState ? (
-          <></>
-        ) : cooldownRemaining ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <CooldownTimer
-              cooldownInterval={cooldownInterval}
-              setCooldownRemaining={setCooldownRemaining}
-            />
-          </div>
-        ) : (
-          <>
-            <i className="ki-filled ki-arrow-right"></i>
-            <div style={{ marginLeft: "5px" }}>{269 - text.length}</div>
-          </>
-        )}
-      </button>
-    </div>
-  );
+        <EmojiPicker
+          onEmojiClick={onEmojiClick}
+          theme="light"
+          height={350}
+          width={300}
+        />
+      </div>
+    )}
+
+    {/* Send Button */}
+    <button
+      className={`btn btn-sm btn-primary mt-3 input-ui-send-button ${
+        text ? "text" : ""
+      } ${cooldownRemaining ? "cooldown" : ""}`}
+      disabled={!text}
+      onClick={handleSend}
+      style={{
+        alignSelf: "flex-end",
+        marginTop: "10px",
+        opacity: !text ? 0.6 : 1,
+        cursor: !text ? "not-allowed" : "pointer",
+        transition: "opacity 0.3s",
+      }}
+    >
+      {giphyState ? (
+        <></>
+      ) : cooldownRemaining ? (
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <CooldownTimer
+            cooldownInterval={cooldownInterval}
+            setCooldownRemaining={setCooldownRemaining}
+          />
+        </div>
+      ) : (
+        <>
+          <i className="ki-filled ki-arrow-right"></i>
+          <div style={{ marginLeft: "5px" }}>{269 - text.length}</div>
+        </>
+      )}
+    </button>
+  </div>
+);
+
 };
 
