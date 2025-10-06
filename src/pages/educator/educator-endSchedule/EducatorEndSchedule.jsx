@@ -25,6 +25,8 @@ import {
 } from "@/components";
 import { format } from "date-fns";
 import { useLazyGetLiveSessionListQuery } from "../../../store/api/educator/educatorLiveStreamApiSlice";
+import debounce from "lodash.debounce";
+import { SearchFilterInput } from "@/components";
 
 const EducatorEndSchedule = ({ title = "Ended Live Sessions" }) => {
   const { language } = useLanguage();
@@ -47,6 +49,9 @@ const EducatorEndSchedule = ({ title = "Ended Live Sessions" }) => {
     useLazyGetLiveSessionListQuery();
   const navigate = useNavigate();
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
+
+  const [searchText, setSearchText] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
 
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
@@ -216,6 +221,7 @@ const EducatorEndSchedule = ({ title = "Ended Live Sessions" }) => {
         page: newPage,
         limit: newLimit,
         status: "ended",
+        search: searchTextInput || "",
       }).unwrap();
 
       const endedData = response.data.filter((row) => row.status === "ended");
@@ -231,16 +237,37 @@ const EducatorEndSchedule = ({ title = "Ended Live Sessions" }) => {
     }
   };
 
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchTextInput(value);
+        reloadTable();
+      }, 500),
+    []
+  );
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
+
   return (
     <div className="container-fluid">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Ended Live Session" />
           <ToolbarDescription>
-            Track Ended Live Sessions with key insights and performance
-            data.
+            Track Ended Live Sessions with key insights and performance data.
           </ToolbarDescription>
         </ToolbarHeading>
+        <ToolbarActions>
+          <div className="relative w-full md:w-80">
+            <SearchFilterInput
+              searchText={searchText}
+              handleSearchChange={handleSearchChange}
+            />
+          </div>
+        </ToolbarActions>
       </Toolbar>
 
       <DataGrid

@@ -6,8 +6,8 @@ export const adminEducatorsApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getEducators: builder.query({
-      query: ({ page = 1, limit = 10, search = "" }) =>
-        `/admin/educator/list?page=${page}&limit=${limit}&search=${search}`,
+      query: ({ page = 1, limit = 10, search = "" , educator = "" }) =>
+        `/admin/educator/list?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
     }),
 
     createEducator: builder.mutation({
@@ -34,7 +34,7 @@ export const adminEducatorsApiSlice = createApi({
       query: ({ callId }) => `/educator/kpi/${callId}`,
     }),
     kpis: builder.query({
-      query: ({ page = 1, limit = 10, educatorId, startDate, endDate }) => {
+      query: ({ page = 1, limit = 10, educatorId, startDate, endDate , search="" }) => {
         let url = `/admin/kpi?page=${page}&limit=${limit}`;
         if (educatorId) {
           url += `&educatorId=${educatorId}`;
@@ -45,6 +45,10 @@ export const adminEducatorsApiSlice = createApi({
 
         if (endDate) {
           url += `&endDate=${endDate}`;
+        }
+        if(search){
+          url += `&search=${search}`
+
         }
         return url;
       },

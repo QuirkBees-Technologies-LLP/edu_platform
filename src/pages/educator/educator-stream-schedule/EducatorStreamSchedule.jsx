@@ -2,6 +2,7 @@ import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/i18n";
+import debounce from "lodash.debounce";
 import {
   DataGrid,
   DataGridColumnHeader,
@@ -41,6 +42,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useEndCallMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import CreateRecurrenceScheduleModel from "./CreateRecurrenceScheduleModel";
+import { SearchFilterInput } from "@/components";
 
 const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -51,6 +53,8 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     useLazyGetEducatorStreamScheduleQuery();
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+   const [searchText, setSearchText] = useState("");
+  const [searchTextInput,setSearchTextInput] = useState("");
   const [isReccurenceScheduleOpen, setIsReccurenceScheduleOpen] =
     useState(false);
 
@@ -435,6 +439,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
       const response = await getEducatorStreamSchedule({
         page: newPage,
         limit: newLimit,
+        search: searchTextInput || "",
       }).unwrap();
 
       return {
@@ -447,6 +452,20 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     }
   };
 
+  const debouncedSearch = useMemo(
+  () =>
+    debounce((value) => {
+      setSearchTextInput(value); 
+      reloadTable(); 
+    }, 500),
+  []
+);
+  const handleSearchChange = (event) => {
+
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
   return (
     <div className="container-fluid">
       <Toolbar>
@@ -466,6 +485,12 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
             </div>
           </ToolbarActions> */}
           <ToolbarActions>
+            <div className="relative w-full md:w-80">
+                          <SearchFilterInput
+                            searchText={searchText}
+                            handleSearchChange={handleSearchChange}
+                          />
+                        </div>
             <div className="text-end">
               <button
                 className="btn btn-primary"

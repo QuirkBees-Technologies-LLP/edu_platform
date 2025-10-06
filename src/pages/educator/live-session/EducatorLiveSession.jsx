@@ -2,6 +2,7 @@ import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/i18n";
+import debounce from "lodash.debounce";
 import {
   DataGrid,
   DataGridColumnHeader,
@@ -48,6 +49,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ro, tr } from "@faker-js/faker";
 import CreateLiveStream from "./CreateLiveNow";
+import { SearchFilterInput } from "@/components";
 
 const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -64,6 +66,8 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
     const [lastNote , setLastNote] = useState(false)
+      const [searchText, setSearchText] = useState("");
+  const [searchTextInput,setSearchTextInput] = useState("");
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -472,6 +476,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
       const response = await getLiveSessionList({
         page: newPage,
         limit: newLimit,
+        search: searchTextInput || "",
       }).unwrap();
 
       return {
@@ -484,6 +489,22 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     }
   };
 
+   const debouncedSearch = useMemo(
+  () =>
+    debounce((value) => {
+      setSearchTextInput(value); 
+      reloadTable(); 
+    }, 500),
+  []
+);
+  const handleSearchChange = (event) => {
+
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
+
+
   return (
     <div className="container-fluid">
       <Toolbar>
@@ -495,6 +516,12 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
+            <div className="relative w-full md:w-80">
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+              />
+            </div>
           <div className="text-end pb-4 relative group inline-block">
             <button className="btn btn-primary" onClick={handleClickOpen}>
               Create a New Live Session

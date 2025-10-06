@@ -23,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SearchFilterInput } from "@/components";
+import debounce from "lodash.debounce";
 
 import { format } from "date-fns";
 import { useLazyGetLiveSessionListQuery } from "../../../store/api/admin/adminLiveSessionApiSlice";
@@ -48,6 +50,8 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [loading, setLoading] = useState(false);
+    const [searchText, setSearchText] = useState("");
+  const [searchTextInput,setSearchTextInput] = useState("");
 
 
   const reloadTable = () => {
@@ -239,9 +243,12 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
       const response = await getKpiList({
         page: newPage,
         limit: newLimit,
+        search : searchTextInput || "",
         ...(selectedEducator ? { educatorId: selectedEducator } : {}),
         ...(startDate ? { startDate } : {}),
         ...(endDate ? { endDate } : {}),
+
+ 
       }).unwrap();
       console.log("response", response);
 
@@ -287,6 +294,22 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
     }
   };
 
+   const debouncedSearch = useMemo(
+  () =>
+    debounce((value) => {
+      setSearchTextInput(value); 
+      reloadTable(); 
+    }, 500),
+  []
+);
+  const handleSearchChange = (event) => {
+
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
+
+
   return (
     <div className="container-fluid">
       <Toolbar>
@@ -301,6 +324,12 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
             {/* <label className="form-label text-gray-900 gap-1">
               Educator<span className="text-danger">*</span>
             </label> */}
+              <div className="relative w-full md:w-80">
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+              />
+            </div>
             <div className="relative w-72">
               <Select
                 value={selectedEducator || ""}
