@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
+import { FiCalendar } from "react-icons/fi";
 
 const DateRangePicker = ({
   onDateRangeChange,
@@ -151,7 +152,7 @@ const DateRangePicker = ({
     },
     closeBtn: {
       position: "absolute",
-      top: "8px",
+      top: "12px",
       right: "8px",
       background: "transparent",
       border: "none",
@@ -212,7 +213,7 @@ const DateRangePicker = ({
   return (
     <div ref={dropdownRef} style={styles.container}>
       <button style={styles.toggle} onClick={() => setShow(!show)}>
-        <i className="bi bi-calendar" />
+        <FiCalendar size={16} />
         <span>{displayLabel}</span>
         <i
           className="bi bi-chevron-down"
@@ -321,7 +322,7 @@ const DateRangePicker = ({
 const CustomDateRangePicker = ({ handleDateRangeChangeCallback }) => {
   const handleDateRangeChange = (start, end, rangeName) => {
     handleDateRangeChangeCallback?.(start, end, rangeName);
-    console.log("Selected Range:", { start, end, rangeName });
+    // console.log("Selected Range:", { start, end, rangeName });
   };
 
   return (
