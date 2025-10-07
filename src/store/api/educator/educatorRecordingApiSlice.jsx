@@ -36,7 +36,15 @@ export const educatorRecordingApiSlice = createApi({
                 method: 'DELETE',
             }),
         }),
+        createEducatorRecording : builder.mutation({
+            query: (data) => ({
+                url: '/educator/recording/manual',
+                method: 'POST',
+                body: data,
+                formData: true,
+            }),
+        }),
     }),
 });
 
-export const { useGetEducatorStreamScheduleQuery,useGetEducatorRecordingByCallIDQuery,useGetEducatorRecordingDataQuery, useLazyGetEducatorRecordingQuery, useSaveEducatorRecordingMutation, useUpdateEducatorRecordingMutation, useDeleteEducatorRecordingMutation } = educatorRecordingApiSlice;
+export const { useGetEducatorStreamScheduleQuery,useGetEducatorRecordingByCallIDQuery,useGetEducatorRecordingDataQuery, useLazyGetEducatorRecordingQuery, useSaveEducatorRecordingMutation, useUpdateEducatorRecordingMutation, useDeleteEducatorRecordingMutation  , useCreateEducatorRecordingMutation} = educatorRecordingApiSlice;

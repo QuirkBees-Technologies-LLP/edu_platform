@@ -6,6 +6,7 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
+
 import { Calendar, CirclePlay, Clock3, Timer, Videotape } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -29,6 +30,9 @@ import {
 } from "@/components";
 import DeleteEducatorRecording from "./DeleteEducatorRecording";
 import CreateEducatorRecording from "./CreateEducatorRecording";
+import { reload } from "@firebase/auth";
+import UpdateEducatorRecording from "./UpdateEducatorRecording";
+import { set } from "date-fns";
 
 const EducatorRecordingSession = () => {
   const { data, isFetching, isError, error, refetch } =
@@ -41,6 +45,7 @@ const EducatorRecordingSession = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [updateDeleteRecording, setUpdateDeleteRecording] = useState(null); // state to hold selected recording for edit/delete
   const [selectedRow, setSelectedRow] = useState(null);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   console.log("updateDeleteRecording: ", updateDeleteRecording);
   const { getThemeMode } = useSettings();
 
@@ -95,6 +100,7 @@ const EducatorRecordingSession = () => {
 
   const handleDeleteClose = () => {
     setIsDeleteOpen(false);
+    setSelectedRow(null);
   };
   const handleActionClick = (item) => {
     setUpdateDeleteRecording(item);
@@ -105,14 +111,23 @@ const EducatorRecordingSession = () => {
     setIsDeleteOpen(false);
     setIsCreateOpen(false);
   };
+  const handleCloseUpdate = () => {
+    setIsDeleteOpen(false);
+    setIsUpdateOpen(false);
+    setSelectedRow(null);
+  };
 
+  const handleUpdateOpen = () => {
+    setIsUpdateOpen(true);
+  }
   const ActionMenu = (item) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
         <MenuItem
           onClick={() => {
+            console.log("ittttem", item);
             handleActionClick(item); // store selected recording
-            setIsCreateOpen(true); // edit modal open
+            handleUpdateOpen(); // edit modal open
           }}
         >
           <MenuLink>
@@ -137,6 +152,9 @@ const EducatorRecordingSession = () => {
         </MenuItem>
       </MenuSub>
     );
+  };
+  const handleClickOpen = () => {
+    setIsCreateOpen(true);
   };
 
   return (
@@ -190,6 +208,13 @@ const EducatorRecordingSession = () => {
           <ToolbarHeading>
             <ToolbarPageTitle text="Recorded Academy" />
           </ToolbarHeading>
+          <ToolbarActions>
+            <div className="text-end pb-4">
+              <button className="btn btn-primary" onClick={handleClickOpen}>
+                Create Recording
+              </button>
+            </div>
+          </ToolbarActions>
         </Toolbar>
         <div className="grid grid-cols-12 gap-4">
           {data?.data?.recordings.map((item, index) => {
@@ -238,11 +263,10 @@ const EducatorRecordingSession = () => {
                   <div className="card-body p-4 rounded-2xl">
                     <div className="flex justify-between">
                       <div className="recorded_details">
-                        
-                            <h6 className="text-xl font-medium text-gray-900 mb-1">
-                              {item?.call_title}
-                            </h6>
-                          
+                        <h6 className="text-xl font-medium text-gray-900 mb-1">
+                          {item?.call_title}
+                        </h6>
+
                         <p
                           className="text-2sm text-gray-900 dark:text-gray-900 mb-3"
                           dangerouslySetInnerHTML={{
@@ -275,20 +299,20 @@ const EducatorRecordingSession = () => {
                         </div>
                       </div>
                       <div className="ml-2">
-                            <Menu className="items-stretch">
-                              <MenuItem
-                                toggle="dropdown"
-                                trigger="click"
-                                placement="bottom-end"
-                                className="p-0"
-                              >
-                                <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-                                  <KeenIcon icon="dots-vertical" />
-                                </MenuToggle>
-                                {ActionMenu(item)}
-                              </MenuItem>
-                            </Menu>
-                          </div>
+                        <Menu className="items-stretch">
+                          <MenuItem
+                            toggle="dropdown"
+                            trigger="click"
+                            placement="bottom-end"
+                            className="p-0"
+                          >
+                            <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+                              <KeenIcon icon="dots-vertical" />
+                            </MenuToggle>
+                            {ActionMenu(item)}
+                          </MenuItem>
+                        </Menu>
+                      </div>
                     </div>
 
                     {/* Footer */}
@@ -321,21 +345,33 @@ const EducatorRecordingSession = () => {
       />
       {isDeleteOpen && (
         <DeleteEducatorRecording
-          refetch={refetch}
+          refetch={() => refetch()}
           onClose={handleDeleteClose}
           isDeleteOpen={isDeleteOpen}
           handleDeleteClose={handleDeleteClose}
           selectedRow={updateDeleteRecording}
         />
       )}
-      <CreateEducatorRecording
-        setSelectedRow={setSelectedRow}
-        handleCloseCreate={handleCloseCreate}
-        isCreateOpen={isCreateOpen}
-        setIsCreateOpen={setIsCreateOpen}
-        refetch={refetch}
-        selectedRow={updateDeleteRecording}
-      />
+      {isCreateOpen && (
+        <CreateEducatorRecording
+          // setSelectedRow={setSelectedRow}
+          handleCloseCreate={handleCloseCreate}
+          isCreateOpen={isCreateOpen}
+          setIsCreateOpen={setIsCreateOpen}
+          refetch={() => refetch()}
+          // selectedRow={updateDeleteRecording}
+        />
+      )}
+      {isUpdateOpen && (
+        <UpdateEducatorRecording
+           setSelectedRow={setSelectedRow}
+          handleCloseUpdate={handleCloseUpdate}
+          isUpdateOpen={isUpdateOpen}
+          setIsUpdateOpen={setIsUpdateOpen}
+          refetch={() => refetch()}
+           selectedRow={updateDeleteRecording}
+        />
+      )}
     </div>
   );
 };
