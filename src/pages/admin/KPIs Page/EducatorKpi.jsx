@@ -35,12 +35,13 @@ import {
 } from "../../../store/api/admin/adminEducatorsApiSlice";
 import Loader from "../../../components/ui/loader";
 import { Loader2 } from "lucide-react";
+import CustomDateRangePicker from "../../../components/CustomDateRangePicker";
 
 const EducatorKpi = ({ title = "Educator KPIs" }) => {
   const { isRTL } = useLanguage();
   const [getLiveSessionList, { data: liveSessionData, isLoading, refetch }] =
     useLazyGetLiveSessionListQuery();
-  const [getKpiList, { data: kpiData, isLoading: kpiLoading }] =
+  const [getKpiList, { data: kpiData, isLoading: kpiLoading  , refetch: kpiRefetch}] =
     useLazyKpisQuery();
   const [exportKpis] = useKpisExportMutation();
   const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
@@ -50,9 +51,13 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [loading, setLoading] = useState(false);
-    const [searchText, setSearchText] = useState("");
-  const [searchTextInput,setSearchTextInput] = useState("");
-
+  const [searchText, setSearchText] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
+  const [selectedDateRange, setSelectedDateRange] = useState({
+    start: null,
+    end: null,
+    rangeName: "",
+  });
 
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1);
@@ -243,12 +248,14 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
       const response = await getKpiList({
         page: newPage,
         limit: newLimit,
-        search : searchTextInput || "",
-        ...(selectedEducator ? { educatorId: selectedEducator } : {}),
-        ...(startDate ? { startDate } : {}),
-        ...(endDate ? { endDate } : {}),
-
- 
+        search: searchTextInput || "",
+        educatorId: selectedEducator || "",
+        startDate: selectedDateRange.start
+          ? format(selectedDateRange.start, "yyyy-MM-dd")
+          : "",
+        endDate: selectedDateRange.end
+          ? format(selectedDateRange.end, "yyyy-MM-dd")
+          : "",
       }).unwrap();
       console.log("response", response);
 
@@ -285,7 +292,6 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
       window.URL.revokeObjectURL(url);
 
       toast("Export successful");
-
     } catch (err) {
       console.error(err);
       toast("Export failed", { type: "error" });
@@ -294,21 +300,28 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
     }
   };
 
-   const debouncedSearch = useMemo(
-  () =>
-    debounce((value) => {
-      setSearchTextInput(value); 
-      reloadTable(); 
-    }, 500),
-  []
-);
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchTextInput(value);
+        reloadTable();
+      }, 500),
+    []
+  );
   const handleSearchChange = (event) => {
-
     const value = event.target.value;
     setSearchText(value);
     debouncedSearch(value);
   };
 
+  const handleDateRangeChangeCallback = (startDate, endDate, rangeName) => {
+    setSelectedDateRange({
+      start: startDate,
+      end: endDate,
+      rangeName,
+    });
+    reloadTable();
+  };
 
   return (
     <div className="container-fluid">
@@ -324,7 +337,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
             {/* <label className="form-label text-gray-900 gap-1">
               Educator<span className="text-danger">*</span>
             </label> */}
-              <div className="relative w-full md:w-80">
+            <div className="relative gap-2 border border-gray-200 rounded-md">
               <SearchFilterInput
                 searchText={searchText}
                 handleSearchChange={handleSearchChange}
@@ -364,8 +377,11 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <div>
+            <div className="flex items-center gap-2 border border-gray-200 rounded-md">
+              <CustomDateRangePicker
+                handleDateRangeChangeCallback={handleDateRangeChangeCallback}
+              />
+              {/* <div>
                 <label className="form-label text-gray-900 text-sm">
                   Start Date
                 </label>
@@ -393,7 +409,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
                     reloadTable();
                   }}
                 />
-              </div>
+              </div> */}
             </div>
 
             <button
@@ -401,11 +417,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
               className="px-2 py-2 bg-green-500 text-white rounded"
               onClick={handleExport}
             >
-              {loading ? (
-               <Loader2/>
-              ) : (
-                "Export KPI   "
-              )}
+              {loading ? <Loader2 /> : "Export KPI   "}
             </button>
           </ToolbarActions>
         </div>
