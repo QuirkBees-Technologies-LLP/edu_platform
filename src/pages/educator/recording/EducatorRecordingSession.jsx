@@ -65,20 +65,30 @@ const EducatorRecordingSession = () => {
     );
   }
 
-  if (data?.data?.recordings?.length === 0) {
-    return (
-      <Container className="pb-10">
-        <div className="card w-full h-100 items-center justify-center">
-          <div className="text-center flex items-center gap-3 flex-col py-24">
-            <Videotape size={30} />
-            <h3 className="text-xl font-medium text-gray-700">
-              No Recording available
-            </h3>
-          </div>
-        </div>
-      </Container>
-    );
-  }
+  // if (data?.data?.recordings?.length === 0) {
+  //   return (
+  //     <Container className="pb-10">
+  //       <div className="card w-full h-100 items-center justify-center">
+  //         <div className="text-center flex items-center gap-3 flex-col py-24">
+  //           <Videotape size={30} />
+  //           <h3 className="text-xl font-medium text-gray-700">
+  //             No Recording available
+  //           </h3>
+  //           <button className="mt-5">
+  //             <span
+  //               onClick={() => {
+  //                 setIsCreateOpen(true)
+  //                  console.log("clicked")}}
+  //               className="btn btn-primary"
+  //             >
+  //               Create Recording
+  //             </span>
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </Container>
+  //   );
+  // }
 
   const toggleTags = (index) => {
     setShowAllTags((prev) => ({
@@ -204,6 +214,7 @@ const EducatorRecordingSession = () => {
             </div>
           </div>
         </div>
+        
         <Toolbar>
           <ToolbarHeading>
             <ToolbarPageTitle text="Recorded Academy" />
@@ -216,7 +227,22 @@ const EducatorRecordingSession = () => {
             </div>
           </ToolbarActions>
         </Toolbar>
-        <div className="grid grid-cols-12 gap-4">
+         {/* ✅ CONDITIONAL GRID OR EMPTY STATE */}
+      {data?.data?.recordings?.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-24 text-center">
+          <Videotape size={32} className="text-gray-500" />
+          <h3 className="text-lg font-medium text-gray-700">
+            No recordings available
+          </h3>
+          {/* <button
+            onClick={() => setIsCreateOpen(true)}
+            className="btn btn-primary mt-4"
+          >
+            Create Recording
+          </button> */}
+        </div>
+      ) : (
+         <div className="grid grid-cols-12 gap-4">
           {data?.data?.recordings.map((item, index) => {
             const showTags = showAllTags[index] || false;
             const visibleTags = showTags
@@ -336,6 +362,9 @@ const EducatorRecordingSession = () => {
             );
           })}
         </div>
+      )}
+
+       
       </Container>
       <VideoPlayerModal
         open={open}
