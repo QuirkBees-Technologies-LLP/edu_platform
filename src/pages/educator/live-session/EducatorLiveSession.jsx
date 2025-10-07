@@ -515,6 +515,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
             data.
           </ToolbarDescription>
         </ToolbarHeading>
+        <div className="flex gap-2 flex-wrap">
         <ToolbarActions>
             <div className="relative w-full md:w-80">
               <SearchFilterInput
@@ -522,7 +523,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
                 handleSearchChange={handleSearchChange}
               />
             </div>
-          <div className="text-end pb-4 relative group inline-block">
+          <div className="text-end  relative group inline-block">
             <button className="btn btn-primary" onClick={handleClickOpen}>
               Create a New Live Session
             </button>
@@ -532,6 +533,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
             </div>
           </div>
         </ToolbarActions>
+        </div>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>

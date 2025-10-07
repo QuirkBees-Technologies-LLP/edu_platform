@@ -302,7 +302,7 @@ const Educators = ({ title = "Educators" }) => {
               </button>
             )}
           </div>
-          <div className="text-end pb-4">
+          <div className="text-end ">
             <button className="btn btn-primary" onClick={handleClickOpen}>
               Create Educator
             </button>
