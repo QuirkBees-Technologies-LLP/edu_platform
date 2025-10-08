@@ -48,7 +48,7 @@ export const MessageInputUI = () => {
     const emoji = emojiData.emoji;
     const newEvent = {
       target: { value: text + emoji },
-      preventDefault: () => {},
+      preventDefault: () => { },
     };
     handleChange(newEvent);
   };
@@ -68,7 +68,6 @@ export const MessageInputUI = () => {
         event.target.value = value.replace("/giphy", "");
         setGiphyState(true);
       }
-
       handleChange(event);
     },
     [text, giphyState, numberOfUploads, handleChange, setGiphyState]
@@ -91,7 +90,8 @@ export const MessageInputUI = () => {
       style={{
         position: "relative",
         display: "flex",
-        flexDirection: "column",
+        // flexDirection: "column",
+        alignItems: "center",
         width: "100%",
       }}
     >
@@ -182,9 +182,8 @@ export const MessageInputUI = () => {
 
       {/* SEND BUTTON */}
       <button
-        className={`btn btn-sm input-ui-send-button ${text ? "text" : ""} ${
-          cooldownRemaining ? "cooldown" : ""
-        }`}
+        className={`btn btn-sm input-ui-send-button ${text ? "text" : ""} ${cooldownRemaining ? "cooldown" : ""
+          }`}
         disabled={!text}
         onClick={handleSend}
         style={{
@@ -198,6 +197,10 @@ export const MessageInputUI = () => {
           alignItems: "center",
           justifyContent: "center",
           cursor: text ? "pointer" : "not-allowed",
+          position: "absolute",
+          right: "20px",
+          zIndex: 1,
+          top: "3px",
           opacity: text ? 1 : 0.6,
         }}
       >
@@ -214,6 +217,6 @@ export const MessageInputUI = () => {
           <Send size={20} />
         )}
       </button>
-    </div>
+    </div >
   );
 };
