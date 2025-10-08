@@ -196,9 +196,10 @@ const IqAcademyEducators = () => {
                       src={educator.image}
                       alt={educator.image}
                       className="w-20 h-20 object-cover rounded-full object-top"
+                       onClick={() => navigate(`/iq-educators/${educator._id}`)}
                     />
-                    <div className="text-center sm:text-start">
-                      <h4 className="text-gray-800 font-medium mb-1">
+                    <div className="text-center sm:text-start"  onClick={() => navigate(`/iq-educators/${educator._id}`)}>
+                      <h4 className="text-gray-800 font-medium mb-1" >
                         {educator.first_name} {educator.last_name}
                       </h4>
                       <p className="text-xs text-gray-500">{educator.skills}</p>
