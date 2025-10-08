@@ -49,6 +49,7 @@ const IqEducators = () => {
   const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleCloseView = () => {
     setIsViewOpen(false);
@@ -242,7 +243,6 @@ const IqEducators = () => {
 
     setVideoUrl(url);
     setOpen(true);
-  
   };
 
   function handleShare() {
@@ -267,6 +267,12 @@ const IqEducators = () => {
         }, 3000);
       });
   }
+
+  const makeClickableLinks = (text) =>
+    text?.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
+      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
+      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
+    });
 
   return (
     <div className="container-fluid pb-10">
@@ -315,9 +321,7 @@ const IqEducators = () => {
                 className="relative w-full sm:w-[800px] bg-white rounded-2xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
               >
-                <span
-                  className="text-gray-700 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center"
-                >
+                <span className="text-gray-700 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
                   Change in Sound Option from Automatic (Default) to Allow,{" "}
                   <br /> like in the Image
                 </span>
@@ -860,7 +864,7 @@ const IqEducators = () => {
 
                   {/* Messages */}
                   {response?.data?.PostData?.length > 0 ? (
-                    response.data.PostData.map((update) => (
+                    response?.data?.PostData?.map((update) => (
                       <div
                         key={update.id}
                         className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
@@ -883,9 +887,20 @@ const IqEducators = () => {
                             </p>
                           </div>
                         </div>
-                        <p className="text-sm font-normal text-gray-700">
+                        {/* <p className="text-sm font-normal text-gray-700">
                           {update.content}
-                        </p>
+                        </p> */}
+
+                        {update?.content && (
+                          <div className="mb-3">
+                            <p
+                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+                              dangerouslySetInnerHTML={{
+                                __html: makeClickableLinks(update?.content),
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     ))
                   ) : (
