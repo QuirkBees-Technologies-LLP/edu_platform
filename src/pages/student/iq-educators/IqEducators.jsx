@@ -1019,9 +1019,20 @@ const IqEducators = () => {
                             </p>
                           </div>
                         </div>
-                        <p className="text-sm font-normal text-gray-700">
+                        {/* <p className="text-sm font-normal text-gray-700">
                           {update.content}
-                        </p>
+                        </p> */}
+                        
+                        {update?.content && (
+                          <div className="mb-3">
+                            <p
+                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+                              dangerouslySetInnerHTML={{
+                                __html: makeClickableLinks(update?.content),
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     ))
                   ) : (
