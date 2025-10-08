@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageSquare, Share2 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 const SocialPostCard = ({ post, onEdit, refetch }) => {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -27,17 +30,52 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
     commentCount = 0,
   } = post;
 
+  const htmlToPlainText = (html) => {
+    if (!html) return "";
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const text = doc.body.textContent || "";
+      return text.trim();
+    } catch (err) {
+      return html.replace(/<[^>]+>/g, "").trim(); // fallback
+    }
+  };
+
+  const plainTextContent = htmlToPlainText(content || "");
+
+  const makeClickableLinks = (text) =>
+    text.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
+      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
+      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
+    });
+
+  const displayText = isExpanded
+    ? plainTextContent
+    : plainTextContent.substring(0, 200);
+  const finalHtml =
+    makeClickableLinks(displayText) +
+    (plainTextContent.length > 200
+      ? isExpanded
+        ? ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
+        : ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
+      : "");
+
   return (
     <div className="card rounded-xl bg-white dark:bg-gray-800 p-5 mb-6 transition-all">
       {/* Author */}
       <div className="flex items-center mb-4">
         <img
+          onClick={() => navigate(`/iq-educators/${author?._id}`)}
           src={author?.image}
           alt={author?.first_name}
           className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 dark:border-gray-700"
         />
         <div className="ml-3">
-          <p className="font-semibold text-gray-800 dark:text-gray-100">
+          <p
+            className="font-semibold text-gray-800 dark:text-gray-100 hover:cursor-pointer "
+            onClick={() => navigate(`/iq-educators/${author?._id}`)}
+          >
             {author?.first_name} {author?.last_name}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -47,8 +85,17 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       </div>
 
       {/* Post Content */}
-      {content && (
-        <p className="text-gray-800 dark:text-gray-200">{content}</p>
+      {/* {content && <p className="text-gray-800 dark:text-gray-200">{content}</p>} */}
+      {plainTextContent && (
+        <div className="mb-3">
+          <p
+            className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+            dangerouslySetInnerHTML={{ __html: finalHtml }}
+            onClick={(e) => {
+              if (e.target.id === "toggleText") setIsExpanded(!isExpanded);
+            }}
+          />
+        </div>
       )}
 
       {/* Images */}
