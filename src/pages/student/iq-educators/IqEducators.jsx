@@ -321,7 +321,7 @@ const IqEducators = () => {
                 className="relative w-full sm:w-[800px] bg-white rounded-2xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
               >
-                <span className="text-gray-700 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
+                <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
                   Change in Sound Option from Automatic (Default) to Allow,{" "}
                   <br /> like in the Image
                 </span>
@@ -333,7 +333,7 @@ const IqEducators = () => {
                 </div>
 
                 <span
-                  className="mb-1 text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+                  className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
 
 "
                 >
