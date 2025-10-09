@@ -108,7 +108,7 @@ const CreateEducatorRecording = forwardRef(
             educator_id: values.educator_id,
             videoUrl: values.videoInputType === "url" ? values.videoUrl : "",
             start_time: values.start_time,
-            end_time: values.end_time,
+            end_time: Date.now(),
             call_title: values.call_title,
             call_description: values.call_description,
             call_category: values.call_category,
@@ -353,7 +353,7 @@ const CreateEducatorRecording = forwardRef(
           <DialogHeader>
             <DialogTitle>
               {/* {selectedRow?._id ? "Update Recording" : "Create Educator"} */}
-              Create Educator
+              Upload Recording Session
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
@@ -410,7 +410,7 @@ const CreateEducatorRecording = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Start Date<span className="text-danger">*</span>
+                    Date of the session<span className="text-danger">*</span>
                   </label>
                   <div className="custom_datepicket">
                     <DateTimePicker
@@ -435,7 +435,7 @@ const CreateEducatorRecording = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     End Date<span className="text-danger">*</span>
@@ -461,7 +461,7 @@ const CreateEducatorRecording = forwardRef(
                     </span>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               <div className="col-span-12">
                 <div className="col-span-6">

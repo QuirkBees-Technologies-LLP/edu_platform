@@ -77,10 +77,21 @@ const LectureContent = ({
     };
     console.log(lectureContent, "lectureContent");
 
-    if (lecture.content) {
-      setVideoInputType("url");
+    // if (lecture.content) {
+    //   setVideoInputType("url");
+    // } else {
+    //   setVideoInputType("upload");
+    // }
+    if (lecture.type === "VIDEO") {
+      if (lecture.content && isValidVideoUrl(lecture.content)) {
+        setVideoInputType("url");
+      } else if (lecture.videoFile || lecture.thumbnail) {
+        setVideoInputType("upload");
+      } else {
+        setVideoInputType("");
+      }
     } else {
-      setVideoInputType("upload");
+      setVideoInputType("");
     }
 
     if (lecture) {
@@ -216,6 +227,7 @@ const LectureContent = ({
         videoId = videoId.replace(/\/$/, "");
         return `https://player.dyntube.com/video/${videoId}`;
       }
+
     return url;
   };
 
@@ -428,10 +440,9 @@ const LectureContent = ({
             </div> */}
 
             <Select
-              value={videoInputType}
+              value={videoInputType || ""}
               onValueChange={(value) => {
                 setVideoInputType(value);
-                // reset fields when switching
                 setFormData({ ...formData, content: "" });
                 setVideoFile(null);
                 setShowPreview(false);
@@ -760,6 +771,29 @@ const LectureContent = ({
       </div>
     );
   };
+  const handleEditClick = () => {
+  if (!isEditing) {
+
+    if (formData.type === "VIDEO") {
+      if (isValidVideoUrl(formData.content)) {
+        setVideoInputType("url");
+      } else if (formData.thumbnail || videoFile) {
+        setVideoInputType("upload");
+      } else {
+        setVideoInputType(""); 
+      }
+    } else {
+      setVideoInputType("");
+    }
+  } else {
+   
+    setShowPreview(false);
+    setShowPreview1(false);
+  }
+
+  setIsEditing(!isEditing);
+};
+
 
   return (
     <div className="space-y-6">
@@ -787,10 +821,7 @@ const LectureContent = ({
               ? "btn border-red-600 text-red-600"
               : "bg-primary hover:bg-primary"
           }
-          onClick={() => {
-            setIsEditing(!isEditing);
-            setShowPreview(false);
-          }}
+           onClick={handleEditClick}
         >
           {isEditing ? (
             <>
@@ -969,7 +1000,7 @@ const LectureContent = ({
               {/* Tabs */}
               <div className="flex border-b border-gray-200">
                 <button
-                  onClick={() => setActiveTab("content")}
+                   onClick={() => setActiveTab("content")}
                   className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
                     activeTab === "content"
                       ? "text-primary border-b-2 border-primary bg-light"

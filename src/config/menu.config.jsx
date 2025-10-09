@@ -1346,12 +1346,12 @@ export const sideMenus = {
           path: "/admin/stream-schedule",
         },
         {
-          title: "Live Session",
+          title: "Live Sessions",
           icon: <PlayCircle />,
           path: "/admin/live-session",
         },
         {
-          title: "Ended Session ",
+          title: "Ended Sessions ",
           icon: <PlayCircle />,
           path: "/admin/ended-live-sessions",
         },
@@ -1441,12 +1441,12 @@ export const sideMenus = {
           path: "/educator/stream-schedule",
         },
         {
-          title: "Live Session",
+          title: "Live Sessions",
           icon: <PlayCircle />,
           path: "/educator/live-session",
         },
         {
-          title: "Ended Session ",
+          title: "Ended Sessions ",
           icon: <PlayCircle />,
           path: "/educator/ended-live-sessions",
         }
