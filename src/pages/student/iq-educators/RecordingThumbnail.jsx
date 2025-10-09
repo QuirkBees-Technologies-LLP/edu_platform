@@ -1,148 +1,138 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 
-const RecordingThumbnail = ({
-  videoUrl,
-  seekTime = 1,
-  image,
-  onRecordingClick,
-}) => {
-  const containerRef = useRef(null);
-  const videoRef = useRef(null); // dynamically created video element
-  const [thumbnail, setThumbnail] = useState(image || null);
-  const [visible, setVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
+const RecordingThumbnail = ({ videoUrl, seekTime = 1, image, onRecordingClick }) => {
+    const videoRef = useRef(null);
+    const [thumbnail, setThumbnail] = useState();
+    console.log(videoUrl, "videoUrl")
+    
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !videoUrl) return;
 
-  // ✅ Lazy-load when visible
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.disconnect();
-          }
+        video.crossOrigin = 'anonymous'; // Enable this after configuring CORS on Azure
+        video.preload = 'auto';
+
+        const handleLoadedData = () => {
+            console.log("Video loaded, duration:", video.duration, "currentTime:", video.currentTime);
+            if (video.duration > 0) {
+                video.currentTime = Math.min(seekTime, video.duration);
+            }
+        };
+
+        const handleSeeked = () => {
+            console.log("Video seeked to:", video.currentTime, "dimensions:", video.videoWidth, "x", video.videoHeight);
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 320;
+                canvas.height = video.videoHeight || 240;
+                
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    throw new Error('Could not get canvas context');
+                }
+
+                // Draw the video frame to canvas
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Convert to data URL
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                console.log("Thumbnail generated successfully, size:", imageData.length);
+                setThumbnail(imageData);
+            } catch (err) {
+                console.log("Thumbnail generation failed:", err.message);
+                
+                // Check if it's a CORS issue
+                if (err.message.includes('tainted')) {
+                    console.log("CORS issue detected. To fix this:");
+                    console.log("1. Configure CORS on Azure Blob Storage");
+                    console.log("2. Allow origins: http://localhost:5173, https://iqonic.vip");
+                    console.log("3. Methods: GET, HEAD");
+                }
+                
+                // Continue without thumbnail - video still works
+            }
+        };
+
+        video.addEventListener('loadeddata', handleLoadedData);
+        video.addEventListener('seeked', handleSeeked);
+        video.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+            console.error('Video error details:', video.error);
         });
-      },
-      { rootMargin: "0px 0px 200px 0px" }
-    );
 
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
+        return () => {
+            video.removeEventListener('loadeddata', handleLoadedData);
+            video.removeEventListener('seeked', handleSeeked);
+            video.removeEventListener('error', (e) => {
+                console.error('Video error:', e);
+                console.error('Video error details:', video.error);
+            });
+        };
+    }, [videoUrl, seekTime]);
 
-  // ✅ Generate thumbnail only when visible, no thumbnail yet, and video exists
-  useEffect(() => {
-    if (!visible || thumbnail || !videoUrl) return;
-
-    setLoading(true);
-
-    const video = document.createElement("video");
-    videoRef.current = video;
-    video.crossOrigin = "anonymous";
-    video.preload = "metadata";
-    video.src = videoUrl;
-
-    const generateThumbnail = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth || 320;
-        canvas.height = video.videoHeight || 240;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Cannot get canvas context");
-
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL("image/jpeg", 0.7);
-        setThumbnail(dataURL);
-      } catch (err) {
-        console.warn("Thumbnail generation failed:", err.message);
-      } finally {
-        setLoading(false);
-      }
+    const handleThumbnailClick = () => {
+        if (videoUrl) {
+            window.open(videoUrl, '_blank');
+        }
     };
 
-    const handleLoadedData = () => {
-      try {
-        video.currentTime = Math.min(seekTime, video.duration);
-      } catch (e) {
-        console.warn("Cannot seek video yet", e);
-      }
-    };
-
-    const handleSeeked = () => generateThumbnail();
-
-    video.addEventListener("loadeddata", handleLoadedData);
-    video.addEventListener("seeked", handleSeeked);
-    video.addEventListener("error", (e) => console.warn("Video error:", e));
-
-    return () => {
-      video.removeEventListener("loadeddata", handleLoadedData);
-      video.removeEventListener("seeked", handleSeeked);
-      video.removeEventListener("error", () => {});
-      video.src = "";
-      videoRef.current = null;
-    };
-  }, [visible, videoUrl, seekTime, thumbnail]);
-
-  const handleClick = useCallback(() => {
-    if (onRecordingClick) onRecordingClick();
-    else if (videoUrl) window.open(videoUrl, "_blank");
-  }, [onRecordingClick, videoUrl]);
-
-  return (
-    <div
-      ref={containerRef}
-      onClick={handleClick}
-      className="w-full h-[28vh] cursor-pointer bg-light flex justify-center items-center rounded-lg relative"
-    >
-      {thumbnail ? (
-        <>
-          <img
-            src={thumbnail}
-            alt="Thumbnail"
-            className="rounded-lg w-full h-[28vh] object-cover"
-          />
-          <div className="rounded-lg absolute inset-0 flex justify-center items-center bg-black/25">
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polygon points="10 8 16 12 10 16 10 8" />
-            </svg>
-          </div>
-        </>
-      ) : (
-        <div className="rounded-lg w-full h-full flex justify-center items-center bg-light">
-          {loading ? (
-            <span className="text-gray-500 text-xs">Loading thumbnail...</span>
-          ) : (
-            <div className="flex flex-col items-center text-gray-500">
-              <svg
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="gray"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polygon points="10 8 16 12 10 16 10 8" />
-              </svg>
-              <span className="text-xs mt-2">Loading thumbnail...</span>
-            </div>
-          )}
+    return (
+        <div
+            onClick={onRecordingClick}
+            className='w-full h-44 cursor-pointer bg-light d-flex justify-center align-items-center rounded-lg'
+        >
+            <video
+                ref={videoRef}
+                src={videoUrl}
+                style={{ display: 'none' }}
+                muted
+                playsInline
+            />
+            {image || thumbnail ? (
+                <>
+                    <div className="w-full h-[28vh] relative">
+                        <img src={image || thumbnail} alt="Thumbnail"
+                            className='rounded-lg w-full h-full object-cover'
+                        />
+                        <div className='rounded-lg absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-black bg-opacity-20'>
+                            <svg
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="white"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <circle cx="12" cy="12" r="10" />
+                                <polygon points="10 8 16 12 10 16 10 8" />
+                            </svg>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div className='rounded-lg w-full h-full flex justify-center items-center bg-light'>
+                    <div className="flex flex-col items-center">
+                        <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="gray"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <polygon points="10 8 16 12 10 16 10 8" />
+                        </svg>
+                        <span className="text-gray-500 mt-2">Click to play video</span>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default RecordingThumbnail;
