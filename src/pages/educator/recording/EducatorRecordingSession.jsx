@@ -182,8 +182,8 @@ const EducatorRecordingSession = () => {
           <div class="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10">
             <img
               src={
-                data?.data?.recorder?.thumbnail
-                  ? data?.data?.recorder?.thumbnail
+                data?.data?.recorder?.image
+                  ? data?.data?.recorder?.image
                   : "/media/avatars/300-1.png"
               }
               class="rounded-full border-3 border-success size-[100px] shrink-0 object-cover"
@@ -195,7 +195,7 @@ const EducatorRecordingSession = () => {
               </h6>
             </div>
             <div class="flex flex-wrap justify-center gap-1 lg:gap-4.5 text-sm">
-              <div class="flex gap-1.25 items-center">
+              <div class="flex gap-1.25 items-center">          
                 <i class="ki-filled ki-user text-gray-500 text-sm"></i>
                 <span class="text-gray-600 font-medium">
                   {data?.data?.recorder?.role}

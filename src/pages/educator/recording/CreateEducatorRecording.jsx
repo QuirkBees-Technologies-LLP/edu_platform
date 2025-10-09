@@ -208,10 +208,10 @@ const CreateEducatorRecording = forwardRef(
       }
 
       // Dyntube
-      if (url.includes("dyntube.com/v/")) {
-        let videoId = url.split("dyntube.com/v/")[1].split("?")[0];
+      if (url.includes("dyntube.com/video/")) {
+        let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
         videoId = videoId.replace(/\/$/, "");
-        return `https://player.dyntube.com/iframes/${videoId}`;
+        return `https://player.dyntube.com/video/${videoId}`;
       }
       return url;
     };
