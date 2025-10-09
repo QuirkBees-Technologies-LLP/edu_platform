@@ -214,11 +214,11 @@ export default function FastStartTraining() {
       return `https://www.loom.com/embed/${videoId}`;
     }
     // Dyntube
-    if (url.includes("dyntube.com/v/")) {
-      let videoId = url.split("dyntube.com/v/")[1].split("?")[0];
-      videoId = videoId.replace(/\/$/, "");
-      return `https://player.dyntube.com/iframes/${videoId}`;
-    }
+    if (url.includes("dyntube.com/video/")) {
+        let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
+        videoId = videoId.replace(/\/$/, "");
+        return `https://player.dyntube.com/video/${videoId}`;
+      }
 
     return url;
   };
