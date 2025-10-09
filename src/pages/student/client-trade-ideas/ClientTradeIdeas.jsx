@@ -276,6 +276,9 @@ const ClientTradeIdeas = () => {
                 <div
                   key={trade._id}
                   className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
+                   ref={
+                    index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
+                  }
                 >
                   <div className="relative h-[28vh] w-full">
                     <img
