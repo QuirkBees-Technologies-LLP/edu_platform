@@ -222,7 +222,7 @@ const EducatorRecordingSession = () => {
           <ToolbarActions>
             <div className="text-end pb-4">
               <button className="btn btn-primary" onClick={handleClickOpen}>
-                Create Recording
+                Upload Recording Session
               </button>
             </div>
           </ToolbarActions>
