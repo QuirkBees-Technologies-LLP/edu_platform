@@ -4,6 +4,7 @@ const RecordingThumbnail = ({
   videoUrl,
   seekTime = 1,
   image,
+  defaultImage,
   onRecordingClick,
 }) => {
   const containerRef = useRef(null);
@@ -11,76 +12,80 @@ const RecordingThumbnail = ({
   const [thumbnail, setThumbnail] = useState(image || null);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+    const displayImage = image || defaultImage; 
+
+    console.log(videoUrl, "videoUrl");
+  
 
   
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.disconnect();
-          }
-        });
-      },
-      { rootMargin: "0px 0px 200px 0px" }
-    );
+  // useEffect(() => {
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       entries.forEach((entry) => {
+  //         if (entry.isIntersecting) {
+  //           setVisible(true);
+  //           observer.disconnect();
+  //         }
+  //       });
+  //     },
+  //     { rootMargin: "0px 0px 200px 0px" }
+  //   );
 
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
+  //   if (containerRef.current) observer.observe(containerRef.current);
+  //   return () => observer.disconnect();
+  // }, []);
 
  
-  useEffect(() => {
-    if (!visible || thumbnail || !videoUrl) return;
+  // useEffect(() => {
+  //   if (!visible || thumbnail || !videoUrl) return;
 
-    setLoading(true);
-    const video = document.createElement("video");
-    videoRef.current = video;
-    video.crossOrigin = "anonymous";
-    video.preload = "metadata";
-    video.src = videoUrl;
+  //   setLoading(true);
+  //   const video = document.createElement("video");
+  //   videoRef.current = video;
+  //   video.crossOrigin = "anonymous";
+  //   video.preload = "metadata";
+  //   video.src = videoUrl;
 
-    const generateThumbnail = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth || 320;
-        canvas.height = video.videoHeight || 240;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Cannot get canvas context");
+  //   const generateThumbnail = () => {
+  //     try {
+  //       const canvas = document.createElement("canvas");
+  //       canvas.width = video.videoWidth || 320;
+  //       canvas.height = video.videoHeight || 240;
+  //       const ctx = canvas.getContext("2d");
+  //       if (!ctx) throw new Error("Cannot get canvas context");
 
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL("image/jpeg", 0.7);
-        setThumbnail(dataURL);
-      } catch (err) {
-        console.warn("Thumbnail generation failed:", err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  //       const dataURL = canvas.toDataURL("image/jpeg", 0.7);
+  //       setThumbnail(dataURL);
+  //     } catch (err) {
+  //       console.warn("Thumbnail generation failed:", err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    const handleLoadedData = () => {
-      try {
-        video.currentTime = Math.min(seekTime, video.duration);
-      } catch (e) {
-        console.warn("Cannot seek video yet", e);
-      }
-    };
+  //   const handleLoadedData = () => {
+  //     try {
+  //       video.currentTime = Math.min(seekTime, video.duration);
+  //     } catch (e) {
+  //       console.warn("Cannot seek video yet", e);
+  //     }
+  //   };
 
-    const handleSeeked = () => generateThumbnail();
+  //   const handleSeeked = () => generateThumbnail();
 
-    video.addEventListener("loadeddata", handleLoadedData);
-    video.addEventListener("seeked", handleSeeked);
-    video.addEventListener("error", (e) => console.warn("Video error:", e));
+  //   video.addEventListener("loadeddata", handleLoadedData);
+  //   video.addEventListener("seeked", handleSeeked);
+  //   video.addEventListener("error", (e) => console.warn("Video error:", e));
 
-    return () => {
-      video.removeEventListener("loadeddata", handleLoadedData);
-      video.removeEventListener("seeked", handleSeeked);
-      video.removeEventListener("error", () => {});
-      video.src = "";
-      videoRef.current = null;
-    };
-  }, [visible, videoUrl, seekTime, thumbnail]);
+  //   return () => {
+  //     video.removeEventListener("loadeddata", handleLoadedData);
+  //     video.removeEventListener("seeked", handleSeeked);
+  //     video.removeEventListener("error", () => {});
+  //     video.src = "";
+  //     videoRef.current = null;
+  //   };
+  // }, [visible, videoUrl, seekTime, thumbnail]);
 
   const handleClick = useCallback(() => {
     if (onRecordingClick) onRecordingClick();
@@ -93,10 +98,10 @@ const RecordingThumbnail = ({
       onClick={handleClick}
       className="w-full h-[28vh] cursor-pointer bg-light flex justify-center items-center rounded-lg relative overflow-hidden"
     >
-      {thumbnail ? (
+      {displayImage ? (
         <>
           <img
-            src={thumbnail}
+            src={displayImage}
             alt="Thumbnail"
             className="rounded-lg w-full h-[28vh] object-cover"
           />

@@ -319,6 +319,7 @@ const EducatorRecordingSession = () => {
                         videoUrl={item?.url}
                         seekTime={2}
                         image={item?.thumbnail}
+                         defaultImage={data?.data?.recorder?.bannerImage}
                         onRecordingClick={() => handleOpen(item?.url)}
                         data={recording}
                       />
