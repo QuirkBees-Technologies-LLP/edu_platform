@@ -95,12 +95,11 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
             embedUrl ? (
               // 🎬 Iframe-based embed player
               <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-                <iframe
+                 <iframe
                   src={embedUrl}
-                  frameBorder="0"
-                  allow="autoplay; fullscreen; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="w-full h-full"
+                  className="w-full aspect-video border rounded-md"
                 ></iframe>
               </div>
             ) : (
