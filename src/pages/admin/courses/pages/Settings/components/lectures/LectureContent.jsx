@@ -48,11 +48,13 @@ const LectureContent = ({
   const [videoURL, setVideoURL] = useState(null);
   const [showPreviewVideo, setShowPreviewVideo] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [videoInputType, setVideoInputType] = useState("");
+  const [videoInputType, setVideoInputType] = useState("url");
   const [lectureContent, setLectureContent] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
 
   console.log("videoInputType=============>", videoInputType);
+
+  console.log("lecture",lecture)
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
     description: lecture?.description || "",
@@ -64,7 +66,8 @@ const LectureContent = ({
       typeof lecture?.section === "object"
         ? lecture?.section?._id
         : lecture?.section,
-    thumbnail: lecture?.thumbnail || null,
+    thumbnail: lecture?.thumbnailUrl || null,
+    videoUrl: lecture?.videoUrl || null,
   });
 
   useEffect(() => {
@@ -85,7 +88,7 @@ const LectureContent = ({
     if (lecture.type === "VIDEO") {
       if (lecture.content && isValidVideoUrl(lecture.content)) {
         setVideoInputType("url");
-      } else if (lecture.videoFile || lecture.thumbnail) {
+      } else if (lecture.videoUrl || lecture.thumbnailUrl) {
         setVideoInputType("upload");
       } else {
         setVideoInputType("");
@@ -108,7 +111,7 @@ const LectureContent = ({
         order: lecture.order || 0,
         preview: lecture.preview || false,
         section: sectionId || "",
-        thumbnail: lecture?.thumbnail || null,
+        thumbnail: lecture?.thumbnailUrl || null,
       });
 
       // setShowPreview(false);
@@ -172,7 +175,7 @@ const LectureContent = ({
   const isValidVideoUrl = (url) => {
     if (!url) return false;
 
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    if (url.includes("youtube.com") || url.includes("youtu.be")||url.includes("dyntube.com")) {
       return true;
     }
 
@@ -440,7 +443,7 @@ const LectureContent = ({
             </div> */}
 
             <Select
-              value={videoInputType || ""}
+              value={videoInputType }
               onValueChange={(value) => {
                 setVideoInputType(value);
                 setFormData({ ...formData, content: "" });
@@ -451,7 +454,7 @@ const LectureContent = ({
               }}
             >
               <SelectTrigger className="border-primary focus:border-primary focus:ring-primary">
-                <SelectValue placeholder="Select type" />
+                <SelectValue defaultValue="url" placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="url">
@@ -777,8 +780,8 @@ const LectureContent = ({
     if (formData.type === "VIDEO") {
       if (isValidVideoUrl(formData.content)) {
         setVideoInputType("url");
-      } else if (formData.thumbnail || videoFile) {
-        setVideoInputType("upload");
+      } else if (formData.thumbnail || formData.videoUrl ) {
+        setVideoInputType("upload"); 
       } else {
         setVideoInputType(""); 
       }
