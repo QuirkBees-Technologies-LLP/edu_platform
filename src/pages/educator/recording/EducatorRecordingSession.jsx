@@ -8,14 +8,14 @@ import {
 } from "@/partials/toolbar";
 
 import { Calendar, CirclePlay, Clock3, Timer, Videotape } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useSettings } from "@/providers";
 import { toAbsoluteUrl } from "@/utils";
 import Spinner from "@/components/common/LoadingSpinner"; // Optional loader component
 import { it } from "@faker-js/faker";
 import VideoPlayerModal from "./VideoPlayerModal";
-import { useGetEducatorRecordingDataQuery } from "../../../store/api/educator/educatorRecordingApiSlice";
+import { useLazyGetEducatorRecordingQuery } from "../../../store/api/educator/educatorRecordingApiSlice";
 import VideoThumbnail from "../live-session/VideoThumbnail";
 import RecordingThumbnail from "../../student/iq-educators/RecordingThumbnail";
 import {
@@ -35,35 +35,90 @@ import UpdateEducatorRecording from "./UpdateEducatorRecording";
 import { set } from "date-fns";
 
 const EducatorRecordingSession = () => {
-  const { data, isFetching, isError, error, refetch } =
-    useGetEducatorRecordingDataQuery();
   const [showAllTags, setShowAllTags] = useState({});
   const [recording, setRecording] = useState(null);
   const [open, setOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [updateDeleteRecording, setUpdateDeleteRecording] = useState(null); // state to hold selected recording for edit/delete
+  const [updateDeleteRecording, setUpdateDeleteRecording] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
+
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   console.log("updateDeleteRecording: ", updateDeleteRecording);
   const { getThemeMode } = useSettings();
+  const observer = useRef();
 
-  if (isFetching) {
-    return (
-      <div className="flex justify-center py-20">
-        <Spinner />
-      </div>
-    );
-  }
+  const [trigger, { data, isFetching, isError, error }] =
+    useLazyGetEducatorRecordingQuery();
+  const [recordingList, setRecordingList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
-  if (isError) {
-    return (
-      <div className="text-red-500 text-center py-10">
-        Error loading recordings: {error?.message || "Something went wrong"}
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await trigger({ page, limit }).unwrap();
+
+        const newData = Array.isArray(res?.data?.recordings)
+          ? res.data.recordings
+          : [];
+
+        setTotalPages(res?.data?.pagination?.totalPages || 1);
+
+        setRecordingList((prev) => {
+          if (page === 1) return newData;
+          const unique = newData.filter(
+            (item) => !prev.some((p) => p._id === item._id)
+          );
+          return [...prev, ...unique];
+        });
+      } catch (err) {
+        console.error("Error fetching recordings:", err);
+      }
+    };
+
+    fetchData();
+  }, [page, data]);
+
+  useEffect(() => {
+    if (!isUpdateOpen && !isDeleteOpen && !isCreateOpen) {
+      setPage(1);
+      setRecordingList([]);
+      trigger({ page: 1, limit }).unwrap().catch(console.error);
+    }
+  }, [isUpdateOpen, isDeleteOpen, isCreateOpen]);
+
+  const lastRecordingRef = useCallback(
+    (node) => {
+      if (isFetching) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          const first = entries[0];
+          if (first.isIntersecting && page < totalPages && !isFetching) {
+            setPage((prev) => prev + 1);
+          }
+        },
+        { threshold: 0.5 }
+      );
+
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, page, totalPages]
+  );
+  useEffect(() => {
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   setPage(1);
+  //   setRecordingList([]);
+  // }, [filterOptions]);
 
   // if (data?.data?.recordings?.length === 0) {
   //   return (
@@ -98,74 +153,68 @@ const EducatorRecordingSession = () => {
   };
 
   const handleOpen = (url) => {
-    console.log(url, "urls");
-
     setVideoUrl(url);
     setOpen(true);
   };
 
-  const handleDeleteOpen = () => {
-    setIsDeleteOpen(true);
+
+  const handleActionClick = (item) => {
+    setUpdateDeleteRecording(item);
   };
 
+  const handleDeleteOpen = () => setIsDeleteOpen(true);
   const handleDeleteClose = () => {
     setIsDeleteOpen(false);
     setSelectedRow(null);
   };
-  const handleActionClick = (item) => {
-    setUpdateDeleteRecording(item);
-    // selected recording ko state me store kar lo
-  };
 
-  const handleCloseCreate = () => {
-    setIsDeleteOpen(false);
-    setIsCreateOpen(false);
-  };
+  const handleUpdateOpen = () => setIsUpdateOpen(true);
   const handleCloseUpdate = () => {
-    setIsDeleteOpen(false);
     setIsUpdateOpen(false);
     setSelectedRow(null);
   };
 
-  const handleUpdateOpen = () => {
-    setIsUpdateOpen(true);
-  }
-  const ActionMenu = (item) => {
+  const handleClickOpen = () => setIsCreateOpen(true);
+  const handleCloseCreate = () => setIsCreateOpen(false);
+  const ActionMenu = (item) => (
+    <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
+      <MenuItem
+        onClick={() => {
+          handleActionClick(item);
+          handleUpdateOpen();
+        }}
+      >
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="notepad-edit" />
+          </MenuIcon>
+          <MenuTitle>Update</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          handleActionClick(item);
+          handleDeleteOpen();
+        }}
+      >
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="trash" />
+          </MenuIcon>
+          <MenuTitle>Delete</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+    </MenuSub>
+  );
+
+
+  if (isError) {
     return (
-      <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem
-          onClick={() => {
-            console.log("ittttem", item);
-            handleActionClick(item); // store selected recording
-            handleUpdateOpen(); // edit modal open
-          }}
-        >
-          <MenuLink>
-            <MenuIcon>
-              <KeenIcon icon="notepad-edit" />
-            </MenuIcon>
-            <MenuTitle>update</MenuTitle>
-          </MenuLink>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleActionClick(item); // store selected recording
-            handleDeleteOpen(); // delete modal open
-          }}
-        >
-          <MenuLink>
-            <MenuIcon>
-              <KeenIcon icon="trash" />
-            </MenuIcon>
-            <MenuTitle>Delete</MenuTitle>
-          </MenuLink>
-        </MenuItem>
-      </MenuSub>
+      <div className="text-red-500 text-center py-10">
+        Error loading recordings: {error?.message || "Something went wrong"}
+      </div>
     );
-  };
-  const handleClickOpen = () => {
-    setIsCreateOpen(true);
-  };
+  }
 
   return (
     <div>
@@ -195,7 +244,7 @@ const EducatorRecordingSession = () => {
               </h6>
             </div>
             <div class="flex flex-wrap justify-center gap-1 lg:gap-4.5 text-sm">
-              <div class="flex gap-1.25 items-center">          
+              <div class="flex gap-1.25 items-center">
                 <i class="ki-filled ki-user text-gray-500 text-sm"></i>
                 <span class="text-gray-600 font-medium">
                   {data?.data?.recorder?.role}
@@ -214,7 +263,7 @@ const EducatorRecordingSession = () => {
             </div>
           </div>
         </div>
-        
+
         <Toolbar>
           <ToolbarHeading>
             <ToolbarPageTitle text="Recorded Academy" />
@@ -227,48 +276,53 @@ const EducatorRecordingSession = () => {
             </div>
           </ToolbarActions>
         </Toolbar>
-         {/* ✅ CONDITIONAL GRID OR EMPTY STATE */}
-      {data?.data?.recordings?.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-24 text-center">
-          <Videotape size={32} className="text-gray-500" />
-          <h3 className="text-lg font-medium text-gray-700">
-            No recordings available
-          </h3>
-          {/* <button
+        {/* ✅ CONDITIONAL GRID OR EMPTY STATE */}
+        {recordingList.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-24 text-center">
+            <Videotape size={32} className="text-gray-500" />
+            <h3 className="text-lg font-medium text-gray-700">
+              No recordings available
+            </h3>
+            {/* <button
             onClick={() => setIsCreateOpen(true)}
             className="btn btn-primary mt-4"
           >
             Create Recording
           </button> */}
-        </div>
-      ) : (
-         <div className="grid grid-cols-12 gap-4">
-          {data?.data?.recordings.map((item, index) => {
-            const showTags = showAllTags[index] || false;
-            const visibleTags = showTags
-              ? item.call_tags
-              : item.call_tags.slice(0, 3);
-            const remainingCount = item.call_tags.length - 3;
+          </div>
+        ) : (
+          <div className="grid grid-cols-12 gap-4">
+            {recordingList?.map((item, index) => {
+              const showTags = showAllTags[index] || false;
+              const visibleTags = showTags
+                ? item.call_tags
+                : item.call_tags.slice(0, 3);
+              const remainingCount = item.call_tags.length - 3;
 
-            return (
-              <div
-                className="recorded_card col-span-12 sm:col-span-6 xl:col-span-4"
-                key={index}
-              >
-                <div className="card">
-                  {/* Image with Play Button */}
-                  <div
-                    className="relative w-full h-52 rounded-2xl overflow-hidden"
-                    onClick={() => setRecording(item)}
-                  >
-                    <RecordingThumbnail
-                      videoUrl={item?.url}
-                      seekTime={2}
-                      image={item?.thumbnail}
-                      onRecordingClick={() => handleOpen(item?.url)}
-                      data={recording}
-                    />
-                    {/* <img
+              return (
+                <div
+                  className="recorded_card col-span-12 sm:col-span-6 xl:col-span-4"
+                  key={index}
+                  ref={
+                    index === recordingList?.length - 1
+                      ? lastRecordingRef
+                      : null
+                  }
+                >
+                  <div className="card">
+                    {/* Image with Play Button */}
+                    <div
+                      className="relative w-full h-52 rounded-2xl overflow-hidden"
+                      onClick={() => setRecording(item)}
+                    >
+                      <RecordingThumbnail
+                        videoUrl={item?.url}
+                        seekTime={2}
+                        image={item?.thumbnail}
+                        onRecordingClick={() => handleOpen(item?.url)}
+                        data={recording}
+                      />
+                      {/* <img
                       className="w-full h-full object-cover"
                       src="/media/images/600x400/1.jpg"
                       alt=""
@@ -283,88 +337,91 @@ const EducatorRecordingSession = () => {
                         <CirclePlay size={60} className="text-white" />
                       </button>
                     </div> */}
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="card-body p-4 rounded-2xl">
-                    <div className="flex justify-between">
-                      <div className="recorded_details">
-                        <h6 className="text-xl font-medium text-gray-900 mb-1">
-                          {item?.call_title}
-                        </h6>
-
-                        <p
-                          className="text-2sm text-gray-900 dark:text-gray-900 mb-3"
-                          dangerouslySetInnerHTML={{
-                            __html: item?.call_description || "",
-                          }}
-                        ></p>
-
-                        {/* Badge List */}
-                        <div className="flex gap-2 flex-wrap">
-                          {item?.call_tags.map((badge, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium badge-primary badge-outline"
-                            >
-                              {badge}
-                            </span>
-                          ))}
-
-                          {/* Show More / Show Less Toggle */}
-                          {item?.call_tags.length > 2 && (
-                            <button
-                              onClick={() => toggleTags(index)}
-                              className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-gray-200 text-gray-700"
-                            >
-                              {showTags
-                                ? "Show Less"
-                                : `+${remainingCount} more`}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="ml-2">
-                        <Menu className="items-stretch">
-                          <MenuItem
-                            toggle="dropdown"
-                            trigger="click"
-                            placement="bottom-end"
-                            className="p-0"
-                          >
-                            <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-                              <KeenIcon icon="dots-vertical" />
-                            </MenuToggle>
-                            {ActionMenu(item)}
-                          </MenuItem>
-                        </Menu>
-                      </div>
                     </div>
 
-                    {/* Footer */}
-                    <div className="card-footer justify-between pt-4 p-0 mt-4">
-                      <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                        <Calendar size={16} />{" "}
-                        {new Date(item?.start_time).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                        <Clock3 size={18} />{" "}
-                        {new Date(item?.start_time).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </p>
+                    {/* Card Body */}
+                    <div className="card-body p-4 rounded-2xl">
+                      <div className="flex justify-between">
+                        <div className="recorded_details">
+                          <h6 className="text-xl font-medium text-gray-900 mb-1">
+                            {item?.call_title}
+                          </h6>
+
+                          <p
+                            className="text-2sm text-gray-900 dark:text-gray-900 mb-3"
+                            dangerouslySetInnerHTML={{
+                              __html: item?.call_description || "",
+                            }}
+                          ></p>
+
+                          {/* Badge List */}
+                          <div className="flex gap-2 flex-wrap">
+                            {item?.call_tags.map((badge, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium badge-primary badge-outline"
+                              >
+                                {badge}
+                              </span>
+                            ))}
+
+                            {/* Show More / Show Less Toggle */}
+                            {item?.call_tags.length > 2 && (
+                              <button
+                                onClick={() => toggleTags(index)}
+                                className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-gray-200 text-gray-700"
+                              >
+                                {showTags
+                                  ? "Show Less"
+                                  : `+${remainingCount} more`}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-2">
+                          <Menu className="items-stretch">
+                            <MenuItem
+                              toggle="dropdown"
+                              trigger="click"
+                              placement="bottom-end"
+                              className="p-0"
+                            >
+                              <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+                                <KeenIcon icon="dots-vertical" />
+                              </MenuToggle>
+                              {ActionMenu(item)}
+                            </MenuItem>
+                          </Menu>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="card-footer justify-between pt-4 p-0 mt-4">
+                        <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                          <Calendar size={16} />{" "}
+                          {new Date(item?.start_time).toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                          <Clock3 size={18} />{" "}
+                          {new Date(item?.start_time).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-       
+              );
+            })}
+          </div>
+        )}
+        {isFetching && page > 1 && (
+          <div className="flex justify-center py-8 text-gray-500">
+            <Spinner />
+          </div>
+        )}
       </Container>
       <VideoPlayerModal
         open={open}
@@ -374,7 +431,7 @@ const EducatorRecordingSession = () => {
       />
       {isDeleteOpen && (
         <DeleteEducatorRecording
-          refetch={() => refetch()}
+          refetch={trigger}
           onClose={handleDeleteClose}
           isDeleteOpen={isDeleteOpen}
           handleDeleteClose={handleDeleteClose}
@@ -387,18 +444,18 @@ const EducatorRecordingSession = () => {
           handleCloseCreate={handleCloseCreate}
           isCreateOpen={isCreateOpen}
           setIsCreateOpen={setIsCreateOpen}
-          refetch={() => refetch()}
+          refetch={trigger}
           // selectedRow={updateDeleteRecording}
         />
       )}
       {isUpdateOpen && (
         <UpdateEducatorRecording
-           setSelectedRow={setSelectedRow}
+          setSelectedRow={setSelectedRow}
           handleCloseUpdate={handleCloseUpdate}
           isUpdateOpen={isUpdateOpen}
           setIsUpdateOpen={setIsUpdateOpen}
-          refetch={() => refetch()}
-           selectedRow={updateDeleteRecording}
+          refetch={trigger}
+          selectedRow={updateDeleteRecording}
         />
       )}
     </div>

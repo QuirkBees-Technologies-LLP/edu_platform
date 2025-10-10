@@ -12,7 +12,7 @@ export const adminRecordingApiSlice = createApi({
             query: (id) => `/admin/recording?call_id=${id}`,
         }),
         getAdminRecordingByUserID: builder.query({
-            query: (id) => `/admin/recording?user_id=${id}`,
+            query: ({user_id , page = 1, limit = 10}) => `/admin/recording?user_id=${user_id}&page=${page}&limit=${limit}`,
         }),
         saveAdminRecording: builder.mutation({
             query: (data) => ({
