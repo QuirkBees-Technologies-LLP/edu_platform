@@ -7,7 +7,7 @@ import {
   ToolbarPageTitle,
 } from "@/partials/toolbar";
 import { Calendar, CirclePlay, Clock3, Timer, Videotape } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useSettings } from "@/providers";
 import { toAbsoluteUrl } from "@/utils";
@@ -46,43 +46,84 @@ const AdminRecordingSession = () => {
 
   const { id } = useParams(); // get user_id from URL
 
+  const observer = useRef();
+
+  const [recordingList, setRecordingList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
+
+  /** Fetch recordings from API */
+  const fetchRecordings = useCallback(
+    async (currentPage = 1) => {
+      if (!id) return;
+      try {
+        const res = await trigger({
+          user_id: id,
+          page: currentPage,
+          limit,
+        }).unwrap();
+        const newData = Array.isArray(res?.data?.[0]?.recordings)
+          ? res.data[0].recordings
+          : [];
+        setTotalPages(res?.data?.[0]?.pagination?.totalPages || 1);
+
+        setRecordingList((prev) => {
+          if (currentPage === 1) return newData;
+          const unique = newData.filter(
+            (item) => !prev.some((p) => p._id === item._id)
+          );
+          return [...prev, ...unique];
+        });
+      } catch (err) {
+        console.error("Error fetching recordings:", err);
+      }
+    },
+    [id, trigger]
+  );
+
   useEffect(() => {
-    if (id) {
-      const user_id = id;
-      trigger(user_id); // trigger API call manually
+    setPage(1);
+    setRecordingList([]);
+    fetchRecordings(1);
+  }, [id, fetchRecordings]);
+  useEffect(() => {
+    if (!isDeleteOpen && !isCreateOpen) {
+      setPage(1);
+      setRecordingList([]);
+      fetchRecordings(1);
     }
-  }, [id, trigger]);
+  }, [isDeleteOpen, isCreateOpen]);
 
-  if (isFetching) {
-    return (
-      <div className="flex justify-center py-20">
-        <Spinner />
-      </div>
-    );
-  }
+  const lastRecordingRef = useCallback(
+    (node) => {
+      if (isFetching) return;
+      if (observer.current) observer.current.disconnect();
 
-  if (isError) {
-    return (
-      <div className="text-red-500 text-center py-10">
-        Error loading recordings: {error?.message || "Something went wrong"}
-      </div>
-    );
-  }
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          const first = entries[0];
+          if (first.isIntersecting && page < totalPages && !isFetching) {
+            setPage((prev) => prev + 1);
+          }
+        },
+        { threshold: 0.5 }
+      );
 
-  if (data?.data?.[0]?.recordings?.length === 0) {
-    return (
-      <Container className="pb-10">
-        <div className="card w-full h-100 items-center justify-center">
-          <div className="text-center flex items-center gap-3 flex-col py-24">
-            <Videotape size={30} />
-            <h3 className="text-xl font-medium text-gray-700">
-              No Recording available
-            </h3>
-          </div>
-        </div>
-      </Container>
-    );
-  }
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, page, totalPages]
+  );
+
+  useEffect(() => {
+    if (page > 1) fetchRecordings(page);
+  }, [page, fetchRecordings]);
+
+  useEffect(() => {
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, []);
 
   const toggleTags = (index) => {
     setShowAllTags((prev) => ({
@@ -154,6 +195,13 @@ const AdminRecordingSession = () => {
     );
   };
 
+  if (isError)
+    return (
+      <div className="text-red-500 text-center py-10">
+        Error loading recordings: {error?.message || "Something went wrong"}
+      </div>
+    );
+
   return (
     <div>
       <Container className="pb-10">
@@ -206,117 +254,144 @@ const AdminRecordingSession = () => {
             <ToolbarPageTitle text="Recorded Academy" />
           </ToolbarHeading>
         </Toolbar>
-        <div className="grid grid-cols-12 gap-4">
-          {data?.data?.[0]?.recordings.map((item, index) => {
-            const showTags = showAllTags[index] || false;
-            const visibleTags = showTags
-              ? item.call_tags
-              : item.call_tags.slice(0, 3);
-            const remainingCount = item.call_tags.length - 3;
 
-            return (
-              <div
-                className="recorded_card col-span-12 sm:col-span-6 xl:col-span-4"
-                key={index}
-              >
-                <div className="card">
-                  {/* Image with Play Button */}
-                  <div
-                    className="relative w-full h-52 rounded-2xl overflow-hidden"
-                    onClick={() => setRecording(item)}
-                  >
-                    {/* <img className="w-full h-full object-cover" src="/media/images/600x400/1.jpg" alt="" />
+        {recordingList.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-24 text-center">
+            <Videotape size={32} className="text-gray-500" />
+            <h3 className="text-lg font-medium text-gray-700">
+              No recordings available
+            </h3>
+            {/* <button
+                      onClick={() => setIsCreateOpen(true)}
+                      className="btn btn-primary mt-4"
+                    >
+                      Create Recording
+                    </button> */}
+          </div>
+        ) : (
+          <div className="grid grid-cols-12 gap-4">
+            {recordingList.map((item, index) => {
+              const showTags = showAllTags[index] || false;
+              const visibleTags = showTags
+                ? item.call_tags
+                : item.call_tags.slice(0, 3);
+              const remainingCount = item.call_tags.length - 3;
+
+              return (
+                <div
+                  className="recorded_card col-span-12 sm:col-span-6 xl:col-span-4"
+                  key={index}
+                  ref={
+                    index === recordingList?.length - 1
+                      ? lastRecordingRef
+                      : null
+                  }
+                >
+                  <div className="card">
+                    {/* Image with Play Button */}
+                    <div
+                      className="relative w-full h-52 rounded-2xl overflow-hidden"
+                      onClick={() => setRecording(item)}
+                    >
+                      {/* <img className="w-full h-full object-cover" src="/media/images/600x400/1.jpg" alt="" />
                                         <div className="absolute inset-0 bg-black/50" />
                                         <div className="absolute inset-0 flex items-center justify-center">
                                             <button type="button" className="btn btn-icon btn-circle btn-lg" onClick={() => handleOpen(item?.url)}>
                                                 <CirclePlay size={60} className="text-white" />
                                             </button>
                                         </div> */}
-                    <RecordingThumbnail
-                      videoUrl={item?.url}
-                      image={item?.thumbnail}
-                      seekTime={2}
-                      onRecordingClick={() => handleOpen(item?.url)}
-                    />
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="card-body p-4 rounded-2xl">
-                    <div className="flex justify-between">
-                      <div className="recorded_details">
-                        <h6 className="text-xl font-medium text-gray-900 mb-1">
-                          {item?.call_title}
-                        </h6>
-
-                        <p
-                          className="text-2sm text-gray-900 dark:text-gray-900 mb-3"
-                          dangerouslySetInnerHTML={{
-                            __html: item?.call_description || "",
-                          }}
-                        ></p>
-
-                        {/* Badge List */}
-                        <div className="flex gap-2 flex-wrap">
-                          {item?.call_tags.map((badge, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium badge-primary badge-outline"
-                            >
-                              {badge}
-                            </span>
-                          ))}
-
-                          {/* Show More / Show Less Toggle */}
-                          {item?.call_tags.length > 2 && (
-                            <button
-                              onClick={() => toggleTags(index)}
-                              className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-gray-200 text-gray-700"
-                            >
-                              {showTags
-                                ? "Show Less"
-                                : `+${remainingCount} more`}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="ml-2">
-                        <Menu className="items-stretch">
-                          <MenuItem
-                            toggle="dropdown"
-                            trigger="click"
-                            placement="bottom-end"
-                            className="p-0"
-                          >
-                            <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-                              <KeenIcon icon="dots-vertical" />
-                            </MenuToggle>
-                            {ActionMenu(item)}
-                          </MenuItem>
-                        </Menu>
-                      </div>
+                      <RecordingThumbnail
+                        videoUrl={item?.url}
+                        image={item?.thumbnail}
+                        seekTime={2}
+                        onRecordingClick={() => handleOpen(item?.url)}
+                      />
                     </div>
 
-                    {/* Footer */}
-                    <div className="card-footer justify-between pt-4 p-0 mt-4">
-                      <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                        <Calendar size={16} />{" "}
-                        {new Date(item?.start_time).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                        <Clock3 size={18} />{" "}
-                        {new Date(item?.start_time).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </p>
+                    {/* Card Body */}
+                    <div className="card-body p-4 rounded-2xl">
+                      <div className="flex justify-between">
+                        <div className="recorded_details">
+                          <h6 className="text-xl font-medium text-gray-900 mb-1">
+                            {item?.call_title}
+                          </h6>
+
+                          <p
+                            className="text-2sm text-gray-900 dark:text-gray-900 mb-3"
+                            dangerouslySetInnerHTML={{
+                              __html: item?.call_description || "",
+                            }}
+                          ></p>
+
+                          {/* Badge List */}
+                          <div className="flex gap-2 flex-wrap">
+                            {item?.call_tags.map((badge, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium badge-primary badge-outline"
+                              >
+                                {badge}
+                              </span>
+                            ))}
+
+                            {/* Show More / Show Less Toggle */}
+                            {item?.call_tags.length > 2 && (
+                              <button
+                                onClick={() => toggleTags(index)}
+                                className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-gray-200 text-gray-700"
+                              >
+                                {showTags
+                                  ? "Show Less"
+                                  : `+${remainingCount} more`}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-2">
+                          <Menu className="items-stretch">
+                            <MenuItem
+                              toggle="dropdown"
+                              trigger="click"
+                              placement="bottom-end"
+                              className="p-0"
+                            >
+                              <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+                                <KeenIcon icon="dots-vertical" />
+                              </MenuToggle>
+                              {ActionMenu(item)}
+                            </MenuItem>
+                          </Menu>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="card-footer justify-between pt-4 p-0 mt-4">
+                        <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                          <Calendar size={16} />{" "}
+                          {new Date(item?.start_time).toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                          <Clock3 size={18} />{" "}
+                          {new Date(item?.start_time).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
+
+        {isFetching && page > 1 && (
+          <div className="flex justify-center py-8 text-gray-500">
+            <Spinner />
+          </div>
+        )}
       </Container>
       <VideoPlayerModal
         data={recording}
