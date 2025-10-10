@@ -303,6 +303,7 @@ const AdminRecordingSession = () => {
                       <RecordingThumbnail
                         videoUrl={item?.url}
                         image={item?.thumbnail}
+                        defaultImage={data?.data?.[0]?.recorder.bannerImage}
                         seekTime={2}
                         onRecordingClick={() => handleOpen(item?.url)}
                       />

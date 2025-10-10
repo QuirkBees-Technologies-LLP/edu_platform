@@ -27,6 +27,7 @@ import "yet-another-react-lightbox/styles.css";
 const IqEducators = () => {
   const navigate = useNavigate();
   const { auth } = useAuthContext();
+  // console.log("auth", auth);
 
   console.log(auth);
   const userName = auth?.user?.name;
@@ -1123,6 +1124,7 @@ const IqEducators = () => {
                             videoUrl={course?.url}
                             seekTime={2}
                             image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
                             onRecordingClick={() => handleOpen(course?.url)}
                           />
                         </div>
@@ -1152,6 +1154,7 @@ const IqEducators = () => {
                             videoUrl={course?.url}
                             seekTime={2}
                             image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
                             onRecordingClick={() => handleOpen(course?.url)}
                           />
                         </div>
