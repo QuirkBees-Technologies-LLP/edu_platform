@@ -89,14 +89,14 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
           />
         </DialogHeader>
 
-        <div className="mt-2">
+        {/* <div className="mt-2">
           <iframe
             src={getEmbedUrl(formik.values.videoUrl)}
             className="w-full aspect-video border rounded-md"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-        </div>
+        </div> */}
 
         <div className="p-4">
           {open &&
