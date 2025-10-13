@@ -132,6 +132,25 @@ const getEmbedUrl = (url) => {
 
   // CASE 4: fallback generic
   if (url.includes("dyntube.com/")) return url;
+     // Dyntube
+  // const dyntubePatterns = [
+  //   /app\.dyntube\.com\/#\/video\/([^/?#]+)/,
+  //   /videos\.dyntube\.com\/iframes\/([^/?#]+)/,
+  //   /player\.dyntube\.com\/video\/([^/?#]+)/
+  // ];
+
+  // for (const pattern of dyntubePatterns) {
+  //   const match = url.match(pattern);
+  //   if (match?.[1]) {
+  //     // Determine correct embed domain
+  //     if (pattern.source.includes("iframes"))
+  //       return `https://videos.dyntube.com/iframes/${match[1]}`;
+  //     return `https://player.dyntube.com/video/${match[1]}`;
+  //   }
+  // }
+
+  // Fallback: any other dyntube URL
+  if (url.includes("dyntube.com/")) return url;
 
   return null; // not an embed URL
 };
