@@ -278,6 +278,39 @@ const LectureContent = ({
   const handleSubmit = async (e) => {
     console.log(videoFile, "videoFile");
     e.preventDefault();
+
+    if (!formData.title?.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    if (!formData.description?.trim()) {
+      toast.error("Description is required");
+      return;
+    }
+
+    if (formData.type === "VIDEO" && !formData.thumbnail) {
+      toast.error("Thumbnail is required for video lectures");
+      return;
+    }
+
+    if (
+      formData.type === "VIDEO" &&
+      videoInputType === "url" &&
+      !formData.content
+    ) {
+      toast.error("Video URL is required");
+      return;
+    }
+
+    if (
+      formData.type === "VIDEO" &&
+      videoInputType === "upload" &&
+      !videoFile
+    ) {
+      toast.error("Video file is required");
+      return;
+    }
+
     if (!auth?.token || !lecture?._id) return;
 
     const dataToSend = new FormData();
@@ -333,9 +366,14 @@ const LectureContent = ({
       clearInterval(interval);
       setIsLoading(false);
       setUploadProgress(0);
-      toast.error(
-        "Failed to update lecture: " + (error.message || "Unknown error")
-      );
+      console.error("Failed to update lecture:", error);
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Unknown error";
+
+      toast.error("Failed to update lecture: " + backendMessage);
     } finally {
       setIsLoading(false);
     }
