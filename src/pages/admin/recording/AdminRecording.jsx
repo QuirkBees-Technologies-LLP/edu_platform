@@ -1,31 +1,49 @@
 /* eslint-disable prettier/prettier */
-import * as React from 'react';
-import { useMemo, useState } from 'react';
-import { useLanguage } from '@/i18n';
-import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle } from '@/components';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
-import { MenuIcon, MenuLink, MenuSub, MenuTitle } from '@/components';
-import { TruncatedText } from '../../../lib/utils';
-import { useLazyGetEducatorsQuery } from '../../../store/api/admin/adminEducatorsApiSlice';
-import { toAbsoluteUrl } from '@/utils/Assets';
-import { Create } from '@mui/icons-material';
-import DeleteAdminRecording from './DeleteAdminRecording';
-import CreateAdminRecording from './CreateAdminRecording';
-import { useLazyGetAdminRecordingQuery } from '../../../store/api/admin/adminRecordingApiSlice';
-import { PlayCircle } from 'lucide-react';
-import ShowMoreLess from '../../../components/ui/showmoreless';
-import EducatorViseRecording from './EducatorViseRecording';
-import { useEffect } from 'react';
-
+import * as React from "react";
+import { useMemo, useState } from "react";
+import { useLanguage } from "@/i18n";
+import {
+  DataGrid,
+  DataGridColumnHeader,
+  DataGridColumnVisibility,
+  KeenIcon,
+  useDataGrid,
+  Menu,
+  MenuItem,
+  MenuToggle,
+} from "@/components";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import {
+  Toolbar,
+  ToolbarActions,
+  ToolbarDescription,
+  ToolbarHeading,
+  ToolbarPageTitle,
+} from "@/partials/toolbar";
+import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
+import { TruncatedText } from "../../../lib/utils";
+import { useLazyGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import { toAbsoluteUrl } from "@/utils/Assets";
+import { Create } from "@mui/icons-material";
+import DeleteAdminRecording from "./DeleteAdminRecording";
+import CreateAdminRecording from "./CreateAdminRecording";
+import { useLazyGetAdminRecordingQuery } from "../../../store/api/admin/adminRecordingApiSlice";
+import { PlayCircle } from "lucide-react";
+import ShowMoreLess from "../../../components/ui/showmoreless";
+import EducatorViseRecording from "./EducatorViseRecording";
+import { useEffect } from "react";
+import CreateManualAdminRecording from "./CreateManualAdminRecording";
 
 const AdminRecording = ({ title = "Recorded Academy" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getEducators, { data, isLoading, refetch, error, isError, isFetching }] = useLazyGetAdminRecordingQuery();
+  const [
+    getEducators,
+    { data, isLoading, refetch, error, isError, isFetching },
+  ] = useLazyGetAdminRecordingQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -37,16 +55,19 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
 
   const handleDeleteClose = () => {
     setIsDeleteOpen(false);
-  }
+  };
 
-  const {
-    isRTL
-  } = useLanguage();
-  const storageFilterId = 'members-filter';
-  const ColumnInputFilter = ({
-    column
-  }) => {
-    return <Input placeholder="Filter..." value={column.getFilterValue() ?? ''} onChange={event => column.setFilterValue(event.target.value)} className="h-9 w-full max-w-40" />;
+  const { isRTL } = useLanguage();
+  const storageFilterId = "members-filter";
+  const ColumnInputFilter = ({ column }) => {
+    return (
+      <Input
+        placeholder="Filter..."
+        value={column.getFilterValue() ?? ""}
+        onChange={(event) => column.setFilterValue(event.target.value)}
+        className="h-9 w-full max-w-40"
+      />
+    );
   };
 
   const ActionMenu = () => {
@@ -69,8 +90,8 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
           </MenuLink>
         </MenuItem>
       </MenuSub>
-    )
-  }
+    );
+  };
 
   const truncateText = (text, maxLength) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -212,7 +233,7 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
-    return localStorage.getItem(storageFilterId) || '';
+    return localStorage.getItem(storageFilterId) || "";
   });
 
   // Filtered data based on search term
@@ -221,34 +242,42 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
 
     // return data.filter(member => member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, data?.data]);
-  const handleRowSelection = state => {
+  const handleRowSelection = (state) => {
     const selectedRowIds = Object.keys(state);
     if (selectedRowIds.length > 0) {
       toast(`Total ${selectedRowIds.length} are selected.`, {
         description: `Selected row IDs: ${selectedRowIds}`,
         action: {
-          label: 'Undo',
-          onClick: () => console.log('Undo')
-        }
+          label: "Undo",
+          onClick: () => console.log("Undo"),
+        },
       });
     }
   };
   const ToolbarTable = () => {
-    const {
-      table
-    } = useDataGrid();
-    return <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
-      <h3 className="card-title">{title}</h3>
+    const { table } = useDataGrid();
+    return (
+      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+        <h3 className="card-title">{title}</h3>
 
-      <div className="flex flex-wrap items-center gap-2.5">
-        <div className="relative">
-          <KeenIcon icon="magnifier" className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3" />
-          <input type="text" placeholder="Search Members" className="input input-md ps-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} // Update search term
-          />
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="relative">
+            <KeenIcon
+              icon="magnifier"
+              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
+            />
+            <input
+              type="text"
+              placeholder="Search Members"
+              className="input input-md ps-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+            />
+          </div>
+          <DataGridColumnVisibility table={table} />
         </div>
-        <DataGridColumnVisibility table={table} />
       </div>
-    </div>;
+    );
   };
 
   const handleCloseCreate = () => {
@@ -275,9 +304,8 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
 
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
 
-
   const reloadTable = () => {
-    setTableKey(prevKey => prevKey + 1); // ✅ Change key to force re-fetch
+    setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
 
   useEffect(() => {
@@ -285,14 +313,22 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
   }, []);
 
   return (
-    <div className='container-fluid pb-5'>
+    <div className="container-fluid pb-5">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Educator & Admin Recordings" />
           <ToolbarDescription>
-            View and access all video recordings uploaded by educators and admins.
+            View and access all video recordings uploaded by educators and
+            admins.
           </ToolbarDescription>
         </ToolbarHeading>
+        <ToolbarActions>
+          <div className="text-end pb-4">
+            <button className="btn btn-primary" onClick={handleClickOpen}>
+              Upload Recording Session
+            </button>
+          </div>
+        </ToolbarActions>
       </Toolbar>
       {/* <DataGrid
         key={tableKey}
@@ -304,10 +340,34 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
         }}
         onFetchData={handleFetchData}
       /> */}
-      <EducatorViseRecording data={data?.data} isLoading={isLoading} error={error} isError={isError} isFetching={isFetching} />
-      <CreateAdminRecording setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow}     onUpdateSuccess={() => {}} />
-      {isDeleteOpen && <DeleteAdminRecording refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow}  onDeleteSuccess= {() => {}}/>}
+      <EducatorViseRecording
+        data={data?.data}
+        isLoading={isLoading}
+        error={error}
+        isError={isError}
+        isFetching={isFetching}
+      />
+      {isCreateOpen && (
+        <CreateManualAdminRecording
+        setSelectedRow={setSelectedRow}
+        handleCloseCreate={handleCloseCreate}
+        refetch={getEducators}
+        isCreateOpen={isCreateOpen}
+        setIsCreateOpen={setIsCreateOpen}
+        selectedRow={selectedRow}
+        onUpdateSuccess={() => {}}
+      />
+      )}
+      {isDeleteOpen && (
+        <DeleteAdminRecording
+          refetch={reloadTable}
+          isDeleteOpen={isDeleteOpen}
+          handleDeleteClose={handleDeleteClose}
+          selectedRow={selectedRow}
+          onDeleteSuccess={() => {}}
+        />
+      )}
     </div>
-  )
+  );
 };
 export default AdminRecording;

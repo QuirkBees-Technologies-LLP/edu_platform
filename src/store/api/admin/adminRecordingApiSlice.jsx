@@ -36,7 +36,16 @@ export const adminRecordingApiSlice = createApi({
                 method: 'DELETE',
             }),
         }),
+         createAdminRecording : builder.mutation({
+            query: (data) => ({
+                url: '/educator/recording/manual',
+                method: 'POST',
+                body: data,
+                formData: true,
+            }),
+        }),
+
     }),
 });
 
-export const { useGetAdminRecordingQuery, useLazyGetAdminRecordingByUserIDQuery, useGetAdminRecordingByCallIDQuery, useLazyGetAdminRecordingQuery, useSaveAdminRecordingMutation, useUpdateAdminRecordingMutation, useDeleteAdminRecordingMutation } = adminRecordingApiSlice;
+export const { useGetAdminRecordingQuery, useLazyGetAdminRecordingByUserIDQuery, useGetAdminRecordingByCallIDQuery, useLazyGetAdminRecordingQuery, useSaveAdminRecordingMutation, useUpdateAdminRecordingMutation, useDeleteAdminRecordingMutation , useCreateAdminRecordingMutation } = adminRecordingApiSlice;
