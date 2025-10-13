@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { toAbsoluteUrl } from "@/utils/Assets";
 
 const RecordingThumbnail = ({
   videoUrl,
@@ -12,12 +13,14 @@ const RecordingThumbnail = ({
   const [thumbnail, setThumbnail] = useState(image || null);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-    const displayImage = image || defaultImage; 
+  const displayImage = image
+    ? image
+    : defaultImage
+      ? defaultImage
+      : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg");
 
-    console.log(videoUrl, "videoUrl");
-  
+  console.log(videoUrl, "videoUrl");
 
-  
   // useEffect(() => {
   //   const observer = new IntersectionObserver(
   //     (entries) => {
@@ -35,7 +38,6 @@ const RecordingThumbnail = ({
   //   return () => observer.disconnect();
   // }, []);
 
- 
   // useEffect(() => {
   //   if (!visible || thumbnail || !videoUrl) return;
 
