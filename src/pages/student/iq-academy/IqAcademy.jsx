@@ -59,7 +59,7 @@ export default function IqAcademy() {
   const educators = singleCategoryData?.data?.category?.educators || [];
 
   const isInitialLoading =
-    isCategoryLoading || !activeCategoryId || isDetailLoading;
+    !!isCategoryLoading || !activeCategoryId || !!isDetailLoading;
 
   const isToday = (datetime) =>
     isSameDay(new Date(), new Date(datetime));
