@@ -35,10 +35,7 @@ import { Input } from "postcss";
 import DateTimePicker from "../educator-stream-schedule/DateTimePicker";
 
 const CreateEducatorRecording = forwardRef(
-  (
-    { isCreateOpen, handleCloseCreate,  refetch,  },
-    ref
-  ) => {
+  ({ isCreateOpen, handleCloseCreate, refetch }, ref) => {
     const [updateEducatorRecording] = useUpdateEducatorRecordingMutation();
     const [createEducatorRecording] = useCreateEducatorRecordingMutation();
 
@@ -207,12 +204,32 @@ const CreateEducatorRecording = forwardRef(
         return `https://www.loom.com/embed/${videoId}`;
       }
 
-      // Dyntube
-      if (url.includes("dyntube.com/video/")) {
-        let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
-        videoId = videoId.replace(/\/$/, "");
-        return `https://player.dyntube.com/video/${videoId}`;
+      // // Dyntube
+      // if (url.includes("dyntube.com/video/")) {
+      //   let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
+      //   videoId = videoId.replace(/\/$/, "");
+      //   return `https://player.dyntube.com/video/${videoId}`;
+      // }
+      // CASE 1: https://app.dyntube.com/#/video/<id>/options
+      if (url.includes("app.dyntube.com/#/video/")) {
+        const match = url.match(/video\/([^/]+)/);
+        if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
       }
+
+      // CASE 2: https://videos.dyntube.com/iframes/<id>
+      if (url.includes("videos.dyntube.com/iframes/")) {
+        const match = url.match(/iframes\/([^/?#]+)/);
+        if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
+      }
+
+      // CASE 3: https://player.dyntube.com/video/<id>
+      if (url.includes("player.dyntube.com/video/")) {
+        const match = url.match(/video\/([^/?#]+)/);
+        if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
+      }
+
+      // CASE 4: fallback generic
+      if (url.includes("dyntube.com/")) return url;
       return url;
     };
 
@@ -531,8 +548,6 @@ const CreateEducatorRecording = forwardRef(
                   {renderVideoInput(formik)}
                 </div>
               </div>
-
-            
             </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3 md:py-5">
@@ -552,7 +567,7 @@ const CreateEducatorRecording = forwardRef(
               onClick={formik.handleSubmit}
               className="btn btn-primary"
             >
-             {formik.isSubmitting ? "Submitting..." : "Submit"}
+              {formik.isSubmitting ? "Submitting..." : "Submit"}
             </button>
           </div>
         </DialogContent>
