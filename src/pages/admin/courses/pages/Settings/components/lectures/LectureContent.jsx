@@ -54,7 +54,7 @@ const LectureContent = ({
 
   console.log("videoInputType=============>", videoInputType);
 
-  console.log("lecture",lecture)
+  console.log("lecture", lecture);
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
     description: lecture?.description || "",
@@ -175,7 +175,11 @@ const LectureContent = ({
   const isValidVideoUrl = (url) => {
     if (!url) return false;
 
-    if (url.includes("youtube.com") || url.includes("youtu.be")||url.includes("dyntube.com")) {
+    if (
+      url.includes("youtube.com") ||
+      url.includes("youtu.be") ||
+      url.includes("dyntube.com")
+    ) {
       return true;
     }
 
@@ -225,11 +229,30 @@ const LectureContent = ({
     }
 
     // Dyntube
-    if (url.includes("dyntube.com/video/")) {
-        let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
-        videoId = videoId.replace(/\/$/, "");
-        return `https://player.dyntube.com/video/${videoId}`;
-      }
+    // if (url.includes("dyntube.com/video/")) {
+    //     let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
+    //     videoId = videoId.replace(/\/$/, "");
+    //     return `https://player.dyntube.com/video/${videoId}`;
+    //   }
+    if (url.includes("app.dyntube.com/#/video/")) {
+      const match = url.match(/video\/([^/]+)/);
+      if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
+    }
+
+    // CASE 2: https://videos.dyntube.com/iframes/<id>
+    if (url.includes("videos.dyntube.com/iframes/")) {
+      const match = url.match(/iframes\/([^/?#]+)/);
+      if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
+    }
+
+    // CASE 3: https://player.dyntube.com/video/<id>
+    if (url.includes("player.dyntube.com/video/")) {
+      const match = url.match(/video\/([^/?#]+)/);
+      if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
+    }
+
+    // CASE 4: fallback generic
+    if (url.includes("dyntube.com/")) return url;
 
     return url;
   };
@@ -443,7 +466,7 @@ const LectureContent = ({
             </div> */}
 
             <Select
-              value={videoInputType }
+              value={videoInputType}
               onValueChange={(value) => {
                 setVideoInputType(value);
                 setFormData({ ...formData, content: "" });
@@ -775,28 +798,25 @@ const LectureContent = ({
     );
   };
   const handleEditClick = () => {
-  if (!isEditing) {
-
-    if (formData.type === "VIDEO") {
-      if (isValidVideoUrl(formData.content)) {
-        setVideoInputType("url");
-      } else if (formData.thumbnail || formData.videoUrl ) {
-        setVideoInputType("upload"); 
+    if (!isEditing) {
+      if (formData.type === "VIDEO") {
+        if (isValidVideoUrl(formData.content)) {
+          setVideoInputType("url");
+        } else if (formData.thumbnail || formData.videoUrl) {
+          setVideoInputType("upload");
+        } else {
+          setVideoInputType("");
+        }
       } else {
-        setVideoInputType(""); 
+        setVideoInputType("");
       }
     } else {
-      setVideoInputType("");
+      setShowPreview(false);
+      setShowPreview1(false);
     }
-  } else {
-   
-    setShowPreview(false);
-    setShowPreview1(false);
-  }
 
-  setIsEditing(!isEditing);
-};
-
+    setIsEditing(!isEditing);
+  };
 
   return (
     <div className="space-y-6">
@@ -824,7 +844,7 @@ const LectureContent = ({
               ? "btn border-red-600 text-red-600"
               : "bg-primary hover:bg-primary"
           }
-           onClick={handleEditClick}
+          onClick={handleEditClick}
         >
           {isEditing ? (
             <>
@@ -1003,7 +1023,7 @@ const LectureContent = ({
               {/* Tabs */}
               <div className="flex border-b border-gray-200">
                 <button
-                   onClick={() => setActiveTab("content")}
+                  onClick={() => setActiveTab("content")}
                   className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
                     activeTab === "content"
                       ? "text-primary border-b-2 border-primary bg-light"
