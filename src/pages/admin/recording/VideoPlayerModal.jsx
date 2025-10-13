@@ -42,11 +42,30 @@ const getEmbedUrl = (url) => {
     return `https://www.loom.com/embed/${id}`;
   }
 
-  if (url.includes("dyntube.com/video/")) {
-    let id = url.split("dyntube.com/video/")[1].split("?")[0];
-    id = id.replace(/\/$/, "");
-    return `https://player.dyntube.com/video/${id}`;
+  // if (url.includes("dyntube.com/video/")) {
+  //   let id = url.split("dyntube.com/video/")[1].split("?")[0];
+  //   id = id.replace(/\/$/, "");
+  //   return `https://player.dyntube.com/video/${id}`;
+  // }
+  if (url.includes("app.dyntube.com/#/video/")) {
+    const match = url.match(/video\/([^/]+)/);
+    if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
   }
+
+  // CASE 2: https://videos.dyntube.com/iframes/<id>
+  if (url.includes("videos.dyntube.com/iframes/")) {
+    const match = url.match(/iframes\/([^/?#]+)/);
+    if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
+  }
+
+  // CASE 3: https://player.dyntube.com/video/<id>
+  if (url.includes("player.dyntube.com/video/")) {
+    const match = url.match(/video\/([^/?#]+)/);
+    if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
+  }
+
+  // CASE 4: fallback generic
+  if (url.includes("dyntube.com/")) return url;
 
   return null; // not an embed URL
 };
