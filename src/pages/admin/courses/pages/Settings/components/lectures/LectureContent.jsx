@@ -66,9 +66,11 @@ const LectureContent = ({
       typeof lecture?.section === "object"
         ? lecture?.section?._id
         : lecture?.section,
-    thumbnail: lecture?.thumbnailUrl || null,
+    thumbnail: lecture?.thumbnailUrl ? lecture?.thumbnailUrl : null,
     videoUrl: lecture?.videoUrl || null,
   });
+
+  console.log("formData", formData);
 
   useEffect(() => {
     const fetchLectureContent = async () => {
@@ -91,10 +93,10 @@ const LectureContent = ({
       } else if (lecture.videoUrl || lecture.thumbnailUrl) {
         setVideoInputType("upload");
       } else {
-        setVideoInputType("");
+        setVideoInputType("url");
       }
     } else {
-      setVideoInputType("");
+      setVideoInputType("url");
     }
 
     if (lecture) {
@@ -367,13 +369,14 @@ const LectureContent = ({
       setIsLoading(false);
       setUploadProgress(0);
       console.error("Failed to update lecture:", error);
-      const backendMessage =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
+       const backendMessage =
+        error?.response?.data?.message || 
+        error?.response?.data?.error || 
+        error?.message || 
         "Unknown error";
 
       toast.error("Failed to update lecture: " + backendMessage);
+     
     } finally {
       setIsLoading(false);
     }
@@ -466,10 +469,11 @@ const LectureContent = ({
               </div>
 
               {/* Thumbnail Preview */}
-              {formData.thumbnail?.preview || formData.thumbnail?.url ? (
+              {formData.thumbnail  || formData.thumbnail?.preview || formData.thumbnail?.url ? (
                 <div className="mt-3">
                   <img
                     src={
+                      formData.thumbnail ||
                       formData.thumbnail.preview ||
                       formData.thumbnail.url || // fallback to existing thumbnail URL
                       ""
@@ -843,10 +847,10 @@ const LectureContent = ({
         } else if (formData.thumbnail || formData.videoUrl) {
           setVideoInputType("upload");
         } else {
-          setVideoInputType("");
+          setVideoInputType("url");
         }
       } else {
-        setVideoInputType("");
+        setVideoInputType("url");
       }
     } else {
       setShowPreview(false);

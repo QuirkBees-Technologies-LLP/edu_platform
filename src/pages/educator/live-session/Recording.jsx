@@ -4,11 +4,12 @@ import { Eye, Pencil, RefreshCcw, Save, Trash } from 'lucide-react';
 import { useGetEducatorRecordingByCallIDQuery, useSaveEducatorRecordingMutation } from '../../../store/api/educator/educatorRecordingApiSlice';
 import { useAuthContext } from '../../../auth/useAuthContext';
 import ShowMoreLess from '../../../components/ui/showmoreless';
-import CreateEducatorRecording from '../../educator/recording/CreateEducatorRecording';
+// import CreateEducatorRecording from '../../educator/recording/CreateEducatorRecording';
 import DeleteEducatorRecording from '../../educator/recording/DeleteEducatorRecording';
 import VideoThumbnail from './VideoThumbnail';
 import { format } from 'date-fns';
 import Loader from '../../../components/ui/loader';
+import UpdateEducatorRecording from '../recording/UpdateEducatorRecording';
 
 const Recording = () => {
     const call = useCall();
@@ -18,6 +19,7 @@ const Recording = () => {
     const [streamRecordings, setStreamRecordings] = useState([]);
     const [savingRecordings, setSavingRecordings] = useState(new Set()); // Track loading state for each recording
     const [isLoadingRecordings, setIsLoadingRecordings] = useState(false);
+    const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
     const { auth } = useAuthContext();
     const educator_id = auth?.user?._id ?? '';
@@ -136,7 +138,7 @@ const Recording = () => {
 
     const handleEdit = (rec) => {
         setSelectedRow(rec);
-        setIsCreateOpen(true);
+        setIsUpdateOpen(true);
         setIsDeleteOpen(false);
     };
 
@@ -150,6 +152,10 @@ const Recording = () => {
         setIsDeleteOpen(false);
         setIsCreateOpen(false);
     };
+     const handleCloseUpdate = () => {
+    setIsUpdateOpen(false);
+    setSelectedRow(null);
+  };
 
     const handleDeleteClose = () => {
         setIsDeleteOpen(false);
@@ -269,14 +275,24 @@ const Recording = () => {
                     </div>
                 </div>
             </div>
-            <CreateEducatorRecording
+              {isUpdateOpen && (
+                    <UpdateEducatorRecording
+                      setSelectedRow={setSelectedRow}
+                      handleCloseUpdate={handleCloseUpdate}
+                      isUpdateOpen={isUpdateOpen}
+                      setIsUpdateOpen={setIsUpdateOpen}
+                      refetch={refetch}
+                      selectedRow={selectedRow}
+                    />
+                  )}
+            {/* <CreateEducatorRecording
                 setSelectedRow={setSelectedRow}
                 handleCloseCreate={handleCloseCreate}
                 isCreateOpen={isCreateOpen}
                 setIsCreateOpen={setIsCreateOpen}
                 refetch={refetch}
                 selectedRow={selectedRow}
-            />
+            /> */}
             {isDeleteOpen && (
                 <DeleteEducatorRecording
                     refetch={refetch}
