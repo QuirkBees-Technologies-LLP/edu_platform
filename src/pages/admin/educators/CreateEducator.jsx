@@ -55,13 +55,14 @@ const CreateEducator = forwardRef(
       is_access_trade_analysis: true,
       image: null,
       icon: null,
+      projectId: "",
     };
 
     const createSchema = Yup.object().shape({
       first_name: Yup.string()
         .required("First name is required")
         .min(2, "First name must be at least 2 characters"),
-
+      projectId: Yup.string(),
       last_name: Yup.string()
         .required("Last name is required")
         .min(2, "Last name must be at least 2 characters"),
@@ -229,6 +230,7 @@ const CreateEducator = forwardRef(
           is_access_trade_ideas: selectedRow?.is_access_trade_ideas,
           image: selectedRow?.image || null,
           icon: selectedRow?.bannerImage || null,
+          projectId: selectedRow?.projectId || null,
         };
         formik.setValues(initData);
       }
@@ -528,6 +530,31 @@ const CreateEducator = forwardRef(
                     />
                     IQ Insight
                   </label>
+                </div>
+              </div>
+
+               <div className="col-span-6">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    projectId <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    // readOnly={selectedRow?._id}
+                    placeholder="Enter projectId of dyntube"
+                    autoComplete="off"
+                    {...formik.getFieldProps("projectId")}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.projectId && formik.touched.projectId
+                        ? "border border-danger"
+                        : ""
+                    }`}
+                  />
+                  {formik.touched.projectId && formik.errors.projectId && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.projectId}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
