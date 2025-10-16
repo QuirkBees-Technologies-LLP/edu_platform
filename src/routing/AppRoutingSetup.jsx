@@ -139,9 +139,11 @@ import KpisDashboard from "../pages/admin/KPIs Page/Kpis";
 import PrivacyPolicy from "../auth/pages/PrivacyPolicy";
 import TermsOfService from "../auth/pages/TermsOfService";
 import Support from "../auth/pages/Support";
-import EducatorEndSchedule from "../pages/educator/educator-endSchedule/EducatorEndSchedule";
-import AdminEndSchedule from "../pages/admin/admin-ednSchedule/AdminEndSchedule";
+import EducatorEndSession from "../pages/educator/educator-end-session/EducatorEndSession";
+import EducatorEndSchedule from "../pages/educator/educator-endStream-schedule/EducatorEndSchedule";
+import AdminEndSession from "../pages/admin/admin-end-session/AdminEndSession";
 import EducatorKpi from "../pages/admin/KPIs Page/EducatorKpi";
+import AdminEndSchedule from "../pages/admin/admin-end-schedule/AdminEndSchedule";
 
 const routes = {
   student: [
@@ -192,7 +194,8 @@ const routes = {
     { path: "/educator/educator-details", element: <EducatorDetailPage /> },
     { path: "/educator/profile", element: <EducatorProfile /> },
     { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
-    { path: "/educator/ended-live-sessions", element: <EducatorEndSchedule />},
+    { path: "/educator/ended-live-sessions", element: <EducatorEndSession /> },
+    { path: "/educator/ended-stream-schedule", element: <EducatorEndSchedule /> },
     { path: "/educator/stream-recording", element: <EducatorRecording /> },
     {
       path: "/educator/stream-recording/list",
@@ -219,9 +222,10 @@ const routes = {
     { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
     { path: "admin/general-setting", element: <GeneralSetting /> },
     { path: "/admin/iq-social", element: <AdminCommunityFeed /> },
-    {path : "/admin/kpis" , element : <EducatorKpi/>},
-    { path: "/admin/kpis/:callId" , element: <KpisDashboard /> },
-    { path: "/admin/ended-live-sessions", element: <AdminEndSchedule /> },
+    { path: "/admin/kpis", element: <EducatorKpi /> },
+    { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
+    { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
   ],
 };
 
