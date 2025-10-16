@@ -290,10 +290,10 @@ const LectureContent = ({
       return;
     }
 
-    if (formData.type === "VIDEO" && !formData.thumbnail) {
-      toast.error("Thumbnail is required for video lectures");
-      return;
-    }
+    // if (formData.type === "VIDEO" && !formData.thumbnail) {
+    //   toast.error("Thumbnail is required for video lectures");
+    //   return;
+    // }
 
     if (
       formData.type === "VIDEO" &&
@@ -324,7 +324,7 @@ const LectureContent = ({
     dataToSend.append("section", formData.section);
     dataToSend.append("content", formData.content);
     if (videoFile) {
-      dataToSend.append("thumbnail", formData.thumbnail.file);
+      dataToSend.append("thumbnail",  null);
       dataToSend.append("video", videoFile);
     }
 
