@@ -15,16 +15,17 @@ import {
 const CourseContent = ({ courseId }) => {
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
-  const [selectedLecture, setSelectedLecture] = useState(() => {
-  const savedLectureId = localStorage.getItem("selectedLectureId");
-  return savedLectureId ? { _id: savedLectureId } : null;
-});
+  const [selectedLecture, setSelectedLecture] = useState();
+  //     () => {
+  //   const savedLectureId = localStorage.getItem("selectedLectureId");
+  //   return savedLectureId ? { _id: savedLectureId } : null;
+  // }
   const [forceUpdateLectureList, setForceUpdateLectureList] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sections, setSections] = useState([]); // ✅ Local state for sections
 
-   // Fetch sections when courseId changes
+  // Fetch sections when courseId changes
   useEffect(() => {
     if (courseId && auth?.token) {
       setIsLoading(true);
@@ -40,17 +41,17 @@ const CourseContent = ({ courseId }) => {
   }, [courseId, auth?.token, dispatch]);
 
   // ✅ Restore selected lecture from localStorage when sections are ready
- useEffect(() => {
-  const savedLectureId = localStorage.getItem("selectedLectureId");
-  if (!savedLectureId || !Array.isArray(sections)) return;
+  //  useEffect(() => {
+  //   const savedLectureId = localStorage.getItem("selectedLectureId");
+  //   if (!savedLectureId || !Array.isArray(sections)) return;
 
-  const allLectures = sections.flatMap((section) => section.lectures || []);
-  const foundLecture = allLectures.find((l) => l._id === savedLectureId);
+  //   const allLectures = sections.flatMap((section) => section.lectures || []);
+  //   const foundLecture = allLectures.find((l) => l._id === savedLectureId);
 
-  if (foundLecture) {
-    setSelectedLecture(foundLecture);
-  }
-}, [sections]);
+  //   if (foundLecture) {
+  //     setSelectedLecture(foundLecture);
+  //   }
+  // }, [sections]);
 
   // Update handler
   const handleLectureUpdate = (updatedLecture) => {
@@ -58,7 +59,7 @@ const CourseContent = ({ courseId }) => {
       setSelectedLecture(updatedLecture);
     } else if (updatedLecture === null && selectedLecture) {
       setSelectedLecture(null);
-      localStorage.removeItem("selectedLectureId");
+      // localStorage.removeItem("selectedLectureId");
     }
   };
 
