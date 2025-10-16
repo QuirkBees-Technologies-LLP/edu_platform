@@ -1346,6 +1346,11 @@ export const sideMenus = {
           path: "/admin/stream-schedule",
         },
         {
+          title: "Ended Schedule",
+          icon: <CalendarClock />,
+          path: "/admin/educator-ended-schedule",
+        },
+        {
           title: "Live Sessions",
           icon: <PlayCircle />,
           path: "/admin/live-session",
@@ -1439,6 +1444,11 @@ export const sideMenus = {
           title: "Live Schedule",
           icon: <CalendarClock />,
           path: "/educator/stream-schedule",
+        },
+         {
+          title: "Ended Schedule", 
+          icon: <CalendarClock />,
+          path: "/educator/ended-stream-schedule",
         },
         {
           title: "Live Sessions",

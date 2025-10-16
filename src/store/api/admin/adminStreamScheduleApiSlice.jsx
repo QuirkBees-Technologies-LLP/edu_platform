@@ -7,7 +7,7 @@ export const adminStreamScheduleApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getAdminStreamSchedule: builder.query({
-            query: ({ page = 1, limit = 10  , search = "", educator = "" }) => `/admin/schedule/list?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
+            query: ({ page = 1, limit = 10  , search = "", educator = ""  , status = ""}) => `/admin/schedule/list?page=${page}&limit=${limit}&search=${search}&educator=${educator}&status=${status}`,
         }),
     }),
 });

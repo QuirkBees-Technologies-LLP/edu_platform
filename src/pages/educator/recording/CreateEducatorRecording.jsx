@@ -370,7 +370,7 @@ const CreateEducatorRecording = forwardRef(
           <DialogHeader>
             <DialogTitle>
               {/* {selectedRow?._id ? "Update Recording" : "Create Educator"} */}
-              Upload Recording Session
+              Upload recorded session
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">

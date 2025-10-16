@@ -271,7 +271,7 @@ const EducatorRecordingSession = () => {
           <ToolbarActions>
             <div className="text-end pb-4">
               <button className="btn btn-primary" onClick={handleClickOpen}>
-                Upload Recording Session
+                Upload recorded session
               </button>
             </div>
           </ToolbarActions>
