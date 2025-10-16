@@ -1,5 +1,5 @@
 import React from "react";
-  import { Archive } from "lucide-react";
+import { Archive } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -24,14 +24,15 @@ import {
 import { Users, Eye, Clock, UserCheck, UserPlus, Star } from "lucide-react";
 import { useEducatorKpisQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
 import { useNavigate, useParams } from "react-router";
+import { icon } from "leaflet";
+import Spinner from "@/components/common/LoadingSpinner"; 
 
 const KpisDashboard = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const { callId } = useParams();
-  
 
-  const { data, isLoading, isError } = useEducatorKpisQuery(
+  const { data, isLoading, isError , isFetching } = useEducatorKpisQuery(
     { callId },
     {
       refetchOnMountOrArgChange: true,
@@ -275,17 +276,19 @@ const KpisDashboard = () => {
   //       { name: "iOS", unique: 5 },
   //     ],
   //   };
-  const timelineData = data?.timeline.map((item) => ({
-    time: new Date(item.time).toLocaleTimeString("en-US", {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    max: item.max,
-    last: item.last,
-    first: item.first,
-    min: item.min,
-  }));
+  const timelineData = Array.isArray(data?.timeline)
+  ? data.timeline.map((item) => ({
+      time: new Date(item.time).toLocaleTimeString("en-US", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      max: item.max,
+      last: item.last,
+      first: item.first,
+      min: item.min,
+    }))
+  : [];
 
   const countryNames = {
     AF: "Afghanistan",
@@ -488,37 +491,39 @@ const KpisDashboard = () => {
     ZW: "Zimbabwe",
   };
 
-  const countryData = data?.countryBreakdown
-    ? [...data.countryBreakdown]
-        .sort((a, b) => b.unique - a.unique)
-        .map((country) => ({
-          name: countryNames[country.name] || country.name,
-          code: country.name,
-          users: country.unique,
-          percentage: ((country.unique / data?.uniqueUsers) * 100).toFixed(1),
-        }))
-    : [];
+const countryData = Array.isArray(data?.countryBreakdown)
+  ? [...data?.countryBreakdown]
+      .sort((a, b) => b.unique - a.unique)
+      .map((country) => ({
+        name: countryNames[country.name] || country.name,
+        code: country.name,
+        users: country.unique,
+        percentage: ((country.unique / (data?.uniqueUsers || 1)) * 100).toFixed(1),
+      }))
+  : [];
 
-  const browserData = data?.browserBreakdown
-    ? [...data?.browserBreakdown] // copy before sort
-        .sort((a, b) => b.unique - a.unique)
-        .map((browser) => ({
-          name: browser.name,
-          users: browser.unique,
-        }))
-    : [];
+// Browser breakdown
+const browserData = Array.isArray(data?.browserBreakdown)
+  ? [...data?.browserBreakdown]
+      .sort((a, b) => b.unique - a.unique)
+      .map((browser) => ({
+        name: browser.name,
+        users: browser.unique,
+      }))
+  : [];
 
-  const osDataRaw = data?.osBreakdown.reduce((acc, os) => {
-    const osName = os.name === "linux" ? "Linux" : os.name;
-    const existing = acc.find((item) => item.name === osName);
-    if (existing) {
-      existing.users += os.unique;
-    } else {
-      acc.push({ name: osName, users: os.unique });
-    }
-    return acc;
-  }, []);
-  const osData = osDataRaw?.sort((a, b) => b.users - a.users);
+// OS breakdown
+const osDataRaw = Array.isArray(data?.osBreakdown)
+  ? data?.osBreakdown.reduce((acc, os) => {
+      const osName = os.name.toLowerCase() === "linux" ? "Linux" : os.name;
+      const existing = acc.find((item) => item.name === osName);
+      if (existing) existing.users += os.unique;
+      else acc.push({ name: osName, users: os.unique });
+      return acc;
+    }, [])
+  : [];
+
+const osData = osDataRaw.sort((a, b) => b.users - a.users);
 
   const COLORS = [
     "#3B82F6",
@@ -530,7 +535,7 @@ const KpisDashboard = () => {
   ];
 
   const MetricCard = ({
-    icon: Icon,
+    icon: Icon = Users,
     title,
     value,
     subtitle,
@@ -552,7 +557,7 @@ const KpisDashboard = () => {
       <div className="bg-white rounded-lg shadow-sm border p-6 flex items-center">
         {/* Icon */}
         <div className={`p-3 rounded-xl ${selected.bg}`}>
-          <Icon className={`h-6 w-6 ${selected.text}`} />
+          {Icon && <Icon className={`h-6 w-6 ${selected.text}`} />}
         </div>
 
         {/* Content */}
@@ -564,40 +569,31 @@ const KpisDashboard = () => {
       </div>
     );
   };
-  if (isLoading) {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <p className="text-gray-500 text-sm">Loading KPIs...</p>
-    </div>
-  );
-}
 
-
-
-if (isError || !data) {
-  return (
-    <div className="flex flex-col items-center justify-center h-64 text-center">
-      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 max-w-md shadow-sm">
-        <Archive className="w-10 h-10 text-gray-400 mb-3" />
-        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-          Archived Session
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-          This session is from an earlier date, so KPI insights are not
-          available. You can still view other session details.
-        </p>
+  if (isError  ) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 max-w-md shadow-sm">
+          <Archive className="w-10 h-10 text-gray-400 mb-3" />
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+            Archived Session
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            This session is from an earlier date, so KPI insights are not
+            available. You can still view other session details.
+          </p>
+        </div>
+        <div>
+          <button
+            onClick={() => navigate(`/admin/kpis`)}
+            className="mt-4 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded"
+          >
+            View Session Details
+          </button>
+        </div>
       </div>
-      <div>
-        <button
-          onClick={() => navigate(`/admin/kpis`)}
-          className="mt-4 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded"
-        >
-          View Session Details
-        </button>
-      </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="container-fluid pb-8">
@@ -611,7 +607,13 @@ if (isError || !data) {
         </ToolbarHeading>
       </Toolbar>
       {/* Header */}
-      <div className="mb-8">
+      {isFetching ? (
+          <div className="flex justify-center py-8 text-gray-500">
+                    <Spinner />
+                  </div>
+      ) : (
+        <>
+          <div className="mb-8">
         <div className="bg-white shadow-sm border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           {/* Left section - IDs */}
           <div className="space-y-2 sm:space-y-0 sm:space-x-6 flex flex-col sm:flex-row text-sm text-gray-700">
@@ -869,6 +871,9 @@ if (isError || !data) {
           </ResponsiveContainer>
         </div>
       </div>
+      </>
+      )}
+    
     </div>
   );
 };
