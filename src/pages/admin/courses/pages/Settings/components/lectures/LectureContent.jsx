@@ -324,10 +324,11 @@ const LectureContent = ({
     dataToSend.append("section", formData.section);
     dataToSend.append("content", formData.content);
     if (videoFile) {
-      dataToSend.append("thumbnail",  null);
+       dataToSend.append("thumbnail", formData.thumbnail?.file ? formData.thumbnail?.file : null);
       dataToSend.append("video", videoFile);
     }
 
+    console.log("dataToSend", dataToSend);
     setIsLoading(true);
     setUploadProgress(0);
     let fakeProgress = 0;
