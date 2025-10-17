@@ -62,7 +62,7 @@ const CreateEducator = forwardRef(
       first_name: Yup.string()
         .required("First name is required")
         .min(2, "First name must be at least 2 characters"),
-      projectId: Yup.string(),
+      projectId: Yup.string().nullable(),
       last_name: Yup.string()
         .required("Last name is required")
         .min(2, "Last name must be at least 2 characters"),
