@@ -319,7 +319,7 @@ const LiveSessionPlayer = ({
         <div className="flex flex-col justify-center items-center gap-5 pb-20 pt-20">
           <RouteOff size={44} className="text-primary" />
           <span className="text-gray-300 dark:text-gray-900 font-semibold text-2xl">
-            IQ Academy Ended
+            Session Ended
           </span>
           <p className="text-gray-300 dark:text-gray-900 mb-0 font-semibold">
             Would you like to create a new livestream?
@@ -327,12 +327,12 @@ const LiveSessionPlayer = ({
           <button
             type="button"
             onClick={() => {
-              navigate("/live-session");
+              navigate("/educator/stream-schedule");
             }}
             className="btn btn-md btn-light rounded-5 bg-primary border-0 text-gray-300 dark:text-gray-900 text-md font-semibold py-3"
           >
             <Radio size={20} className="shrink-0" />
-            Create New IQ Academy
+            Create New Session
           </button>
         </div>
       ) : (
