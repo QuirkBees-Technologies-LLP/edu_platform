@@ -261,7 +261,7 @@ const AuthProvider = ({ children }) => {
           username,
           first,
           last,
-          uuid,
+          userid,
           expiration,
           active,
           plan,
@@ -320,11 +320,11 @@ const AuthProvider = ({ children }) => {
 
           try {
           const {email}= loginRes?.data[0];
-            console.log(email, uuid, first, last, active, plan, expiration);
+            console.log(email, userid, first, last, active, plan, expiration);
             const res = await clientCreateUpdate({
-              name: username,
+              name: `${first} ${last}` ,
               email,
-              crm_id: uuid,
+              crm_id: userid,
               first_name: first,
               last_name: last,
               plan,
