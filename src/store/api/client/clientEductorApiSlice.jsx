@@ -7,7 +7,10 @@ export const clientEducatorApiSlice = createApi({
   tagTypes: ["Educator"],
   endpoints: (builder) => ({
     getEducatorsList: builder.query({
-      query: () => `/users/educator-course/`,
+      query: ({ search = "" , category = "" }) =>
+        search
+          ? `/users/educator-course?search=${encodeURIComponent(search)}&category=${category}`
+          : `/users/educator-course?category=${category}`,
       providesTags: ["Educator"],
     }),
     toggleFollow: builder.mutation({
@@ -17,8 +20,15 @@ export const clientEducatorApiSlice = createApi({
       }),
       invalidatesTags: ["Educator"],
     }),
+    getClientEducatorAcademyCategory: builder.query({
+      query: () => `/users/category/list`,
+    }),
+     providesTags: ["Educator"]
   }),
 });
 
-export const { useGetEducatorsListQuery, useToggleFollowMutation } =
-  clientEducatorApiSlice;
+export const {
+  useGetEducatorsListQuery,
+  useToggleFollowMutation,
+  useGetClientEducatorAcademyCategoryQuery,
+} = clientEducatorApiSlice;
