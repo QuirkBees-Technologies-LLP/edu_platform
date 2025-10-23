@@ -1,4 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import debounce from "lodash.debounce";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlignJustify,
   ArrowRight,
@@ -11,12 +19,14 @@ import {
 } from "lucide-react";
 import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
 import {
+  useGetClientEducatorAcademyCategoryQuery,
   useGetEducatorsListQuery,
   useToggleFollowMutation,
 } from "../../../store/api/client/clientEductorApiSlice";
 import Loader from "../../../components/ui/loader";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import SearchFilterInput from "../../../components/SearchFilterInput";
 
 const educatorsData = [
   {
@@ -54,8 +64,15 @@ const IqAcademyEducators = () => {
   const [language, setLanguage] = useState("All");
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [category, setCategory] = useState("All");
 
-  const { data, isLoading } = useGetEducatorsListQuery();
+  const { data, isLoading , refetch} = useGetEducatorsListQuery({
+    search: searchText,
+    category: category,
+  });
+  const { data: categoryList } = useGetClientEducatorAcademyCategoryQuery();
+  console.log("categoryList", categoryList);
   const [toggleFollowData, { isLoading: followLoading }] =
     useToggleFollowMutation();
   console.log("Data", data);
@@ -95,6 +112,39 @@ const IqAcademyEducators = () => {
     const matchLanguage = language === "All" || e.language === language;
     return matchTab && matchSearch && matchLanguage;
   });
+
+  // const debouncedSearch = useMemo(
+  //   () =>
+  //     debounce((value) => {
+  //       setSearchText(value);
+  //     }, 500),
+  //   []
+  // );
+
+  // useEffect(() => {
+  //   return () => debouncedSearch.cancel();
+  // }, [debouncedSearch]);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        // console.log("value", value);
+        setSearchText(value);
+        // reloadTable();
+      }, 500),
+    []
+  );
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
+
+  // const handleSearchChange = (event) => {
+  //   const value = event.target.value;
+  //   debouncedSearch(value);
+  // };
+
   return (
     <div className="container-fluid pb-10">
       <div className="flex items-start justify-between">
@@ -160,19 +210,56 @@ const IqAcademyEducators = () => {
             className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none dark:bg-gray-100"
           />
         </div> */}
-        <div className="flex items-center border border-gray-300 rounded-lg px-3 py-3 w-64 shadow-sm">
-          {/* Search Icon */}
-          <Search className="w-5 h-5 text-gray-400" />
+        {/* Category Dropdown */}
+        <div className=" flex gap-3 sm:gap-6 pb-2 flex-wrap">
+          <div className="relative w-72">
+            <Select
+              value={category || ""}
+              onValueChange={(value) => {
+                setCategory(value);
+                refetch();
+                // reloadTable();
+              }}
+            >
+              <SelectTrigger className="pr-8">
+                {" "}
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryList?.data?.map((item) => (
+                  <SelectItem key={item._id} value={item._id}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Input */}
-          <input
-            type="text"
-            placeholder="Search"
-            className="flex-1 ml-2 outline-none bg-transparent text-xs text-gray-600 placeholder-gray-400"
-          />
+            {category && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCategory(null);
+                  refetch();
+                  // reloadTable();
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+          <div>
+            {/* Search Icon */}
+            {/* <Search className="w-5 h-5 text-gray-400" /> */}
 
-          {/* Filter Icon */}
-          <SlidersHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
+            <SearchFilterInput
+              searchText={searchText}
+              handleSearchChange={handleSearchChange}
+            />
+
+            {/* Filter Icon  */}
+            {/* {/* <SlidersHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" /> */}
+          </div>
         </div>
       </div>
 
@@ -196,10 +283,13 @@ const IqAcademyEducators = () => {
                       src={educator.image}
                       alt={educator.image}
                       className="w-20 h-20 object-cover rounded-full object-top"
-                       onClick={() => navigate(`/iq-educators/${educator._id}`)}
+                      onClick={() => navigate(`/iq-educators/${educator._id}`)}
                     />
-                    <div className="text-center sm:text-start"  onClick={() => navigate(`/iq-educators/${educator._id}`)}>
-                      <h4 className="text-gray-800 font-medium mb-1" >
+                    <div
+                      className="text-center sm:text-start"
+                      onClick={() => navigate(`/iq-educators/${educator._id}`)}
+                    >
+                      <h4 className="text-gray-800 font-medium mb-1">
                         {educator.first_name} {educator.last_name}
                       </h4>
                       <p className="text-xs text-gray-500">{educator.skills}</p>
