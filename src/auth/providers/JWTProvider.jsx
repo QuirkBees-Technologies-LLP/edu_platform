@@ -256,18 +256,18 @@ const AuthProvider = ({ children }) => {
           };
         }
 
-        let  {
+        let {
           // userid,
           username,
           first,
           last,
+          uuid,
           userid,
           expiration,
           active,
           plan,
         } = loginRes?.data[0];
 
-      
         // const {  } = loginRes?.data?.data;
 
         // Step 2: Check Plan Expiry
@@ -307,7 +307,7 @@ const AuthProvider = ({ children }) => {
           //     error: "Token not received for subscription renewal.",
           //   };
           // }
-          const{email}=loginRes?.data[0];
+          const { email } = loginRes?.data[0];
 
           const redirectUrl = `https://shield.iqonic.life/qiqonic/orderproducts.dhtml?alzq=1&username=${email}&site=iqonic&language=EN&setform=ordering.html&thisform=ordering.html&shipto=base&scountry=US&products=PLAN`;
           window.location.href = redirectUrl;
@@ -319,12 +319,12 @@ const AuthProvider = ({ children }) => {
           // const lastName = rest.join(" ");
 
           try {
-          const {email}= loginRes?.data[0];
+            const { email } = loginRes?.data[0];
             console.log(email, userid, first, last, active, plan, expiration);
             const res = await clientCreateUpdate({
-              name: `${first} ${last}` ,
+              name: `${first} ${last}`,
               email,
-              crm_id: userid,
+              crm_id: uuid ? uuid : userid,
               first_name: first,
               last_name: last,
               plan,
