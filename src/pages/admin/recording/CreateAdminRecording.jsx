@@ -211,7 +211,6 @@ const CreateAdminRecording = forwardRef(
                   <label className="form-label text-gray-900 gap-1">
                     Thumbnail
                   </label>
-
                   <input
                     type="file"
                     accept="image/*"
@@ -228,7 +227,7 @@ const CreateAdminRecording = forwardRef(
 
                   {/* Preview */}
                   {formik.values.thumbnail && (
-                    <div className="mt-2">
+                    <div className="relative mt-2 w-40 h-40">
                       <img
                         src={
                           typeof formik.values.thumbnail === "string"
@@ -236,8 +235,16 @@ const CreateAdminRecording = forwardRef(
                             : URL.createObjectURL(formik.values.thumbnail) // Local file preview
                         }
                         alt="Thumbnail preview"
-                        className="w-40 h-40 rounded-lg border border-gray-200"
+                        className="w-40 h-40 rounded-lg border border-gray-200 object-cover"
                       />
+                      {/* Cross button */}
+                      <button
+                        type="button"
+                        onClick={() => formik.setFieldValue("thumbnail", null)}
+                        className="absolute top-1 right-1 bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center text-gray-700 hover:bg-gray-300"
+                      >
+                        ×
+                      </button>
                     </div>
                   )}
 
