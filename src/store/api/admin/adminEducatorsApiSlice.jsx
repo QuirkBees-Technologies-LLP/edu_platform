@@ -53,6 +53,24 @@ export const adminEducatorsApiSlice = createApi({
         return url;
       },
     }),
+    logs: builder.query({
+      query: ({ page = 1, limit = 10, startDate, endDate , search="" }) => {
+        let url = `/logs?page=${page}&limit=${limit}`;
+        
+        if (startDate) {
+          url += `&startDate=${startDate}`;
+        }
+
+        if (endDate) {
+          url += `&endDate=${endDate}`;
+        }
+        if(search){
+          url += `&search=${search}`
+
+        }
+        return url;
+      },
+    }),
 
     kpisExport: builder.mutation({
       query: (payload) => ({
@@ -76,5 +94,6 @@ export const {
   useDeleteEducatorMutation,
   useEducatorKpisQuery,
   useLazyKpisQuery,
+  useLazyLogsQuery,
   useKpisExportMutation,
 } = adminEducatorsApiSlice;
