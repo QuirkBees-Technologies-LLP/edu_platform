@@ -1428,6 +1428,11 @@ export const sideMenus = {
       icon: <MessageCircleMore />,
       path: "/admin/iq-social",
     },
+    {
+      title: "Logs",
+      icon: <MessageCircleMore />,
+      path: "/admin/logs",
+    },
   ],
   educator: [
     {

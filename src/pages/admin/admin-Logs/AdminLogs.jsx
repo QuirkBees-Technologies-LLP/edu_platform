@@ -19,6 +19,7 @@ import { SearchFilterInput } from "@/components";
 import debounce from "lodash.debounce";
 import { Loader2 } from "lucide-react";
 import CustomDateRangePicker from "../../../components/CustomDateRangePicker";
+import { useLazyLogsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
 
 const AdminLogs = ({ title = "Admin Logs" }) => {
   const [logs, setLogs] = useState([]);
@@ -32,39 +33,77 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
     rangeName: "",
   });
 
+  const [getLogsList] = useLazyLogsQuery();
 
-  const fetchLogs = async () => {
+  const fetchLogs = async ({ pageIndex, pageSize }) => {
+    const newPage = pageIndex + 1;
+    const newLimit = pageSize;
+
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await fetch("/api/admin/logs"); 
-      const result = await response.json();
+      const response = await getLogsList({
+        page: newPage,
+        limit: newLimit,
+        search: searchTextInput || "",
+        startDate: selectedDateRange.start
+          ? format(selectedDateRange.start, "yyyy-MM-dd")
+          : "",
+        endDate: selectedDateRange.end
+          ? format(selectedDateRange.end, "yyyy-MM-dd")
+          : "",
+      }).unwrap();
 
-      if (!response.ok) throw new Error(result.message || "Failed to fetch");
+      console.log("response", response);
 
-      let data = result.data || [];
+      // ✅ Update state
+      setLogs(response.posts || []);
 
-      if (searchTextInput.trim()) {
-        const query = searchTextInput.toLowerCase();
-        data = data.filter(
-          (item) =>
-            item.username?.toLowerCase().includes(query) ||
-            item.action?.toLowerCase().includes(query) ||
-            item.route?.toLowerCase().includes(query) ||
-            item.description?.toLowerCase().includes(query)
-        );
-      }
-
-      setLogs(data);
-    } catch (err) {
-      toast.error("Error fetching logs", { description: err.message });
+      // ✅ Return for DataGrid pagination
+      return {
+        data: response.posts || [],
+        totalCount: response.pagination?.totalRecords || 0,
+      };
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      setLogs([]);
+      return { data: [], totalCount: 0 };
     } finally {
       setLoading(false);
     }
   };
 
+  // useEffect(() => {
+  //   getLogsList();
+  // }, [tableKey, searchTextInput]);
+
+
   useEffect(() => {
-    fetchLogs();
-  }, [tableKey, searchTextInput]);
+  const fetchLogs = async () => {
+    try {
+      const res = await getLogsList({
+        page: 1,
+        limit: 10,
+        search: searchTextInput || "",
+        startDate: selectedDateRange.start
+          ? format(selectedDateRange.start, "yyyy-MM-dd")
+          : "",
+        endDate: selectedDateRange.end
+          ? format(selectedDateRange.end, "yyyy-MM-dd")
+          : "",
+      }).unwrap();
+
+      console.log("✅ Logs fetched:", res);
+      setLogs(res.posts || []); // ✅ Store data in state
+    } catch (err) {
+      console.error("❌ Error fetching logs:", err);
+      setLogs([]);
+    }
+  };
+
+  fetchLogs();
+}, [tableKey, searchTextInput, selectedDateRange]);
+
+
 
   const reloadTable = () => setTableKey((prev) => prev + 1);
 
@@ -122,14 +161,15 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         cell: (info) => (
           <span
             className={`badge capitalize badge-outline ${
-              info.row.original.action === "CREATE"
+              info.row.original.action === "POST"
                 ? "badge-success"
-                : info.row.original.action === "UPDATE"
+                : info.row.original.action === "PUT"
                   ? "badge-warning"
                   : "badge-danger"
             }`}
           >
-            {info.row.original.action}
+            
+            {info.row.original.action==="PUT"?"UPDATE":info.row.original.action==="POST"?'CREATE':"DELETE"}
           </span>
         ),
         meta: { headerClassName: "min-w-[120px]" },
@@ -204,7 +244,6 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
 
   return (
     <div className="container-fluid">
-  
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Admin Logs" />
@@ -251,6 +290,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         layout={{
           card: true,
         }}
+        onFetchData={fetchLogs}
       />
     </div>
   );
