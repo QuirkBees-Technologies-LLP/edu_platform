@@ -144,6 +144,7 @@ import EducatorEndSchedule from "../pages/educator/educator-endStream-schedule/E
 import AdminEndSession from "../pages/admin/admin-end-session/AdminEndSession";
 import EducatorKpi from "../pages/admin/KPIs Page/EducatorKpi";
 import AdminEndSchedule from "../pages/admin/admin-end-schedule/AdminEndSchedule";
+import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
 
 const routes = {
   student: [
@@ -195,7 +196,10 @@ const routes = {
     { path: "/educator/profile", element: <EducatorProfile /> },
     { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
     { path: "/educator/ended-live-sessions", element: <EducatorEndSession /> },
-    { path: "/educator/ended-stream-schedule", element: <EducatorEndSchedule /> },
+    {
+      path: "/educator/ended-stream-schedule",
+      element: <EducatorEndSchedule />,
+    },
     { path: "/educator/stream-recording", element: <EducatorRecording /> },
     {
       path: "/educator/stream-recording/list",
@@ -226,6 +230,7 @@ const routes = {
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
+    { path: "/admin/logs", element: <AdminLogs /> },
   ],
 };
 
