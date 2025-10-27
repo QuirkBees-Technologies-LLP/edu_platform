@@ -28,20 +28,24 @@ import { educatorTradeAnalysisApiSlice } from "./api/educator/educatorTradeAnaly
 import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSlice";
 import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
 import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
-import { persistReducer, persistStore } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // localStorage
+import { persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // localStorage
 import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
 import { clientEducatorApiSlice } from "./api/client/clientEductorApiSlice";
 import { clientSocialApiSlice } from "./api/client/clientSocialApiSlilce";
+import { adminPackageApiSlice } from "./api/admin/adminPackageApiSlice";
 
 const languagePersistConfig = {
-  key: 'language',
+  key: "language",
   storage,
-  whitelist: ['selectedLanguage', "languages"],
+  whitelist: ["selectedLanguage", "languages"],
 };
 
-const persistedLanguageReducer = persistReducer(languagePersistConfig, studentLanagugeSlice);
+const persistedLanguageReducer = persistReducer(
+  languagePersistConfig,
+  studentLanagugeSlice
+);
 
 export const store = configureStore({
   reducer: {
@@ -53,17 +57,24 @@ export const store = configureStore({
     language: persistedLanguageReducer,
     [adminCoursesTypesApiSlice.reducerPath]: adminCoursesTypesApiSlice.reducer,
     [adminLanguagesApiSlice.reducerPath]: adminLanguagesApiSlice.reducer,
-    [clientCreateUpdateApiSlice.reducerPath]: clientCreateUpdateApiSlice.reducer,
+    [clientCreateUpdateApiSlice.reducerPath]:
+      clientCreateUpdateApiSlice.reducer,
     [adminRecordingApiSlice.reducerPath]: adminRecordingApiSlice.reducer,
-    [adminStreamScheduleApiSlice.reducerPath]: adminStreamScheduleApiSlice.reducer,
+    [adminStreamScheduleApiSlice.reducerPath]:
+      adminStreamScheduleApiSlice.reducer,
     [educatorRecordingApiSlice.reducerPath]: educatorRecordingApiSlice.reducer,
-    [educatorLiveStreamApiSlice.reducerPath]: educatorLiveStreamApiSlice.reducer,
-    [educatorAcademyCategoryApiSlice.reducerPath]: educatorAcademyCategoryApiSlice.reducer,
-    [clientAcademyCategoryApiSlice.reducerPath]: clientAcademyCategoryApiSlice.reducer,
+    [educatorLiveStreamApiSlice.reducerPath]:
+      educatorLiveStreamApiSlice.reducer,
+    [educatorAcademyCategoryApiSlice.reducerPath]:
+      educatorAcademyCategoryApiSlice.reducer,
+    [clientAcademyCategoryApiSlice.reducerPath]:
+      clientAcademyCategoryApiSlice.reducer,
     [clientCoursesApiSlice.reducerPath]: clientCoursesApiSlice.reducer,
-    [educatorStreamScheduleApiSlice.reducerPath]: educatorStreamScheduleApiSlice.reducer,
+    [educatorStreamScheduleApiSlice.reducerPath]:
+      educatorStreamScheduleApiSlice.reducer,
     [adminEducatorsApiSlice.reducerPath]: adminEducatorsApiSlice.reducer,
-    [adminAcademyCategoryApiSlice.reducerPath]: adminAcademyCategoryApiSlice.reducer,
+    [adminAcademyCategoryApiSlice.reducerPath]:
+      adminAcademyCategoryApiSlice.reducer,
     [adminProfileApiSlice.reducerPath]: adminProfileApiSlice.reducer,
     [educatorProfileApiSlice.reducerPath]: educatorProfileApiSlice.reducer,
     [clientProfileApiSlice.reducerPath]: clientProfileApiSlice.reducer,
@@ -71,13 +82,17 @@ export const store = configureStore({
     [clientTradeIdeasApiSlice.reducerPath]: clientTradeIdeasApiSlice.reducer,
     [adminLiveSessionApiSlice.reducerPath]: adminLiveSessionApiSlice.reducer,
     [clientLiveSessionApiSlice.reducerPath]: clientLiveSessionApiSlice.reducer,
-    [educatorTradeIdeasApiSlice.reducerPath]: educatorTradeIdeasApiSlice.reducer,
+    [educatorTradeIdeasApiSlice.reducerPath]:
+      educatorTradeIdeasApiSlice.reducer,
     [clientRecordingApiSlice.reducerPath]: clientRecordingApiSlice.reducer,
-    [educatorTradeAnalysisApiSlice.reducerPath]: educatorTradeAnalysisApiSlice.reducer,
-    [adminTradeAnalysisApiSlice.reducerPath]: adminTradeAnalysisApiSlice.reducer,
+    [educatorTradeAnalysisApiSlice.reducerPath]:
+      educatorTradeAnalysisApiSlice.reducer,
+    [adminTradeAnalysisApiSlice.reducerPath]:
+      adminTradeAnalysisApiSlice.reducer,
     [clientLanguageApiSlice.reducerPath]: clientLanguageApiSlice.reducer,
     [clientEducatorApiSlice.reducerPath]: clientEducatorApiSlice.reducer,
-    [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer
+    [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer,
+    [adminPackageApiSlice.reducerPath]: adminPackageApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -107,7 +122,8 @@ export const store = configureStore({
       adminTradeAnalysisApiSlice.middleware,
       clientLanguageApiSlice.middleware,
       clientEducatorApiSlice.middleware,
-      clientSocialApiSlice.middleware
+      clientSocialApiSlice.middleware,
+      adminPackageApiSlice.middleware
     ),
 });
 
