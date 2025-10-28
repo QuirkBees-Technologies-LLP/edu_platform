@@ -15,7 +15,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../../components/ui/breadcrumb";
-import { Container, ShieldAlert, Videotape } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Container,
+  ShieldAlert,
+  Videotape,
+} from "lucide-react";
 import {
   Toolbar,
   ToolbarActions,
@@ -170,9 +176,8 @@ const IqInsight = () => {
                   key={idea._id}
                   className="card border-2 hover:bg-gray-200 overflow-hidden flex flex-col h-full"
                 >
-                  {/* Image */}
                   <div
-                    className="overflow-hidden cursor-pointer"
+                    className="relative overflow-hidden cursor-pointer"
                     onClick={() => {
                       setSelectedIdea(idea);
                       setIsViewOpen(true);
@@ -181,11 +186,87 @@ const IqInsight = () => {
                       index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
                     }
                   >
-                    <img
-                      src={idea?.image?.[0]}
-                      className="w-full h-[220px] object-cover"
-                      alt=""
-                    />
+                    {idea.image && idea.image.length > 0 && (
+                      <>
+                        <img
+                          src={idea.image[idea.currentIndex ?? 0]}
+                          alt={idea.name}
+                          className="w-full h-[220px] object-cover transition-all duration-500"
+                        />
+
+                        {idea.image.length > 1 && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTradeIdeas((prev) =>
+                                  prev.map((t) =>
+                                    t._id === idea._id
+                                      ? {
+                                          ...t,
+                                          currentIndex:
+                                            (t.currentIndex ?? 0) === 0
+                                              ? t.image.length - 1
+                                              : (t.currentIndex ?? 0) - 1,
+                                        }
+                                      : t
+                                  )
+                                );
+                              }}
+                              className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                            >
+                              <ChevronLeft size={20} />
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTradeIdeas((prev) =>
+                                  prev.map((t) =>
+                                    t._id === idea._id
+                                      ? {
+                                          ...t,
+                                          currentIndex:
+                                            (t.currentIndex ?? 0) ===
+                                            t.image.length - 1
+                                              ? 0
+                                              : (t.currentIndex ?? 0) + 1,
+                                        }
+                                      : t
+                                  )
+                                );
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2!right-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md -translate-y-1/2"
+                            >
+                              <ChevronRight size={20} />
+                            </button>
+
+                            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                              {idea.image.map((_, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTradeIdeas((prev) =>
+                                      prev.map((t) =>
+                                        t._id === idea._id
+                                          ? { ...t, currentIndex: idx }
+                                          : t
+                                      )
+                                    );
+                                  }}
+                                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                                    (idea.currentIndex ?? 0) === idx
+                                      ? "bg-primary"
+                                      : "bg-gray-300 hover:bg-gray-400"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   {/* Body + Footer */}
