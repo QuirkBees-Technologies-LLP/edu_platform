@@ -32,6 +32,7 @@ jobs:
           VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
           VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
           npm ci
           npm install express
           npm run build
@@ -50,5 +51,6 @@ jobs:
           app-name: 'edu'
           slot-name: 'Production'
           package: site.zip
+
 
 
