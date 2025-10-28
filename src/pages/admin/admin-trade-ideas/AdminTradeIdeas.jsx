@@ -29,6 +29,14 @@ import { useLazyGetAdminTradeIdeasQuery } from "../../../store/api/admin/adminTr
 import { TruncatedText } from "../../../lib/utils";
 import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
 import AdminTradeCards from "./AdminTradeCards";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -38,9 +46,10 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
+  const [category, setCategory] = useState(null);
   const [fetchTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetAdminTradeIdeasQuery();
-
+  const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
@@ -52,7 +61,6 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const handleDeleteClose = () => {
     setIsDeleteOpen(false);
   };
-
 
   const handleCloseView = () => {
     setIsLightBoxOpen(false);
@@ -251,9 +259,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <div className="flex flex-col gap-0.5">
-              <p>
-                {info.row.original.category?.name ?? "NA"}
-              </p>
+              <p>{info.row.original.category?.name ?? "NA"}</p>
             </div>
           </div>
         ),
@@ -360,6 +366,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
       const response = await fetchTradeIdeas({
         page: newPage,
         limit: newLimit,
+        category: category?._id || "",
       }).unwrap();
 
       return {
@@ -377,27 +384,29 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
-  const [activeTab, setActiveTab] = useState('TableView');
+  const [activeTab, setActiveTab] = useState("TableView");
 
   return (
     <div className="container-fluid pb-5">
       <div className="pb-10">
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
-            onClick={() => setActiveTab('TableView')}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === 'TableView'
-              ? 'bg-gray-100 text-gray-900 shadow'
-              : 'text-gray-600'
-              }`}
+            onClick={() => setActiveTab("TableView")}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "TableView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             Table View
           </button>
           <button
-            onClick={() => setActiveTab('UserView')}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === 'UserView'
-              ? 'bg-gray-100 text-gray-900 shadow'
-              : 'text-gray-600'
-              }`}
+            onClick={() => setActiveTab("UserView")}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "UserView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             User View
           </button>
@@ -409,12 +418,58 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             <ToolbarHeading>
               <ToolbarPageTitle text="IQ Ideas" />
               <ToolbarDescription>
-                Generate, analyze, and execute profitable trading opportunities with
-                smart insights, market trends, and data-driven strategies
+                Generate, analyze, and execute profitable trading opportunities
+                with smart insights, market trends, and data-driven strategies
               </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <div className="text-end pb-4">
+              {/* <div className="flex-1 min-w-[150px] md:min-w-[200px] relative">
+                <Select
+                  value={category?._id || ""}
+                  onValueChange={(value) => {
+                    const selected = categoryList?.data?.find(
+                      (item) => item._id === value
+                    );
+                    if (selected) {
+                      setCategory({
+                        _id: selected._id,
+                        name: `${selected.name}`,
+                      });
+                      reloadTable();
+                    }
+                  }}
+                >
+                  <SelectTrigger className="pr-5">
+                    <SelectValue
+                      placeholder="Select Category"
+                      value={category?._id || ""}
+                    >
+                      {category ? category.name : "Select Category"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryList?.data?.map((item) => (
+                      <SelectItem key={item._id} value={item._id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {category && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory(null);
+                      reloadTable();
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    ✖
+                  </button>
+                )}
+              </div> */}
+              <div className="text-end ">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
                   Create IQ Idea
                 </button>
@@ -468,11 +523,8 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           )}
         </>
       )}
-      {activeTab === "UserView" && (
-        <AdminTradeCards />
-      )}
+      {activeTab === "UserView" && <AdminTradeCards />}
     </div>
-
   );
 };
 export default AdminTradeIdeas;

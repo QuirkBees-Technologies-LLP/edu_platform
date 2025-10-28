@@ -6,8 +6,8 @@ export const adminTradeIdeasApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getAdminTradeIdeas: builder.query({
-      query: ({ page = 1, limit = 10, isview = true }) =>
-        `/admin/idea/get?page=${page}&limit=${limit}&isview=${isview}`,
+      query: ({ page = 1, limit = 10, isview = true , category = ""}) =>
+        `/admin/idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}`,
     }),
     getAdminWithoutTradeIdeas: builder.query({
       query: ({ isview = true }) => `/admin/idea/get?isview=${isview}`,
