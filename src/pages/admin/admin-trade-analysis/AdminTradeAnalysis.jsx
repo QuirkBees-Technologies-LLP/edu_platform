@@ -15,6 +15,13 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Toolbar,
   ToolbarActions,
   ToolbarDescription,
@@ -27,14 +34,18 @@ import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import DeleteTradeAnalysis from "./DeleteTradeAnalysis";
 import { useLazyGetAdminTradeAnalysisQuery } from "../../../store/api/admin/adminTradeAnalysisApiSlice";
 import ViewAdminTradeAnalysis from "./ViewAdminTradeAnalysis";
+import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { set } from "date-fns";
 
 const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [category, setCategory] = useState(null);
   const [getAdminTradeAnalysis, { data, isLoading, refetch }] =
     useLazyGetAdminTradeAnalysisQuery();
+  const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
 
   const handleCloseView = () => {
     setIsLightBoxOpen(false);
@@ -173,9 +184,7 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <div className="flex flex-col gap-0.5">
-              <p>
-                {info.row.original.category?.name ?? "NA"}
-              </p>
+              <p>{info.row.original.category?.name ?? "NA"}</p>
             </div>
           </div>
         ),
@@ -282,6 +291,7 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
       const response = await getAdminTradeAnalysis({
         page: newPage,
         limit: newLimit,
+        category: category?._id || "",
       }).unwrap();
 
       return {
@@ -314,7 +324,53 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
             </ToolbarDescription>
           </ToolbarHeading>
           <ToolbarActions>
-            <div className="text-end pb-4">
+            {/* <div className="flex-1 min-w-[150px] md:min-w-[200px] relative">
+              <Select
+                value={category?._id || ""}
+                onValueChange={(value) => {
+                  const selected = categoryList?.data?.find(
+                    (item) => item._id === value
+                  );
+                  if (selected) {
+                    setCategory({
+                      _id: selected._id,
+                      name: `${selected.name}`,
+                    });
+                    reloadTable();
+                  }
+                }}
+              >
+                <SelectTrigger className="pr-5">
+                  <SelectValue
+                    placeholder="Select Category"
+                    value={category?._id || ""}
+                  >
+                    {category ? category.name : "Select Category"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryList?.data?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {category && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategory(null);
+                    reloadTable();
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  ✖
+                </button>
+              )}
+            </div> */}
+            <div className="text-end ">
               <button className="btn btn-primary" onClick={handleClickOpen}>
                 Create IQ Insight
               </button>
