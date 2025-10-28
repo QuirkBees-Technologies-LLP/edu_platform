@@ -6,7 +6,7 @@ export const educatorTradeAnalysisApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getEducatorTradeAnalysis: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/educator/trade-analysis/?page=${page}&limit=${limit}`,
+            query: ({ page = 1, limit = 10 , category = ""}) => `/educator/trade-analysis/?page=${page}&limit=${limit}&category=${category}`,
         }),
         createEducatorTradeAnalysis: builder.mutation({
             query: (data) => ({

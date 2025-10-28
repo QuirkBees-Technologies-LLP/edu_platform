@@ -6,7 +6,7 @@ export const adminTradeAnalysisApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getAdminTradeAnalysis: builder.query({
-            query: ({ page = 1, limit = 10 }) => `/admin/trade-analysis/?page=${page}&limit=${limit}`,
+            query: ({ page = 1, limit = 10 , category = ""}) => `/admin/trade-analysis/?page=${page}&limit=${limit}&category=${category}`,
         }),
         createAdminTradeAnalysis: builder.mutation({
             query: (data) => ({

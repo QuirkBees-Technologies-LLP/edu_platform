@@ -6,7 +6,7 @@ export const educatorTradeIdeasApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getEducatorTradeIdeas: builder.query({
-            query: ({ page = 1, limit = 10, isview = true }) => `/educator/trade-idea/get?page=${page}&limit=${limit}&isview=${isview}`,
+            query: ({ page = 1, limit = 10, isview = true , category = ""}) => `/educator/trade-idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}`,
         }),
         getEducatorWithoutTradeIdeas: builder.query({
             query: ({isview=true }) => `/educator/trade-idea/get?isview=${isview}`,
