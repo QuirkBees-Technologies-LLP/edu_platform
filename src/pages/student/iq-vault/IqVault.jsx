@@ -17,7 +17,6 @@ export default function IqVault() {
 
   const selectedLanguage = useSelector(selectSelectedLanguage);
 
-  console.log(id);
   const handleClick = (id) => {
     setId(id); // or simply: id, based on your API setup
   };
@@ -76,14 +75,6 @@ export default function IqVault() {
   const [currentCourse, setCurrentCourse] = useState([]);
 
   useEffect(() => {
-    console.log("Course data update:", {
-      hasCourseData: !!data?.course,
-      courseLength: data?.course?.length,
-      activeTab,
-      activeCategoryId: data?.ActiveCategory?.[0]?.categoryId,
-      tabMatches: activeTab === `${data?.ActiveCategory?.[0]?.categoryId}`,
-    });
-
     // Only set course data if we have course data AND the active tab matches
     if (
       data?.course &&
@@ -91,17 +82,13 @@ export default function IqVault() {
       activeTab === `${data?.ActiveCategory?.[0]?.categoryId}`
     ) {
       setCurrentCourse(data.course);
-      console.log("Setting course data:", data.course.length, "courses");
     } else {
       // Reset course data if no course data or tab doesn't match
       setCurrentCourse([]);
-      console.log("Resetting course data - no valid course data");
     }
   }, [data, activeTab]);
 
   useEffect(() => {
-    console.log("data in side ", data);
-
     // Auto-select first category tab when data loads
     if (data?.ActiveCategory?.length > 0 && !activeTab) {
       setActiveTab(data.ActiveCategory[0]?.categoryId);
@@ -158,7 +145,6 @@ export default function IqVault() {
     // Listen for visibility change to refetch when user returns to page
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log("Page became visible, refetching data...");
         refetch();
       }
     };
@@ -174,19 +160,13 @@ export default function IqVault() {
   // Ensure active tab is set when returning to page
   useEffect(() => {
     if (data && !activeTab) {
-      console.log("Setting active tab on return to page");
       // Priority 1: Try to select from ActiveCategory
       if (data.ActiveCategory?.length > 0) {
         setActiveTab(data.ActiveCategory[0]?.categoryId);
-        console.log(
-          "Set active tab from ActiveCategory:",
-          data.ActiveCategory[0]?.categoryId
-        );
       }
       // Priority 2: Try to select from categories
       else if (data.categories?.length > 0) {
         setActiveTab(data.categories[0]?._id);
-        console.log("Set active tab from categories:", data.categories[0]?._id);
       }
     }
   }, [data, activeTab]);

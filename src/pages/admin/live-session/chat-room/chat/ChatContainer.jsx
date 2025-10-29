@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Channel as StreamChannel } from "stream-chat";
-import { Channel, Chat } from "stream-chat-react"
+import { Channel, Chat } from "stream-chat-react";
 import { useEventContext } from "../context/EventContext";
 import { useInitChat } from "../hooks/useInitChat";
 import { MessageUI } from "./MessageUI";
@@ -21,7 +21,7 @@ const ChatContainer = ({ sessionToken }) => {
     setSearching,
     showChannelList,
     userActionType,
-    setIsFullScreen
+    setIsFullScreen,
   } = useEventContext();
 
   const [dmChannel, setDmChannel] = useState(null);
@@ -39,23 +39,24 @@ const ChatContainer = ({ sessionToken }) => {
   const userId = auth?.user?._id;
   const userName = auth?.user?.first_name + " " + auth?.user?.last_name;
 
-  const { chatClient, currentChannel, dmUnread, eventUnread, globalUnread, qaUnread } = useInitChat({
+  const {
+    chatClient,
+    currentChannel,
+    dmUnread,
+    eventUnread,
+    globalUnread,
+    qaUnread,
+  } = useInitChat({
     userId,
     userToken: sessionToken,
     callId,
-    userName
+    userName,
   });
 
   if (!chatClient) return null;
 
-
-  console.log("currentChannel", currentChannel);
-  console.log("chatClient", chatClient);
-
   return (
-    <div
-      className={`chat str-chat`}
-    >
+    <div className={`chat str-chat`}>
       {isFullScreen && (
         <ChatSidebar
           isFullScreen={isFullScreen}
@@ -66,28 +67,32 @@ const ChatContainer = ({ sessionToken }) => {
           setIsFullScreen={setIsFullScreen}
         />
       )}
-      {!isFullScreen && <div className={`chat-components ${isFullScreen ? "full-screen" : ""}`}>
-        <Chat client={chatClient}>
-          <ChatHeader
-            dmUnread={dmUnread}
-            eventUnread={eventUnread}
-            globalUnread={globalUnread}
-            qaUnread={qaUnread}
-          />
-          <Channel
-            channel={currentChannel}
-            // EmptyStateIndicator={<div>Empty</div>}
-            GiphyPreviewMessage={GiphyPreview}
-            Input={MessageInputUI}
-            VirtualMessage={(props) => (
-              <MessageUI {...props} setMessageActionUser={setMessageActionUser} />
-            )}
-          >
-            <ChannelInner />
-          </Channel>
-
-        </Chat>
-      </div>}
+      {!isFullScreen && (
+        <div className={`chat-components ${isFullScreen ? "full-screen" : ""}`}>
+          <Chat client={chatClient}>
+            <ChatHeader
+              dmUnread={dmUnread}
+              eventUnread={eventUnread}
+              globalUnread={globalUnread}
+              qaUnread={qaUnread}
+            />
+            <Channel
+              channel={currentChannel}
+              // EmptyStateIndicator={<div>Empty</div>}
+              GiphyPreviewMessage={GiphyPreview}
+              Input={MessageInputUI}
+              VirtualMessage={(props) => (
+                <MessageUI
+                  {...props}
+                  setMessageActionUser={setMessageActionUser}
+                />
+              )}
+            >
+              <ChannelInner />
+            </Channel>
+          </Chat>
+        </div>
+      )}
     </div>
   );
 };

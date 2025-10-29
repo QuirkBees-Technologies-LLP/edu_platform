@@ -1,6 +1,13 @@
 import { useDrag, useDrop } from "react-dnd";
 
-const DraggableSection = ({ section, index, moveSection, onReorder,sections, children }) => {
+const DraggableSection = ({
+  section,
+  index,
+  moveSection,
+  onReorder,
+  sections,
+  children,
+}) => {
   const [{ isDragging }, drag] = useDrag({
     type: "SECTION",
     item: { id: section._id, index },
@@ -21,13 +28,11 @@ const DraggableSection = ({ section, index, moveSection, onReorder,sections, chi
       if (!onReorder) return;
 
       // const sections = document.querySelectorAll("[data-section-id]");
-      console.log("sections________________>",sections)
+
       const newOrder = Array.from(sections).map((el, idx) => ({
         id: el._id,
         order: idx,
       }));
-
-      console.log("📦 Sending reorder payload to API", newOrder);
 
       try {
         await onReorder(newOrder);

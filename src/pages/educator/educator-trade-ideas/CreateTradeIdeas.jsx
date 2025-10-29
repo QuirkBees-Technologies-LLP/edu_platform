@@ -86,7 +86,6 @@ const CreateTradeIdeas = forwardRef(
       revalidateOnMount: true,
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
-        console.log("values", values);
         const exitsValues =
           typeof values.exits === "string"
             ? values.exits.split(",").map(Number)
@@ -133,7 +132,6 @@ const CreateTradeIdeas = forwardRef(
       },
     });
 
-    console.log("formik", formik);
     useEffect(() => {
       if (educatorId && formik.values) {
         formik.setFieldValue("educatorId", educatorId);
@@ -202,11 +200,11 @@ const CreateTradeIdeas = forwardRef(
       formik.setFieldValue("files", newFiles);
     };
 
-  useEffect(() => {
-  if (!selectedRow) {
-    formik.resetForm(); 
-  }
-}, [selectedRow]);
+    useEffect(() => {
+      if (!selectedRow) {
+        formik.resetForm();
+      }
+    }, [selectedRow]);
 
     return (
       <>

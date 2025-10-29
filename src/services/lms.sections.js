@@ -54,7 +54,6 @@ export const createSection = async (sectionData, token) => {
  * @returns {Promise<Object>} Response data
  */
 export const updateSection = async (id, sectionData, token) => {
-  console.log("Updating section", sectionData, id);
   const response = await api.put(`/admin/section/${id}`, sectionData, {
     headers: {
       Authorization: `Bearer ${token}`,

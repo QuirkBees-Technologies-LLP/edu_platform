@@ -33,7 +33,6 @@ const CreateManualAdminRecording = forwardRef(
     const { auth } = useAuthContext();
     // const educatorId = auth?.user?._id ?? null;
 
-    
     const [showPreviewVideo, setShowPreviewVideo] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [videoInputType, setVideoInputType] = useState("");
@@ -137,7 +136,6 @@ const CreateManualAdminRecording = forwardRef(
           handleCloseCreate();
           // setSelectedRow({});
         } catch (err) {
-            console.log(err , "ERRROR");
           toast.error(err?.data?.message || "Something went wrong!");
         }
       },
@@ -154,9 +152,6 @@ const CreateManualAdminRecording = forwardRef(
     //     formik.setValues(initData);
     //   }
     // }, [selectedRow?._id, isCreateOpen]);
-
-    // console.log(formik.values, "values");
-    // console.log(selectedRow, "selectedRow");
 
     const getEmbedUrl = (url) => {
       if (!url) return "";

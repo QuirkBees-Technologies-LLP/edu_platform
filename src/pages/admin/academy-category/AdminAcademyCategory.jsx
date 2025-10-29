@@ -142,7 +142,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
       header: () => 'Status',
       enableSorting: false,
       cell: ({ row }) => {
-        console.log(toggleStatusData, "toggleStatusData");
+      
 
         return (
           <Switch
