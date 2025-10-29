@@ -23,7 +23,6 @@ const CourseList = ({ onCourseSelect }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-console.log(courses, "courses1");
 
   const handleUpdateCourse = async (courseData) => {
     if (!selectedCourse) return;

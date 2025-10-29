@@ -58,7 +58,7 @@ const CreateEducator = forwardRef(
     const [updateEducator] = useUpdateEducatorMutation();
 
     const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
-    console.log(categoryList, "categoryList");
+
     const initialValues = {
       first_name: "",
       last_name: "",
@@ -209,8 +209,6 @@ const CreateEducator = forwardRef(
             }
           }
 
-          console.log("formData", formData);
-
           // API call using FormData
           if (selectedRow?._id) {
             await updateEducator({
@@ -237,8 +235,6 @@ const CreateEducator = forwardRef(
       },
     });
 
-    console.log("Formik", formik);
-
     useEffect(() => {
       if (selectedRow?._id) {
         const initData = {
@@ -264,8 +260,6 @@ const CreateEducator = forwardRef(
       event.preventDefault();
       setPasswordVisible(!passwordVisible);
     };
-
-    console.log(formik.values, "values");
 
     return (
       <Dialog

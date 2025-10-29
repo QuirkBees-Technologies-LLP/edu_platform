@@ -44,7 +44,8 @@ const CreateTradeAnalysis = forwardRef(
       title: "",
       files: [],
       createdBy: "",
-      description: "", category: "",
+      description: "",
+      category: "",
       url: "",
     };
 
@@ -55,7 +56,8 @@ const CreateTradeAnalysis = forwardRef(
       description: Yup.string().required("Entry is required"),
       url: Yup.string()
         .url("Please enter a valid URL")
-        .optional("URL is required"), category: Yup.string().required("Category is required"),
+        .optional("URL is required"),
+      category: Yup.string().required("Category is required"),
     });
 
     const formik = useFormik({
@@ -64,8 +66,6 @@ const CreateTradeAnalysis = forwardRef(
       revalidateOnMount: true,
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
-        console.log("values", values);
-
         const formData = new FormData();
         formData.append("title", values.title);
         values.files.forEach((file) =>
@@ -79,11 +79,10 @@ const CreateTradeAnalysis = forwardRef(
           formData.append("id", selectedRow?._id);
         }
 
-
         try {
           if (selectedRow?._id) {
             let a = await updateAdminTradeAnalysis(formData).unwrap();
-            console.log("==============================>", a);
+
             refetch();
             toast.success("IQ Insight updated successfully!");
           } else {
@@ -175,10 +174,11 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter Title"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
-                        ? "border border-danger"
-                        : ""
-                        }`}
+                      className={`form-control input input-md w-full ${
+                        formik.errors.title && formik.touched.title
+                          ? "border border-danger"
+                          : ""
+                      }`}
                       {...formik.getFieldProps("title")}
                     />
                     {formik.touched.title && formik.errors.title && (
@@ -223,10 +223,11 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter url"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${formik.errors.url && formik.touched.url
-                        ? "border border-danger"
-                        : ""
-                        }`}
+                      className={`form-control input input-md w-full ${
+                        formik.errors.url && formik.touched.url
+                          ? "border border-danger"
+                          : ""
+                      }`}
                       {...formik.getFieldProps("url")}
                     />
                     {formik.touched.url && formik.errors.url && (
@@ -237,26 +238,6 @@ const CreateTradeAnalysis = forwardRef(
                   </div>
                 </div>
 
-                {/* <div className="col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Message <span className="text-danger">*</span>
-                  </label>
-                  <RichTextEditor
-                    content={formik.values.message}
-                    onChange={(value) => formik.setFieldValue("message", value)}
-                    onBlur={() => formik.setFieldTouched("message", true)}
-                    theme="snow"
-                    touched={formik.touched.message}
-                    error={formik.errors.message}
-                  />
-                  {formik.touched.message && formik.errors.message && (
-                    <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors.message}
-                    </span>
-                  )}
-                </div>
-              </div> */}
                 <div className="col-span-12">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -264,7 +245,9 @@ const CreateTradeAnalysis = forwardRef(
                     </label>
                     <Select
                       value={formik.values.category}
-                      onValueChange={(value) => formik.setFieldValue("category", value)}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("category", value)
+                      }
                       className={`form-control input input-md w-full ${formik.errors.category ? "border border-danger" : ""}`}
                     >
                       <SelectTrigger>
@@ -278,7 +261,9 @@ const CreateTradeAnalysis = forwardRef(
                             </SelectItem>
                           ))
                         ) : (
-                          <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
+                          <div className="px-4 py-2 text-sm text-gray-500">
+                            No options available
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -305,10 +290,11 @@ const CreateTradeAnalysis = forwardRef(
                         >
                           <div
                             className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-            ${formik.touched.files && formik.errors.files
-                                ? "border-danger"
-                                : "border-gray-200"
-                              }`}
+            ${
+              formik.touched.files && formik.errors.files
+                ? "border-danger"
+                : "border-gray-200"
+            }`}
                           >
                             <i className="ki-filled ki-picture"></i>
                           </div>

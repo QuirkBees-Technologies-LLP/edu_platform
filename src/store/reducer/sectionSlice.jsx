@@ -90,8 +90,6 @@ export const deleteExistingSection = createAsyncThunk(
 export const reorderSections = createAsyncThunk(
   "sections/reorderSections",
   async ({ sections, token }, { rejectWithValue }) => {
-    console.log("sections createAsyncThunk", sections);
-    console.log("token createAsyncThunk", token);
     try {
       const response = await reorderSectionsApi(sections, token);
       return response;

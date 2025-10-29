@@ -135,7 +135,6 @@ const CreateAdminStreamSchedule = forwardRef(
 
         formData.append("userId", values?.userId);
         formData.append("educator", values?.educator);
-       
 
         if (thumbnailFile) {
           formData.append("files", thumbnailFile); // key must match your backend field
@@ -156,7 +155,6 @@ const CreateAdminStreamSchedule = forwardRef(
 
         try {
           if (selectedRow?._id) {
-           
             await updateEducatorStreamSchedule({
               data: formData,
               id: selectedRow._id,
@@ -186,7 +184,6 @@ const CreateAdminStreamSchedule = forwardRef(
         // formik.setFieldValue("userId", educatorId);
       }
     }, [educatorId, formik.values]);
-    console.log(selectedRow, "selectedRow");
 
     useEffect(() => {
       if (selectedRow?._id) {
@@ -201,7 +198,7 @@ const CreateAdminStreamSchedule = forwardRef(
           userId: selectedRow?.userId,
           language: selectedRow?.language,
         };
-      
+
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
@@ -209,7 +206,6 @@ const CreateAdminStreamSchedule = forwardRef(
     const handleImageChange = (updatedImages) => {
       formik.setFieldValue("thumbnail", updatedImages);
     };
-    console.log(formik, "formik");
 
     return (
       <Dialog
@@ -299,9 +295,9 @@ const CreateAdminStreamSchedule = forwardRef(
                       isPickerOpen={isPickerOpen}
                       setIsPickerOpen={setIsPickerOpen}
                       value={formik.values.datetime}
-                        onChange={(date) =>
-                          formik.setFieldValue("datetime", date)
-                        }
+                      onChange={(date) =>
+                        formik.setFieldValue("datetime", date)
+                      }
                       className={
                         formik.errors.datetime && formik.touched.datetime
                           ? "border border-danger"

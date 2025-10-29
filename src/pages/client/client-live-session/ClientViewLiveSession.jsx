@@ -17,10 +17,11 @@ const ClientViewLiveSession = () => {
   const { auth } = useAuthContext();
 
   const userId = auth?.user?._id ?? null;
-  console.log("userId",userId)
+
   const [payload, setPayload] = useState({ userId: userId, callId: callId });
   const [token, setToken] = useState(null);
-  const [getClientToken, { data, error, isLoading }] = useGetClientTokenMutation();
+  const [getClientToken, { data, error, isLoading }] =
+    useGetClientTokenMutation();
 
   useEffect(() => {
     const fetchClientToken = async () => {
@@ -39,17 +40,18 @@ const ClientViewLiveSession = () => {
     const initClient = async () => {
       try {
         if (client) {
-          console.warn("Stream client already initialized, skipping re-creation.");
+          console.warn(
+            "Stream client already initialized, skipping re-creation."
+          );
           return;
         }
 
         const newClient = new StreamVideoClient({ apiKey });
         const newCall = newClient.call("livestream", callId);
         await newClient.connectUser({ id: userId }, token);
-        await newCall.get(); 
+        await newCall.get();
         setClient(newClient);
         setCall(newCall);
-        console.log("Stream client initialized successfully.");
       } catch (error) {
         console.error("Error initializing Stream client:", error);
       }
@@ -59,9 +61,10 @@ const ClientViewLiveSession = () => {
 
     return () => {
       if (client) {
-        client.disconnectUser()
+        client
+          .disconnectUser()
           .then(() => console.log("User disconnected from Stream."))
-          .catch(err => console.error("Error disconnecting user:", err));
+          .catch((err) => console.error("Error disconnecting user:", err));
       }
     };
   }, [client, token]);
@@ -70,7 +73,11 @@ const ClientViewLiveSession = () => {
     <EventProvider>
       <StreamWrapper call={call} callId={callId}>
         <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
-          <ClientLiveSessionWrapper token={token} client={client} callId={callId} />
+          <ClientLiveSessionWrapper
+            token={token}
+            client={client}
+            callId={callId}
+          />
         </StreamTheme>
       </StreamWrapper>
     </EventProvider>

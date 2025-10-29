@@ -9,7 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Alert } from "../../../../components/alert/Alert";
 import { toast } from "sonner";
-import { useCreateAdminCoursesTypesMutation, useUpdateAdminCoursesTypesMutation } from "../../../../store/api/admin/adminCoursesTypesApiSlice";
+import {
+  useCreateAdminCoursesTypesMutation,
+  useUpdateAdminCoursesTypesMutation,
+} from "../../../../store/api/admin/adminCoursesTypesApiSlice";
 
 const CreateCoursesTypes = forwardRef(
   (
@@ -46,7 +49,10 @@ const CreateCoursesTypes = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            await updateAdminCoursesTypes({...payload, status: String(selectedRow?.status)}).unwrap();
+            await updateAdminCoursesTypes({
+              ...payload,
+              status: String(selectedRow?.status),
+            }).unwrap();
             setSelectedRow({});
 
             refetch();
@@ -77,9 +83,6 @@ const CreateCoursesTypes = forwardRef(
       }
     }, [selectedRow?._id, isCreateOpen]);
 
-
-    console.log(formik.values, "values");
-
     return (
       <Dialog
         open={isCreateOpen}
@@ -107,10 +110,11 @@ const CreateCoursesTypes = forwardRef(
                     type="text"
                     placeholder="Enter name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.name && formik.touched.name
+                        ? "border border-danger"
+                        : ""
+                    }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (

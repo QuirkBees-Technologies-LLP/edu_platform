@@ -1,27 +1,25 @@
-import { useCallStateHooks } from '@stream-io/video-react-sdk';
-import { useEffect, useState } from 'react';
+import { useCallStateHooks } from "@stream-io/video-react-sdk";
+import { useEffect, useState } from "react";
 
-const RecordingControls = ({call}) => {
+const RecordingControls = ({ call }) => {
   const { useIsCallRecordingInProgress } = useCallStateHooks();
   const isRecording = useIsCallRecordingInProgress();
-  console.log(isRecording, "isRecording");
+
   const [recordings, setRecordings] = useState([]);
 
   const handleStart = async () => {
     try {
       await call.startRecording();
-      console.log('Recording started');
     } catch (err) {
-      console.error('Failed to start recording:', err);
+      console.error("Failed to start recording:", err);
     }
   };
 
   const handleStop = async () => {
     try {
       await call.stopRecording();
-      console.log('Recording stopped');
     } catch (err) {
-      console.error('Failed to stop recording:', err);
+      console.error("Failed to stop recording:", err);
     }
   };
 
@@ -30,7 +28,7 @@ const RecordingControls = ({call}) => {
       const response = await call.queryRecordings();
       setRecordings(response.recordings);
     } catch (err) {
-      console.error('Failed to fetch recordings:', err);
+      console.error("Failed to fetch recordings:", err);
     }
   };
 
@@ -41,8 +39,24 @@ const RecordingControls = ({call}) => {
 
   return (
     <div>
-      {!isRecording && <button className='btn btn-primary' onClick={handleStart} disabled={isRecording}>Start Recording</button>}
-      {isRecording && <button className='btn btn-danger' onClick={handleStop} disabled={!isRecording}>Stop Recording</button>}
+      {!isRecording && (
+        <button
+          className="btn btn-primary"
+          onClick={handleStart}
+          disabled={isRecording}
+        >
+          Start Recording
+        </button>
+      )}
+      {isRecording && (
+        <button
+          className="btn btn-danger"
+          onClick={handleStop}
+          disabled={!isRecording}
+        >
+          Stop Recording
+        </button>
+      )}
     </div>
   );
 };

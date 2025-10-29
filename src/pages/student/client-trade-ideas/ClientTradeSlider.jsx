@@ -55,7 +55,6 @@ export default function ClientTradeSlider({
       <div className="w-2 h-2 bg-gray-400 rounded-full hover:bg-gray-700" />
     ),
   };
-  console.log("selectedIdea", sliderImages);
 
   return (
     <div className="grid grid-cols-12 gap-4">

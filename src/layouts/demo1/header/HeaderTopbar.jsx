@@ -52,12 +52,13 @@ const HeaderTopbar = () => {
   const { data } = useGetLanguageQuery();
 
   useEffect(() => {
-    if(data)
-    {
-      dispatch(setLanguages(data.data))
+    if (data) {
+      dispatch(setLanguages(data.data));
       // Set English as default language if no language is selected
       if (!selectedLanguage) {
-        const englishLanguage = data.data.find(lang => lang.name === 'English');
+        const englishLanguage = data.data.find(
+          (lang) => lang.name === "English"
+        );
         if (englishLanguage) {
           dispatch(setSelectedLanguage(englishLanguage.name));
         }
@@ -68,12 +69,10 @@ const HeaderTopbar = () => {
   // Fallback: Set English as default if no language is selected and no API data
   useEffect(() => {
     if (!selectedLanguage && !data) {
-      dispatch(setSelectedLanguage('English'));
+      dispatch(setSelectedLanguage("English"));
     }
   }, [selectedLanguage, data, dispatch]);
 
-
-  console.log("selectedLanguage",selectedLanguage)
   return (
     <>
       {" "}

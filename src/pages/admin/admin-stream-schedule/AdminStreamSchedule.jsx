@@ -286,7 +286,6 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
                 info.row.original.isRecurent ? "badge-success" : "badge-danger"
               }`}
             >
-              {console.log("isRecurent", info.row.original.isRecurent)}
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>
           </div>
@@ -295,54 +294,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           headerClassName: "min-w-[100px]",
         },
       },
-      // {
-      //   accessorFn: row => row.createdAt,
-      //   id: 'createdAt',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Created At' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
-      // {
-      //   accessorFn: row => row.create_by,
-      //   id: 'create_by',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Created By' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {info.row.original.create_by?.first_name + " " + info.row.original.create_by?.last_name}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
-      // {
-      //   accessorFn: row => row.callId,
-      //   id: 'callId',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Call Id' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {info.row.original.callId}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
+
       {
         id: "click",
         header: () => "",
@@ -453,7 +405,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           return { data: [], totalCount: 0 };
         }
       },
-    [getAdminStreamSchedule, selectedEducator , searchTextInput]
+    [getAdminStreamSchedule, selectedEducator, searchTextInput]
   );
 
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
@@ -473,7 +425,6 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
   const debouncedSearch = useMemo(
     () =>
       debounce((value) => {
-        // console.log("value", value);
         setSearchTextInput(value);
         reloadTable();
       }, 500),

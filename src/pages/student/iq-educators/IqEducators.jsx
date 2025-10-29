@@ -27,9 +27,7 @@ import "yet-another-react-lightbox/styles.css";
 const IqEducators = () => {
   const navigate = useNavigate();
   const { auth } = useAuthContext();
-  // console.log("auth", auth);
 
-  console.log(auth);
   const userName = auth?.user?.name;
 
   const { id } = useParams();
@@ -88,8 +86,6 @@ const IqEducators = () => {
       setCallId(response.data.schedules[0].callId);
     }
   }, [response]);
-  console.log("response", response);
-  console.log("callId", callId);
 
   const updates = [
     {
@@ -240,8 +236,6 @@ const IqEducators = () => {
   const data = activeTab === "feed" ? feedData : ideasData;
 
   const handleOpen = (url) => {
-    console.log(url, "urls");
-
     setVideoUrl(url);
     setOpen(true);
   };
@@ -251,7 +245,7 @@ const IqEducators = () => {
     navigator.clipboard
       .writeText(currentUrl)
       .then(() => {
-        console.log("URL copied to clipboard:", currentUrl);
+       
         // Show toast notification
         setShowShareToast(true);
         // Hide toast after 3 seconds
@@ -1023,7 +1017,7 @@ const IqEducators = () => {
                         {/* <p className="text-sm font-normal text-gray-700">
                           {update.content}
                         </p> */}
-                        
+
                         {update?.content && (
                           <div className="mb-3">
                             <p

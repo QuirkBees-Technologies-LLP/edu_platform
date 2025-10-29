@@ -246,8 +246,6 @@ const AuthProvider = ({ children }) => {
           }
         );
 
-        console.log("loginRes", loginRes.data);
-
         // const loginData = await loginRes.json();
 
         if (loginRes?.data[0].error) {
@@ -299,7 +297,6 @@ const AuthProvider = ({ children }) => {
             // );
             // const tokenData = await tokenRes.json();
 
-            // console.log("tokenRes", tokenRes);
             // const token = tokenRes?.data?.data?.token;
             // if (!token) {
             //   return {
@@ -320,7 +317,7 @@ const AuthProvider = ({ children }) => {
 
             try {
               const { email } = loginRes?.data[0];
-              console.log(email, userid, first, last, active, plan, expiration);
+
               const res = await clientCreateUpdate({
                 name: `${first} ${last}`,
                 email,
@@ -332,8 +329,6 @@ const AuthProvider = ({ children }) => {
                 expire_at: expiration,
                 role: "student",
               }).unwrap();
-
-              console.log("res-------------->", res);
 
               const auth = {
                 token: res.token,

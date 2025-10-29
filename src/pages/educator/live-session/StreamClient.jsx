@@ -29,13 +29,10 @@ const StreamClient = ({
   setIsTooltipOpen,
   isTooltipOpen,
   id,
-  checkLastRecurrence ,
-  isRecurent
+  checkLastRecurrence,
+  isRecurent,
 }) => {
   const call = useCall();
-
-  console.log("isTooltipOpen", isTooltipOpen);
-  console.log("rtmp_url", isTooltipOpen);
 
   const truncateText = (text, maxLength) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;

@@ -116,7 +116,6 @@ export const updateCourse = async (id, courseData, token = null) => {
  */
 export const deleteCourse = async (id, token = null) => {
   try {
-    console.log(id);
     const response = await api.delete(`/admin/course/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
