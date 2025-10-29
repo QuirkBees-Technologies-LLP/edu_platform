@@ -280,6 +280,30 @@ export default function IqVault() {
     },
   ];
 
+  const sanitizeHtmlContent = (html) => {
+    if (!html) return "";
+
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      const links = [...doc.querySelectorAll("a")];
+      links.forEach((a) => {
+        a.setAttribute("target", "_blank");
+        a.setAttribute("rel", "noopener noreferrer");
+        a.classList.add("text-blue-600", "underline", "hover:text-blue-800");
+      });
+
+      const htmlWithLinks = doc.body.innerHTML.replace(
+        /<(?!a\s|\/a)[^>]+>/g,
+        ""
+      );
+      return htmlWithLinks.trim();
+    } catch (err) {
+      return html.replace(/<(?!a\s|\/a)[^>]+>/g, "").trim();
+    }
+  };
+
   return (
     <>
       <div>
@@ -472,14 +496,27 @@ export default function IqVault() {
                                     Mark as Complete
                                   </button>
                                 </div>
-                                {lecture.type == "TEXT" && (
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    {lecture.content?.replace(/<\/?p>/g, "")}
-                                  </p>
+                                {lecture.type === "TEXT" && (
+                                  <div
+                                    className="text-sm text-gray-600 mt-1"
+                                    dangerouslySetInnerHTML={{
+                                      __html: sanitizeHtmlContent(
+                                        lecture.content
+                                      ),
+                                    }}
+                                  />
                                 )}
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {lecture.description?.replace(/<\/?p>/g, "")}
-                                </p>
+
+                                {lecture.description && (
+                                  <div
+                                    className="text-sm text-gray-600 mt-1"
+                                    dangerouslySetInnerHTML={{
+                                      __html: sanitizeHtmlContent(
+                                        lecture.description
+                                      ),
+                                    }}
+                                  />
+                                )}
                               </div>
                             </div>
                           ) : (
