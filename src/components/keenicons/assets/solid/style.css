@@ -1722,3 +1722,13 @@
 /* .str-video__livestream-layout__wrapper{
   min-height: 500px;
 } */
+
+.live-player-container.fullscreen-fallback {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999;
+  background: black;
+}
