@@ -12,17 +12,15 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
     if (!playerRef.current) return;
 
     const container = playerRef.current;
-
-    // Detect mobile
     const isMobile = window.innerWidth < 768;
 
-    if (!isMobile) return; // Only apply on mobile
+    if (!isMobile) return; // Only handle on mobile
 
-    // Delegate click to fullscreen icon
     const handleClick = (e) => {
       const fullscreenButton = e.target.closest(
         '[data-testid="fullscreen-button"]'
       );
+
       if (fullscreenButton) {
         e.stopPropagation();
         e.preventDefault();
@@ -32,24 +30,50 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
 
     container.addEventListener("click", handleClick);
 
-    return () => {
-      container.removeEventListener("click", handleClick);
-    };
+    return () => container.removeEventListener("click", handleClick);
   }, []);
 
   const toggleFullscreen = async (element) => {
-    if (!document.fullscreenElement) {
-      try {
-        await element.requestFullscreen();
-      } catch (err) {
-        console.warn("Fullscreen request failed:", err);
+    try {
+      if (!document.fullscreenElement) {
+        // Enter fullscreen
+        if (element.requestFullscreen) {
+          await element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+          await element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+          await element.msRequestFullscreen();
+        }
+
+        // Try to lock to landscape
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock("landscape");
+          }
+        } catch (err) {
+          console.warn("Orientation lock failed:", err);
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        }
+
+        // Unlock to portrait again
+        try {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        } catch (err) {
+          console.warn("Orientation unlock failed:", err);
+        }
       }
-    } else {
-      try {
-        await document.exitFullscreen();
-      } catch (err) {
-        console.warn("Exit fullscreen failed:", err);
-      }
+    } catch (err) {
+      console.warn("Fullscreen toggle failed:", err);
     }
   };
 
