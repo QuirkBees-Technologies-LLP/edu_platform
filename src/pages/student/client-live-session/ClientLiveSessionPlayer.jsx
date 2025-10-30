@@ -3,93 +3,53 @@ import {
   StreamCall,
   StreamVideo,
 } from "@stream-io/video-react-sdk";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
+// import { Volume2, VolumeX } from "lucide-react";
 
 const ClientLiveSessionPlayer = ({ callId, client, call }) => {
-  const playerRef = useRef(null);
+//   const [volume, setVolume] = useState(1);
+//   const [isMuted, setIsMuted] = useState(false);
+//   const [isFullscreen, setIsFullscreen] = useState(false);
+//   const controlsRef = useRef(null);
 
-  useEffect(() => {
-    if (!playerRef.current) return;
+//   useEffect(() => {
+//     if (!call) return;
+//     try {
+//       call.setMasterOutputVolume(isMuted ? 0 : volume);
+//     } catch (err) {
+//       console.warn("Failed to set master output volume:", err);
+//     }
+//   }, [volume, isMuted, call]);
 
-    const container = playerRef.current;
+//   const toggleMute = () => setIsMuted(!isMuted);
 
-    const handleClick = (e) => {
-      const fullscreenButton = e.target.closest(
-        '[data-testid="fullscreen-button"]'
-      );
+//   useEffect(() => {
+//     const handleFullscreenChange = () => {
+//       const fsElement = document.fullscreenElement;
+//       setIsFullscreen(!!fsElement);
 
-      if (fullscreenButton) {
-        e.stopPropagation();
-        e.preventDefault();
-        toggleFullscreen(container);
-      }
-    };
+//       if (fsElement && controlsRef.current) {
+//         fsElement.appendChild(controlsRef.current);
+//       } else if (!fsElement && controlsRef.current && document.body) {
+//         const playerContainer = document.querySelector(
+//           ".live-player-container"
+//         );
+//         if (playerContainer) playerContainer.appendChild(controlsRef.current);
+//       }
+//     };
 
-    container.addEventListener("click", handleClick);
-    return () => container.removeEventListener("click", handleClick);
-  }, []);
-
-  const toggleFullscreen = async (element) => {
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const videoEl = element.querySelector("video");
-
-    try {
-      // ENTER fullscreen
-      if (!document.fullscreenElement) {
-        if (isIOS && videoEl && videoEl.webkitEnterFullscreen) {
-          // iOS-specific native fullscreen
-          videoEl.webkitEnterFullscreen();
-        } else if (element.requestFullscreen) {
-          await element.requestFullscreen();
-        } else if (element.webkitRequestFullscreen) {
-          await element.webkitRequestFullscreen();
-        } else if (element.msRequestFullscreen) {
-          await element.msRequestFullscreen();
-        }
-
-        // Orientation lock for Android only
-        if (isAndroid && screen.orientation?.lock) {
-          try {
-            await screen.orientation.lock("landscape");
-          } catch (err) {
-            console.warn("Orientation lock failed:", err);
-          }
-        }
-      } else {
-        // EXIT fullscreen
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          await document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-          await document.msExitFullscreen();
-        }
-
-        // Unlock orientation if supported
-        if (isAndroid && screen.orientation?.unlock) {
-          try {
-            await screen.orientation.unlock();
-          } catch (err) {
-            console.warn("Orientation unlock failed:", err);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("Fullscreen toggle failed:", err);
-    }
-  };
+//     document.addEventListener("fullscreenchange", handleFullscreenChange);
+//     return () =>
+//       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+//   }, []);
 
   return (
     client && (
       <StreamVideo client={client}>
         <StreamCall call={call}>
-          <div
-            ref={playerRef}
-            className="relative w-full h-full rounded-xl overflow-hidden bg-black live-player-container"
-          >
+          {/* <div className="relative w-full h-full rounded-xl overflow-hidden live-player-container"> */}
             <LivestreamPlayer
-              displayName="IQ Academy"
+              displayName="Hello guys"
               layoutProps={{
                 showLiveBadge: true,
                 showSpeakerName: true,
@@ -100,7 +60,39 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
               callType="livestream"
               callId={callId}
             />
-          </div>
+{/* 
+            <div
+              ref={controlsRef}
+              className="absolute bottom-3.5 right-14 flex items-center gap-2 group opacity-70 z-[99999] pointer-events-auto"
+            >
+              <button
+                onClick={toggleMute}
+                className="bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-2 transition flex items-center justify-center"
+              >
+                {isMuted || volume === 0 ? (
+                  <VolumeX size={18} className="text-white" />
+                ) : (
+                  <Volume2 size={18} className="text-white" />
+                )}
+              </button>
+
+              <div className="w-24  opacity-0 group-hover:opacity-100 transition duration-200">
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={isMuted ? 0 : volume}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setVolume(val);
+                    if (isMuted && val > 0) setIsMuted(false);
+                  }}
+                  className="w-full h-1 rounded-lg accent-yellow-300"
+                />
+              </div>
+            </div> */}
+          {/* </div> */}
         </StreamCall>
       </StreamVideo>
     )
