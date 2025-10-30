@@ -1723,12 +1723,3 @@
   min-height: 500px;
 } */
 
-.live-player-container:fullscreen {
-  width: 100vw !important;
-  height: 100vh !important;
-  background: black;
-}
-
-video::-webkit-media-controls-fullscreen-button {
-  display: block;
-}
