@@ -62,7 +62,7 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
   };
 
   // Columns definition
- const columns = useMemo(
+  const columns = useMemo(
     () => [
       {
         accessorFn: (row) => row.status,
@@ -133,7 +133,10 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
         accessorFn: (row) => row.create_by,
         id: "schedule_time",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Scheduled from this date" column={column} />
+          <DataGridColumnHeader
+            title="Scheduled from this date"
+            column={column}
+          />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -195,7 +198,6 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
                 info.row.original.isRecurent ? "badge-success" : "badge-danger"
               }`}
             >
-              {console.log("isRecurent", info.row.original.isRecurent)}
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>
           </div>
@@ -252,39 +254,39 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
       //     headerClassName: 'min-w-[200px]'
       //   }
       // },
-    //   {
-    //     id: "click",
-    //     header: () => "",
-    //     enableSorting: false,
-    //     cell: ({ row }) => (
-    //       <Menu className="items-stretch">
-    //         <MenuItem
-    //           toggle="dropdown"
-    //           onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
-    //           trigger="click"
-    //           dropdownProps={{
-    //             placement: isRTL() ? "bottom-start" : "bottom-end",
-    //             modifiers: [
-    //               {
-    //                 name: "offset",
-    //                 options: {
-    //                   offset: isRTL() ? [0, -10] : [0, 10], // [skid, distance]
-    //                 },
-    //               },
-    //             ],
-    //           }}
-    //         >
-    //           <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-    //             <KeenIcon icon="dots-vertical" />
-    //           </MenuToggle>
-    //           {ActionMenu(row.original)}
-    //         </MenuItem>
-    //       </Menu>
-    //     ),
-    //     meta: {
-    //       headerClassName: "w-[60px]",
-    //     },
-    //   },
+      //   {
+      //     id: "click",
+      //     header: () => "",
+      //     enableSorting: false,
+      //     cell: ({ row }) => (
+      //       <Menu className="items-stretch">
+      //         <MenuItem
+      //           toggle="dropdown"
+      //           onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+      //           trigger="click"
+      //           dropdownProps={{
+      //             placement: isRTL() ? "bottom-start" : "bottom-end",
+      //             modifiers: [
+      //               {
+      //                 name: "offset",
+      //                 options: {
+      //                   offset: isRTL() ? [0, -10] : [0, 10], // [skid, distance]
+      //                 },
+      //               },
+      //             ],
+      //           }}
+      //         >
+      //           <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+      //             <KeenIcon icon="dots-vertical" />
+      //           </MenuToggle>
+      //           {ActionMenu(row.original)}
+      //         </MenuItem>
+      //       </Menu>
+      //     ),
+      //     meta: {
+      //       headerClassName: "w-[60px]",
+      //     },
+      //   },
     ],
     [isRTL]
   );
@@ -330,10 +332,7 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
         search: searchTextInput || "",
       }).unwrap();
 
-      console.log("response", response);
-
       const endedData = response.data.filter((row) => row.status === "ended");
-      console.log("endedData", endedData);
 
       return {
         data: endedData || [],

@@ -68,8 +68,6 @@ const CreateTradeAnalysis = forwardRef(
       revalidateOnMount: true,
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
-        console.log("values", values);
-
         const formData = new FormData();
         formData.append("title", values.title);
         values.files.forEach((file) =>
@@ -86,12 +84,11 @@ const CreateTradeAnalysis = forwardRef(
         try {
           if (selectedRow?._id) {
             let a = await updateEducatorTradeAnalysis(formData).unwrap();
-            console.log("==============================>", a);
 
             toast.success("IQ Insight updated successfully!");
           } else {
             await createEducatorTradeAnalysis(formData).unwrap();
-           
+
             toast.success("IQ Insight created successfully!");
           }
           formik.resetForm();
@@ -157,10 +154,10 @@ const CreateTradeAnalysis = forwardRef(
     };
 
     useEffect(() => {
-  if (!selectedRow) {
-    formik.resetForm(); 
-  }
-}, [selectedRow]);
+      if (!selectedRow) {
+        formik.resetForm();
+      }
+    }, [selectedRow]);
 
     const existingImages =
       selectedRow?.image?.map((img) => ({

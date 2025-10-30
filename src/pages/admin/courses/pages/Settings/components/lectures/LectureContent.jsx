@@ -52,9 +52,6 @@ const LectureContent = ({
   const [lectureContent, setLectureContent] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
 
-  console.log("videoInputType=============>", videoInputType);
-
-  console.log("lecture", lecture);
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
     description: lecture?.description || "",
@@ -70,8 +67,6 @@ const LectureContent = ({
     videoUrl: lecture?.videoUrl || null,
   });
 
-  console.log("formData", formData);
-
   useEffect(() => {
     const fetchLectureContent = async () => {
       const response = await lmsLectures.getLectureById(
@@ -80,7 +75,6 @@ const LectureContent = ({
       );
       setLectureContent(response?.data);
     };
-    console.log(lectureContent, "lectureContent");
 
     // if (lecture.content) {
     //   setVideoInputType("url");
@@ -278,7 +272,6 @@ const LectureContent = ({
   }, [videoFile]);
 
   const handleSubmit = async (e) => {
-    console.log(videoFile, "videoFile");
     e.preventDefault();
 
     if (!formData.title?.trim()) {
@@ -324,11 +317,13 @@ const LectureContent = ({
     dataToSend.append("section", formData.section);
     dataToSend.append("content", formData.content);
     if (videoFile) {
-       dataToSend.append("thumbnail", formData.thumbnail?.file ? formData.thumbnail?.file : null);
+      dataToSend.append(
+        "thumbnail",
+        formData.thumbnail?.file ? formData.thumbnail?.file : null
+      );
       dataToSend.append("video", videoFile);
     }
 
-    console.log("dataToSend", dataToSend);
     setIsLoading(true);
     setUploadProgress(0);
     let fakeProgress = 0;
@@ -370,14 +365,13 @@ const LectureContent = ({
       setIsLoading(false);
       setUploadProgress(0);
       console.error("Failed to update lecture:", error);
-       const backendMessage =
-        error?.response?.data?.message || 
-        error?.response?.data?.error || 
-        error?.message || 
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
         "Unknown error";
 
       toast.error("Failed to update lecture: " + backendMessage);
-     
     } finally {
       setIsLoading(false);
     }
@@ -470,7 +464,9 @@ const LectureContent = ({
               </div>
 
               {/* Thumbnail Preview */}
-              {formData.thumbnail  || formData.thumbnail?.preview || formData.thumbnail?.url ? (
+              {formData.thumbnail ||
+              formData.thumbnail?.preview ||
+              formData.thumbnail?.url ? (
                 <div className="mt-3">
                   <img
                     src={

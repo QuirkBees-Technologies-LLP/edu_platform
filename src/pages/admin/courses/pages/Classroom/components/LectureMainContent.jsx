@@ -35,7 +35,7 @@ const LectureMainContent = ({ currentLecture }) => {
         setIsLoading(false);
       }
     };
-    console.log(lectureContent);
+
     fetchLectureContent();
   }, [currentLecture?._id, auth.token]);
 
@@ -111,9 +111,7 @@ const LectureMainContent = ({ currentLecture }) => {
 
       {lectureContent.description && (
         <div className="bg-primary-light border border-primary-100 rounded-lg p-5 mt-6">
-          <h3 className="text-sm font-medium text-primary mb-2">
-            Description
-          </h3>
+          <h3 className="text-sm font-medium text-primary mb-2">Description</h3>
           {/* <p className="text-indigo-700">{lectureContent.description}</p> */}
           <ShowMoreLess html={lectureContent.description} limit={120} />
         </div>

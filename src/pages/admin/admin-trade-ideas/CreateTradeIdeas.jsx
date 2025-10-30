@@ -59,7 +59,9 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
+      entry: Yup.number()
+        .required("Entry is required")
+        .positive("Entry must be a positive number"),
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
         .required("Invalidation is required")
@@ -82,7 +84,6 @@ const CreateTradeIdeas = forwardRef(
       revalidateOnMount: true,
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
-        console.log("values", values);
         const exitsValues =
           typeof values.exits === "string"
             ? values.exits.split(",").map(Number)
@@ -127,7 +128,6 @@ const CreateTradeIdeas = forwardRef(
       },
     });
 
-    console.log("formik", formik);
     useEffect(() => {
       if (educatorId && formik.values) {
         formik.setFieldValue("educatorId", educatorId);
@@ -223,10 +223,11 @@ const CreateTradeIdeas = forwardRef(
                     type="text"
                     placeholder="Enter symbol"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.name && formik.touched.name
+                        ? "border border-danger"
+                        : ""
+                    }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (
@@ -251,10 +252,11 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("type", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${formik.errors.type && formik.touched.type
-                        ? "border border-danger"
-                        : ""
-                        }`}
+                      className={`form-control input input-md w-full ${
+                        formik.errors.type && formik.touched.type
+                          ? "border border-danger"
+                          : ""
+                      }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -310,10 +312,11 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("timeFrame", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${formik.errors.timeFrame && formik.touched.timeFrame
-                        ? "border border-danger"
-                        : ""
-                        }`}
+                      className={`form-control input input-md w-full ${
+                        formik.errors.timeFrame && formik.touched.timeFrame
+                          ? "border border-danger"
+                          : ""
+                      }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -347,10 +350,11 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("status", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
-                        ? "border border-danger"
-                        : ""
-                        }`}
+                      className={`form-control input input-md w-full ${
+                        formik.errors.status && formik.touched.status
+                          ? "border border-danger"
+                          : ""
+                      }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -382,10 +386,11 @@ const CreateTradeIdeas = forwardRef(
                     type="number"
                     placeholder="Enter entry"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.entry && formik.touched.entry
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.entry && formik.touched.entry
+                        ? "border border-danger"
+                        : ""
+                    }`}
                   />
                   {formik.touched.entry && formik.errors.entry && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -404,10 +409,11 @@ const CreateTradeIdeas = forwardRef(
                     placeholder="Enter invalidation"
                     autoComplete="off"
                     {...formik.getFieldProps("invalidation")}
-                    className={`form-control input input-md w-full ${formik.errors.invalidation && formik.touched.invalidation
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.invalidation && formik.touched.invalidation
+                        ? "border border-danger"
+                        : ""
+                    }`}
                   />
                   {formik.touched.invalidation &&
                     formik.errors.invalidation && (
@@ -439,11 +445,12 @@ const CreateTradeIdeas = forwardRef(
                             newExits[index] = e.target.value;
                             formik.setFieldValue("exits", newExits);
                           }}
-                          className={`form-control input input-md w-full ${formik.errors.exits?.[index] &&
+                          className={`form-control input input-md w-full ${
+                            formik.errors.exits?.[index] &&
                             formik.touched.exits?.[index]
-                            ? "border border-danger"
-                            : ""
-                            }`}
+                              ? "border border-danger"
+                              : ""
+                          }`}
                         />
 
                         {/* Remove Button (if more than 1 exit) */}
@@ -476,7 +483,9 @@ const CreateTradeIdeas = forwardRef(
                   </label>
                   <Select
                     value={formik.values.category}
-                    onValueChange={(value) => formik.setFieldValue("category", value)}
+                    onValueChange={(value) =>
+                      formik.setFieldValue("category", value)
+                    }
                     className={`form-control input input-md w-full ${formik.errors.category ? "border border-danger" : ""}`}
                   >
                     <SelectTrigger>
@@ -490,7 +499,9 @@ const CreateTradeIdeas = forwardRef(
                           </SelectItem>
                         ))
                       ) : (
-                        <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
+                        <div className="px-4 py-2 text-sm text-gray-500">
+                          No options available
+                        </div>
                       )}
                     </SelectContent>
                   </Select>
@@ -537,10 +548,11 @@ const CreateTradeIdeas = forwardRef(
                       >
                         <div
                           className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-            ${formik.touched.files && formik.errors.files
-                              ? "border-danger"
-                              : "border-gray-200"
-                            }`}
+            ${
+              formik.touched.files && formik.errors.files
+                ? "border-danger"
+                : "border-gray-200"
+            }`}
                         >
                           <i className="ki-filled ki-picture"></i>
                         </div>

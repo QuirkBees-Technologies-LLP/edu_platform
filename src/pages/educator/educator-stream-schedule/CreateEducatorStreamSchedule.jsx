@@ -16,7 +16,10 @@ import { useNavigate } from "react-router";
 import { v4 as uuidv4 } from "uuid";
 import TagInput from "../../../components/ui/tagInput";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import { useGetEducatorAcademyCategoryQuery, useGetLanguageListQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import {
+  useGetEducatorAcademyCategoryQuery,
+  useGetLanguageListQuery,
+} from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import {
   Select,
   SelectContent,
@@ -36,19 +39,19 @@ const CreateEducatorStreamSchedule = forwardRef(
     { isCreateOpen, handleCloseCreate, selectedRow, setSelectedRow, refetch },
     ref
   ) => {
- const [time, setTime] = useState({
+    const [time, setTime] = useState({
       date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
       clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
     });
-     useEffect(() => {
-          const interval = setInterval(() => {
-            setTime({
-              date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-              clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
-            });
-          }, 1000);
-          return () => clearInterval(interval);
-        }, []);
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setTime({
+          date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
+          clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }, []);
     const { auth } = useAuthContext();
     const [createEducatorStreamSchedule] =
       useCreateEducatorStreamScheduleMutation();
@@ -59,7 +62,6 @@ const CreateEducatorStreamSchedule = forwardRef(
     const { data, isLoading } = useGetEducatorAcademyCategoryQuery();
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const { data: languagesList } = useGetLanguageListQuery();
-    console.log(selectedRow, "selectedRow");
 
     const initialValues = {
       title: "",
@@ -126,7 +128,7 @@ const CreateEducatorStreamSchedule = forwardRef(
         formData.append("category", values.category);
         formData.append("description", values.description);
         formData.append("datetime", values.datetime);
-        formData.append('language', values.language);
+        formData.append("language", values.language);
         values.tags.forEach((tag) => {
           formData.append(`tags[]`, tag);
         });
@@ -195,7 +197,7 @@ const CreateEducatorStreamSchedule = forwardRef(
           category: selectedRow?.category?._id,
           // files: [{ file: null, dataURL: selectedRow?.image }],
           userId: selectedRow?.userId,
-          language: selectedRow?.language
+          language: selectedRow?.language,
           // files: selectedRow?.image
         };
         formik.setValues(initData);
@@ -205,7 +207,6 @@ const CreateEducatorStreamSchedule = forwardRef(
     const handleImageChange = (updatedImages) => {
       formik.setFieldValue("files", updatedImages);
     };
-    console.log(formik, "formik");
 
     return (
       <Dialog
@@ -236,10 +237,11 @@ const CreateEducatorStreamSchedule = forwardRef(
                     type="text"
                     placeholder="Enter title"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.title && formik.touched.title
+                        ? "border border-danger"
+                        : ""
+                    }`}
                     {...formik.getFieldProps("title")}
                   />
                   {formik.touched.title && formik.errors.title && (
@@ -340,7 +342,7 @@ const CreateEducatorStreamSchedule = forwardRef(
                   )}
                 </div>
               </div>
-               {/* <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <div className="flex items-center justify-between">
                 <p className="text-xs font-medium tracking-wide">
                 EASTERN TIME (EST)
@@ -387,21 +389,26 @@ const CreateEducatorStreamSchedule = forwardRef(
                   </label>
                   <Select
                     value={formik.values.language}
-                    onValueChange={(value) => formik.setFieldValue("language", value)}
+                    onValueChange={(value) =>
+                      formik.setFieldValue("language", value)
+                    }
                     className={`form-control input input-md w-full ${formik.errors.language ? "border border-danger" : ""}`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.isArray(languagesList?.data) && languagesList.data.length > 0 ? (
+                      {Array.isArray(languagesList?.data) &&
+                      languagesList.data.length > 0 ? (
                         languagesList.data.map((item) => (
                           <SelectItem key={item._id} value={item.name}>
                             {item.name}
                           </SelectItem>
                         ))
                       ) : (
-                        <div className="px-4 py-2 text-sm text-gray-500">No options available</div>
+                        <div className="px-4 py-2 text-sm text-gray-500">
+                          No options available
+                        </div>
                       )}
                     </SelectContent>
                   </Select>
@@ -423,10 +430,11 @@ const CreateEducatorStreamSchedule = forwardRef(
                       onValueChange={(value) =>
                         formik.setFieldValue("category", value)
                       }
-                      className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
-                        ? "border border-danger"
-                        : ""
-                        }`}
+                      className={`form-control input input-md w-full ${
+                        formik.errors.category && formik.touched.category
+                          ? "border border-danger"
+                          : ""
+                      }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -474,7 +482,7 @@ const CreateEducatorStreamSchedule = forwardRef(
                   </label>
                   <div className="flex-wrap gap-5">
                     {/* Image Input */}
-                    {/* <ImageInput
+              {/* <ImageInput
                       value={formik.values.files}
                       onChange={handleImageChange}
                       acceptType={["jpg", "jpeg", "png"]}

@@ -45,7 +45,7 @@ const EducatorRecordingSession = () => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  console.log("updateDeleteRecording: ", updateDeleteRecording);
+
   const { getThemeMode } = useSettings();
   const observer = useRef();
 
@@ -115,36 +115,6 @@ const EducatorRecordingSession = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   setPage(1);
-  //   setRecordingList([]);
-  // }, [filterOptions]);
-
-  // if (data?.data?.recordings?.length === 0) {
-  //   return (
-  //     <Container className="pb-10">
-  //       <div className="card w-full h-100 items-center justify-center">
-  //         <div className="text-center flex items-center gap-3 flex-col py-24">
-  //           <Videotape size={30} />
-  //           <h3 className="text-xl font-medium text-gray-700">
-  //             No Recording available
-  //           </h3>
-  //           <button className="mt-5">
-  //             <span
-  //               onClick={() => {
-  //                 setIsCreateOpen(true)
-  //                  console.log("clicked")}}
-  //               className="btn btn-primary"
-  //             >
-  //               Create Recording
-  //             </span>
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </Container>
-  //   );
-  // }
-
   const toggleTags = (index) => {
     setShowAllTags((prev) => ({
       ...prev,
@@ -156,7 +126,6 @@ const EducatorRecordingSession = () => {
     setVideoUrl(url);
     setOpen(true);
   };
-
 
   const handleActionClick = (item) => {
     setUpdateDeleteRecording(item);
@@ -206,7 +175,6 @@ const EducatorRecordingSession = () => {
       </MenuItem>
     </MenuSub>
   );
-
 
   if (isError) {
     return (
@@ -319,7 +287,7 @@ const EducatorRecordingSession = () => {
                         videoUrl={item?.url}
                         seekTime={2}
                         image={item?.thumbnail}
-                         defaultImage={data?.data?.recorder?.bannerImage}
+                        defaultImage={data?.data?.recorder?.bannerImage}
                         onRecordingClick={() => handleOpen(item?.url)}
                         data={recording}
                       />

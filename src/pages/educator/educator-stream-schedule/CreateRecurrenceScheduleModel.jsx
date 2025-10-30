@@ -199,7 +199,6 @@ const CreateRecurrenceScheduleModel = forwardRef(
             }).unwrap();
             toast.success("Schedule updated successfully!");
           } else {
-            console.log(formData, "formdata");
             await createRecurrenceSchedule(formData).unwrap();
             toast.success("Schedule created successfully!");
           }
@@ -216,8 +215,6 @@ const CreateRecurrenceScheduleModel = forwardRef(
         }
       },
     });
-
-    console.log(formik, "inReccurence");
 
     useEffect(() => {
       if (selectedRow?._id) {

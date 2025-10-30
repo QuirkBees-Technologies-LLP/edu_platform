@@ -19,8 +19,6 @@ const RecordingThumbnail = ({
       ? defaultImage
       : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg");
 
-  console.log(videoUrl, "videoUrl");
-
   // useEffect(() => {
   //   const observer = new IntersectionObserver(
   //     (entries) => {

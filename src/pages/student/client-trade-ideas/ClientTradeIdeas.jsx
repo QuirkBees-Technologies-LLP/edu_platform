@@ -120,7 +120,6 @@ const ClientTradeIdeas = () => {
   const [copiedField, setCopiedField] = useState({ id: null, field: null });
 
   const handleCopyField = async (tradeId, fieldName, value) => {
-    console.log("called.....", tradeId, fieldName, value);
     try {
       await navigator.clipboard.writeText(value ?? "N/A");
       setCopiedField({ id: tradeId, field: fieldName });

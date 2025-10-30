@@ -14,15 +14,17 @@ const Courses = () => {
       className="rounded-full border-3 border-success size-[100px] shrink-0 object-cover object-top"
     />
   );
-  console.log(auth?.user?.name, "auth?.user?.name");
-  
+
   return (
     <div className="min-h-screen">
       <UserProfileHero
         name={auth?.user?.first_name + " " + auth?.user?.last_name}
         image={image}
         info={[
-          { label: `${auth?.user?.first_name} ${auth?.user?.last_name}`, icon: "abstract-41" },
+          {
+            label: `${auth?.user?.first_name} ${auth?.user?.last_name}`,
+            icon: "abstract-41",
+          },
           { label: `${auth?.user?.role}`, icon: "geolocation" },
           { email: `${auth?.user?.email}`, icon: "sms" },
         ]}

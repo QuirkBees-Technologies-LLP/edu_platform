@@ -3,51 +3,64 @@ import {
   StreamCall,
   StreamVideo,
 } from "@stream-io/video-react-sdk";
-import React, { useEffect, useState, useRef } from "react";
-// import { Volume2, VolumeX } from "lucide-react";
+import React, { useEffect, useRef } from "react";
 
 const ClientLiveSessionPlayer = ({ callId, client, call }) => {
-//   const [volume, setVolume] = useState(1);
-//   const [isMuted, setIsMuted] = useState(false);
-//   const [isFullscreen, setIsFullscreen] = useState(false);
-//   const controlsRef = useRef(null);
+  const playerRef = useRef(null);
 
-//   useEffect(() => {
-//     if (!call) return;
-//     try {
-//       call.setMasterOutputVolume(isMuted ? 0 : volume);
-//     } catch (err) {
-//       console.warn("Failed to set master output volume:", err);
-//     }
-//   }, [volume, isMuted, call]);
+  useEffect(() => {
+    if (!playerRef.current) return;
 
-//   const toggleMute = () => setIsMuted(!isMuted);
+    const container = playerRef.current;
 
-//   useEffect(() => {
-//     const handleFullscreenChange = () => {
-//       const fsElement = document.fullscreenElement;
-//       setIsFullscreen(!!fsElement);
+    // Detect mobile
+    const isMobile = window.innerWidth < 768;
 
-//       if (fsElement && controlsRef.current) {
-//         fsElement.appendChild(controlsRef.current);
-//       } else if (!fsElement && controlsRef.current && document.body) {
-//         const playerContainer = document.querySelector(
-//           ".live-player-container"
-//         );
-//         if (playerContainer) playerContainer.appendChild(controlsRef.current);
-//       }
-//     };
+    if (!isMobile) return; // Only apply on mobile
 
-//     document.addEventListener("fullscreenchange", handleFullscreenChange);
-//     return () =>
-//       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-//   }, []);
+    // Delegate click to fullscreen icon
+    const handleClick = (e) => {
+      const fullscreenButton = e.target.closest(
+        '[data-testid="fullscreen-button"]'
+      );
+      if (fullscreenButton) {
+        e.stopPropagation();
+        e.preventDefault();
+        toggleFullscreen(container);
+      }
+    };
+
+    container.addEventListener("click", handleClick);
+
+    return () => {
+      container.removeEventListener("click", handleClick);
+    };
+  }, []);
+
+  const toggleFullscreen = async (element) => {
+    if (!document.fullscreenElement) {
+      try {
+        await element.requestFullscreen();
+      } catch (err) {
+        console.warn("Fullscreen request failed:", err);
+      }
+    } else {
+      try {
+        await document.exitFullscreen();
+      } catch (err) {
+        console.warn("Exit fullscreen failed:", err);
+      }
+    }
+  };
 
   return (
     client && (
       <StreamVideo client={client}>
         <StreamCall call={call}>
-          {/* <div className="relative w-full h-full rounded-xl overflow-hidden live-player-container"> */}
+          <div
+            ref={playerRef}
+            className="relative w-full h-full rounded-xl overflow-hidden live-player-container"
+          >
             <LivestreamPlayer
               displayName="Hello guys"
               layoutProps={{
@@ -60,39 +73,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
               callType="livestream"
               callId={callId}
             />
-{/* 
-            <div
-              ref={controlsRef}
-              className="absolute bottom-3.5 right-14 flex items-center gap-2 group opacity-70 z-[99999] pointer-events-auto"
-            >
-              <button
-                onClick={toggleMute}
-                className="bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-2 transition flex items-center justify-center"
-              >
-                {isMuted || volume === 0 ? (
-                  <VolumeX size={18} className="text-white" />
-                ) : (
-                  <Volume2 size={18} className="text-white" />
-                )}
-              </button>
-
-              <div className="w-24  opacity-0 group-hover:opacity-100 transition duration-200">
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={isMuted ? 0 : volume}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    setVolume(val);
-                    if (isMuted && val > 0) setIsMuted(false);
-                  }}
-                  className="w-full h-1 rounded-lg accent-yellow-300"
-                />
-              </div>
-            </div> */}
-          {/* </div> */}
+          </div>
         </StreamCall>
       </StreamVideo>
     )

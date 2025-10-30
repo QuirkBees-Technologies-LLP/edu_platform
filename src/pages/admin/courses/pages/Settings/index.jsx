@@ -17,13 +17,17 @@ import { clearSections } from "@/store/reducer/sectionSlice";
 import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import ErrorMessages from "@/components/common/ErrorsMessage"
+import ErrorMessages from "@/components/common/ErrorsMessage";
 
 const SettingsSection = () => {
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
- const [content, setContent] = useState(() => localStorage.getItem("courseView") || "list");
-const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getItem("selectedCourseId"));
+  const [content, setContent] = useState(
+    () => localStorage.getItem("courseView") || "list"
+  );
+  const [selectedCourseId, setSelectedCourseId] = useState(() =>
+    localStorage.getItem("selectedCourseId")
+  );
 
   // Selectors
   const courses = useSelector(selectAllCourses);
@@ -33,7 +37,6 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
   // Fetch courses on mount and when token changes
   useEffect(() => {
     if (auth?.token) {
-      console.log("Fetching IQ Vault with token:", auth.token);
       dispatch(
         fetchCourses({
           params: {
@@ -43,7 +46,7 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
         })
       )
         .unwrap()
-        .then((response) => {
+         .then((response) => {
           console.log("IQ Vault fetched successfully:", response);
         })
         .catch((error) => {
@@ -56,21 +59,20 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
 
   // Handle course select
   const handleCourseSelect = (course) => {
-  setSelectedCourseId(course._id);
-  setContent("content");
-  localStorage.setItem("selectedCourseId", course._id);
-  localStorage.setItem("courseView", "content");
-};
+    setSelectedCourseId(course._id);
+    setContent("content");
+    localStorage.setItem("selectedCourseId", course._id);
+    localStorage.setItem("courseView", "content");
+  };
 
   // Handle back navigation
   const handleBack = () => {
-  setSelectedCourseId(null);
-  setContent("list");
-  localStorage.removeItem("selectedCourseId");
-  localStorage.setItem("courseView", "list");
-  dispatch(clearSections());
-};
-
+    setSelectedCourseId(null);
+    setContent("list");
+    localStorage.removeItem("selectedCourseId");
+    localStorage.setItem("courseView", "list");
+    dispatch(clearSections());
+  };
 
   // Handle error clear
   const handleErrorClear = () => {
@@ -80,11 +82,11 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
   // Render content based on status and content type
 
   useEffect(() => {
-  return () => {
-    localStorage.removeItem("selectedCourseId");
-    localStorage.removeItem("courseView");
-  };
-}, []);
+    return () => {
+      localStorage.removeItem("selectedCourseId");
+      localStorage.removeItem("courseView");
+    };
+  }, []);
   const renderContent = () => {
     if (status === "loading") {
       return <LoadingSpinner />;
@@ -93,8 +95,10 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
     if (error) {
       return (
         <ErrorMessages
-         heading={"No IQ Vault Yet"}
-          message={"You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."}
+          heading={"No IQ Vault Yet"}
+          message={
+            "You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."
+          }
           onRetry={() =>
             dispatch(
               fetchCourses({
@@ -135,7 +139,7 @@ const [selectedCourseId, setSelectedCourseId] = useState(() => localStorage.getI
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to IQ Vault 
+                  Back to IQ Vault
                 </button>
               )}
             </div>

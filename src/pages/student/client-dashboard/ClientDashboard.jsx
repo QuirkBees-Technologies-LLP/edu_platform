@@ -24,7 +24,7 @@ import {
   usePostQuery,
 } from "../../../store/api/client/clientSocialApiSlilce";
 import { formatDistanceToNow } from "date-fns";
-import {QRCodeCanvas} from 'qrcode.react';
+import { QRCodeCanvas } from "qrcode.react";
 const ClientDashboard = () => {
   const { auth } = useAuthContext();
 
@@ -38,9 +38,7 @@ const ClientDashboard = () => {
     isError,
   } = useCorporatePostQuery();
 
-  console.log(corporatePost);
   const liveStreams = liveEducator?.streams || [];
-  console.log(liveStreams, "liveStreams");
 
   const userName = auth?.user?.name;
   const categories = [
@@ -334,14 +332,17 @@ const ClientDashboard = () => {
         <DialogContent className="p-5 max-w-[400px]">
           <DialogHeader>
             <DialogTitle className="text-center text-lg font-semibold text-gray-800">
-              {qrType === "android" ? "Download Android Beta" : "Enroll for iOS Beta"}
+              {qrType === "android"
+                ? "Download Android Beta"
+                : "Enroll for iOS Beta"}
             </DialogTitle>
           </DialogHeader>
           <div className="flex justify-center items-center p-6">
             <QRCodeCanvas
-              value={qrType === "android"
-                ? "https://drive.google.com/drive/folders/1s9bCLuFn6lRv9BSBSfoFj78oE0Dvk0dQ?usp=sharing"
-                : "https://testflight.apple.com/join/qynfgnna"
+              value={
+                qrType === "android"
+                  ? "https://drive.google.com/drive/folders/1s9bCLuFn6lRv9BSBSfoFj78oE0Dvk0dQ?usp=sharing"
+                  : "https://testflight.apple.com/join/qynfgnna"
               }
               size={200}
               bgColor="#ffffff"
@@ -353,8 +354,7 @@ const ClientDashboard = () => {
           <p className="text-center text-sm text-gray-600 mb-4">
             {qrType === "android"
               ? "Scan this QR code to download the Android Beta app"
-              : "Scan this QR code to enroll for iOS Beta testing"
-            }
+              : "Scan this QR code to enroll for iOS Beta testing"}
           </p>
         </DialogContent>
       </Dialog>
@@ -670,15 +670,41 @@ const ClientDashboard = () => {
                           Be part of our beta testers.
                         </h1>
                         <p className="mt-2 text-slate-600">
-                          New iOS and Android <span className="font-medium text-slate-800">Iqonic</span> App
+                          New iOS and Android{" "}
+                          <span className="font-medium text-slate-800">
+                            Iqonic
+                          </span>{" "}
+                          App
                         </p>
                         <div className="mt-6 space-y-3 text-sm text-slate-600">
                           <div className="flex items-center gap-2">
-                            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden className="h-4 w-4 text-emerald-600"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z" clipRule="evenodd" /></svg>
+                            <svg
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden
+                              className="h-4 w-4 text-emerald-600"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
                             Early access to new features
                           </div>
                           <div className="flex items-center gap-2">
-                            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden className="h-4 w-4 text-emerald-600"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z" clipRule="evenodd" /></svg>
+                            <svg
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden
+                              className="h-4 w-4 text-emerald-600"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16Zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4Z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
                             Help shape the final release
                           </div>
                         </div>
@@ -686,12 +712,18 @@ const ClientDashboard = () => {
                           <h4 className="w-full md:w-auto text-base rounded-xl font-medium text-primary cursor-pointer">
                             Click to join our Beta Tester Program.
                           </h4>
-                          <p className="mt-3 text-xs text-slate-500">Your leader will share the private download links.</p>
+                          <p className="mt-3 text-xs text-slate-500">
+                            Your leader will share the private download links.
+                          </p>
                         </div>
                       </div>
                       <div className="flex gap-4 flex-col">
                         <div className="flex items-center gap-4">
-                          <a href="https://drive.google.com/drive/folders/1s9bCLuFn6lRv9BSBSfoFj78oE0Dvk0dQ?usp=sharing" target="_blank" className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs p-2 text-gray-800 font-medium w-[80%] md:w-[80%]">
+                          <a
+                            href="https://drive.google.com/drive/folders/1s9bCLuFn6lRv9BSBSfoFj78oE0Dvk0dQ?usp=sharing"
+                            target="_blank"
+                            className="btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs p-2 text-gray-800 font-medium w-[80%] md:w-[80%]"
+                          >
                             <img
                               src="/media/images/android.png"
                               alt="Download Android Beta"
@@ -711,7 +743,11 @@ const ClientDashboard = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-4">
-                            <a href="https://testflight.apple.com/join/qynfgnna" target="_blank" className="btn btn-light btn-lg p-2 rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium w-[80%]">
+                            <a
+                              href="https://testflight.apple.com/join/qynfgnna"
+                              target="_blank"
+                              className="btn btn-light btn-lg p-2 rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium w-[80%]"
+                            >
                               <img
                                 src="/media/images/apple.png"
                                 alt="Enroll for iOS Beta"

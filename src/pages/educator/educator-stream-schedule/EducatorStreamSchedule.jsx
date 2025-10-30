@@ -53,8 +53,8 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     useLazyGetEducatorStreamScheduleQuery();
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-   const [searchText, setSearchText] = useState("");
-  const [searchTextInput,setSearchTextInput] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
   const [isReccurenceScheduleOpen, setIsReccurenceScheduleOpen] =
     useState(false);
 
@@ -78,7 +78,6 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const handleDeleteOpen = () => {
-    console.log("handleDeleteOpen");
     setIsDeleteOpen(true);
   };
 
@@ -134,7 +133,6 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const ActionMenu = (raw) => {
-    console.log("raw", raw);
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
         <MenuItem onClick={() => handleEdit(raw)}>
@@ -156,7 +154,6 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
       </MenuSub>
     );
   };
-  console.log(selectedRow, "selectedrow");
 
   const columns = useMemo(
     () => [
@@ -229,7 +226,10 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         accessorFn: (row) => row.create_by,
         id: "schedule_time",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Scheduled from this date" column={column} />
+          <DataGridColumnHeader
+            title="Scheduled from this date"
+            column={column}
+          />
         ),
         enableSorting: true,
         cell: (info) => (
@@ -291,7 +291,6 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
                 info.row.original.isRecurent ? "badge-success" : "badge-danger"
               }`}
             >
-              {console.log("isRecurent", info.row.original.isRecurent)}
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>
           </div>
@@ -453,15 +452,14 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const debouncedSearch = useMemo(
-  () =>
-    debounce((value) => {
-      setSearchTextInput(value); 
-      reloadTable(); 
-    }, 500),
-  []
-);
+    () =>
+      debounce((value) => {
+        setSearchTextInput(value);
+        reloadTable();
+      }, 500),
+    []
+  );
   const handleSearchChange = (event) => {
-
     const value = event.target.value;
     setSearchText(value);
     debouncedSearch(value);
@@ -486,11 +484,11 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           </ToolbarActions> */}
           <ToolbarActions>
             <div className="relative w-full md:w-80">
-                          <SearchFilterInput
-                            searchText={searchText}
-                            handleSearchChange={handleSearchChange}
-                          />
-                        </div>
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+              />
+            </div>
             <div className="text-end">
               <button
                 className="btn btn-primary"

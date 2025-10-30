@@ -90,7 +90,6 @@ const HeroSectionCourse = ({ course }) => {
   // Manejar error de carga de imagen
   const handleImageError = () => {
     setImageError(true);
-    console.log(`Error loading image for course: ${title}`);
   };
 
   return (
@@ -170,11 +169,12 @@ const HeroSectionCourse = ({ course }) => {
               {instructor && (
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm">
-                    {((instructor?.first_name?.charAt(0) || '').toUpperCase() +
-                      (instructor?.last_name?.charAt(0) || '').toUpperCase()) || 'U'}
+                    {(instructor?.first_name?.charAt(0) || "").toUpperCase() +
+                      (instructor?.last_name?.charAt(0) || "").toUpperCase() ||
+                      "U"}
                   </div>
                   <span className="text-white/90 text-sm">
-                    {instructor.first_name + ' ' + instructor.last_name}
+                    {instructor.first_name + " " + instructor.last_name}
                   </span>
                 </div>
               )}

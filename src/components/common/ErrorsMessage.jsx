@@ -8,23 +8,11 @@ const ErrorMessages = ({ heading, message, onRetry, onDismiss }) => {
           <AlertCircle className="w-6 h-6 text-red-500" />
         </div>
 
-        <h3 className="mb-2 text-lg font-medium text-gray-900">
-          {heading}
-        </h3>
+        <h3 className="mb-2 text-lg font-medium text-gray-900">{heading}</h3>
 
         <p className="mb-4 text-sm text-gray-500 text-center">{message}</p>
 
         <div className="flex items-center space-x-4">
-          {/* {onRetry && (
-            <button
-              onClick={onRetry}
-              className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Try Again
-            </button>
-          )} */}
-
           {onDismiss && (
             <button
               onClick={onDismiss}
