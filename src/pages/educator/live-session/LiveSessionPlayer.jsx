@@ -54,10 +54,9 @@ const LiveSessionPlayer = ({
   const [lastRecurrence, setLastRecurrence] = useState(true);
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
-    const [lastNote , setLastNote] = useState(false)
+  const [lastNote, setLastNote] = useState(false);
 
   useEffect(() => {
-    console.log(checkLastRecurrence);
     if (!call) return;
 
     let subscriptions = [];
@@ -68,7 +67,6 @@ const LiveSessionPlayer = ({
 
         // 🔥 Call start state
         const startedSub = call.state.startedAt$.subscribe((startedAt) => {
-          console.log("Stream started at:", startedAt);
           setIsCallStarted(!!startedAt);
         });
 
@@ -135,42 +133,11 @@ const LiveSessionPlayer = ({
     }
   };
 
-  console.log(call?.state?.backstage, "call1234");
-
-  // useEffect(() => {
-  //   const handleStart = async () => {
-  //     try {
-  //       await call.startRecording();
-  //       console.log("Recording started");
-  //     } catch (err) {
-  //       console.error("Failed to start recording:", err);
-  //     }
-  //   };
-  //   !isRecording && handleStart();
-  // }, [call, isRecording]);
-
-  // useEffect(() => {
-  //   if (!call) return;
-
-  //   const autoStartRecording = async () => {
-  //     try {
-  //       if (!isRecording && isLive) {
-  //         await call.startRecording();
-  //         console.log("✅ Auto recording started as stream went live");
-  //       }
-  //     } catch (err) {
-  //       console.error("❌ Failed to start recording:", err);
-  //     }
-  //   };
-
-  //   autoStartRecording();
-  // }, [call, isRecording, isLive]);
-
   const fetchStreamRecordings = async () => {
     setIsLoadingRecordings(true);
     try {
       const response = await call.queryRecordings();
-      console.log("Recordings response:", response);
+
       if (response && response.recordings) {
         setStreamRecordings(response.recordings);
       } else {
@@ -184,17 +151,6 @@ const LiveSessionPlayer = ({
     }
   };
 
-  // // Fetch recordings when live stream stops
-  // useEffect(() => {
-  //   if (!isLive && call) {
-  //     // Add a small delay to ensure the server has processed the stop request
-  //     const timer = setTimeout(() => {
-  //       fetchStreamRecordings();
-  //     }, 2000);
-
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [isLive, call]);
   const handleEndCall = async (callId) => {
     try {
       if (!callId) {
@@ -260,7 +216,7 @@ const LiveSessionPlayer = ({
     if (!!isRecurent) {
       if (!!checkLastRecurrence) {
         setLastRecurrence(false);
-          setLastNote(true);
+        setLastNote(true);
       } else {
         setLastRecurrence(true);
       }
@@ -283,37 +239,6 @@ const LiveSessionPlayer = ({
         callType="livestream"
         callId={callId}
       />
-      {/* <div>{isLive ? `Live: ${participantCount}` : `In Backstage`}</div> */}
-      {/* {firstParticipant ? (
-                <ParticipantView participant={firstParticipant} />
-            ) : (
-                <div>The host hasn't joined yet</div>
-            )}
-            <div style={{ display: "flex", gap: "4px" }}>
-                <button onClick={() => (isLive ? call.stopLive() : call.goLive())}>
-                    {isLive ? "Stop Live" : "Go Live"}
-                </button>
-                <button onClick={() => cam.toggle()}>
-                    {isCamEnabled ? "Disable camera" : "Enable camera"}
-                </button>
-                <button onClick={() => mic.toggle()}>
-                    {isMicEnabled ? "Mute Mic" : "Unmute Mic"}
-                </button>
-
-                <button
-                    style={{ backgroundColor: "red", color: "white" }}
-                    onClick={async () => {
-                        try {
-                            await call.endCall();
-                            console.log("Stream has ended completely!");
-                        } catch (error) {
-                            console.error("Failed to end stream", error);
-                        }
-                    }}
-                >
-                    End Stream
-                </button>
-            </div> */}
 
       {isCallEnd ? (
         <div className="flex flex-col justify-center items-center gap-5 pb-20 pt-20">
@@ -503,7 +428,7 @@ const LiveSessionPlayer = ({
             <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
               Are you sure you want to end this livestream for everyone?
             </p>
-              {lastRecurrence === false && lastNote === true && (
+            {lastRecurrence === false && lastNote === true && (
               <p className="mb-4 text-red-600 dark:text-red-500 text-center">
                 This is your last recurrence. After ending, you will need to
                 create a new recurrence.

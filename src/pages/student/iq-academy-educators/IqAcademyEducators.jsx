@@ -67,16 +67,14 @@ const IqAcademyEducators = () => {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState("All");
 
-  const { data, isLoading , refetch} = useGetEducatorsListQuery({
+  const { data, isLoading, refetch } = useGetEducatorsListQuery({
     search: searchText,
     category: category,
   });
   const { data: categoryList } = useGetClientEducatorAcademyCategoryQuery();
-  console.log("categoryList", categoryList);
+
   const [toggleFollowData, { isLoading: followLoading }] =
     useToggleFollowMutation();
-  console.log("Data", data);
-  console.log("isLoading", isLoading);
 
   const toggleFollow = (id) => {
     setEducators((prev) =>
@@ -128,7 +126,6 @@ const IqAcademyEducators = () => {
   const debouncedSearch = useMemo(
     () =>
       debounce((value) => {
-        // console.log("value", value);
         setSearchText(value);
         // reloadTable();
       }, 500),

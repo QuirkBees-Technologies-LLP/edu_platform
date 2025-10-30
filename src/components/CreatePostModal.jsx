@@ -97,23 +97,14 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     // Only handle success after component has properly initialized
     if (!hasInitialized) return;
 
-    console.log("Status check:", {
-      createStatus,
-      generalStatus,
-      isEditing,
-      hasInitialized,
-    });
-
     // Handle create post success (only when not editing)
     if (createStatus === "succeeded" && !isEditing) {
-      console.log("Create post succeeded, closing modal");
       handleClose();
       dispatch(clearCreatePostStatus());
     }
 
     // Handle update post success (only when actively editing)
     if (generalStatus === "succeeded" && isEditing) {
-      console.log("Update post succeeded, closing modal");
       handleClose();
       // Clear the general error state when update succeeds
       dispatch(clearEducatorPostsStatus());
@@ -134,7 +125,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   }, [images, videos, documents]);
 
   const handleClose = () => {
-    console.log("handleClose called");
     setContent("");
     setImages([]);
     setVideos([]);
@@ -313,7 +303,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         }, 1000);
       } else {
         const result = await dispatch(createEducatorPost(postData)).unwrap();
-        console.log("Create post result:", result);
+
         toast.success("Post created successfully!");
         // Close modal immediately and also after a delay as backup
         handleClose();

@@ -35,17 +35,17 @@ const AdminLiveSessionView = () => {
       const newClient = new StreamVideoClient({
         apiKey,
         token,
-        user: { 
-          id: userId, 
-          name: auth?.user?.first_name + " " + auth?.user?.last_name 
+        user: {
+          id: userId,
+          name: auth?.user?.first_name + " " + auth?.user?.last_name,
         },
       });
 
       const newCall = newClient.call("livestream", callId);
-      
+
       // Check if already joined before joining
       if (!newCall.state.joined) {
-        await newCall.join({ role: 'admin' });
+        await newCall.join({ role: "admin" });
         await newCall.get();
       }
 
@@ -57,7 +57,6 @@ const AdminLiveSessionView = () => {
           newCall.leave();
         }
         newClient.disconnectUser();
-        console.log("🔴 Cleaned up Stream client and call.");
       };
     } catch (error) {
       console.error("❌ Error initializing Stream:", error);
@@ -78,7 +77,7 @@ const AdminLiveSessionView = () => {
 
     return () => {
       effectRan.current = false;
-      if (typeof cleanupFn === 'function') {
+      if (typeof cleanupFn === "function") {
         cleanupFn();
       }
       // Cleanup existing client and call on unmount
@@ -94,15 +93,17 @@ const AdminLiveSessionView = () => {
   return (
     <EventProvider>
       <StreamWrapper call={call}>
-        {call && client && <StreamClient
-          sessionToken={sessionToken}
-          call={call}
-          client={client}
-          callId={callId}
-          token={rtmp_stream_key}
-          rtmp_stream_key={rtmp_stream_key}
-          rtmp_url={rtmp_url}
-        />}
+        {call && client && (
+          <StreamClient
+            sessionToken={sessionToken}
+            call={call}
+            client={client}
+            callId={callId}
+            token={rtmp_stream_key}
+            rtmp_stream_key={rtmp_stream_key}
+            rtmp_url={rtmp_url}
+          />
+        )}
       </StreamWrapper>
     </EventProvider>
   );

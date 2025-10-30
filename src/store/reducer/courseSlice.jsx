@@ -35,8 +35,6 @@ export const fetchCourses = createAsyncThunk(
 export const fetchCoursesByEducatorId = createAsyncThunk(
   "courses/fetchByEducatorId",
   async ({ id, token }, { rejectWithValue }) => {
-    console.log(id, "id in api");
-    
     try {
       const response = await getCourseByEducatorId(id, token);
       return response.data;
@@ -189,7 +187,6 @@ const courseSlice = createSlice({
         state.status = COURSE_STATUS.FAILED;
         state.error = action.payload;
       })
-
 
       // Fetch Course By ID
       .addCase(fetchCourseById.pending, (state) => {

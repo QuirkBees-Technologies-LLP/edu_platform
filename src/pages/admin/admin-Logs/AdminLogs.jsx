@@ -53,7 +53,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
           : "",
       }).unwrap();
 
-      console.log("response", response);
+     
 
       // ✅ Update state
       setLogs(response.posts || []);
@@ -92,7 +92,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
           : "",
       }).unwrap();
 
-      console.log("✅ Logs fetched:", res);
+     
       setLogs(res.posts || []); // ✅ Store data in state
     } catch (err) {
       console.error("❌ Error fetching logs:", err);

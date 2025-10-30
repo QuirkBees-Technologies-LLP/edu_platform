@@ -92,8 +92,6 @@ const Main = ({ onSelectCourse }) => {
 
   // Filter courses based on search term and selected category
   const filteredCourses = coursesList.filter((course) => {
-    console.log(course, "IQ Vault");
-
     const matchesSearch =
       !searchTerm ||
       course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,7 +102,6 @@ const Main = ({ onSelectCourse }) => {
 
     return matchesSearch && matchesCategory;
   });
-  console.log(selectedCategory, "selectedCategory");
 
   // Get featured courses (highest rated or marked as featured)
   const featuredCourses = coursesList
@@ -119,7 +116,9 @@ const Main = ({ onSelectCourse }) => {
           <div className="p-2 bg-primary-light text-primary rounded-lg">
             {icon}
           </div>
-          <h2 className="xs:text-sm sm:text-xl font-bold text-gray-800">{title}</h2>
+          <h2 className="xs:text-sm sm:text-xl font-bold text-gray-800">
+            {title}
+          </h2>
         </div>
         {viewAllLink && (
           <a
@@ -192,7 +191,6 @@ const Main = ({ onSelectCourse }) => {
       </div>
     );
   }
-  console.log(categories, "categories");
 
   return (
     <div className="">

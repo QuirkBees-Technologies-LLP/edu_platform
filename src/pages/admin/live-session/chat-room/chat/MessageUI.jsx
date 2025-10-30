@@ -236,7 +236,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
         inline: "nearest", // 👈 page scroll nahi hoga, sirf container ke andar hoga
       });
     }
-  }, [isRecentMessage,messages.length]);
+  }, [isRecentMessage, messages.length]);
 
   const isTopMessage = messages?.[0].id === message.id;
 
@@ -244,7 +244,6 @@ export const MessageUI = ({ setMessageActionUser }) => {
     message.user?.title === "Admin" || message.user?.title === "Moderator";
 
   const isQA = chatType === "qa";
-  console.log(message.user?.name, "message.user.name");
 
   if (!message.user) return null;
   return (

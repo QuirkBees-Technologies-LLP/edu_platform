@@ -235,7 +235,7 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
       }).unwrap();
 
       const endedData = response.data.filter((row) => row.status === "ended");
-      console.log("endedData", endedData);
+     
 
       return {
         data: endedData || [],

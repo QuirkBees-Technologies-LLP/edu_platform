@@ -79,8 +79,6 @@ const CreateAdminRecording = forwardRef(
         try {
           const payload = { ...values };
 
-          console.log(payload, "payload");
-
           if (selectedRow?._id) {
             // Update mode
             payload.id = selectedRow._id;
@@ -112,7 +110,6 @@ const CreateAdminRecording = forwardRef(
               formData.append("call_title", payload.title);
               formData.append("call_description", payload.description);
 
-              console.log("payload", formData);
               await updateEducatorRecording({
                 formData: formData,
                 id: selectedRow._id,
@@ -159,9 +156,6 @@ const CreateAdminRecording = forwardRef(
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
-
-    console.log(formik.values, "values");
-    console.log(selectedRow, "selectedRow");
 
     return (
       <Dialog

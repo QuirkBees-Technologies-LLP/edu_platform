@@ -37,7 +37,6 @@ const SectionList = ({
   const [sections, setSections] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
-  
 
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
@@ -50,29 +49,25 @@ const SectionList = ({
   }, [reduxSections]);
 
   const moveSection = (fromIndex, toIndex) => {
-     setSections((prevSections) => {
-    const updated = [...prevSections];
-    const [moved] = updated.splice(fromIndex, 1);
-    updated.splice(toIndex, 0, moved);
-    return updated;
-  });
+    setSections((prevSections) => {
+      const updated = [...prevSections];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return updated;
+    });
   };
 
   const handleReorder = async (newOrder) => {
-    console.log("newOrder----->", newOrder);
-
     try {
       const payload = newOrder.map(({ id, order }) => ({
         _id: id,
         order,
       }));
 
-      console.log("PPayload", payload);
-      console.log("PPayload", auth.token);
       await dispatch(
         reorderSections({ sections: payload, token: auth.token })
       ).unwrap();
-      console.log("✅ API called: sections reordered");
+
       // No necesitamos actualizar el estado local aquí porque el useEffect
       // se encargará de actualizarlo cuando cambien las secciones en Redux
     } catch (error) {
@@ -113,8 +108,6 @@ const SectionList = ({
     setNewSectionTitle("");
     setIsAddingSection(false);
   };
-
-  console.log("sections",sections)
 
   return (
     <DndProvider backend={HTML5Backend}>

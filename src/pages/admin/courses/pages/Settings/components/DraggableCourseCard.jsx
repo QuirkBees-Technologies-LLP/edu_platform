@@ -46,10 +46,8 @@ const DraggableCourseCard = ({
     published,
     tier,
     instructor,
-    section
+    section,
   } = course;
-  console.log(course, "course");
-  
 
   // Fallback image URL
   const fallbackImage =
@@ -204,13 +202,12 @@ const DraggableCourseCard = ({
         {/** Content Section */}
         <div className="p-5">
           <div className="flex items-start justify-between">
-          <h3 className="text-lg w-[200px] font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">
-            {title}
-          </h3>
-          <span className="text-xs badge font-medium text-gray-900 rounded-2xl transition-colors duration-200">
-            {section}
-          </span>
-
+            <h3 className="text-lg w-[200px] font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">
+              {title}
+            </h3>
+            <span className="text-xs badge font-medium text-gray-900 rounded-2xl transition-colors duration-200">
+              {section}
+            </span>
           </div>
           <p className="text-sm text-gray-600 mb-4 line-clamp-2">
             {description}
@@ -220,14 +217,19 @@ const DraggableCourseCard = ({
           <div className="flex items-center gap-3 flex-wrap text-sm">
             <div className="flex items-center gap-1.5 text-blue-600">
               <Book className="w-4 h-4 text-primary shrink-0" />
-              <span className="font-medium text-primary">{category?.name || "Uncategorized"}</span>
+              <span className="font-medium text-primary">
+                {category?.name || "Uncategorized"}
+              </span>
             </div>
 
             <div className="h-4 w-px bg-gray-300"></div>
 
             <div className="flex items-center gap-1.5 text-gray-500">
               <Users className="w-4 h-4" />
-              <span>{instructor?.first_name + " " + instructor?.last_name || "Unknown Instructor"}</span>
+              <span>
+                {instructor?.first_name + " " + instructor?.last_name ||
+                  "Unknown Instructor"}
+              </span>
             </div>
           </div>
         </div>
@@ -268,32 +270,7 @@ const DraggableCourseCard = ({
   );
 };
 
-// DraggableCourseCard.propTypes = {
-//   course: PropTypes.shape({
-//     _id: PropTypes.string.isRequired,
-//     title: PropTypes.string.isRequired,
-//     description: PropTypes.string,
-//     imageUrl: PropTypes.string,
-//     category: PropTypes.any,
-//     published: PropTypes.bool,
-//     tier: PropTypes.oneOf(["FREE", "PRO"]),
-//     instructor: PropTypes.shape({
-//       id: PropTypes.string,
-//       name: PropTypes.string,
-//       email: PropTypes.string,
-//       role: PropTypes.string,
-//       tier: PropTypes.string,
-//     }),
-//     sections: PropTypes.arrayOf(PropTypes.object),
-//     createdAt: PropTypes.string,
-//     updatedAt: PropTypes.string,
-//   }).isRequired,
-//   index: PropTypes.number.isRequired,
-//   onEdit: PropTypes.func,
-//   onMove: PropTypes.func,
-//   onDelete: PropTypes.func,
-//   onSelect: PropTypes.func,
-// };
+
 
 DraggableCourseCard.defaultProps = {
   onEdit: () => {},
