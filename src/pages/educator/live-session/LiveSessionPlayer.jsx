@@ -378,7 +378,14 @@ const LiveSessionPlayer = ({
 
                       if (!isRecording) {
                         try {
-                          await call.startRecording();
+                          await call.startRecording({
+                            mode: "single",
+                            options: {
+                              "participant.filter": {
+                                isPinned: true,
+                              },
+                            },
+                          });
                         } catch (err) {
                           console.warn("⚠ startRecording failed:", err);
                         }

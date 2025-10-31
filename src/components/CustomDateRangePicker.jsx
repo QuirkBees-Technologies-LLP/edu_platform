@@ -16,15 +16,20 @@ const DateRangePicker = ({
   const [show, setShow] = useState(false);
 
   const dropdownRef = useRef(null);
-  const today = new Date();
 
   const formatDate = (date) => date.toISOString().split("T")[0];
 
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
   const dateRanges = {
-    Today: { start: today, end: today },
+    Today: {
+      start: today,
+      end: today,
+    },
     Yesterday: {
-      start: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000),
-      end: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000),
+      start: yesterday,
+      end: yesterday,
     },
     "Last 7 Days": {
       start: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000),
@@ -43,6 +48,20 @@ const DateRangePicker = ({
       end: new Date(today.getFullYear(), today.getMonth(), 0),
     },
   };
+
+  const startOfDay = (date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+
+  const endOfDay = (date) =>
+    new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      23,
+      59,
+      59,
+      999
+    );
 
   useEffect(() => {
     const handleClickOutside = (event) => {
