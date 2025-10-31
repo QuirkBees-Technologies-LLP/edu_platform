@@ -46,21 +46,21 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         limit: newLimit,
         search: searchTextInput || "",
         startDate: selectedDateRange.start
-          ? format(selectedDateRange.start, "yyyy-MM-dd")
+          ? new Date(selectedDateRange.start.setHours(0, 0, 0, 0)).toISOString()
           : "",
         endDate: selectedDateRange.end
-          ? format(selectedDateRange.end, "yyyy-MM-dd")
+          ? new Date(
+              selectedDateRange.end.setHours(23, 59, 59, 999)
+            ).toISOString()
           : "",
       }).unwrap();
 
-     
-
       // ✅ Update state
-      setLogs(response.posts || []);
+      setLogs(response.logs || []);
 
       // ✅ Return for DataGrid pagination
       return {
-        data: response.posts || [],
+        data: response.logs || [],
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
@@ -76,34 +76,30 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
   //   getLogsList();
   // }, [tableKey, searchTextInput]);
 
-
   useEffect(() => {
-  const fetchLogs = async () => {
-    try {
-      const res = await getLogsList({
-        page: 1,
-        limit: 10,
-        search: searchTextInput || "",
-        startDate: selectedDateRange.start
-          ? format(selectedDateRange.start, "yyyy-MM-dd")
-          : "",
-        endDate: selectedDateRange.end
-          ? format(selectedDateRange.end, "yyyy-MM-dd")
-          : "",
-      }).unwrap();
+    const fetchLogs = async () => {
+      try {
+        const res = await getLogsList({
+          page: 1,
+          limit: 10,
+          search: searchTextInput || "",
+          startDate: selectedDateRange.start
+            ? format(selectedDateRange.start, "yyyy-MM-dd")
+            : "",
+          endDate: selectedDateRange.end
+            ? format(selectedDateRange.end, "yyyy-MM-dd")
+            : "",
+        }).unwrap();
 
-     
-      setLogs(res.posts || []); // ✅ Store data in state
-    } catch (err) {
-      console.error("❌ Error fetching logs:", err);
-      setLogs([]);
-    }
-  };
+        setLogs(res.logs || []); // ✅ Store data in state
+      } catch (err) {
+        console.error("❌ Error fetching logs:", err);
+        setLogs([]);
+      }
+    };
 
-  fetchLogs();
-}, [tableKey, searchTextInput, selectedDateRange]);
-
-
+    fetchLogs();
+  }, [tableKey, searchTextInput, selectedDateRange]);
 
   const reloadTable = () => setTableKey((prev) => prev + 1);
 
@@ -168,8 +164,11 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
                   : "badge-danger"
             }`}
           >
-            
-            {info.row.original.action==="PUT"?"UPDATE":info.row.original.action==="POST"?'CREATE':"DELETE"}
+            {info.row.original.action === "PUT"
+              ? "UPDATE"
+              : info.row.original.action === "POST"
+                ? "CREATE"
+                : "DELETE"}
           </span>
         ),
         meta: { headerClassName: "min-w-[120px]" },
@@ -261,7 +260,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
               handleDateRangeChangeCallback={handleDateRangeChangeCallback}
             />
           </div>
-          <div>
+          {/* <div>
             <button
               type="button"
               className="px-2 py-2 bg-green-500 text-white rounded"
@@ -269,7 +268,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
             >
               {loading ? <Loader2 /> : "Export CSV"}
             </button>
-          </div>
+          </div> */}
         </ToolbarActions>
       </Toolbar>
 

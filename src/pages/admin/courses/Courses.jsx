@@ -8,6 +8,13 @@ import Content from "./Content";
 const Courses = () => {
   const { auth } = useAuthContext();
 
+  const name =
+    auth?.user?.first_name && auth?.user?.last_name
+      ? `${auth.user.first_name} ${auth.user.last_name}`
+      : auth?.user?.name;
+
+  const userName = name || "User";
+
   const image = (
     <img
       src={toAbsoluteUrl(auth?.user?.image)}
@@ -18,11 +25,11 @@ const Courses = () => {
   return (
     <div className="min-h-screen">
       <UserProfileHero
-        name={auth?.user?.first_name + " " + auth?.user?.last_name}
+        name={userName}
         image={image}
         info={[
           {
-            label: `${auth?.user?.first_name} ${auth?.user?.last_name}`,
+            label: `${userName}`,
             icon: "abstract-41",
           },
           { label: `${auth?.user?.role}`, icon: "geolocation" },

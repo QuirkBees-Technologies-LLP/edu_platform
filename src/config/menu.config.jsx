@@ -1324,7 +1324,7 @@ export const filterSidebarByPlan = (sidebarItems = [], allowedPaths = []) => {
 };
 
 export const sideMenus = {
-  admin: [
+  super_admin: [
     {
       title: "Dashboard",
       icon: <LayoutDashboard />,
@@ -1433,6 +1433,116 @@ export const sideMenus = {
       icon: <MessageCircleMore />,
       path: "/admin/logs",
     },
+  ],
+  admin: [
+    {
+      title: "Dashboard",
+      icon: <LayoutDashboard />,
+      path: "/",
+    },
+    {
+      title: "Academy",
+      icon: <BookOpen />,
+      path: "/admin/courses",
+    },
+
+    {
+      title: "IQ Live",
+      icon: <CalendarClock />,
+      // path: "/admin/stream-schedule",
+      children: [
+        {
+          title: "Live Schedule",
+          icon: <CalendarClock />,
+          path: "/admin/stream-schedule",
+        },
+        {
+          title: "Ended Schedule",
+          icon: <CalendarClock />,
+          path: "/admin/educator-ended-schedule",
+        },
+        {
+          title: "Live Sessions",
+          icon: <PlayCircle />,
+          path: "/admin/live-session",
+        },
+        {
+          title: "Ended Sessions ",
+          icon: <PlayCircle />,
+          path: "/admin/ended-live-sessions",
+        },
+      ],
+    },
+
+    {
+      title: "Recorded Live",
+      icon: <CircleDot />,
+      path: "/admin/stream-recording",
+    },
+    {
+      title: "IQ Insight",
+      icon: <ChartCandlestick />,
+      path: "/admin/trade-analysis",
+    },
+    {
+      title: "IQ Ideas",
+      icon: <Lightbulb />,
+      path: "/admin/ideas",
+    },
+    {
+      title: "IQ Strategies",
+      icon: <ChartNoAxesCombined />,
+      children: [
+        {
+          title: "IQ Charts",
+          icon: <Dot />,
+          path: "https://www.iqcharts.com/",
+          externalLink: true,
+          newTab: true,
+        },
+      ],
+    },
+    {
+      title: "Educators",
+      icon: <User />,
+      path: "/admin/educators",
+    },
+    // {
+    //   title: 'Video Library',
+    //   icon: <Clapperboard />,
+    //   path: '/admin/video-library'
+    // },
+    // {
+    //   title: 'Academy Category',
+    //   icon: <Layers />,
+    //   path: '/admin/academy-category'
+    // },
+    {
+      title: "KPIs",
+      icon: <ChartSpline />,
+      path: "/admin/kpis",
+    },
+    {
+      title: "Package",
+      icon: <Package />,
+      path: "/admin/package",
+    },
+    {
+      title: "General Setting",
+      icon: <Layers />,
+      path: "/admin/general-setting",
+    },
+
+    {
+      title: "IQ Social",
+      icon: <MessageCircleMore />,
+      path: "/admin/iq-social",
+    },
+    // {
+    //   title: "Logs",
+    //   icon: <MessageCircleMore />,
+    //   path: "/admin/logs",
+    // },
   ],
   educator: [
     {
