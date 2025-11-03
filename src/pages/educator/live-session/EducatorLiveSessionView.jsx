@@ -17,10 +17,8 @@ const EducatorLiveSessionView = () => {
     token: rtmp_stream_key,
     _id: _id,
     schedule: { isRecurent } = {},
-    checkLastRecurrence: checkLastRecurrence 
+    checkLastRecurrence: checkLastRecurrence,
   } = sessionData || {};
-
-  console.log(sessionData._id,"sessionData")
 
   const { auth } = useAuthContext();
   const userId = auth?.user?._id;
@@ -65,7 +63,6 @@ const EducatorLiveSessionView = () => {
           newCall.leave();
         }
         newClient.disconnectUser();
-        console.log("🔴 Cleaned up Stream client and call.");
       };
     } catch (error) {
       console.error("❌ Error initializing Stream:", error);

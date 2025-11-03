@@ -133,7 +133,6 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
       onSubmit: async (values) => {
         try {
           const { recurrenceRule } = values;
-          console.log(recurrenceRule, "recurrenceRule");
 
           let frequency = recurrenceRule.frequency;
           let interval = recurrenceRule.interval || 1;
@@ -166,7 +165,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           formData.append("datetime", values.datetime);
           formData.append("category", values.category);
           formData.append("language", values.language);
-         formData.append("educator", values?.educator);
+          formData.append("educator", values?.educator);
 
           values.tags.forEach((tag) => {
             formData.append("tags[]", tag);
@@ -198,14 +197,13 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
 
           if (selectedRow?._id) {
             formData.append("id", selectedRow._id);
-            console.log(formData, "formdata");
+
             await updateRecurrenceSchedule({
               id: selectedRow._id,
               data: formData,
             }).unwrap();
             toast.success("Schedule updated successfully!");
           } else {
-            console.log(formData, "formdata");
             await createRecurrenceSchedule(formData).unwrap();
             toast.success("Schedule created successfully!");
           }
@@ -223,8 +221,6 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
       },
     });
 
-    console.log(formik, "inReccurence");
-
     useEffect(() => {
       if (selectedRow?._id) {
         const initData = {
@@ -236,7 +232,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           tags: selectedRow?.tags || [],
           category: selectedRow?.category?._id,
           language: selectedRow?.language,
-           educator: selectedRow?.educator?._id,
+          educator: selectedRow?.educator?._id,
           recurrenceRule: {
             frequency: selectedRow?.recurrenceRuleId?.frequency || "NONE",
             interval: selectedRow?.recurrenceRuleId?.interval || 1,
@@ -327,7 +323,8 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    From this date onwards it will be schedule<span className="text-danger">*</span>
+                    From this date onwards it will be schedule
+                    <span className="text-danger">*</span>
                   </label>
                   <div className="custom_datepicket">
                     <DateTimePicker

@@ -7,6 +7,7 @@ import { lmsAuth } from "../../services";
 
 import { set } from "date-fns";
 import { logoutUser, setToken } from "../../store/reducer/authSlice";
+import { toast } from "sonner";
 const API_URL = import.meta.env.VITE_APP_API_URL;
 export const LOGIN_URL = `${API_URL}/signin`;
 export const ADMIN_LOGIN_URL = `${API_URL}/admin/auth/signin`;
@@ -245,116 +246,111 @@ const AuthProvider = ({ children }) => {
           }
         );
 
-        console.log("loginRes", loginRes.data);
-
         // const loginData = await loginRes.json();
 
-        if (!loginRes?.data[0]) {
+        if (loginRes?.data[0].error) {
           return {
             success: false,
             error: loginRes.data.message || "Login failed.",
           };
-        }
-
-        let {
-          // userid,
-          username,
-          first,
-          last,
-          uuid,
-          userid,
-          expiration,
-          active,
-          plan,
-        } = loginRes?.data[0];
-
-        // const {  } = loginRes?.data?.data;
-
-        // Step 2: Check Plan Expiry
-        // const isExpired = new Date(expiration) < new Date();
-        // const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
-
-        if (active === "Inactive") {
-          // Step 3: Get token and redirect
-          // const tokenRes = await fetch(
-          //   `https://api.iqonic.life/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
-          //   {
-          //     method: "GET",
-          //     headers: {
-          //       "api-key": API_KEY,
-          //     },
-          //   }
-          // );
-
-          // const tokenRes = await axios.get(
-          //   "https://api.iqonic.life/api/cb/outbound/iqverse/user/token",
-          //   {
-          //     params: {
-          //       user_id: userId,
-          //     },
-          //     headers: {
-          //       "api-key": API_KEY,
-          //     },
-          //   }
-          // );
-          // const tokenData = await tokenRes.json();
-
-          // console.log("tokenRes", tokenRes);
-          // const token = tokenRes?.data?.data?.token;
-          // if (!token) {
-          //   return {
-          //     success: false,
-          //     error: "Token not received for subscription renewal.",
-          //   };
-          // }
-          const { email } = loginRes?.data[0];
-
-          const redirectUrl = `https://shield.iqonic.life/qiqonic/orderproducts.dhtml?alzq=1&username=${email}&site=iqonic&language=EN&setform=ordering.html&thisform=ordering.html&shipto=base&scountry=US&products=PLAN`;
-          window.location.href = redirectUrl;
-
-          return { success: true, redirect: true }; // Optional success response before redirect
         } else {
-          // ✅ Step 4: Plan active — create educator
-          // const [, ...rest] = name.trim().split(" ");
-          // const lastName = rest.join(" ");
+          let {
+            // userid,
+            username,
+            first,
+            last,
+            uuid,
+            userid,
+            expiration,
+            active,
+            plan,
+          } = loginRes?.data[0];
 
-          try {
+          // const {  } = loginRes?.data?.data;
+
+          // Step 2: Check Plan Expiry
+          // const isExpired = new Date(expiration) < new Date();
+          // const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
+
+          if (active === "Inactive") {
+            // Step 3: Get token and redirect
+            // const tokenRes = await fetch(
+            //   `https://api.iqonic.life/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
+            //   {
+            //     method: "GET",
+            //     headers: {
+            //       "api-key": API_KEY,
+            //     },
+            //   }
+            // );
+
+            // const tokenRes = await axios.get(
+            //   "https://api.iqonic.life/api/cb/outbound/iqverse/user/token",
+            //   {
+            //     params: {
+            //       user_id: userId,
+            //     },
+            //     headers: {
+            //       "api-key": API_KEY,
+            //     },
+            //   }
+            // );
+            // const tokenData = await tokenRes.json();
+
+            // const token = tokenRes?.data?.data?.token;
+            // if (!token) {
+            //   return {
+            //     success: false,
+            //     error: "Token not received for subscription renewal.",
+            //   };
+            // }
             const { email } = loginRes?.data[0];
-            console.log(email, userid, first, last, active, plan, expiration);
-            const res = await clientCreateUpdate({
-              name: `${first} ${last}`,
-              email,
-              crm_id: uuid ? uuid : userid,
-              first_name: first,
-              last_name: last,
-              plan,
-              status: active,
-              expire_at: expiration,
-              role: "student",
-            }).unwrap();
 
-            console.log("res-------------->", res);
+            const redirectUrl = `https://shield.iqonic.life/qiqonic/orderproducts.dhtml?alzq=1&username=${email}&site=iqonic&language=EN&setform=ordering.html&thisform=ordering.html&shipto=base&scountry=US&products=PLAN`;
+            window.location.href = redirectUrl;
 
-            const auth = {
-              token: res.token,
-              user: res.user,
-            };
+            return { success: true, redirect: true }; // Optional success response before redirect
+          } else {
+            // ✅ Step 4: Plan active — create educator
+            // const [, ...rest] = name.trim().split(" ");
+            // const lastName = rest.join(" ");
 
-            saveAuth(auth);
-            dispatch(setToken(auth.token));
-            setCurrentUser(auth?.user);
+            try {
+              const { email } = loginRes?.data[0];
 
-            return {
-              success: true,
-              user: res.user,
-              token: res.token,
-            };
-          } catch (apiError) {
-            const errorMessage =
-              apiError?.data?.error?.[0] ||
-              apiError?.data?.message ||
-              "User creation failed.";
-            return { success: false, error: errorMessage };
+              const res = await clientCreateUpdate({
+                name: `${first} ${last}`,
+                email,
+                crm_id: uuid ? uuid : userid,
+                first_name: first,
+                last_name: last,
+                plan,
+                status: active,
+                expire_at: expiration,
+                role: "student",
+              }).unwrap();
+
+              const auth = {
+                token: res.token,
+                user: res.user,
+              };
+
+              saveAuth(auth);
+              dispatch(setToken(auth.token));
+              setCurrentUser(auth?.user);
+
+              return {
+                success: true,
+                user: res.user,
+                token: res.token,
+              };
+            } catch (apiError) {
+              const errorMessage =
+                apiError?.data?.error?.[0] ||
+                apiError?.data?.message ||
+                "User creation failed.";
+              return { success: false, error: errorMessage };
+            }
           }
         }
       } catch (err) {

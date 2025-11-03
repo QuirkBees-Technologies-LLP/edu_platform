@@ -113,7 +113,6 @@ export const reorderCourses = async (courseOrders, token) => {
 
 export const deleteCourse = async (courseId, token) => {
   try {
-    console.log("courseId", courseId);
     const response = await api.delete(`/courses/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -222,11 +221,11 @@ export const updateLecture = async (lectureId, lectureData, token) => {
     sectionId: lectureData.sectionId,
     thumbnailUrl: lectureData.thumbnailUrl,
   };
-  console.log("payload", payload);
+
   const response = await api.put(`/lectures/${lectureId}`, payload, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  console.log("response", response.data);
+
   return response.data;
 };
 

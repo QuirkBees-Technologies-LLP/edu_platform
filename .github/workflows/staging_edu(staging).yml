@@ -31,6 +31,7 @@ jobs:
           VITE_APP_CRM_API_KEY: ${{ secrets.STAGING_VITE_APP_CRM_API_KEY }}
           VITE_APP_STREAM_API_KEY: ${{ secrets.STAGING_VITE_APP_STREAM_API_KEY }}
         run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
           npm ci
           npm run build
           zip -r site.zip dist
@@ -48,3 +49,4 @@ jobs:
           app-name: 'edu'
           slot-name: 'staging'
           package: site.zip
+

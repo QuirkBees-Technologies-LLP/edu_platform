@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { StreamVideoClient, StreamTheme } from "@stream-io/video-react-sdk";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import { useParams } from "react-router";
-import { useGetClientLiveScheduleQuery, useGetClientTokenMutation } from "../../../store/api/client/clientLiveSessionApiSlice";
+import {
+  useGetClientLiveScheduleQuery,
+  useGetClientTokenMutation,
+} from "../../../store/api/client/clientLiveSessionApiSlice";
 import { useAuthContext } from "../../../auth/useAuthContext";
 import { EventProvider } from "./chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "./ClientLiveSessionWrapper";
@@ -11,18 +14,15 @@ import { format } from "date-fns";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
-const ClientViewLiveSession = ({bannerImage, callId}) => {
+const ClientViewLiveSession = ({ bannerImage, callId }) => {
   const [client, setClient] = useState(null);
-  console.log(callId, "callId");
-  
+
   const [call, setCall] = useState(null);
   const isInitializing = useRef(false); // Track initialization attempts
   // const { callId } = useParams();
   const { auth } = useAuthContext();
   const userId = auth?.user?._id ?? null;
 
-  console.log("userId",auth)
-  console.log("callId----->",callId)
   const [recordings, setRecordings] = useState([]);
 
   // 1. Fetch token and schedule data (uncomment schedule logic)
@@ -64,7 +64,7 @@ const ClientViewLiveSession = ({bannerImage, callId}) => {
                 layout: {
                   name: "single_participant",
                   options: {
-                    "video_border_radius": "0",
+                    video_border_radius: "0",
                   },
                 },
               },
@@ -94,26 +94,24 @@ const ClientViewLiveSession = ({bannerImage, callId}) => {
   }, [client]);
 
   // 4. Render logic with safe scheduleData access
-  const isUpcoming = scheduleData?.data?.datetime 
+  const isUpcoming = scheduleData?.data?.datetime
     ? new Date(scheduleData.data.datetime) > new Date()
     : false;
 
-     const fetchRecordings = async () => {
-        try {
-          const response = await call.queryRecordings();
-          setRecordings(response.recordings);
-        } catch (err) {
-          console.error('Failed to fetch recordings:', err);
-        }
-      };
-    
-      // useEffect(() => {
-      //   // Fetch recordings when the component mounts
-      //   fetchRecordings();
-      // }, [call]);
+  const fetchRecordings = async () => {
+    try {
+      const response = await call.queryRecordings();
+      setRecordings(response.recordings);
+    } catch (err) {
+      console.error("Failed to fetch recordings:", err);
+    }
+  };
 
-      console.log(call, "call");
-      
+  // useEffect(() => {
+  //   // Fetch recordings when the component mounts
+  //   fetchRecordings();
+  // }, [call]);
+
   return (
     <>
       {/* {isUpcoming ? (
@@ -127,13 +125,20 @@ const ClientViewLiveSession = ({bannerImage, callId}) => {
           </p>
         </div>
       ) : ( */}
-        <EventProvider>
-          <StreamWrapper call={call} callId={callId} bannerImage={bannerImage}>
-            <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
-              {<ClientLiveSessionWrapper bannerImage={bannerImage} client={client} callId={callId} token={token}/>}
-            </StreamTheme>
-          </StreamWrapper>
-        </EventProvider>
+      <EventProvider>
+        <StreamWrapper call={call} callId={callId} bannerImage={bannerImage}>
+          <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
+            {
+              <ClientLiveSessionWrapper
+                bannerImage={bannerImage}
+                client={client}
+                callId={callId}
+                token={token}
+              />
+            }
+          </StreamTheme>
+        </StreamWrapper>
+      </EventProvider>
       {/* )} */}
     </>
   );

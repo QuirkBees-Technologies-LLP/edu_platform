@@ -151,21 +151,6 @@ const CreateEducatorRecording = forwardRef(
       },
     });
 
-    // useEffect(() => {
-    //   if (selectedRow?._id) {
-    //     const initData = {
-    //       title: selectedRow?.call_title,
-    //       description: selectedRow?.call_description,
-    //       id: selectedRow?._id,
-    //       thumbnail: selectedRow?.thumbnail || null,
-    //     };
-    //     formik.setValues(initData);
-    //   }
-    // }, [selectedRow?._id, isCreateOpen]);
-
-    // console.log(formik.values, "values");
-    // console.log(selectedRow, "selectedRow");
-
     const getEmbedUrl = (url) => {
       if (!url) return "";
 

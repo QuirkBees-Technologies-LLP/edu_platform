@@ -41,7 +41,7 @@ const AdminRecordingSession = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [updateDeleteRecording, setUpdateDeleteRecording] = useState(null); // state to hold selected recording for edit/delete
   const [selectedRow, setSelectedRow] = useState(null);
-  console.log("updateDeleteRecording: ", updateDeleteRecording);
+
   const { getThemeMode } = useSettings();
 
   const { id } = useParams(); // get user_id from URL
@@ -133,8 +133,6 @@ const AdminRecordingSession = () => {
   };
 
   const handleOpen = (url) => {
-    console.log(url, "urls");
-
     setVideoUrl(url);
     setOpen(true);
   };

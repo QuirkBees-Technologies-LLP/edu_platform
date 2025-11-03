@@ -82,8 +82,6 @@ export const useCourses = () => {
         dispatch(setCourses(coursesData));
         dispatch(setFeaturedCourses(featuredData));
       } else {
-        // Si no hay URL de API, usa los datos mock
-        console.log("Using mock data - No API URL configured");
         dispatch(setCourses(mockCourses));
         dispatch(setFeaturedCourses(mockFeaturedCourses));
       }

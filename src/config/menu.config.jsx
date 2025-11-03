@@ -15,7 +15,8 @@ import {
   ChartLine,
   ChartNoAxesCombined,
   MessageCircleMore,
-  ChartSpline 
+  ChartSpline ,
+  Package 
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1412,6 +1413,11 @@ export const sideMenus = {
       path: "/admin/kpis",
     },
     {
+      title: "Package",
+      icon: <Package />,
+      path: "/admin/package",
+    },
+    {
       title: "General Setting",
       icon: <Layers />,
       path: "/admin/general-setting",
@@ -1421,6 +1427,11 @@ export const sideMenus = {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/admin/iq-social",
+    },
+    {
+      title: "Logs",
+      icon: <MessageCircleMore />,
+      path: "/admin/logs",
     },
   ],
   educator: [

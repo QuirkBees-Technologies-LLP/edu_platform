@@ -119,7 +119,7 @@ const CreateEducator = forwardRef(({ isCreateOpen, handleCloseCreate, selectedRo
         setPasswordVisible(!passwordVisible);
     };
 
-    console.log(formik.values, "values");
+    
 
     return (
         <Dialog open={isCreateOpen} onOpenChange={() => {

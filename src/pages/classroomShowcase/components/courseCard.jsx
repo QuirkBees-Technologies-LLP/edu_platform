@@ -17,9 +17,6 @@ const CourseCard = (props) => {
 
   const { onSelectCourse } = props;
 
-  console.log("props----------------->",props)
-
-  console.log("onSelectCourse----------------->",onSelectCourse)
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
 
