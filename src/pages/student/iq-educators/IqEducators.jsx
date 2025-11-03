@@ -1127,9 +1127,14 @@ const IqEducators = () => {
                           <h3 className="text-md font-normal mb-2">
                             {course.call_title}
                           </h3>
-                          <p className="text-xs text-gray-600">
-                            {course.createdAt}
-                          </p>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(
+                                course?.start_time
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1160,7 +1165,9 @@ const IqEducators = () => {
                           <div className="card-footer justify-between pt-4 p-0 mt-4">
                             <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
                               <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
+                              {new Date(
+                                course?.start_time
+                              ).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
