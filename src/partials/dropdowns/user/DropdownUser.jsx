@@ -214,7 +214,7 @@ const DropdownUser = ({
   };
   const buildFooter = () => {
     return <div className="flex flex-col">
-      {/* <div className="menu-item mb-0.5">
+      <div className="menu-item mb-0.5">
         <div className="menu-link">
           <span className="menu-icon">
             <KeenIcon icon="moon" />
@@ -226,7 +226,7 @@ const DropdownUser = ({
             <input name="theme" type="checkbox" checked={settings.themeMode === 'dark'} onChange={handleThemeMode} value="1" />
           </label>
         </div>
-      </div> */}
+      </div>
 
       <div className="menu-item px-4 py-1.5">
         <a onClick={() => logout(dispatch)} className="btn btn-sm btn-light justify-center">
