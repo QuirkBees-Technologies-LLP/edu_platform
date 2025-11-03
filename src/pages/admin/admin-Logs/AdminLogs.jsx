@@ -248,19 +248,20 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
           <ToolbarPageTitle text="Admin Logs" />
           <ToolbarDescription>Track all admin activities</ToolbarDescription>
         </ToolbarHeading>
-        <ToolbarActions>
-          <div className="relative w-full md:w-80">
-            <SearchFilterInput
-              searchText={searchText}
-              handleSearchChange={handleSearchChange}
-            />
-          </div>
-          <div className="flex items-center gap-2 border border-gray-200 rounded-md">
-            <CustomDateRangePicker
-              handleDateRangeChangeCallback={handleDateRangeChangeCallback}
-            />
-          </div>
-          {/* <div>
+        <div className="flex gap-2 flex-wrap">
+          <ToolbarActions>
+            <div className="relative w-full md:w-80">
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+              />
+            </div>
+            <div className="flex gap-2 ">
+              <CustomDateRangePicker
+                handleDateRangeChangeCallback={handleDateRangeChangeCallback}
+              />
+            </div>
+            {/* <div>
             <button
               type="button"
               className="px-2 py-2 bg-green-500 text-white rounded"
@@ -269,7 +270,8 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
               {loading ? <Loader2 /> : "Export CSV"}
             </button>
           </div> */}
-        </ToolbarActions>
+          </ToolbarActions>
+        </div>
       </Toolbar>
 
       <DataGrid
