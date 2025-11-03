@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
 import EducatorImage from "./EducatorImage";
-import { Copy, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, Eye } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,7 +37,7 @@ const statusColorMap = {
   win: "blue",
   partialWin: "violet",
   loss: "red",
-  breakEven: "gray"  
+  breakEven: "gray",
 };
 
 const ClientTradeIdeas = () => {
@@ -120,7 +120,6 @@ const ClientTradeIdeas = () => {
   const [copiedField, setCopiedField] = useState({ id: null, field: null });
 
   const handleCopyField = async (tradeId, fieldName, value) => {
-    console.log("called.....", tradeId, fieldName, value);
     try {
       await navigator.clipboard.writeText(value ?? "N/A");
       setCopiedField({ id: tradeId, field: fieldName });
@@ -276,29 +275,103 @@ const ClientTradeIdeas = () => {
                 <div
                   key={trade._id}
                   className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
-                   ref={
+                  ref={
                     index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
                   }
                 >
-                  <div className="relative h-[28vh] w-full">
-                    <img
-                      src={trade?.image[0]}
-                      alt={trade.pair}
-                      className="w-full object-cover h-full cursor-pointer"
-                      onClick={() => {
-                        setSelectedIdea(trade);
-                        setIsViewOpen(true);
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        setSelectedIdea(trade);
-                        setIsLightBoxOpen(true);
-                      }}
-                      className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
-                    >
-                      <Eye size={20} />
-                    </button>
+                  <div className="relative h-[28vh] w-full overflow-hidden">
+                    {trade.image && trade.image.length > 0 && (
+                      <>
+                        <img
+                          src={trade.image[trade.currentIndex ?? 0]}
+                          alt={trade.pair}
+                          className="w-full h-full object-cover cursor-pointer transition-all duration-500"
+                          onClick={() => {
+                            setSelectedIdea(trade);
+                            setIsViewOpen(true);
+                          }}
+                        />
+
+                        <button
+                          onClick={() => {
+                            setSelectedIdea(trade);
+                            setIsLightBoxOpen(true);
+                          }}
+                          className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
+                        >
+                          <Eye size={20} />
+                        </button>
+
+                        {trade.image.length > 1 && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setTradeIdeas((prev) =>
+                                  prev.map((t) =>
+                                    t._id === trade._id
+                                      ? {
+                                          ...t,
+                                          currentIndex:
+                                            (t.currentIndex ?? 0) === 0
+                                              ? t.image.length - 1
+                                              : (t.currentIndex ?? 0) - 1,
+                                        }
+                                      : t
+                                  )
+                                );
+                              }}
+                              className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                            >
+                              <ChevronLeft size={20} />
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setTradeIdeas((prev) =>
+                                  prev.map((t) =>
+                                    t._id === trade._id
+                                      ? {
+                                          ...t,
+                                          currentIndex:
+                                            (t.currentIndex ?? 0) ===
+                                            t.image.length - 1
+                                              ? 0
+                                              : (t.currentIndex ?? 0) + 1,
+                                        }
+                                      : t
+                                  )
+                                );
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2!right-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md -translate-y-1/2"
+                            >
+                              <ChevronRight size={20} />
+                            </button>
+
+                            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                              {trade.image.map((_, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    setTradeIdeas((prev) =>
+                                      prev.map((t) =>
+                                        t._id === trade._id
+                                          ? { ...t, currentIndex: idx }
+                                          : t
+                                      )
+                                    );
+                                  }}
+                                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                                    (trade.currentIndex ?? 0) === idx
+                                      ? "bg-primary"
+                                      : "bg-gray-300 hover:bg-gray-400"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   <div className="p-4">

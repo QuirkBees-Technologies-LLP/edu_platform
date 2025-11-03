@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
-import * as React from 'react';
-import { useMemo, useState } from 'react';
-import { useLanguage } from '@/i18n';
+import * as React from "react";
+import { useMemo, useState } from "react";
+import { useLanguage } from "@/i18n";
 import {
   DataGrid,
   DataGridColumnHeader,
@@ -11,29 +11,26 @@ import {
   Menu,
   MenuItem,
   MenuToggle,
-} from '@/components';
-import { toast } from 'sonner';
+} from "@/components";
+import { toast } from "sonner";
 import {
   Toolbar,
   ToolbarActions,
   ToolbarDescription,
   ToolbarHeading,
   ToolbarPageTitle,
-} from '@/partials/toolbar';
+} from "@/partials/toolbar";
+import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
+import { toAbsoluteUrl } from "@/utils/Assets";
+import { useLazyGetLanguagesQuery } from "../../../../store/api/admin/adminLanguagesApiSlice";
+import CreateCoursesTypes from "./CreateCoursesTypes";
+import DeleteCoursesTypes from "./DeleteCoursesTypes";
 import {
-  MenuIcon,
-  MenuLink,
-  MenuSub,
-  MenuTitle
-} from '@/components';
-import { toAbsoluteUrl } from '@/utils/Assets';
-import { useLazyGetLanguagesQuery } from '../../../../store/api/admin/adminLanguagesApiSlice';
-import CreateCoursesTypes from './CreateCoursesTypes';
-import DeleteCoursesTypes from './DeleteCoursesTypes';
-import { useLazyGetAdminCoursesTypesQuery, useUpdateAdminCoursesTypesMutation } from '../../../../store/api/admin/adminCoursesTypesApiSlice';
-import { Switch } from '../../../../components/ui/switch';
-import { set } from 'date-fns';
-
+  useLazyGetAdminCoursesTypesQuery,
+  useUpdateAdminCoursesTypesMutation,
+} from "../../../../store/api/admin/adminCoursesTypesApiSlice";
+import { Switch } from "../../../../components/ui/switch";
+import { set } from "date-fns";
 
 // ✅ MOVED OUTSIDE COMPONENT
 const ToolbarTable = ({ searchTerm, setSearchTerm, title }) => {
@@ -62,13 +59,13 @@ const ToolbarTable = ({ searchTerm, setSearchTerm, title }) => {
   );
 };
 
-
 const CoursesTypes = ({ title = "Courses Types" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
-  const [searchTerm, setSearchTerm] = useState('');
-  const [getAdminCoursesTypes, { isLoading }] = useLazyGetAdminCoursesTypesQuery();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [getAdminCoursesTypes, { isLoading }] =
+    useLazyGetAdminCoursesTypesQuery();
   const [updateAdminCoursesTypes] = useUpdateAdminCoursesTypesMutation();
   const [toggleStatusData, setToggleStatusData] = useState([]);
 
@@ -79,14 +76,14 @@ const CoursesTypes = ({ title = "Courses Types" }) => {
   const handleDeleteClose = () => setIsDeleteOpen(false);
   const handleCloseCreate = () => setIsCreateOpen(false);
 
-  const handleRowSelection = state => {
+  const handleRowSelection = (state) => {
     const selectedRowIds = Object.keys(state);
     if (selectedRowIds.length > 0) {
       toast(`Total ${selectedRowIds.length} are selected.`, {
         description: `Selected row IDs: ${selectedRowIds}`,
         action: {
-          label: 'Undo',
-          onClick: () => console.log('Undo'),
+          label: "Undo",
+          onClick: () => console.log("Undo"),
         },
       });
     }
@@ -94,7 +91,7 @@ const CoursesTypes = ({ title = "Courses Types" }) => {
 
   // ✅ Re-fetch on search term change
   const [tableKey, setTableKey] = useState(0);
-  const reloadTable = () => setTableKey(prev => prev + 1);
+  const reloadTable = () => setTableKey((prev) => prev + 1);
 
   React.useEffect(() => {
     reloadTable(); // this triggers setTableKey and remounts the entire DataGrid
@@ -104,13 +101,23 @@ const CoursesTypes = ({ title = "Courses Types" }) => {
     try {
       const newVisibility = !Boolean(currentVisibility);
 
-      setToggleStatusData(toggleStatusData.map(type => type._id === typeId ? { ...type, status: newVisibility } : type));
-      const payload = toggleStatusData.find(type => type._id === typeId);
+      setToggleStatusData(
+        toggleStatusData.map((type) =>
+          type._id === typeId ? { ...type, status: newVisibility } : type
+        )
+      );
+      const payload = toggleStatusData.find((type) => type._id === typeId);
       // Make API call
-      await updateAdminCoursesTypes({ ...payload, id: payload?._id, status: String(newVisibility) }).unwrap();
-      toast.success(`Course type status updated to ${newVisibility ? 'Active' : 'Inactive'}`);
+      await updateAdminCoursesTypes({
+        ...payload,
+        id: payload?._id,
+        status: String(newVisibility),
+      }).unwrap();
+      toast.success(
+        `Course type status updated to ${newVisibility ? "Active" : "Inactive"}`
+      );
     } catch (error) {
-      toast.error(error?.data?.message || 'Failed to update test visibility');
+      toast.error(error?.data?.message || "Failed to update test visibility");
     }
   };
 
@@ -156,77 +163,96 @@ const CoursesTypes = ({ title = "Courses Types" }) => {
       </MenuItem>
     </MenuSub>
   );
-  console.log(toggleStatusData, "toggleStatusData");
 
-  const columns = useMemo(() => [
-    {
-      accessorFn: row => `${row.name}`,
-      id: 'name',
-      header: ({ column }) => <DataGridColumnHeader title='Name' column={column} />,
-      enableSorting: true,
-      cell: info => <div>{info.getValue()}</div>,
-      meta: { headerClassName: 'min-w-[200px]' },
-    },
-    {
-      id: 'status',
-      header: () => 'Status',
-      enableSorting: false,
-      cell: ({ row }) => {
-
-
-        return (
-          <Switch
-            checked={toggleStatusData.find(test => test._id === row?.original?._id)?.status}
-            onCheckedChange={() => handleVisibilityToggle(row?.original?._id, toggleStatusData.find(type => type._id === row?.original?._id)?.status)}
-          />
-        );
+  const columns = useMemo(
+    () => [
+      {
+        accessorFn: (row) => `${row.name}`,
+        id: "name",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Name" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => <div>{info.getValue()}</div>,
+        meta: { headerClassName: "min-w-[200px]" },
       },
-    },
-    {
-      id: 'click',
-      header: () => '',
-      enableSorting: false,
-      cell: ({ row }) => (
-        <Menu className="items-stretch">
-          <MenuItem
-            toggle="dropdown"
-            onClick={() => setSelectedRow(toggleStatusData.find(type => type._id === row?.original?._id))}
-            trigger="click"
-            dropdownProps={{
-              placement: isRTL() ? 'bottom-start' : 'bottom-end',
-              modifiers: [
-                {
-                  name: 'offset',
-                  options: { offset: isRTL() ? [0, -10] : [0, 10] },
-                },
-              ],
-            }}
-          >
-            <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-              <KeenIcon icon="dots-vertical" />
-            </MenuToggle>
-            {ActionMenu()}
-          </MenuItem>
-        </Menu>
-      ),
-      meta: { headerClassName: 'w-[150px]' },
-    }
-  ], [isRTL, toggleStatusData, handleVisibilityToggle]);
+      {
+        id: "status",
+        header: () => "Status",
+        enableSorting: false,
+        cell: ({ row }) => {
+          return (
+            <Switch
+              checked={
+                toggleStatusData.find((test) => test._id === row?.original?._id)
+                  ?.status
+              }
+              onCheckedChange={() =>
+                handleVisibilityToggle(
+                  row?.original?._id,
+                  toggleStatusData.find(
+                    (type) => type._id === row?.original?._id
+                  )?.status
+                )
+              }
+            />
+          );
+        },
+      },
+      {
+        id: "click",
+        header: () => "",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <Menu className="items-stretch">
+            <MenuItem
+              toggle="dropdown"
+              onClick={() =>
+                setSelectedRow(
+                  toggleStatusData.find(
+                    (type) => type._id === row?.original?._id
+                  )
+                )
+              }
+              trigger="click"
+              dropdownProps={{
+                placement: isRTL() ? "bottom-start" : "bottom-end",
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: { offset: isRTL() ? [0, -10] : [0, 10] },
+                  },
+                ],
+              }}
+            >
+              <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+                <KeenIcon icon="dots-vertical" />
+              </MenuToggle>
+              {ActionMenu()}
+            </MenuItem>
+          </Menu>
+        ),
+        meta: { headerClassName: "w-[150px]" },
+      },
+    ],
+    [isRTL, toggleStatusData, handleVisibilityToggle]
+  );
 
   return (
-    <div className='mt-5'>
+    <div className="mt-5">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Vault Types" />
           <ToolbarDescription>
             <ToolbarDescription>
-              Define and manage different types of IQ Vault offered on the platform.
+              Define and manage different types of IQ Vault offered on the
+              platform.
             </ToolbarDescription>
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
-            <button className='btn btn-primary' onClick={handleClickOpen}>
+            <button className="btn btn-primary" onClick={handleClickOpen}>
               Create Course Types
             </button>
           </div>

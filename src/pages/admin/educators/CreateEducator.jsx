@@ -14,6 +14,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+} from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useAuthContext } from "../../../auth/useAuthContext";
 import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
@@ -32,6 +45,7 @@ import {
 import clsx from "clsx";
 import { KeenIcon } from "@/components";
 import { icon } from "leaflet";
+import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 const CreateEducator = forwardRef(
   (
@@ -43,11 +57,14 @@ const CreateEducator = forwardRef(
     const [createEducator] = useCreateEducatorMutation();
     const [updateEducator] = useUpdateEducatorMutation();
 
+    const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
+
     const initialValues = {
       first_name: "",
       last_name: "",
       email: "",
       password: "",
+      categories: [],
       role: "educator",
       status: "",
       is_create_stream: false,
@@ -70,6 +87,10 @@ const CreateEducator = forwardRef(
       email: Yup.string()
         .email("Invalid email format")
         .required("Email is required"),
+      categories: Yup.array()
+        .min(1, "At least one category is required")
+        .of(Yup.string().required())
+        .required("Category is required"),
 
       password: Yup.string()
         .min(6, "Minimum 6 characters are required")
@@ -188,8 +209,6 @@ const CreateEducator = forwardRef(
             }
           }
 
-          console.log("formData", formData);
-
           // API call using FormData
           if (selectedRow?._id) {
             await updateEducator({
@@ -231,6 +250,7 @@ const CreateEducator = forwardRef(
           image: selectedRow?.image || null,
           icon: selectedRow?.bannerImage || null,
           projectId: selectedRow?.projectId || null,
+          categories: selectedRow?.categories?.map((cat) => cat._id) || [],
         };
         formik.setValues(initData);
       }
@@ -240,8 +260,6 @@ const CreateEducator = forwardRef(
       event.preventDefault();
       setPasswordVisible(!passwordVisible);
     };
-
-    console.log(formik.values, "values");
 
     return (
       <Dialog
@@ -533,7 +551,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-               <div className="col-span-6">
+              <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     projectId <span className="text-danger">*</span>
@@ -553,6 +571,78 @@ const CreateEducator = forwardRef(
                   {formik.touched.projectId && formik.errors.projectId && (
                     <span role="alert" className="text-danger text-xs mt-1">
                       {formik.errors.projectId}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-span-6">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Category<span className="text-danger">*</span>
+                  </label>
+
+                  <Select
+                    value={formik.values?.categories || []}
+                    onValueChange={(value) => {
+                      const prev = Array.isArray(formik.values?.categories)
+                        ? formik.values.categories
+                        : [];
+                      if (prev.includes(value)) {
+                        formik.setFieldValue(
+                          "categories",
+                          prev.filter((v) => v !== value)
+                        );
+                      } else {
+                        formik.setFieldValue("categories", [...prev, value]);
+                      }
+                    }}
+                    multiple
+                  >
+                    <SelectTrigger className="flex flex-wrap gap-1 min-h-[2.5rem] items-center">
+                      {formik.values?.categories?.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {formik.values.categories.map((id) => {
+                            const cat = categoryList?.data?.find(
+                              (c) => c._id === id
+                            );
+                            return (
+                              <span
+                                key={id}
+                                className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs"
+                              >
+                                {cat?.name}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">
+                          Select Category
+                        </span>
+                      )}
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {categoryList?.data?.map((item) => (
+                        <SelectItem
+                          key={item?._id}
+                          value={item?._id}
+                          className={
+                            formik.values?.categories?.includes(item._id)
+                              ? "bg-blue-100 text-blue-700"
+                              : ""
+                          }
+                        >
+                          {item?.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {formik.touched?.categories && formik.errors?.categories && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors?.categories}
                     </span>
                   )}
                 </div>

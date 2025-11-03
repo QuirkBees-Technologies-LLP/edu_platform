@@ -376,8 +376,6 @@ const ContentManagementPage = ({ course, onUpdate }) => {
         sections: updatedSections,
       };
 
-
-console.log("updatedCourse=============>",updatedCourse)
       setLocalCourse(updatedCourse);
 
       // Then update store

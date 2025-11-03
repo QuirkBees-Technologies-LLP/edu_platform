@@ -3,7 +3,11 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
-import { useGetCoursesTypesQuery, useGetEducatorAcademyCategoryQuery, useGetLanguageListQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import {
+  useGetCoursesTypesQuery,
+  useGetEducatorAcademyCategoryQuery,
+  useGetLanguageListQuery,
+} from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import {
   Select,
   SelectContent,
@@ -32,9 +36,11 @@ const COURSE_CATEGORIES = [
 const createCourseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  imageFile: z.instanceof(File, { message: "Course thumbnail is required" }).refine((file) => file && file.size > 0, {
-    message: "Please select a valid course thumbnail image"
-  }),
+  imageFile: z
+    .instanceof(File, { message: "Course thumbnail is required" })
+    .refine((file) => file && file.size > 0, {
+      message: "Please select a valid course thumbnail image",
+    }),
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
@@ -48,14 +54,20 @@ const createCourseSchema = z.object({
 const editCourseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  imageFile: z.instanceof(File, { message: "Course thumbnail is required" }).optional().refine((file) => {
-    // If no file is provided, it's valid (for edit mode with existing image)
-    if (!file) return true;
-    // If file is provided, it must have content
-    return file.size > 0;
-  }, {
-    message: "Please select a valid course thumbnail image"
-  }),
+  imageFile: z
+    .instanceof(File, { message: "Course thumbnail is required" })
+    .optional()
+    .refine(
+      (file) => {
+        // If no file is provided, it's valid (for edit mode with existing image)
+        if (!file) return true;
+        // If file is provided, it must have content
+        return file.size > 0;
+      },
+      {
+        message: "Please select a valid course thumbnail image",
+      }
+    ),
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
@@ -112,7 +124,6 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       }
     }
   }, [initialData, setValue]);
-  // console.log(initialData.category?._id, "initialData.category?._id");
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -131,8 +142,6 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const selectedSection = watch("section");
   const selectedLanguage = watch("language");
   const submitHandler = async (data) => {
-
-    console.log('data==============>', data)
     const formData = new FormData();
 
     // Append all regular fields
@@ -243,10 +252,12 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             />
           </div>
         )}
-        
+
         {/* Error message for thumbnail */}
         {errors.imageFile && (
-          <p className="text-sm text-red-600 mt-2">{errors.imageFile.message}</p>
+          <p className="text-sm text-red-600 mt-2">
+            {errors.imageFile.message}
+          </p>
         )}
       </div>
 
@@ -278,7 +289,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem disabled value="null">No types found</SelectItem>
+                    <SelectItem disabled value="null">
+                      No types found
+                    </SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -316,7 +329,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem disabled value="null">No languages found</SelectItem>
+                    <SelectItem disabled value="null">
+                      No languages found
+                    </SelectItem>
                   )}
                 </SelectContent>
               </Select>

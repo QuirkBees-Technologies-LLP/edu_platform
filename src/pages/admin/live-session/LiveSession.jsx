@@ -71,15 +71,14 @@ const LiveSession = ({ title = "Live Session" }) => {
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
   const [lastNote, setLastNote] = useState(false);
-   const [selectedEducator, setSelectedEducator] = useState(null);
-     const [searchText, setSearchText] = useState("");
-     const [searchTextInput,setSearchTextInput] = useState("");
+  const [selectedEducator, setSelectedEducator] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
 
   const handleDeleteOpen = () => {
-    console.log("handleDeleteOpen");
     setIsDeleteOpen(true);
   };
 
@@ -172,7 +171,6 @@ const LiveSession = ({ title = "Live Session" }) => {
       </MenuSub>
     );
   };
-  console.log(selectedRow, "selectedrow");
 
   const handleRedirect = (callId, row) => {
     navigate(`/admin/live-session/${callId}`, { state: row });
@@ -400,8 +398,6 @@ const LiveSession = ({ title = "Live Session" }) => {
     return localStorage.getItem(storageFilterId) || "";
   });
 
-  console.log(data, "data");
-
   // Filtered data based on search term
   const filteredData = useMemo(() => {
     if (!searchTerm) return data?.data; // If no search term, return full data
@@ -450,8 +446,8 @@ const LiveSession = ({ title = "Live Session" }) => {
       const response = await getLiveSessionList({
         page: newPage,
         limit: newLimit,
-        educator :selectedEducator?._id || "",
-        search : searchTextInput || "",
+        educator: selectedEducator?._id || "",
+        search: searchTextInput || "",
       }).unwrap();
 
       return {
@@ -469,22 +465,20 @@ const LiveSession = ({ title = "Live Session" }) => {
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
-  
-   const debouncedSearch = useMemo(
+
+  const debouncedSearch = useMemo(
     () =>
       debounce((value) => {
-        setSearchTextInput(value); 
-        reloadTable(); 
+        setSearchTextInput(value);
+        reloadTable();
       }, 500),
     []
   );
-    const handleSearchChange = (event) => {
-    
-      const value = event.target.value;
-      setSearchText(value);
-      debouncedSearch(value);
-    };
-  
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
 
   return (
     <div className="container-fluid pb-5">
@@ -507,11 +501,11 @@ const LiveSession = ({ title = "Live Session" }) => {
                          </ToolbarActions> */}
           <ToolbarActions>
             <div className="relative w-full md:w-80">
-                          <SearchFilterInput
-                            searchText={searchText}
-                            handleSearchChange={handleSearchChange}
-                          />
-                        </div>
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+              />
+            </div>
             <div className="relative w-72">
               <Select
                 value={selectedEducator?._id || ""}
@@ -561,7 +555,6 @@ const LiveSession = ({ title = "Live Session" }) => {
                 </button>
               )}
             </div>
-            
           </ToolbarActions>
         </div>
       </Toolbar>

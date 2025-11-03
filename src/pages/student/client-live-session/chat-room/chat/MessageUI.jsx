@@ -205,7 +205,6 @@ export const MessageUI = ({ setMessageActionUser }) => {
   const { chatType, themeModalOpen } = useEventContext();
   const { message } = useMessageContext();
   const messageRef = useRef(null);
-  console.log(message);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -227,20 +226,19 @@ export const MessageUI = ({ setMessageActionUser }) => {
     return getFormattedTime(secondsSinceLastMessage);
   }, [message]);
 
-   // ✅ tum already yeh check kar rahe ho
-  const isRecentMessage =
-    messages?.[messages.length - 1].id === message.id;
+  // ✅ tum already yeh check kar rahe ho
+  const isRecentMessage = messages?.[messages.length - 1].id === message.id;
 
   // 👇 yaha scroll hook lagao
-useEffect(() => {
-  if (isRecentMessage && messageRef.current) {
-    messageRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest", // 👈 ye important hai
-      inline: "nearest" // 👈 page scroll nahi hoga, sirf container ke andar hoga
-    });
-  }
-}, [isRecentMessage,messages.length]);
+  useEffect(() => {
+    if (isRecentMessage && messageRef.current) {
+      messageRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest", // 👈 ye important hai
+        inline: "nearest", // 👈 page scroll nahi hoga, sirf container ke andar hoga
+      });
+    }
+  }, [isRecentMessage, messages.length]);
   const isTopMessage = messages?.[0].id === message.id;
 
   const showTitle =
@@ -251,7 +249,7 @@ useEffect(() => {
   if (!message.user) return null;
   return (
     <div
-     ref={messageRef}
+      ref={messageRef}
       className={`message-ui p-4 ${themeModalOpen ? "theme-open" : ""}`}
       onMouseEnter={() => setShowOptions(true)}
       onMouseLeave={clearModals}

@@ -379,7 +379,6 @@ export const CourseContent = () => {
   };
 
   if (!selectedCourse) {
-    console.log(selectedCourse);
     return (
       <div className="flex-1 p-8 flex flex-col items-center justify-center text-slate-500">
         <Layout size={48} className="mb-4 text-slate-400" />

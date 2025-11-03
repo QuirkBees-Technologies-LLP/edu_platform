@@ -283,7 +283,6 @@ const AdminEndSchedule = ({ title = "Live Schedule" }) => {
                 info.row.original.isRecurent ? "badge-success" : "badge-danger"
               }`}
             >
-              {console.log("isRecurent", info.row.original.isRecurent)}
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>
           </div>
@@ -292,54 +291,7 @@ const AdminEndSchedule = ({ title = "Live Schedule" }) => {
           headerClassName: "min-w-[100px]",
         },
       },
-      // {
-      //   accessorFn: row => row.createdAt,
-      //   id: 'createdAt',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Created At' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
-      // {
-      //   accessorFn: row => row.create_by,
-      //   id: 'create_by',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Created By' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {info.row.original.create_by?.first_name + " " + info.row.original.create_by?.last_name}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
-      // {
-      //   accessorFn: row => row.callId,
-      //   id: 'callId',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Call Id' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {info.row.original.callId}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
+
       {
         id: "click",
         header: () => "",
@@ -471,7 +423,6 @@ const AdminEndSchedule = ({ title = "Live Schedule" }) => {
   const debouncedSearch = useMemo(
     () =>
       debounce((value) => {
-        // console.log("value", value);
         setSearchTextInput(value);
         reloadTable();
       }, 500),
@@ -583,7 +534,7 @@ const AdminEndSchedule = ({ title = "Live Schedule" }) => {
           setSelectedRow={setSelectedRow}
           handleCloseCreate={handleCloseCreate}
           refetch={reloadTable}
-          isCreateOpen={isCreateOpen}   
+          isCreateOpen={isCreateOpen}
           setIsCreateOpen={setIsCreateOpen}
           selectedRow={selectedRow}
         />

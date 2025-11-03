@@ -322,7 +322,6 @@ const DateRangePicker = ({
 const CustomDateRangePicker = ({ handleDateRangeChangeCallback }) => {
   const handleDateRangeChange = (start, end, rangeName) => {
     handleDateRangeChangeCallback?.(start, end, rangeName);
-    // console.log("Selected Range:", { start, end, rangeName });
   };
 
   return (

@@ -41,8 +41,10 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
   const { isRTL } = useLanguage();
   const [getLiveSessionList, { data: liveSessionData, isLoading, refetch }] =
     useLazyGetLiveSessionListQuery();
-  const [getKpiList, { data: kpiData, isLoading: kpiLoading  , refetch: kpiRefetch}] =
-    useLazyKpisQuery();
+  const [
+    getKpiList,
+    { data: kpiData, isLoading: kpiLoading, refetch: kpiRefetch },
+  ] = useLazyKpisQuery();
   const [exportKpis] = useKpisExportMutation();
   const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const navigate = useNavigate();
@@ -257,7 +259,6 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
           ? format(selectedDateRange.end, "yyyy-MM-dd")
           : "",
       }).unwrap();
-      console.log("response", response);
 
       return {
         data: response.data || [],
@@ -277,8 +278,6 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
         educatorName: row.educator?.first_name + " " + row.educator?.last_name,
         callIds: row.callId,
       }));
-
-      console.log("payload------------->", payload);
 
       const blob = await exportKpis(payload).unwrap();
 

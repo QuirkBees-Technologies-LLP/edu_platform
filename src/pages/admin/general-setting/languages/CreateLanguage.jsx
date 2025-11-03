@@ -9,7 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Alert } from "../../../../components/alert/Alert";
 import { toast } from "sonner";
-import { useCreateLanguageMutation, useUpdateLanguageMutation } from "../../../../store/api/admin/adminLanguagesApiSlice";
+import {
+  useCreateLanguageMutation,
+  useUpdateLanguageMutation,
+} from "../../../../store/api/admin/adminLanguagesApiSlice";
 
 const CreateLanguage = forwardRef(
   (
@@ -46,13 +49,16 @@ const CreateLanguage = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            await updateLanguage({...payload, status: String(selectedRow?.status)}).unwrap();
+            await updateLanguage({
+              ...payload,
+              status: String(selectedRow?.status),
+            }).unwrap();
             setSelectedRow({});
 
             refetch();
             toast.success("Language updated successfully!");
           } else {
-            await createLanguage({...payload, status: "true"}).unwrap();
+            await createLanguage({ ...payload, status: "true" }).unwrap();
             refetch();
             toast.success("Language created successfully!");
           }
@@ -76,9 +82,6 @@ const CreateLanguage = forwardRef(
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
-
-
-    console.log(formik.values, "values");
 
     return (
       <Dialog
@@ -107,10 +110,11 @@ const CreateLanguage = forwardRef(
                     type="text"
                     placeholder="Enter name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
-                      ? "border border-danger"
-                      : ""
-                      }`}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.name && formik.touched.name
+                        ? "border border-danger"
+                        : ""
+                    }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (

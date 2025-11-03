@@ -13,7 +13,10 @@ import { useUpdateEducatorRecordingMutation } from "../../../store/api/educator/
 import { Alert } from "../../../components/alert/Alert";
 
 const UpdateEducatorRecording = forwardRef(
-  ({ isUpdateOpen, handleCloseUpdate, selectedRow, refetch, setSelectedRow }, ref) => {
+  (
+    { isUpdateOpen, handleCloseUpdate, selectedRow, refetch, setSelectedRow },
+    ref
+  ) => {
     const [updateEducatorRecording] = useUpdateEducatorRecordingMutation();
 
     const initialValues = {
@@ -29,23 +32,23 @@ const UpdateEducatorRecording = forwardRef(
       description: Yup.string()
         .required("Description is required")
         .min(2, "Description must be at least 2 characters"),
-      thumbnail: Yup.mixed()
-        .required("Thumbnail is required")
-        .test(
-          "fileSize",
-          "Thumbnail size too large (max 20MB)",
-          (value) => !value || (value && value.size <= 20000000)
-        )
-        .test(
-          "fileType",
-          "Unsupported file format. Please use JPEG, PNG, JPG, or WebP",
-          (value) =>
-            !value ||
-            (value &&
-              ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
-                value.type
-              ))
-        ),
+      // thumbnail: Yup.mixed()
+      //   .required("Thumbnail is required")
+      //   .test(
+      //     "fileSize",
+      //     "Thumbnail size too large (max 20MB)",
+      //     (value) => !value || (value && value.size <= 20000000)
+      //   )
+      //   .test(
+      //     "fileType",
+      //     "Unsupported file format. Please use JPEG, PNG, JPG, or WebP",
+      //     (value) =>
+      //       !value ||
+      //       (value &&
+      //         ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
+      //           value.type
+      //         ))
+      //   ),
     });
 
     const formik = useFormik({
@@ -57,12 +60,16 @@ const UpdateEducatorRecording = forwardRef(
         setSubmitting(true);
         try {
           if (!selectedRow?._id) {
-          // Create
+            // Create mode
             const formData = new FormData();
             formData.append("title", values.title);
             formData.append("description", values.description);
-            formData.append("thumbnail", values.thumbnail);
-            // const res = await createEducatorRecording(formData).unwrap();
+            if (values.thumbnail) {
+              formData.append("thumbnail", values.thumbnail);
+            }
+
+            // Call your create API here
+            // await createEducatorRecording(formData).unwrap();
 
             toast.success("Recording created successfully!");
             formik.resetForm();
@@ -71,33 +78,28 @@ const UpdateEducatorRecording = forwardRef(
             return;
           }
 
-          // Update
+          // Update mode
           const hasNewThumbnail =
             values.thumbnail && typeof values.thumbnail !== "string";
-
-          let res;
+          const formData = new FormData();
+          formData.append("id", selectedRow._id);
+          formData.append("call_title", values.title);
+          formData.append("call_description", values.description);
 
           if (hasNewThumbnail) {
-            const formData = new FormData();
-            formData.append("id", selectedRow._id);
-            formData.append("call_title", values.title);
-            formData.append("call_description", values.description);
+            // New file uploaded
             formData.append("thumbnail", values.thumbnail);
-
-            res = await updateEducatorRecording({
-              formData,
-              id: selectedRow._id,
-            }).unwrap();
-          } else {
-            const payload = {
-              id: selectedRow._id,
-              call_title: values.title,
-              call_description: values.description,
-            };
-            res = await updateEducatorRecording(payload).unwrap();
+          } else if (values.thumbnail === null) {
+            // User cleared thumbnail → set explicitly to null
+            formData.append("thumbnail", null);
           }
 
-         
+          const res = await updateEducatorRecording({
+            formData,
+            id: selectedRow._id,
+          }).unwrap();
+
+          // Handle API response
           if (res.success) {
             toast.success(res.message || "Recording updated successfully!");
             refetch();
@@ -109,12 +111,12 @@ const UpdateEducatorRecording = forwardRef(
           }
         } catch (err) {
           console.error("Update API error:", err);
-
-          if (err?.status || err?.data) {
-            const errorMessage =
-              err?.data?.message || err?.error || err?.originalStatus || "Unexpected error occurred";
-            toast.error(errorMessage);
-          }
+          const errorMessage =
+            err?.data?.message ||
+            err?.error ||
+            err?.originalStatus ||
+            "Unexpected error occurred";
+          toast.error(errorMessage);
         } finally {
           setSubmitting(false);
         }
@@ -158,7 +160,9 @@ const UpdateEducatorRecording = forwardRef(
                 placeholder="Enter title"
                 autoComplete="off"
                 className={`form-control input input-md w-full ${
-                  formik.errors.title && formik.touched.title ? "border border-danger" : ""
+                  formik.errors.title && formik.touched.title
+                    ? "border border-danger"
+                    : ""
                 }`}
                 {...formik.getFieldProps("title")}
               />
@@ -169,43 +173,60 @@ const UpdateEducatorRecording = forwardRef(
               )}
             </div>
 
-           
             <div className="flex flex-col gap-1">
               <label className="form-label text-gray-900 gap-1">
-                Thumbnail<span className="text-danger">*</span>
+                Thumbnail
               </label>
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => formik.setFieldValue("thumbnail", e.currentTarget.files[0])}
+                onChange={(event) => {
+                  const file = event.currentTarget.files[0];
+                  formik.setFieldValue("thumbnail", file);
+                }}
                 className={`form-control input input-md w-full h-full p-3 ${
-                  formik.errors.thumbnail && formik.touched.thumbnail ? "border border-danger" : ""
+                  formik.errors.thumbnail && formik.touched.thumbnail
+                    ? "border border-danger"
+                    : ""
                 }`}
               />
+
+              {/* Preview */}
               {formik.values.thumbnail && (
-                <div className="mt-2">
+                <div className="relative mt-2 w-40 h-40">
                   <img
                     src={
                       typeof formik.values.thumbnail === "string"
-                        ? formik.values.thumbnail
-                        : URL.createObjectURL(formik.values.thumbnail)
+                        ? formik.values.thumbnail // Backend URL
+                        : URL.createObjectURL(formik.values.thumbnail) // Local file preview
                     }
                     alt="Thumbnail preview"
-                    className="w-40 h-40 rounded-lg border border-gray-200"
+                    className="w-40 h-40 rounded-lg border border-gray-200 object-cover"
                   />
+                  {/* Cross button */}
+                  <button
+                    type="button"
+                    onClick={() => formik.setFieldValue("thumbnail", null)}
+                    className="absolute top-1 right-1 bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center text-gray-700 hover:bg-gray-300"
+                  >
+                    ×
+                  </button>
                 </div>
               )}
+
+              {/* Thumbnail Validation Error */}
               {formik.touched.thumbnail && formik.errors.thumbnail && (
                 <span role="alert" className="text-danger text-xs mt-1">
                   {formik.errors.thumbnail}
                 </span>
               )}
+
+              {/* Help Text */}
               <p className="text-xs text-gray-500 mt-1">
                 Supported formats: JPEG, PNG, JPG, WebP. Maximum size: 20MB
               </p>
             </div>
 
-         
             <div className="flex flex-col gap-1">
               <label className="form-label text-gray-900 gap-1">
                 Description<span className="text-danger">*</span>
@@ -226,7 +247,6 @@ const UpdateEducatorRecording = forwardRef(
             </div>
           </div>
 
-         
           <div className="flex border-gray-200 border-t justify-end py-5 rounded-b gap-3">
             <button
               className="btn btn-light"

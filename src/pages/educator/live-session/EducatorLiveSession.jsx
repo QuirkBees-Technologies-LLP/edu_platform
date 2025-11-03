@@ -65,9 +65,9 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [lastRecurrence, setLastRecurrence] = useState(false);
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
-    const [lastNote , setLastNote] = useState(false)
-      const [searchText, setSearchText] = useState("");
-  const [searchTextInput,setSearchTextInput] = useState("");
+  const [lastNote, setLastNote] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -80,7 +80,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   };
 
   const handleDeleteOpen = () => {
-    console.log("handleDeleteOpen");
     setIsDeleteOpen(true);
   };
 
@@ -92,7 +91,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     try {
       const callId = rowData?.callId;
       const Id = rowData?._id;
-      console.log(Id, "Id");
+
       if (!callId) {
         toast.error("Missing callId");
         return;
@@ -112,7 +111,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     try {
       const callId = rowData?.callId;
       const Id = rowData?._id;
-      console.log(Id, "Id");
+
       if (!callId) {
         toast.error("Missing callId");
         return;
@@ -154,7 +153,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     if (row?.schedule?.isRecurent) {
       if (row?.checkLastRecurrence) {
         setLastRecurrence(false);
-        setLastNote(true)
+        setLastNote(true);
       } else {
         setLastRecurrence(true);
       }
@@ -198,7 +197,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
       </MenuSub>
     );
   };
-  console.log(selectedRow, "selectedrow");
 
   const handleRedirect = (callId, row) => {
     navigate(`/educator/live-session/${callId}`, { state: row });
@@ -426,8 +424,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     return localStorage.getItem(storageFilterId) || "";
   });
 
-  console.log(data, "data");
-
   // Filtered data based on search term
   const filteredData = useMemo(() => {
     if (!searchTerm) return data?.data; // If no search term, return full data
@@ -489,21 +485,19 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     }
   };
 
-   const debouncedSearch = useMemo(
-  () =>
-    debounce((value) => {
-      setSearchTextInput(value); 
-      reloadTable(); 
-    }, 500),
-  []
-);
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchTextInput(value);
+        reloadTable();
+      }, 500),
+    []
+  );
   const handleSearchChange = (event) => {
-
     const value = event.target.value;
     setSearchText(value);
     debouncedSearch(value);
   };
-
 
   return (
     <div className="container-fluid">
@@ -516,23 +510,23 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <div className="flex gap-2 flex-wrap">
-        <ToolbarActions>
+          <ToolbarActions>
             <div className="relative w-full md:w-80">
               <SearchFilterInput
                 searchText={searchText}
                 handleSearchChange={handleSearchChange}
               />
             </div>
-          <div className="text-end  relative group inline-block">
-            <button className="btn btn-primary" onClick={handleClickOpen}>
-              Create a New Live Session
-            </button>
-            {/* Tooltip */}
-            <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
-              It won't appear in the schedule
+            <div className="text-end  relative group inline-block">
+              <button className="btn btn-primary" onClick={handleClickOpen}>
+                Create a New Live Session
+              </button>
+              {/* Tooltip */}
+              <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
+                It won't appear in the schedule
+              </div>
             </div>
-          </div>
-        </ToolbarActions>
+          </ToolbarActions>
         </div>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
@@ -607,7 +601,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
               >
                 {isEnding ? "Ending..." : "Yes, End Call"}
               </button> */}
-               {lastRecurrence ? (
+              {lastRecurrence ? (
                 <button
                   type="button"
                   className="btn btn-danger"
