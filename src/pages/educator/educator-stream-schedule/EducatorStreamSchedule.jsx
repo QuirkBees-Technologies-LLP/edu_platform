@@ -72,6 +72,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     setIsReccurenceScheduleOpen(true);
   };
 
+
   const handleClickCloseReccurenceSchedule = () => {
     setSelectedRow(null);
     setIsReccurenceScheduleOpen(false);
@@ -123,7 +124,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const handleEdit = (raw) => {
-    if (raw.isRecurent) {
+    if (raw.isRecurent || raw?.recurrenceRuleId) {
       setIsReccurenceScheduleOpen(true);
       setSelectedRow(raw);
     } else {
