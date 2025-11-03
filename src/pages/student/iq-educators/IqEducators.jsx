@@ -1160,7 +1160,7 @@ const IqEducators = () => {
                           <div className="card-footer justify-between pt-4 p-0 mt-4">
                             <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
                               <Calendar size={16} />{" "}
-                              {new Date(course?.createdAt).toLocaleDateString()}
+                              {new Date(course?.start_time).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
