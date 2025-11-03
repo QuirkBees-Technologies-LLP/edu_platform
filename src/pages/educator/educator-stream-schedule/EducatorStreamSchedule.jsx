@@ -123,7 +123,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   };
 
   const handleEdit = (raw) => {
-    if (raw.isRecurent) {
+    if (raw.isRecurent || raw?.recurrenceRuleId) {
       setIsReccurenceScheduleOpen(true);
       setSelectedRow(raw);
     } else {
