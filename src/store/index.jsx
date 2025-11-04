@@ -35,6 +35,7 @@ import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
 import { clientEducatorApiSlice } from "./api/client/clientEductorApiSlice";
 import { clientSocialApiSlice } from "./api/client/clientSocialApiSlilce";
 import { adminPackageApiSlice } from "./api/admin/adminPackageApiSlice";
+import { superAdminApiSlice } from "./api/admin/superAdminApiSlice";
 
 const languagePersistConfig = {
   key: "language",
@@ -93,6 +94,7 @@ export const store = configureStore({
     [clientEducatorApiSlice.reducerPath]: clientEducatorApiSlice.reducer,
     [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer,
     [adminPackageApiSlice.reducerPath]: adminPackageApiSlice.reducer,
+    [superAdminApiSlice.reducerPath]: superAdminApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -123,7 +125,8 @@ export const store = configureStore({
       clientLanguageApiSlice.middleware,
       clientEducatorApiSlice.middleware,
       clientSocialApiSlice.middleware,
-      adminPackageApiSlice.middleware
+      adminPackageApiSlice.middleware,
+      superAdminApiSlice.middleware
     ),
 });
 
