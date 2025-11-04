@@ -146,7 +146,7 @@ import EducatorKpi from "../pages/admin/KPIs Page/EducatorKpi";
 import AdminEndSchedule from "../pages/admin/admin-end-schedule/AdminEndSchedule";
 import Package from "../pages/admin/admin-package/Package";
 import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
-// import Admin from "../pages/superAdmin/admin/Admin";
+import Admin from "../pages/superAdmin/admin/Admin";
 
 const routes = {
   student: [
@@ -257,7 +257,7 @@ const routes = {
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },
-    // { path: "/member", element: <Admin /> },
+    { path: "/member", element: <Admin /> },
   ],
   marketer: [
     { path: "/", element: <DefaultPage /> },
