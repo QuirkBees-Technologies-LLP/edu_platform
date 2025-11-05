@@ -845,7 +845,7 @@ const ClientDashboard = () => {
               </div>
               <div className="col-span-12">
                 <button className="w-full bg-blue-gradient p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300  group">
-                  <Link to="/ideas">
+                  <Link to="/iq-insight">
                     <div className="flex items-center justify-center space-x-3">
                       {/* <Lightbulb className="w-6 h-6" /> */}
                       <span className="text-md font-normal text-gray-100 dark:text-gray-900">
