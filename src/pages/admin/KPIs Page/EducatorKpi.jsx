@@ -253,10 +253,10 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
         search: searchTextInput || "",
         educatorId: selectedEducator || "",
         startDate: selectedDateRange.start
-          ? format(selectedDateRange.start, "yyyy-MM-dd")
+          ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
           : "",
         endDate: selectedDateRange.end
-          ? format(selectedDateRange.end, "yyyy-MM-dd")
+          ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
           : "",
       }).unwrap();
 
