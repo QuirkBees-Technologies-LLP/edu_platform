@@ -38,27 +38,23 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
   const fetchLogs = async ({ pageIndex, pageSize }) => {
     const newPage = pageIndex + 1;
     const newLimit = pageSize;
-
     setLoading(true);
+
     try {
       const response = await getLogsList({
         page: newPage,
         limit: newLimit,
         search: searchTextInput || "",
         startDate: selectedDateRange.start
-          ? new Date(selectedDateRange.start.setHours(0, 0, 0, 0)).toISOString()
+          ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
           : "",
         endDate: selectedDateRange.end
-          ? new Date(
-              selectedDateRange.end.setHours(23, 59, 59, 999)
-            ).toISOString()
+          ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
           : "",
       }).unwrap();
 
-      // ✅ Update state
       setLogs(response.logs || []);
 
-      // ✅ Return for DataGrid pagination
       return {
         data: response.logs || [],
         totalCount: response.pagination?.totalRecords || 0,
@@ -72,33 +68,29 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
     }
   };
 
-  // useEffect(() => {
-  //   getLogsList();
-  // }, [tableKey, searchTextInput]);
-
   useEffect(() => {
-    const fetchLogs = async () => {
+    const fetchInitialLogs = async () => {
       try {
         const res = await getLogsList({
           page: 1,
           limit: 10,
           search: searchTextInput || "",
           startDate: selectedDateRange.start
-            ? format(selectedDateRange.start, "yyyy-MM-dd")
+            ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
             : "",
           endDate: selectedDateRange.end
-            ? format(selectedDateRange.end, "yyyy-MM-dd")
+            ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
             : "",
         }).unwrap();
 
-        setLogs(res.logs || []); // ✅ Store data in state
+        setLogs(res.logs || []);
       } catch (err) {
-        console.error("❌ Error fetching logs:", err);
+        console.error("Error fetching logs:", err);
         setLogs([]);
       }
     };
 
-    fetchLogs();
+    fetchInitialLogs();
   }, [tableKey, searchTextInput, selectedDateRange]);
 
   const reloadTable = () => setTableKey((prev) => prev + 1);
@@ -173,15 +165,6 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         ),
         meta: { headerClassName: "min-w-[120px]" },
       },
-      //   {
-      //     accessorFn: (row) => row.route,
-      //     id: "Route",
-      //     header: ({ column }) => (
-      //       <DataGridColumnHeader title="Route" column={column} />
-      //     ),
-      //     cell: (info) => <span>{info.row.original.route || "—"}</span>,
-      //     meta: { headerClassName: "min-w-[160px]" },
-      //   },
       {
         accessorFn: (row) => row.description,
         id: "Description",
@@ -204,15 +187,6 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         cell: (info) => <span>{info.row.original.ipAddress || "N/A"}</span>,
         meta: { headerClassName: "min-w-[130px]" },
       },
-      //   {
-      //     accessorFn: (row) => row.targetCollection,
-      //     id: "Target",
-      //     header: ({ column }) => (
-      //       <DataGridColumnHeader title="Target Collection" column={column} />
-      //     ),
-      //     cell: (info) => <span>{info.row.original.targetCollection || "—"}</span>,
-      //     meta: { headerClassName: "min-w-[150px]" },
-      //   },
     ],
     []
   );
@@ -227,9 +201,6 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         </div>
       </div>
     );
-  };
-  const handleExport = async () => {
-    console.log("Exporting...");
   };
 
   const handleDateRangeChangeCallback = (startDate, endDate, rangeName) => {
@@ -256,20 +227,11 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
                 handleSearchChange={handleSearchChange}
               />
             </div>
-            <div className="flex gap-2 ">
+            <div className="flex gap-2">
               <CustomDateRangePicker
                 handleDateRangeChangeCallback={handleDateRangeChangeCallback}
               />
             </div>
-            {/* <div>
-            <button
-              type="button"
-              className="px-2 py-2 bg-green-500 text-white rounded"
-              onClick={handleExport}
-            >
-              {loading ? <Loader2 /> : "Export CSV"}
-            </button>
-          </div> */}
           </ToolbarActions>
         </div>
       </Toolbar>
@@ -284,13 +246,9 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
           const selected = Object.keys(state);
           if (selected.length) toast.info(`${selected.length} rows selected.`);
         }}
-        pagination={{
-          size: 10,
-        }}
+        pagination={{ size: 10 }}
         toolbar={<ToolbarTable />}
-        layout={{
-          card: true,
-        }}
+        layout={{ card: true }}
         onFetchData={fetchLogs}
       />
     </div>
