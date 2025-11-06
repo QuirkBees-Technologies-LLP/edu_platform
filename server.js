@@ -1,22 +1,21 @@
 import express from "express";
 import path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
-
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// Serve static files from dist
-app.use(express.static(path.resolve(__dirname, "dist")));
+// Serve static files from the Vite build folder
+app.use(express.static(path.join(__dirname, "dist")));
 
-// Fallback for SPA routing
+// For all routes, return index.html (important for React Router)
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "dist", "index.html"));
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-})
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
