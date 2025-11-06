@@ -221,13 +221,14 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         </ToolbarHeading>
         <div className="flex gap-2 flex-wrap">
           <ToolbarActions>
-            <div className="relative w-full md:w-80">
+            <div className="relative gap-2 border border-gray-200 rounded-md">
               <SearchFilterInput
                 searchText={searchText}
                 handleSearchChange={handleSearchChange}
               />
             </div>
             <div className="flex gap-2">
+         
               <CustomDateRangePicker
                 handleDateRangeChangeCallback={handleDateRangeChangeCallback}
               />
