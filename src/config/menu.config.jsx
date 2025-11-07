@@ -15,8 +15,9 @@ import {
   ChartLine,
   ChartNoAxesCombined,
   MessageCircleMore,
-  ChartSpline ,
-  Package 
+  ChartSpline,
+  Package,
+  UserRoundCog,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1399,7 +1400,7 @@ export const sideMenus = {
     },
     {
       title: "Members",
-      icon: <User />,
+      icon: <UserRoundCog />,
       path: "/member",
     },
     // {
@@ -1412,6 +1413,7 @@ export const sideMenus = {
     //   icon: <Layers />,
     //   path: '/admin/academy-category'
     // },
+
     {
       title: "KPIs",
       icon: <ChartSpline />,
@@ -1681,8 +1683,8 @@ export const sideMenus = {
           icon: <CalendarClock />,
           path: "/educator/stream-schedule",
         },
-         {
-          title: "Ended Schedule", 
+        {
+          title: "Ended Schedule",
           icon: <CalendarClock />,
           path: "/educator/ended-stream-schedule",
         },
@@ -1695,7 +1697,7 @@ export const sideMenus = {
           title: "Ended Sessions ",
           icon: <PlayCircle />,
           path: "/educator/ended-live-sessions",
-        }
+        },
       ],
     },
     {
@@ -1792,7 +1794,7 @@ export const sideMenus = {
       icon: <Lightbulb />,
       path: "/ideas",
     },
-  
+
     // {
     //   title: 'IQ Academy',
     //   icon: <Tv />,
@@ -1836,7 +1838,7 @@ export const sideMenus = {
         },
       ],
     },
-      {
+    {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/iq-social",

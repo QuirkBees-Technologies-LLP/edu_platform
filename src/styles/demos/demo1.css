@@ -995,9 +995,9 @@ chat */
 	background-color: #201946;
 	padding-inline: 20px;
 }
-.dark .left_sidebar .accordion-toggle {
+/* .dark .left_sidebar .accordion-toggle {
 	background-color: #262626;
-}
+} */
 .left_sidebar .accordion-toggle span {
 	color: #fff;
 }
