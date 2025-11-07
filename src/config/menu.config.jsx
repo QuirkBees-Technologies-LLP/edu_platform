@@ -18,6 +18,7 @@ import {
   ChartSpline,
   Package,
   UserRoundCog,
+  ListTodo,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1440,6 +1441,11 @@ export const sideMenus = {
       icon: <MessageCircleMore />,
       path: "/admin/logs",
     },
+    {
+      title: "tickets",
+      icon: <ListTodo />,
+      path: "/admin/ticket",
+    },
   ],
   admin: [
     {
@@ -1545,11 +1551,11 @@ export const sideMenus = {
       icon: <MessageCircleMore />,
       path: "/admin/iq-social",
     },
-    // {
-    //   title: "Logs",
-    //   icon: <MessageCircleMore />,
-    //   path: "/admin/logs",
-    // },
+    {
+      title: "tickets",
+      icon: <ListTodo/>,
+      path: "/admin/ticket",
+    },
   ],
   marketer: [
     {

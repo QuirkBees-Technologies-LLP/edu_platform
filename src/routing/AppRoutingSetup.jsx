@@ -147,6 +147,7 @@ import AdminEndSchedule from "../pages/admin/admin-end-schedule/AdminEndSchedule
 import Package from "../pages/admin/admin-package/Package";
 import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
 import Admin from "../pages/superAdmin/admin/Admin";
+import Task from "../pages/admin/task-management/Task";
 
 const routes = {
   student: [
@@ -233,6 +234,7 @@ const routes = {
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
+    { path: "/admin/ticket", element: <Task /> },
     // { path: "/admin/logs", element: <AdminLogs /> },
   ],
   super_admin: [
@@ -258,6 +260,7 @@ const routes = {
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },
     { path: "/member", element: <Admin /> },
+    { path: "/admin/ticket", element: <Task /> },
   ],
   marketer: [
     { path: "/", element: <DefaultPage /> },
