@@ -146,9 +146,9 @@ const DateRangePicker = ({
     dropdown: {
       position: "absolute",
       top: "calc(100% + 6px)",
-      left: 0,
+      left: "-50px",
       zIndex: 9999,
-      width: "max-content",
+      width: "fit-content",
       minWidth: "260px",
       background: colors.bg,
       border: `1px solid ${colors.border}`,
@@ -285,10 +285,10 @@ const DateRangePicker = ({
                   (e.currentTarget.style.backgroundColor = colors.bgHover)
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    selectedRange === rangeName
-                      ? colors.bgActive
-                      : "transparent")
+                (e.currentTarget.style.backgroundColor =
+                  selectedRange === rangeName
+                    ? colors.bgActive
+                    : "transparent")
                 }
               >
                 {rangeName}
