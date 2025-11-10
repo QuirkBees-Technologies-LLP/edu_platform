@@ -299,6 +299,9 @@ const AppRoutingSetup = () => {
       ? getStudentRoutesByPlan(plan)
       : routes[userRole] || [];
 
+  console.log("roleRoutes", roleRoutes);
+  console.log("auth", auth);
+
   // const roleRoutes = routes[userRole] || [];
 
   return (
@@ -329,6 +332,7 @@ const AppRoutingSetup = () => {
       <Route path="error/*" element={<ErrorsRouting />} />
       <Route path="auth/*" element={<AuthPage />} />
       {/* <Route path="*" element={<Navigate to="/error/404" />} /> */}
+
       <Route
         path="*"
         element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />}
