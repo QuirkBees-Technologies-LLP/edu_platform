@@ -34,9 +34,11 @@ jobs:
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096"
           npm ci
-          npm install express
           npm run build
-          zip -r site.zip dist
+          cp server.js dist/
+          echo '{"name":"edu-app","version":"1.0.0","type":"module","main":"server.js","dependencies":{"express":"^4.21.2"},"scripts":{"start":"node server.js"}}' > dist/package.json
+          cd dist && npm install --production
+          zip -r ../site.zip *
 
       - name: Azure Login
         uses: azure/login@v2
@@ -51,6 +53,3 @@ jobs:
           app-name: 'edu'
           slot-name: 'Production'
           package: site.zip
-
-
-
