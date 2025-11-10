@@ -15,8 +15,10 @@ import {
   ChartLine,
   ChartNoAxesCombined,
   MessageCircleMore,
-  ChartSpline ,
-  Package 
+  ChartSpline,
+  Package,
+  UserRoundCog,
+  ListTodo,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1399,7 +1401,7 @@ export const sideMenus = {
     },
     {
       title: "Members",
-      icon: <User />,
+      icon: <UserRoundCog />,
       path: "/member",
     },
     // {
@@ -1412,6 +1414,7 @@ export const sideMenus = {
     //   icon: <Layers />,
     //   path: '/admin/academy-category'
     // },
+
     {
       title: "KPIs",
       icon: <ChartSpline />,
@@ -1437,6 +1440,11 @@ export const sideMenus = {
       title: "Logs",
       icon: <MessageCircleMore />,
       path: "/admin/logs",
+    },
+    {
+      title: "tickets",
+      icon: <ListTodo />,
+      path: "/admin/ticket",
     },
   ],
   admin: [
@@ -1543,11 +1551,11 @@ export const sideMenus = {
       icon: <MessageCircleMore />,
       path: "/admin/iq-social",
     },
-    // {
-    //   title: "Logs",
-    //   icon: <MessageCircleMore />,
-    //   path: "/admin/logs",
-    // },
+    {
+      title: "tickets",
+      icon: <ListTodo/>,
+      path: "/admin/ticket",
+    },
   ],
   marketer: [
     {
@@ -1681,8 +1689,8 @@ export const sideMenus = {
           icon: <CalendarClock />,
           path: "/educator/stream-schedule",
         },
-         {
-          title: "Ended Schedule", 
+        {
+          title: "Ended Schedule",
           icon: <CalendarClock />,
           path: "/educator/ended-stream-schedule",
         },
@@ -1695,7 +1703,7 @@ export const sideMenus = {
           title: "Ended Sessions ",
           icon: <PlayCircle />,
           path: "/educator/ended-live-sessions",
-        }
+        },
       ],
     },
     {
@@ -1792,7 +1800,7 @@ export const sideMenus = {
       icon: <Lightbulb />,
       path: "/ideas",
     },
-  
+
     // {
     //   title: 'IQ Academy',
     //   icon: <Tv />,
@@ -1836,7 +1844,7 @@ export const sideMenus = {
         },
       ],
     },
-      {
+    {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/iq-social",
