@@ -6,6 +6,8 @@ import {
   Share2,
   Check,
   Volume2,
+  Calendar,
+  Clock3,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
@@ -245,7 +247,6 @@ const IqEducators = () => {
     navigator.clipboard
       .writeText(currentUrl)
       .then(() => {
-       
         // Show toast notification
         setShowShareToast(true);
         // Hide toast after 3 seconds
@@ -1126,9 +1127,14 @@ const IqEducators = () => {
                           <h3 className="text-md font-normal mb-2">
                             {course.call_title}
                           </h3>
-                          <p className="text-xs text-gray-600">
-                            {course.address}
-                          </p>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(
+                                course?.start_time
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1156,9 +1162,14 @@ const IqEducators = () => {
                           <h3 className="text-md font-normal mb-2">
                             {course.call_title}
                           </h3>
-                          <p className="text-xs text-gray-600">
-                            {course.address}
-                          </p>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(
+                                course?.start_time
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}

@@ -38,29 +38,25 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
   const fetchLogs = async ({ pageIndex, pageSize }) => {
     const newPage = pageIndex + 1;
     const newLimit = pageSize;
-
     setLoading(true);
+
     try {
       const response = await getLogsList({
         page: newPage,
         limit: newLimit,
         search: searchTextInput || "",
         startDate: selectedDateRange.start
-          ? format(selectedDateRange.start, "yyyy-MM-dd")
+          ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
           : "",
         endDate: selectedDateRange.end
-          ? format(selectedDateRange.end, "yyyy-MM-dd")
+          ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
           : "",
       }).unwrap();
 
-     
+      setLogs(response.logs || []);
 
-      // ✅ Update state
-      setLogs(response.posts || []);
-
-      // ✅ Return for DataGrid pagination
       return {
-        data: response.posts || [],
+        data: response.logs || [],
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
@@ -72,38 +68,30 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
     }
   };
 
-  // useEffect(() => {
-  //   getLogsList();
-  // }, [tableKey, searchTextInput]);
-
-
   useEffect(() => {
-  const fetchLogs = async () => {
-    try {
-      const res = await getLogsList({
-        page: 1,
-        limit: 10,
-        search: searchTextInput || "",
-        startDate: selectedDateRange.start
-          ? format(selectedDateRange.start, "yyyy-MM-dd")
-          : "",
-        endDate: selectedDateRange.end
-          ? format(selectedDateRange.end, "yyyy-MM-dd")
-          : "",
-      }).unwrap();
+    const fetchInitialLogs = async () => {
+      try {
+        const res = await getLogsList({
+          page: 1,
+          limit: 10,
+          search: searchTextInput || "",
+          startDate: selectedDateRange.start
+            ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
+            : "",
+          endDate: selectedDateRange.end
+            ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
+            : "",
+        }).unwrap();
 
-     
-      setLogs(res.posts || []); // ✅ Store data in state
-    } catch (err) {
-      console.error("❌ Error fetching logs:", err);
-      setLogs([]);
-    }
-  };
+        setLogs(res.logs || []);
+      } catch (err) {
+        console.error("Error fetching logs:", err);
+        setLogs([]);
+      }
+    };
 
-  fetchLogs();
-}, [tableKey, searchTextInput, selectedDateRange]);
-
-
+    fetchInitialLogs();
+  }, [tableKey, searchTextInput, selectedDateRange]);
 
   const reloadTable = () => setTableKey((prev) => prev + 1);
 
@@ -168,21 +156,15 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
                   : "badge-danger"
             }`}
           >
-            
-            {info.row.original.action==="PUT"?"UPDATE":info.row.original.action==="POST"?'CREATE':"DELETE"}
+            {info.row.original.action === "PUT"
+              ? "UPDATE"
+              : info.row.original.action === "POST"
+                ? "CREATE"
+                : "DELETE"}
           </span>
         ),
         meta: { headerClassName: "min-w-[120px]" },
       },
-      //   {
-      //     accessorFn: (row) => row.route,
-      //     id: "Route",
-      //     header: ({ column }) => (
-      //       <DataGridColumnHeader title="Route" column={column} />
-      //     ),
-      //     cell: (info) => <span>{info.row.original.route || "—"}</span>,
-      //     meta: { headerClassName: "min-w-[160px]" },
-      //   },
       {
         accessorFn: (row) => row.description,
         id: "Description",
@@ -205,15 +187,6 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         cell: (info) => <span>{info.row.original.ipAddress || "N/A"}</span>,
         meta: { headerClassName: "min-w-[130px]" },
       },
-      //   {
-      //     accessorFn: (row) => row.targetCollection,
-      //     id: "Target",
-      //     header: ({ column }) => (
-      //       <DataGridColumnHeader title="Target Collection" column={column} />
-      //     ),
-      //     cell: (info) => <span>{info.row.original.targetCollection || "—"}</span>,
-      //     meta: { headerClassName: "min-w-[150px]" },
-      //   },
     ],
     []
   );
@@ -228,9 +201,6 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         </div>
       </div>
     );
-  };
-  const handleExport = async () => {
-    console.log("Exporting...");
   };
 
   const handleDateRangeChangeCallback = (startDate, endDate, rangeName) => {
@@ -249,28 +219,22 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
           <ToolbarPageTitle text="Admin Logs" />
           <ToolbarDescription>Track all admin activities</ToolbarDescription>
         </ToolbarHeading>
-        <ToolbarActions>
-          <div className="relative w-full md:w-80">
-            <SearchFilterInput
-              searchText={searchText}
-              handleSearchChange={handleSearchChange}
-            />
-          </div>
-          <div className="flex items-center gap-2 border border-gray-200 rounded-md">
-            <CustomDateRangePicker
-              handleDateRangeChangeCallback={handleDateRangeChangeCallback}
-            />
-          </div>
-          <div>
-            <button
-              type="button"
-              className="px-2 py-2 bg-green-500 text-white rounded"
-              onClick={handleExport}
-            >
-              {loading ? <Loader2 /> : "Export CSV"}
-            </button>
-          </div>
-        </ToolbarActions>
+        <div className="flex gap-2 flex-wrap">
+          <ToolbarActions>
+            <div className="relative gap-2 border border-gray-200 rounded-md">
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+              />
+            </div>
+            <div className="flex gap-2">
+         
+              <CustomDateRangePicker
+                handleDateRangeChangeCallback={handleDateRangeChangeCallback}
+              />
+            </div>
+          </ToolbarActions>
+        </div>
       </Toolbar>
 
       <DataGrid
@@ -283,13 +247,9 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
           const selected = Object.keys(state);
           if (selected.length) toast.info(`${selected.length} rows selected.`);
         }}
-        pagination={{
-          size: 10,
-        }}
+        pagination={{ size: 10 }}
         toolbar={<ToolbarTable />}
-        layout={{
-          card: true,
-        }}
+        layout={{ card: true }}
         onFetchData={fetchLogs}
       />
     </div>

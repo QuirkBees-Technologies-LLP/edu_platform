@@ -81,6 +81,12 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
       responsive: true,
       fluid: true,
       muted: true,
+      html5: {
+        attributes: {
+          controlsList: "nodownload noplaybackrate",
+          disablePictureInPicture: true,
+        },
+      },
       sources: [
         {
           src: videoUrl,

@@ -146,6 +146,8 @@ import EducatorKpi from "../pages/admin/KPIs Page/EducatorKpi";
 import AdminEndSchedule from "../pages/admin/admin-end-schedule/AdminEndSchedule";
 import Package from "../pages/admin/admin-package/Package";
 import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
+import Admin from "../pages/superAdmin/admin/Admin";
+import Task from "../pages/admin/task-management/Task";
 
 const routes = {
   student: [
@@ -212,6 +214,55 @@ const routes = {
     },
   ],
   admin: [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
+    { path: "/admin/courses", element: <Courses /> },
+    { path: "/admin/live-session", element: <LiveSession /> },
+    { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/admin/recordings", element: <AdminRecording /> },
+    { path: "/admin/educators", element: <Educators /> },
+    { path: "/admin/profile", element: <AdminProfile /> },
+    { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
+    { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
+    { path: "/admin/stream-recording", element: <AdminRecording /> },
+    { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
+    { path: "admin/general-setting", element: <GeneralSetting /> },
+    { path: "/admin/iq-social", element: <AdminCommunityFeed /> },
+    { path: "/admin/kpis", element: <EducatorKpi /> },
+    { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
+    { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
+    { path: "/admin/package", element: <Package /> },
+    { path: "/admin/ticket", element: <Task /> },
+    // { path: "/admin/logs", element: <AdminLogs /> },
+  ],
+  super_admin: [
+    { path: "/", element: <DefaultPage /> },
+    { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
+    { path: "/admin/courses", element: <Courses /> },
+    { path: "/admin/live-session", element: <LiveSession /> },
+    { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
+    { path: "/admin/recordings", element: <AdminRecording /> },
+    { path: "/admin/educators", element: <Educators /> },
+    { path: "/admin/profile", element: <AdminProfile /> },
+    { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
+    { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
+    { path: "/admin/stream-recording", element: <AdminRecording /> },
+    { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
+    { path: "admin/general-setting", element: <GeneralSetting /> },
+    { path: "/admin/iq-social", element: <AdminCommunityFeed /> },
+    { path: "/admin/kpis", element: <EducatorKpi /> },
+    { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
+    { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
+    { path: "/admin/package", element: <Package /> },
+    { path: "/admin/logs", element: <AdminLogs /> },
+    { path: "/member", element: <Admin /> },
+    { path: "/admin/ticket", element: <Task /> },
+  ],
+  marketer: [
     { path: "/", element: <DefaultPage /> },
     { path: "/admin/ideas", element: <AdminTradeIdeas /> },
     { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },

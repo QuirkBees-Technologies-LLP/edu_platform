@@ -132,7 +132,7 @@ const getEmbedUrl = (url) => {
 
   // CASE 4: fallback generic
   if (url.includes("dyntube.com/")) return url;
-     // Dyntube
+  // Dyntube
   // const dyntubePatterns = [
   //   /app\.dyntube\.com\/#\/video\/([^/?#]+)/,
   //   /videos\.dyntube\.com\/iframes\/([^/?#]+)/,
@@ -166,6 +166,12 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
       responsive: true,
       fluid: true,
       muted: true,
+      html5: {
+        attributes: {
+          controlsList: "nodownload noplaybackrate",
+          disablePictureInPicture: true,
+        },
+      },
       sources: [
         {
           src: videoUrl,

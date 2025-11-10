@@ -72,6 +72,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     setIsReccurenceScheduleOpen(true);
   };
 
+
   const handleClickCloseReccurenceSchedule = () => {
     setSelectedRow(null);
     setIsReccurenceScheduleOpen(false);

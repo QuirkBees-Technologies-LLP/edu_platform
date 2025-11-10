@@ -2,6 +2,8 @@ import { useCall, useCallStateHooks } from "@stream-io/video-react-sdk";
 import { useEffect, useState } from "react";
 import { Eye, Pencil, RefreshCcw, Save, Trash } from "lucide-react";
 import {
+  useCreateParmanentRecordingMutation,
+  useCreateTemporaryRecordingMutation,
   useGetEducatorRecordingByCallIDQuery,
   useSaveEducatorRecordingMutation,
 } from "../../../store/api/educator/educatorRecordingApiSlice";
@@ -13,6 +15,7 @@ import VideoThumbnail from "./VideoThumbnail";
 import { format } from "date-fns";
 import Loader from "../../../components/ui/loader";
 import UpdateEducatorRecording from "../recording/UpdateEducatorRecording";
+import { toast } from "sonner";
 
 const Recording = () => {
   const call = useCall();
@@ -29,6 +32,8 @@ const Recording = () => {
   const { data: backendRecordings = [], refetch } =
     useGetEducatorRecordingByCallIDQuery(call?.id);
   const [addRecording] = useSaveEducatorRecordingMutation();
+  const [createTemporaryRecording] = useCreateTemporaryRecordingMutation();
+  const [createParmanentRecording] = useCreateParmanentRecordingMutation();
 
   // Get live status from Stream.io
   const { useIsCallLive } = useCallStateHooks();
@@ -54,10 +59,9 @@ const Recording = () => {
   };
 
   // Handle saving a Stream recording to backend
+  // Temporary Save
   const handleSaveRecording = async (recording) => {
-    const recordingKey =
-      recording.filename || recording.id || `recording-${Date.now()}`;
-
+    const recordingKey = `temp-${recording.filename || recording.id || Date.now()}`;
     setSavingRecordings((prev) => new Set([...prev, recordingKey]));
 
     try {
@@ -69,16 +73,49 @@ const Recording = () => {
         call_description: call?.state?.custom?.description,
         call_category: call?.state?.custom?.category,
         call_tags: call?.state?.custom?.tags,
+        isPermanent: false,
       };
-      await addRecording(payload).unwrap();
-      refetch(); // Refresh the backend recordings list
+
+      await createTemporaryRecording(payload).unwrap();
+      refetch();
     } catch (err) {
+      toast.error("Failed to save temporary recording: " + err?.data?.message);
       console.error("Failed to save recording:", err);
     } finally {
       setSavingRecordings((prev) => {
         const newSet = new Set(prev);
         newSet.delete(recordingKey);
+        return newSet;
+      });
+    }
+  };
 
+  // Permanent Save
+  const handleSavePermanentRecording = async (recording) => {
+    const recordingKey = `perm-${recording.filename || recording.id || Date.now()}`;
+    setSavingRecordings((prev) => new Set([...prev, recordingKey]));
+
+    try {
+      const payload = {
+        ...recording,
+        educator_id,
+        call_id: call.id,
+        call_title: call?.state?.custom?.title,
+        call_description: call?.state?.custom?.description,
+        call_category: call?.state?.custom?.category,
+        call_tags: call?.state?.custom?.tags,
+        isPermanent: true,
+      };
+
+      await createParmanentRecording(payload).unwrap();
+      refetch();
+    } catch (err) {
+      toast.error("Failed to save permanent recording: " + err?.data?.message);
+      console.error("Failed to save permanent recording:", err);
+    } finally {
+      setSavingRecordings((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(recordingKey);
         return newSet;
       });
     }
@@ -226,24 +263,61 @@ const Recording = () => {
                             </p>
                           </div>
                         </div>
+
                         <button
                           onClick={() => handleSaveRecording(rec)}
                           disabled={
                             isSaved ||
-                            savingRecordings.has(rec.filename || rec.id)
+                            savingRecordings.has(
+                              `temp-${rec.filename || rec.id}`
+                            ) ||
+                            savingRecordings.has(
+                              `perm-${rec.filename || rec.id}`
+                            )
                           }
                           className={`w-full py-2 px-4 rounded-md flex items-center justify-center ${
+                            isSaved
+                              ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                              : "bg-danger hover:bg-danger-dark text-white"
+                          }`}
+                        >
+                          {savingRecordings.has(
+                            `temp-${rec.filename || rec.id}`
+                          ) ? (
+                            "Saving..."
+                          ) : (
+                            <>
+                              <Save size={16} className="mr-2" />
+                              {isSaved ? "Saved" : "Save Temporary Recording"}
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => handleSavePermanentRecording(rec)}
+                          disabled={
+                            isSaved ||
+                            savingRecordings.has(
+                              `perm-${rec.filename || rec.id}`
+                            ) ||
+                            savingRecordings.has(
+                              `temp-${rec.filename || rec.id}`
+                            )
+                          }
+                          className={`w-full mt-1 py-2 px-4 rounded-md flex items-center justify-center ${
                             isSaved
                               ? "bg-gray-200 text-gray-600 cursor-not-allowed"
                               : "bg-primary hover:bg-primary-dark text-white"
                           }`}
                         >
-                          {savingRecordings.has(rec.filename || rec.id) ? (
+                          {savingRecordings.has(
+                            `perm-${rec.filename || rec.id}`
+                          ) ? (
                             "Saving..."
                           ) : (
                             <>
                               <Save size={16} className="mr-2" />
-                              {isSaved ? "Saved" : "Save Recording"}
+                              {isSaved ? "Saved" : "Save Permanent Recording"}
                             </>
                           )}
                         </button>

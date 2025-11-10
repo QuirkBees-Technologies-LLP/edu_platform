@@ -1,7 +1,12 @@
 // VideoPlayerModal.jsx
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import VideoJS from '../../../components/VideoJS';
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import VideoJS from "../../../components/VideoJS";
 
 const VideoPlayerModal = ({ open, onOpenChange, videoUrl }) => {
   const playerOptions = {
@@ -10,16 +15,22 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl }) => {
     responsive: true,
     fluid: true,
     muted: true,
+    html5: {
+      attributes: {
+        controlsList: "nodownload noplaybackrate",
+        disablePictureInPicture: true,
+      },
+    },
     sources: [
       {
         src: videoUrl,
-        type: 'video/mp4',
+        type: "video/mp4",
       },
     ],
   };
 
   const handlePlayerReady = (player) => {
-    console.log('VideoJS Player is ready', player);
+    console.log("VideoJS Player is ready", player);
   };
 
   return (
@@ -27,11 +38,16 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl }) => {
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden">
         <DialogHeader className="p-4 pb-0 bg-white">
           <DialogTitle>Recording Playback</DialogTitle>
-          <p className='flex items-center gap-2 text-sm font-normal text-gray-700'>View and access all video recordings uploaded by educators and admins.</p>
+          <p className="flex items-center gap-2 text-sm font-normal text-gray-700">
+            View and access all video recordings uploaded by educators and
+            admins.
+          </p>
         </DialogHeader>
         <div className="p-4">
           {/* ✅ Only render the video when modal is open */}
-          {open && <VideoJS options={playerOptions} onReady={handlePlayerReady} />}
+          {open && (
+            <VideoJS options={playerOptions} onReady={handlePlayerReady} />
+          )}
         </div>
       </DialogContent>
     </Dialog>

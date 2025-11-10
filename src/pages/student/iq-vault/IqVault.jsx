@@ -575,12 +575,12 @@ export default function IqVault() {
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                           <h2 className="text-xl font-medium">IQ Vault</h2>
                           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                            <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
+                            <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
                               <option>Experience</option>
                               <option>Beginner</option>
                               <option>Advanced</option>
                             </select>
-                            <select className="bg-[#2a165d] text-white p-2 rounded-md w-full sm:w-auto">
+                            <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
                               <option>Style</option>
                               <option>Technical</option>
                               <option>Fundamental</option>

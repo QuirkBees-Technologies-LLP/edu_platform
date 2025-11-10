@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import { FiCalendar } from "react-icons/fi";
+import { useSettings } from "../providers/SettingsProvider";
 
 const DateRangePicker = ({
   onDateRangeChange,
   initialStartDate = null,
   initialEndDate = null,
 }) => {
+  const { getThemeMode } = useSettings();
+  const theme = getThemeMode();
+  const isDark = theme === "dark";
+
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
   const [selectedRange, setSelectedRange] = useState("");
@@ -20,12 +25,12 @@ const DateRangePicker = ({
 
   const formatDate = (date) => date.toISOString().split("T")[0];
 
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
   const dateRanges = {
     Today: { start: today, end: today },
-    Yesterday: {
-      start: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000),
-      end: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000),
-    },
+    Yesterday: { start: yesterday, end: yesterday },
     "Last 7 Days": {
       start: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000),
       end: today,
@@ -78,7 +83,6 @@ const DateRangePicker = ({
     const start = new Date(tempStartDate);
     const end = new Date(tempEndDate);
     if (start > end) return;
-
     setStartDate(start);
     setEndDate(end);
     setShowCustomRange(false);
@@ -105,6 +109,19 @@ const DateRangePicker = ({
 
   const displayLabel = selectedRange || "Filter By Date";
 
+  const colors = {
+    bg: isDark ? "#1f1f1f" : "#ffffff",
+    bgHover: isDark ? "#2a2a2a" : "#f9fafb",
+    bgActive: isDark ? "#2e2e2e" : "#f3f4f6",
+    text: isDark ? "#f3f4f6" : "#111827",
+    subText: isDark ? "#9ca3af" : "#6b7280",
+    border: isDark ? "#3f3f46" : "#d1d5db",
+    borderHover: isDark ? "#565658" : "#9ca3af",
+    shadow: isDark
+      ? "0 4px 16px rgba(0,0,0,0.5)"
+      : "0 4px 16px rgba(0,0,0,0.1)",
+  };
+
   const styles = {
     container: {
       position: "relative",
@@ -118,24 +135,25 @@ const DateRangePicker = ({
       width: "100%",
       height: "38px",
       padding: "8px 12px",
-      border: "1px solid #d1d5db",
+      border: `1px solid ${colors.border}`,
       borderRadius: "6px",
-      background: "#fff",
-      color: "#374151",
+      background: colors.bg,
+      color: colors.text,
       fontSize: "14px",
       cursor: "pointer",
+      transition: "all 0.2s ease",
     },
     dropdown: {
       position: "absolute",
       top: "calc(100% + 6px)",
-      left: 0,
+      left: "-50px",
       zIndex: 9999,
-      width: "max-content",
+      width: "fit-content",
       minWidth: "260px",
-      background: "#fff",
-      border: "1px solid #e5e7eb",
+      background: colors.bg,
+      border: `1px solid ${colors.border}`,
       borderRadius: "8px",
-      boxShadow: "0px 4px 16px rgba(0,0,0,0.1)",
+      boxShadow: colors.shadow,
       padding: "8px 0",
       display: show ? "block" : "none",
     },
@@ -146,18 +164,18 @@ const DateRangePicker = ({
       textAlign: "left",
       border: "none",
       background: "transparent",
-      color: "#111827",
+      color: colors.text,
       cursor: "pointer",
-      transition: "background-color 0.15s ease",
+      transition: "background-color 0.15s ease, color 0.15s ease",
     },
     closeBtn: {
       position: "absolute",
-      top: "12px",
+      top: "10px",
       right: "8px",
       background: "transparent",
       border: "none",
       cursor: "pointer",
-      color: "#9ca3af",
+      color: colors.subText,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -165,7 +183,7 @@ const DateRangePicker = ({
     },
     customContainer: {
       padding: "12px",
-      borderTop: "1px solid #e5e7eb",
+      borderTop: `1px solid ${colors.border}`,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -180,10 +198,14 @@ const DateRangePicker = ({
       height: "36px",
       width: "150px",
       padding: "6px 8px",
-      border: "1px solid #d1d5db",
+      border: `1px solid ${colors.border}`,
       borderRadius: "6px",
       fontSize: "14px",
       textAlign: "center",
+      background: colors.bg,
+      color: colors.text,
+      caretColor: colors.text,
+      transition: "border 0.2s ease",
     },
     buttonRow: {
       display: "flex",
@@ -205,14 +227,23 @@ const DateRangePicker = ({
       color: "#fff",
     },
     btnCancel: {
-      background: "#e5e7eb",
-      color: "#374151",
+      background: isDark ? "#3f3f46" : "#e5e7eb",
+      color: isDark ? "#e5e7eb" : "#374151",
     },
   };
 
   return (
     <div ref={dropdownRef} style={styles.container}>
-      <button style={styles.toggle} onClick={() => setShow(!show)}>
+      <button
+        style={styles.toggle}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.border = `1px solid ${colors.borderHover}`)
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.border = `1px solid ${colors.border}`)
+        }
+        onClick={() => setShow(!show)}
+      >
         <FiCalendar size={16} />
         <span>{displayLabel}</span>
         <i
@@ -228,8 +259,8 @@ const DateRangePicker = ({
         <button
           style={styles.closeBtn}
           onClick={handleClear}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#374151")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
+          onMouseEnter={(e) => (e.currentTarget.style.color = colors.text)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = colors.subText)}
         >
           <RxCross2 size={18} />
         </button>
@@ -244,16 +275,20 @@ const DateRangePicker = ({
                 style={{
                   ...styles.item,
                   backgroundColor:
-                    selectedRange === rangeName ? "#f3f4f6" : "transparent",
-                  fontWeight: selectedRange === rangeName ? "450" : "normal",
+                    selectedRange === rangeName
+                      ? colors.bgActive
+                      : "transparent",
+                  fontWeight: selectedRange === rangeName ? "500" : "normal",
                 }}
                 onClick={() => handleRangeSelect(rangeName)}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f9fafb")
+                  (e.currentTarget.style.backgroundColor = colors.bgHover)
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    selectedRange === rangeName ? "#f3f4f6" : "transparent")
+                (e.currentTarget.style.backgroundColor =
+                  selectedRange === rangeName
+                    ? colors.bgActive
+                    : "transparent")
                 }
               >
                 {rangeName}
@@ -263,7 +298,7 @@ const DateRangePicker = ({
               style={styles.item}
               onClick={() => handleRangeSelect("Custom Range")}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#f9fafb")
+                (e.currentTarget.style.backgroundColor = colors.bgHover)
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.backgroundColor = "transparent")
