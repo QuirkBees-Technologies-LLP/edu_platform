@@ -43,9 +43,9 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E0658178099D4C98ABF3AA7A39085F24 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_01008F7B4B784A34BB7D2742483ED52F }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2EA6958ABB2E4874B29BDD5245696536 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4905028732654A2392D9E4EA425A3F77 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_28B8DAC023274A68B488DCACC8E929EE }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0A743F3603404696B587754BA075F752 }}
 
       - name: Deploy static content to Azure Web App
         uses: azure/webapps-deploy@v3
