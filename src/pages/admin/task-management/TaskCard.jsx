@@ -103,7 +103,7 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
                     <img
                       src={getUrl(img)}
                       alt="Task"
-                      className="w-full h-32 object-cover rounded-lg cursor-pointer"
+                      className="w-full h-96 object-cover rounded-lg cursor-pointer"
                       onClick={() => setSelectedImage(getUrl(img))}
                     />
                     {i === 3 && images.length > 4 && (
@@ -121,7 +121,7 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
         )}
 
         {videos.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2 ">
             {videos.map((video, i) => (
               <video
                 key={i}
@@ -134,7 +134,7 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
         )}
 
         {documents.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2 ">
             {documents.map((doc, i) => (
               <div
                 key={i}

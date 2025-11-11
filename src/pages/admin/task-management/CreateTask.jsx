@@ -42,6 +42,8 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
       priority: Yup.string()
         .oneOf(["low", "medium", "high"], "Invalid priority")
         .required("Priority is required"),
+      images: Yup.array().max(4, "Maximum 4 images are allowed"),
+      videos: Yup.array().max(4, "Maximum 4 Videos are allowed"),
     }),
 
     onSubmit: async (values, { resetForm }) => {
@@ -236,6 +238,11 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
                 ))}
               </div>
             )}
+            {formik.touched.images && formik.errors.images && (
+              <span className="text-danger text-xs mt-1">
+                {formik.errors.images}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col gap-1">
@@ -276,6 +283,11 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
                   </div>
                 ))}
               </div>
+            )}
+            {formik.touched.videos && formik.errors.videos && (
+              <span className="text-danger text-xs mt-1">
+                {formik.errors.videos}
+              </span>
             )}
           </div>
 
