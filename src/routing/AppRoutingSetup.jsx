@@ -149,6 +149,8 @@ import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
 import Admin from "../pages/superAdmin/admin/Admin";
 import Task from "../pages/admin/task-management/Task";
 
+
+
 const routes = {
   student: [
     { path: "/", element: <DefaultPage /> },
@@ -303,9 +305,11 @@ const AppRoutingSetup = () => {
       : routes[userRole] || [];
 
   console.log("roleRoutes", roleRoutes);
+  console.log("-----------------",)
   console.log("auth", auth);
 
   // const roleRoutes = routes[userRole] || [];
+
 
   return (
     <Routes>
