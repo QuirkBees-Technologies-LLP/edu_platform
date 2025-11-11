@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '22.x'
 
-      # 3️⃣ Install dependencies and build Vite + prepare Express server
+      # 3️⃣ Install dependencies and build Vite
       - name: Install dependencies and build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
@@ -39,18 +39,17 @@ jobs:
           npm ci
           npm run build
 
-          # copy backend file and create runtime package.json
-          cp server.js dist/
-          echo '{"name":"edu-app","version":"1.0.0","type":"module","main":"server.js","dependencies":{"express":"^4.21.2"},"scripts":{"start":"node server.js"}}' > dist/package.json
-
-          # install runtime dependencies only
-          cd dist
+          # Create a runtime folder (not just dist)
+          mkdir runtime
+          cp -r dist runtime/dist
+          cp server.js runtime/
+          echo '{"name":"edu-app","version":"1.0.0","type":"module","main":"server.js","dependencies":{"express":"^4.21.2"},"scripts":{"start":"node server.js"}}' > runtime/package.json
+          
+          cd runtime
           npm install --production
-
-          # zip everything for Azure
           zip -r ../site.zip *
 
-      # 4️⃣ Login to Azure using prod credentials
+      # 4️⃣ Login to Azure
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -58,8 +57,8 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76075C8D564542E2B56E0A2DC5156C6B }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CCB2529DDE84406A4CB3A4D67D43139 }}
 
-      # 5️⃣ Deploy to Azure Web App (Production slot)
-      - name: Deploy static content to Azure Web App (Production)
+      # 5️⃣ Deploy to Azure
+      - name: Deploy to Azure Web App (Production)
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'edu'
