@@ -1,14 +1,17 @@
 import React, { useRef, useEffect } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "sonner";
+import { X, Image, Video, Flag } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { X, Image, Video, Flag } from "lucide-react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { toast } from "sonner";
+
+import RichTextEditor from "../../../components/ui/rich-editor";
 import {
   useCreateTaskMutation,
   useUpdateTaskMutation,
@@ -33,13 +36,12 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
       title: Yup.string()
         .trim()
         .min(3, "Title must be at least 3 characters")
-        .max(100, "Title must be under 100 characters")
+        // .max(100, "Title must be under 100 characters")
         .required("Title is required"),
-      description: Yup.string()
-        .trim()
-        .max(500, "Description must be under 500 characters")
-        .required("Description is required"),
-      priority: Yup.string().oneOf(["low", "medium", "high"]).required(),
+      description: Yup.string().trim().required("Description is required"),
+      priority: Yup.string()
+        .oneOf(["low", "medium", "high"], "Invalid priority")
+        .required("Priority is required"),
     }),
 
     onSubmit: async (values, { resetForm }) => {
@@ -49,12 +51,8 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
         formData.append("description", values.description);
         formData.append("priority", values.priority);
 
-        values.images?.forEach((file) => {
-          formData.append("images", file);
-        });
-        values.videos?.forEach((file) => {
-          formData.append("videos", file);
-        });
+        values.images.forEach((file) => formData.append("images", file));
+        values.videos.forEach((file) => formData.append("videos", file));
 
         if (editingTask) {
           await updateTask({
@@ -76,15 +74,15 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
       }
     },
   });
-  console.log("editingTask", editingTask);
+
   useEffect(() => {
     if (editingTask && isOpen) {
       formik.setValues({
         title: editingTask?.title || "",
         description: editingTask?.description || "",
         priority: editingTask?.priority || "medium",
-        images: editingTask?.images.map((u) => u.url) || [],
-        videos: editingTask?.videos.map((u) => u.url) || [],
+        images: editingTask?.images?.map((u) => u.url) || [],
+        videos: editingTask?.videos?.map((u) => u.url) || [],
       });
     } else if (!editingTask && isOpen) {
       formik.resetForm();
@@ -104,7 +102,6 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
       }
       return true;
     });
-
     formik.setFieldValue(type === "image" ? "images" : "videos", [
       ...(formik.values[type === "image" ? "images" : "videos"] || []),
       ...validFiles,
@@ -126,79 +123,90 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="p-5 max-w-[600px]">
+        <DialogHeader className="pb-5 pt-0 px-0">
           <DialogTitle>
             {editingTask ? "Edit Ticket" : "Create Ticket"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title <span className="text-red-500">*</span>
+        <form onSubmit={formik.handleSubmit} className="grid gap-5">
+          <div className="flex flex-col gap-1">
+            <label className="form-label text-gray-900 gap-1">
+              Title<span className="text-danger">*</span>
             </label>
             <input
               type="text"
-              name="title"
-              value={formik.values.title}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Enter Ticket title"
-              className="input w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter title"
+              className={`form-control input input-md w-full ${
+                formik.errors.title && formik.touched.title
+                  ? "border border-danger"
+                  : ""
+              }`}
+              {...formik.getFieldProps("title")}
             />
             {formik.touched.title && formik.errors.title && (
-              <p className="text-sm text-red-600 mt-1">{formik.errors.title}</p>
+              <span className="text-danger text-xs mt-1">
+                {formik.errors.title}
+              </span>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description <span className="text-red-500">*</span>
+          <div className="flex flex-col gap-1">
+            <label className="form-label text-gray-900 gap-1">
+              Description<span className="text-danger">*</span>
             </label>
-            <textarea
-              name="description"
-              value={formik.values.description}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              rows="4"
-              placeholder="Describe your Ticket"
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500"
+            <RichTextEditor
+              content={formik.values.description}
+              onChange={(value) => formik.setFieldValue("description", value)}
+              onBlur={() => formik.setFieldTouched("description", false)}
+              theme="snow"
+              touched={formik.touched.description}
+              error={formik.errors.description}
             />
             {formik.touched.description && formik.errors.description && (
-              <p className="text-sm text-red-600 mt-1">
+              <span className="text-danger text-xs mt-1">
                 {formik.errors.description}
-              </p>
+              </span>
             )}
           </div>
 
-          {/* Priority */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1  items-center gap-2">
-              {/* <Flag size={16} /> Priority */}Priority   
+          <div className="flex flex-col gap-1">
+            <label className="form-label text-gray-900 gap-1">
+              {/* <Flag size={14} className="inline mr-1" /> */}
+              Priority<span className="text-danger">*</span>
             </label>
             <select
               name="priority"
               value={formik.values.priority}
               onChange={formik.handleChange}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500"
+              className={`form-control input input-md w-full ${
+                formik.errors.priority && formik.touched.priority
+                  ? "border border-danger"
+                  : ""
+              }`}
             >
               <option value="low">🟢 Low</option>
               <option value="medium">🟡 Medium</option>
               <option value="high">🔴 High</option>
             </select>
+            {formik.touched.priority && formik.errors.priority && (
+              <span className="text-danger text-xs mt-1">
+                {formik.errors.priority}
+              </span>
+            )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="flex flex-col gap-1">
+            <label className="form-label text-gray-900 gap-1">
               Upload Images
             </label>
             <button
               type="button"
               onClick={() => imageInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 border rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+              className="flex items-center gap-2 px-3 py-2 border rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600 w-fit"
             >
-              <Image size={18} /> Add Images
+              <Image size={16} /> Add Images
             </button>
             <input
               type="file"
@@ -208,14 +216,13 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
               className="hidden"
               onChange={(e) => handleFileChange(e, "image")}
             />
-
             {formik.values.images.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-3">
                 {formik.values.images.map((file, idx) => (
                   <div key={idx} className="relative group">
                     <img
                       src={getFilePreview(file)}
-                      alt={`image-${idx}`}
+                      alt={`img-${idx}`}
                       className="w-full h-24 object-cover rounded-md"
                     />
                     <button
@@ -231,16 +238,16 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="flex flex-col gap-1">
+            <label className="form-label text-gray-900 gap-1">
               Upload Videos
             </label>
             <button
               type="button"
               onClick={() => videoInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 border rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600"
+              className="flex items-center gap-2 px-3 py-2 border rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600 w-fit"
             >
-              <Video size={18} /> Add Videos
+              <Video size={16} /> Add Videos
             </button>
             <input
               type="file"
@@ -250,7 +257,6 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
               className="hidden"
               onChange={(e) => handleFileChange(e, "video")}
             />
-
             {formik.values.videos.length > 0 && (
               <div className="grid grid-cols-2 gap-2 mt-3">
                 {formik.values.videos.map((file, idx) => (
@@ -273,7 +279,7 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex border-gray-200 border-t justify-end pt-5 gap-3">
             <button
               type="button"
               onClick={onClose}
