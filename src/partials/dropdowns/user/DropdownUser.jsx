@@ -1,73 +1,80 @@
-import { Fragment } from 'react';
-import { Link } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
-import { useAuthContext } from '@/auth';
-import { useLanguage } from '@/i18n';
-import { toAbsoluteUrl } from '@/utils';
-import { DropdownUserLanguages } from './DropdownUserLanguages';
-import { useSettings } from '@/providers/SettingsProvider';
-import { DefaultTooltip, KeenIcon } from '@/components';
-import { MenuItem, MenuLink, MenuSub, MenuTitle, MenuSeparator, MenuArrow, MenuIcon } from '@/components/menu';
-import { useDispatch } from 'react-redux';
-const DropdownUser = ({
-  menuItemRef
-}) => {
-  const {
-    settings,
-    storeSettings
-  } = useSettings();
-  const {
-    logout
-  } = useAuthContext();
+import { Fragment } from "react";
+import { Link } from "react-router-dom";
+import { FormattedMessage } from "react-intl";
+import { useAuthContext } from "@/auth";
+import { useLanguage } from "@/i18n";
+import { toAbsoluteUrl } from "@/utils";
+import { DropdownUserLanguages } from "./DropdownUserLanguages";
+import { useSettings } from "@/providers/SettingsProvider";
+import { KeenIcon } from "@/components";
+import {
+  MenuItem,
+  MenuLink,
+  MenuSub,
+  MenuTitle,
+  MenuSeparator,
+  MenuIcon,
+} from "@/components/menu";
+import { useDispatch } from "react-redux";
+
+const DropdownUser = ({ menuItemRef }) => {
+  const { settings, storeSettings } = useSettings();
+  const { logout, auth } = useAuthContext();
   const dispatch = useDispatch();
-  const {
-    isRTL
-  } = useLanguage();
-  const handleThemeMode = event => {
-    const newThemeMode = event.target.checked ? 'dark' : 'light';
-    storeSettings({
-      themeMode: newThemeMode
-    });
+  const { isRTL } = useLanguage();
+
+  const handleThemeMode = () => {
+    const newThemeMode = settings.themeMode === "dark" ? "light" : "dark";
+    storeSettings({ themeMode: newThemeMode });
   };
-  const { auth } = useAuthContext();
 
   const userEmail = auth?.user?.email;
-  const profilePhoto = auth?.user?.image;
+  const profilePhoto =
+    auth?.user?.image?.includes("undefined") || !auth?.user?.image
+      ? toAbsoluteUrl("/media/avatars/300-2.png")
+      : auth?.user?.image;
 
-  const buildHeader = () => {
-    return <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
+  const buildHeader = () => (
+    <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
       <div className="flex items-center gap-2">
-        <img className="size-9 rounded-full border-2 border-success flex-shrink-0 object-cover object-top" src={profilePhoto?.includes("undefined") ? toAbsoluteUrl('/media/avatars/300-2.png') : profilePhoto} alt="" />
+        <img
+          className="size-9 rounded-full border-2 border-success flex-shrink-0 object-cover object-top"
+          src={profilePhoto}
+          alt="User Avatar"
+        />
         <div className="flex flex-col">
-          <Link to="#" className="text-sm text-gray-800 hover:text-primary font-semibold leading-none">
-          {auth?.user.first_name}{" "}{auth?.user.last_name} 
-          </Link> 
+          <Link
+            to="#"
+            className="text-sm text-gray-800 dark:text-gray-200 hover:text-primary font-semibold leading-none"
+          >
+            {auth?.user?.first_name} {auth?.user?.last_name}
+          </Link>
           <a
             href={`mailto:${userEmail}`}
-            className="block w-24 md:w-40 line-clamp-1 truncate text-xs text-gray-600 hover:text-primary font-medium leading-none"
+            className="block w-24 md:w-40 line-clamp-1 truncate text-xs text-gray-600 dark:text-gray-400 hover:text-primary font-medium leading-none"
             title={userEmail}
           >
             {userEmail}
           </a>
-
         </div>
       </div>
-      {/* <span className="badge badge-xs badge-primary badge-outline">Pro</span> */}
-    </div>;
-  };
+    </div>
+  );
+
   const buildMenu = () => {
     const roleBasedProfilePaths = {
-      user: '/profile',
-      admin: '/admin/profile',
-      educator: '/educator/profile',
+      user: "/profile",
+      admin: "/admin/profile",
+      educator: "/educator/profile",
     };
 
-    const profilePath = roleBasedProfilePaths[auth.user.role] || '/profile';
+    const profilePath = roleBasedProfilePaths[auth.user.role] || "/profile";
 
-    return <Fragment>
-      <MenuSeparator />
-      <div className="flex flex-col">
-        {/* <MenuItem>
+    return (
+      <Fragment>
+        <MenuSeparator />
+        <div className="flex flex-col">
+          {/* <MenuItem>
           <MenuLink path="/public-profile/profiles/default">
             <MenuIcon className="menu-icon">
               <KeenIcon icon="badge" />
@@ -77,17 +84,17 @@ const DropdownUser = ({
             </MenuTitle>
           </MenuLink>
         </MenuItem> */}
-        <MenuItem>
-          <MenuLink path={profilePath}>
-            <MenuIcon>
-              <KeenIcon icon="profile-circle" />
-            </MenuIcon>
-            <MenuTitle>
-              <FormattedMessage id="USER.MENU.MY_PROFILE" />
-            </MenuTitle>
-          </MenuLink>
-        </MenuItem>
-        {/* <MenuItem>
+          <MenuItem>
+            <MenuLink path={profilePath}>
+              <MenuIcon>
+                <KeenIcon icon="profile-circle" />
+              </MenuIcon>
+              <MenuTitle>
+                <FormattedMessage id="USER.MENU.MY_PROFILE" />
+              </MenuTitle>
+            </MenuLink>
+          </MenuItem>
+          {/* <MenuItem>
           <MenuLink path="/educator-details">
             <MenuIcon>
               <KeenIcon icon="profile-circle" />
@@ -207,38 +214,56 @@ const DropdownUser = ({
             </MenuTitle>
           </MenuLink>
         </MenuItem> */}
-        <DropdownUserLanguages menuItemRef={menuItemRef} />
-        <MenuSeparator />
-      </div>
-    </Fragment>;
+          <DropdownUserLanguages menuItemRef={menuItemRef} />
+          <MenuSeparator />
+        </div>
+      </Fragment>
+    );
   };
+
   const buildFooter = () => {
-    return <div className="flex flex-col">
-      <div className="menu-item mb-0.5">
-        <div className="menu-link">
-          <span className="menu-icon">
-            <KeenIcon icon="moon" />
-          </span>
-          <span className="menu-title">
-            <FormattedMessage id="USER.MENU.DARK_MODE" />
-          </span>
-          <label className="switch switch-sm">
-            <input name="theme" type="checkbox" checked={settings.themeMode === 'dark'} onChange={handleThemeMode} value="1" />
-          </label>
+    const isDark = settings.themeMode === "dark";
+    return (
+      <div className="flex flex-col">
+        <div className="menu-item mb-0.5">
+          <div
+            className="menu-link cursor-pointer select-none"
+            onClick={handleThemeMode}
+          >
+            <span className="menu-icon">
+              <KeenIcon icon="moon" />
+            </span>
+            <span className="menu-title">
+              <FormattedMessage id="USER.MENU.DARK_MODE" />
+            </span>
+            <label className="switch switch-sm pointer-events-none">
+              <input name="theme" type="checkbox" checked={isDark} readOnly />
+            </label>
+          </div>
+        </div>
+
+        <div className="menu-item px-4 py-1.5">
+          <button
+            onClick={() => logout(dispatch)}
+            className="btn btn-sm btn-light justify-center w-full"
+          >
+            <FormattedMessage id="USER.MENU.LOGOUT" />
+          </button>
         </div>
       </div>
-
-      <div className="menu-item px-4 py-1.5">
-        <a onClick={() => logout(dispatch)} className="btn btn-sm btn-light justify-center">
-          <FormattedMessage id="USER.MENU.LOGOUT" />
-        </a>
-      </div>
-    </div>;
+    );
   };
-  return <MenuSub className="menu-default light:border-gray-300 w-[200px] md:w-[250px]" rootClassName="p-0">
-    {buildHeader()}
-    {buildMenu()}
-    {buildFooter()}
-  </MenuSub>;
+
+  return (
+    <MenuSub
+      className="menu-default light:border-gray-300 w-[200px] md:w-[250px]"
+      rootClassName="p-0"
+    >
+      {buildHeader()}
+      {buildMenu()}
+      {buildFooter()}
+    </MenuSub>
+  );
 };
+
 export { DropdownUser };

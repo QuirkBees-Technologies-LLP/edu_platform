@@ -1,6 +1,6 @@
 // Default settings for the application
 const defaultSettings = {
-  themeMode: 'light',
+  themeMode: 'dark',
   // Default to light mode for the application
   keeniconsStyle: 'filled',
   // Default to using filled KeenIcons style
