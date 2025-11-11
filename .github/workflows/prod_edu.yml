@@ -13,14 +13,17 @@ jobs:
       contents: read
 
     steps:
+      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up Node.js environment
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
 
+      # 3️⃣ Install dependencies and build frontend
       - name: Install dependencies and build frontend
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
@@ -35,14 +38,16 @@ jobs:
           npm ci
           npm run build
 
+      # 4️⃣ Prepare deployment package (server.js + dist + package files)
       - name: Prepare deployment package
         run: |
           mkdir deploy
-          cp -r dist deploy/
+          cp -r dist deploy/dist
           cp server.js package.json package-lock.json deploy/
           cd deploy
-          zip -r ../site.zip .
+          zip -r ../site.zip *   # 👈 Important: zip contents, not folder
 
+      # 5️⃣ Login to Azure
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -50,6 +55,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76075C8D564542E2B56E0A2DC5156C6B }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CCB2529DDE84406A4CB3A4D67D43139 }}
 
+      # 6️⃣ Deploy to Azure Web App (Production)
       - name: Deploy to Azure Web App (Production)
         uses: azure/webapps-deploy@v3
         with:
