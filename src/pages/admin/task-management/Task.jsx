@@ -164,7 +164,7 @@ const Task = () => {
               <div className="card rounded-lg shadow-md p-8 text-center">
                 <div className="animate-spin h-12 w-12 border-b-2 border-blue-500 mx-auto rounded-full"></div>
                 <p className="mt-4 text-gray-600 font-termina">
-                  Loading tasks...
+                  Loading tickets...
                 </p>
               </div>
             ) : tasks.length === 0 ? (
@@ -173,10 +173,10 @@ const Task = () => {
                   <Rss size={48} className="mx-auto" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-700 mb-2 font-termina">
-                  No tasks yet
+                  No tickets yet
                 </h3>
                 <p className="text-gray-500 mb-4 font-termina">
-                  Be the first to create a task!
+                  Be the first to create a tickets!
                 </p>
                 <button
                   onClick={handleCreateTask}
@@ -192,12 +192,12 @@ const Task = () => {
                 hasMore={hasMore}
                 loader={
                   <div className="text-center py-4 text-gray-500 font-termina">
-                    Loading more tasks...
+                    Loading more tickets...
                   </div>
                 }
                 endMessage={
                   <div className="text-center text-sm text-gray-400 py-4 font-termina">
-                    No more tasks
+                    No more tickets
                   </div>
                 }
               >

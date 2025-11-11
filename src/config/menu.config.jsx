@@ -1442,7 +1442,7 @@ export const sideMenus = {
       path: "/admin/logs",
     },
     {
-      title: "tickets",
+      title: "Tickets",
       icon: <ListTodo />,
       path: "/admin/ticket",
     },
@@ -1552,7 +1552,7 @@ export const sideMenus = {
       path: "/admin/iq-social",
     },
     {
-      title: "tickets",
+      title: "Tickets",
       icon: <ListTodo/>,
       path: "/admin/ticket",
     },
