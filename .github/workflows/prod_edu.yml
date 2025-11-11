@@ -1,4 +1,4 @@
-name: Build and deploy full Vite + Node app to Azure Web App - edu
+name: Build and deploy Vite + Node app to Azure Web App - edu
 
 on:
   push:
@@ -13,18 +13,18 @@ jobs:
       contents: read
 
     steps:
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Node.js environment
-      - name: Set up Node.js version
+      # 2️⃣ Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
 
       # 3️⃣ Install dependencies and build frontend
-      - name: Install dependencies and build frontend
+      - name: Install dependencies and build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
@@ -38,14 +38,16 @@ jobs:
           npm ci
           npm run build
 
-      # 4️⃣ Prepare deployment package (server.js + dist + package files)
-      - name: Prepare deployment package
+      # 4️⃣ Prepare ZIP (this is the critical part)
+      - name: Prepare deployment ZIP
         run: |
-          mkdir deploy
-          cp -r dist deploy/dist
-          cp server.js package.json package-lock.json deploy/
-          cd deploy
-          zip -r ../site.zip *   # 👈 Important: zip contents, not folder
+          mkdir tempdeploy
+          cp -r dist tempdeploy/dist
+          cp server.js package.json package-lock.json tempdeploy/
+          cd tempdeploy
+          zip -r ../site.zip *   # 👈 ensures files are at ZIP root
+          cd ..
+          unzip -l site.zip | grep server.js || echo "❌ server.js not found in ZIP!"
 
       # 5️⃣ Login to Azure
       - name: Login to Azure
@@ -55,7 +57,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76075C8D564542E2B56E0A2DC5156C6B }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CCB2529DDE84406A4CB3A4D67D43139 }}
 
-      # 6️⃣ Deploy to Azure Web App (Production)
+      # 6️⃣ Deploy ZIP to Azure Web App
       - name: Deploy to Azure Web App (Production)
         uses: azure/webapps-deploy@v3
         with:
