@@ -21,9 +21,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: 22
+          cache: 'npm'
 
       - name: Install dependencies and build
         env:
@@ -35,13 +36,24 @@ jobs:
           VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
           VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: |
+          # Increase memory limit for build
           export NODE_OPTIONS="--max-old-space-size=4096"
+
+          # Clean install and build frontend
           npm ci
           npm run build
+
+          # Copy backend server into dist/
           cp server.js dist/
+
+          # Create minimal package.json for runtime
           echo '{"name":"edu-app","version":"1.0.0","type":"module","main":"server.js","dependencies":{"express":"^4.21.2"},"scripts":{"start":"node server.js"}}' > dist/package.json
-          cd dist && npm install --production
-          zip -r ../site.zip *
+
+          # Install only production dependencies inside dist/
+          npm install --production --prefix dist
+
+          # ✅ Package the entire "dist" folder (not its contents)
+          zip -r site.zip dist
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -50,11 +62,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6BE959D7853A44B3A7DC0EBAF73F0A34 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_698EC872EB8C4D40BB1BB76AFF913127 }}
 
-      - name: Deploy static content to Azure Web App
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'edu'
           slot-name: 'Production'
           package: site.zip
-
-          
