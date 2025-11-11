@@ -1,20 +1,21 @@
-name: Build and deploy Vite + Node app to Azure Web App - edu
+name: Build and Deploy Vite App to Azure Web App - edu (prod)
 
 on:
   push:
     branches:
       - prod
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
+      id-token: write
 
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout repository
+      # 1️⃣ Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       # 2️⃣ Setup Node.js
@@ -23,7 +24,7 @@ jobs:
         with:
           node-version: '22.x'
 
-      # 3️⃣ Install dependencies and build frontend
+      # 3️⃣ Install dependencies and build Vite + prepare Express server
       - name: Install dependencies and build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
@@ -38,29 +39,29 @@ jobs:
           npm ci
           npm run build
 
-      # 4️⃣ Prepare ZIP (this is the critical part)
-      - name: Prepare deployment ZIP
-        run: |
-          mkdir tempdeploy
-          cp -r dist tempdeploy/dist
-          cp server.js package.json package-lock.json tempdeploy/
-          cd tempdeploy
-          zip -r ../site.zip *   # 👈 ensures files are at ZIP root
-          cd ..
-          unzip -l site.zip | grep server.js || echo "❌ server.js not found in ZIP!"
+          # copy backend file and create runtime package.json
+          cp server.js dist/
+          echo '{"name":"edu-app","version":"1.0.0","type":"module","main":"server.js","dependencies":{"express":"^4.21.2"},"scripts":{"start":"node server.js"}}' > dist/package.json
 
-      # 5️⃣ Login to Azure
-      - name: Login to Azure
+          # install runtime dependencies only
+          cd dist
+          npm install --production
+
+          # zip everything for Azure
+          zip -r ../site.zip *
+
+      # 4️⃣ Login to Azure using prod credentials
+      - name: Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_88D21AAB24FB453183DD18FA2E8CB5A4 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76075C8D564542E2B56E0A2DC5156C6B }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CCB2529DDE84406A4CB3A4D67D43139 }}
 
-      # 6️⃣ Deploy ZIP to Azure Web App
-      - name: Deploy to Azure Web App (Production)
+      # 5️⃣ Deploy to Azure Web App (Production slot)
+      - name: Deploy static content to Azure Web App (Production)
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'edu'
-          slot-name: 'production'
+          slot-name: 'Production'
           package: site.zip
