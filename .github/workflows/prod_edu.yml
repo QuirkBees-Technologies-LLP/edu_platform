@@ -70,7 +70,7 @@ name: Build and deploy Vite app to Azure Web App - edu (
 on:
   push:
     branches:
-      -   workflow_dispatch:
+      - prod
 
 jobs:
   build-and-deploy:
