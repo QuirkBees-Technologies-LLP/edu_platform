@@ -151,63 +151,42 @@ const IqAcademyEducators = () => {
         <div className="flex bg-gray-200 p-1 rounded-lg shadow-inner w-fit">
           <button
             onClick={() => setActive("grid")}
-            className={`p-2 rounded-lg transition-all ${
-              active === "grid" ? "bg-white shadow-md" : "bg-transparent"
-            }`}
+            className={`p-2 rounded-lg transition-all ${active === "grid" ? "bg-white shadow-md" : "bg-transparent"
+              }`}
           >
             <LayoutGrid
-              className={`w-5 h-5 ${
-                active === "grid" ? "text-gray-700" : "text-gray-400"
-              }`}
+              className={`w-5 h-5 ${active === "grid" ? "text-gray-700" : "text-gray-400"
+                }`}
             />
           </button>
 
           <button
             onClick={() => setActive("list")}
-            className={`p-2 rounded-lg transition-all ${
-              active === "list" ? "bg-white shadow-md" : "bg-transparent"
-            }`}
+            className={`p-2 rounded-lg transition-all ${active === "list" ? "bg-white shadow-md" : "bg-transparent"
+              }`}
           >
             <AlignJustify
-              className={`w-5 h-5 ${
-                active === "list" ? "text-gray-700" : "text-gray-400"
-              }`}
+              className={`w-5 h-5 ${active === "list" ? "text-gray-700" : "text-gray-400"
+                }`}
             />
           </button>
         </div>
       </div>
-
-      {/* Tabs + Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        {/* Tabs */}
         <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
           {["All"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 border-b-2 ${
-                activeTab === tab
-                  ? "border-black dark:border-white text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-900"
-              }`}
+              className={`pb-4 border-b-2 ${activeTab === tab
+                ? "border-black dark:border-white text-gray-900"
+                : "border-transparent text-gray-500 hover:text-gray-900"
+                }`}
             >
               {tab}
             </button>
           ))}
         </div>
-
-        {/* Filters: Language + Search */}
-        {/* <div className="flex flex-wrap gap-3">
-
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none dark:bg-gray-100"
-          />
-        </div> */}
-        {/* Category Dropdown */}
         <div className=" flex gap-3 sm:gap-6 pb-2 flex-wrap">
           <div className="relative w-72">
             <Select
@@ -215,7 +194,6 @@ const IqAcademyEducators = () => {
               onValueChange={(value) => {
                 setCategory(value);
                 refetch();
-                // reloadTable();
               }}
             >
               <SelectTrigger className="pr-8">
@@ -237,7 +215,6 @@ const IqAcademyEducators = () => {
                 onClick={() => {
                   setCategory(null);
                   refetch();
-                  // reloadTable();
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
@@ -246,35 +223,25 @@ const IqAcademyEducators = () => {
             )}
           </div>
           <div>
-            {/* Search Icon */}
-            {/* <Search className="w-5 h-5 text-gray-400" /> */}
 
             <SearchFilterInput
               searchText={searchText}
               handleSearchChange={handleSearchChange}
             />
-
-            {/* Filter Icon  */}
-            {/* {/* <SlidersHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" /> */}
           </div>
         </div>
       </div>
-
-      {/* Educators List */}
-
-      {!isLoading ? (
+      {/* {!isLoading ? (
         <div className="flex flex-col gap-4">
           {data?.data?.length > 0 ? (
             data?.data?.map((educator) => (
               <div
                 className="card cursor-pointer"
-                // onClick={() => navigate(`/iq-educators/${educator._id}`)}
               >
                 <div
                   key={educator._id}
                   className="flex items-center justify-between p-8 rounded-xl border flex-col sm:flex-row gap-4"
                 >
-                  {/* Left Section */}
                   <div className="flex items-center gap-4 flex-col sm:flex-row">
                     <img
                       src={educator.image}
@@ -296,17 +263,15 @@ const IqAcademyEducators = () => {
                   <div className="flex gap-4">
                     <button
                       onClick={() => handleToggle(educator)}
-                      className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${
-                        educator?.isFollowing
-                          ? "bg-[#4F46E5] text-white border-[#4F46E5]"
-                          : "bg-transparent text-[#4F46E5] border-[#4F46E5]"
-                      }`}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${educator?.isFollowing
+                        ? "bg-[#4F46E5] text-white border-[#4F46E5]"
+                        : "bg-transparent text-[#4F46E5] border-[#4F46E5]"
+                        }`}
                     >
                       <EyeIcon size={16} />
                       {educator?.isFollowing ? "Following" : "Follow"}
                     </button>
 
-                    {/* Follow Button */}
                     <button
                       onClick={() => navigate(`/iq-educators/${educator._id}`)}
                       className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border bg-[#4F46E5] text-white border-[#4F46E5]"
@@ -326,14 +291,85 @@ const IqAcademyEducators = () => {
         </div>
       ) : (
         <Loader />
-      )}
+      )} */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-      {/* Show More */}
-      {/* <div className="text-center mt-4">
-        <button className="text-primary pb-3 text-sm border-b-2 border-dashed border-primary">
-          Show more Connections
-        </button>
-      </div> */}
+        {/* Card */}
+        {[1, 2, 3].map((n) => (
+          <div
+            key={n}
+            className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all"
+          >
+            {/* COVER IMAGE */}
+            <div className="relative h-[200px] bg-gray-300 dark:bg-gray-700 flex justify-center items-center overflow-hidden">
+              <span className="text-gray-500 dark:text-gray-400 text-sm select-none">
+                {/* <img src="../../public/media/avatars/1.jpg" alt="" /> */}
+                400 × 200
+              </span>
+
+              {/* Top Left Badge */}
+              <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs px-3 py-1 rounded-lg">
+                Forex
+              </span>
+
+              {/* Languages */}
+              <span className="absolute top-3 right-3 bg-gray-200 text-dark dark:text-white text-xs px-3 py-1 rounded-lg flex items-center gap-1">
+                English
+              </span>
+            </div>
+
+            {/* PROFILE SECTION */}
+            <div className="p-5 relative">
+              {/* Profile Image */}
+              <div className="absolute -top-10 left-5">
+                <div className="w-20 h-20 rounded-full border-4 border-white dark:border-[#0F0F1A] bg-gray-300 dark:bg-gray-700" />
+                <div className="w-5 h-5 bg-blue-600 text-white rounded-full grid place-items-center text-xs absolute bottom-1 right-1">
+                  ✓
+                </div>
+              </div>
+
+              <div className="mt-12">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-900">
+                  Felipe Ferrer
+                </h2>
+                <p className="text-sm text-purple-500 font-medium">Senior Trader</p>
+
+                <p className="text-sm text-gray-600 dark:text-gray-800 mt-2 leading-relaxed">
+                  15+ years trading forex markets. Specializing in major currency
+                  pairs and risk management.
+                </p>
+
+                {/* Stats */}
+                <div className="flex justify-between text-gray-700 dark:text-gray-300 mt-6">
+                  <div className="text-center">
+                    <p className="font-semibold dark:text-gray-800">12.5K</p>
+                    <p className="text-xs dark:text-gray-700">Followers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold dark:text-gray-800">⭐ 4.9</p>
+                    <p className="text-xs dark:text-gray-700">Rating</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold dark:text-gray-800">8</p>
+                    <p className="text-xs dark:text-gray-700">Courses</p>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex items-center gap-3 mt-6">
+                  <button className="flex-1 bg-purple-600 hover:bg-purple-700 transition text-white text-sm py-2 rounded-xl">
+                    Follow
+                  </button>
+
+                  <button className="flex-1 bg-gray-200 dark:bg-light text-gray-800 dark:text-gray-900 py-2 rounded-xl text-sm">
+                    View Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
