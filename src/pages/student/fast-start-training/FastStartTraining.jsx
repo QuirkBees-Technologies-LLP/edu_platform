@@ -222,25 +222,25 @@ export default function FastStartTraining() {
     return url;
   };
 
-  const tabs = [
-    {
-      id: "Backoffice",
-      name: "Backoffice",
-      content: "Select the lactures", // Dynamic content rendered based on `lecture`
-    },
-    {
-      id: "Crypto",
-      name: "Crypto",
-      content:
-        "Explore the world of cryptocurrencies, blockchain technology, and digital asset trading.",
-    },
-    {
-      id: "Stock-options",
-      name: "Stock Options",
-      content:
-        "Understand stock options, strategies, and how to trade them effectively.",
-    },
-  ];
+  // const tabs = [
+  //   {
+  //     id: "Backoffice",
+  //     name: "Backoffice",
+  //     content: "Select the lactures", // Dynamic content rendered based on `lecture`
+  //   },
+  //   {
+  //     id: "Crypto",
+  //     name: "Crypto",
+  //     content:
+  //       "Explore the world of cryptocurrencies, blockchain technology, and digital asset trading.",
+  //   },
+  //   {
+  //     id: "Stock-options",
+  //     name: "Stock Options",
+  //     content:
+  //       "Understand stock options, strategies, and how to trade them effectively.",
+  //   },
+  // ];
 
   // Added the image
 

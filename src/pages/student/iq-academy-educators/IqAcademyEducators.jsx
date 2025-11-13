@@ -151,23 +151,27 @@ const IqAcademyEducators = () => {
         <div className="flex bg-gray-200 p-1 rounded-lg shadow-inner w-fit">
           <button
             onClick={() => setActive("grid")}
-            className={`p-2 rounded-lg transition-all ${active === "grid" ? "bg-white shadow-md" : "bg-transparent"
-              }`}
+            className={`p-2 rounded-lg transition-all ${
+              active === "grid" ? "bg-white shadow-md" : "bg-transparent"
+            }`}
           >
             <LayoutGrid
-              className={`w-5 h-5 ${active === "grid" ? "text-gray-700" : "text-gray-400"
-                }`}
+              className={`w-5 h-5 ${
+                active === "grid" ? "text-gray-700" : "text-gray-400"
+              }`}
             />
           </button>
 
           <button
             onClick={() => setActive("list")}
-            className={`p-2 rounded-lg transition-all ${active === "list" ? "bg-white shadow-md" : "bg-transparent"
-              }`}
+            className={`p-2 rounded-lg transition-all ${
+              active === "list" ? "bg-white shadow-md" : "bg-transparent"
+            }`}
           >
             <AlignJustify
-              className={`w-5 h-5 ${active === "list" ? "text-gray-700" : "text-gray-400"
-                }`}
+              className={`w-5 h-5 ${
+                active === "list" ? "text-gray-700" : "text-gray-400"
+              }`}
             />
           </button>
         </div>
@@ -178,10 +182,11 @@ const IqAcademyEducators = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-4 border-b-2 ${activeTab === tab
-                ? "border-black dark:border-white text-gray-900"
-                : "border-transparent text-gray-500 hover:text-gray-900"
-                }`}
+              className={`pb-4 border-b-2 ${
+                activeTab === tab
+                  ? "border-black dark:border-white text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-900"
+              }`}
             >
               {tab}
             </button>
@@ -223,7 +228,6 @@ const IqAcademyEducators = () => {
             )}
           </div>
           <div>
-
             <SearchFilterInput
               searchText={searchText}
               handleSearchChange={handleSearchChange}
@@ -293,9 +297,8 @@ const IqAcademyEducators = () => {
         <Loader />
       )} */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
         {/* Card */}
-        {[1, 2, 3].map((n) => (
+        {data?.data?.map((n) => (
           <div
             key={n}
             className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all"
@@ -303,8 +306,10 @@ const IqAcademyEducators = () => {
             {/* COVER IMAGE */}
             <div className="relative h-[200px] bg-gray-300 dark:bg-gray-700 flex justify-center items-center overflow-hidden">
               <span className="text-gray-500 dark:text-gray-400 text-sm select-none">
-                {/* <img src="../../public/media/avatars/1.jpg" alt="" /> */}
-                400 × 200
+                <img
+                  src={`${n.bannerImage ? n.bannerImage : "../../public/media/avatars/1.jpg"}`}
+                  alt=""
+                />
               </span>
 
               {/* Top Left Badge */}
@@ -322,7 +327,11 @@ const IqAcademyEducators = () => {
             <div className="p-5 relative">
               {/* Profile Image */}
               <div className="absolute -top-10 left-5">
-                <div className="w-20 h-20 rounded-full border-4 border-white dark:border-[#0F0F1A] bg-gray-300 dark:bg-gray-700" />
+                <img
+                  src={n.image}
+                  alt={n.image}
+                  className="w-20 h-20 object-cover rounded-full object-top"
+                />
                 <div className="w-5 h-5 bg-blue-600 text-white rounded-full grid place-items-center text-xs absolute bottom-1 right-1">
                   ✓
                 </div>
@@ -330,13 +339,15 @@ const IqAcademyEducators = () => {
 
               <div className="mt-12">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-900">
-                  Felipe Ferrer
+                  {n.first_name} {n.last_name}
                 </h2>
-                <p className="text-sm text-purple-500 font-medium">Senior Trader</p>
+                <p className="text-sm text-purple-500 font-medium">
+                  Senior Trader
+                </p>
 
                 <p className="text-sm text-gray-600 dark:text-gray-800 mt-2 leading-relaxed">
-                  15+ years trading forex markets. Specializing in major currency
-                  pairs and risk management.
+                  15+ years trading forex markets. Specializing in major
+                  currency pairs and risk management.
                 </p>
 
                 {/* Stats */}
@@ -357,11 +368,18 @@ const IqAcademyEducators = () => {
 
                 {/* Buttons */}
                 <div className="flex items-center gap-3 mt-6">
-                  <button className="flex-1 bg-purple-600 hover:bg-purple-700 transition text-white text-sm py-2 rounded-xl">
-                    Follow
+                  <button onClick={() => handleToggle(n)}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${n?.isFollowing
+                        ? "bg-[#4F46E5] text-white border-[#4F46E5]"
+                        : "bg-transparent text-[#4F46E5] border-[#4F46E5]"
+                        }`}
+                >
+                    {n?.isFollowing ? "Following" : "Follow"}
                   </button>
 
-                  <button className="flex-1 bg-gray-200 dark:bg-light text-gray-800 dark:text-gray-900 py-2 rounded-xl text-sm">
+                  
+
+                  <button className="flex-1 bg-gray-200 dark:bg-light text-gray-800 dark:text-gray-900 py-2 rounded-xl text-sm" onClick={() => navigate(`/iq-educators/${n._id}`)}>
                     View Profile
                   </button>
                 </div>

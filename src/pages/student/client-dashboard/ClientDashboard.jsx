@@ -813,9 +813,9 @@ const ClientDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
           {/* Beta Invite Banners */}
-          <div className="space-y-3 mb-6">
+          {/* <div className="space-y-3 mb-6"> */}
             {/* IQ Social Beta */}
-            <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-xl p-4 border border-purple-500/30">
+            {/* <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-xl p-4 border border-purple-500/30">
               <div className="flex items-center justify-between flex-wrap gap-5">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
@@ -844,10 +844,10 @@ const ClientDashboard = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* IQ Sync App Beta */}
-            <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 rounded-xl p-4 border border-blue-500/30">
+            {/* <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 rounded-xl p-4 border border-blue-500/30">
               <div className="flex items-center justify-between flex-wrap gap-5">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
@@ -876,18 +876,31 @@ const ClientDashboard = () => {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
 
           {/* Hero Banner */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <div className="h-64 rounded-xl bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
               <div className="text-center">
                 <h1 className="text-3xl xl:text-5xl font-bold text-white mb-3">RISE ABOVE ORDINARY</h1>
                 <p className="text-lg text-gray-100 dark:text-gray-800">Master the markets with expert guidance</p>
               </div>
             </div>
+          </div> */}
+
+           <div className="relative welcome_banner w-full mb-10 rounded-xl overflow-hidden">
+          <div className="relative z-1 flex items-center justify-center md:justify-end h-full p-4">
+            <div className="xl:hidden absolute inset-0 bg-black/40"></div>
+            <div className="text-center z-1">
+              <div className="flex items-center justify-center flex-col sm:flex-row space-x-2 animate-fadeInUp delay-200 md:pr-20">
+                <span className="text-xl text-gray-50 font-medium tracking-widest">
+                  RISE ABOVE ORDINARY
+                </span>
+              </div>
+            </div>
           </div>
+        </div>
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -899,7 +912,7 @@ const ClientDashboard = () => {
                 {/* IQ Academy */}
                 <div className="bg-gray-900/50 rounded-lg overflow-hidden border hover:border-purple-700 transition-all cursor-pointer group">
                   <div className="relative h-48">
-                    <img src="../../public/media/avatars/1.jpg" alt="IQ Academy" className="w-full h-full object-cover" />
+                    <img src="/media/images/2600x1600/banner_1.jpg" alt="IQ Academy" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     <div className="absolute top-3 left-3">
                       <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded">IQ Academy</span>
@@ -921,7 +934,7 @@ const ClientDashboard = () => {
                 {/* Fast Start Training */}
                 <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-lg overflow-hidden border border-green-800/50 hover:border-green-600 transition-all cursor-pointer group">
                   <div className="relative h-48">
-                    <img src="../../public/media/avatars/1.jpg" alt="Fast Start" className="w-full h-full object-cover" />
+                    <img src="/media/images/2600x1600/fast_start.jpg" alt="Fast Start" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-br from-green-800/30 to-emerald-700/30"></div>
                     <div className="absolute top-3 left-3">
                       <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">Fast Start</span>
@@ -943,7 +956,7 @@ const ClientDashboard = () => {
                 {/* IQ Live */}
                 <div className="bg-gray-900/50 rounded-lg overflow-hidden border hover:border-red-700 transition-all cursor-pointer group">
                   <div className="relative h-48">
-                    <img src="../../public/media/avatars/1.jpg" alt="IQ Live" className="w-full h-full object-cover" />
+                    <img src="/media/images/2600x1600/banner_2.jpg" alt="IQ Live" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                     <div className="absolute top-3 left-3">
                       <span className="px-2 py-1 bg-red-600 text-white text-xs rounded flex items-center gap-1">
@@ -971,7 +984,7 @@ const ClientDashboard = () => {
                 {/* IQ Strategies */}
                 <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 rounded-lg overflow-hidden border border-blue-800/50 hover:border-blue-600 transition-all cursor-pointer group">
                   <div className="relative h-48">
-                    <img src="../../public/media/avatars/1.jpg" alt="IQ Strategies" className="w-full h-full object-cover" />
+                    <img src="/media/images/2600x1600/banner_3.jpg" alt="IQ Strategies" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-800/30 to-purple-700/30"></div>
                     <div className="absolute top-3 left-3">
                       <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">Strategies</span>
