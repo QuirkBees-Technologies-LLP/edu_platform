@@ -25,6 +25,40 @@ import {
 } from "../../../store/api/client/clientSocialApiSlilce";
 import { formatDistanceToNow } from "date-fns";
 import { QRCodeCanvas } from "qrcode.react";
+
+const ShowMoreLess = ({
+  text = "",
+  html = "",
+  limit = 1000,
+  showMoreText = " Show More",
+  showLessText = " Show Less",
+  className = "text-sm text-gray-700 leading-relaxed",
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const isHtml = !!html;
+  const content = isHtml ? html : text;
+  const plainText = isHtml ? content.replace(/<[^>]+>/g, "") : text;
+  // const isLong = plainText.length > limit;
+  const isLong = false;
+
+  return (
+    <div className={className}>
+      <div
+        className={`${!expanded && isLong ? "line-clamp-4" : ""}`}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+      {isLong && (
+        <span
+          onClick={() => setExpanded(!expanded)}
+          className="text-blue-600 cursor-pointer hover:underline font-medium"
+        >
+          {expanded ? showLessText : showMoreText}
+        </span>
+      )}
+    </div>
+  );
+};
+
 const ClientDashboard = () => {
   const { auth } = useAuthContext();
 
@@ -37,6 +71,14 @@ const ClientDashboard = () => {
     isFetching,
     isError,
   } = useCorporatePostQuery();
+
+  const makeClickableLinks = (htmlOrText) => {
+    if (!htmlOrText) return "";
+    return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
+      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
+      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
+    });
+  };
 
   const liveStreams = liveEducator?.streams || [];
 
@@ -836,7 +878,20 @@ const ClientDashboard = () => {
                           </div>
                         </div>
                         <p className="text-sm font-normal text-gray-700">
-                          {update.content}
+                          {update?.content &&
+                            (() => {
+                              const formattedContent = makeClickableLinks(
+                                update?.content.replace(/\r?\n/g, "<br />")
+                              );
+
+                              return (
+                                <ShowMoreLess
+                                  html={formattedContent}
+                                  limit={1000}
+                                  className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+                                />
+                              );
+                            })()}
                         </p>
                       </div>
                     ))}
