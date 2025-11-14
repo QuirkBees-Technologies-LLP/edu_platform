@@ -1330,6 +1330,7 @@ const ClientDashboard = () => {
                                 alt={slide?.educator?.first_name}
                                 className="w-full h-full object-cover"
                               />
+                              
 
                               {/* DARK OVERLAY */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
@@ -1351,13 +1352,13 @@ const ClientDashboard = () => {
                               </div>
 
                               {/* PLAY / WATCH LIVE */}
-                              <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
+                              <div className="absolute inset-0 flex m-5 items-end justify-end pointer-events-auto">
                                 <Link
                                   to={`/iq-educators/${slide?.educator?._id}`}
-                                  className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition"
+                                  className="w-12 h-12  backdrop-blur rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition"
                                 >
                                   <Play
-                                    className="w-8 h-8 text-white ml-1"
+                                    className="w-6 h-6 text-white ml-1"
                                     fill="white"
                                   />
                                 </Link>
