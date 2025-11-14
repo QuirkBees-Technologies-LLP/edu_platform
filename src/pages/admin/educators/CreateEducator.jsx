@@ -73,6 +73,8 @@ const CreateEducator = forwardRef(
       image: null,
       icon: null,
       projectId: "",
+      educatorRole: "",
+      bio: "",
     };
 
     const createSchema = Yup.object().shape({
@@ -130,6 +132,11 @@ const CreateEducator = forwardRef(
       //     ),
 
       role: Yup.string().required("Role is required"),
+      educatorRole: Yup.string().required("Educator Role is required"),
+      bio: Yup.string()
+        .required("Educator description is required")
+        .min(30, "Bio must be at least 30 characters")
+        .max(120, "Bio cannot exceed 120 characters"),
       status: Yup.boolean().required("Status is required"),
       image: Yup.mixed().nullable(),
       icon: Yup.mixed().nullable(),
@@ -251,6 +258,8 @@ const CreateEducator = forwardRef(
           icon: selectedRow?.bannerImage || null,
           projectId: selectedRow?.projectId || null,
           categories: selectedRow?.categories?.map((cat) => cat._id) || [],
+          educatorRole: selectedRow?.educatorRole || "",
+          bio: selectedRow?.bio || "",
         };
         formik.setValues(initData);
       }
@@ -393,6 +402,54 @@ const CreateEducator = forwardRef(
                       {formik.errors.last_name}
                     </span>
                   )}
+                </div>
+              </div>
+              <div className="col-span-6">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Educator Bio<span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter Discription"
+                    autoComplete="off"
+                    className={`form-control input input-md w-full ${
+                      formik.errors.bio && formik.touched.bio
+                        ? "border border-danger"
+                        : ""
+                    }`}
+                    {...formik.getFieldProps("bio")}
+                  />
+                  {formik.touched.bio && formik.errors.bio && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.bio}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="col-span-6">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Educator Role <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    // readOnly={selectedRow?._id}
+                    placeholder="Enter Educator Role"
+                    autoComplete="off"
+                    {...formik.getFieldProps("educatorRole")}
+                    className={`form-control input input-md w-full ${
+                      formik.errors.educatorRole && formik.touched.educatorRole
+                        ? "border border-danger"
+                        : ""
+                    }`}
+                  />
+                  {formik.touched.educatorRole &&
+                    formik.errors.educatorRole && (
+                      <span role="alert" className="text-danger text-xs mt-1">
+                        {formik.errors.educatorRole}
+                      </span>
+                    )}
                 </div>
               </div>
               <div className="col-span-6">

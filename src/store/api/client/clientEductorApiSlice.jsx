@@ -7,12 +7,27 @@ export const clientEducatorApiSlice = createApi({
   tagTypes: ["Educator"],
   endpoints: (builder) => ({
     getEducatorsList: builder.query({
-      query: ({ search = "" , category = "" }) =>
-        search
-          ? `/users/educator-course?search=${encodeURIComponent(search)}&category=${category}`
-          : `/users/educator-course?category=${category}`,
+      query: ({
+        search = "",
+        tab = "all",
+        category = "",
+        page = 1,
+        limit = 9,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (search) params.append("search", search);
+        if (tab === "following") params.append("tab", tab);
+        if (category) params.append("category", category);
+
+        params.append("page", page);
+        params.append("limit", limit);
+
+        return `/users/educator-course?${params.toString()}`;
+      },
       providesTags: ["Educator"],
     }),
+
     toggleFollow: builder.mutation({
       query: (educatorId) => ({
         url: `/users/auth/${educatorId}/follow`,
@@ -20,10 +35,11 @@ export const clientEducatorApiSlice = createApi({
       }),
       invalidatesTags: ["Educator"],
     }),
+
     getClientEducatorAcademyCategory: builder.query({
       query: () => `/users/category/list`,
+      providesTags: ["Educator"],
     }),
-     providesTags: ["Educator"]
   }),
 });
 
