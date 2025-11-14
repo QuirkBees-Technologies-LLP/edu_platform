@@ -1,14 +1,24 @@
 import React, { useState } from "react";
 import {
-  Award, BookOpen, ChevronRight, CircleDot, Download, OctagonAlert, QrCode, Sparkles, TrendingUp, TrendingUpDown, Play,
+  Award,
+  BookOpen,
+  ChevronRight,
+  CircleDot,
+  Download,
+  OctagonAlert,
+  QrCode,
+  Sparkles,
+  TrendingUp,
+  TrendingUpDown,
+  Play,
   Zap,
   Globe,
-  Activity
+  Activity,
 } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Calendar, Target, Users, Trophy, Clock } from "lucide-react";
 import { MessageCircle, ThumbsUp, Megaphone } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
@@ -63,13 +73,15 @@ const ShowMoreLess = ({
 };
 
 const ClientDashboard = () => {
+  const navigate = useNavigate();
   const liveSession = {
     instructor: "Diego Aguirre",
-    thumbnail: "/api/placeholder/400/400"
+    thumbnail: "/api/placeholder/400/400",
   };
   const { auth } = useAuthContext();
 
   const allowedRoutes = auth?.user?.plan?.allowedSideBar;
+
   const { data: liveEducator, isLoading: educatorsLoading } =
     useGetLiveEducatorListQuery();
   const {
@@ -349,7 +361,8 @@ const ClientDashboard = () => {
 
   const data = activeTab === "feed" ? feedData : ideasData;
   const IQLive = "/iq-academy";
-  const IQStrategies = "/iq-strategies";
+  const IQInsight = "/iq-insight";
+  const IQIdea = "/ideas";
   const IQAcademy = "/iq-vault";
 
   const handleRouteClick = () => {
@@ -814,7 +827,6 @@ const ClientDashboard = () => {
       <div className="min-h-screen">
         {/* Add Tailwind CSS via CDN */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
           {/* Beta Invite Banners */}
           {/* <div className="space-y-3 mb-6"> */}
           {/* IQ Social Beta */}
@@ -1236,10 +1248,6 @@ const ClientDashboard = () => {
             </div>
           </div> */}
 
-
-
-
-
           {/* <div className="fixed inset-0"></div>
           <div className="fixed inset-0" style={{
             backgroundImage: `radial-gradient(circle at 20% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
@@ -1248,12 +1256,15 @@ const ClientDashboard = () => {
           }}></div> */}
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
             {/* Hero Section with Live Session */}
             <div className="mb-8">
               <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
                 <div className="absolute inset-0">
-                  <img src="/media/images/2600x1600/dashboard_banner.jpg" alt="Hero" className="w-full h-full object-cover opacity-30" />
+                  <img
+                    src="/media/images/2600x1600/dashboard_banner.jpg"
+                    alt="Hero"
+                    className="w-full h-full object-cover opacity-60"
+                  />
                   {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div> */}
                 </div>
 
@@ -1266,21 +1277,100 @@ const ClientDashboard = () => {
                   </div>
 
                   {/* Right Side - Live Preview */}
-                  <div className="hidden lg:block">
+                  {/* <div className="hidden lg:block">
                     <div className="relative w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
-                      <img src='/media/images/2600x1600/watch_live.jpg' alt="Live Session" className="w-full h-full object-cover" />
+                      <img
+                        src="/media/images/2600x1600/watch_live.jpg"
+                        alt="Live Session"
+                        className="w-full h-full object-cover"
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                       <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="text-xs text-gray-300 dark:text-gray-900 mb-1">Trading Live</p>
-                        <h3 className="text-white font-bold mb-1">{liveSession.instructor}</h3>
-                        <p className="text-xs text-gray-400">{liveSession.title}</p>
+                        <p className="text-xs text-gray-300 dark:text-gray-900 mb-1">
+                          Trading Live
+                        </p>
+                        <h3 className="text-white font-bold mb-1">
+                          {liveSession.instructor}
+                        </h3>
+                        <p className="text-xs text-gray-400">
+                          {liveSession.title}
+                        </p>
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition">
-                          <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                          <Play
+                            className="w-8 h-8 text-white ml-1"
+                            fill="white"
+                          />
                         </div>
                       </div>
                     </div>
+                  </div> */}
+
+                  <div className="hidden lg:block">
+                    {educatorsLoading ? (
+                      <div className="flex justify-center py-10">
+                        <Loader />
+                      </div>
+                    ) : liveStreams.length > 0 ? (
+                      <Swiper
+                        modules={[Pagination, Autoplay]}
+                        spaceBetween={20}
+                        slidesPerView={1}
+                        pagination={{ clickable: true }}
+                        autoplay={{ delay: 3000 }}
+                        className="w-80 h-64"
+                      >
+                        {liveStreams.map((slide, index) => (
+                          <SwiperSlide key={index}>
+                            <div className="relative w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+                              {/* IMAGE */}
+                              <img
+                                src={slide?.educator?.image}
+                                alt={slide?.educator?.first_name}
+                                className="w-full h-full object-cover"
+                              />
+
+                              {/* DARK OVERLAY */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+
+                              {/* BOTTOM TEXT */}
+                              <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
+                                <p className="text-xs text-gray-300 mb-1">
+                                  Trading Live
+                                </p>
+
+                                <h3 className="text-white font-bold mb-1">
+                                  {slide?.educator?.first_name}{" "}
+                                  {slide?.educator?.last_name}
+                                </h3>
+
+                                <p className="text-xs text-gray-400">
+                                  {slide?.title || "Live market session"}
+                                </p>
+                              </div>
+
+                              {/* PLAY / WATCH LIVE */}
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
+                                <Link
+                                  to={`/iq-educators/${slide?.educator?._id}`}
+                                  className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition"
+                                >
+                                  <Play
+                                    className="w-8 h-8 text-white ml-1"
+                                    fill="white"
+                                  />
+                                </Link>
+                              </div>
+                            </div>
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
+                    ) : (
+                      <div className="flex items-center justify-center w-80 h-64">
+                        <p className="text-white">No Live Educators</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1293,15 +1383,29 @@ const ClientDashboard = () => {
                 <div className="group relative xl:h-64">
                   {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div> */}
                   <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition shadow-md">
-                    <div className="flex flex-col md:flex-row h-full">
+                    <div
+                      className="flex flex-col md:flex-row h-full"
+                      onClick={() =>
+                        allowedRoutes.includes(IQAcademy)
+                          ? navigate(IQAcademy)
+                          : handleRouteClick()
+                      }
+                    >
                       <div className="flex-1 p-8 flex flex-col justify-between">
                         <div>
                           <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-600/20 rounded-lg mb-4">
                             <BookOpen className="w-4 h-4 text-purple-400" />
-                            <span className="text-xs text-purple-400 font-medium">FEATURED</span>
+                            <span className="text-xs text-purple-400 font-medium">
+                              FEATURED
+                            </span>
                           </div>
-                          <h3 className="text-3xl font-bold dark:text-white mb-2">IQ Academy</h3>
-                          <p className="text-gray-600 mb-4">Comprehensive trading education from basics to advanced strategies</p>
+                          <h3 className="text-3xl font-bold dark:text-white mb-2">
+                            IQ Academy
+                          </h3>
+                          <p className="text-gray-600 mb-4">
+                            Comprehensive trading education from basics to
+                            advanced strategies
+                          </p>
                         </div>
                         <button className="self-start px-4 py-2 btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium flex items-center gap-2 transition">
                           Start Learning
@@ -1309,7 +1413,11 @@ const ClientDashboard = () => {
                         </button>
                       </div>
                       <div className="w-full md:w-72 relative overflow-hidden">
-                        <img src="/media/images/2600x1600/fast_start.jpg" alt="Academy" className="w-full h-full object-cover" />
+                        <img
+                          src="/media/images/2600x1600/banner_1.jpg"
+                          alt="Academy"
+                          className="w-full h-full object-cover"
+                        />
                         {/* <div className="absolute inset-0 bg-gradient-to-l from-transparent to-gray-900/50"></div> */}
                       </div>
                     </div>
@@ -1319,15 +1427,23 @@ const ClientDashboard = () => {
 
               {/* Fast Start - Medium Card */}
               <div className="col-span-12 xl:col-span-4">
-                <div className="group relative h-64">
+                <div
+                  className="group relative h-64"
+                  onClick={() => navigate(`/fast-start-training`)}
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
                   <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-green-500/20 hover:border-green-500/40 transition p-6 flex flex-col justify-between shadow-md">
                     <div>
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
                         <Zap className="w-6 h-6 text-white" />
                       </div>
-                      <h3 className="text-xl font-bold dark:text-white mb-2 truncate">Fast Start Training</h3>
-                      <p className="text-gray-600 text-sm">Begin your journey with us, let us guide you to the whole process</p>
+                      <h3 className="text-xl font-bold dark:text-white mb-2 truncate">
+                        Fast Start Training
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        Begin your journey with us, let us guide you to the
+                        whole process
+                      </p>
                     </div>
                     <button className="w-full py-2 bg-green-600/20 hover:bg-green-600/30 dark:text-green-100 text-green-900 rounded-lg transition">
                       Start Here →
@@ -1340,12 +1456,24 @@ const ClientDashboard = () => {
             {/* Secondary Features Grid with Images */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
               {/* IQ Live with Image */}
+
               <div className="group relative ">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
                 <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-red-500/20 hover:border-red-500/40 transition shadow-md">
-                  <div className="h-full flex flex-col">
+                  <div
+                    className="h-full flex flex-col"
+                    onClick={() =>
+                      allowedRoutes.includes(IQLive)
+                        ? navigate(IQLive)
+                        : handleRouteClick()
+                    }
+                  >
                     <div className=" relative overflow-hidden">
-                      <img src="/media/images/2600x1600/watch_live.jpg" alt="IQ Live" className="w-full h-52 object-cover" />
+                      <img
+                        src="/media/images/2600x1600/banner_2.jpg"
+                        alt="IQ Live"
+                        className="w-full h-52 object-cover"
+                      />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
                         <span className="px-2 py-1 bg-red-600/20 text-red-100 text-xs rounded-full flex items-center gap-1">
@@ -1355,8 +1483,12 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                     <div className="flex-1 p-6">
-                      <h3 className="text-lg font-bold dark:text-white mb-2">IQ Live</h3>
-                      <p className="text-gray-600 text-sm mb-4">Join live trading sessions and webinars</p>
+                      <h3 className="text-lg font-bold dark:text-white mb-2">
+                        IQ Live
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Join live trading sessions and webinars
+                      </p>
                       <div className="flex items-center justify-end">
                         <ChevronRight className="w-4 h-4 text-gray-600" />
                       </div>
@@ -1369,9 +1501,20 @@ const ClientDashboard = () => {
               <div className="group relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
                 <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-blue-500/20 hover:border-blue-500/40 transition shadow-md">
-                  <div className="h-full flex flex-col">
+                  <div
+                    className="h-full flex flex-col"
+                    onClick={() =>
+                      allowedRoutes.includes("https://www.iqcharts.com")
+                        ? window.open("https://www.iqcharts.com", "_blank")
+                        : handleRouteClick()
+                    }
+                  >
                     <div className="relative overflow-hidden">
-                      <img src="/media/images/2600x1600/watch_live.jpg" alt="IQ Strategies" className="w-full h-52 object-cover" />
+                      <img
+                        src="/media/images/2600x1600/banner_3.jpg"
+                        alt="IQ Strategies"
+                        className="w-full h-52 object-cover"
+                      />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
                         <span className="px-2 py-1 bg-blue-600/20 text-blue-100 text-xs rounded-full">
@@ -1380,8 +1523,12 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                     <div className="flex-1 p-6">
-                      <h3 className="text-lg font-bold dark:text-white mb-2">IQ Strategies</h3>
-                      <p className="text-gray-600 text-sm mb-4">Advanced trading techniques and analysis</p>
+                      <h3 className="text-lg font-bold dark:text-white mb-2">
+                        IQ Strategies
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Advanced trading techniques and analysis
+                      </p>
                       <div className="flex items-center justify-end">
                         <ChevronRight className="w-4 h-4 text-gray-600" />
                       </div>
@@ -1394,19 +1541,34 @@ const ClientDashboard = () => {
               <div className="group relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
                 <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition shadow-md">
-                  <div className="h-full flex flex-col">
+                  <div
+                    className="h-full flex flex-col"
+                    onClick={() =>
+                      allowedRoutes.includes("/iq-social")
+                        ? navigate("/iq-social")
+                        : handleRouteClick()
+                    }
+                  >
                     <div className="relative overflow-hidden">
-                      <img src="/media/images/2600x1600/watch_live.jpg" alt="IQ Social" className="w-full h-52 object-cover" />
+                      <img
+                        src="/media/images/2600x1600/fast_start.jpg"
+                        alt="IQ Social"
+                        className="w-full h-52 object-cover"
+                      />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-purple-600/20 text-purple-100 text-xs rounded-full">
+                        <span className="px-2 py-1 bg-purple-600/20 text-black text-xs rounded-full">
                           Community
                         </span>
                       </div>
                     </div>
                     <div className="flex-1 p-6">
-                      <h3 className="text-lg font-bold dark:text-white mb-2">IQ Social</h3>
-                      <p className="text-gray-600 text-sm mb-4">Connect with your favorite educators</p>
+                      <h3 className="text-lg font-bold dark:text-white mb-2">
+                        IQ Social
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Connect with your favorite educators
+                      </p>
                       <div className="flex items-center justify-end">
                         <ChevronRight className="w-4 h-4 text-gray-600" />
                       </div>
@@ -1428,58 +1590,66 @@ const ClientDashboard = () => {
                     </h3>
                     <div className="flex gap-1 bg-gray-800/50 p-1 rounded-lg">
                       <button
-                        onClick={() => setActiveTab('live')}
+                        onClick={() => setActiveTab("live")}
                         className={`
       px-4 py-2 rounded-md text-sm font-medium transition-all
-      ${activeTab === 'live'
-                            ? 'bg-purple-600 text-white shadow-md'
-                            : 'text-gray-600 hover:bg-gray-700/50'
-                          }
+      ${
+        activeTab === "live"
+          ? "bg-purple-600 text-white shadow-md"
+          : "text-gray-600 hover:bg-gray-700/50"
+      }
     `}
                       >
                         Company
                       </button>
 
                       <button
-                        onClick={() => setActiveTab('social')}
+                        onClick={() => setActiveTab("social")}
                         className={`
       px-4 py-2 rounded-md text-sm font-medium transition-all
-      ${activeTab === 'social'
-                            ? 'bg-blue-600 text-white shadow-md'
-                            : 'text-gray-600 hover:bg-gray-700/50'
-                          }
+      ${
+        activeTab === "social"
+          ? "bg-blue-600 text-white shadow-md"
+          : "text-gray-600 hover:bg-gray-700/50"
+      }
     `}
                       >
                         Social
                       </button>
                     </div>
-
                   </div>
 
                   <div className="space-y-3">
-                    {[1, 2, 3, 4, 5, 6, 7].map(i => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition cursor-pointer">
+                    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition cursor-pointer"
+                      >
                         <div className="relative">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
-                            {activeTab === 'live' ? 'IQ' : 'DA'}
+                            {activeTab === "live" ? "IQ" : "DA"}
                           </div>
                           <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
                         </div>
                         <div className="flex-1">
                           <p className="text-sm text-gray-600">
                             <span className="dark:text-white font-medium">
-                              {activeTab === 'live' ? 'IQonic Team' : 'Diego Aguirre'}
-                            </span>
-                            {' '}
+                              {activeTab === "live"
+                                ? "IQonic Team"
+                                : "Diego Aguirre"}
+                            </span>{" "}
                             <span className="text-gray-600">
-                              {activeTab === 'live' ? 'published' : 'started'}
-                            </span>
-                            {' '}
+                              {activeTab === "live" ? "published" : "started"}
+                            </span>{" "}
                             <span className="text-purple-400">
-                              {activeTab === 'live' ? 'Market Analysis' : 'Live Session'}
+                              {activeTab === "live"
+                                ? "Market Analysis"
+                                : "Live Session"}
                             </span>
                           </p>
-                          <p className="text-xs text-gray-600 mt-1">{i * 10} minutes ago</p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            {i * 10} minutes ago
+                          </p>
                         </div>
                         <ChevronRight className="w-4 h-4 text-gray-600" />
                       </div>
@@ -1490,7 +1660,9 @@ const ClientDashboard = () => {
 
               {/* Social Links & Apps - Vertical Stack */}
               <div className="space-y-4 flex flex-col h-full">
-                <h3 className="text-lg font-bold dark:text-white">Connect With Us</h3>
+                <h3 className="text-lg font-bold dark:text-white">
+                  Connect With Us
+                </h3>
 
                 {/* Follow IQonic */}
                 <div className="group relative">
@@ -1502,8 +1674,12 @@ const ClientDashboard = () => {
                           <Globe className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm dark:text-white font-medium">Follow IQonic</p>
-                          <p className="text-xs text-gray-600">@iqonic_official</p>
+                          <p className="text-sm dark:text-white font-medium">
+                            Follow IQonic
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            @iqonic_official
+                          </p>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition" />
@@ -1513,7 +1689,9 @@ const ClientDashboard = () => {
 
                 {/* Download our Apps Section */}
                 <div className="space-y-3">
-                  <h4 className="text-sm font-bold text-gray-800 mt-4 mb-2">Download our Apps</h4>
+                  <h4 className="text-sm font-bold text-gray-800 mt-4 mb-2">
+                    Download our Apps
+                  </h4>
 
                   {/* IQ Social App */}
                   <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-purple-500/20 p-3 hover:border-purple-500/40 transition">
@@ -1522,11 +1700,23 @@ const ClientDashboard = () => {
                         <Sparkles className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm dark:text-white font-medium">IQ Social</p>
-                        <p className="text-xs text-purple-400">10K+ Beta Users</p>
+                        <p className="text-sm dark:text-white font-medium">
+                          IQ Social
+                        </p>
+                        <p className="text-xs text-purple-400">
+                          10K+ Beta Users
+                        </p>
                       </div>
                     </div>
-                    <button className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition">
+                    <button
+                      onClick={() =>
+                        window.open(
+                          "https://play.google.com/store/apps/details?id=com.eductionplatform&pcampaignid=web_share",
+                          "_blank"
+                        )
+                      }
+                      className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
+                    >
                       <Download className="w-4 h-4" />
                       Download Now
                     </button>
@@ -1539,11 +1729,18 @@ const ClientDashboard = () => {
                         <Activity className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm dark:text-white font-medium">IQ Sync</p>
+                        <p className="text-sm dark:text-white font-medium">
+                          IQ Sync
+                        </p>
                         <p className="text-xs text-blue-400">Cross-Platform</p>
                       </div>
                     </div>
-                    <button className="w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition">
+                    <button
+                      onClick={() =>
+                        window.open("https://qrco.de/iqsync", "_blank")
+                      }
+                      className="w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
+                    >
                       <Download className="w-4 h-4" />
                       Download Now
                     </button>
@@ -1551,21 +1748,35 @@ const ClientDashboard = () => {
                 </div>
 
                 {/* Ideas and Insights Section */}
+
                 <div className="space-y-3 flex-1">
-                  <h4 className="text-sm font-bold text-gray-800 mt-6 mb-2">Ideas and Insights</h4>
+                  <h4 className="text-sm font-bold text-gray-800 mt-6 mb-2">
+                    Ideas and Insights
+                  </h4>
 
                   {/* IQ Ideas Link */}
                   <div className="group relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-yellow-600 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition"></div>
                     <div className="relative bg-gray-900/50 backdrop-blur-xl rounded-xl border border-white/10 p-3 hover:border-orange-500/40 transition cursor-pointer">
-                      <div className="flex items-center justify-between">
+                      <div
+                        className="flex items-center justify-between"
+                        onClick={() =>
+                          allowedRoutes.includes(IQIdea)
+                            ? navigate(IQIdea)
+                            : handleRouteClick()
+                        }
+                      >
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center">
                             <Sparkles className="w-4 h-4 text-white" />
                           </div>
                           <div>
-                            <p className="text-sm dark:text-white font-medium">IQ Ideas</p>
-                            <p className="text-xs text-orange-400">Trading ideas & strategies</p>
+                            <p className="text-sm dark:text-white font-medium">
+                              IQ Ideas
+                            </p>
+                            <p className="text-xs text-orange-400">
+                              Trading ideas & strategies
+                            </p>
                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition" />
@@ -1574,17 +1785,29 @@ const ClientDashboard = () => {
                   </div>
 
                   {/* IQ Insights Link */}
+
                   <div className="group relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition"></div>
                     <div className="relative bg-gray-900/50 backdrop-blur-xl rounded-xl border border-white/10 p-3 hover:border-cyan-500/40 transition cursor-pointer">
-                      <div className="flex items-center justify-between">
+                      <div
+                        className="flex items-center justify-between"
+                        onClick={() =>
+                          allowedRoutes.includes(IQInsight)
+                            ? navigate(IQInsight)
+                            : handleRouteClick()
+                        }
+                      >
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
                             <TrendingUp className="w-4 h-4 text-white" />
                           </div>
                           <div>
-                            <p className="text-sm dark:text-white font-medium">IQ Insights</p>
-                            <p className="text-xs text-cyan-400">Market analysis & reports</p>
+                            <p className="text-sm dark:text-white font-medium">
+                              IQ Insights
+                            </p>
+                            <p className="text-xs text-cyan-400">
+                              Market analysis & reports
+                            </p>
                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition" />
@@ -1596,7 +1819,7 @@ const ClientDashboard = () => {
             </div>
           </div>
         </div>
-      </div >
+      </div>
     </>
   );
 };
