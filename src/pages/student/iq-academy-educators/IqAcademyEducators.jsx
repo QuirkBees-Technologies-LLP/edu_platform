@@ -292,7 +292,7 @@ const IqAcademyEducators = () => {
             <EducatorCardSkeleton key={i} />
           ))}
 
-        {!isLoading && !isFetching && educatorList.length === 0 && (
+        {!isLoading && !isFetching && educatorList?.length === 0 && (
           <div className="col-span-full py-10 text-center text-gray-500 text-lg">
             No educators found
           </div>
@@ -302,7 +302,7 @@ const IqAcademyEducators = () => {
           educatorList?.map((n, index) => (
             <div
               key={n._id}
-              ref={index === educatorList.length - 1 ? lastEducatorRef : null}
+              ref={index === educatorList?.length - 1 ? lastEducatorRef : null}
               className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all"
             >
               <div className="relative h-[200px] bg-gray-300 dark:bg-gray-700 overflow-hidden">
@@ -312,7 +312,7 @@ const IqAcademyEducators = () => {
                   className="w-full h-full object-cover"
                 />
 
-                {n?.categories.length > 0 && (
+                {n?.categories?.length > 0 && (
                   <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs px-3 py-1 rounded-lg">
                     {n?.categories.map((c) => c.name).join(", ")}
                   </span>
