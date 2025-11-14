@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Award, ChevronRight, CircleDot, Download, OctagonAlert, QrCode, Sparkles, TrendingUp, TrendingUpDown } from "lucide-react";
+import {
+  Award, BookOpen, ChevronRight, CircleDot, Download, OctagonAlert, QrCode, Sparkles, TrendingUp, TrendingUpDown, Play,
+  Zap,
+  Globe,
+  Activity
+} from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Calendar, Target, Users, Trophy, Clock } from "lucide-react";
-import { Zap, Lightbulb } from "lucide-react";
 import { MessageCircle, ThumbsUp, Megaphone } from "lucide-react";
-import { Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -814,8 +817,8 @@ const ClientDashboard = () => {
 
           {/* Beta Invite Banners */}
           {/* <div className="space-y-3 mb-6"> */}
-            {/* IQ Social Beta */}
-            {/* <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-xl p-4 border border-purple-500/30">
+          {/* IQ Social Beta */}
+          {/* <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-xl p-4 border border-purple-500/30">
               <div className="flex items-center justify-between flex-wrap gap-5">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
@@ -846,8 +849,8 @@ const ClientDashboard = () => {
               </div>
             </div> */}
 
-            {/* IQ Sync App Beta */}
-            {/* <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 rounded-xl p-4 border border-blue-500/30">
+          {/* IQ Sync App Beta */}
+          {/* <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 rounded-xl p-4 border border-blue-500/30">
               <div className="flex items-center justify-between flex-wrap gap-5">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
@@ -889,27 +892,25 @@ const ClientDashboard = () => {
             </div>
           </div> */}
 
-           <div className="relative welcome_banner w-full mb-10 rounded-xl overflow-hidden">
-          <div className="relative z-1 flex items-center justify-center md:justify-end h-full p-4">
-            <div className="xl:hidden absolute inset-0 bg-black/40"></div>
-            <div className="text-center z-1">
-              <div className="flex items-center justify-center flex-col sm:flex-row space-x-2 animate-fadeInUp delay-200 md:pr-20">
-                <span className="text-xl text-gray-50 font-medium tracking-widest">
-                  RISE ABOVE ORDINARY
-                </span>
+          {/* <div className="relative welcome_banner w-full mb-10 rounded-xl overflow-hidden">
+            <div className="relative z-1 flex items-center justify-center md:justify-end h-full p-4">
+              <div className="xl:hidden absolute inset-0 bg-black/40"></div>
+              <div className="text-center z-1">
+                <div className="flex items-center justify-center flex-col sm:flex-row space-x-2 animate-fadeInUp delay-200 md:pr-20">
+                  <span className="text-xl text-gray-50 font-medium tracking-widest">
+                    RISE ABOVE ORDINARY
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </div> */}
 
           {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* Left Content - 2/3 */}
             <div className="lg:col-span-2">
               <div className="grid md:grid-cols-2 gap-4">
 
-                {/* IQ Academy */}
                 <div className="bg-gray-900/50 rounded-lg overflow-hidden border hover:border-purple-700 transition-all cursor-pointer group">
                   <div className="relative h-48">
                     <img src="/media/images/2600x1600/banner_1.jpg" alt="IQ Academy" className="w-full h-full object-cover" />
@@ -931,7 +932,6 @@ const ClientDashboard = () => {
                   </div>
                 </div>
 
-                {/* Fast Start Training */}
                 <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-lg overflow-hidden border border-green-800/50 hover:border-green-600 transition-all cursor-pointer group">
                   <div className="relative h-48">
                     <img src="/media/images/2600x1600/fast_start.jpg" alt="Fast Start" className="w-full h-full object-cover" />
@@ -953,7 +953,6 @@ const ClientDashboard = () => {
                   </div>
                 </div>
 
-                {/* IQ Live */}
                 <div className="bg-gray-900/50 rounded-lg overflow-hidden border hover:border-red-700 transition-all cursor-pointer group">
                   <div className="relative h-48">
                     <img src="/media/images/2600x1600/banner_2.jpg" alt="IQ Live" className="w-full h-full object-cover" />
@@ -981,7 +980,6 @@ const ClientDashboard = () => {
                   </div>
                 </div>
 
-                {/* IQ Strategies */}
                 <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 rounded-lg overflow-hidden border border-blue-800/50 hover:border-blue-600 transition-all cursor-pointer group">
                   <div className="relative h-48">
                     <img src="/media/images/2600x1600/banner_3.jpg" alt="IQ Strategies" className="w-full h-full object-cover" />
@@ -1005,9 +1003,7 @@ const ClientDashboard = () => {
               </div>
             </div>
 
-            {/* Right Sidebar - 1/3 */}
             <div>
-              {/* Live Widget - 400x300 */}
               <div className="bg-gray-900/50 rounded-lg overflow-hidden border mb-4">
                 <div className="relative" style={{ height: '300px' }}>
                   <img src="../../public/media/avatars/1.jpg" className="w-full h-full object-cover" />
@@ -1025,7 +1021,6 @@ const ClientDashboard = () => {
                 </div>
               </div>
 
-              {/* Social Links */}
               <div className="space-y-3">
                 <div className="bg-gradient-to-r from-pink-900/40 to-purple-900/40 rounded-lg p-3 border border-pink-800/50 cursor-pointer">
                   <div className="flex items-center justify-between">
@@ -1067,10 +1062,10 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Recent Activity */}
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-gray-900/50 rounded-lg border p-5">
               <h3 className="text-sm font-semibold dark:text-white mb-4 flex items-center gap-2">
                 <Users className="w-4 h-4 text-purple-400" />
@@ -1206,10 +1201,10 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Explore More */}
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-lg overflow-hidden border border-purple-800/50 cursor-pointer group">
               <div className="h-32 flex items-center justify-center">
                 <Users className="w-16 h-16 text-white dark:text-gtray-800" />
@@ -1239,9 +1234,369 @@ const ClientDashboard = () => {
                 <p className="text-xs dark:text-gray-800">Trading ideas & strategies</p>
               </div>
             </div>
+          </div> */}
+
+
+
+
+
+          {/* <div className="fixed inset-0"></div>
+          <div className="fixed inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+                                      radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                                      radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)`
+          }}></div> */}
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+            {/* Hero Section with Live Session */}
+            <div className="mb-8">
+              <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
+                <div className="absolute inset-0">
+                  <img src="/media/images/2600x1600/dashboard_banner.jpg" alt="Hero" className="w-full h-full object-cover opacity-30" />
+                  {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div> */}
+                </div>
+
+                <div className="relative h-full flex items-center justify-between p-8">
+                  {/* Left Side - Hero Content */}
+                  <div className="flex-1 max-w-2xl">
+                    <h1 className="text-3xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">
+                      RISE ABOVE ORDINARY
+                    </h1>
+                  </div>
+
+                  {/* Right Side - Live Preview */}
+                  <div className="hidden lg:block">
+                    <div className="relative w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+                      <img src='/media/images/2600x1600/watch_live.jpg' alt="Live Session" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <p className="text-xs text-gray-300 dark:text-gray-900 mb-1">Trading Live</p>
+                        <h3 className="text-white font-bold mb-1">{liveSession.instructor}</h3>
+                        <p className="text-xs text-gray-400">{liveSession.title}</p>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition">
+                          <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Features - Bento Grid */}
+            <div className="grid grid-cols-12 gap-4 mb-8">
+              {/* IQ Academy - Large Card */}
+              <div className="col-span-12 xl:col-span-8">
+                <div className="group relative xl:h-64">
+                  {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div> */}
+                  <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition shadow-md">
+                    <div className="flex flex-col md:flex-row h-full">
+                      <div className="flex-1 p-8 flex flex-col justify-between">
+                        <div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-600/20 rounded-lg mb-4">
+                            <BookOpen className="w-4 h-4 text-purple-400" />
+                            <span className="text-xs text-purple-400 font-medium">FEATURED</span>
+                          </div>
+                          <h3 className="text-3xl font-bold dark:text-white mb-2">IQ Academy</h3>
+                          <p className="text-gray-600 mb-4">Comprehensive trading education from basics to advanced strategies</p>
+                        </div>
+                        <button className="self-start px-4 py-2 btn btn-light btn-lg rounded-2xl bg-gray-200 text-xs text-gray-800 font-medium flex items-center gap-2 transition">
+                          Start Learning
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="w-full md:w-72 relative overflow-hidden">
+                        <img src="/media/images/2600x1600/fast_start.jpg" alt="Academy" className="w-full h-full object-cover" />
+                        {/* <div className="absolute inset-0 bg-gradient-to-l from-transparent to-gray-900/50"></div> */}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fast Start - Medium Card */}
+              <div className="col-span-12 xl:col-span-4">
+                <div className="group relative h-64">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
+                  <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-green-500/20 hover:border-green-500/40 transition p-6 flex flex-col justify-between shadow-md">
+                    <div>
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
+                        <Zap className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold dark:text-white mb-2 truncate">Fast Start Training</h3>
+                      <p className="text-gray-600 text-sm">Begin your journey with us, let us guide you to the whole process</p>
+                    </div>
+                    <button className="w-full py-2 bg-green-600/20 hover:bg-green-600/30 dark:text-green-100 text-green-900 rounded-lg transition">
+                      Start Here →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Secondary Features Grid with Images */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
+              {/* IQ Live with Image */}
+              <div className="group relative ">
+                <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
+                <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-red-500/20 hover:border-red-500/40 transition shadow-md">
+                  <div className="h-full flex flex-col">
+                    <div className=" relative overflow-hidden">
+                      <img src="/media/images/2600x1600/watch_live.jpg" alt="IQ Live" className="w-full h-52 object-cover" />
+                      {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2 py-1 bg-red-600/20 text-red-100 text-xs rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></span>
+                          Live
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-6">
+                      <h3 className="text-lg font-bold dark:text-white mb-2">IQ Live</h3>
+                      <p className="text-gray-600 text-sm mb-4">Join live trading sessions and webinars</p>
+                      <div className="flex items-center justify-end">
+                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* IQ Strategies with Image */}
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
+                <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-blue-500/20 hover:border-blue-500/40 transition shadow-md">
+                  <div className="h-full flex flex-col">
+                    <div className="relative overflow-hidden">
+                      <img src="/media/images/2600x1600/watch_live.jpg" alt="IQ Strategies" className="w-full h-52 object-cover" />
+                      {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2 py-1 bg-blue-600/20 text-blue-100 text-xs rounded-full">
+                          Advanced
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-6">
+                      <h3 className="text-lg font-bold dark:text-white mb-2">IQ Strategies</h3>
+                      <p className="text-gray-600 text-sm mb-4">Advanced trading techniques and analysis</p>
+                      <div className="flex items-center justify-end">
+                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* IQ Social with Image */}
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
+                <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition shadow-md">
+                  <div className="h-full flex flex-col">
+                    <div className="relative overflow-hidden">
+                      <img src="/media/images/2600x1600/watch_live.jpg" alt="IQ Social" className="w-full h-52 object-cover" />
+                      {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2 py-1 bg-purple-600/20 text-purple-100 text-xs rounded-full">
+                          Community
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-6">
+                      <h3 className="text-lg font-bold dark:text-white mb-2">IQ Social</h3>
+                      <p className="text-gray-600 text-sm mb-4">Connect with your favorite educators</p>
+                      <div className="flex items-center justify-end">
+                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Activity Feed & Social Links */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* Combined Activity Feed */}
+              <div className="lg:col-span-2">
+                <div className="card rounded-2xl border p-6 h-full shadow-md">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-purple-400" />
+                      Live Activity Feed
+                    </h3>
+                    <div className="flex gap-1 bg-gray-800/50 p-1 rounded-lg">
+                      <button
+                        onClick={() => setActiveTab('live')}
+                        className={`
+      px-4 py-2 rounded-md text-sm font-medium transition-all
+      ${activeTab === 'live'
+                            ? 'bg-purple-600 text-white shadow-md'
+                            : 'text-gray-600 hover:bg-gray-700/50'
+                          }
+    `}
+                      >
+                        Company
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab('social')}
+                        className={`
+      px-4 py-2 rounded-md text-sm font-medium transition-all
+      ${activeTab === 'social'
+                            ? 'bg-blue-600 text-white shadow-md'
+                            : 'text-gray-600 hover:bg-gray-700/50'
+                          }
+    `}
+                      >
+                        Social
+                      </button>
+                    </div>
+
+                  </div>
+
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition cursor-pointer">
+                        <div className="relative">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
+                            {activeTab === 'live' ? 'IQ' : 'DA'}
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600">
+                            <span className="dark:text-white font-medium">
+                              {activeTab === 'live' ? 'IQonic Team' : 'Diego Aguirre'}
+                            </span>
+                            {' '}
+                            <span className="text-gray-600">
+                              {activeTab === 'live' ? 'published' : 'started'}
+                            </span>
+                            {' '}
+                            <span className="text-purple-400">
+                              {activeTab === 'live' ? 'Market Analysis' : 'Live Session'}
+                            </span>
+                          </p>
+                          <p className="text-xs text-gray-600 mt-1">{i * 10} minutes ago</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Links & Apps - Vertical Stack */}
+              <div className="space-y-4 flex flex-col h-full">
+                <h3 className="text-lg font-bold dark:text-white">Connect With Us</h3>
+
+                {/* Follow IQonic */}
+                <div className="group relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition"></div>
+                  <div className="relative bg-gray-900/50 backdrop-blur-xl rounded-xl border border-white/10 p-4 hover:border-white/20 transition cursor-pointer">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-600 to-purple-600 flex items-center justify-center">
+                          <Globe className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm dark:text-white font-medium">Follow IQonic</p>
+                          <p className="text-xs text-gray-600">@iqonic_official</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Download our Apps Section */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-gray-800 mt-4 mb-2">Download our Apps</h4>
+
+                  {/* IQ Social App */}
+                  <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-purple-500/20 p-3 hover:border-purple-500/40 transition">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm dark:text-white font-medium">IQ Social</p>
+                        <p className="text-xs text-purple-400">10K+ Beta Users</p>
+                      </div>
+                    </div>
+                    <button className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition">
+                      <Download className="w-4 h-4" />
+                      Download Now
+                    </button>
+                  </div>
+
+                  {/* IQ Sync App */}
+                  <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-blue-500/20 p-3 hover:border-blue-500/40 transition">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm dark:text-white font-medium">IQ Sync</p>
+                        <p className="text-xs text-blue-400">Cross-Platform</p>
+                      </div>
+                    </div>
+                    <button className="w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition">
+                      <Download className="w-4 h-4" />
+                      Download Now
+                    </button>
+                  </div>
+                </div>
+
+                {/* Ideas and Insights Section */}
+                <div className="space-y-3 flex-1">
+                  <h4 className="text-sm font-bold text-gray-800 mt-6 mb-2">Ideas and Insights</h4>
+
+                  {/* IQ Ideas Link */}
+                  <div className="group relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-yellow-600 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition"></div>
+                    <div className="relative bg-gray-900/50 backdrop-blur-xl rounded-xl border border-white/10 p-3 hover:border-orange-500/40 transition cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center">
+                            <Sparkles className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm dark:text-white font-medium">IQ Ideas</p>
+                            <p className="text-xs text-orange-400">Trading ideas & strategies</p>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* IQ Insights Link */}
+                  <div className="group relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition"></div>
+                    <div className="relative bg-gray-900/50 backdrop-blur-xl rounded-xl border border-white/10 p-3 hover:border-cyan-500/40 transition cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                            <TrendingUp className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm dark:text-white font-medium">IQ Insights</p>
+                            <p className="text-xs text-cyan-400">Market analysis & reports</p>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 };
