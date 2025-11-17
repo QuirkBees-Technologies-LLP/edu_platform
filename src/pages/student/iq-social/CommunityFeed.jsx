@@ -82,8 +82,8 @@ const CommunityFeed = () => {
                 {socialType === "social"
                   ? "Social"
                   : socialType === "company"
-                    ? "Company"
-                    : "Select Type"}
+                    ? "Corporate"
+                    : "Select "}
               </SelectValue>
             </SelectTrigger>
 
