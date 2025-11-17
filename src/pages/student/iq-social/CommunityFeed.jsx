@@ -93,7 +93,7 @@ const CommunityFeed = () => {
             </SelectContent>
           </Select>
 
-          {socialType && (
+          {socialType !== "all" && (
             <button
               type="button"
               onClick={() => {

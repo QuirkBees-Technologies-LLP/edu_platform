@@ -94,6 +94,23 @@ const ClientDashboard = () => {
     return posted.toLocaleDateString();
   };
 
+  const htmlToPlainText = (html) => {
+    if (!html) return "";
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      return (doc.body.textContent || "").trim();
+    } catch {
+      return html.replace(/<[^>]+>/g, "").trim();
+    }
+  };
+
+  const getShortContent = (content = "") => {
+    const clean = htmlToPlainText(content);
+    if (clean.length <= 120) return clean;
+    return clean.substring(0, 120);
+  };
+
   return (
     <>
       <Dialog open={isUpgradeModalOpen} onOpenChange={setUpgradeModalOpen}>
@@ -1398,10 +1415,21 @@ const ClientDashboard = () => {
                               </p>
                             </div>
 
-                            <p className="text-xs text-gray-700 dark:text-gray-600 mt-1 ">
-                              {post?.content.length > 30
-                                ? post.content.slice(0, 120) + " ..."
-                                : post.content}
+                            <p className="text-xs text-gray-700 dark:text-gray-600 mt-1">
+                              {getShortContent(post.content)}
+                              {htmlToPlainText(post.content).length > 120 && (
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/iq-social?socialType=${socialType}`
+                                    );
+                                  }}
+                                  className="ml-1 text-blue-600 dark:text-purple-400 font-medium cursor-pointer"
+                                >
+                                  See more
+                                </span>
+                              )}
                             </p>
                           </div>
 
