@@ -132,7 +132,7 @@ const CreateEducator = forwardRef(
       //     ),
 
       role: Yup.string().required("Role is required"),
-      educatorRole: Yup.string().required("Educator Role is required"),
+      educatorRole: Yup.string().required("Educator Speciality is required"),
       bio: Yup.string()
         .required("Educator description is required")
         .min(30, "Bio must be at least 30 characters")
@@ -430,12 +430,12 @@ const CreateEducator = forwardRef(
               <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Educator Role <span className="text-danger">*</span>
+                    Educator Speciality <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
                     // readOnly={selectedRow?._id}
-                    placeholder="Enter Educator Role"
+                    placeholder="Enter Educator Speciality"
                     autoComplete="off"
                     {...formik.getFieldProps("educatorRole")}
                     className={`form-control input input-md w-full ${

@@ -1,23 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Award,
   BookOpen,
   ChevronRight,
-  CircleDot,
   Download,
   OctagonAlert,
-  QrCode,
   Sparkles,
   TrendingUp,
-  TrendingUpDown,
   Play,
   Zap,
   Globe,
   Activity,
+  Loader2,
 } from "lucide-react";
-import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
-import { Calendar, Target, Users, Trophy, Clock } from "lucide-react";
-import { MessageCircle, ThumbsUp, Megaphone } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -32,48 +27,14 @@ import {
 } from "@/components/ui/dialog";
 import { useGetLiveEducatorListQuery } from "../../../store/api/client/clientLiveSessionApiSlice";
 import Loader from "../../../components/ui/loader";
-import {
-  useCorporatePostQuery,
-  usePostQuery,
-} from "../../../store/api/client/clientSocialApiSlilce";
-import { formatDistanceToNow } from "date-fns";
+
 import { QRCodeCanvas } from "qrcode.react";
-
-const ShowMoreLess = ({
-  text = "",
-  html = "",
-  limit = 1000,
-  showMoreText = " Show More",
-  showLessText = " Show Less",
-  className = "text-sm text-gray-700 leading-relaxed",
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const isHtml = !!html;
-  const content = isHtml ? html : text;
-  const plainText = isHtml ? content.replace(/<[^>]+>/g, "") : text;
-  // const isLong = plainText.length > limit;
-  const isLong = false;
-
-  return (
-    <div className={className}>
-      <div
-        className={`${!expanded && isLong ? "line-clamp-4" : ""}`}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-      {isLong && (
-        <span
-          onClick={() => setExpanded(!expanded)}
-          className="text-blue-600 cursor-pointer hover:underline font-medium"
-        >
-          {expanded ? showLessText : showMoreText}
-        </span>
-      )}
-    </div>
-  );
-};
+import { usePostQuery } from "../../../store/api/client/clientSocialApiSlilce";
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
+  const [socialType, setSocialType] = useState("company");
+  const [posts, setPosts] = useState([]);
   const liveSession = {
     instructor: "Diego Aguirre",
     thumbnail: "/api/placeholder/400/400",
@@ -82,284 +43,35 @@ const ClientDashboard = () => {
 
   const allowedRoutes = auth?.user?.plan?.allowedSideBar;
 
+  const limit = 5;
+  const page = 1;
+
+  const {
+    data: Posts,
+    isLoading: isPostsLoading,
+    isFetching: isFetchingPosts,
+    isError: isPostsError,
+  } = usePostQuery(
+    { page, limit, socialType },
+    { refetchOnMountOrArgChange: true }
+  );
+
+  useEffect(() => {
+    if (Posts?.posts) {
+      setPosts(Posts?.posts);
+    }
+  }, [Posts]);
+
   const { data: liveEducator, isLoading: educatorsLoading } =
     useGetLiveEducatorListQuery();
-  const {
-    data: corporatePost,
-    isLoading,
-    isFetching,
-    isError,
-  } = useCorporatePostQuery();
-
-  const makeClickableLinks = (htmlOrText) => {
-    if (!htmlOrText) return "";
-    return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
-  };
 
   const liveStreams = liveEducator?.streams || [];
 
-  const userName = auth?.user?.name;
-  const categories = [
-    {
-      id: "forex",
-      title: "FOREX",
-      icon: <TrendingUpDown className="w-12 h-12" />,
-      description:
-        "Master the world's largest financial market with professional strategies",
-      gradient: "from-purple-600 to-indigo-600",
-      hoverGradient: "from-purple-700 to-indigo-700",
-    },
-    {
-      id: "crypto",
-      title: "CRYPTO",
-      icon: <Bitcoin className="w-12 h-12" />,
-      description:
-        "Navigate the digital revolution with confidence and expertise",
-      gradient: "from-orange-500 to-yellow-500",
-      hoverGradient: "from-orange-600 to-yellow-600",
-    },
-    {
-      id: "stocks",
-      title: "STOCK OPTIONS",
-      icon: <BarChart3 className="w-12 h-12" />,
-      description: "Master options trading strategies for consistent returns",
-      gradient: "from-emerald-500 to-teal-500",
-      hoverGradient: "from-emerald-600 to-teal-600",
-    },
-  ];
-  const sessions = [
-    {
-      id: 0,
-      title: "Bitcoin Market Analysis",
-      educator: "Jane Doe",
-      avatar: "JD",
-      viewers: 245,
-      gradient: "from-purple-600 to-indigo-600",
-    },
-    {
-      id: 1,
-      title: "Forex Fundamentals",
-      educator: "Mike Smith",
-      avatar: "MS",
-      viewers: 189,
-      gradient: "from-emerald-500 to-teal-500",
-    },
-    {
-      id: 2,
-      title: "Options Trading Basics",
-      educator: "Sarah Chen",
-      avatar: "SC",
-      viewers: 312,
-      gradient: "from-purple-600 to-indigo-600",
-    },
-    {
-      id: 3,
-      title: "Altcoin Deep Dive",
-      educator: "Alex Wong",
-      avatar: "AW",
-      viewers: 156,
-      gradient: "from-orange-500 to-yellow-500",
-    },
-    {
-      id: 4,
-      title: "Technical Analysis Masterclass",
-      educator: "David Kim",
-      avatar: "DK",
-      viewers: 278,
-      gradient: "from-blue-500 to-cyan-500",
-    },
-    {
-      id: 5,
-      title: "Risk Management Strategies",
-      educator: "Emma Wilson",
-      avatar: "EW",
-      viewers: 203,
-      gradient: "from-pink-500 to-rose-500",
-    },
-  ];
-
-  // const [activeTab, setActiveTab] = useState<'news' | 'feed'>('news');
-  const newsItems = [
-    {
-      id: 1,
-      type: "ANNOUNCEMENT",
-      title: "New Forex Trading Course Launch",
-      excerpt:
-        "Master the fundamentals of forex trading with our comprehensive new course...",
-      time: "10 mins ago",
-      badge: "bg-purple-600",
-    },
-    {
-      id: 2,
-      type: "UPDATE",
-      title: "Platform Maintenance Complete",
-      excerpt: "All systems are operational. Thank you for your patience...",
-      time: "2 hours ago",
-      badge: "bg-blue-600",
-    },
-    {
-      id: 3,
-      type: "EVENT",
-      title: "Weekly Trading Competition",
-      excerpt: "Join our weekly competition with $10,000 in prizes...",
-      time: "5 hours ago",
-      badge: "bg-green-600",
-    },
-    {
-      id: 4,
-      type: "ALERT",
-      title: "Market Volatility Warning",
-      excerpt:
-        "High volatility expected in crypto markets due to regulatory news...",
-      time: "1 day ago",
-      badge: "bg-orange-600",
-    },
-    {
-      id: 5,
-      type: "FEATURE",
-      title: "New Trading Tools Released",
-      excerpt:
-        "Advanced charting tools and indicators now available in your dashboard...",
-      time: "2 days ago",
-      badge: "bg-indigo-600",
-    },
-  ];
-
-  const feedItems = [
-    {
-      id: 1,
-      author: "Jane Doe",
-      avatar: "JD",
-      message:
-        "🚀 BTC breaking through resistance! This is exactly what we discussed in today's session.",
-      likes: 42,
-      comments: 15,
-      time: "2 mins ago",
-      gradient: "from-purple-600 to-indigo-600",
-    },
-    {
-      id: 2,
-      author: "Mike Smith",
-      avatar: "MS",
-      message:
-        "New strategy alert! 🌟 Amazing setup we'll cover in tomorrow's session.",
-      likes: 28,
-      comments: 9,
-      time: "15 mins ago",
-      gradient: "from-emerald-500 to-teal-500",
-    },
-    {
-      id: 3,
-      author: "Sarah Chen",
-      avatar: "SC",
-      message:
-        "Options flow showing unusual activity in tech stocks. Great learning opportunity! 📊",
-      likes: 35,
-      comments: 12,
-      time: "1 hour ago",
-      gradient: "from-purple-600 to-indigo-600",
-    },
-    {
-      id: 4,
-      author: "David Kim",
-      avatar: "DK",
-      message:
-        "Technical analysis update: Key support levels holding strong across major pairs 💪",
-      likes: 19,
-      comments: 7,
-      time: "3 hours ago",
-      gradient: "from-blue-500 to-cyan-500",
-    },
-  ];
-
-  const updates = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-    {
-      id: 2,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-15.png",
-    },
-    {
-      id: 3,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-  ];
-
-  const feedData = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-    {
-      id: 2,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-15.png",
-    },
-    {
-      id: 3,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-    {
-      id: 4,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-  ];
-
-  const ideasData = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-  ];
-
-  const slides = [
-    {
-      title: "RALPH DANQUAH",
-      image: "/media/images/2600x1600/watch_live.jpg",
-    },
-    {
-      title: "JOHN DOE",
-      image: "/media/images/2600x1600/watch_live.jpg",
-    },
-    {
-      title: "JANE SMITH",
-      image: "/media/images/2600x1600/watch_live.jpg",
-    },
-  ];
   const [activeTab, setActiveTab] = useState("feed");
   const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [isQRModalOpen, setQRModalOpen] = useState(false);
   const [qrType, setQrType] = useState("android"); // "android" or "ios"
 
-  const data = activeTab === "feed" ? feedData : ideasData;
   const IQLive = "/iq-academy";
   const IQInsight = "/iq-insight";
   const IQIdea = "/ideas";
@@ -367,6 +79,19 @@ const ClientDashboard = () => {
 
   const handleRouteClick = () => {
     setUpgradeModalOpen(true);
+  };
+
+  const timeAgo = (date) => {
+    const now = new Date();
+    const posted = new Date(date);
+    const diffMs = now - posted;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMin / 60);
+
+    if (diffMin < 1) return "Just now";
+    if (diffMin < 60) return `${diffMin} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    return posted.toLocaleDateString();
   };
 
   return (
@@ -420,6 +145,7 @@ const ClientDashboard = () => {
           </p>
         </DialogContent>
       </Dialog>
+
       {/* ---- START: Educator Cards Section (Added by ChatGPT) ---- */}
 
       {/* ---- END: Educator Cards Section ---- */}
@@ -1254,7 +980,6 @@ const ClientDashboard = () => {
                                       radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
                                       radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)`
           }}></div> */}
-
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {/* Hero Section with Live Session */}
             <div className="mb-8">
@@ -1306,7 +1031,6 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                   </div> */}
-
                   <div className="hidden lg:block">
                     {educatorsLoading ? (
                       <div className="flex justify-center py-10">
@@ -1330,7 +1054,6 @@ const ClientDashboard = () => {
                                 alt={slide?.educator?.first_name}
                                 className="w-full h-full object-cover"
                               />
-                              
 
                               {/* DARK OVERLAY */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
@@ -1584,36 +1307,38 @@ const ClientDashboard = () => {
               {/* Combined Activity Feed */}
               <div className="lg:col-span-2">
                 <div className="card rounded-2xl border p-6 h-full shadow-md">
+                  {/* Header */}
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
                       <Activity className="w-5 h-5 text-purple-400" />
                       Live Activity Feed
                     </h3>
+
                     <div className="flex gap-1 bg-gray-800/50 p-1 rounded-lg">
                       <button
-                        onClick={() => setActiveTab("live")}
+                        onClick={() => setSocialType("company")}
                         className={`
-      px-4 py-2 rounded-md text-sm font-medium transition-all
-      ${
-        activeTab === "live"
-          ? "bg-purple-600 text-white shadow-md"
-          : "text-gray-600 hover:bg-gray-700/50"
-      }
-    `}
+            px-4 py-2 rounded-md text-sm font-medium transition-all
+            ${
+              socialType === "company"
+                ? "bg-purple-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-700/50"
+            }
+          `}
                       >
-                        Company
+                        Corporate
                       </button>
 
                       <button
-                        onClick={() => setActiveTab("social")}
+                        onClick={() => setSocialType("social")}
                         className={`
-      px-4 py-2 rounded-md text-sm font-medium transition-all
-      ${
-        activeTab === "social"
-          ? "bg-blue-600 text-white shadow-md"
-          : "text-gray-600 hover:bg-gray-700/50"
-      }
-    `}
+            px-4 py-2 rounded-md text-sm font-medium transition-all
+            ${
+              socialType === "social"
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-700/50"
+            }
+          `}
                       >
                         Social
                       </button>
@@ -1621,40 +1346,73 @@ const ClientDashboard = () => {
                   </div>
 
                   <div className="space-y-3">
-                    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition cursor-pointer"
-                      >
-                        <div className="relative">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white text-xs font-bold">
-                            {activeTab === "live" ? "IQ" : "DA"}
+                    {isPostsLoading || isFetchingPosts ? (
+                      <>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-3 p-3  rounded-xl animate-pulse"
+                          >
+                            <div className="w-10 h-10 rounded-full  bg-gray-300  bg-gray-700/40"></div>
+
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="w-24 h-4 bg-gray-700/40  bg-gray-300  rounded"></div>
+                                <div className="w-14 h-4 bg-gray-700/40  bg-gray-300  rounded"></div>
+                              </div>
+
+                              <div className="w-full h-4 bg-gray-700/40  bg-gray-300  rounded"></div>
+
+                              <div className="w-3/4 h-4 bg-gray-700/40  bg-gray-300  rounded"></div>
+                            </div>
+
+                            <div className="w-4 h-4 bg-gray-700/40  bg-gray-300  rounded"></div>
                           </div>
-                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
+                        ))}
+                      </>
+                    ) : posts.length > 0 ? (
+                      posts.map((post) => (
+                        <div
+                          key={post._id}
+                          className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition cursor-pointer"
+                          onClick={() =>
+                            navigate(`/iq-social?socialType=${socialType}`)
+                          }
+                        >
+                          <div className="relative">
+                            <img
+                              src={post.author?.image}
+                              alt={post.author?.first_name || "IQNOIC"}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          </div>
+
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="dark:text-white font-medium">
+                                {post.author?.first_name || "IQNOIC"}{" "}
+                                {post.author?.last_name || "EDUCATOR"}
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-800">
+                                {timeAgo(post.createdAt || new Date())}
+                              </p>
+                            </div>
+
+                            <p className="text-xs text-gray-700 dark:text-gray-600 mt-1 ">
+                              {post?.content.length > 30
+                                ? post.content.slice(0, 120) + " ..."
+                                : post.content}
+                            </p>
+                          </div>
+
+                          <ChevronRight className="w-4 h-4 text-gray-600" />
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-600">
-                            <span className="dark:text-white font-medium">
-                              {activeTab === "live"
-                                ? "IQonic Team"
-                                : "Diego Aguirre"}
-                            </span>{" "}
-                            <span className="text-gray-600">
-                              {activeTab === "live" ? "published" : "started"}
-                            </span>{" "}
-                            <span className="text-purple-400">
-                              {activeTab === "live"
-                                ? "Market Analysis"
-                                : "Live Session"}
-                            </span>
-                          </p>
-                          <p className="text-xs text-gray-600 mt-1">
-                            {i * 10} minutes ago
-                          </p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                      ))
+                    ) : (
+                      <div className="text-center py-10 text-gray-500">
+                        No posts available right now.
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               </div>

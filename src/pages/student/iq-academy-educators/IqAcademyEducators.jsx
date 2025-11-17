@@ -209,13 +209,13 @@ const IqAcademyEducators = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 pb-10">
+      <div className="max-w-7xl mx-auto px-6 pb-10">
         <div className="flex items-start justify-between mb-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Educators
           </h2>
 
-          <div className="px-4 py-2 bg-gray-900/50 text-white rounded-xl shadow border border-white/10">
+          <div className="px-4 py-2 bg-gray-900/50 dark:text-white text-gray-900 rounded-xl shadow border border-white/10">
             {totalRecords} Educators
           </div>
         </div>
@@ -302,7 +302,7 @@ const IqAcademyEducators = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {(isLoading || (isFetching && page === 1)) &&
-            Array.from({ length: 6 }).map((_, i) => (
+            Array.from({ length: 9 }).map((_, i) => (
               <EducatorCardSkeleton key={i} />
             ))}
 

@@ -17,9 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSearchParams } from "react-router-dom";
 
 const CommunityFeed = () => {
-  const [socialType, setSocialType] = useState("social");
+  const [searchParams] = useSearchParams();
+  const initialType = searchParams.get("socialType") || "all";
+  const [socialType, setSocialType] = useState(initialType);
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -34,7 +37,6 @@ const CommunityFeed = () => {
     setPosts([]);
     setHasMore(true);
     setPage(1);
-    console.log(posts, "posts");
   }, [socialType]);
 
   useEffect(() => {
@@ -87,9 +89,22 @@ const CommunityFeed = () => {
 
             <SelectContent>
               <SelectItem value="social">Social</SelectItem>
-              <SelectItem value="company">Company</SelectItem>
+              <SelectItem value="company">corporate</SelectItem>
             </SelectContent>
           </Select>
+
+          {socialType && (
+            <button
+              type="button"
+              onClick={() => {
+                setSocialType("all");
+                setPage(1);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              ✖
+            </button>
+          )}
         </div>
       </Toolbar>
 
@@ -102,7 +117,7 @@ const CommunityFeed = () => {
             </div>
           ) : isError ? (
             <div className="text-center text-red-500">Error loading posts</div>
-          ) : posts.length === 0 ? (
+          ) : posts.length === 0 && !isLoading ? (
             <div className="card rounded-lg shadow-md p-8 text-center">
               <Rss size={48} className="mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-700">
