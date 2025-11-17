@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import debounce from "lodash.debounce";
 import {
   Select,
@@ -7,333 +13,474 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlignJustify,
-  ArrowRight,
-  CheckCircle,
-  EyeIcon,
-  LayoutGrid,
-  Search,
-  SlidersHorizontal,
-  UserPlus,
-} from "lucide-react";
-import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import { Loader2 } from "lucide-react";
 import {
   useGetClientEducatorAcademyCategoryQuery,
   useGetEducatorsListQuery,
   useToggleFollowMutation,
 } from "../../../store/api/client/clientEductorApiSlice";
-import Loader from "../../../components/ui/loader";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import SearchFilterInput from "../../../components/SearchFilterInput";
+import { toAbsoluteUrl } from "@/utils/Assets";
 
-const educatorsData = [
-  {
-    id: 1,
-    name: "Ralph Danquah",
-    skills: "Forex Day Trading, Price Action, Risk Management",
-    avatar: "/media/avatars/300-1.png",
-    category: "Forex",
-    isFollowing: true,
-  },
-  {
-    id: 2,
-    name: "John Smith",
-    skills: "Crypto Trading, Risk Management",
-    avatar: "/media/avatars/300-2.png",
-    category: "Crypto",
-    isFollowing: false,
-  },
-  {
-    id: 3,
-    name: "Alex Brown",
-    skills: "Stock Options, Technical Analysis",
-    avatar: "/media/avatars/300-3.png",
-    category: "Stock Options",
-    isFollowing: false,
-  },
-];
+const safeArray = (val) => (Array.isArray(val) ? val : []);
+
+const EducatorCardSkeleton = () => {
+  return (
+    <div className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden animate-pulse">
+      <div className="relative h-[200px] bg-gray-300 dark:bg-gray-700" />
+
+      <div className="p-5 relative">
+        <div className="absolute -top-10 left-5">
+          <div className="w-20 h-20 rounded-full bg-gray-300 dark:bg-gray-700" />
+          <div className="w-6 h-6 rounded-full bg-gray-400 dark:bg-gray-600 absolute -bottom-1 right-0" />
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <div className="h-4 w-40 bg-gray-300 dark:bg-gray-700 rounded" />
+
+          <div className="flex justify-between mt-6">
+            <div className="text-center space-y-2">
+              <div className="h-4 w-10 bg-gray-300 dark:bg-gray-700 rounded" />
+              <div className="h-3 w-14 bg-gray-300 dark:bg-gray-700 rounded" />
+            </div>
+
+            <div className="text-center space-y-2">
+              <div className="h-4 w-10 bg-gray-300 dark:bg-gray-700 rounded" />
+              <div className="h-3 w-14 bg-gray-300 dark:bg-gray-700 rounded" />
+            </div>
+
+            <div className="text-center space-y-2">
+              <div className="h-4 w-10 bg-gray-300 dark:bg-gray-700 rounded" />
+              <div className="h-3 w-14 bg-gray-300 dark:bg-gray-700 rounded" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-6">
+            <div className="h-10 flex-1 bg-gray-300 dark:bg-gray-700 rounded-xl" />
+            <div className="h-10 flex-1 bg-gray-300 dark:bg-gray-700 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const IqAcademyEducators = () => {
   const navigate = useNavigate();
-  const [active, setActive] = useState("list");
-  const [educators, setEducators] = useState(educatorsData);
-  const [activeTab, setActiveTab] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [language, setLanguage] = useState("All");
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  const [activeTab, setActiveTab] = useState("all");
   const [searchText, setSearchText] = useState("");
-  const [category, setCategory] = useState("All");
+  const [category, setCategory] = useState(null);
+  const [followLoadingId, setFollowLoadingId] = useState(null);
 
-  const { data, isLoading, refetch } = useGetEducatorsListQuery({
+  const [page, setPage] = useState(1);
+  const [limit] = useState(9);
+  const [educatorList, setEducatorList] = useState([]);
+
+  const observer = useRef(null);
+
+  const { data, isLoading, isFetching, refetch } = useGetEducatorsListQuery({
     search: searchText,
-    category: category,
+    tab: activeTab,
+    category: category?._id || "",
+    page,
+    limit,
   });
+
+  const totalPages = data?.pagination?.totalPages || 1;
+  const totalRecords = data?.pagination?.totalRecords || 0;
+
   const { data: categoryList } = useGetClientEducatorAcademyCategoryQuery();
+  const categories = safeArray(categoryList?.data);
 
-  const [toggleFollowData, { isLoading: followLoading }] =
-    useToggleFollowMutation();
-
-  const toggleFollow = (id) => {
-    setEducators((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, isFollowing: !e.isFollowing } : e))
-    );
-  };
-
-  const handleToggle = async (educator) => {
-    try {
-      let res = await toggleFollowData(educator._id).unwrap();
-      if (res.isFollowing === true) {
-        toast.success(
-          `You are now following ${educator.first_name} ${educator.last_name}`
-        );
-      } else if (res.isFollowing === false) {
-        toast.info(
-          `You have unfollowed ${educator.first_name} ${educator.last_name}`
-        );
-      }
-    } catch (error) {
-      if (error.status == 400) {
-        toast.error(error.data.message);
-      }
-
-      console.error("Follow toggle failed:", error);
-    }
-  };
-
-  // Filter educators based on tab, search, and language
-  const filteredEducators = educators.filter((e) => {
-    const matchTab = activeTab === "All" || e.category === activeTab;
-    const matchSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchLanguage = language === "All" || e.language === language;
-    return matchTab && matchSearch && matchLanguage;
-  });
-
-  // const debouncedSearch = useMemo(
-  //   () =>
-  //     debounce((value) => {
-  //       setSearchText(value);
-  //     }, 500),
-  //   []
-  // );
-
-  // useEffect(() => {
-  //   return () => debouncedSearch.cancel();
-  // }, [debouncedSearch]);
+  const [toggleFollowData] = useToggleFollowMutation();
 
   const debouncedSearch = useMemo(
     () =>
       debounce((value) => {
         setSearchText(value);
-        // reloadTable();
+        setPage(1);
       }, 500),
     []
   );
-  const handleSearchChange = (event) => {
-    const value = event.target.value;
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
     setSearchText(value);
     debouncedSearch(value);
   };
 
-  // const handleSearchChange = (event) => {
-  //   const value = event.target.value;
-  //   debouncedSearch(value);
-  // };
+  useEffect(() => {
+    const list = safeArray(data?.data);
+
+    if (page === 1) {
+      setEducatorList(list);
+    } else {
+      setEducatorList((prev) => {
+        const newItems = list.filter(
+          (item) => !prev.some((p) => p._id === item._id)
+        );
+        return [...prev, ...newItems];
+      });
+    }
+  }, [data, page]);
+
+  const lastEducatorRef = useCallback(
+    (node) => {
+      if (isFetching || page >= totalPages) return;
+
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting) {
+          setPage((prev) => prev + 1);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, page, totalPages]
+  );
+
+  const handleToggle = async (educator) => {
+    const eduId = educator._id;
+    const previousList = [...educatorList];
+
+    setEducatorList((prev) =>
+      prev.map((item) =>
+        item._id === eduId
+          ? {
+              ...item,
+              isFollowing: !item.isFollowing,
+              followingCount: item.isFollowing
+                ? Math.max(0, (item.followingCount || 0) - 1)
+                : (item.followingCount || 0) + 1,
+            }
+          : item
+      )
+    );
+
+    setFollowLoadingId(eduId);
+
+    try {
+      const res = await toggleFollowData(eduId).unwrap();
+
+      setEducatorList((prev) =>
+        prev.map((item) =>
+          item._id === eduId
+            ? {
+                ...item,
+                isFollowing: res.isFollowing,
+                followingCount: res.isFollowing
+                  ? (item.followingCount || 0) + 1
+                  : Math.max(0, (item.followingCount || 0) - 1),
+              }
+            : item
+        )
+      );
+
+      toast.success(
+        res.isFollowing
+          ? `You are now following ${educator.first_name}`
+          : `You unfollowed ${educator.first_name}`
+      );
+    } catch (err) {
+      setEducatorList(previousList);
+      toast.error(err?.data?.message || "Failed to update follow status");
+    } finally {
+      setFollowLoadingId(null);
+    }
+  };
+
+  useEffect(() => {
+    setPage(1);
+    // setEducatorList([]);
+    refetch();
+  }, [activeTab, category, searchText]);
+
+  //   const filteredEducators = useMemo(() => {
+  //   if (activeTab === "following") {
+  //     return safeArray(educatorList).filter((e) => e.isFollowing === true);
+  //   }
+  //   return educatorList;
+  // }, [activeTab, educatorList]);
 
   return (
-    <div className="container-fluid pb-10">
-      <div className="flex items-start justify-between">
-        <h2 className="text-lg font-medium text-gray-800 mb-10">
-          {data?.data?.length} Educators
-        </h2>
-        <div className="flex bg-gray-200 p-1 rounded-lg shadow-inner w-fit">
-          <button
-            onClick={() => setActive("grid")}
-            className={`p-2 rounded-lg transition-all ${
-              active === "grid" ? "bg-white shadow-md" : "bg-transparent"
-            }`}
-          >
-            <LayoutGrid
-              className={`w-5 h-5 ${
-                active === "grid" ? "text-gray-700" : "text-gray-400"
-              }`}
-            />
-          </button>
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto px-6 pb-10">
+        <div className="flex items-start justify-between mb-10">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Educators
+          </h2>
 
-          <button
-            onClick={() => setActive("list")}
-            className={`p-2 rounded-lg transition-all ${
-              active === "list" ? "bg-white shadow-md" : "bg-transparent"
-            }`}
-          >
-            <AlignJustify
-              className={`w-5 h-5 ${
-                active === "list" ? "text-gray-700" : "text-gray-400"
-              }`}
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs + Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        {/* Tabs */}
-        <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
-          {["All"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-4 border-b-2 ${
-                activeTab === tab
-                  ? "border-black dark:border-white text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Filters: Language + Search */}
-        {/* <div className="flex flex-wrap gap-3">
-
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none dark:bg-gray-100"
-          />
-        </div> */}
-        {/* Category Dropdown */}
-        <div className=" flex gap-3 sm:gap-6 pb-2 flex-wrap">
-          <div className="relative w-72">
-            <Select
-              value={category || ""}
-              onValueChange={(value) => {
-                setCategory(value);
-                refetch();
-                // reloadTable();
-              }}
-            >
-              <SelectTrigger className="pr-8">
-                {" "}
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryList?.data?.map((item) => (
-                  <SelectItem key={item._id} value={item._id}>
-                    {item.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {category && (
-              <button
-                type="button"
-                onClick={() => {
-                  setCategory(null);
-                  refetch();
-                  // reloadTable();
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                ✖
-              </button>
-            )}
+          <div className="px-4 py-2 bg-gray-900/50 dark:text-white text-gray-900 rounded-xl shadow border border-white/10">
+            {totalRecords} Educators
           </div>
-          <div>
-            {/* Search Icon */}
-            {/* <Search className="w-5 h-5 text-gray-400" /> */}
+        </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
+          <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <button
+                onClick={() => {
+                  setActiveTab("all");
+                  setPage(1);
+                }}
+                className={`px-4 h-[40px] flex items-center rounded-lg text-sm font-medium transition-all ${
+                  activeTab === "all"
+                    ? "bg-[#4F46E5] text-white shadow"
+                    : "border border-gray-400 dark:border-gray-600 text-gray-700"
+                }`}
+              >
+                All
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab("following");
+                  setPage(1);
+                }}
+                className={`px-4 h-[40px] flex items-center rounded-lg text-sm font-medium transition-all ${
+                  activeTab === "following"
+                    ? "bg-[#4F46E5] text-white shadow"
+                    : "border border-gray-400 dark:border-gray-600 text-gray-700"
+                }`}
+              >
+                Following
+              </button>
+
+              <div className="flex items-center gap-2 relative">
+                <Select
+                  value={category?._id || ""}
+                  onValueChange={(value) => {
+                    const selected = categories.find((c) => c._id === value);
+                    setCategory(selected || null);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select Category">
+                      {category ? category.name : "Select Category"}
+                    </SelectValue>
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {categories.map((item) => (
+                      <SelectItem key={item._id} value={item._id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {category && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory(null);
+                      setPage(1);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    ✖
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 sm:gap-6 pb-4 flex-wrap">
             <SearchFilterInput
               searchText={searchText}
               handleSearchChange={handleSearchChange}
+              className="mt-[-4px]"
             />
-
-            {/* Filter Icon  */}
-            {/* {/* <SlidersHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" /> */}
           </div>
         </div>
-      </div>
 
-      {/* Educators List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {(isLoading || (isFetching && page === 1)) &&
+            Array.from({ length: 9 }).map((_, i) => (
+              <EducatorCardSkeleton key={i} />
+            ))}
 
-      {!isLoading ? (
-        <div className="flex flex-col gap-4">
-          {data?.data?.length > 0 ? (
-            data?.data?.map((educator) => (
-              <div
-                className="card cursor-pointer"
-                // onClick={() => navigate(`/iq-educators/${educator._id}`)}
-              >
-                <div
-                  key={educator._id}
-                  className="flex items-center justify-between p-8 rounded-xl border flex-col sm:flex-row gap-4"
-                >
-                  {/* Left Section */}
-                  <div className="flex items-center gap-4 flex-col sm:flex-row">
-                    <img
-                      src={educator.image}
-                      alt={educator.image}
-                      className="w-20 h-20 object-cover rounded-full object-top"
-                      onClick={() => navigate(`/iq-educators/${educator._id}`)}
-                    />
-                    <div
-                      className="text-center sm:text-start"
-                      onClick={() => navigate(`/iq-educators/${educator._id}`)}
-                    >
-                      <h4 className="text-gray-800 font-medium mb-1">
-                        {educator.first_name} {educator.last_name}
-                      </h4>
-                      <p className="text-xs text-gray-500">{educator.skills}</p>
+          {!isLoading &&
+            !isFetching &&
+            safeArray(educatorList).length === 0 && (
+              <div className="col-span-full py-10 text-center text-gray-500 text-lg">
+                No educators found
+              </div>
+            )}
+
+          {safeArray(educatorList).map((n, index) => (
+            <div
+              key={n._id}
+              ref={
+                index === educatorList.length - 1 ? lastEducatorRef : undefined
+              }
+              className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all"
+            >
+              <div className="relative h-[200px] bg-gray-300 dark:bg-gray-700 overflow-hidden">
+                <img
+                  src={
+                    n.bannerImage
+                      ? n.bannerImage
+                      : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg")
+                  }
+                  onError={(e) =>
+                    (e.currentTarget.src = toAbsoluteUrl(
+                      "/media/images/2600x1600/live_banner.jpg"
+                    ))
+                  }
+                  className="w-full h-full object-cover"
+                  alt="banner"
+                />
+
+                {Array.isArray(n.categories) && n.categories.length > 0 && (
+                  <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs px-3 py-1 rounded-lg">
+                    {n.categories.map((c) => c?.name).join(", ")}
+                  </span>
+                )}
+              </div>
+
+              <div className="p-5 relative">
+                <div className="absolute -top-10 left-5">
+                  <img
+                    src={
+                      n.image
+                        ? n.image
+                        : toAbsoluteUrl(
+                            "/media/images/2600x1600/live_banner.jpg"
+                          )
+                    }
+                    onError={(e) =>
+                      (e.currentTarget.src = toAbsoluteUrl(
+                        "/media/images/2600x1600/live_banner.jpg"
+                      ))
+                    }
+                    alt="profile"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                  <div className="w-6 h-6 bg-[#4F46E5] text-white rounded-full absolute -bottom-1 right-0 flex items-center justify-center text-xs font-bold shadow">
+                    {n.isFollowing ? "✓" : "+"}
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {n.first_name} {n.last_name}
+                  </h2>
+                  {/* <p className="text-sm text-purple-500 font-medium">
+                    Senior Trader
+                  </p> */}
+
+                  {/* <p className="text-sm text-gray-600 dark:text-gray-800 mt-2 leading-relaxed">
+                    15+ years trading forex markets. Specializing in major
+                    currency pairs and risk management.
+                  </p> */}
+
+                  <div className="flex justify-between text-gray-700 dark:text-gray-300 mt-6">
+                    {/* <div className="text-center">
+                      <p className="font-semibold dark:text-gray-800">
+                        {n.followingCount || 0}
+                      </p>
+                      <p className="text-xs dark:text-gray-700">Followers</p>
+                    </div> */}
+                    {/* <div className="text-center">
+                      <p className="font-semibold dark:text-gray-800">⭐ 4.9</p>
+                      <p className="text-xs dark:text-gray-700">Rating</p>
+                    </div> */}
+                    <div className="text-center">
+                      <p className="font-semibold dark:text-gray-800">
+                        {n?.courseCount || 0}
+                      </p>
+                      <p className="text-xs dark:text-gray-700">Courses</p>
+                    </div>
+
+                    <div className="text-center">
+                      <p className="font-semibold dark:text-gray-800">
+                        {n?.ideaCount || 0}
+                      </p>
+                      <p className="text-xs dark:text-gray-700">Trade ideas</p>
+                    </div>
+
+                    <div className="text-center">
+                      <p className="font-semibold dark:text-gray-800">
+                        {n?.insightCount || 0}
+                      </p>
+                      <p className="text-xs dark:text-gray-700">Insights</p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex items-center gap-3 mt-6">
                     <button
-                      onClick={() => handleToggle(educator)}
-                      className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border ${
-                        educator?.isFollowing
-                          ? "bg-[#4F46E5] text-white border-[#4F46E5]"
-                          : "bg-transparent text-[#4F46E5] border-[#4F46E5]"
+                      onClick={() => handleToggle(n)}
+                      disabled={followLoadingId === n._id}
+                      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all w-full ${
+                        n.isFollowing
+                          ? "bg-[#4F46E5] text-white border border-[#4F46E5]"
+                          : "bg-[#4F46E5]/10 text-[#4F46E5] border border-[#4F46E5] dark:text-gray-900"
+                      } ${
+                        followLoadingId === n._id
+                          ? "opacity-60 cursor-not-allowed"
+                          : ""
                       }`}
                     >
-                      <EyeIcon size={16} />
-                      {educator?.isFollowing ? "Following" : "Follow"}
+                      {followLoadingId === n._id ? (
+                        <Loader2 className="animate-spin" size={18} />
+                      ) : n.isFollowing ? (
+                        <>
+                          <span className="flex items-center justify-center w-4 h-4 rounded-full bg-white text-[#4F46E5] text-xs">
+                            ✓
+                          </span>
+                          Following
+                        </>
+                      ) : (
+                        <>
+                          <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[#4F46E5] text-white text-xs">
+                            +
+                          </span>
+                          Follow
+                        </>
+                      )}
                     </button>
 
-                    {/* Follow Button */}
                     <button
-                      onClick={() => navigate(`/iq-educators/${educator._id}`)}
-                      className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium border bg-[#4F46E5] text-white border-[#4F46E5]"
+                      onClick={() => navigate(`/iq-educators/${n._id}`)}
+                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border bg-transparent text-gray-800 dark:text-gray-900 border-gray-400 w-full"
                     >
-                      <EyeIcon size={16} />
+                      <svg
+                        width="18"
+                        height="18"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        className="text-gray-600 dark:text-gray-900"
+                      >
+                        <path
+                          d="M12 5c-7.633 0-11 7-11 7s3.367 7 11 7 11-7 11-7-3.367-7-11-7zm0 12c-2.761 0-5-2.239-5-5s2.239-5 5-5 
+                        5 2.239 5 5-2.239 5-5 5zm0-8c-1.657 0-3 1.343-3 3s1.343 3 3 3 
+                        3-1.343 3-3-1.343-3-3-3z"
+                        />
+                      </svg>
                       View Profile
                     </button>
                   </div>
                 </div>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-sm text-center py-4">
-              No educators found.
-            </p>
-          )}
+            </div>
+          ))}
         </div>
-      ) : (
-        <Loader />
-      )}
 
-      {/* Show More */}
-      {/* <div className="text-center mt-4">
-        <button className="text-primary pb-3 text-sm border-b-2 border-dashed border-primary">
-          Show more Connections
-        </button>
-      </div> */}
+        {isFetching && page > 1 && (
+          <div className="text-center py-6 text-gray-500">Loading more...</div>
+        )}
+      </div>
+
+      {/* {page >= totalPages && educatorList.length > 0 && (
+        <p className="text-center text-gray-500 my-8">No more educators.</p>
+      )} */}
     </div>
   );
 };

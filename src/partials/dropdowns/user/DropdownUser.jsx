@@ -45,13 +45,13 @@ const DropdownUser = ({ menuItemRef }) => {
         <div className="flex flex-col">
           <Link
             to="#"
-            className="text-sm text-gray-800 dark:text-gray-200 hover:text-primary font-semibold leading-none"
+            className="text-sm text-gray-800 dark:text-gray-800 hover:text-primary font-semibold leading-none"
           >
             {auth?.user?.first_name} {auth?.user?.last_name}
           </Link>
           <a
             href={`mailto:${userEmail}`}
-            className="block w-24 md:w-40 line-clamp-1 truncate text-xs text-gray-600 dark:text-gray-400 hover:text-primary font-medium leading-none"
+            className="block w-24 md:w-40 line-clamp-1 truncate text-xs text-gray-600 dark:text-gray-500 hover:text-primary font-medium leading-none"
             title={userEmail}
           >
             {userEmail}

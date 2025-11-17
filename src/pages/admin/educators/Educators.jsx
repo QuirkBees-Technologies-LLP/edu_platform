@@ -197,6 +197,16 @@ const Educators = ({ title = "Educators" }) => {
         meta: { headerClassName: "min-w-[200px]" },
       },
       {
+        accessorFn: (row) => row.followingCount,
+        id: "followingCount",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Followers" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => <div>{info.getValue()}</div>,
+        meta: { headerClassName: "min-w-[100px]" },
+      },
+      {
         accessorFn: (row) => row.status,
         id: "status",
         header: ({ column }) => (

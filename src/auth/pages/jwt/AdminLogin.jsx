@@ -135,7 +135,7 @@ const AdminLogin = () => {
               placeholder="Email"
               autoComplete="off"
               {...formik.getFieldProps("email")}
-              className={clsx("text-gray-100 form-control", {
+              className={clsx("text-gray-100 dark:text-white form-control", {
                 "is-invalid": formik.touched.email && formik.errors.email,
               })}
             />
@@ -158,7 +158,7 @@ const AdminLogin = () => {
               type={showPassword ? "text" : "password"}
               autoComplete="off"
               {...formik.getFieldProps("password")}
-              className={clsx("text-gray-100 form-control", {
+              className={clsx("text-gray-100 dark:text-white form-control", {
                 "is-invalid": formik.touched.password && formik.errors.password,
               })}
             />

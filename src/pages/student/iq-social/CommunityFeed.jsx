@@ -10,16 +10,34 @@ import {
   ToolbarDescription,
 } from "@/partials/toolbar";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useSearchParams } from "react-router-dom";
+
 const CommunityFeed = () => {
+  const [searchParams] = useSearchParams();
+  const initialType = searchParams.get("socialType") || "all";
+  const [socialType, setSocialType] = useState(initialType);
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const limit = 10;
   const [hasMore, setHasMore] = useState(true);
 
   const { data, isLoading, isFetching, isError } = usePostQuery(
-    { page, limit },
+    { page, limit, socialType },
     { refetchOnMountOrArgChange: true }
   );
+
+  useEffect(() => {
+    setPosts([]);
+    setHasMore(true);
+    setPage(1);
+  }, [socialType]);
 
   useEffect(() => {
     if (data?.posts) {
@@ -35,8 +53,9 @@ const CommunityFeed = () => {
     }
   }, [data]);
 
-  const loadMore = () => {
+  console.log(posts, "posts");
 
+  const loadMore = () => {
     if (!isFetching && hasMore) {
       setPage((prev) => prev + 1);
     }
@@ -49,6 +68,44 @@ const CommunityFeed = () => {
           <ToolbarPageTitle text="IQ Social" />
           <ToolbarDescription>Latest community posts</ToolbarDescription>
         </ToolbarHeading>
+        <div className="flex items-center gap-2 relative">
+          <Select
+            className="w-[180px] text-sm font-medium"
+            value={socialType}
+            onValueChange={(value) => {
+              setSocialType(value);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select Type">
+                {socialType === "social"
+                  ? "Social"
+                  : socialType === "company"
+                    ? "Corporate"
+                    : "Select "}
+              </SelectValue>
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="social">Social</SelectItem>
+              <SelectItem value="company">corporate</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {socialType !== "all" && (
+            <button
+              type="button"
+              onClick={() => {
+                setSocialType("all");
+                setPage(1);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              ✖
+            </button>
+          )}
+        </div>
       </Toolbar>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
@@ -59,10 +116,8 @@ const CommunityFeed = () => {
               <p className="mt-4 text-gray-600">Loading posts…</p>
             </div>
           ) : isError ? (
-            <div className="text-center text-red-500">
-              Error loading posts
-            </div>
-          ) : posts.length === 0 ? (
+            <div className="text-center text-red-500">Error loading posts</div>
+          ) : posts.length === 0 && !isLoading ? (
             <div className="card rounded-lg shadow-md p-8 text-center">
               <Rss size={48} className="mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-700">
@@ -83,9 +138,9 @@ const CommunityFeed = () => {
               scrollThreshold={0.9}
             >
               <div className="container max-w-full sm:max-w-2xl mx-auto pb-8">
-                  {posts.map((post) => (
-                    <SocialPostCard key={post._id} post={post} />
-                  ))}
+                {posts.map((post) => (
+                  <SocialPostCard key={post._id} post={post} />
+                ))}
               </div>
             </InfiniteScroll>
           )}
