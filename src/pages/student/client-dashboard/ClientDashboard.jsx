@@ -569,7 +569,7 @@ const ClientDashboard = () => {
       </div> */}
       <div className="min-h-screen">
         {/* Add Tailwind CSS via CDN */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
           {/* Beta Invite Banners */}
           {/* <div className="space-y-3 mb-6"> */}
           {/* IQ Social Beta */}
@@ -997,23 +997,20 @@ const ClientDashboard = () => {
                                       radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
                                       radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)`
           }}></div> */}
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="relative">
             {/* Hero Section with Live Session */}
             <div className="mb-8">
               <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
-                <div className="absolute inset-0">
-                  <img
-                    src="/media/images/2600x1600/dashboard_banner.jpg"
-                    alt="Hero"
-                    className="w-full h-full object-cover opacity-60"
-                  />
-                  {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div> */}
-                </div>
-
-                <div className="relative h-full flex items-center justify-between p-8">
+                <div
+                  className="absolute inset-0 bg-cover bg-left bg-no-repeat opacity-60"
+                  style={{
+                    backgroundImage: "url('/media/images/2600x1600/dashboard_banner.jpg')",
+                  }}
+                ></div>
+                <div className="relative h-full flex items-center justify-between flex-col lg:flex-row p-8">
                   {/* Left Side - Hero Content */}
                   <div className="flex-1 max-w-2xl">
-                    <h1 className="text-3xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">
+                    <h1 className="text-3xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent text-center">
                       RISE ABOVE ORDINARY
                     </h1>
                   </div>
@@ -1048,7 +1045,7 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                   </div> */}
-                  <div className="hidden lg:block">
+                  <div className="">
                     {educatorsLoading ? (
                       <div className="flex justify-center py-10">
                         <Loader />
@@ -1325,7 +1322,7 @@ const ClientDashboard = () => {
               <div className="lg:col-span-2">
                 <div className="card rounded-2xl border p-6 h-full shadow-md">
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
                     <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
                       <Activity className="w-5 h-5 text-purple-400" />
                       Live Activity Feed
@@ -1336,11 +1333,10 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("company")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${
-              socialType === "company"
-                ? "bg-purple-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-700/50"
-            }
+            ${socialType === "company"
+                            ? "bg-purple-600 text-white shadow-md"
+                            : "text-gray-600 hover:bg-gray-700/50"
+                          }
           `}
                       >
                         Corporate
@@ -1350,11 +1346,10 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("social")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${
-              socialType === "social"
-                ? "bg-blue-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-700/50"
-            }
+            ${socialType === "social"
+                            ? "bg-blue-600 text-white shadow-md"
+                            : "text-gray-600 hover:bg-gray-700/50"
+                          }
           `}
                       >
                         Social
