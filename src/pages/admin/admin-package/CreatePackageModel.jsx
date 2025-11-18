@@ -127,7 +127,7 @@ const CreatePackageModel = forwardRef(
                       type="text"
                       placeholder="Enter package name"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
+                      className={`form-control input dark:bg-[#2b2b2b] input-md w-full ${
                         formik.errors.name && formik.touched.name
                           ? "border border-danger"
                           : ""

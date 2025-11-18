@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ChevronLeft } from "lucide-react";
 import {
   BookOpen,
   ChevronRight,
@@ -40,6 +41,7 @@ const ClientDashboard = () => {
     thumbnail: "/api/placeholder/400/400",
   };
   const { auth } = useAuthContext();
+  const swiperRef = React.useRef(null);
 
   const allowedRoutes = auth?.user?.plan?.allowedSideBar;
 
@@ -1004,7 +1006,8 @@ const ClientDashboard = () => {
                 <div
                   className="absolute inset-0 bg-cover bg-left bg-no-repeat opacity-60"
                   style={{
-                    backgroundImage: "url('/media/images/2600x1600/dashboard_banner.jpg')",
+                    backgroundImage:
+                      "url('/media/images/2600x1600/dashboard_banner.jpg')",
                   }}
                 ></div>
                 <div className="relative h-full flex items-center justify-between flex-col lg:flex-row p-8">
@@ -1047,63 +1050,78 @@ const ClientDashboard = () => {
                   </div> */}
                   <div className="">
                     {educatorsLoading ? (
-                      <div className="flex justify-center py-10">
+                      <div className="relative w-80">
                         <Loader />
                       </div>
                     ) : liveStreams.length > 0 ? (
-                      <Swiper
-                        modules={[Pagination, Autoplay]}
-                        spaceBetween={20}
-                        slidesPerView={1}
-                        pagination={{ clickable: true }}
-                        autoplay={{ delay: 3000 }}
-                        className="w-80 h-64"
-                      >
-                        {liveStreams.map((slide, index) => (
-                          <SwiperSlide key={index}>
-                            <div className="relative w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
-                              {/* IMAGE */}
-                              <img
-                                src={slide?.educator?.image}
-                                alt={slide?.educator?.first_name}
-                                className="w-full h-full object-cover"
-                              />
+                      <div className="relative w-80">
+                        {/* LEFT ARROW */}
+                        <button
+                          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-white/40 dark:bg-white/20 hover:bg-white text-gray-700 rounded-full p-1 shadow-md"
+                          onClick={() => swiperRef.current?.slidePrev()}
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
 
-                              {/* DARK OVERLAY */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                        {/* RIGHT ARROW */}
+                        <button
+                          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-white/40 hover:bg-white dark:bg-white/20 text-gray-700 rounded-full p-1 shadow-md"
+                          onClick={() => swiperRef.current?.slideNext()}
+                        >
+                          <ChevronRight size={20} />
+                        </button>
 
-                              {/* BOTTOM TEXT */}
-                              <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-                                <p className="text-xs text-gray-300 mb-1">
-                                  Trading Live
-                                </p>
+                        <Swiper
+                          modules={[Pagination, Autoplay]}
+                          spaceBetween={20}
+                          slidesPerView={1}
+                          pagination={{ clickable: true }}
+                          autoplay={{ delay: 3000 }}
+                          onSwiper={(swiper) => (swiperRef.current = swiper)}
+                          className="w-80 h-64 rounded-xl overflow-hidden"
+                        >
+                          {liveStreams.map((slide, index) => (
+                            <SwiperSlide key={index}>
+                              <div className="relative w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+                                <img
+                                  src={slide?.educator?.image}
+                                  alt={slide?.educator?.first_name}
+                                  className="w-full h-full object-cover"
+                                />
 
-                                <h3 className="text-white font-bold mb-1">
-                                  {slide?.educator?.first_name}{" "}
-                                  {slide?.educator?.last_name}
-                                </h3>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
-                                <p className="text-xs text-gray-400">
-                                  {slide?.title || "Live market session"}
-                                </p>
+                                <div className="absolute bottom-0 left-0 right-0 p-4">
+                                  <p className="text-xs text-gray-300 dark:text-gray-900 mb-1">
+                                    Trading Live
+                                  </p>
+
+                                  <h3 className="text-white  font-bold mb-1">
+                                    {slide?.educator?.first_name}{" "}
+                                    {slide?.educator?.last_name}
+                                  </h3>
+
+                                  <p className="text-xs text-gray-400 dark:text-gray-600 pb-2">
+                                    {slide?.title || "Live market session"}
+                                  </p>
+                                </div>
+
+                                <div className="absolute inset-0 flex m-5 items-end justify-end">
+                                  <Link
+                                    to={`/iq-educators/${slide?.educator?._id}`}
+                                    className="w-12 h-12 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition"
+                                  >
+                                    <Play
+                                      className="w-6 h-6 text-white ml-1"
+                                      fill="white"
+                                    />
+                                  </Link>
+                                </div>
                               </div>
-
-                              {/* PLAY / WATCH LIVE */}
-                              <div className="absolute inset-0 flex m-5 items-end justify-end pointer-events-auto">
-                                <Link
-                                  to={`/iq-educators/${slide?.educator?._id}`}
-                                  className="w-12 h-12  backdrop-blur rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition"
-                                >
-                                  <Play
-                                    className="w-6 h-6 text-white ml-1"
-                                    fill="white"
-                                  />
-                                </Link>
-                              </div>
-                            </div>
-                          </SwiperSlide>
-                        ))}
-                      </Swiper>
+                            </SwiperSlide>
+                          ))}
+                        </Swiper>
+                      </div>
                     ) : (
                       <div className="flex items-center justify-center w-80 h-64">
                         <p className="text-white">No Live Educators</p>
@@ -1333,10 +1351,11 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("company")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${socialType === "company"
-                            ? "bg-purple-600 text-white shadow-md"
-                            : "text-gray-600 hover:bg-gray-700/50"
-                          }
+            ${
+              socialType === "company"
+                ? "bg-purple-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-700/50"
+            }
           `}
                       >
                         Corporate
@@ -1346,10 +1365,11 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("social")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${socialType === "social"
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "text-gray-600 hover:bg-gray-700/50"
-                          }
+            ${
+              socialType === "social"
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-700/50"
+            }
           `}
                       >
                         Social

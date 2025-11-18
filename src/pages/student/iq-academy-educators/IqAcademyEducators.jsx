@@ -209,7 +209,7 @@ const IqAcademyEducators = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-6 pb-10">
+      <div className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-start justify-between mb-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Educators
@@ -322,7 +322,7 @@ const IqAcademyEducators = () => {
               }
               className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all"
             >
-              <div className="relative h-[200px] bg-gray-300 dark:bg-gray-700 overflow-hidden">
+              <div className="relative h-[170px] bg-gray-300 dark:bg-gray-700 overflow-hidden">
                 <img
                   src={
                     n.bannerImage
@@ -368,49 +368,46 @@ const IqAcademyEducators = () => {
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                <div className="mt-6">
+                  <h2
+                    className="text-lg font-semibold text-gray-900 truncate"
+                    title={`${n.first_name} ${n.last_name}`}
+                  >
                     {n.first_name} {n.last_name}
                   </h2>
-                  {/* <p className="text-sm text-purple-500 font-medium">
-                    Senior Trader
-                  </p> */}
 
-                  {/* <p className="text-sm text-gray-600 dark:text-gray-800 mt-2 leading-relaxed">
-                    15+ years trading forex markets. Specializing in major
-                    currency pairs and risk management.
-                  </p> */}
+                  <p className="text-[14px] text-[#5b1deb] dark:text-[#8B5CF6] leading-relaxed line-clamp-1 h-[18px] overflow-hidden">
+                    {n?.educatorRole ? n?.educatorRole : ""}
+                  </p>
 
-                  <div className="flex justify-between text-gray-700 dark:text-gray-300 mt-6">
-                    {/* <div className="text-center">
-                      <p className="font-semibold dark:text-gray-800">
-                        {n.followingCount || 0}
-                      </p>
-                      <p className="text-xs dark:text-gray-700">Followers</p>
-                    </div> */}
+                  <p className="text-[12px] text-gray-800 dark:text-gray-700 mt-2 leading-relaxed  h-16 overflow-hidden">
+                    {n?.bio ? n?.bio : ""}
+                  </p>
+
+                  <div className="flex justify-between text-gray-700 dark:text-gray-300 mt-">
                     {/* <div className="text-center">
                       <p className="font-semibold dark:text-gray-800">⭐ 4.9</p>
                       <p className="text-xs dark:text-gray-700">Rating</p>
                     </div> */}
                     <div className="text-center">
-                      <p className="font-semibold dark:text-gray-800">
+                      <p className="font-semibold dark:text-gray-800 text-gray-700">
                         {n?.courseCount || 0}
                       </p>
-                      <p className="text-xs dark:text-gray-700">Courses</p>
+                      <p className="text-xs dark:text-gray-700 text-gray-700">Courses</p>
                     </div>
 
                     <div className="text-center">
-                      <p className="font-semibold dark:text-gray-800">
+                      <p className="font-semibold dark:text-gray-700 text-gray-700">
                         {n?.ideaCount || 0}
                       </p>
-                      <p className="text-xs dark:text-gray-700">Trade ideas</p>
+                      <p className="text-xs dark:text-gray-700 text-gray-700">Trade ideas</p>
                     </div>
 
                     <div className="text-center">
-                      <p className="font-semibold dark:text-gray-800">
+                      <p className="font-semibold dark:text-gray-800 text-gray-700">
                         {n?.insightCount || 0}
                       </p>
-                      <p className="text-xs dark:text-gray-700">Insights</p>
+                      <p className="text-xs dark:text-gray-700 text-gray-700">Insights</p>
                     </div>
                   </div>
 
