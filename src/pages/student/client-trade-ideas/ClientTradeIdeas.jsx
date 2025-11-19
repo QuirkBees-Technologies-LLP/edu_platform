@@ -48,7 +48,7 @@ const TradeCard = ({ trade }) => {
   return (
     <div className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md">
       {/* Chart placeholder */}
-      <div className="relative h-[32vh] rounded-t-[20px] overflow-hidden">
+      <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
         <img
           src="/media/images/2600x1600/banner_3.jpg"
           alt="Academy"
@@ -331,7 +331,7 @@ const ClientTradeIdeas = () => {
     }
   ];
   return (
-    <div className="container-fluid mb-8">
+    <div className="max-w-7xl mx-auto px-4 pb-10">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Ideas" />

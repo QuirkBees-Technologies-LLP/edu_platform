@@ -52,11 +52,11 @@ const statusColorMap = {
 };
 const MarketCard = ({ pair, timeframe, analyst, timestamp, title, description, views, likes, comments, bgGradient }) => (
   <div className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md">
-    <div className="relative h-[32vh] rounded-t-[20px] overflow-hidden">
+    <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
 
       {/* IMAGE */}
       <img
-        src="/media/images/2600x1600/banner_3.jpg"
+        src="/media/images/2600x1600/dummy.png"
         alt="Academy"
         className="w-full h-full object-cover"
       />
@@ -260,7 +260,7 @@ const IqInsight = () => {
   const markets = ['All Markets', 'Forex', 'Crypto', 'Indices'];
   const timeframes = ['1H', '4H', 'DAILY', 'WEEKLY'];
   return (
-    <div className="container-fluid pb-5">
+    <div className="max-w-7xl mx-auto px-4 pb-10">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Insight" />
