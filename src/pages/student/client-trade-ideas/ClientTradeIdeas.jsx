@@ -15,7 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "../../../components/ui/breadcrumb";
 import { ArrowDown, ArrowUp, Container, Link2, Link2Icon } from "lucide-react";
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown } from "lucide-react";
 import {
   Toolbar,
   ToolbarActions,
@@ -40,112 +40,134 @@ const statusColorMap = {
   loss: "red",
   breakEven: "gray",
 };
-const TradeCard = ({ trade }) => {
-  const isWin = trade.status === 'win';
-  const isLoss = trade.status === 'loss';
-  const isActive = trade.status === 'active';
+// const TradeCard = ({ trade, ref }) => {
+//   const isWin = trade.status === "win";
+//   const isLoss = trade.status === "loss";
+//   const isActive = trade.status === "active";
 
-  return (
-    <div className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md">
-      {/* Chart placeholder */}
-      <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
-        <img
-          src="/media/images/2600x1600/banner_3.jpg"
-          alt="Academy"
-          className="w-full h-full object-cover"
-        />
+//   return (
+//     <div className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md">
+//       {/* Chart placeholder */}
+//       <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
+//         <img
+//           src="/media/images/2600x1600/banner_3.jpg"
+//           alt="Academy"
+//           className="w-full h-full object-cover"
+//         />
 
-        {/* OVERLAY BLOCK */}
-        <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 ${trade.type === "buy"
-                  ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                  : "bg-red-500 hover:bg-red-600 text-white"
-                }`}
-            >
-              {trade.type === "buy" ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-              {trade.type.toUpperCase()}
-            </button>
+//         {/* OVERLAY BLOCK */}
+//         <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
+//           <div className="flex items-center gap-3">
+//             <button
+//               className={`px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 ${
+//                 trade.type === "buy"
+//                   ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+//                   : "bg-red-500 hover:bg-red-600 text-white"
+//               }`}
+//             >
+//               {trade.type === "buy" ? (
+//                 <TrendingUp size={16} />
+//               ) : (
+//                 <TrendingDown size={16} />
+//               )}
+//               {trade.type.toUpperCase()}
+//             </button>
 
-            <div className="bg-gray-800 px-4 py-2 rounded-lg font-semibold text-sm text-white">
-              {trade.pair}
-            </div>
-          </div>
+//             <div className="bg-gray-800 px-4 py-2 rounded-lg font-semibold text-sm text-white">
+//               {trade.name}
+//             </div>
+//           </div>
 
-          {isActive && (
-            <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-              ACTIVE
-            </div>
-          )}
+//           {isActive && (
+//             <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+//               <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+//               ACTIVE
+//             </div>
+//           )}
 
-          {isWin && (
-            <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
-              <span>★</span>
-              WIN +{trade.pips} pips
-            </div>
-          )}
+//           {isWin && (
+//             <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+//               <span>★</span>
+//               WIN +{trade.pips} pips
+//             </div>
+//           )}
 
-          {isLoss && (
-            <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
-              <span>▲</span>
-              LOSS {trade.pips} pips
-            </div>
-          )}
-        </div>
-      </div>
+//           {isLoss && (
+//             <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+//               <span>▲</span>
+//               LOSS {trade.pips} pips
+//             </div>
+//           )}
+//         </div>
+//       </div>
 
+//       <div className="p-6">
+//         {/* Trader Info */}
+//         <div className="flex items-center justify-between mb-6">
+//           <div className="flex items-center gap-3">
+//             <div
+//               className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
+//                 trade.avatarColor
+//               }`}
+//             >
+//               <img
+//                 className="w-12 h-12 rounded-full flex items-center justify-center"
+//                 src={`${trade?.educatorDetails?.image}`}
+//                 alt=""
+//               />
+//             </div>
+//             <div>
+//               <div className="dark:text-white font-semibold">
+//                 {trade?.educatorDetails?.first_name}{" "}
+//                 {trade?.educatorDetails?.last_name}
+//               </div>
+//               <div className="text-gray-600 text-sm">
+//                 {Array.isArray(trade?.educatorDetails?.categories) &&
+//                 trade?.educatorDetails?.categories?.length > 0
+//                   ? trade?.educatorDetails?.categories
+//                       .map((cat) => cat)
+//                       .join(", ")
+//                   : "-"}
+//               </div>
+//             </div>
+//           </div>
+//           <div className="text-gray-600 text-sm">
+//             {trade.createAt ? new Date(trade.createAt).getFullYear() : ""}
+//           </div>
+//         </div>
 
-      <div className="p-6">
-        {/* Trader Info */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${trade.avatarColor
-              }`}>
-              {trade.initials}
-            </div>
-            <div>
-              <div className="dark:text-white font-semibold">{trade.name}</div>
-              <div className="text-gray-600 text-sm">{trade.market}</div>
-            </div>
-          </div>
-          <div className="text-gray-600 text-sm">{trade.year}</div>
-        </div>
+//         {/* Trade Details */}
+//         <div className="space-y-3 mb-6">
+//           <div className="flex justify-between items-center">
+//             <span className="text-gray-800">Entry</span>
+//             <span className="text-white font-mono">{trade.entry}</span>
+//           </div>
+//           <div className="flex justify-between items-center">
+//             <span className="text-gray-800">Stop Loss</span>
+//             <span className="text-red-600 font-mono">{trade.invalidation}</span>
+//           </div>
+//           {["tp1", "tp2", "tp3"].map((tpField, idx) => {
+//             const tpValue = trade?.exits?.[idx] ?? "N/A";
+//             const fieldName = `TP ${idx + 1}`;
 
-        {/* Trade Details */}
-        <div className="space-y-3 mb-6">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-800">Entry</span>
-            <span className="text-white font-mono">{trade.entry}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-800">Stop Loss</span>
-            <span className="text-red-600 font-mono">{trade.stopLoss}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-800">TP 1</span>
-            <span className="text-emerald-600 font-mono">{trade.tp1}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-800">TP 2</span>
-            <span className="text-emerald-600 font-mono">{trade.tp2}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-800">TP 3</span>
-            <span className="text-emerald-600 font-mono">{trade.tp3}</span>
-          </div>
-        </div>
+//             return (
+//               <div className="flex justify-between items-center" key={tpField}>
+//                 <span className="text-gray-800">{fieldName}</span>
+//                 <span className="text-emerald-600 font-mono">{tpValue}</span>
+//               </div>
+//             );
+//           })}
+//         </div>
 
-        {/* View Details Button */}
-        <button className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
-          <Eye size={18} />
-          View Details
-        </button>
-      </div>
-    </div>
-  );
-};
+//         {/* View Details Button */}
+//         <button className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+//           <Eye size={18} />
+//           View Details
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
 const ClientTradeIdeas = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -236,100 +258,101 @@ const ClientTradeIdeas = () => {
   };
   const trades = [
     {
-      type: 'sell',
-      pair: 'GBPCHF',
-      status: 'active',
-      name: 'Sheriff Aderemi',
-      initials: 'SA',
-      avatarColor: 'bg-purple-500',
-      market: 'Forex',
-      year: '2025',
-      entry: '1.04732',
-      stopLoss: '1.05403',
-      tp1: '1.04537',
-      tp2: '1.04186',
-      tp3: '1.03644'
+      type: "sell",
+      pair: "GBPCHF",
+      status: "active",
+      name: "Sheriff Aderemi",
+      initials: "SA",
+      avatarColor: "bg-purple-500",
+      market: "Forex",
+      year: "2025",
+      entry: "1.04732",
+      stopLoss: "1.05403",
+      tp1: "1.04537",
+      tp2: "1.04186",
+      tp3: "1.03644",
     },
     {
-      type: 'sell',
-      pair: 'GOLD',
-      status: 'loss',
-      pips: '-68',
-      name: 'Andre Tyson',
-      initials: 'AT',
-      avatarColor: 'bg-purple-500',
-      market: 'Forex',
-      year: '2025',
-      entry: '1947.32',
-      stopLoss: '1954.03',
-      tp1: '1945.37',
-      tp2: '1941.86',
-      tp3: '1936.44'
+      type: "sell",
+      pair: "GOLD",
+      status: "loss",
+      pips: "-68",
+      name: "Andre Tyson",
+      initials: "AT",
+      avatarColor: "bg-purple-500",
+      market: "Forex",
+      year: "2025",
+      entry: "1947.32",
+      stopLoss: "1954.03",
+      tp1: "1945.37",
+      tp2: "1941.86",
+      tp3: "1936.44",
     },
     {
-      type: 'buy',
-      pair: 'GOLD',
-      status: 'win',
-      pips: '+127',
-      name: 'Ricardo Garcia',
-      initials: 'RG',
-      avatarColor: 'bg-pink-500',
-      market: 'Forex',
-      year: '2025',
-      entry: '4074.30',
-      stopLoss: '4092.27',
-      tp1: '4067.14',
-      tp2: '4060.31',
-      tp3: '4054.40'
+      type: "buy",
+      pair: "GOLD",
+      status: "win",
+      pips: "+127",
+      name: "Ricardo Garcia",
+      initials: "RG",
+      avatarColor: "bg-pink-500",
+      market: "Forex",
+      year: "2025",
+      entry: "4074.30",
+      stopLoss: "4092.27",
+      tp1: "4067.14",
+      tp2: "4060.31",
+      tp3: "4054.40",
     },
     {
-      type: 'buy',
-      pair: 'EURUSD',
-      status: 'win',
-      pips: '+64',
-      name: 'Maria Chen',
-      initials: 'MC',
-      avatarColor: 'bg-purple-500',
-      market: 'Forex',
-      year: '2025',
-      entry: '1.0856',
-      stopLoss: '1.0823',
-      tp1: '1.0889',
-      tp2: '1.0912',
-      tp3: '1.0945'
+      type: "buy",
+      pair: "EURUSD",
+      status: "win",
+      pips: "+64",
+      name: "Maria Chen",
+      initials: "MC",
+      avatarColor: "bg-purple-500",
+      market: "Forex",
+      year: "2025",
+      entry: "1.0856",
+      stopLoss: "1.0823",
+      tp1: "1.0889",
+      tp2: "1.0912",
+      tp3: "1.0945",
     },
     {
-      type: 'sell',
-      pair: 'BTCUSD',
-      status: 'active',
-      name: 'John Miller',
-      initials: 'JM',
-      avatarColor: 'bg-purple-500',
-      market: 'Crypto',
-      year: '2025',
-      entry: '98,250',
-      stopLoss: '99,180',
-      tp1: '97,420',
-      tp2: '96,850',
-      tp3: '95,900'
+      type: "sell",
+      pair: "BTCUSD",
+      status: "active",
+      name: "John Miller",
+      initials: "JM",
+      avatarColor: "bg-purple-500",
+      market: "Crypto",
+      year: "2025",
+      entry: "98,250",
+      stopLoss: "99,180",
+      tp1: "97,420",
+      tp2: "96,850",
+      tp3: "95,900",
     },
     {
-      type: 'buy',
-      pair: 'GBPJPY',
-      status: 'loss',
-      pips: '-65',
-      name: 'Alex Kumar',
-      initials: 'AK',
-      avatarColor: 'bg-pink-500',
-      market: 'Forex',
-      year: '2025',
-      entry: '188.45',
-      stopLoss: '187.80',
-      tp1: '189.10',
-      tp2: '189.75',
-      tp3: '190.40'
-    }
+      type: "buy",
+      pair: "GBPJPY",
+      status: "loss",
+      pips: "-65",
+      name: "Alex Kumar",
+      initials: "AK",
+      avatarColor: "bg-pink-500",
+      market: "Forex",
+      year: "2025",
+      entry: "188.45",
+      stopLoss: "187.80",
+      tp1: "189.10",
+      tp2: "189.75",
+      tp3: "190.40",
+    },
   ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <Toolbar>
@@ -634,12 +657,269 @@ const ClientTradeIdeas = () => {
       ) : (
         <Loader />
       )} */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trades.map((trade, index) => (
-          <TradeCard key={index} trade={trade} />
-        ))}
-      </div>
 
+      {isLoading == false ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tradeIdeas?.map((trade, index) => (
+            <div
+              key={trade._id}
+              className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md"
+              ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
+            >
+              {/* Chart placeholder */}
+              <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
+                {/* <img
+                  src="/media/images/2600x1600/banner_3.jpg"
+                  alt="Academy"
+                  className="w-full h-full object-cover"
+                /> */}
+
+                {/* <div className="relative h-[28vh] w-full overflow-hidden"> */}
+                {trade.image && trade.image.length > 0 && (
+                  <>
+                    <img
+                      src={trade.image[trade.currentIndex ?? 0]}
+                      alt={trade.pair}
+                      className="w-full h-full object-cover cursor-pointer transition-all duration-500"
+                    />
+
+                    {/* <button
+                          onClick={() => {
+                            setSelectedIdea(trade);
+                            setIsLightBoxOpen(true);
+                          }}
+                          className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
+                        >
+                          <Eye size={20} />
+                        </button> */}
+
+                    {trade.image.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setTradeIdeas((prev) =>
+                              prev.map((t) =>
+                                t._id === trade._id
+                                  ? {
+                                      ...t,
+                                      currentIndex:
+                                        (t.currentIndex ?? 0) === 0
+                                          ? t.image.length - 1
+                                          : (t.currentIndex ?? 0) - 1,
+                                    }
+                                  : t
+                              )
+                            );
+                          }}
+                          className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setTradeIdeas((prev) =>
+                              prev.map((t) =>
+                                t._id === trade._id
+                                  ? {
+                                      ...t,
+                                      currentIndex:
+                                        (t.currentIndex ?? 0) ===
+                                        t.image.length - 1
+                                          ? 0
+                                          : (t.currentIndex ?? 0) + 1,
+                                    }
+                                  : t
+                              )
+                            );
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2!right-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md -translate-y-1/2"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+
+                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                          {trade.image.map((_, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setTradeIdeas((prev) =>
+                                  prev.map((t) =>
+                                    t._id === trade._id
+                                      ? { ...t, currentIndex: idx }
+                                      : t
+                                  )
+                                );
+                              }}
+                              className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                                (trade.currentIndex ?? 0) === idx
+                                  ? "bg-primary"
+                                  : "bg-gray-300 hover:bg-gray-400"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+                {/* </div> */}
+
+                {/* OVERLAY BLOCK */}
+                <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      className={`px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 ${
+                        trade.type === "buy"
+                          ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                          : "bg-red-500 hover:bg-red-600 text-white"
+                      }`}
+                    >
+                      {trade.type === "buy" ? (
+                        <TrendingUp size={16} />
+                      ) : (
+                        <TrendingDown size={16} />
+                      )}
+                      {trade.type.toUpperCase()}
+                    </button>
+
+                    <div className="bg-gray-800 px-4 py-2 rounded-lg font-semibold text-sm text-white">
+                      {trade.name}
+                    </div>
+                  </div>
+
+                  {LabelMap[trade.status] === "Active" && (
+                    <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                      {LabelMap[trade.status]}
+                    </div>
+                  )}
+                  {LabelMap[trade.status] === "Pending" && (
+                    <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                      {LabelMap[trade.status]}
+                    </div>
+                  )}
+
+                  {LabelMap[trade.status] === "Win" && (
+                    <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span>★</span>
+                      WIN +{trade.pips} pips
+                    </div>
+                  )}
+
+                  {LabelMap[trade.status] === "Loss" && (
+                    <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span>▲</span>
+                      LOSS -{trade.pips} pips
+                    </div>
+                  )}
+                  {LabelMap[trade.status] === "Partial Win" && (
+                    <div className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span>▲</span>
+                      PARTIAL WIN {trade.pips} pips
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Trader Info */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
+                        trade.avatarColor
+                      }`}
+                    >
+                      <img
+                        className="w-12 h-12 rounded-full flex items-center justify-center"
+                        src={`${trade?.educatorDetails?.image}`}
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <div className="dark:text-white font-semibold">
+                        {trade?.educatorDetails?.first_name}{" "}
+                        {trade?.educatorDetails?.last_name}
+                      </div>
+                      <div className="text-gray-600 text-sm">
+                        {Array.isArray(trade?.educatorDetails?.categories) &&
+                        trade?.educatorDetails?.categories?.length > 0
+                          ? trade?.educatorDetails?.categories
+                              .map((cat) => cat)
+                              .join(", ")
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-gray-600 text-sm">
+                    {trade.createAt
+                      ? new Date(trade.createAt).getFullYear()
+                      : ""}
+                  </div>
+                </div>
+
+                {/* Trade Details */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-800">Entry</span>
+                    <span className="text-white font-mono">{trade.entry}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-800">Stop Loss</span>
+                    <span className="text-red-600 font-mono">
+                      {trade.invalidation}
+                    </span>
+                  </div>
+                  {["tp1", "tp2", "tp3"].map((tpField, idx) => {
+                    const tpValue = trade?.exits?.[idx] ?? "N/A";
+                    const fieldName = `TP ${idx + 1}`;
+
+                    return (
+                      <div
+                        className="flex justify-between items-center"
+                        key={tpField}
+                      >
+                        <span className="text-gray-800">{fieldName}</span>
+                        <span className="text-emerald-600 font-mono">
+                          {tpValue}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* View Details Button */}
+                <button
+                  className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  onClick={() => {
+                    setSelectedIdea(trade);
+                    setIsViewOpen(true);
+                  }}
+                >
+                  <Eye size={18} />
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <ViewClientTradeIdeas
+            isViewOpen={isViewOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            handleCloseView={handleCloseView}
+            selectedIdea={selectedIdea}
+          />
+          <ImageLightBox
+            isLightBoxOpen={isLightBoxOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            selectedIdea={selectedIdea}
+          />
+        </div>
+      ) : (
+        <Loader />
+      )}
     </div>
   );
 };
