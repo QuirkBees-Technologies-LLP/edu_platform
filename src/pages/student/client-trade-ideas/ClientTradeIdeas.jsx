@@ -681,6 +681,10 @@ const ClientTradeIdeas = () => {
                       src={trade.image[trade.currentIndex ?? 0]}
                       alt={trade.pair}
                       className="w-full h-full object-cover cursor-pointer transition-all duration-500"
+                      onClick={() => {
+                        setSelectedIdea(trade);
+                        setIsLightBoxOpen(true);
+                      }}
                     />
 
                     {/* <button
@@ -789,13 +793,13 @@ const ClientTradeIdeas = () => {
                   </div>
 
                   {LabelMap[trade.status] === "Active" && (
-                    <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                    <div className="bg-cyan-700 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
                       <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                       {LabelMap[trade.status]}
                     </div>
                   )}
                   {LabelMap[trade.status] === "Pending" && (
-                    <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                    <div className="bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
                       <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                       {LabelMap[trade.status]}
                     </div>
