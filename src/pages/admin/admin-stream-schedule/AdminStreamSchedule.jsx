@@ -447,7 +447,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <div className="flex flex-wrap items-center gap-2">
-          <ToolbarActions>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <div className="flex-1 min-w-[200px] md:min-w-[300px]">
               <SearchFilterInput
                 searchText={searchText}
@@ -512,7 +512,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
                 Create Recurring Schedule
               </button>
             </div>
-          </ToolbarActions>
+          </div>
         </div>
       </Toolbar>
       <DataGrid

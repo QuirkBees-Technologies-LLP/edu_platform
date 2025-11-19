@@ -510,7 +510,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <div className="flex gap-2 flex-wrap">
-          <ToolbarActions>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <div className="relative w-full md:w-80">
               <SearchFilterInput
                 searchText={searchText}
@@ -526,7 +526,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
                 It won't appear in the schedule
               </div>
             </div>
-          </ToolbarActions>
+          </div>
         </div>
         {/* <ToolbarActions>
           <div className="text-end pb-4">

@@ -483,7 +483,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
               </button>
             </div>
           </ToolbarActions> */}
-          <ToolbarActions>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <div className="relative w-full md:w-80">
               <SearchFilterInput
                 searchText={searchText}
@@ -498,7 +498,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
                 Create Recurring Schedule
               </button>
             </div>
-          </ToolbarActions>
+          </div>
         </div>
       </Toolbar>
       <DataGrid

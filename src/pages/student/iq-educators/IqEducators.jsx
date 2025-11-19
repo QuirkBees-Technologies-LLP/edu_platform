@@ -314,7 +314,7 @@ const IqEducators = () => {
               onClick={() => setIsOpen(false)}
             >
               <div
-                className="relative w-full sm:w-[800px] bg-white rounded-2xl p-6 shadow-lg"
+                className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
               >
                 <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">

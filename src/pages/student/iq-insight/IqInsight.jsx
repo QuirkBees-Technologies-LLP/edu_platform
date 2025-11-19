@@ -52,7 +52,7 @@ const statusColorMap = {
 };
 const MarketCard = ({ pair, timeframe, analyst, timestamp, title, description, views, likes, comments, bgGradient }) => (
   <div className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md">
-    <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
+    <div className="relative h-[32vh] rounded-t-[20px] overflow-hidden">
 
       {/* IMAGE */}
       <img

@@ -1013,7 +1013,7 @@ const ClientDashboard = () => {
                 <div className="relative h-full flex items-center justify-between flex-col lg:flex-row p-8">
                   {/* Left Side - Hero Content */}
                   <div className="flex-1 max-w-2xl">
-                    <h1 className="text-3xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent text-center">
+                    <h1 className="text-2xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent text-center">
                       RISE ABOVE ORDINARY
                     </h1>
                   </div>
@@ -1054,7 +1054,7 @@ const ClientDashboard = () => {
                         <Loader />
                       </div>
                     ) : liveStreams.length > 0 ? (
-                      <div className="relative w-80">
+                      <div className="relative w-56 sm:w-80">
                         {/* LEFT ARROW */}
                         <button
                           className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-white/40 dark:bg-white/20 hover:bg-white text-gray-700 rounded-full p-1 shadow-md"
@@ -1078,11 +1078,11 @@ const ClientDashboard = () => {
                           pagination={{ clickable: true }}
                           autoplay={{ delay: 3000 }}
                           onSwiper={(swiper) => (swiperRef.current = swiper)}
-                          className="w-80 h-64 rounded-xl overflow-hidden"
+                          className="w-56 sm:w-80 h-64 rounded-xl overflow-hidden"
                         >
                           {liveStreams.map((slide, index) => (
                             <SwiperSlide key={index}>
-                              <div className="relative w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+                              <div className="relative w-56 sm:w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
                                 <img
                                   src={slide?.educator?.image}
                                   alt={slide?.educator?.first_name}

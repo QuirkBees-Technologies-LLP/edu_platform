@@ -462,7 +462,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-32 p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-lg"
+                className="w-full min-h-32 p-3 border border-gray-200 bg-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-600 text-lg"
                 placeholder="What do you want to talk about?"
                 maxLength={2000}
               />

@@ -332,7 +332,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <div className="flex gap-2 flex-wrap">
-          <ToolbarActions>
+          <div className="flex items-center gap-2.5 flex-wrap">
             {/* <label className="form-label text-gray-900 gap-1">
               Educator<span className="text-danger">*</span>
             </label> */}
@@ -418,7 +418,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
             >
               {loading ? <Loader2 /> : "Export KPI   "}
             </button>
-          </ToolbarActions>
+          </div>
         </div>
       </Toolbar>
 
