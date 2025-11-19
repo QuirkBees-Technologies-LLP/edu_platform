@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
+import { FaGooglePlay, FaAppStoreIos } from "react-icons/fa";
 import {
   BookOpen,
   ChevronRight,
@@ -1510,18 +1511,32 @@ const ClientDashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={() =>
-                        window.open(
-                          "https://play.google.com/store/apps/details?id=com.eductionplatform&pcampaignid=web_share",
-                          "_blank"
-                        )
-                      }
-                      className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download Now
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() =>
+                          window.open(
+                            "https://play.google.com/store/apps/details?id=com.eductionplatform&pcampaignid=web_share",
+                            "_blank"
+                          )
+                        }
+                        className="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
+                      >
+                        <FaGooglePlay className="w-4 h-4" b />
+                        Download Now
+                      </button>
+                      <button
+                        onClick={() =>
+                          window.open(
+                            "https://testflight.apple.com/join/qynfgnna",
+                            "_blank"
+                          )
+                        }
+                        className="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
+                      >
+                        <FaAppStoreIos className="w-4 h-4" />
+                        Download Now
+                      </button>
+                    </div>
                   </div>
 
                   {/* IQ Sync App */}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
 import {
@@ -31,122 +31,85 @@ import {
 } from "@/partials/toolbar";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
-import ShowMoreLess from "../../../components/ui/showmoreless";
 import Loader from "../../../components/ui/loader";
-import { Eye, ThumbsUp, MessageCircle, Share2, FileText } from 'lucide-react';
+import { Eye, ThumbsUp, MessageCircle, Share2, FileText } from "lucide-react";
+import SearchFilterInput from "../../../components/SearchFilterInput";
+import debounce from "lodash.debounce";
 
-const LabelMap = {
-  active: "Active",
-  pending: "Pending",
-  win: "Win",
-  partialWin: "Partial Win",
-  loss: "Loss",
-};
+const ShowMoreLess = ({
+  text = "",
+  html = "",
+  limit = 100,
+  showMoreText = " . . .",
+  showLessText = " . . .",
+  className,
+}) => {
+  const [expanded, setExpanded] = useState(false);
 
-const statusColorMap = {
-  active: "bg-green-50 text-green-700 ring-green-600/20",
-  pending: "bg-yellow-50 text-yellow-700 ring-yellow-600/20",
-  win: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  partialWin: "bg-violet-50 text-violet-700 ring-violet-600/20",
-  loss: "bg-red-50 text-red-700 ring-red-600/20",
-};
-const MarketCard = ({ pair, timeframe, analyst, timestamp, title, description, views, likes, comments, bgGradient }) => (
-  <div className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md">
-    <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
+  const isHtml = !!html;
+  const content = isHtml ? html : text;
+  const plainText = isHtml ? html.replace(/<[^>]+>/g, "") : text;
+  const isLong = plainText.length > limit;
 
-      {/* IMAGE */}
-      <img
-        src="/media/images/2600x1600/dummy.png"
-        alt="Academy"
-        className="w-full h-full object-cover"
-      />
+  const displayed =
+    expanded || !isLong ? content : plainText.substring(0, limit);
 
-      {/* OVERLAY BADGES */}
-      <div className="absolute top-4 left-4 flex items-center gap-3">
-        <div className="bg-gray-100 px-4 py-2 rounded-lg">
-          <span className="dark:text-white text-md font-medium">{pair}</span>
-        </div>
-
-        <div
-          className={`${timeframe === "4H"
-            ? "bg-primary"
-            : timeframe === "Daily"
-              ? "bg-primary"
-              : timeframe === "1H"
-                ? "bg-primary"
-                : "bg-purple-500"
-            } px-3 py-1 rounded-md`}
+  return (
+    <div
+      className={
+        className ? className : "text-sm text-gray-700 leading-relaxed"
+      }
+    >
+      {isHtml ? (
+        <span dangerouslySetInnerHTML={{ __html: displayed }} />
+      ) : (
+        <span>{displayed}</span>
+      )}
+      {isLong && (
+        <span
+          onClick={() => setExpanded(!expanded)}
+          className="text-primary cursor-pointer hover:underline"
         >
-          <span className="text-white text-sm">{timeframe}</span>
-        </div>
-      </div>
+          {expanded ? showLessText : showMoreText}
+        </span>
+      )}
     </div>
+  );
+};
 
-    <div className="p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
-          {analyst.split(' ').map(n => n[0]).join('')}
-        </div>
-        <div>
-          <div className="dark:text-white font-semibold">{analyst}</div>
-          <div className="text-slate-400 text-sm">{timestamp}</div>
-        </div>
-      </div>
-
-      <h3 className="text-gray-700 dark:text-gray-800 font-semibold mb-2 text-lg line-clamp-2">{title}</h3>
-      <p className="text-slate-400 text-sm mb-4 line-clamp-2">{description}</p>
-
-      <div className="flex items-center gap-6 mb-4 text-slate-400">
-        <div className="flex items-center gap-2">
-          <Eye size={18} />
-          <span className="text-sm">{views}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <ThumbsUp size={18} />
-          <span className="text-sm">{likes}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MessageCircle size={18} />
-          <span className="text-sm">{comments}</span>
-        </div>
-        <button className="ml-auto hover:text-primary transition-colors">
-          <Share2 size={18} />
-        </button>
-      </div>
-
-      <div className="flex gap-3 flex-col xl:flex-row">
-        <button className="flex-1 bg-gray-200 hover:bg-gray-100 dark:text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-          <FileText size={18} />
-          Full Analysis
-        </button>
-        <button className="px-6 bg-primary hover:bg-primary text-white py-3 rounded-lg font-medium transition-colors">
-          Show More
-        </button>
-      </div>
-    </div>
-  </div >
-);
 const IqInsight = () => {
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(9);
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [activeMarket, setActiveMarket] = useState("All");
+  const [activeTimeframe, setActiveTimeframe] = useState("WEEKLY");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const observer = useRef();
 
-  const { data, isFetching, isLoading } = useGetClientTradeAnalysisQuery({
-    page: page,
-    limit: limit,
-  });
+  const { data, isFetching, isLoading, isError } =
+    useGetClientTradeAnalysisQuery({
+      page: page,
+      limit: limit,
+      search: searchText,
+      // timeframe: activeTimeframe,
+      markets: activeMarket,
+      refreshKey,
+    });
 
   const totalPages = data?.pagination?.totalPages || 1;
 
   useEffect(() => {
+    // if (data?.data.length === 0) {
+    //   setTradeIdeas([]);
+    // }
     if (data?.data) {
       if (page === 1) {
-        setTradeIdeas(data.data); // replace data if first page
+        setTradeIdeas(data.data);
       } else {
         // Append new unique items only
         setTradeIdeas((prevIdeas) => {
@@ -179,86 +142,149 @@ const IqInsight = () => {
     setIsViewOpen(false);
   };
 
-  const [activeMarket, setActiveMarket] = useState('All Markets');
-  const [activeTimeframe, setActiveTimeframe] = useState('DAILY');
-
   const marketData = [
     {
-      pair: 'USDJPY',
-      timeframe: '4H',
-      analyst: 'Ricardo Garcia',
-      timestamp: 'Nov 17, 2025, 07:02 AM',
-      title: 'Key resistance at 151.95 with potential reversal pattern forming',
-      description: 'Please refer to the weekly overview for reference. Everything is...',
-      views: '1.2K',
-      likes: '87',
-      comments: '23',
-      bgGradient: 'bg-gradient-to-br from-slate-600 to-slate-800'
+      pair: "USDJPY",
+      timeframe: "4H",
+      analyst: "Ricardo Garcia",
+      timestamp: "Nov 17, 2025, 07:02 AM",
+      title: "Key resistance at 151.95 with potential reversal pattern forming",
+      description:
+        "Please refer to the weekly overview for reference. Everything is...",
+      views: "1.2K",
+      likes: "87",
+      comments: "23",
+      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
     },
     {
-      pair: 'USDCAD',
-      timeframe: 'Daily',
-      analyst: 'Florian Krauß',
-      timestamp: 'Nov 16, 2025, 03:02 PM',
-      title: 'Bullish continuation expected after consolidation phase',
-      description: 'Please refer to the weekly overview for reference. Everything is...',
-      views: '2.8K',
-      likes: '156',
-      comments: '23',
-      bgGradient: 'bg-gradient-to-br from-slate-600 to-slate-800'
+      pair: "USDCAD",
+      timeframe: "Daily",
+      analyst: "Florian Krauß",
+      timestamp: "Nov 16, 2025, 03:02 PM",
+      title: "Bullish continuation expected after consolidation phase",
+      description:
+        "Please refer to the weekly overview for reference. Everything is...",
+      views: "2.8K",
+      likes: "156",
+      comments: "23",
+      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
     },
     {
-      pair: 'EURUSD',
-      timeframe: '1H',
-      analyst: 'Florian Krauß',
-      timestamp: 'Nov 16, 2025, 02:53 PM',
-      title: 'Major support zone tested, watching for breakout confirmation',
-      description: 'Please refer to the weekly overview for reference. Everything is...',
-      views: '3.4K',
-      likes: '203',
-      comments: '23',
-      bgGradient: 'bg-gradient-to-br from-slate-600 to-slate-800'
+      pair: "EURUSD",
+      timeframe: "1H",
+      analyst: "Florian Krauß",
+      timestamp: "Nov 16, 2025, 02:53 PM",
+      title: "Major support zone tested, watching for breakout confirmation",
+      description:
+        "Please refer to the weekly overview for reference. Everything is...",
+      views: "3.4K",
+      likes: "203",
+      comments: "23",
+      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
     },
     {
-      pair: 'GBPJPY',
-      timeframe: '4H',
-      analyst: 'Ricardo Garcia',
-      timestamp: 'Nov 17, 2025, 06:45 AM',
-      title: 'Strong momentum building above key moving averages',
-      description: 'Please refer to the weekly overview for reference. Everything is...',
-      views: '1.5K',
-      likes: '92',
-      comments: '18',
-      bgGradient: 'bg-gradient-to-br from-slate-600 to-slate-800'
+      pair: "GBPJPY",
+      timeframe: "4H",
+      analyst: "Ricardo Garcia",
+      timestamp: "Nov 17, 2025, 06:45 AM",
+      title: "Strong momentum building above key moving averages",
+      description:
+        "Please refer to the weekly overview for reference. Everything is...",
+      views: "1.5K",
+      likes: "92",
+      comments: "18",
+      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
     },
     {
-      pair: 'XAUUSD',
-      timeframe: 'Daily',
-      analyst: 'Florian Krauß',
-      timestamp: 'Nov 16, 2025, 01:30 PM',
-      title: 'Gold reaches critical resistance, potential pullback expected',
-      description: 'Please refer to the weekly overview for reference. Everything is...',
-      views: '4.1K',
-      likes: '245',
-      comments: '31',
-      bgGradient: 'bg-gradient-to-br from-slate-600 to-slate-800'
+      pair: "XAUUSD",
+      timeframe: "Daily",
+      analyst: "Florian Krauß",
+      timestamp: "Nov 16, 2025, 01:30 PM",
+      title: "Gold reaches critical resistance, potential pullback expected",
+      description:
+        "Please refer to the weekly overview for reference. Everything is...",
+      views: "4.1K",
+      likes: "245",
+      comments: "31",
+      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
     },
     {
-      pair: 'BTCUSD',
-      timeframe: 'Weekly',
-      analyst: 'Ricardo Garcia',
-      timestamp: 'Nov 15, 2025, 09:15 AM',
-      title: 'Weekly chart shows strong bullish structure formation',
-      description: 'Please refer to the weekly overview for reference. Everything is...',
-      views: '5.2K',
-      likes: '312',
-      comments: '45',
-      bgGradient: 'bg-gradient-to-br from-slate-600 to-slate-800'
-    }
+      pair: "BTCUSD",
+      timeframe: "Weekly",
+      analyst: "Ricardo Garcia",
+      timestamp: "Nov 15, 2025, 09:15 AM",
+      title: "Weekly chart shows strong bullish structure formation",
+      description:
+        "Please refer to the weekly overview for reference. Everything is...",
+      views: "5.2K",
+      likes: "312",
+      comments: "45",
+      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
+    },
   ];
 
-  const markets = ['All Markets', 'Forex', 'Crypto', 'Indices'];
-  const timeframes = ['1H', '4H', 'DAILY', 'WEEKLY'];
+  // const markets = ["All", "Forex", "Crypto", "Indices"];
+  const markets = ["All", "Forex", "Crypto"];
+  const timeframes = ["1H", "4H", "DAILY", "WEEKLY"];
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchText(value);
+        setPage(1);
+      }, 500),
+    []
+  );
+
+  // bg - teal - 800;
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
+    setTradeIdeas([]);
+    setPage(1);
+    setRefreshKey((prev) => prev + 1);
+    debouncedSearch(value);
+  };
+
+  const ShowMoreLess = ({
+    text = "",
+    html = "",
+    limit = 100,
+    showMoreText = " . . .",
+    className,
+    onOpen,
+  }) => {
+    const isHtml = !!html;
+    const content = isHtml ? html : text;
+    const plainText = isHtml ? html.replace(/<[^>]+>/g, "") : text;
+    const isLong = plainText.length > limit;
+
+    const displayed = plainText.substring(0, limit);
+
+    return (
+      <div className={className || "text-sm text-gray-700 leading-relaxed"}>
+        {isHtml ? (
+          <span dangerouslySetInnerHTML={{ __html: displayed }} />
+        ) : (
+          <span>{displayed}</span>
+        )}
+
+        {isLong && (
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen && onOpen();
+            }}
+            className="text-primary cursor-pointer "
+          >
+            {showMoreText}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <Toolbar>
@@ -269,67 +295,139 @@ const IqInsight = () => {
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
-
-      <div className="">
-        <div className="flex justify-between items-center flex-wrap mb-8 gap-3">
-          <div className="flex gap-3 flex-wrap">
-            <div className="p-2 flex overflow-auto bg-gray-200 rounded-xl gap-1 sm:gap-2">
-              {markets.map(market => (
-                <button
-                  key={market}
-                  onClick={() => setActiveMarket(market)}
-                  className={`px-3 sm:px-6 py-2.5 text-xs sm:text-md rounded-lg font-semibold transition-all
-                        ${activeMarket === market
-                      ? 'bg-primary text-white shadow-lg shadow-primary/50'
-                      : ' text-gray-600 hover:bg-gray-300'
-                    }`}
-                >
-                  {market}
-                </button>
-              ))}
-            </div>
-            <div className="p-2 flex overflow-auto bg-gray-200 rounded-xl gap-1 sm:gap-2">
-              {timeframes.map(tf => (
-                <button
-                  key={tf}
-                  onClick={() => setActiveTimeframe(tf)}
-                  className={`px-3 sm:px-6 py-2.5 text-xs sm:text-md rounded-lg font-semibold transition-all ${activeTimeframe === tf
-                      ? 'bg-primary text-white shadow-lg shadow-primary/50'
-                      : 'text-gray-600 hover:bg-gray-300'
-                    }`}
-                >
-                  {tf}
-                </button>
-              ))}
-            </div>
+      <div className="flex justify-between items-center flex-wrap mb-8 gap-5">
+        <div className="flex gap-3.5 flex-wrap">
+          <div className="sm:px-3 p-2 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md border-purple-200 dark:border-gray-200">
+            {markets.map((market) => (
+              <button
+                key={market}
+                onClick={() => {
+                  setActiveMarket(market);
+                  setTradeIdeas([]);
+                  setRefreshKey((prev) => prev + 1);
+                  setPage(1);
+                }}
+                className={`sm:px-4 py-2 text-xs sm:text-md rounded-lg font-semibold transition-all
+                        ${
+                          activeMarket === market
+                            ? "bg-sky-500 text-white shadow-lg shadow-primary/50"
+                            : " text-gray-600 hover:bg-gray-300"
+                        }`}
+              >
+                {market}
+              </button>
+            ))}
           </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search pairs or analysis..."
-              className="bg-gray-200 dark:text-white pl-12 pr-6 py-3 rounded-lg w-80 focus:outline-none placeholder-slate-500"
-            />
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
+          {/* <div className="p-2 flex overflow-auto bg-gray-200 rounded-xl gap-1 sm:gap-2 shadow-md border-purple-200 dark:border-gray-200">
+            {timeframes.map((tf) => (
+              <button
+                key={tf}
+                onClick={() => {
+                  setActiveTimeframe(tf);
+                  setTradeIdeas([]);
+                  setRefreshKey((prev) => prev + 1);
+                  setPage(1);
+                }}
+                className={`sm:px-4 py-2 text-xs sm:text-md rounded-lg font-semibold transition-all ${
+                  activeTimeframe === tf
+                    ? "bg-primary text-white shadow-lg shadow-primary/50"
+                    : "text-gray-600 hover:bg-gray-300"
+                }`}
+              >
+                {tf}
+              </button>
+            ))}
+          </div> */}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
-          {marketData.map((data, index) => (
-            <MarketCard key={index} {...data} />
-          ))}
+        <div className="flex gap-3 sm:gap-6 flex-wrap mr-3">
+          <SearchFilterInput
+            searchText={searchText}
+            handleSearchChange={handleSearchChange}
+            className="w-full sm:w-auto rounded-xl h-11"
+          />
         </div>
-        {/* <div className="col-span-12 text-white">
+      </div>
+
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+            {isError && (
+              <div className="col-span-12 flex items-center justify-center py-20">
+                <div className="text-gray-700 text-lg font-semibold">
+                  No records found
+                </div>
+              </div>
+            )}
             {isLoading ? (
               <Loader />
+            ) : tradeIdeas.length === 0 &&
+              !isLoading &&
+              !isError &&
+              !isFetching &&
+              page === 1 ? (
+              <div className="col-span-12 flex items-center justify-center py-20">
+                <div className="text-gray-700 text-lg font-semibold">
+                  No records found
+                </div>
+              </div>
             ) : tradeIdeas.length > 0 ? (
               tradeIdeas.map((idea, index) => (
+                // <div
+                //   key={idea._id}
+                //   className="card border-2 hover:bg-gray-200 overflow-hidden h-fit"
+                // >
+                //   <div
+                //     className="overflow-hidden cursor-pointer"
+                //     onClick={() => {
+                //       setSelectedIdea(idea);
+                //       setIsViewOpen(true);
+                //     }}
+                //     ref={
+                //       index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
+                //     }
+                //   >
+                //     <img
+                //       src={idea?.image?.[0]}
+                //       className="w-full h-[220px] object-cover "
+                //       alt=""
+                //     />
+                //   </div>
+                //   <div className="card-border card-rounded-b flex flex-col gap-2 justify-between min-h-[210px]">
+                //     <div className="px-5 py-4.5 ">
+                //       <div className="flex item-center justify-between  mb-2">
+                //         <div className="font-bold mr-3 text-gray-900">
+                //           {idea?.name}
+                //         </div>
+                //       </div>
+                //       <ShowMoreLess
+                //         className="text-gray-900 text-sm mt-2 leading-relaxed"
+                //         html={idea?.description || "No description"}
+                //         limit={65}
+                //       />
+                //     </div>
+                //     <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
+                //       <div className="flex items-center">
+                //         <EducatorImage educator={idea?.educatorDetails} />
+                //         <div>
+                //           <Link
+                //             to={`/iq-educators/${idea?.educatorDetails?._id}`}
+                //             className="text-2sm text-gray-800 hover:text-primary mb-px"
+                //           >
+                //             {idea?.educatorDetails?.first_name}{" "}
+                //             {idea?.educatorDetails?.last_name}{" "}
+                //           </Link>
+                //           <div className="text-2sm text-gray-700 mb-px">
+                //             {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
+                //           </div>
+                //         </div>
+                //       </div>
+                //     </div>
+                //   </div>
+                // </div>
                 <div
-                  key={idea._id}
-                  className="card border-2 hover:bg-gray-200 overflow-hidden flex flex-col h-full"
+                  key={idea?._id}
+                  className="card border-2  shadow-md border-purple-200 dark:border-gray-200 overflow-hidden flex flex-col h-full"
                 >
                   <div
                     className="relative overflow-hidden cursor-pointer"
@@ -341,104 +439,169 @@ const IqInsight = () => {
                       index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
                     }
                   >
-                    {idea.image && idea.image.length > 0 && (
+                    {idea?.image && idea?.image.length > 0 && (
                       <>
+                        {idea?.isLoading && (
+                          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
+                            <Loader />
+                          </div>
+                        )}
+
+                        {/* Image */}
                         <img
-                          src={idea.image[idea.currentIndex ?? 0]}
-                          alt={idea.name}
-                          className="w-full h-[220px] object-cover transition-all duration-500"
+                          src={idea?.image[idea.currentIndex ?? 0]}
+                          alt={idea?.name}
+                          className={`w-full h-[220px] object-cover transition-opacity duration-200 ${idea?.isLoading ? "opacity-0" : "opacity-100"}`}
                         />
 
-                        {idea.image.length > 1 && (
+                        <button
+                          onClick={() => {
+                            setSelectedIdea(trade);
+                            setIsLightBoxOpen(true);
+                          }}
+                          className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
+                        >
+                          <Eye size={20} />
+                        </button>
+
+                        {/* Arrows */}
+                        {idea?.image.length > 1 && (
                           <>
+                            {/* Left */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+
+                                const newIndex =
+                                  (idea.currentIndex ?? 0) === 0
+                                    ? idea?.image.length - 1
+                                    : (idea.currentIndex ?? 0) - 1;
+
+                                // Start Loading
                                 setTradeIdeas((prev) =>
                                   prev.map((t) =>
-                                    t._id === idea._id
-                                      ? {
-                                          ...t,
-                                          currentIndex:
-                                            (t.currentIndex ?? 0) === 0
-                                              ? t.image.length - 1
-                                              : (t.currentIndex ?? 0) - 1,
-                                        }
+                                    t._id === idea?._id
+                                      ? { ...t, isLoading: true }
                                       : t
                                   )
                                 );
+
+                                // Preload next image
+                                const img = new Image();
+                                img.src = idea?.image[newIndex];
+                                img.onload = () => {
+                                  setTradeIdeas((prev) =>
+                                    prev.map((t) =>
+                                      t._id === idea?._id
+                                        ? {
+                                            ...t,
+                                            currentIndex: newIndex,
+                                            isLoading: false,
+                                          }
+                                        : t
+                                    )
+                                  );
+                                };
                               }}
-                              className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                              className="left-3 z-10 bg-white/60 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
                             >
                               <ChevronLeft size={20} />
                             </button>
 
+                            {/* Right */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+
+                                const newIndex =
+                                  (idea.currentIndex ?? 0) ===
+                                  idea.image.length - 1
+                                    ? 0
+                                    : (idea.currentIndex ?? 0) + 1;
+
+                                // Start Loading
                                 setTradeIdeas((prev) =>
                                   prev.map((t) =>
                                     t._id === idea._id
-                                      ? {
-                                          ...t,
-                                          currentIndex:
-                                            (t.currentIndex ?? 0) ===
-                                            t.image.length - 1
-                                              ? 0
-                                              : (t.currentIndex ?? 0) + 1,
-                                        }
+                                      ? { ...t, isLoading: true }
                                       : t
                                   )
                                 );
+
+                                // Preload next image
+                                const img = new Image();
+                                img.src = idea.image[newIndex];
+                                img.onload = () => {
+                                  setTradeIdeas((prev) =>
+                                    prev.map((t) =>
+                                      t._id === idea._id
+                                        ? {
+                                            ...t,
+                                            currentIndex: newIndex,
+                                            isLoading: false,
+                                          }
+                                        : t
+                                    )
+                                  );
+                                };
                               }}
-                              className="absolute right-2 top-1/2 -translate-y-1/2!right-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md -translate-y-1/2"
+                              className="right-3 z-10 bg-white/60 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
                             >
                               <ChevronRight size={20} />
                             </button>
+                          </>
+                        )}
 
-                            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
-                              {idea.image.map((_, idx) => (
-                                <button
-                                  key={idx}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
+                        {/* Dots */}
+                        {idea?.image.length > 1 && (
+                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                            {idea.image.map((_, idx) => (
+                              <button
+                                key={idx}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+
+                                  // Start Loading
+                                  setTradeIdeas((prev) =>
+                                    prev.map((t) =>
+                                      t._id === idea._id
+                                        ? { ...t, isLoading: true }
+                                        : t
+                                    )
+                                  );
+
+                                  const img = new Image();
+                                  img.src = idea.image[idx];
+                                  img.onload = () => {
                                     setTradeIdeas((prev) =>
                                       prev.map((t) =>
                                         t._id === idea._id
-                                          ? { ...t, currentIndex: idx }
+                                          ? {
+                                              ...t,
+                                              currentIndex: idx,
+                                              isLoading: false,
+                                            }
                                           : t
                                       )
                                     );
-                                  }}
-                                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                                    (idea.currentIndex ?? 0) === idx
-                                      ? "bg-primary"
-                                      : "bg-gray-300 hover:bg-gray-400"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </>
+                                  };
+                                }}
+                                className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                                  (idea.currentIndex ?? 0) === idx
+                                    ? "bg-primary"
+                                    : "bg-gray-300 hover:bg-gray-400"
+                                }`}
+                              />
+                            ))}
+                          </div>
                         )}
                       </>
                     )}
                   </div>
 
-                  <div className="card-border card-rounded-b flex flex-col gap-2 justify-between min-h-[210px]">
-                    <div className="px-5 py-4.5 flex-grow">
-                      <div className="flex item-center justify-between mb-2">
-                        <div className="font-bold mr-3 text-gray-900">
-                          {idea?.name}
-                        </div>
-                      </div>
-                      <ShowMoreLess
-                        className="text-gray-900 text-sm mt-2 leading-relaxed"
-                        html={idea?.description || "No description"}
-                        limit={65}
-                      />
-                    </div>
-
-                    <div className="border-t bg-gray-100 px-5 py-3">
+                  {/* Body + Footer */}
+                  <div className="flex flex-col gap-2 justify-between min-h-[200px]">
+                    <div className=" bg-gray-100 px-3 py-3">
                       <div className="flex items-center">
                         <EducatorImage educator={idea?.educatorDetails} />
                         <div>
@@ -455,16 +618,56 @@ const IqInsight = () => {
                         </div>
                       </div>
                     </div>
+                    {/* Body */}
+                    <div className="px-5 py-2 flex-1 flex flex-col">
+                      <div className="flex item-center justify-between mb-2 min-h-10">
+                        <div className="font-bold mr-3 text-sky-500">
+                          {idea?.name}
+                        </div>
+                      </div>
+                      <div className="text-gray-900 text-sm leading-relaxed h-20 overflow-hidden">
+                        <ShowMoreLess
+                          html={idea?.description || "No description"}
+                          limit={100}
+                          onOpen={() => {
+                            setSelectedIdea(idea);
+                            setIsViewOpen(true);
+                          }}
+                        />
+                      </div>
+                      <div className="mt-auto">
+                        <button
+                          onClick={() => {
+                            setSelectedIdea(idea);
+                            setIsViewOpen(true);
+                          }}
+                          className="w-full bg-teal-800 hover:bg-teal-900 border dark:text-white font-sm py-1.5 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                        >
+                          <Eye size={18} />
+                          View Details
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-900 my-10">
-                No IQ Ideas to load.
-              </div>
+              isFetching &&
+              !isLoading && (
+                <div className="col-span-12 flex items-center justify-center py-20">
+                  <div className="text-gray-700 text-lg font-semibold">
+                    <Loader />
+                  </div>
+                </div>
+              )
             )}
           </div>
-        </div> */}
+          {isFetching && page > 1 && (
+            <div className="text-center py-5 text-gray-500">
+              Loading more...
+            </div>
+          )}
+        </div>
 
         <ViewInsightTradeIdeas
           isViewOpen={isViewOpen}
