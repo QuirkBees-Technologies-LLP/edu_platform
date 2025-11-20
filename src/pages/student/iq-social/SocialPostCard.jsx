@@ -17,6 +17,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
     content,
     images = [],
     author,
+    videos=[],
     createdAt,
     likeCount = 0,
     commentCount = 0,
@@ -115,6 +116,25 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
           ))}
         </div>
       )}
+      {videos.length > 0 && (
+        <div
+          className={`grid ${
+            videos.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          } gap-3 mt-3`}
+        >
+          {videos.map((vid) => (
+            <div key={vid._id || vid.url} className="relative group">
+              <video
+                src={vid.url}
+                alt="post"
+                 controls
+                className="w-full h-56 rounded-xl object-cover border border-gray-200 dark:border-[#22242A] cursor-pointer hover:opacity-90 transition-all"
+                // onClick={() => setSelectedImage(img.url)}
+              />
+            </div>
+          ))}
+        </div>
+      )}  
 
       {/* Image Modal */}
       {selectedImage && (

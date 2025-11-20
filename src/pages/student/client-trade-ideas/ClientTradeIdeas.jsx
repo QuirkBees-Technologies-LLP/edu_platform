@@ -222,6 +222,18 @@ const ClientTradeIdeas = () => {
     setIsViewOpen(false);
   };
 
+  const statusPriority = {
+  pending: 1,
+  active: 2,
+  default: 3,
+};
+
+const sortedIdeas = [...tradeIdeas].sort((a, b) => {
+  const orderA = statusPriority[a.status] || statusPriority.default;
+  const orderB = statusPriority[b.status] || statusPriority.default;
+  return orderA - orderB;
+});
+
   const call = () => {
     window.alert("Link is not provide..!");
   };
@@ -660,7 +672,7 @@ const ClientTradeIdeas = () => {
 
       {isLoading == false ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tradeIdeas?.map((trade, index) => (
+          {sortedIdeas?.map((trade, index) => (
             <div
               key={trade._id}
               className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md"
@@ -866,19 +878,69 @@ const ClientTradeIdeas = () => {
 
                 {/* Trade Details */}
                 <div className="space-y-3 mb-6">
+                  {/* ENTRY */}
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-800">Entry</span>
-                    <span className="text-white font-mono">{trade.entry}</span>
+                    <span className="text-gray-800 dark:text-white-200">
+                      Entry
+                    </span>
+
+                    <span className="font-mono flex items-center gap-2 text-dark dark:text-white">
+                      {copiedField.id === trade._id &&
+                      copiedField.field === "Entry" ? (
+                        <span className="text-black dark:text-white text-xs bg-transparent">
+                          Copied!
+                        </span>
+                      ) : (
+                        trade.entry && (
+                          <button
+                            onClick={() =>
+                              handleCopyField(trade._id, "Entry", trade.entry)
+                            }
+                            className="text-gray-800 dark:text-white-200 flex items-center"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        )
+                      )}
+
+                      {trade.entry}
+                    </span>
                   </div>
+
+                  {/* STOP LOSS */}
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-800">Stop Loss</span>
-                    <span className="text-red-600 font-mono">
+                    <span className="text-gray-800">Invalidation</span>
+
+                    <span className="text-red-600 font-mono flex items-center gap-2">
+                      {copiedField.id === trade._id &&
+                      copiedField.field === "Stop Loss" ? (
+                        <span className="text-dark bg-white text-xs">
+                          Copied!
+                        </span>
+                      ) : (
+                        trade.invalidation && (
+                          <button
+                            onClick={() =>
+                              handleCopyField(
+                                trade._id,
+                                "Stop Loss",
+                                trade.invalidation
+                              )
+                            }
+                            className="text-red-600 flex items-center"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        )
+                      )}
+
                       {trade.invalidation}
                     </span>
                   </div>
-                  {["tp1", "tp2", "tp3"].map((tpField, idx) => {
+
+                  {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
                     const tpValue = trade?.exits?.[idx] ?? "N/A";
-                    const fieldName = `TP ${idx + 1}`;
+                    const fieldName = `Exit ${idx + 1}`;
 
                     return (
                       <div
@@ -886,7 +948,26 @@ const ClientTradeIdeas = () => {
                         key={tpField}
                       >
                         <span className="text-gray-800">{fieldName}</span>
-                        <span className="text-emerald-600 font-mono">
+
+                        <span className="text-emerald-600 font-mono flex items-center gap-2">
+                          {copiedField.id === trade._id &&
+                          copiedField.field === fieldName ? (
+                            <span className="text-dark bg-white text-xs">
+                              Copied!
+                            </span>
+                          ) : (
+                            tpValue !== "N/A" && (
+                              <button
+                                onClick={() =>
+                                  handleCopyField(trade._id, fieldName, tpValue)
+                                }
+                                className="text-gray-800 flex items-center"
+                              >
+                                <Copy size={14} />
+                              </button>
+                            )
+                          )}
+
                           {tpValue}
                         </span>
                       </div>

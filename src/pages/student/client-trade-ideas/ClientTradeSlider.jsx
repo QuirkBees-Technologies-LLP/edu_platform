@@ -98,7 +98,7 @@ export default function ClientTradeSlider({
 
           {[0, 1, 2].map((idx) => (
             <div key={idx} className="flex justify-between text-sm">
-              <span className="text-gray-600">{`TP ${idx + 1}`}</span>
+              <span className="text-gray-600">{`Exit ${idx + 1}`}</span>
               <span className="font-medium text-gray-800">
                 {selectedIdea?.exits?.[idx] ?? "N/A"}
               </span>
