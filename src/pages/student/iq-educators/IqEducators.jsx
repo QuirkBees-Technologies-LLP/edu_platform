@@ -25,6 +25,7 @@ import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import RatingModal from "./RatingModel";
 
 const IqEducators = () => {
   const navigate = useNavigate();
@@ -51,6 +52,7 @@ const IqEducators = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
 
   const handleCloseView = () => {
     setIsViewOpen(false);
@@ -300,70 +302,78 @@ const IqEducators = () => {
         </div>
 
         {/* Buttons side by side */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsOpen(true)}
-            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
-          >
-            <Volume2 size={18} />
-          </button>
-
-          {isOpen && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-              onClick={() => setIsOpen(false)}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsOpen(true)}
+              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
             >
-              <div
-                className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
-                onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
-              >
-                <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
-                  Change in Sound Option from Automatic (Default) to Allow,{" "}
-                  <br /> like in the Image
-                </span>
-                <div
-                  className="overflow-hidden rounded-lg cursor-pointer"
-                  onClick={() => isVolumeOpen(true)}
-                >
-                  <img src={InfoImage} alt="Info" />
-                </div>
+              <Volume2 size={18} />
+            </button>
 
-                <span
-                  className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+            {isOpen && (
+              <div
+                className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+                onClick={() => setIsOpen(false)}
+              >
+                <div
+                  className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
+                  onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
+                >
+                  <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
+                    Change in Sound Option from Automatic (Default) to Allow,{" "}
+                    <br /> like in the Image
+                  </span>
+                  <div
+                    className="overflow-hidden rounded-lg cursor-pointer"
+                    onClick={() => isVolumeOpen(true)}
+                  >
+                    <img src={InfoImage} alt="Info" />
+                  </div>
+
+                  <span
+                    className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
 
 "
-                >
-                  Or follow the video tutorial
-                </span>
-                {/* <p className="text-gray-700 mb-1">
+                  >
+                    Or follow the video tutorial
+                  </span>
+                  {/* <p className="text-gray-700 mb-1">
                   <strong>Specialization:</strong> Forex Day Trading, Price
                   Action
                 </p> */}
-                {/* <p className="text-gray-700 mb-4">
+                  {/* <p className="text-gray-700 mb-4">
               <strong>Experience:</strong> 5+ Years
             </p> */}
-                <div className="overflow-hidden rounded-lg mx-auto block w-fit">
-                  <video width="500" height="240" muted loop controls>
-                    <source src={videotutorial} type="video/mp4" />
-                  </video>
+                  <div className="overflow-hidden rounded-lg mx-auto block w-fit">
+                    <video width="500" height="240" muted loop controls>
+                      <source src={videotutorial} type="video/mp4" />
+                    </video>
+                  </div>
+
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
+                  >
+                    ✕
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
-                >
-                  ✕
-                </button>
               </div>
-            </div>
-          )}
+            )}
 
+            <button
+              onClick={() => handleShare()}
+              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+            >
+              <Share2 size={16} />
+              Share
+            </button>
+          </div>
           <button
-            onClick={() => handleShare()}
-            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+            onClick={() => setShowRatingModal(true)}
+            className="border border-primary bg-primary text-white ml-auto px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors w-fit"
           >
-            <Share2 size={16} />
-            Share
+            ⭐ Rate Me
           </button>
         </div>
       </div>
@@ -1212,6 +1222,13 @@ const IqEducators = () => {
         close={() => setIsVolumeOpen(false)}
         slides={[{ src: InfoImage }]}
       />
+      {showRatingModal && (
+        <RatingModal
+          showRatingModal={showRatingModal}
+          setShowRatingModal={setShowRatingModal}
+          educatorId={id}
+        />
+      )}
     </div>
   );
 };
