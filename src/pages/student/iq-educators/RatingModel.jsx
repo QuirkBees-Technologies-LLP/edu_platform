@@ -1,7 +1,7 @@
 import React from "react";
 import { Star, X } from "lucide-react";
 import { useFormik } from "formik";
-import * as Yup from "Yup";
+import * as Yup from "yup";
 import { useRateEducatorMutation } from "../../../store/api/admin/adminRatingApiSlice";
 import { toast } from "sonner";
 
