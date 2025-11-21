@@ -52,27 +52,27 @@ export default function RatingModal({
         onClick={() => setShowRatingModal(false)}
       >
         <div
-          className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 relative"
+          className="w-full max-w-md bg-white dark:bg-gray-200 rounded-2xl shadow-xl p-6 relative max-w-6xl mx-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button
             onClick={() => setShowRatingModal(false)}
-            className="absolute top-3 right-3 text-gray-700 dark:text-gray-300 hover:text-black"
+            className="absolute top-5 right-5 text-gray-700 dark:text-gray-900 hover:text-black"
           >
             ✕
           </button>
 
-          <h2 className="text-xl font-bold text-center mb-4 mt-4 text-gray-800 dark:text-gray-100">
+          <h2 className="text-xl font-bold text-center mb-4 mt-6 text-gray-800 dark:text-gray-900">
             Your opinion matters to us!
           </h2>
 
-          <p className="text-center text-gray-600 dark:text-gray-300 mb-4 font-medium">
+          <p className="text-center text-gray-600 dark:text-gray-800 mb-6 font-medium">
             How would you rate this educator?
           </p>
 
           {/* STAR RATING */}
-          <div className="flex justify-center gap-4 mb-4">
+          <div className="flex justify-center gap-4 mb-5">
             {[1, 2, 3, 4, 5].map((star) => (
               <div
                 key={star}
@@ -83,7 +83,7 @@ export default function RatingModal({
                   height="36"
                   viewBox="0 0 24 24"
                   fill={star <= formik.values.rating ? "#FDB344" : "none"}
-                  stroke={star <= formik.values.rating ? "none" : "#0ea5e9"}
+                  stroke={star <= formik.values.rating ? "none" : "#FDB344"}
                   strokeWidth="2"
                   className="cursor-pointer transition-all "
                 >
@@ -102,7 +102,7 @@ export default function RatingModal({
 
           {/* Rating Label */}
           {formik.values.rating > 0 && (
-            <p className="text-center text-sm font-semibold mb-4 text-[#0ea5e9]">
+            <p className="text-center text-sm font-semibold mb-6 text-[#FDB344]">
               {ratings[formik.values.rating - 1]}
             </p>
           )}
@@ -112,7 +112,7 @@ export default function RatingModal({
             <textarea
               placeholder="Leave a message, if you want"
               rows="3"
-              className={`w-full p-3 rounded-lg border dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400 dark:bg-gray-700 dark:text-gray-200 ${
+              className={`w-full p-3 rounded-lg border dark:border-gray-200 focus:outline-none bg-gray-100 dark:bg-gray-100 dark:text-gray-800 ${
                 formik.errors.feedback && formik.touched.feedback
                   ? "border border-red-500"
                   : ""
@@ -141,7 +141,7 @@ export default function RatingModal({
 
           <button
             onClick={() => setShowRatingModal(false)}
-            className="w-full mt-3 text-gray-500 dark:text-gray-300 text-sm hover:text-gray-700 dark:hover:text-gray-100"
+            className="w-full mt-3 text-gray-500 dark:text-gray-800 text-sm hover:text-gray-700 dark:hover:text-gray-700"
           >
             Maybe later
           </button>

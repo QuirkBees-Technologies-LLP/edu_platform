@@ -148,6 +148,7 @@ import Package from "../pages/admin/admin-package/Package";
 import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
 import Admin from "../pages/superAdmin/admin/Admin";
 import Task from "../pages/admin/task-management/Task";
+import EducatorRatings from "../pages/admin/rating/EducatorRatings";
 
 const routes = {
   student: [
@@ -235,6 +236,7 @@ const routes = {
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/ticket", element: <Task /> },
+    { path: "/admin/rating", element: <EducatorRatings /> },
     // { path: "/admin/logs", element: <AdminLogs /> },
   ],
   super_admin: [
