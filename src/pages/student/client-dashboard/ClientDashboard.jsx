@@ -1005,17 +1005,16 @@ const ClientDashboard = () => {
             <div className="mb-8">
               <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
                 <div
-                  className="absolute inset-0 bg-cover bg-left bg-no-repeat opacity-60"
+                  className="absolute inset-0 bg-cover bg-left bg-no-repeat "
                   style={{
-                    backgroundImage:
-                      "url('/media/images/2600x1600/dashboard_banner.jpg')",
+                    backgroundImage: "url('/media/images/1400x400 banner.jpg')",
                   }}
                 ></div>
                 <div className="relative h-full flex items-center justify-between flex-col lg:flex-row p-8">
                   {/* Left Side - Hero Content */}
                   <div className="flex-1 max-w-2xl">
                     <h1 className="text-2xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent text-center">
-                      RISE ABOVE ORDINARY
+                      {/* RISE ABOVE ORDINARY */}
                     </h1>
                   </div>
 
@@ -1171,7 +1170,7 @@ const ClientDashboard = () => {
                       </div>
                       <div className="w-full md:w-72 relative overflow-hidden">
                         <img
-                          src="/media/images/2600x1600/banner_1.jpg"
+                          src="/media/images/academy_300x300.jpg"
                           alt="Academy"
                           className="w-full h-full object-cover"
                         />
@@ -1227,14 +1226,14 @@ const ClientDashboard = () => {
                   >
                     <div className=" relative overflow-hidden">
                       <img
-                        src="/media/images/2600x1600/banner_2.jpg"
+                        src="/media/images/livestream_400x300.jpg"
                         alt="IQ Live"
                         className="w-full h-52 object-cover"
                       />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-red-600/20 text-red-100 text-xs rounded-full flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></span>
+                        <span className="px-2 py-1 bg-red-300 text-dark text-xs rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
                           Live
                         </span>
                       </div>
@@ -1268,13 +1267,13 @@ const ClientDashboard = () => {
                   >
                     <div className="relative overflow-hidden">
                       <img
-                        src="/media/images/2600x1600/banner_3.jpg"
+                        src="/media/images/iqcharts_400x300.jpg"
                         alt="IQ Strategies"
                         className="w-full h-52 object-cover"
                       />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-blue-600/20 text-blue-100 text-xs rounded-full">
+                        <span className="px-2 py-1 bg-blue-800/20 text-blue-100 text-xs rounded-full">
                           Advanced
                         </span>
                       </div>
@@ -1308,13 +1307,13 @@ const ClientDashboard = () => {
                   >
                     <div className="relative overflow-hidden">
                       <img
-                        src="/media/images/2600x1600/fast_start.jpg"
+                        src="/media/images/iqsocial_400x300.jpg"
                         alt="IQ Social"
                         className="w-full h-52 object-cover"
                       />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-purple-600/20 text-black text-xs rounded-full">
+                        <span className="px-2 py-1 bg-purple-500 text-white text-xs rounded-full">
                           Community
                         </span>
                       </div>
@@ -1500,7 +1499,12 @@ const ClientDashboard = () => {
                   <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-purple-500/20 p-3 hover:border-purple-500/40 transition">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-white" />
+                        {/* <Sparkles className="w-4 h-4 text-white" /> */}
+                        <img
+                          src="/media/images/IQsocial_icon.svg"
+                          alt="IQ Social"
+                          className=" w-8 h-8"
+                        />
                       </div>
                       <div>
                         <p className="text-sm dark:text-white font-medium">
@@ -1543,7 +1547,11 @@ const ClientDashboard = () => {
                   <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-blue-500/20 p-3 hover:border-blue-500/40 transition">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                        <Activity className="w-4 h-4 text-white" />
+                        <img
+                          src="/media/images/IQsync_icon.svg"
+                          alt="IQ Sync"
+                          className=" w-8 h-8"
+                        />
                       </div>
                       <div>
                         <p className="text-sm dark:text-white font-medium">
