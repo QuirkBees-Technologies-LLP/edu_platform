@@ -1,6 +1,7 @@
 import React from "react";
+import { Star, X } from "lucide-react";
 import { useFormik } from "formik";
-import * as Yup from "yup";
+import * as Yup from "Yup";
 import { useRateEducatorMutation } from "../../../store/api/admin/adminRatingApiSlice";
 import { toast } from "sonner";
 
@@ -11,13 +12,13 @@ export default function RatingModal({
 }) {
   const ratings = ["AWFUL", "BAD", "OKAY", "GOOD", "BRILLIANT"];
 
-  console.log(educatorId, "educatorId" || "No educator ID found");
-
   const [rateEducator, { isLoading }] = useRateEducatorMutation();
 
   const validationSchema = Yup.object().shape({
     rating: Yup.number().min(1, "Please select a rating").required(),
-    feedback: Yup.string().max(500),
+    feedback: Yup.string()
+      .max(500, "Feedback must be less than 500 characters")
+      .optional(),
   });
 
   const formik = useFormik({
@@ -35,8 +36,8 @@ export default function RatingModal({
 
         await rateEducator(payload).unwrap();
 
-        formik.resetForm();
         toast.success("Rating submitted successfully!");
+        formik.resetForm();
         setShowRatingModal(false);
       } catch (err) {
         console.error("Rating submit failed:", err);
@@ -45,107 +46,89 @@ export default function RatingModal({
     },
   });
 
+  if (!showRatingModal) return null;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 p-8">
+    <div
+      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+      onClick={() => setShowRatingModal(false)}
+    >
       <div
-        className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-        onClick={() => setShowRatingModal(false)}
+        className="bg-white dark:bg-gray-200 rounded-xl shadow-lg w-full max-w-lg p-6 relative"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className="w-full max-w-md bg-white dark:bg-gray-200 rounded-2xl shadow-xl p-6 relative max-w-6xl mx-auto"
-          onClick={(e) => e.stopPropagation()}
+        <button
+          onClick={() => setShowRatingModal(false)}
+          className="absolute top-4 right-4 text-gray-700 hover:text-black"
         >
-          {/* Close Button */}
-          <button
-            onClick={() => setShowRatingModal(false)}
-            className="absolute top-5 right-5 text-gray-700 dark:text-gray-900 hover:text-black"
-          >
-            ✕
-          </button>
+          <X className="w-5 h-5" />
+        </button>
 
-          <h2 className="text-xl font-bold text-center mb-4 mt-6 text-gray-800 dark:text-gray-900">
-            Your opinion matters to us!
-          </h2>
+        <h2 className="text-xl font-bold text-gray-900 text-center mb-2">
+          Your opinion matters to us!
+        </h2>
+        <p className="text-center text-gray-600 mb-5">
+          How would you rate this educator?
+        </p>
 
-          <p className="text-center text-gray-600 dark:text-gray-800 mb-6 font-medium">
-            How would you rate this educator?
-          </p>
-
-          {/* STAR RATING */}
-          <div className="flex justify-center gap-4 mb-5">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <div
-                key={star}
-                onClick={() => formik.setFieldValue("rating", star)}
-              >
-                <svg
-                  width="36"
-                  height="36"
-                  viewBox="0 0 24 24"
-                  fill={star <= formik.values.rating ? "#FDB344" : "none"}
-                  stroke={star <= formik.values.rating ? "none" : "#FDB344"}
-                  strokeWidth="2"
-                  className="cursor-pointer transition-all "
-                >
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              </div>
-            ))}
-          </div>
-
-          {/* Validation Error */}
-          {formik.touched.rating && formik.errors.rating && (
-            <p className="text-red-500 text-xs text-center mb-3">
-              {formik.errors.rating}
-            </p>
-          )}
-
-          {/* Rating Label */}
-          {formik.values.rating > 0 && (
-            <p className="text-center text-sm font-semibold mb-6 text-[#FDB344]">
-              {ratings[formik.values.rating - 1]}
-            </p>
-          )}
-
-          {/* FEEDBACK INPUT */}
-          <div className="flex flex-col gap-1">
-            <textarea
-              placeholder="Leave a message, if you want"
-              rows="3"
-              className={`w-full p-3 rounded-lg border dark:border-gray-200 focus:outline-none bg-gray-100 dark:bg-gray-100 dark:text-gray-800 ${
-                formik.errors.feedback && formik.touched.feedback
-                  ? "border border-red-500"
-                  : ""
+        <div className="flex justify-center gap-3 mb-4">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`w-8 h-8 cursor-pointer transition-all ${
+                star <= formik.values.rating
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-gray-300"
               }`}
-              {...formik.getFieldProps("feedback")}
+              onClick={() => formik.setFieldValue("rating", star)}
             />
-            {formik.touched.feedback && formik.errors.feedback && (
-              <span className="text-red-500 text-xs">
-                {formik.errors.feedback}
-              </span>
-            )}
-          </div>
-
-          {/* SUBMIT BUTTON */}
-          <button
-            onClick={formik.handleSubmit}
-            disabled={formik.values.rating < 1 || isLoading}
-            className={`w-full py-3 rounded-lg text-white font-semibold mt-4 transition-all ${
-              formik.values.rating < 1
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary hover:bg-primary/90"
-            }`}
-          >
-            {isLoading ? "Submitting..." : "Rate Now"}
-          </button>
-
-          <button
-            onClick={() => setShowRatingModal(false)}
-            className="w-full mt-3 text-gray-500 dark:text-gray-800 text-sm hover:text-gray-700 dark:hover:text-gray-700"
-          >
-            Maybe later
-          </button>
+          ))}
         </div>
+
+        {formik.touched.rating && formik.errors.rating && (
+          <p className="text-center text-red-500 text-sm mb-2">
+            {formik.errors.rating}
+          </p>
+        )}
+
+        {formik.values.rating > 0 && (
+          <p className="text-center text-yellow-500 font-semibold mb-4">
+            {ratings[formik.values.rating - 1]}
+          </p>
+        )}
+
+        <textarea
+          placeholder="Write your feedback (optional)"
+          rows="4"
+          className={`w-full p-3 rounded-lg border bg-gray-100 dark:bg-gray-100 dark:text-gray-800 focus:outline-none ${
+            formik.errors.feedback &&
+            formik.touched.feedback &&
+            "border-red-500"
+          }`}
+          {...formik.getFieldProps("feedback")}
+        />
+        {formik.touched.feedback && formik.errors.feedback && (
+          <p className="text-red-500 text-xs mt-1">{formik.errors.feedback}</p>
+        )}
+
+        <button
+          onClick={formik.handleSubmit}
+          disabled={formik.values.rating < 1 || isLoading}
+          className={`w-full mt-5 py-3 rounded-lg text-white font-semibold transition-all ${
+            formik.values.rating < 1
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-purple-600 hover:bg-purple-700"
+          }`}
+        >
+          {isLoading ? "Submitting..." : "Rate Now"}
+        </button>
+
+        <button
+          onClick={() => setShowRatingModal(false)}
+          className="w-full mt-3 text-gray-500 hover:text-gray-700 text-sm"
+        >
+          Maybe later
+        </button>
       </div>
     </div>
   );

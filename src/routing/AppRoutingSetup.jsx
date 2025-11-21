@@ -148,7 +148,9 @@ import Package from "../pages/admin/admin-package/Package";
 import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
 import Admin from "../pages/superAdmin/admin/Admin";
 import Task from "../pages/admin/task-management/Task";
-import EducatorRatings from "../pages/admin/rating/EducatorRatings";
+import AdminRating from "../pages/admin/admin-educator-rating/AdminRating";
+import EducatorRating from "../pages/educator/educator-rating/EducatoRating";
+import AdminEducatorRatings from "../pages/admin/admin-educator-rating/AdminEducatorRatings";
 
 const routes = {
   student: [
@@ -213,6 +215,7 @@ const routes = {
       path: "/educator/iq-social",
       element: <EducatorCommunityFeed />,
     },
+    { path: "/educator/rating", element: <EducatorRating /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
@@ -236,8 +239,12 @@ const routes = {
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/ticket", element: <Task /> },
-    { path: "/admin/rating", element: <EducatorRatings /> },
     // { path: "/admin/logs", element: <AdminLogs /> },
+    { path: "/admin/educator-rating", element: <AdminRating /> },
+    {
+      path: "/admin/educator-rating/:educatorId",
+      element: <AdminEducatorRatings />,
+    },
   ],
   super_admin: [
     { path: "/", element: <DefaultPage /> },
@@ -263,6 +270,11 @@ const routes = {
     { path: "/admin/logs", element: <AdminLogs /> },
     { path: "/member", element: <Admin /> },
     { path: "/admin/ticket", element: <Task /> },
+    { path: "/admin/educator-rating", element: <AdminRating /> },
+    {
+      path: "/admin/educator-rating/:educatorId",
+      element: <AdminEducatorRatings />,
+    },
   ],
   marketer: [
     { path: "/", element: <DefaultPage /> },
