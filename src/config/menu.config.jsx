@@ -19,6 +19,7 @@ import {
   Package,
   UserRoundCog,
   ListTodo,
+  Star,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1446,6 +1447,11 @@ export const sideMenus = {
       icon: <ListTodo />,
       path: "/admin/ticket",
     },
+    {
+      title: "Educator Ratings",
+      icon: <Star />,
+      path: "/admin/educator-rating",
+    },
   ],
   admin: [
     {
@@ -1553,8 +1559,13 @@ export const sideMenus = {
     },
     {
       title: "Tickets",
-      icon: <ListTodo/>,
+      icon: <ListTodo />,
       path: "/admin/ticket",
+    },
+    {
+      title: "Educator Ratings",
+      icon: <Star />,
+      path: "/admin/educator-rating",
     },
   ],
   marketer: [
@@ -1738,6 +1749,11 @@ export const sideMenus = {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/educator/iq-social",
+    },
+    {
+      title: "Educator Ratings",
+      icon: <Star />,
+      path: "/educator/rating",
     },
     // {
     //   title: 'Video Library',

@@ -17,12 +17,19 @@ export const ratingApiSlice = createApi({
 
     getEducatorsRatings: builder.query({
       query: ({ page = 1, limit = 10, search = "", sort = "-avgRating" }) =>
-        `/rating/admin/rating/list?page=${page}&limit=${limit}&search=${search}&sort=${sort}`,
+        `/admin/rating/list?page=${page}&limit=${limit}&search=${search}&sort=${sort}`,
       providesTags: ["EducatorRatings"],
     }),
     getMyRatings: builder.query({
-      query: ({ page = 1, limit = 10, search = "", sort = "-createdAt" }) =>
-        `/rating/educator/rating?page=${page}&limit=${limit}&search=${search}&sort=${sort}`,
+      query: ({
+        educatorId,
+        page = 1,
+        limit = 10,
+        search = "",
+        sort = "-createdAt",
+      }) =>
+        `/educator/rating?page=${page}&limit=${limit}&search=${search}&sort=${sort}&educatorId=${educatorId}`,
+
       providesTags: ["Rating"],
     }),
   }),
@@ -32,4 +39,5 @@ export const {
   useRateEducatorMutation,
   useGetEducatorsRatingsQuery,
   useGetMyRatingsQuery,
+  useLazyGetEducatorsRatingsQuery,
 } = ratingApiSlice;

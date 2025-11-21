@@ -139,7 +139,7 @@ const CreateEducator = forwardRef(
         .min(30, "Bio must be at least 30 characters")
         .max(120, "Bio cannot exceed 120 characters"),
       description: Yup.string()
-        .required("Educator description is required")
+        .required("Educator long bio is required")
         .min(10, "Bio must be at least 30 characters")
         .max(500, "Bio cannot exceed 120 characters"),
       status: Yup.boolean().required("Status is required"),
@@ -714,7 +714,7 @@ const CreateEducator = forwardRef(
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Description<span className="text-danger">*</span>
+                    Long Bio<span className="text-danger">*</span>
                   </label>
                   <RichTextEditor
                     content={formik.values.description}
