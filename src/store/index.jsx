@@ -37,6 +37,7 @@ import { clientSocialApiSlice } from "./api/client/clientSocialApiSlilce";
 import { adminPackageApiSlice } from "./api/admin/adminPackageApiSlice";
 import { superAdminApiSlice } from "./api/admin/superAdminApiSlice";
 import { adminTaskManagementApiSlice } from "./api/admin/adminTaskManagementApiSlice";
+import { ratingApiSlice } from "./api/admin/adminRatingApiSlice";
 
 const languagePersistConfig = {
   key: "language",
@@ -98,6 +99,7 @@ export const store = configureStore({
     [superAdminApiSlice.reducerPath]: superAdminApiSlice.reducer,
     [adminTaskManagementApiSlice.reducerPath]:
       adminTaskManagementApiSlice.reducer,
+    [ratingApiSlice.reducerPath]: ratingApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -130,7 +132,8 @@ export const store = configureStore({
       clientSocialApiSlice.middleware,
       adminPackageApiSlice.middleware,
       superAdminApiSlice.middleware,
-      adminTaskManagementApiSlice.middleware
+      adminTaskManagementApiSlice.middleware,
+      ratingApiSlice.middleware
     ),
 });
 

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { KeenIcon } from "@/components/keenicons";
+import { useLocation } from "react-router-dom";
+
 import { toAbsoluteUrl } from "@/utils";
 import { Menu, MenuItem, MenuToggle } from "@/components";
 import { DropdownUser } from "@/partials/dropdowns/user";
@@ -28,11 +30,31 @@ import {
 import { useGetLanguageQuery } from "../../../store/api/client/clientLanguageApiSlice";
 
 const HeaderTopbar = () => {
+  const STUDENT_ALLOWED_ROUTES = [
+    "/fast-start-training",
+    "/iq-vault",
+    "/iq-academy",
+    "/iq-academy-educators",
+  ];
+  const location = useLocation();
   const { isRTL } = useLanguage();
   const itemChatRef = useRef(null);
   const itemAppsRef = useRef(null);
   const itemUserRef = useRef(null);
   const { auth } = useAuthContext();
+
+  const user = auth?.user;
+  const role = user?.role;
+  const planRoutes = user?.plan?.allowedSideBar || [];
+
+  const allowedRoutes =
+    role === "student"
+      ? planRoutes.filter((r) => STUDENT_ALLOWED_ROUTES.includes(r))
+      : planRoutes;
+
+  const showLanguageSelector =
+    role !== "student" || allowedRoutes.includes(location.pathname);
+
   const profilePhoto = auth?.user?.image;
   const itemNotificationsRef = useRef(null);
   const handleShow = () => {
@@ -160,8 +182,9 @@ const HeaderTopbar = () => {
             })}
           </MenuItem>
         </Menu>
-        <div className="relative sm:w-56 language_select">
-          {/* <button
+        {showLanguageSelector && (
+          <div className="relative sm:w-56 language_select">
+            {/* <button
         onClick={() => setOpen(!open)}
         className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white dark:bg-gray-100 text-gray-600 shadow-sm hover:border-gray-400 transition"
       >
@@ -193,29 +216,30 @@ const HeaderTopbar = () => {
           ))}
         </ul>
       )} */}
-          <Select
-            value={selectedLanguage}
-            onValueChange={(value) => dispatch(setSelectedLanguage(value))}
-            className={`form-control input input-md w-full`}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.isArray(languages) && languages.length > 0 ? (
-                languages?.map((item) => (
-                  <SelectItem key={item._id} value={item.name}>
-                    {item.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">
-                  No options available
-                </div>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
+            <Select
+              value={selectedLanguage}
+              onValueChange={(value) => dispatch(setSelectedLanguage(value))}
+              className={`form-control input input-md w-full`}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.isArray(languages) && languages.length > 0 ? (
+                  languages?.map((item) => (
+                    <SelectItem key={item._id} value={item.name}>
+                      {item.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-sm text-gray-500">
+                    No options available
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <Menu>
           <MenuItem
             ref={itemUserRef}

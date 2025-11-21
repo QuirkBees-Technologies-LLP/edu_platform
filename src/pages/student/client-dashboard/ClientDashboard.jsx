@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { ChevronLeft } from "lucide-react";
+import { FaGooglePlay, FaAppStoreIos } from "react-icons/fa";
 import {
   BookOpen,
   ChevronRight,
@@ -40,6 +42,7 @@ const ClientDashboard = () => {
     thumbnail: "/api/placeholder/400/400",
   };
   const { auth } = useAuthContext();
+  const swiperRef = React.useRef(null);
 
   const allowedRoutes = auth?.user?.plan?.allowedSideBar;
 
@@ -569,7 +572,7 @@ const ClientDashboard = () => {
       </div> */}
       <div className="min-h-screen">
         {/* Add Tailwind CSS via CDN */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
           {/* Beta Invite Banners */}
           {/* <div className="space-y-3 mb-6"> */}
           {/* IQ Social Beta */}
@@ -997,24 +1000,21 @@ const ClientDashboard = () => {
                                       radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
                                       radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)`
           }}></div> */}
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="relative">
             {/* Hero Section with Live Session */}
             <div className="mb-8">
               <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
-                <div className="absolute inset-0">
-                  <img
-                    src="/media/images/2600x1600/dashboard_banner.jpg"
-                    alt="Hero"
-                    className="w-full h-full object-cover opacity-60"
-                  />
-                  {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div> */}
-                </div>
-
-                <div className="relative h-full flex items-center justify-between p-8">
+                <div
+                  className="absolute inset-0 bg-cover bg-left bg-no-repeat "
+                  style={{
+                    backgroundImage: "url('/media/images/1400x400 banner.jpg')",
+                  }}
+                ></div>
+                <div className="relative h-full flex items-center justify-between flex-col lg:flex-row p-8">
                   {/* Left Side - Hero Content */}
                   <div className="flex-1 max-w-2xl">
-                    <h1 className="text-3xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">
-                      RISE ABOVE ORDINARY
+                    <h1 className="text-2xl xl:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent text-center">
+                      {/* RISE ABOVE ORDINARY */}
                     </h1>
                   </div>
 
@@ -1048,65 +1048,80 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                   </div> */}
-                  <div className="hidden lg:block">
+                  <div className="">
                     {educatorsLoading ? (
-                      <div className="flex justify-center py-10">
+                      <div className="relative w-80">
                         <Loader />
                       </div>
                     ) : liveStreams.length > 0 ? (
-                      <Swiper
-                        modules={[Pagination, Autoplay]}
-                        spaceBetween={20}
-                        slidesPerView={1}
-                        pagination={{ clickable: true }}
-                        autoplay={{ delay: 3000 }}
-                        className="w-80 h-64"
-                      >
-                        {liveStreams.map((slide, index) => (
-                          <SwiperSlide key={index}>
-                            <div className="relative w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
-                              {/* IMAGE */}
-                              <img
-                                src={slide?.educator?.image}
-                                alt={slide?.educator?.first_name}
-                                className="w-full h-full object-cover"
-                              />
+                      <div className="relative w-56 sm:w-80">
+                        {/* LEFT ARROW */}
+                        <button
+                          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-white/40 dark:bg-white/20 hover:bg-white text-gray-700 rounded-full p-1 shadow-md"
+                          onClick={() => swiperRef.current?.slidePrev()}
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
 
-                              {/* DARK OVERLAY */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                        {/* RIGHT ARROW */}
+                        <button
+                          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-white/40 hover:bg-white dark:bg-white/20 text-gray-700 rounded-full p-1 shadow-md"
+                          onClick={() => swiperRef.current?.slideNext()}
+                        >
+                          <ChevronRight size={20} />
+                        </button>
 
-                              {/* BOTTOM TEXT */}
-                              <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-                                <p className="text-xs text-gray-300 mb-1">
-                                  Trading Live
-                                </p>
+                        <Swiper
+                          modules={[Pagination, Autoplay]}
+                          spaceBetween={20}
+                          slidesPerView={1}
+                          pagination={{ clickable: true }}
+                          autoplay={{ delay: 3000 }}
+                          onSwiper={(swiper) => (swiperRef.current = swiper)}
+                          className="w-56 sm:w-80 h-64 rounded-xl overflow-hidden"
+                        >
+                          {liveStreams.map((slide, index) => (
+                            <SwiperSlide key={index}>
+                              <div className="relative w-56 sm:w-80 h-64 rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+                                <img
+                                  src={slide?.educator?.image}
+                                  alt={slide?.educator?.first_name}
+                                  className="w-full h-full object-cover"
+                                />
 
-                                <h3 className="text-white font-bold mb-1">
-                                  {slide?.educator?.first_name}{" "}
-                                  {slide?.educator?.last_name}
-                                </h3>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
-                                <p className="text-xs text-gray-400">
-                                  {slide?.title || "Live market session"}
-                                </p>
+                                <div className="absolute bottom-0 left-0 right-0 p-4">
+                                  <p className="text-xs text-gray-300 dark:text-gray-900 mb-1">
+                                    Trading Live
+                                  </p>
+
+                                  <h3 className="text-white  font-bold mb-1">
+                                    {slide?.educator?.first_name}{" "}
+                                    {slide?.educator?.last_name}
+                                  </h3>
+
+                                  <p className="text-xs text-gray-400 dark:text-gray-600 pb-2">
+                                    {slide?.title || "Live market session"}
+                                  </p>
+                                </div>
+
+                                <div className="absolute inset-0 flex m-5 items-end justify-end">
+                                  <Link
+                                    to={`/iq-educators/${slide?.educator?._id}`}
+                                    className="w-12 h-12 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition"
+                                  >
+                                    <Play
+                                      className="w-6 h-6 text-white ml-1"
+                                      fill="white"
+                                    />
+                                  </Link>
+                                </div>
                               </div>
-
-                              {/* PLAY / WATCH LIVE */}
-                              <div className="absolute inset-0 flex m-5 items-end justify-end pointer-events-auto">
-                                <Link
-                                  to={`/iq-educators/${slide?.educator?._id}`}
-                                  className="w-12 h-12  backdrop-blur rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition"
-                                >
-                                  <Play
-                                    className="w-6 h-6 text-white ml-1"
-                                    fill="white"
-                                  />
-                                </Link>
-                              </div>
-                            </div>
-                          </SwiperSlide>
-                        ))}
-                      </Swiper>
+                            </SwiperSlide>
+                          ))}
+                        </Swiper>
+                      </div>
                     ) : (
                       <div className="flex items-center justify-center w-80 h-64">
                         <p className="text-white">No Live Educators</p>
@@ -1155,7 +1170,7 @@ const ClientDashboard = () => {
                       </div>
                       <div className="w-full md:w-72 relative overflow-hidden">
                         <img
-                          src="/media/images/2600x1600/banner_1.jpg"
+                          src="/media/images/academy_300x300.jpg"
                           alt="Academy"
                           className="w-full h-full object-cover"
                         />
@@ -1211,14 +1226,14 @@ const ClientDashboard = () => {
                   >
                     <div className=" relative overflow-hidden">
                       <img
-                        src="/media/images/2600x1600/banner_2.jpg"
+                        src="/media/images/livestream_400x300.jpg"
                         alt="IQ Live"
                         className="w-full h-52 object-cover"
                       />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-red-600/20 text-red-100 text-xs rounded-full flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></span>
+                        <span className="px-2 py-1 bg-red-300 text-dark text-xs rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
                           Live
                         </span>
                       </div>
@@ -1252,13 +1267,13 @@ const ClientDashboard = () => {
                   >
                     <div className="relative overflow-hidden">
                       <img
-                        src="/media/images/2600x1600/banner_3.jpg"
+                        src="/media/images/iqcharts_400x300.jpg"
                         alt="IQ Strategies"
                         className="w-full h-52 object-cover"
                       />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-blue-600/20 text-blue-100 text-xs rounded-full">
+                        <span className="px-2 py-1 bg-blue-800/20 text-blue-100 text-xs rounded-full">
                           Advanced
                         </span>
                       </div>
@@ -1292,13 +1307,13 @@ const ClientDashboard = () => {
                   >
                     <div className="relative overflow-hidden">
                       <img
-                        src="/media/images/2600x1600/fast_start.jpg"
+                        src="/media/images/iqsocial_400x300.jpg"
                         alt="IQ Social"
                         className="w-full h-52 object-cover"
                       />
                       {/* <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div> */}
                       <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-purple-600/20 text-black text-xs rounded-full">
+                        <span className="px-2 py-1 bg-purple-500 text-white text-xs rounded-full">
                           Community
                         </span>
                       </div>
@@ -1325,7 +1340,7 @@ const ClientDashboard = () => {
               <div className="lg:col-span-2">
                 <div className="card rounded-2xl border p-6 h-full shadow-md">
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
                     <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
                       <Activity className="w-5 h-5 text-purple-400" />
                       Live Activity Feed
@@ -1484,7 +1499,12 @@ const ClientDashboard = () => {
                   <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-purple-500/20 p-3 hover:border-purple-500/40 transition">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-white" />
+                        {/* <Sparkles className="w-4 h-4 text-white" /> */}
+                        <img
+                          src="/media/images/IQsocial_icon.svg"
+                          alt="IQ Social"
+                          className=" w-8 h-8"
+                        />
                       </div>
                       <div>
                         <p className="text-sm dark:text-white font-medium">
@@ -1495,25 +1515,43 @@ const ClientDashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={() =>
-                        window.open(
-                          "https://play.google.com/store/apps/details?id=com.eductionplatform&pcampaignid=web_share",
-                          "_blank"
-                        )
-                      }
-                      className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download Now
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() =>
+                          window.open(
+                            "https://play.google.com/store/apps/details?id=com.eductionplatform&pcampaignid=web_share",
+                            "_blank"
+                          )
+                        }
+                        className="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
+                      >
+                        <FaGooglePlay className="w-4 h-4" b />
+                        Download Now
+                      </button>
+                      <button
+                        onClick={() =>
+                          window.open(
+                            "https://testflight.apple.com/join/qynfgnna",
+                            "_blank"
+                          )
+                        }
+                        className="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
+                      >
+                        <FaAppStoreIos className="w-4 h-4" />
+                        Download Now
+                      </button>
+                    </div>
                   </div>
 
                   {/* IQ Sync App */}
                   <div className="bg-gray-900/50 backdrop-blur-xl rounded-xl border border-blue-500/20 p-3 hover:border-blue-500/40 transition">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                        <Activity className="w-4 h-4 text-white" />
+                        <img
+                          src="/media/images/IQsync_icon.svg"
+                          alt="IQ Sync"
+                          className=" w-8 h-8"
+                        />
                       </div>
                       <div>
                         <p className="text-sm dark:text-white font-medium">

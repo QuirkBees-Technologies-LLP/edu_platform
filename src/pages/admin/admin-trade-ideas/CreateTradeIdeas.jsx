@@ -214,7 +214,7 @@ const CreateTradeIdeas = forwardRef(
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Symbol<span className="text-danger">*</span>
@@ -237,7 +237,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Direction <span className="text-danger">*</span>
@@ -274,7 +274,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Description<span className="text-danger">*</span>
@@ -297,7 +297,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Type <span className="text-danger">*</span>
@@ -335,7 +335,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Status <span className="text-danger">*</span>
@@ -376,7 +376,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Entry <span className="text-danger">*</span>
@@ -399,7 +399,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Invalidation <span className="text-danger">*</span>
@@ -423,7 +423,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Exits <span className="text-danger">*</span>
@@ -476,7 +476,7 @@ const CreateTradeIdeas = forwardRef(
                   ))}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Category <span className="text-danger">*</span>

@@ -53,6 +53,7 @@ const CreateTradeIdeas = forwardRef(
       exits: [""],
       description: "",
       category: "",
+      pips: "",
     };
 
     const createSchema = Yup.object().shape({
@@ -78,6 +79,7 @@ const CreateTradeIdeas = forwardRef(
         )
         .min(1, "At least one exit is required"),
       category: Yup.string().required("Category is required"),
+      pips: Yup.number().optional(),
     });
 
     const formik = useFormik({
@@ -97,6 +99,7 @@ const CreateTradeIdeas = forwardRef(
           formData.append("files", file?.file?.file)
         );
         formData.append("type", values.type);
+        formData.append("pips", values.pips);
         formData.append("timeFrame[]", [values.timeFrame]);
         formData.append("educatorId", values.educatorId);
         formData.append("status", values.status);
@@ -157,6 +160,7 @@ const CreateTradeIdeas = forwardRef(
           invalidation: selectedRow?.invalidation,
           description: selectedRow?.description,
           exits: selectedRow?.exits,
+          pips: selectedRow?.pips,
         };
         formik.setValues(initData);
       }
@@ -225,7 +229,7 @@ const CreateTradeIdeas = forwardRef(
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">
               <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Symbol<span className="text-danger">*</span>
@@ -248,7 +252,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Direction <span className="text-danger">*</span>
@@ -285,7 +289,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Description<span className="text-danger">*</span>
@@ -311,7 +315,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Type <span className="text-danger">*</span>
@@ -348,7 +352,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Status <span className="text-danger">*</span>
@@ -389,7 +393,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Entry <span className="text-danger">*</span>
@@ -412,7 +416,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Invalidation <span className="text-danger">*</span>
@@ -437,7 +441,7 @@ const CreateTradeIdeas = forwardRef(
                       )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Exits <span className="text-danger">*</span>
@@ -490,7 +494,7 @@ const CreateTradeIdeas = forwardRef(
                     ))}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Category <span className="text-danger">*</span>
@@ -546,6 +550,37 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div> */}
+
+                {["win", "loss", "partialWin"].includes(
+                  formik.values.status
+                ) && (
+                  <div className="col-span-12 md:col-span-6">
+                    <div className="flex flex-col gap-1">
+                      <label className="form-label text-gray-900 gap-1">
+                        Pips <span className="text-danger"></span>
+                      </label>
+
+                      <input
+                        type="number"
+                        placeholder="Enter Pips"
+                        autoComplete="off"
+                        className={`form-control input input-md w-full ${
+                          formik.errors.pips && formik.touched.pips
+                            ? "border border-danger"
+                            : ""
+                        }`}
+                        {...formik.getFieldProps("pips")}
+                      />
+
+                      {formik.touched.pips && formik.errors.pips && (
+                        <span role="alert" className="text-danger text-xs mt-1">
+                          {formik.errors.pips}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
                     {/* Upload Box - always shown */}

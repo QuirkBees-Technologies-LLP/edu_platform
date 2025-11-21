@@ -280,7 +280,7 @@ const EducatorRecordingSession = () => {
                   <div className="card">
                     {/* Image with Play Button */}
                     <div
-                      className="relative w-full h-52 rounded-2xl overflow-hidden"
+                      className="relative w-full h-52 rounded-t-2xl overflow-hidden"
                       onClick={() => setRecording(item)}
                     >
                       <RecordingThumbnail

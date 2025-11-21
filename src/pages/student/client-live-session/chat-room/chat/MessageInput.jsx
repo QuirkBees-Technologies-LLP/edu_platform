@@ -97,13 +97,11 @@ export const MessageInputUI = () => {
     >
       {/* INPUT CONTAINER */}
       <div
-        className={`input-ui-input ${giphyState ? "giphy" : ""}`}
+        className={`input-ui-input  dark:bg-gray-900 bg-gray-200 ${giphyState ? "giphy" : ""}`}
         style={{
           display: "flex",
           alignItems: "center",
           width: "100%",
-          background: "#fff",
-          border: "1px solid #ddd",
           borderRadius: "8px",
           padding: "6px 10px",
           boxSizing: "border-box",
@@ -187,7 +185,7 @@ export const MessageInputUI = () => {
         disabled={!text}
         onClick={handleSend}
         style={{
-          marginTop: 10,
+          marginTop: 12,
           alignSelf: "flex-end",
           background: "#4f46e5",
           color: "#fff",
@@ -200,7 +198,8 @@ export const MessageInputUI = () => {
           position: "absolute",
           right: "20px",
           zIndex: 1,
-          top: "3px",
+          top:"15px",
+          bottom: "20px",
           opacity: text ? 1 : 0.6,
         }}
       >

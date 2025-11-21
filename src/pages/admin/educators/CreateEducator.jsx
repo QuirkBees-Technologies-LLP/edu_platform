@@ -75,6 +75,7 @@ const CreateEducator = forwardRef(
       projectId: "",
       educatorRole: "",
       bio: "",
+      description: "",
     };
 
     const createSchema = Yup.object().shape({
@@ -134,9 +135,13 @@ const CreateEducator = forwardRef(
       role: Yup.string().required("Role is required"),
       educatorRole: Yup.string().required("Educator Speciality is required"),
       bio: Yup.string()
-        .required("Educator description is required")
+        .required("Educator bio is required")
         .min(30, "Bio must be at least 30 characters")
         .max(120, "Bio cannot exceed 120 characters"),
+      description: Yup.string()
+        .required("Educator description is required")
+        .min(10, "Bio must be at least 30 characters")
+        .max(500, "Bio cannot exceed 120 characters"),
       status: Yup.boolean().required("Status is required"),
       image: Yup.mixed().nullable(),
       icon: Yup.mixed().nullable(),
@@ -260,6 +265,7 @@ const CreateEducator = forwardRef(
           categories: selectedRow?.categories?.map((cat) => cat._id) || [],
           educatorRole: selectedRow?.educatorRole || "",
           bio: selectedRow?.bio || "",
+          description: selectedRow?.description || "",
         };
         formik.setValues(initData);
       }
@@ -288,7 +294,7 @@ const CreateEducator = forwardRef(
           </DialogHeader>
           <div className="grid gap-5 px-0 pb-5">
             <div className="grid grid-cols-12 gap-4">
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Profile Photo
@@ -319,7 +325,7 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Banner Photo
@@ -358,7 +364,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     First Name<span className="text-danger">*</span>
@@ -381,7 +387,7 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Last Name<span className="text-danger">*</span>
@@ -404,14 +410,14 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Educator Bio<span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter Discription"
+                    placeholder="Enter bio"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${
                       formik.errors.bio && formik.touched.bio
@@ -427,7 +433,7 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Educator Speciality <span className="text-danger">*</span>
@@ -452,7 +458,7 @@ const CreateEducator = forwardRef(
                     )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Email <span className="text-danger">*</span>
@@ -477,7 +483,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
               {!selectedRow?._id && (
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Password <span className="text-danger">*</span>
@@ -515,7 +521,7 @@ const CreateEducator = forwardRef(
                   </div>
                 </div>
               )}
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Status <span className="text-danger">*</span>
@@ -546,7 +552,7 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Can create a stream ?<span className="text-danger">*</span>
@@ -581,7 +587,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <label className="form-label text-gray-900">Can access </label>
                 <div className="flex items-center gap-6 mt-1">
                   <label className="flex items-center gap-2 text-gray-800">
@@ -608,7 +614,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     projectId <span className="text-danger">*</span>
@@ -633,7 +639,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Category<span className="text-danger">*</span>
@@ -700,6 +706,29 @@ const CreateEducator = forwardRef(
                   {formik.touched?.categories && formik.errors?.categories && (
                     <span role="alert" className="text-danger text-xs mt-1">
                       {formik.errors?.categories}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-span-12 md:col-span-6">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Description<span className="text-danger">*</span>
+                  </label>
+                  <RichTextEditor
+                    content={formik.values.description}
+                    onChange={(value) =>
+                      formik.setFieldValue("description", value)
+                    }
+                    onBlur={() => formik.setFieldTouched("description", false)}
+                    theme="snow"
+                    touched={formik.touched.description}
+                    error={formik.errors.description}
+                  />
+                  {formik.touched.description && formik.errors.description && (
+                    <span className="text-danger text-xs mt-1">
+                      {formik.errors.description}
                     </span>
                   )}
                 </div>

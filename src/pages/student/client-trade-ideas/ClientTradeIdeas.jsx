@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "../../../components/ui/breadcrumb";
 import { ArrowDown, ArrowUp, Container, Link2, Link2Icon } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import {
   Toolbar,
   ToolbarActions,
@@ -39,7 +40,134 @@ const statusColorMap = {
   loss: "red",
   breakEven: "gray",
 };
+// const TradeCard = ({ trade, ref }) => {
+//   const isWin = trade.status === "win";
+//   const isLoss = trade.status === "loss";
+//   const isActive = trade.status === "active";
 
+//   return (
+//     <div className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md">
+//       {/* Chart placeholder */}
+//       <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
+//         <img
+//           src="/media/images/2600x1600/banner_3.jpg"
+//           alt="Academy"
+//           className="w-full h-full object-cover"
+//         />
+
+//         {/* OVERLAY BLOCK */}
+//         <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
+//           <div className="flex items-center gap-3">
+//             <button
+//               className={`px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 ${
+//                 trade.type === "buy"
+//                   ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+//                   : "bg-red-500 hover:bg-red-600 text-white"
+//               }`}
+//             >
+//               {trade.type === "buy" ? (
+//                 <TrendingUp size={16} />
+//               ) : (
+//                 <TrendingDown size={16} />
+//               )}
+//               {trade.type.toUpperCase()}
+//             </button>
+
+//             <div className="bg-gray-800 px-4 py-2 rounded-lg font-semibold text-sm text-white">
+//               {trade.name}
+//             </div>
+//           </div>
+
+//           {isActive && (
+//             <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+//               <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+//               ACTIVE
+//             </div>
+//           )}
+
+//           {isWin && (
+//             <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+//               <span>★</span>
+//               WIN +{trade.pips} pips
+//             </div>
+//           )}
+
+//           {isLoss && (
+//             <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+//               <span>▲</span>
+//               LOSS {trade.pips} pips
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       <div className="p-6">
+//         {/* Trader Info */}
+//         <div className="flex items-center justify-between mb-6">
+//           <div className="flex items-center gap-3">
+//             <div
+//               className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
+//                 trade.avatarColor
+//               }`}
+//             >
+//               <img
+//                 className="w-12 h-12 rounded-full flex items-center justify-center"
+//                 src={`${trade?.educatorDetails?.image}`}
+//                 alt=""
+//               />
+//             </div>
+//             <div>
+//               <div className="dark:text-white font-semibold">
+//                 {trade?.educatorDetails?.first_name}{" "}
+//                 {trade?.educatorDetails?.last_name}
+//               </div>
+//               <div className="text-gray-600 text-sm">
+//                 {Array.isArray(trade?.educatorDetails?.categories) &&
+//                 trade?.educatorDetails?.categories?.length > 0
+//                   ? trade?.educatorDetails?.categories
+//                       .map((cat) => cat)
+//                       .join(", ")
+//                   : "-"}
+//               </div>
+//             </div>
+//           </div>
+//           <div className="text-gray-600 text-sm">
+//             {trade.createAt ? new Date(trade.createAt).getFullYear() : ""}
+//           </div>
+//         </div>
+
+//         {/* Trade Details */}
+//         <div className="space-y-3 mb-6">
+//           <div className="flex justify-between items-center">
+//             <span className="text-gray-800">Entry</span>
+//             <span className="text-white font-mono">{trade.entry}</span>
+//           </div>
+//           <div className="flex justify-between items-center">
+//             <span className="text-gray-800">Stop Loss</span>
+//             <span className="text-red-600 font-mono">{trade.invalidation}</span>
+//           </div>
+//           {["tp1", "tp2", "tp3"].map((tpField, idx) => {
+//             const tpValue = trade?.exits?.[idx] ?? "N/A";
+//             const fieldName = `TP ${idx + 1}`;
+
+//             return (
+//               <div className="flex justify-between items-center" key={tpField}>
+//                 <span className="text-gray-800">{fieldName}</span>
+//                 <span className="text-emerald-600 font-mono">{tpValue}</span>
+//               </div>
+//             );
+//           })}
+//         </div>
+
+//         {/* View Details Button */}
+//         <button className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+//           <Eye size={18} />
+//           View Details
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
 const ClientTradeIdeas = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -94,6 +222,18 @@ const ClientTradeIdeas = () => {
     setIsViewOpen(false);
   };
 
+  const statusPriority = {
+  pending: 1,
+  active: 2,
+  default: 3,
+};
+
+const sortedIdeas = [...tradeIdeas].sort((a, b) => {
+  const orderA = statusPriority[a.status] || statusPriority.default;
+  const orderB = statusPriority[b.status] || statusPriority.default;
+  return orderA - orderB;
+});
+
   const call = () => {
     window.alert("Link is not provide..!");
   };
@@ -128,9 +268,105 @@ const ClientTradeIdeas = () => {
       console.error("Copy failed", err);
     }
   };
+  const trades = [
+    {
+      type: "sell",
+      pair: "GBPCHF",
+      status: "active",
+      name: "Sheriff Aderemi",
+      initials: "SA",
+      avatarColor: "bg-purple-500",
+      market: "Forex",
+      year: "2025",
+      entry: "1.04732",
+      stopLoss: "1.05403",
+      tp1: "1.04537",
+      tp2: "1.04186",
+      tp3: "1.03644",
+    },
+    {
+      type: "sell",
+      pair: "GOLD",
+      status: "loss",
+      pips: "-68",
+      name: "Andre Tyson",
+      initials: "AT",
+      avatarColor: "bg-purple-500",
+      market: "Forex",
+      year: "2025",
+      entry: "1947.32",
+      stopLoss: "1954.03",
+      tp1: "1945.37",
+      tp2: "1941.86",
+      tp3: "1936.44",
+    },
+    {
+      type: "buy",
+      pair: "GOLD",
+      status: "win",
+      pips: "+127",
+      name: "Ricardo Garcia",
+      initials: "RG",
+      avatarColor: "bg-pink-500",
+      market: "Forex",
+      year: "2025",
+      entry: "4074.30",
+      stopLoss: "4092.27",
+      tp1: "4067.14",
+      tp2: "4060.31",
+      tp3: "4054.40",
+    },
+    {
+      type: "buy",
+      pair: "EURUSD",
+      status: "win",
+      pips: "+64",
+      name: "Maria Chen",
+      initials: "MC",
+      avatarColor: "bg-purple-500",
+      market: "Forex",
+      year: "2025",
+      entry: "1.0856",
+      stopLoss: "1.0823",
+      tp1: "1.0889",
+      tp2: "1.0912",
+      tp3: "1.0945",
+    },
+    {
+      type: "sell",
+      pair: "BTCUSD",
+      status: "active",
+      name: "John Miller",
+      initials: "JM",
+      avatarColor: "bg-purple-500",
+      market: "Crypto",
+      year: "2025",
+      entry: "98,250",
+      stopLoss: "99,180",
+      tp1: "97,420",
+      tp2: "96,850",
+      tp3: "95,900",
+    },
+    {
+      type: "buy",
+      pair: "GBPJPY",
+      status: "loss",
+      pips: "-65",
+      name: "Alex Kumar",
+      initials: "AK",
+      avatarColor: "bg-pink-500",
+      market: "Forex",
+      year: "2025",
+      entry: "188.45",
+      stopLoss: "187.80",
+      tp1: "189.10",
+      tp2: "189.75",
+      tp3: "190.40",
+    },
+  ];
 
   return (
-    <div className="container-fluid">
+    <div className="max-w-7xl mx-auto px-4 pb-10">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="IQ Ideas" />
@@ -141,135 +377,9 @@ const ClientTradeIdeas = () => {
         </ToolbarHeading>
       </Toolbar>
 
-      {isLoading == false ? (
+      {/* {isLoading == false ? (
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-12 text-white">
-            {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {tradeIdeas.map((idea, index) => (
-              <div
-                key={idea._id}
-                className="card border-2 hover:bg-gray-200 cursor-pointer overflow-hidden h-fit"
-              >
-                <div
-                  className="h-52 overflow-hidden "
-                  onClick={() => {
-                    setSelectedIdea(idea);
-                    setIsViewOpen(true);
-                  }}
-                  ref={
-                    index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
-                  }
-                >
-                  <img
-                    src={idea?.image?.[0]}
-                    className="w-full h-full	 object-cover"
-                    alt=""
-                  />
-                </div>
-                <div className="h-[405px] card-border card-rounded-b flex flex-col gap-2 justify-between">
-                  <div className="px-5 py-4.5 ">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 justify-between  mb-3">
-                      <div className="text-sm sm:text-xs md:text-sm font-medium mr-3 text-gray-900">
-                        {idea?.name.toUpperCase()}/{idea?.type.toUpperCase()}
-                      </div>
-                      <div className="ideas_link flex items-center md:gap-5 gap-3">
-                        <span
-                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${statusColorMap[idea?.status] || "bg-gray-50 text-gray-700 ring-gray-600/20"}`}
-                        >
-                          {LabelMap[idea?.status]}
-                        </span>
-
-                        {idea?.url ? (
-                          <Link to={idea.url} className="z-9">
-                            <div className="link_card bg-primary rounded-lg p-2">
-                              <Link2 className="text-gray-100 dark:text-gray-900" />
-                            </div>
-                          </Link>
-                        ) : (
-                          <span
-                            onClick={() =>
-                              window.alert("Link is not provided..!")
-                            }
-                            className="z-9 cursor-pointer text-blue-500 underline"
-                          >
-                            <div className="link_card bg-primary rounded-lg p-2">
-                              <Link2 className="text-gray-100 dark:text-gray-900" />
-                            </div>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className=" flex gap-10 mb-4 text-gray-800">
-                      {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
-                    </div>
-                    <div className="flex gap-10 mb-4">
-                      <div>
-                        <div className="text-2sm text-gray-800 uppercase mb-1">
-                          Entry
-                        </div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-green-50 dark:bg-green-700 dark:text-green-300 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
-                          {idea?.entry}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="text-2sm text-gray-800 uppercase mb-1">
-                          Invalidation
-                        </div>
-                        <span class="mt-1 inline-flex items-center rounded-md bg-red-50 dark:bg-red-700 dark:text-red-300 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
-                          {idea?.invalidation}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="">
-                      <div className="text-2sm mb-2   text-gray-800 uppercase ">
-                        Exits
-                      </div>
-                      <div className="flex flex-col  gap-2 mt-2">
-                        {idea?.exits?.map((exit, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2 mt-1"
-                          >
-                            <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
-                              {idx + 1}
-                            </div>
-                            <div className="text-sm text-gray-900">{exit}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
-                    <div className="flex items-center">
-                      <EducatorImage
-                        educator={idea?.educatorDetails}
-                        defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
-                      />
-                      <div className="">
-                        <Link
-                          to="#"
-                          className="text-2sm text-gray-800 hover:text-primary mb-px"
-                        >
-                          {idea?.educatorDetails?.first_name}{" "}
-                          {idea?.educatorDetails?.last_name}
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="flex mt-2">
-                      <div className="text-2sm mb-2   text-gray-800 ">
-                        Category:-
-                      </div>
-                      <div className="text-2sm text-gray-700 mb-px ml-2">
-                        {idea?.category
-                          ? idea?.category?.name
-                          : "Category not assigned"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div> */}
             <div className="grid grid-cols-12 gap-5 md:gap-6">
               {tradeIdeas?.map((trade, index) => (
                 <div
@@ -395,23 +505,6 @@ const ClientTradeIdeas = () => {
                           </p>
                         </div>
                       </div>
-                      {/* <span
-                        className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                      >
-                        {trade.status.toUpperCase()}
-                      </span> */}
-                      {/* {copiedId === trade._id ? (
-                      <span className="text-dark text-sm">
-                        Copied!
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => handleCopy(trade)}
-                        className="text-gray-800 items-center"
-                      >
-                       <Copy />
-                      </button>
-                    )} */}
                       <div className="flex sm:flex-col items-end gap-2">
                         <span
                           className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
@@ -420,22 +513,9 @@ const ClientTradeIdeas = () => {
                         </span>
                         <span
                           className={`bg-gray-100 text-${statusColorMap[trade.status]}-700 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                          // className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                         >
                           {trade.timeFrame}
                         </span>
-                        {/* {copiedId === trade._id ? (
-                      <span className="text-dark text-sm">
-                        Copied!
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => handleCopy(trade)}
-                        className="text-gray-800 items-center"
-                      >
-                       <Copy />
-                      </button>
-                    )} */}
                       </div>
                     </div>
 
@@ -538,55 +618,16 @@ const ClientTradeIdeas = () => {
                       >
                         Read More...
                       </button>
-                      {/* {[0, 1, 2].map((idx) => (
-                        <div key={idx} className="flex justify-between text-sm">
-                          <span className="text-gray-600 font-normal text-sm">
-                            {`Exit ${idx + 1}`}
-                          </span>
-                          <span className="font-medium text-gray-800">
-                            {copiedField.id === trade._id &&
-                            copiedField.field === `Exit ${idx + 1}` ? (
-                              <span className="text-dark text-sm mr-2">
-                                Copied!
-                              </span>
-                            ) : (
-                              <button
-                                onClick={() =>
-                                  handleCopyField(
-                                    trade._id,
-                                    `Exit ${idx + 1}`,
-                                    trade?.exits?.[idx] ?? "N/A"
-                                  )
-                                }
-                                className="text-gray-800 items-center mr-2"
-                              >
-                                <Copy size={14} />
-                              </button>
-                            )}
-                            {trade?.exits?.[idx] ?? "N/A"}
-                          </span>
-                        </div>
-                      ))} */}
-                      {/* <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 font-normal text-sm">
-                          Exit 2
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {trade.exit2}
-                        </span>
-                      </div> */}
                     </div>
                   </div>
                   <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
                     <div className="flex items-center">
                       <EducatorImage
                         educator={trade?.educatorDetails}
-                        // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
                       />
                       <div className="">
                         <Link
                           to={`/iq-educators/${trade?.educatorDetails?._id}`}
-                          // to="#"
                           className="text-2sm text-gray-800 hover:text-primary mb-px"
                         >
                           {trade?.educatorDetails?.first_name}{" "}
@@ -612,6 +653,342 @@ const ClientTradeIdeas = () => {
               </p>
             )}
           </div>
+
+          <ViewClientTradeIdeas
+            isViewOpen={isViewOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            handleCloseView={handleCloseView}
+            selectedIdea={selectedIdea}
+          />
+          <ImageLightBox
+            isLightBoxOpen={isLightBoxOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            selectedIdea={selectedIdea}
+          />
+        </div>
+      ) : (
+        <Loader />
+      )} */}
+
+      {isLoading == false ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedIdeas?.map((trade, index) => (
+            <div
+              key={trade._id}
+              className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md"
+              ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
+            >
+              {/* Chart placeholder */}
+              <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
+                {/* <img
+                  src="/media/images/2600x1600/banner_3.jpg"
+                  alt="Academy"
+                  className="w-full h-full object-cover"
+                /> */}
+
+                {/* <div className="relative h-[28vh] w-full overflow-hidden"> */}
+                {trade.image && trade.image.length > 0 && (
+                  <>
+                    <img
+                      src={trade.image[trade.currentIndex ?? 0]}
+                      alt={trade.pair}
+                      className="w-full h-full object-cover cursor-pointer transition-all duration-500"
+                      onClick={() => {
+                        setSelectedIdea(trade);
+                        setIsLightBoxOpen(true);
+                      }}
+                    />
+
+                    {/* <button
+                          onClick={() => {
+                            setSelectedIdea(trade);
+                            setIsLightBoxOpen(true);
+                          }}
+                          className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
+                        >
+                          <Eye size={20} />
+                        </button> */}
+
+                    {trade.image.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setTradeIdeas((prev) =>
+                              prev.map((t) =>
+                                t._id === trade._id
+                                  ? {
+                                      ...t,
+                                      currentIndex:
+                                        (t.currentIndex ?? 0) === 0
+                                          ? t.image.length - 1
+                                          : (t.currentIndex ?? 0) - 1,
+                                    }
+                                  : t
+                              )
+                            );
+                          }}
+                          className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setTradeIdeas((prev) =>
+                              prev.map((t) =>
+                                t._id === trade._id
+                                  ? {
+                                      ...t,
+                                      currentIndex:
+                                        (t.currentIndex ?? 0) ===
+                                        t.image.length - 1
+                                          ? 0
+                                          : (t.currentIndex ?? 0) + 1,
+                                    }
+                                  : t
+                              )
+                            );
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2!right-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md -translate-y-1/2"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+
+                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                          {trade.image.map((_, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setTradeIdeas((prev) =>
+                                  prev.map((t) =>
+                                    t._id === trade._id
+                                      ? { ...t, currentIndex: idx }
+                                      : t
+                                  )
+                                );
+                              }}
+                              className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                                (trade.currentIndex ?? 0) === idx
+                                  ? "bg-primary"
+                                  : "bg-gray-300 hover:bg-gray-400"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+                {/* </div> */}
+
+                {/* OVERLAY BLOCK */}
+                <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      className={`px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 ${
+                        trade.type === "buy"
+                          ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                          : "bg-red-500 hover:bg-red-600 text-white"
+                      }`}
+                    >
+                      {trade.type === "buy" ? (
+                        <TrendingUp size={16} />
+                      ) : (
+                        <TrendingDown size={16} />
+                      )}
+                      {trade.type.toUpperCase()}
+                    </button>
+
+                    <div className="bg-gray-800 px-4 py-2 rounded-lg font-semibold text-sm text-white">
+                      {trade.name}
+                    </div>
+                  </div>
+
+                  {LabelMap[trade.status] === "Active" && (
+                    <div className="bg-cyan-700 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                      {LabelMap[trade.status]}
+                    </div>
+                  )}
+                  {LabelMap[trade.status] === "Pending" && (
+                    <div className="bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                      {LabelMap[trade.status]}
+                    </div>
+                  )}
+
+                  {LabelMap[trade.status] === "Win" && (
+                    <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span>★</span>
+                      WIN +{trade.pips} pips
+                    </div>
+                  )}
+
+                  {LabelMap[trade.status] === "Loss" && (
+                    <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span>▲</span>
+                      LOSS -{trade.pips} pips
+                    </div>
+                  )}
+                  {LabelMap[trade.status] === "Partial Win" && (
+                    <div className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                      <span>▲</span>
+                      PARTIAL WIN {trade.pips} pips
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Trader Info */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
+                        trade.avatarColor
+                      }`}
+                    >
+                      <img
+                        className="w-12 h-12 rounded-full flex items-center justify-center"
+                        src={`${trade?.educatorDetails?.image}`}
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <div className="dark:text-white font-semibold">
+                        {trade?.educatorDetails?.first_name}{" "}
+                        {trade?.educatorDetails?.last_name}
+                      </div>
+                      <div className="text-gray-600 text-sm">
+                        {Array.isArray(trade?.educatorDetails?.categories) &&
+                        trade?.educatorDetails?.categories?.length > 0
+                          ? trade?.educatorDetails?.categories
+                              .map((cat) => cat)
+                              .join(", ")
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-gray-600 text-sm">
+                    {trade.createAt
+                      ? new Date(trade.createAt).getFullYear()
+                      : ""}
+                  </div>
+                </div>
+
+                {/* Trade Details */}
+                <div className="space-y-3 mb-6">
+                  {/* ENTRY */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-800 dark:text-white-200">
+                      Entry
+                    </span>
+
+                    <span className="font-mono flex items-center gap-2 text-dark dark:text-white">
+                      {copiedField.id === trade._id &&
+                      copiedField.field === "Entry" ? (
+                        <span className="text-black dark:text-white text-xs bg-transparent">
+                          Copied!
+                        </span>
+                      ) : (
+                        trade.entry && (
+                          <button
+                            onClick={() =>
+                              handleCopyField(trade._id, "Entry", trade.entry)
+                            }
+                            className="text-gray-800 dark:text-white-200 flex items-center"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        )
+                      )}
+
+                      {trade.entry}
+                    </span>
+                  </div>
+
+                  {/* STOP LOSS */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-800">Invalidation</span>
+
+                    <span className="text-red-600 font-mono flex items-center gap-2">
+                      {copiedField.id === trade._id &&
+                      copiedField.field === "Stop Loss" ? (
+                        <span className="text-dark bg-white text-xs">
+                          Copied!
+                        </span>
+                      ) : (
+                        trade.invalidation && (
+                          <button
+                            onClick={() =>
+                              handleCopyField(
+                                trade._id,
+                                "Stop Loss",
+                                trade.invalidation
+                              )
+                            }
+                            className="text-red-600 flex items-center"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        )
+                      )}
+
+                      {trade.invalidation}
+                    </span>
+                  </div>
+
+                  {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
+                    const tpValue = trade?.exits?.[idx] ?? "N/A";
+                    const fieldName = `Exit ${idx + 1}`;
+
+                    return (
+                      <div
+                        className="flex justify-between items-center"
+                        key={tpField}
+                      >
+                        <span className="text-gray-800">{fieldName}</span>
+
+                        <span className="text-emerald-600 font-mono flex items-center gap-2">
+                          {copiedField.id === trade._id &&
+                          copiedField.field === fieldName ? (
+                            <span className="text-dark bg-white text-xs">
+                              Copied!
+                            </span>
+                          ) : (
+                            tpValue !== "N/A" && (
+                              <button
+                                onClick={() =>
+                                  handleCopyField(trade._id, fieldName, tpValue)
+                                }
+                                className="text-gray-800 flex items-center"
+                              >
+                                <Copy size={14} />
+                              </button>
+                            )
+                          )}
+
+                          {tpValue}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* View Details Button */}
+                <button
+                  className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  onClick={() => {
+                    setSelectedIdea(trade);
+                    setIsViewOpen(true);
+                  }}
+                >
+                  <Eye size={18} />
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
 
           <ViewClientTradeIdeas
             isViewOpen={isViewOpen}

@@ -289,7 +289,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                 </button>
 
                 {showOptions && (
-                  <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-999 min-w-[120px]">
+                  <div className="absolute right-0 top-8 bg-white dark:bg-gray-200 border border-gray-200 rounded-lg shadow-lg py-2 min-w-[120px] z-[9]">
                     <button
                       onClick={handleEdit}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
@@ -299,7 +299,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-gray-100 flex items-center gap-2"
                     >
                       <Trash2 size={14} />
                       Delete
