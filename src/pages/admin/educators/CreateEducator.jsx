@@ -141,7 +141,7 @@ const CreateEducator = forwardRef(
       description: Yup.string()
         .required("Educator long bio is required")
         .min(10, "Bio must be at least 30 characters")
-        .max(500, "Bio cannot exceed 120 characters"),
+        .max(500, "Bio cannot exceed 500 characters"),
       status: Yup.boolean().required("Status is required"),
       image: Yup.mixed().nullable(),
       icon: Yup.mixed().nullable(),

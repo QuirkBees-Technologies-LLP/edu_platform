@@ -18,10 +18,6 @@ import { useAuthContext } from "../../../auth/useAuthContext";
 import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
-import {
-  useCreateTradeIdeasMutation,
-  useUpdateTradeIdeaMutation,
-} from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import {
   useCreateEducatorTradeIdeasMutation,
@@ -53,8 +49,16 @@ const CreateTradeIdeas = forwardRef(
       exits: [""],
       description: "",
       category: "",
-      pips: "",
+      pips: 0,
     };
+    const numberField = () =>
+      Yup.number()
+        .nullable()
+        .transform((value, originalValue) => {
+          if (originalValue === "" || originalValue === undefined) return null;
+          const cleaned = Number(originalValue);
+          return isNaN(cleaned) ? 0 : cleaned;
+        });
 
     const createSchema = Yup.object().shape({
       name: Yup.string().required("symbol is required"),
@@ -79,7 +83,7 @@ const CreateTradeIdeas = forwardRef(
         )
         .min(1, "At least one exit is required"),
       category: Yup.string().required("Category is required"),
-      pips: Yup.number().optional(),
+      pips: numberField(),
     });
 
     const formik = useFormik({
@@ -99,7 +103,7 @@ const CreateTradeIdeas = forwardRef(
           formData.append("files", file?.file?.file)
         );
         formData.append("type", values.type);
-        formData.append("pips", values.pips);
+        formData.append("pips", values.pips ?? 0);
         formData.append("timeFrame[]", [values.timeFrame]);
         formData.append("educatorId", values.educatorId);
         formData.append("status", values.status);

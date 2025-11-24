@@ -10,8 +10,46 @@ import truncate from "html-truncate";
 import { useLivestreamStatus } from "./liveStreamStatus";
 import { Send } from "lucide-react";
 
+const ShowMoreLess = ({
+  text = "",
+  html = "",
+  limit = 120,
+  showMoreText = " Show More",
+  showLessText = " Show Less",
+  className = "text-sm text-gray-700 leading-relaxed",
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const isHtml = !!html;
+  const content = isHtml ? html : text;
+  const plainText = isHtml ? content.replace(/<[^>]+>/g, "") : text;
+  const isLong = plainText.length > limit;
+
+  return (
+    <div className={className}>
+      <div
+        className={`${!expanded && isLong ? "line-clamp-4" : ""}`}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+      {isLong && (
+        <span
+          onClick={() => setExpanded(!expanded)}
+          className="text-blue-600 cursor-pointer hover:underline font-medium"
+        >
+          {expanded ? showLessText : showMoreText}
+        </span>
+      )}
+    </div>
+  );
+};
+
 // Inner component that uses Stream Video hooks (guaranteed to be within StreamCall context)
-const ClientLiveSessionContent = ({ client, callId, token, bannerImage }) => {
+const ClientLiveSessionContent = ({
+  client,
+  callId,
+  token,
+  bannerImage,
+  educatorData,
+}) => {
   const [showFull, setShowFull] = useState(false);
   const isMdUp = useResponsive("up", "md");
   const call = useCall();
@@ -106,6 +144,18 @@ const ClientLiveSessionContent = ({ client, callId, token, bannerImage }) => {
     );
   }
 
+  const makeClickableLinks = (htmlOrText) => {
+    if (!htmlOrText) return "";
+    return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
+      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
+      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
+    });
+  };
+
+  const safeHtml = makeClickableLinks(educatorData || "");
+
+  console.log("safeHtml", educatorData);
+
   return (
     <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 chatbox_chat">
       <div
@@ -138,35 +188,22 @@ const ClientLiveSessionContent = ({ client, callId, token, bannerImage }) => {
             <ChatContainer sessionToken={token} callId={callId} />
           )}
           {token && callId && status !== "live" && (
-            <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col chatbox_chat">
+            <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
               <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
-                <h3 className="text-white font-semibold text-sm">Chatbox</h3>
+                <h3 className="text-white font-semibold text-sm">About </h3>
               </div>
-              <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-4">
-                <div className="flex flex-col gap-2 h-full justify-center items-center">
-                  <div className="text-sm text-gray-900 font-medium text-center">
-                    Stream is not live yet.
-                  </div>
-                </div>
-              </div>
-              <form className="p-4 border-t border-gray-200">
-                <div className="flex items-center justify-center">
-                  <div className="relative w-full max-w-md">
-                    <input
-                      type="text"
-                      placeholder="Your comment..."
-                      className="w-full p-4 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 text-xs dark:bg-gray-100"
+
+              <div className="flex-1 p-4 overflow-y-auto">
+                <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-line">
+                  {educatorData && (
+                    <ShowMoreLess
+                      html={safeHtml}
+                      limit={500}
+                      className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
                     />
-                    <button
-                      type="submit"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 duration-200 focus:outline-none"
-                      aria-label="Send message"
-                    >
-                      <Send size={20} />
-                    </button>
-                  </div>
-                </div>
-              </form>
+                  )}
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -176,13 +213,20 @@ const ClientLiveSessionContent = ({ client, callId, token, bannerImage }) => {
 };
 
 // Main wrapper component that doesn't use Stream Video hooks
-const ClientLiveSessionWrapper = ({ client, callId, token, bannerImage }) => {
+const ClientLiveSessionWrapper = ({
+  client,
+  callId,
+  token,
+  bannerImage,
+  educatorData,
+}) => {
   return (
     <ClientLiveSessionContent
       client={client}
       callId={callId}
       token={token}
       bannerImage={bannerImage}
+      educatorData={educatorData}
     />
   );
 };
