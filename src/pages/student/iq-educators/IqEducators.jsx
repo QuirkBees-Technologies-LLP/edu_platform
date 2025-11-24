@@ -383,9 +383,27 @@ const IqEducators = () => {
           <ClientViewLiveSession
             bannerImage={response?.data?.educator?.bannerImage}
             callId={callId}
+            educatorData={response?.data?.educator?.description}
           />
         </div>
       </div>
+
+      {callId && (
+        <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4 h-full">
+          <div className="w-full flex flex-col items-start">
+            <h3 className="text-white font-semibold text-base sm:text-lg mb-3">
+              About Me
+            </h3>
+
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl w-full max-h-64 overflow-y-auto">
+              <p className="text-white text-sm leading-relaxed whitespace-pre-line">
+                {response?.data?.educator?.description || `No bio available.`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">
           {/* <div className="">

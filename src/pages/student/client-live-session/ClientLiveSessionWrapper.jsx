@@ -140,7 +140,7 @@ const ClientLiveSessionContent = ({ client, callId, token, bannerImage }) => {
           {token && callId && status !== "live" && (
             <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col chatbox_chat">
               <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
-                <h3 className="text-white font-semibold text-sm">Chatbox</h3>
+                <h3 className="text-white font-semibold text-sm">Chatbox </h3>
               </div>
               <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-4">
                 <div className="flex flex-col gap-2 h-full justify-center items-center">

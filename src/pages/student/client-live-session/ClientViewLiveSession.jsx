@@ -14,7 +14,7 @@ import { format } from "date-fns";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
-const ClientViewLiveSession = ({ bannerImage, callId }) => {
+const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
   const [client, setClient] = useState(null);
 
   const [call, setCall] = useState(null);
@@ -126,7 +126,12 @@ const ClientViewLiveSession = ({ bannerImage, callId }) => {
         </div>
       ) : ( */}
       <EventProvider>
-        <StreamWrapper call={call} callId={callId} bannerImage={bannerImage}>
+        <StreamWrapper
+          call={call}
+          callId={callId}
+          bannerImage={bannerImage}
+          educatorData={educatorData}
+        >
           <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
             {
               <ClientLiveSessionWrapper
@@ -134,6 +139,7 @@ const ClientViewLiveSession = ({ bannerImage, callId }) => {
                 client={client}
                 callId={callId}
                 token={token}
+              
               />
             }
           </StreamTheme>
