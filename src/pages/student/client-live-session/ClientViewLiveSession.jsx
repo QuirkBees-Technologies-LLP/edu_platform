@@ -139,7 +139,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
                 client={client}
                 callId={callId}
                 token={token}
-              
+                educatorData={educatorData}
               />
             }
           </StreamTheme>

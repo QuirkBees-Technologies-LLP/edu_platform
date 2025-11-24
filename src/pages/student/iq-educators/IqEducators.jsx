@@ -388,7 +388,7 @@ const IqEducators = () => {
         </div>
       </div>
 
-      {callId && (
+      {/* {callId && (
         <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4 h-full">
           <div className="w-full flex flex-col items-start">
             <h3 className="text-white font-semibold text-base sm:text-lg mb-3">
@@ -402,7 +402,7 @@ const IqEducators = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">

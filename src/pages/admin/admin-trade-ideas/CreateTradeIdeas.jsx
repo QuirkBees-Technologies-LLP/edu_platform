@@ -33,7 +33,7 @@ const CreateTradeIdeas = forwardRef(
     const { auth } = useAuthContext();
     const [createTradeIdeas] = useCreateTradeIdeasMutation();
     const [updateTradeIdea] = useUpdateTradeIdeaMutation();
-    const educatorId = auth?.user?._id ?? null;
+    const educatorId = null;
     const { data } = useGetEducatorAcademyCategoryQuery();
 
     const initialValues = {
@@ -153,6 +153,7 @@ const CreateTradeIdeas = forwardRef(
           description: selectedRow?.description,
           category: selectedRow?.category?._id,
           exits: selectedRow?.exits,
+          educatorId: selectedRow?.educatorDetails?._id,
         };
         formik.setValues(initData);
       }
@@ -533,6 +534,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div> */}
+
               <div className="col-span-12">
                 <div className="flex flex-wrap gap-5">
                   {/* Upload Box - always shown */}

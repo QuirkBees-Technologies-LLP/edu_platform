@@ -130,15 +130,7 @@ export default function EducatorRating() {
         <div className="border dark:bg-gray-200 shadow-md rounded-xl px-6 py-20 mb-8 ">
           <div className="flex items-center justify-between flex-col md:flex-row gap-2 md:gap-6">
             <div className="flex items-center gap-6 flex-col md:flex-row">
-              {educatorImage ? (
-                <img
-                  src={educatorImage}
-                  alt={educatorName}
-                  className="w-20 h-20 rounded-full object-cover"
-                />
-              ) : (
-                <FallbackAvatar name={educatorName} size={80} />
-              )}
+              {<FallbackAvatar name={educatorName} size={80} />}
               <div className="text-center md:text-start">
                 <h2 className="text-xl font-bold text-gray-900">
                   {educatorName}
@@ -225,10 +217,11 @@ export default function EducatorRating() {
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-6 h-5 ${i < Math.floor(fb.rating || 0)
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-gray-300"
-                                }`}
+                              className={`w-6 h-5 ${
+                                i < Math.floor(fb.rating || 0)
+                                  ? "text-yellow-400 fill-yellow-400"
+                                  : "text-gray-300"
+                              }`}
                             />
                           ))}
                         </div>
