@@ -205,7 +205,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[100px]",
         },
       },
 
@@ -229,7 +229,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           );
         },
         meta: {
-          headerClassName: "w-[225px]",
+          headerClassName: "w-[100px]",
         },
       },
       {
@@ -259,7 +259,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         enableSorting: true,
         cell: (info) => info.getValue(),
         meta: {
-          headerClassName: "min-w-[125px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
@@ -277,7 +277,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[125px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
@@ -295,7 +295,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
