@@ -8,20 +8,17 @@ import React, { useEffect, useState, useRef } from "react";
 import { useLayout } from "../../../providers";
 
 const ClientLiveSessionPlayer = ({ callId, client, call }) => {
-  const { useSpeakerState, useParticipants } = useCallStateHooks();
+  const { useSpeakerState } = useCallStateHooks();
 
   const { speaker } = useSpeakerState();
-
-  const { educator } = useParticipants();
   const { isMuted, volume } = useLayout();
 
   useEffect(() => {
     if (!speaker) return;
 
     const target = isMuted ? 0 : Number(volume ?? 1);
-
     speaker.setVolume(target);
-  }, [speaker, educator, volume, isMuted]);
+  }, [speaker, volume, isMuted]);
 
   if (!client || !call) return null;
   return (
