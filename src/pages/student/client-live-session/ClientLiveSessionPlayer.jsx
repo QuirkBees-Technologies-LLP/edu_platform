@@ -11,12 +11,33 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
   const containerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Toggle fullscreen using CSS-only approach (avoids SDK conflicts)
+  const [viewportHeight, setViewportHeight] = useState(null);
+
+  // Calculate actual viewport height (fixes iOS address bar issue)
+  useEffect(() => {
+    const updateViewportHeight = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    updateViewportHeight();
+    window.addEventListener("resize", updateViewportHeight);
+    window.addEventListener("orientationchange", () => {
+      // Delay for orientation change to complete
+      setTimeout(updateViewportHeight, 100);
+    });
+
+    return () => {
+      window.removeEventListener("resize", updateViewportHeight);
+      window.removeEventListener("orientationchange", updateViewportHeight);
+    };
+  }, []);
+
+  // Toggle fullscreen
   const toggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => !prev);
   }, []);
 
-  // Handle escape key to exit fullscreen
+  // Handle fullscreen state
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape" && isFullscreen) {
@@ -26,7 +47,6 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
 
     if (isFullscreen) {
       document.addEventListener("keydown", handleKeyDown);
-      // Prevent body scroll when in fullscreen
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -75,20 +95,20 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
             className={`relative w-full h-full rounded-xl overflow-hidden live-player-container ${
               isFullscreen ? "css-fullscreen-active" : ""
             }`}
-            style={{
-              ...(isFullscreen && {
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100vw",
-                height: "100vh",
-                maxWidth: "100vw",
-                maxHeight: "100vh",
-                borderRadius: 0,
-                zIndex: 99999,
-                backgroundColor: "#000",
-              }),
-            }}
+            style={
+              isFullscreen
+                ? {
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: viewportHeight ? `${viewportHeight}px` : "100vh",
+                    zIndex: 99999,
+                    backgroundColor: "#000",
+                    borderRadius: 0,
+                  }
+                : undefined
+            }
           >
             {/* Custom fullscreen button */}
             <button
