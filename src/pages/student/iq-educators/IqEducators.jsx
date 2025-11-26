@@ -14,7 +14,10 @@ import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
+import {
+  useGetEducatorWithCoursesQuery,
+  useLazyGetSecureVideoQuery,
+} from "../../../store/api/client/clientCoursesApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
@@ -48,6 +51,7 @@ const IqEducators = () => {
     if (isMuted && Number(val) > 0) setIsMuted(false);
   };
 
+  const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
   const [showAll, setShowAll] = useState(false);
@@ -251,8 +255,13 @@ const IqEducators = () => {
   const [activeTab, setActiveTab] = useState("feed");
   const data = activeTab === "feed" ? feedData : ideasData;
 
-  const handleOpen = (url) => {
-    setVideoUrl(url);
+  const handleOpen = async (videoKey) => {
+    // const { data } = await triggerSecureVideo(videoKey);
+    // if (data?.url) {
+    //   setVideoUrl(data.url);
+    //   setOpen(true);
+    // }
+    setVideoUrl(videoKey);
     setOpen(true);
   };
 
@@ -1234,6 +1243,7 @@ const IqEducators = () => {
                             image={course?.thumbnail}
                             defaultImage={response?.data?.educator?.bannerImage}
                             onRecordingClick={() => handleOpen(course?.url)}
+                            // onRecordingClick={() => handleOpen(course?.url)}
                           />
                         </div>
                         <div className="p-4">
