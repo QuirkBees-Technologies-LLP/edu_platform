@@ -154,8 +154,6 @@ const ClientLiveSessionContent = ({
 
   const safeHtml = makeClickableLinks(educatorData || "");
 
-  console.log("safeHtml", educatorData);
-
   return (
     <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 chatbox_chat">
       <div

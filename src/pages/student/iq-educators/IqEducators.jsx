@@ -8,12 +8,16 @@ import {
   Volume2,
   Calendar,
   Clock3,
+  VolumeX,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
+import {
+  useGetEducatorWithCoursesQuery,
+  useLazyGetSecureVideoQuery,
+} from "../../../store/api/client/clientCoursesApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
@@ -26,6 +30,7 @@ import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import RatingModal from "./RatingModel";
+import { useLayout } from "../../../providers";
 
 const IqEducators = () => {
   const navigate = useNavigate();
@@ -35,6 +40,18 @@ const IqEducators = () => {
 
   const { id } = useParams();
   const { data: response } = useGetEducatorWithCoursesQuery(id);
+
+  const { volume, setVolume, isMuted, setIsMuted } = useLayout();
+
+  const toggleMute = () => setIsMuted((v) => !v);
+  const decVolume = () => setVolume((v) => Math.max(0, +(v - 0.1).toFixed(2)));
+  const incVolume = () => setVolume((v) => Math.min(1, +(v + 0.1).toFixed(2)));
+  const onSliderChange = (val) => {
+    setVolume(Number(val));
+    if (isMuted && Number(val) > 0) setIsMuted(false);
+  };
+
+  const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
   const [showAll, setShowAll] = useState(false);
@@ -42,7 +59,6 @@ const IqEducators = () => {
   const [recording, setRecording] = useState(null);
   const [idea, setIdea] = useState(null);
   const [insight, setInsight] = useState(null);
-
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
@@ -239,8 +255,13 @@ const IqEducators = () => {
   const [activeTab, setActiveTab] = useState("feed");
   const data = activeTab === "feed" ? feedData : ideasData;
 
-  const handleOpen = (url) => {
-    setVideoUrl(url);
+  const handleOpen = async (videoKey) => {
+    // const { data } = await triggerSecureVideo(videoKey);
+    // if (data?.url) {
+    //   setVideoUrl(data.url);
+    //   setOpen(true);
+    // }
+    setVideoUrl(videoKey);
     setOpen(true);
   };
 
@@ -284,20 +305,58 @@ const IqEducators = () => {
 
       <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
         {/* Image + Name */}
-        <div className="flex items-center gap-4 sm:flex-row flex-col sm:justify-start justify-center">
-          <img
-            src={response?.data?.educator?.image}
-            alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
-            className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
-          />
-          <div className="text-center sm:text-start">
-            <h3 className="text-white font-semibold text-base sm:text-lg mb-1">
-              {response?.data?.educator?.first_name}{" "}
-              {response?.data?.educator?.last_name}
-            </h3>
-            {/* <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
-        Forex Day Trading, Price Action, Risk Management
-      </p> */}
+        <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
+          <div className="flex items-center gap-4">
+            <img
+              src={response?.data?.educator?.image}
+              alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
+              className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
+            />
+            <div className="text-center sm:text-start">
+              <h3 className="text-white font-semibold text-base sm:text-lg mb-1">
+                {response?.data?.educator?.first_name}{" "}
+                {response?.data?.educator?.last_name}
+              </h3>
+              {/* <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
+          Forex Day Trading, Price Action, Risk Management
+        </p> */}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm">
+            {/* Mute Toggle */}
+            <button
+              onClick={toggleMute}
+              className="text-white hover:text-yellow-300 transition p-1"
+            >
+              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+            </button>
+
+            {/* Volume Down */}
+            <button
+              onClick={decVolume}
+              className="text-white text-lg px-1 hover:text-yellow-300 transition"
+            >
+              –
+            </button>
+
+            {/* Slider */}
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={isMuted ? 0 : volume}
+              onChange={(e) => onSliderChange(e.target.value)}
+              className="w-24 accent-blue-500 cursor-pointer"
+            />
+
+            {/* Volume Up */}
+            <button
+              onClick={incVolume}
+              className="text-white text-lg px-1 hover:text-yellow-300 transition"
+            >
+              +
+            </button>
           </div>
         </div>
 
@@ -334,17 +393,17 @@ const IqEducators = () => {
                   <span
                     className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
 
-"
+  "
                   >
                     Or follow the video tutorial
                   </span>
                   {/* <p className="text-gray-700 mb-1">
-                  <strong>Specialization:</strong> Forex Day Trading, Price
-                  Action
-                </p> */}
+                    <strong>Specialization:</strong> Forex Day Trading, Price
+                    Action
+                  </p> */}
                   {/* <p className="text-gray-700 mb-4">
-              <strong>Experience:</strong> 5+ Years
-            </p> */}
+                <strong>Experience:</strong> 5+ Years
+              </p> */}
                   <div className="overflow-hidden rounded-lg mx-auto block w-fit">
                     <video width="500" height="240" muted loop controls>
                       <source src={videotutorial} type="video/mp4" />
@@ -481,7 +540,7 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.courses?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full border rounded-xl shadow-sm cursor-pointer"
                         onClick={() =>
                           navigate(
@@ -512,7 +571,7 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.courses?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
                         onClick={() =>
                           navigate(
@@ -610,7 +669,7 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.idea?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full border rounded-xl shadow-sm cursor-pointer"
                         onClick={() => {
                           setSelectedIdea(course);
@@ -647,7 +706,7 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.idea?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
                         onClick={() => {
                           setSelectedIdea(course);
@@ -713,7 +772,7 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.insight?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full border rounded-xl shadow-sm cursor-pointer"
                         onClick={() => {
                           setSelectedInsight(course);
@@ -750,7 +809,7 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.insight?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
                         onClick={() => {
                           setSelectedInsight(course);
@@ -890,7 +949,7 @@ const IqEducators = () => {
                   {response?.data?.PostData?.length > 0 ? (
                     response?.data?.PostData?.map((update) => (
                       <div
-                        key={update.id}
+                        key={update._id}
                         className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
                       >
                         <div className="flex flex-col gap-4 mb-4">
@@ -1022,7 +1081,7 @@ const IqEducators = () => {
                   {response?.data?.analysisData?.length > 0 ? (
                     response.data.analysisData.map((update) => (
                       <div
-                        key={update.id}
+                        key={update._id}
                         className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
                       >
                         <div className="flex flex-col gap-4 mb-4">
@@ -1136,7 +1195,7 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.recordings?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full cursor-pointer border rounded-xl shadow-sm"
                       >
                         <div
@@ -1171,7 +1230,7 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.recordings?.map((course) => (
                       <div
-                        key={course.id}
+                        key={course._id}
                         className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
                       >
                         <div
@@ -1184,6 +1243,7 @@ const IqEducators = () => {
                             image={course?.thumbnail}
                             defaultImage={response?.data?.educator?.bannerImage}
                             onRecordingClick={() => handleOpen(course?.url)}
+                            // onRecordingClick={() => handleOpen(course?.url)}
                           />
                         </div>
                         <div className="p-4">

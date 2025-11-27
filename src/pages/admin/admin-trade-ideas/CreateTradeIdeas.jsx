@@ -33,7 +33,7 @@ const CreateTradeIdeas = forwardRef(
     const { auth } = useAuthContext();
     const [createTradeIdeas] = useCreateTradeIdeasMutation();
     const [updateTradeIdea] = useUpdateTradeIdeaMutation();
-    const educatorId = null;
+    const educatorId = auth?.user?._id;
     const { data } = useGetEducatorAcademyCategoryQuery();
 
     const initialValues = {
@@ -127,6 +127,7 @@ const CreateTradeIdeas = forwardRef(
         }
       },
     });
+
 
     useEffect(() => {
       if (educatorId && formik.values) {

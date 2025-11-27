@@ -193,7 +193,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
@@ -216,7 +216,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           );
         },
         meta: {
-          headerClassName: "w-[225px]",
+          headerClassName: "w-[100px]",
         },
       },
       {
