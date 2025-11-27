@@ -1005,7 +1005,7 @@ const ClientDashboard = () => {
             <div className="mb-8">
               <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
                 <div
-                  className="absolute inset-0 bg-cover bg-left bg-no-repeat "
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat "
                   style={{
                     backgroundImage: "url('/media/images/1400x400 banner.jpg')",
                   }}

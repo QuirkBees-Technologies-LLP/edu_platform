@@ -783,9 +783,9 @@ const sortedIdeas = [...tradeIdeas].sort((a, b) => {
 
                 {/* OVERLAY BLOCK */}
                 <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <button
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 ${
+                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${
                         trade.type === "buy"
                           ? "bg-emerald-500 hover:bg-emerald-600 text-white"
                           : "bg-red-500 hover:bg-red-600 text-white"
@@ -799,39 +799,39 @@ const sortedIdeas = [...tradeIdeas].sort((a, b) => {
                       {trade.type.toUpperCase()}
                     </button>
 
-                    <div className="bg-gray-800 px-4 py-2 rounded-lg font-semibold text-sm text-white">
+                    <div className="bg-gray-800 px-2 py-1 rounded-lg font-semibold text-xs text-white">
                       {trade.name}
                     </div>
                   </div>
 
                   {LabelMap[trade.status] === "Active" && (
-                    <div className="bg-cyan-700 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                    <div className="bg-cyan-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
                       <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                       {LabelMap[trade.status]}
                     </div>
                   )}
                   {LabelMap[trade.status] === "Pending" && (
-                    <div className="bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                    <div className="bg-purple-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
                       <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                       {LabelMap[trade.status]}
                     </div>
                   )}
 
                   {LabelMap[trade.status] === "Win" && (
-                    <div className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                    <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
                       <span>★</span>
                       WIN +{trade.pips} pips
                     </div>
                   )}
 
                   {LabelMap[trade.status] === "Loss" && (
-                    <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                    <div className="bg-red-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
                       <span>▲</span>
                       LOSS -{trade.pips} pips
                     </div>
                   )}
                   {LabelMap[trade.status] === "Partial Win" && (
-                    <div className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2">
+                    <div className="bg-purple-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
                       <span>▲</span>
                       PARTIAL WIN {trade.pips} pips
                     </div>
