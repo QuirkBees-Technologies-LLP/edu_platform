@@ -1502,3 +1502,20 @@ chat */
 .dark .ant-select-selection-placeholder {
   color: #fff;
 }
+.animated-bg {
+  background: linear-gradient(11deg, #7f80ff, #5b4bff, #1e0066);
+  background-size: 300% 300%;
+  animation: gradientMove 8s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
