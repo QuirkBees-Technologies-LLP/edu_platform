@@ -67,29 +67,42 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
   /** ✅ iOS Native Fullscreen - uses webkitEnterFullscreen on video element */
   const enterIOSFullscreen = useCallback(() => {
     const container = containerRef.current;
-    if (!container) return false;
+    console.log("🟡 Container:", container);
+    if (!container) {
+      console.log("🔴 No container found!");
+      return false;
+    }
 
     // Find the video element inside the Stream SDK
     const video = container.querySelector("video");
-    if (!video) return false;
+    console.log("🟡 Video element:", video);
+    console.log("🟡 Video has webkitEnterFullscreen:", video?.webkitEnterFullscreen ? "YES" : "NO");
+    console.log("🟡 Video has webkitSetPresentationMode:", video?.webkitSetPresentationMode ? "YES" : "NO");
+    
+    if (!video) {
+      console.log("🔴 No video element found!");
+      return false;
+    }
 
     // Try iOS native fullscreen
     if (video.webkitEnterFullscreen) {
       try {
+        console.log("🟢 Calling webkitEnterFullscreen...");
         video.webkitEnterFullscreen();
         return true;
       } catch (e) {
-        console.log("iOS webkitEnterFullscreen failed:", e);
+        console.log("🔴 webkitEnterFullscreen failed:", e);
       }
     }
 
     // Try webkit presentation mode
     if (video.webkitSetPresentationMode) {
       try {
+        console.log("🟢 Calling webkitSetPresentationMode...");
         video.webkitSetPresentationMode("fullscreen");
         return true;
       } catch (e) {
-        console.log("iOS webkitSetPresentationMode failed:", e);
+        console.log("🔴 webkitSetPresentationMode failed:", e);
       }
     }
 
@@ -98,14 +111,21 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
 
   /** ✅ Toggle fullscreen */
   const toggleFullscreen = useCallback(() => {
+    // DEBUG: Check if button click is registered
+    console.log("🔵 Fullscreen button clicked!");
+    console.log("🔵 isIOS:", isIOSDevice);
+    console.log("🔵 Current isFullscreen:", isFullscreen);
+
     if (!isFullscreen) {
       // Try iOS native fullscreen first
       if (isIOSDevice) {
+        console.log("🔵 Trying iOS native fullscreen...");
         const success = enterIOSFullscreen();
+        console.log("🔵 iOS fullscreen result:", success);
         if (success) {
-          // iOS handles its own fullscreen, we just track state
           return;
         }
+        console.log("🔵 iOS native failed, falling back to CSS fullscreen");
       }
       // Fall back to CSS fullscreen
       setIsFullscreen(true);
@@ -213,8 +233,19 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
           {/* ✅ Fullscreen button */}
           <button
             type="button"
-            onClick={toggleFullscreen}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // DEBUG: Show alert to confirm button tap is detected
+              alert("Button tapped! isFullscreen: " + isFullscreen);
+              toggleFullscreen();
+            }}
             className="absolute bottom-[52px] right-3 z-[100000] bg-black/60 hover:bg-black/80 text-white rounded p-1.5 transition-all custom-fullscreen-btn"
+            style={{
+              pointerEvents: "auto",
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "rgba(255,255,255,0.3)",
+            }}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
             {isFullscreen ? (
