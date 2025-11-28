@@ -23,7 +23,22 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Check, ChevronDown } from "lucide-react";
 import Loader from "../../../components/ui/loader";
+import { useGetClientEducatorAcademyCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 const LabelMap = {
   active: "Active",
   pending: "Pending",
@@ -176,13 +191,20 @@ const ClientTradeIdeas = () => {
   const [selectedIdea, setSelectedIdea] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [category, setCategory] = useState([]);
+  const [status, setStatus] = useState("");
 
   const observer = useRef();
 
   const { data, isFetching, isLoading } = useGetClientTradeIdeasQuery({
-    page: page,
-    limit: limit,
+    page,
+    limit,
+    status: status || undefined,
+    category: category.length > 0 ? category : undefined,
   });
+
+  const { data: categoryList } = useGetClientEducatorAcademyCategoryQuery();
+  const categories = categoryList?.data || [];
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -217,22 +239,26 @@ const ClientTradeIdeas = () => {
     },
     [isFetching, page, totalPages]
   );
+  useEffect(() => {
+    // setTradeIdeas([]);
+    setPage(1);
+  }, [status, category]);
 
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
 
   const statusPriority = {
-  pending: 1,
-  active: 2,
-  default: 3,
-};
+    pending: 1,
+    active: 2,
+    default: 3,
+  };
 
-const sortedIdeas = [...tradeIdeas].sort((a, b) => {
-  const orderA = statusPriority[a.status] || statusPriority.default;
-  const orderB = statusPriority[b.status] || statusPriority.default;
-  return orderA - orderB;
-});
+  const sortedIdeas = [...tradeIdeas].sort((a, b) => {
+    const orderA = statusPriority[a.status] || statusPriority.default;
+    const orderB = statusPriority[b.status] || statusPriority.default;
+    return orderA - orderB;
+  });
 
   const call = () => {
     window.alert("Link is not provide..!");
@@ -364,6 +390,22 @@ const sortedIdeas = [...tradeIdeas].sort((a, b) => {
       tp3: "190.40",
     },
   ];
+  const statusLabelMap = {
+    active: "Active",
+    pending: "Pending",
+    win: "Win",
+    loss: "Loss",
+    breakEven: "Break Even",
+    partialWin: "Partial Win",
+  };
+  const statusOptions = [
+    "active",
+    "pending",
+    "win",
+    "loss",
+    "breakEven",
+    "partialWin",
+  ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
@@ -376,6 +418,124 @@ const sortedIdeas = [...tradeIdeas].sort((a, b) => {
           </ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
+
+      <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
+        <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 relative">
+              <Select
+                value={status || ""}
+                onValueChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[190px]">
+                  <SelectValue placeholder="Select Status">
+                    {status ? statusLabelMap[status] : "Select Status"}
+                  </SelectValue>
+                </SelectTrigger>
+
+                <SelectContent>
+                  {statusOptions.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {statusLabelMap[key]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {status && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatus("");
+                    setPage(1);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2 relative">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="min-w-56 flex justify-between items-center border rounded-md px-3 py-2 bg-white dark:bg-[#1c1f26]">
+                    <span className="truncate text-sm">
+                      {category.length > 0
+                        ? `${category.length} category selected`
+                        : "Select Category"}
+                    </span>
+                    <ChevronDown size={16} />
+                  </button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-[225px] p-0">
+                  <Command>
+                    <CommandGroup>
+                      {categories.map((item) => {
+                        const selected = category.includes(item._id);
+
+                        return (
+                          <CommandItem
+                            key={item._id}
+                            onSelect={() => {
+                              setCategory((prev) => {
+                                const exists = prev.includes(item._id);
+                                const updated = exists
+                                  ? prev.filter((id) => id !== item._id)
+                                  : [...prev, item._id];
+
+                                setPage(1);
+                                return updated;
+                              });
+                            }}
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            <div
+                              className={`h-4 w-4 border rounded flex items-center justify-center ${
+                                selected
+                                  ? "bg-primary text-white border-primary"
+                                  : "bg-white dark:bg-[#1c1f26]"
+                              }`}
+                            >
+                              {selected && <Check size={14} />}
+                            </div>
+
+                            {item.name}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              {category?.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategory([]);
+                    setPage(1);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="flex gap-3 sm:gap-6 pb-4 flex-wrap">
+          <SearchFilterInput
+            searchText={searchText}
+            handleSearchChange={handleSearchChange}
+            className="mt-[-4px]"
+          />
+        </div> */}
+      </div>
 
       {/* {isLoading == false ? (
         <div className="grid grid-cols-12 gap-4">
@@ -1005,6 +1165,7 @@ const sortedIdeas = [...tradeIdeas].sort((a, b) => {
       ) : (
         <Loader />
       )}
+      {isFetching && <Loader />}
     </div>
   );
 };
