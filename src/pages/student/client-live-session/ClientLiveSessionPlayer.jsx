@@ -227,23 +227,35 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
           className={`relative w-full h-full rounded-xl overflow-hidden live-player-container ${
             isFullscreen ? "css-fullscreen-active" : ""
           }`}
-          style={fullscreenStyles}
+          style={{
+            ...fullscreenStyles,
+            // Ensure children can receive pointer events
+            pointerEvents: "auto",
+          }}
         >
           {/* ✅ Fullscreen button - positioned for iOS visibility */}
           <button
-            onClick={toggleFullscreen}
-            onTouchEnd={(e) => {
-              e.preventDefault();
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
               toggleFullscreen();
             }}
-            className="absolute z-[2147483647] bg-black/70 hover:bg-black/90 active:bg-black text-white rounded-lg p-3 transition-all custom-fullscreen-btn"
+            className="absolute bg-black/70 hover:bg-black/90 active:bg-black text-white rounded-lg p-3 transition-all custom-fullscreen-btn"
             style={{
               bottom: isFullscreen ? "70px" : "52px",
               right: "12px",
+              zIndex: 2147483647,
               WebkitTapHighlightColor: "transparent",
               touchAction: "manipulation",
-              minWidth: "44px", // iOS minimum touch target
-              minHeight: "44px", // iOS minimum touch target
+              minWidth: "48px",
+              minHeight: "48px",
+              pointerEvents: "auto",
+              cursor: "pointer",
+              // Ensure visibility on iOS
+              WebkitAppearance: "none",
+              appearance: "none",
+              border: "none",
+              outline: "none",
             }}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >

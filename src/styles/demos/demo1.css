@@ -538,6 +538,20 @@ body.ios-fullscreen-active {
   pointer-events: auto !important;
   cursor: pointer !important;
   -webkit-tap-highlight-color: transparent !important;
+  /* iOS specific - ensure button is tappable */
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+}
+
+/* Ensure button is always visible and clickable */
+.live-player-container .custom-fullscreen-btn {
+  position: absolute !important;
+  pointer-events: auto !important;
+  z-index: 2147483647 !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* Hide the SDK's default fullscreen button since we have our own */
@@ -561,10 +575,6 @@ body.ios-fullscreen-active {
 }
 
 /* Position our custom fullscreen button in the controls bar */
-.live-player-container .custom-fullscreen-btn {
-  bottom: 12px !important;
-  right: 12px !important;
-}
 
 /* In fullscreen, position button at bottom right */
 .mobile-fullscreen-active .custom-fullscreen-btn,
