@@ -1001,7 +1001,7 @@ const ClientTradeIdeas = () => {
 
               <div className="p-6">
                 {/* Trader Info */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
@@ -1029,9 +1029,13 @@ const ClientTradeIdeas = () => {
                       </div>
                     </div>
                   </div>
+
                   <div className="text-gray-600 text-sm">
                     {trade.createAt
-                      ? new Date(trade.createAt).getFullYear()
+                      ? format(
+                          new Date(trade.createAt),
+                          "MMM dd, yyyy, hh:mm a"
+                        )
                       : ""}
                   </div>
                 </div>
