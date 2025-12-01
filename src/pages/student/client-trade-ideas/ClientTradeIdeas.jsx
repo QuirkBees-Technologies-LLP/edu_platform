@@ -254,11 +254,11 @@ const ClientTradeIdeas = () => {
     default: 3,
   };
 
-  const sortedIdeas = [...tradeIdeas].sort((a, b) => {
-    const orderA = statusPriority[a.status] || statusPriority.default;
-    const orderB = statusPriority[b.status] || statusPriority.default;
-    return orderA - orderB;
-  });
+  // const sortedIdeas = [...tradeIdeas].sort((a, b) => {
+  //   const orderA = statusPriority[a.status] || statusPriority.default;
+  //   const orderB = statusPriority[b.status] || statusPriority.default;
+  //   return orderA - orderB;
+  // });
 
   const call = () => {
     window.alert("Link is not provide..!");
@@ -464,8 +464,8 @@ const ClientTradeIdeas = () => {
                   <button className="min-w-56 flex justify-between items-center border rounded-md px-3 py-2 bg-white dark:bg-[#1c1f26]">
                     <span className="truncate text-sm">
                       {category.length > 0
-                        ? `${category.length} category selected`
-                        : "Select Category"}
+                        ? `${category.length} asset class selected`
+                        : "Select asset class"}
                     </span>
                     <ChevronDown size={16} />
                   </button>
@@ -473,41 +473,47 @@ const ClientTradeIdeas = () => {
 
                 <PopoverContent className="w-[225px] p-0">
                   <Command>
-                    <CommandGroup>
-                      {categories.map((item) => {
-                        const selected = category.includes(item._id);
+                    {categories.length === 0 ? (
+                      <div className="p-3 text-sm text-gray-500 text-center">
+                        No asset class found
+                      </div>
+                    ) : (
+                      <CommandGroup>
+                        {categories.map((item) => {
+                          const selected = category.includes(item._id);
 
-                        return (
-                          <CommandItem
-                            key={item._id}
-                            onSelect={() => {
-                              setCategory((prev) => {
-                                const exists = prev.includes(item._id);
-                                const updated = exists
-                                  ? prev.filter((id) => id !== item._id)
-                                  : [...prev, item._id];
+                          return (
+                            <CommandItem
+                              key={item._id}
+                              onSelect={() => {
+                                setCategory((prev) => {
+                                  const exists = prev.includes(item._id);
+                                  const updated = exists
+                                    ? prev.filter((id) => id !== item._id)
+                                    : [...prev, item._id];
 
-                                setPage(1);
-                                return updated;
-                              });
-                            }}
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
-                            <div
-                              className={`h-4 w-4 border rounded flex items-center justify-center ${
-                                selected
-                                  ? "bg-primary text-white border-primary"
-                                  : "bg-white dark:bg-[#1c1f26]"
-                              }`}
+                                  setPage(1);
+                                  return updated;
+                                });
+                              }}
+                              className="flex items-center gap-2 cursor-pointer"
                             >
-                              {selected && <Check size={14} />}
-                            </div>
+                              <div
+                                className={`h-4 w-4 border rounded flex items-center justify-center ${
+                                  selected
+                                    ? "bg-primary text-white border-primary"
+                                    : "bg-white dark:bg-[#1c1f26]"
+                                }`}
+                              >
+                                {selected && <Check size={14} />}
+                              </div>
 
-                            {item.name}
-                          </CommandItem>
-                        );
-                      })}
-                    </CommandGroup>
+                              {item.name}
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    )}
                   </Command>
                 </PopoverContent>
               </Popover>
@@ -832,7 +838,7 @@ const ClientTradeIdeas = () => {
 
       {isLoading == false ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedIdeas?.map((trade, index) => (
+          {tradeIdeas?.map((trade, index) => (
             <div
               key={trade._id}
               className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md"
