@@ -23,7 +23,7 @@ import {
   useCreateEducatorTradeIdeasMutation,
   useUpdateEducatorTradeIdeaMutation,
 } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 
 const CreateTradeIdeas = forwardRef(
   (
@@ -35,7 +35,7 @@ const CreateTradeIdeas = forwardRef(
     const [updateEducatorTradeIdea] = useUpdateEducatorTradeIdeaMutation();
 
     const educatorId = auth?.user?._id ?? null;
-    const { data } = useGetEducatorAcademyCategoryQuery();
+    const { data } = useGetCommonCategoryQuery();
 
     const initialValues = {
       name: "",

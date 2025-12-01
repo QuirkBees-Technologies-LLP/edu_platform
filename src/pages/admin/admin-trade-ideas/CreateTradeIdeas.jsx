@@ -23,7 +23,7 @@ import {
   useUpdateTradeIdeaMutation,
 } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 
 const CreateTradeIdeas = forwardRef(
   (
@@ -34,7 +34,7 @@ const CreateTradeIdeas = forwardRef(
     const [createTradeIdeas] = useCreateTradeIdeasMutation();
     const [updateTradeIdea] = useUpdateTradeIdeaMutation();
     const educatorId = auth?.user?._id;
-    const { data } = useGetEducatorAcademyCategoryQuery();
+    const { data } = useGetCommonCategoryQuery();
 
     const initialValues = {
       name: "",
@@ -127,7 +127,6 @@ const CreateTradeIdeas = forwardRef(
         }
       },
     });
-
 
     useEffect(() => {
       if (educatorId && formik.values) {

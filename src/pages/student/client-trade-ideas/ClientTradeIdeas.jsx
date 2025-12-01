@@ -38,7 +38,7 @@ import {
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Check, ChevronDown } from "lucide-react";
 import Loader from "../../../components/ui/loader";
-import { useGetClientEducatorAcademyCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
+import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 const LabelMap = {
   active: "Active",
   pending: "Pending",
@@ -203,7 +203,7 @@ const ClientTradeIdeas = () => {
     category: category.length > 0 ? category : undefined,
   });
 
-  const { data: categoryList } = useGetClientEducatorAcademyCategoryQuery();
+  const { data: categoryList } = useGetCommonCategoryQuery();
   const categories = categoryList?.data || [];
 
   const totalPages = data?.pagination?.totalPages || 1;
