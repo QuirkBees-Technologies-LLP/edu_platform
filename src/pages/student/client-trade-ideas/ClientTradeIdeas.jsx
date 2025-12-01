@@ -196,7 +196,7 @@ const ClientTradeIdeas = () => {
 
   const observer = useRef();
 
-  const { data, isFetching, isLoading } = useGetClientTradeIdeasQuery({
+  const { data, isFetching, isLoading, refetch } = useGetClientTradeIdeasQuery({
     page,
     limit,
     status: status || undefined,
@@ -242,6 +242,7 @@ const ClientTradeIdeas = () => {
   useEffect(() => {
     // setTradeIdeas([]);
     setPage(1);
+    refetch();
   }, [status, category]);
 
   const handleCloseView = () => {
@@ -427,7 +428,6 @@ const ClientTradeIdeas = () => {
                 value={status || ""}
                 onValueChange={(val) => {
                   setStatus(val);
-                  setPage(1);
                 }}
               >
                 <SelectTrigger className="w-[190px]">
@@ -450,7 +450,6 @@ const ClientTradeIdeas = () => {
                   type="button"
                   onClick={() => {
                     setStatus("");
-                    setPage(1);
                   }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
@@ -492,7 +491,6 @@ const ClientTradeIdeas = () => {
                                     ? prev.filter((id) => id !== item._id)
                                     : [...prev, item._id];
 
-                                  setPage(1);
                                   return updated;
                                 });
                               }}
@@ -523,7 +521,6 @@ const ClientTradeIdeas = () => {
                   type="button"
                   onClick={() => {
                     setCategory([]);
-                    setPage(1);
                   }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
