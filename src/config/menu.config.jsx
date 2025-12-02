@@ -20,6 +20,7 @@ import {
   UserRoundCog,
   ListTodo,
   Star,
+  BadgeCent,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1377,6 +1378,12 @@ export const sideMenus = {
       icon: <ChartCandlestick />,
       path: "/admin/trade-analysis",
     },
+
+    // {
+    //   title: "IQ Crypto",
+    //   icon: <BadgeCent />,
+    //   path: "/admin/iq-crypto",
+    // },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
@@ -1503,6 +1510,11 @@ export const sideMenus = {
       icon: <ChartCandlestick />,
       path: "/admin/trade-analysis",
     },
+    // {
+    //   title: "IQ Crypto",
+    //   icon: <BadgeCent />,
+    //   path: "/admin/iq-crypto",
+    // },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
@@ -1728,6 +1740,11 @@ export const sideMenus = {
       path: "/educator/trade-analysis",
     },
     {
+      title: "IQ Crypto",
+      icon: <BadgeCent />,
+      path: "/educator/iq-crypto",
+    },
+    {
       title: "IQ Ideas",
       icon: <Lightbulb />,
       path: "/educator/ideas",
@@ -1810,6 +1827,11 @@ export const sideMenus = {
       title: "IQ Insight",
       icon: <ChartLine />,
       path: "/iq-insight",
+    },
+    {
+      title: "IQ Crypto",
+      icon: <BadgeCent />,
+      path: "/iq-crypto",
     },
     {
       title: "IQ Ideas",

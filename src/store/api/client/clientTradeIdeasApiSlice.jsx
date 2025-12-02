@@ -39,8 +39,30 @@ export const clientTradeIdeasApiSlice = createApi({
         return `/users/trade-analysis/list?${params.toString()}`;
       },
     }),
+    getClientCryptoAnalysis: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search = "",
+        // timeframe = "",
+        // markets = "",
+      }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          search,
+          //   timeframe,
+          // markets,
+        });
+
+        return `/users/crypto-analysis/list?${params.toString()}`;
+      },
+    }),
   }),
 });
 
-export const { useGetClientTradeIdeasQuery, useGetClientTradeAnalysisQuery } =
-  clientTradeIdeasApiSlice;
+export const {
+  useGetClientTradeIdeasQuery,
+  useGetClientTradeAnalysisQuery,
+  useGetClientCryptoAnalysisQuery,
+} = clientTradeIdeasApiSlice;
