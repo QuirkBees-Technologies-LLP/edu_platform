@@ -386,7 +386,7 @@ const ClientTradeIdeas = () => {
           <div className="flex flex-col  ">
             <span className="text-gray-700 text-sm">Total Pips</span>
             <span className="text-amber-400 font-bold">
-              {totalSummary.length > 0 && "+ "}
+              {totalSummary.map((item) => item.netPips) > 0 && "+ "}
               {totalSummary.map((item) => item.netPips) || 0}
             </span>
           </div>
