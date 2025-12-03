@@ -8,7 +8,10 @@ import { set } from "date-fns";
 // Delete eductor trade idea
 
 const DeleteAdminIqCrypto = forwardRef(
-  ({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
+  (
+    { isDeleteOpen, handleDeleteClose, setSelectedRow, selectedRow, refetch },
+    ref
+  ) => {
     const [DeleteCryptoAnalysis, { isLoading, isSuccess, isError, error }] =
       useDeleteAdminCryptoAnalysisMutation();
 
@@ -17,9 +20,11 @@ const DeleteAdminIqCrypto = forwardRef(
         await DeleteCryptoAnalysis(selectedRow?._id).unwrap();
         refetch();
         toast.success("IQ Crypto deleted successfully!");
+
+        setSelectedRow({});
         handleDeleteClose();
-      } catch (error) {
-        toast.error(err.data.message);
+      } catch (err) {
+        toast.error(err?.data?.message || "Delete failed");
       }
     };
 
@@ -27,6 +32,7 @@ const DeleteAdminIqCrypto = forwardRef(
       <Dialog
         open={isDeleteOpen}
         onOpenChange={() => {
+          setSelectedRow({});
           handleDeleteClose();
         }}
       >
@@ -44,6 +50,7 @@ const DeleteAdminIqCrypto = forwardRef(
             <button
               className="btn btn-light"
               onClick={() => {
+                setSelectedRow({});
                 handleDeleteClose();
               }}
             >
@@ -53,6 +60,7 @@ const DeleteAdminIqCrypto = forwardRef(
               type="submit"
               className="btn btn-danger"
               onClick={() => {
+                setSelectedRow({});
                 handleDelete();
               }}
               disabled={isLoading}

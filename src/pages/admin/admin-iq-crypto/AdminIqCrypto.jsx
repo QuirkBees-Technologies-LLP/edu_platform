@@ -38,6 +38,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
     setIsLightBoxOpen(false);
   };
   const handleClickOpen = () => {
+    setSelectedRow({});
     setIsCreateOpen(true);
   };
 
@@ -46,16 +47,21 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
   };
 
   const handleDeleteClose = () => {
+    setSelectedRow({});
     setIsDeleteOpen(false);
-    setSelectedRow(null);
   };
 
   const { isRTL } = useLanguage();
 
-  const ActionMenu = () => {
+  const ActionMenu = (row) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem
+          onClick={() => {
+            setSelectedRow(row || {});
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
@@ -63,7 +69,12 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
             <MenuTitle>Edit</MenuTitle>
           </MenuLink>
         </MenuItem>
-        <MenuItem onClick={handleDeleteOpen}>
+        <MenuItem
+          onClick={() => {
+            setIsDeleteOpen(true);
+            setSelectedRow(row);
+          }}
+        >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="trash" />
@@ -152,7 +163,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
           <Menu className="items-stretch">
             <MenuItem
               toggle="dropdown"
-              onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+              // onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
               trigger="click"
               dropdownProps={{
                 placement: isRTL() ? "bottom-start" : "bottom-end",
@@ -169,7 +180,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {ActionMenu()}
+              {ActionMenu(row.original)}
             </MenuItem>
           </Menu>
         ),
@@ -220,8 +231,8 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
   };
 
   const handleCloseCreate = () => {
+    setSelectedRow({});
     setIsCreateOpen(false);
-    setSelectedRow(null);
   };
 
   const handleFetchData = async ({ pageIndex, pageSize }) => {
@@ -306,6 +317,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
             isDeleteOpen={isDeleteOpen}
             handleDeleteClose={handleDeleteClose}
             selectedRow={selectedRow}
+            setSelectedRow={setSelectedRow}
           />
         )}
       </>

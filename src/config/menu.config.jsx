@@ -1379,11 +1379,11 @@ export const sideMenus = {
       path: "/admin/trade-analysis",
     },
 
-    // {
-    //   title: "IQ Crypto",
-    //   icon: <BadgeCent />,
-    //   path: "/admin/iq-crypto",
-    // },
+    {
+      title: "IQ Crypto",
+      icon: <BadgeCent />,
+      path: "/admin/iq-crypto",
+    },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
@@ -1510,11 +1510,11 @@ export const sideMenus = {
       icon: <ChartCandlestick />,
       path: "/admin/trade-analysis",
     },
-    // {
-    //   title: "IQ Crypto",
-    //   icon: <BadgeCent />,
-    //   path: "/admin/iq-crypto",
-    // },
+    {
+      title: "IQ Crypto",
+      icon: <BadgeCent />,
+      path: "/admin/iq-crypto",
+    },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,

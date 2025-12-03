@@ -82,6 +82,7 @@ const CreateAdminIqCrypto = forwardRef(
             toast.success("IQ Crypto created successfully!");
           }
           formik.resetForm();
+          setSelectedRow({});
           handleCloseCreate();
         } catch (err) {
           console.log(err);
@@ -92,6 +93,7 @@ const CreateAdminIqCrypto = forwardRef(
         }
       },
     });
+    console.log(formik, "selectedRow");
     useEffect(() => {
       if (createdBy && formik.values) {
         formik.setFieldValue("createdBy", createdBy);
@@ -106,15 +108,18 @@ const CreateAdminIqCrypto = forwardRef(
             dataURL: img,
           })) || [];
 
-        const initData = {
-          title: selectedRow?.title,
+        formik.setValues({
+          title: selectedRow.title ?? "",
           files: existingImages,
-          description: selectedRow?.description,
-          url: selectedRow?.url,
-        };
-        formik.setValues(initData);
+          description: selectedRow.description ?? "",
+          url: selectedRow.url ?? "",
+          createdBy: selectedRow.createdBy?._id ?? "",
+        });
+      } else {
+        // reset when switching back to create mode
+        formik.resetForm();
       }
-    }, [selectedRow?._id, isCreateOpen]);
+    }, [selectedRow]);
 
     // Handle multiple image selection
     const handleImageChange = (selectedFiles) => {
