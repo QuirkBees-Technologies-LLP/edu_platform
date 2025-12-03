@@ -384,7 +384,7 @@ const ClientTradeIdeas = () => {
                   border dark:border-gray-700 rounded-2xl px-5 py-4 w-full sm:w-[350px] shadow-md "
         >
           <div className="flex flex-col  ">
-            <span className="text-gray-700 text-sm">Total Ideas</span>
+            <span className="text-gray-700 text-sm">Total Pips</span>
             <span className="text-amber-400 font-bold">
               {totalSummary.length > 0 && "+ "}
               {totalSummary.map((item) => item.netPips) || 0}
