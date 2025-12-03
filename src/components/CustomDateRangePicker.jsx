@@ -110,13 +110,13 @@ const DateRangePicker = ({
   const displayLabel = selectedRange || "Filter By Date";
 
   const colors = {
-    bg: isDark ? "#1f1f1f" : "#ffffff",
-    bgHover: isDark ? "#2a2a2a" : "#f9fafb",
-    bgActive: isDark ? "#2e2e2e" : "#f3f4f6",
-    text: isDark ? "#f3f4f6" : "#111827",
-    subText: isDark ? "#9ca3af" : "#6b7280",
-    border: isDark ? "#3f3f46" : "#d1d5db",
-    borderHover: isDark ? "#565658" : "#9ca3af",
+    bg: isDark ? "#1c1f26" : "#ffffff",
+    bgHover: isDark ? "#26272F" : "#f9fafb",
+    bgActive: isDark ? "#26272F" : "#f3f4f6",
+    text: isDark ? "#808290" : "#111827",
+    subText: isDark ? "#808290" : "#6b7280",
+    border: isDark ? "#26272F" : "#d1d5db",
+    borderHover: isDark ? "#26272F" : "#9ca3af",
     shadow: isDark
       ? "0 4px 16px rgba(0,0,0,0.5)"
       : "0 4px 16px rgba(0,0,0,0.1)",
@@ -285,10 +285,10 @@ const DateRangePicker = ({
                   (e.currentTarget.style.backgroundColor = colors.bgHover)
                 }
                 onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  selectedRange === rangeName
-                    ? colors.bgActive
-                    : "transparent")
+                  (e.currentTarget.style.backgroundColor =
+                    selectedRange === rangeName
+                      ? colors.bgActive
+                      : "transparent")
                 }
               >
                 {rangeName}

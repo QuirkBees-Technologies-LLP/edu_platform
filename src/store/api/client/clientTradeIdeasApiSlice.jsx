@@ -6,12 +6,23 @@ export const clientTradeIdeasApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getClientTradeIdeas: builder.query({
-      query: ({ page = 1, limit = 9, status = "", categoryName = [] }) => {
+      query: ({
+        page = 1,
+        limit = 9,
+        status = "",
+        categoryName = [],
+        activeIdea = "",
+        startDate = "",
+        endDate = "",
+      }) => {
         const params = new URLSearchParams();
         params.set("page", page);
         params.set("limit", limit);
 
         if (status) params.set("status", status);
+        if (activeIdea) params.set("ideaType", activeIdea);
+        if (startDate) params.set("startDate", startDate);
+        if (endDate) params.set("endDate", endDate);
 
         if (Array.isArray(categoryName) && categoryName.length > 0) {
           categoryName.forEach((name) => params.append("categoryName", name));
