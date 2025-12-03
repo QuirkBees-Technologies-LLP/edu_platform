@@ -48,7 +48,18 @@ const CreateTradeIdeas = forwardRef(
       exits: [""],
       description: "",
       category: "",
+       pips: 0,
+       
     };
+
+     const numberField = () =>
+          Yup.number()
+            .nullable()
+            .transform((value, originalValue) => {
+              if (originalValue === "" || originalValue === undefined) return null;
+              const cleaned = Number(originalValue);
+              return isNaN(cleaned) ? 0 : cleaned;
+            });
 
     const createSchema = Yup.object().shape({
       name: Yup.string().required("Symbol is required"),
@@ -76,6 +87,7 @@ const CreateTradeIdeas = forwardRef(
         .min(1, "At least one exit is required"),
       description: Yup.string().required("Description is required"),
       category: Yup.string().required("Category is required"),
+      pips: numberField(),
     });
 
     const formik = useFormik({
@@ -95,6 +107,7 @@ const CreateTradeIdeas = forwardRef(
           formData.append("files", file?.file?.file)
         );
         formData.append("type", values.type);
+         formData.append("pips", values.pips ?? 0);
         formData.append("timeFrame[]", [values.timeFrame]);
         formData.append("educatorId", values.educatorId);
         formData.append("status", values.status);
@@ -146,6 +159,7 @@ const CreateTradeIdeas = forwardRef(
           name: selectedRow?.name,
           files: existingImages,
           type: selectedRow?.type,
+          pips: selectedRow?.pips,
           timeFrame: selectedRow?.timeFrame[0],
           status: selectedRow?.status,
           entry: selectedRow?.entry,
@@ -534,6 +548,36 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div> */}
+
+               {["win", "loss", "partialWin"].includes(
+                  formik.values.status
+                ) && (
+                  <div className="col-span-12 md:col-span-6">
+                    <div className="flex flex-col gap-1">
+                      <label className="form-label text-gray-900 gap-1">
+                        Pips <span className="text-danger"></span>
+                      </label>
+
+                      <input
+                        type="number"
+                        placeholder="Enter Pips"
+                        autoComplete="off"
+                        className={`form-control input input-md w-full ${
+                          formik.errors.pips && formik.touched.pips
+                            ? "border border-danger"
+                            : ""
+                        }`}
+                        {...formik.getFieldProps("pips")}
+                      />
+
+                      {formik.touched.pips && formik.errors.pips && (
+                        <span role="alert" className="text-danger text-xs mt-1">
+                          {formik.errors.pips}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
               <div className="col-span-12">
                 <div className="flex flex-wrap gap-5">
