@@ -111,11 +111,11 @@ const CreateTradeIdeas = forwardRef(
           if (selectedRow?._id) {
             await updateTradeIdea(formData).unwrap();
             refetch();
-            toast.success("Trade idea updated successfully!");
+            toast.success("Idea updated successfully!");
           } else {
             await createTradeIdeas(formData).unwrap();
             refetch();
-            toast.success("Trade idea created successfully!");
+            toast.success("Idea created successfully!");
           }
           formik.resetForm();
           handleCloseCreate();

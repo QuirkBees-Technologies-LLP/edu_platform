@@ -26,7 +26,7 @@ import DeleteAdminIqCrypto from "./DeleteAdminIqCrypto";
 import CreateAdminIqCrypto from "./CreateAdminIqCrypto";
 import ViewAdminIqCrypto from "./ViewAdminIqCrypto";
 
-const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
+const AdminIqCrypto = ({ title = "IQ Crypto Projects" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -251,7 +251,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Crypto:", error);
+      console.error("Error fetching IQ Crypto :", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -267,7 +267,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto" }) => {
       <>
         <Toolbar>
           <ToolbarHeading>
-            <ToolbarPageTitle text="IQ Crypto" />
+            <ToolbarPageTitle text="IQ Crypto Projects" />
             <ToolbarDescription>
               Generate, analyze, and execute profitable trading opportunities
               with smart insights, market trends, and data-driven strategies

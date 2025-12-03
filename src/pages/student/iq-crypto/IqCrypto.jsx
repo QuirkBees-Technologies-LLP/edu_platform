@@ -145,7 +145,7 @@ const IqCrypto = () => {
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Crypto" />
+          <ToolbarPageTitle text="IQ Crypto Projects" />
           <ToolbarDescription>
             Transform your crypto strategy with smart insights and real-time
             market intelligence.

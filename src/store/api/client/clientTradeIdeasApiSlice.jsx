@@ -6,15 +6,15 @@ export const clientTradeIdeasApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getClientTradeIdeas: builder.query({
-      query: ({ page = 1, limit = 10, status = "", category = [] }) => {
+      query: ({ page = 1, limit = 9, status = "", categoryName = [] }) => {
         const params = new URLSearchParams();
         params.set("page", page);
         params.set("limit", limit);
 
         if (status) params.set("status", status);
 
-        if (Array.isArray(category) && category.length > 0) {
-          category.forEach((id) => params.append("categoryId", id));
+        if (Array.isArray(categoryName) && categoryName.length > 0) {
+          categoryName.forEach((name) => params.append("categoryName", name));
         }
 
         return `/users/idea/get?${params.toString()}`;
@@ -23,7 +23,7 @@ export const clientTradeIdeasApiSlice = createApi({
     getClientTradeAnalysis: builder.query({
       query: ({
         page = 1,
-        limit = 10,
+        limit = 9,
         search = "",
         // timeframe = "",
         markets = "",

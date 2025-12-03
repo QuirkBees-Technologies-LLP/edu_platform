@@ -1380,7 +1380,7 @@ export const sideMenus = {
     },
 
     {
-      title: "IQ Crypto",
+      title: "IQ Crypto Projects",
       icon: <BadgeCent />,
       path: "/admin/iq-crypto",
     },
@@ -1511,7 +1511,7 @@ export const sideMenus = {
       path: "/admin/trade-analysis",
     },
     {
-      title: "IQ Crypto",
+      title: "IQ Crypto Projects",
       icon: <BadgeCent />,
       path: "/admin/iq-crypto",
     },
@@ -1740,7 +1740,7 @@ export const sideMenus = {
       path: "/educator/trade-analysis",
     },
     {
-      title: "IQ Crypto",
+      title: "IQ Crypto Projects",
       icon: <BadgeCent />,
       path: "/educator/iq-crypto",
     },
@@ -1829,7 +1829,7 @@ export const sideMenus = {
       path: "/iq-insight",
     },
     {
-      title: "IQ Crypto",
+      title: "IQ Crypto Projects",
       icon: <BadgeCent />,
       path: "/iq-crypto",
     },

@@ -120,11 +120,11 @@ const CreateTradeIdeas = forwardRef(
           if (selectedRow?._id) {
             await updateEducatorTradeIdea(formData).unwrap();
 
-            toast.success("Trade idea updated successfully!");
+            toast.success("Idea updated successfully!");
           } else {
             await createEducatorTradeIdeas(formData).unwrap();
 
-            toast.success("Trade idea created successfully!");
+            toast.success("Idea created successfully!");
           }
           formik.resetForm();
           setSelectedRow(null);

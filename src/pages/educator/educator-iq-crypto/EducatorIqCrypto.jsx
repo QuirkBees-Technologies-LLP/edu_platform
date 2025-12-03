@@ -26,7 +26,7 @@ import DeleteEducatorIqCrypto from "./DeleteEducatorIqCrypto";
 import CreateEducatorIqCrypto from "./CreateEducatorIqCrypto";
 import ViewEducatorIqCrypto from "./ViewEducatorIqCrypto";
 
-const EducatorIqCrypto = ({ title = "IQ Crypto" }) => {
+const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -254,7 +254,7 @@ const EducatorIqCrypto = ({ title = "IQ Crypto" }) => {
       <>
         <Toolbar>
           <ToolbarHeading>
-            <ToolbarPageTitle text="IQ Crypto" />
+            <ToolbarPageTitle text="IQ Crypto Projects" />
             <ToolbarDescription>
               Generate, analyze, and execute profitable trading opportunities
               with smart insights, market trends, and data-driven strategies

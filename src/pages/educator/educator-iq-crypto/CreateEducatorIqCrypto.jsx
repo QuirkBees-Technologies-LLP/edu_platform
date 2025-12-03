@@ -165,7 +165,9 @@ const CreateEducatorIqCrypto = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id ? "Update IQ Crypto" : "Create IQ Crypto"}
+                {selectedRow?._id
+                  ? "Update IQ Crypto Projects"
+                  : "Create IQ Crypto Projects"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">

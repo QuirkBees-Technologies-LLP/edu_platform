@@ -185,7 +185,7 @@ const statusColorMap = {
 // };
 const ClientTradeIdeas = () => {
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(9);
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
@@ -196,12 +196,13 @@ const ClientTradeIdeas = () => {
 
   const observer = useRef();
 
-  const { data, isFetching, isLoading, refetch } = useGetClientTradeIdeasQuery({
-    page,
-    limit,
-    status: status || undefined,
-    category: category.length > 0 ? category : undefined,
-  });
+  const { data, isFetching, isLoading, isError, refetch } =
+    useGetClientTradeIdeasQuery({
+      page,
+      limit,
+      status,
+      categoryName: category.length > 0 ? category : undefined,
+    });
 
   const { data: categoryList } = useGetCommonCategoryQuery();
   const categories = categoryList?.data || [];
@@ -463,8 +464,8 @@ const ClientTradeIdeas = () => {
                   <button className="min-w-56 flex justify-between items-center border rounded-md px-3 py-2 bg-white dark:bg-[#1c1f26]">
                     <span className="truncate text-sm">
                       {category.length > 0
-                        ? `${category.length} asset class selected`
-                        : "Select asset class"}
+                        ? `${category.length} Asset Class Selected`
+                        : "Select Asset Class"}
                     </span>
                     <ChevronDown size={16} />
                   </button>
@@ -474,22 +475,22 @@ const ClientTradeIdeas = () => {
                   <Command>
                     {categories.length === 0 ? (
                       <div className="p-3 text-sm text-gray-500 text-center">
-                        No asset class found
+                        No Asset lass found
                       </div>
                     ) : (
                       <CommandGroup>
                         {categories.map((item) => {
-                          const selected = category.includes(item._id);
+                          const selected = category.includes(item.name);
 
                           return (
                             <CommandItem
                               key={item._id}
                               onSelect={() => {
                                 setCategory((prev) => {
-                                  const exists = prev.includes(item._id);
+                                  const exists = prev.includes(item.name);
                                   const updated = exists
-                                    ? prev.filter((id) => id !== item._id)
-                                    : [...prev, item._id];
+                                    ? prev.filter((name) => name !== item.name)
+                                    : [...prev, item.name];
 
                                   return updated;
                                 });
@@ -833,7 +834,25 @@ const ClientTradeIdeas = () => {
         <Loader />
       )} */}
 
-      {isLoading == false ? (
+      {isLoading && page === 1 ? (
+        <Loader />
+      ) : tradeIdeas.length === 0 &&
+        !isLoading &&
+        !isError &&
+        !isFetching &&
+        page === 1 ? (
+        <div className="col-span-12 flex items-center justify-center py-20">
+          <div className="text-gray-700 text-lg font-semibold">
+            No records found
+          </div>
+        </div>
+      ) : isFetching && !isLoading && page === 1 ? (
+        <div className="col-span-12 flex items-center justify-center py-20">
+          <div className="text-gray-700 text-lg font-semibold">
+            <Loader />
+          </div>
+        </div>
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tradeIdeas?.map((trade, index) => (
             <div
@@ -1169,10 +1188,12 @@ const ClientTradeIdeas = () => {
             selectedIdea={selectedIdea}
           />
         </div>
-      ) : (
-        <Loader />
       )}
-      {isFetching && <Loader />}
+      {isFetching && page > 1 && (
+        <p className="text-center text-gray-600 mt-4 text-sm">
+          Loading more...
+        </p>
+      )}
     </div>
   );
 };
