@@ -591,7 +591,7 @@ const ClientTradeIdeas = () => {
                     </div>
                   )}
                   {LabelMap[trade.status] === "Break Even" && (
-                    <div className="bg-gray-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                    <div className="bg-blue-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
                       Break Even
                     </div>
                   )}
