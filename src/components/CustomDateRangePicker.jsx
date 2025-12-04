@@ -133,7 +133,7 @@ const DateRangePicker = ({
       alignItems: "center",
       justifyContent: "space-between",
       width: "100%",
-      height: "38px",
+      height: "44px",
       padding: "8px 12px",
       border: `1px solid ${colors.border}`,
       borderRadius: "6px",

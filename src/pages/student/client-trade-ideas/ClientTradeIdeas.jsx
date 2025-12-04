@@ -189,8 +189,8 @@ const ClientTradeIdeas = () => {
 
       <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
         <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
-          <div className="flex flex-wrap items-center gap-3 mb-2">
-            <div className="py-1 px-4 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-2">
+            <div className="py-1 px-2 flex overflow-auto bg-gray-100 rounded-md gap-3 sm:gap-3.5 shadow-md">
               {ideaType.map((idea) => (
                 <button
                   key={idea}
@@ -201,12 +201,11 @@ const ClientTradeIdeas = () => {
                     setPage(1);
                   }}
                   className={`
-         p-2 flex items-center text-xs sm:text-sm rounded-lg font-semibold transition-all
-        ${
-          activeIdea === idea
-            ? "bg-sky-500 text-white shadow-lg shadow-primary/50"
-            : "text-gray-600 hover:bg-gray-300"
-        }
+         p-2 flex items-center text-xs sm:text-sm rounded-md font-medium transition-all
+        ${activeIdea === idea
+                      ? "bg-primary text-white shadow-lg shadow-primary/50"
+                      : "text-gray-600 hover:bg-gray-300"
+                    }
       `}
                 >
                   {(idea === "all" && "All Idea") ||
@@ -227,7 +226,7 @@ const ClientTradeIdeas = () => {
                   setStatus(val);
                 }}
               >
-                <SelectTrigger className="w-[190px]">
+                <SelectTrigger className="w-[190px] h-11">
                   <SelectValue placeholder="Select Status">
                     {status ? statusLabelMap[status] : "Select Status"}
                   </SelectValue>
@@ -257,7 +256,7 @@ const ClientTradeIdeas = () => {
             <div className="flex items-center gap-2 relative ">
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="min-w-56 flex justify-between items-center border rounded-md px-3 py-2 bg-white dark:bg-[#1c1f26]">
+                  <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
                     <span className="truncate text-sm">
                       {category.length > 0
                         ? `${category.length} Asset Class Selected`
@@ -294,11 +293,10 @@ const ClientTradeIdeas = () => {
                               className="flex items-center gap-2 cursor-pointer"
                             >
                               <div
-                                className={`h-4 w-4 border rounded flex items-center justify-center ${
-                                  selected
-                                    ? "bg-primary text-white border-primary"
-                                    : "bg-white dark:bg-[#1c1f26]"
-                                }`}
+                                className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                                  ? "bg-primary text-white border-primary"
+                                  : "bg-white dark:bg-[#1c1f26]"
+                                  }`}
                               >
                                 {selected && <Check size={14} />}
                               </div>
@@ -338,63 +336,69 @@ const ClientTradeIdeas = () => {
           </div>
         } */}
       </div>
-      <div className="flex items-center flex-wrap gap-4   mb-4 mr-4">
+      <div className="grid grid-cols-12 gap-6 mb-6">
         {/* Winning Trades */}
-        <div
-          className="flex items-center justify-between bg-gray-200 dark:bg-[#111827]/60 backdrop-blur-md 
-                  border dark:border-gray-700 rounded-2xl px-5 py-4 w-full sm:w-[350px] shadow-md "
-        >
-          <div className="flex flex-col  ">
-            <span className="text-gray-700 text-sm">Winning Ideas</span>
-            <span className="text-emerald-400  font-bold">
-              {totalSummary.map((item) => item.winCount) || 0}
-            </span>
-          </div>
+        <div className="col-span-12 sm:col-span-6 md:col-span-4">
+          <div
+            className="flex items-center justify-between
+                  border rounded-2xl px-5 py-4 shadow-md "
+          >
+            <div className="flex flex-col  ">
+              <span className="text-gray-700 text-sm">Winning Ideas</span>
+              <span className="text-emerald-400  font-bold">
+                {totalSummary.map((item) => item.winCount) || 0}
+              </span>
+            </div>
 
-          <div className="flex items-center">
-            <span className="text-emerald-400 text-xl">
-              <ArrowUpRight />
-            </span>
+            <div className="flex items-center">
+              <span className="text-emerald-400 text-xl">
+                <ArrowUpRight />
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Losing Trades */}
-        <div
-          className="flex items-center justify-between  bg-gray-200 dark:bg-[#111827]/60 backdrop-blur-md 
-                  border dark:border-gray-700 rounded-2xl px-5 py-4 w-full sm:w-[350px] shadow-md "
-        >
-          <div className="flex flex-col  ">
-            <span className="text-gray-700 text-sm">Losing Ideas</span>
-            <span className="text-red-400  font-bold">
-              {" "}
-              {totalSummary.map((item) => item.loseCount) || 0}
-            </span>
-          </div>
+        <div className="col-span-12 sm:col-span-6 md:col-span-4">
+          <div
+            className="flex items-center justify-between 
+                  border rounded-2xl px-5 py-4 shadow-md"
+          >
+            <div className="flex flex-col  ">
+              <span className="text-gray-700 text-sm">Losing Ideas</span>
+              <span className="text-red-400  font-bold">
+                {" "}
+                {totalSummary.map((item) => item.loseCount) || 0}
+              </span>
+            </div>
 
-          <div className="flex items-center">
-            <span className="text-red-400 text-xl">
-              <ArrowDownRight />
-            </span>
+            <div className="flex items-center">
+              <span className="text-red-400 text-xl">
+                <ArrowDownRight />
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Total Pips */}
-        <div
-          className="flex items-center justify-between bg-gray-200 dark:bg-[#111827]/60 backdrop-blur-md 
-                  border dark:border-gray-700 rounded-2xl px-5 py-4 w-full sm:w-[350px] shadow-md "
-        >
-          <div className="flex flex-col  ">
-            <span className="text-gray-700 text-sm">Total Pips</span>
-            <span className="text-amber-400 font-bold">
-              {totalSummary.map((item) => item.netPips) > 0 && "+ "}
-              {totalSummary.map((item) => item.netPips) || 0}
-            </span>
-          </div>
+        <div className="col-span-12 md:col-span-4">
+          <div
+            className="flex items-center justify-between 
+                  border rounded-2xl px-5 py-4 shadow-md"
+          >
+            <div className="flex flex-col  ">
+              <span className="text-gray-700 text-sm">Total Pips</span>
+              <span className="text-amber-400 font-bold">
+                {totalSummary.map((item) => item.netPips) > 0 && "+ "}
+                {totalSummary.map((item) => item.netPips) || 0}
+              </span>
+            </div>
 
-          <div className="flex items-center">
-            <span className="text-amber-400 text-xl">
-              <TrendingUp />
-            </span>
+            <div className="flex items-center">
+              <span className="text-amber-400 text-xl">
+                <TrendingUp />
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -464,12 +468,12 @@ const ClientTradeIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) === 0
-                                          ? t.image.length - 1
-                                          : (t.currentIndex ?? 0) - 1,
-                                    }
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) === 0
+                                        ? t.image.length - 1
+                                        : (t.currentIndex ?? 0) - 1,
+                                  }
                                   : t
                               )
                             );
@@ -485,13 +489,13 @@ const ClientTradeIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) ===
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) ===
                                         t.image.length - 1
-                                          ? 0
-                                          : (t.currentIndex ?? 0) + 1,
-                                    }
+                                        ? 0
+                                        : (t.currentIndex ?? 0) + 1,
+                                  }
                                   : t
                               )
                             );
@@ -514,11 +518,10 @@ const ClientTradeIdeas = () => {
                                   )
                                 );
                               }}
-                              className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                                (trade.currentIndex ?? 0) === idx
-                                  ? "bg-primary"
-                                  : "bg-gray-300 hover:bg-gray-400"
-                              }`}
+                              className={`w-2.5 h-2.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx
+                                ? "bg-primary"
+                                : "bg-gray-300 hover:bg-gray-400"
+                                }`}
                             />
                           ))}
                         </div>
@@ -532,11 +535,10 @@ const ClientTradeIdeas = () => {
                 <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <button
-                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${
-                        trade.type === "buy"
-                          ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                          : "bg-red-500 hover:bg-red-600 text-white"
-                      }`}
+                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${trade.type === "buy"
+                        ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                        : "bg-red-500 hover:bg-red-600 text-white"
+                        }`}
                     >
                       {trade.type === "buy" ? (
                         <TrendingUp size={16} />
@@ -591,9 +593,8 @@ const ClientTradeIdeas = () => {
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
-                        trade.avatarColor
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${trade.avatarColor
+                        }`}
                     >
                       <img
                         className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -608,10 +609,10 @@ const ClientTradeIdeas = () => {
                       </div>
                       <div className="text-gray-600 text-sm">
                         {Array.isArray(trade?.educatorDetails?.categories) &&
-                        trade?.educatorDetails?.categories?.length > 0
+                          trade?.educatorDetails?.categories?.length > 0
                           ? trade?.educatorDetails?.categories
-                              .map((cat) => cat)
-                              .join(", ")
+                            .map((cat) => cat)
+                            .join(", ")
                           : "-"}
                       </div>
                     </div>
@@ -620,9 +621,9 @@ const ClientTradeIdeas = () => {
                   <div className="text-gray-600 text-sm">
                     {trade.createAt
                       ? format(
-                          new Date(trade.createAt),
-                          "MMM dd, yyyy, hh:mm a"
-                        )
+                        new Date(trade.createAt),
+                        "MMM dd, yyyy, hh:mm a"
+                      )
                       : ""}
                   </div>
                 </div>
@@ -637,7 +638,7 @@ const ClientTradeIdeas = () => {
 
                     <span className="font-mono flex items-center gap-2 text-dark dark:text-white">
                       {copiedField.id === trade._id &&
-                      copiedField.field === "Entry" ? (
+                        copiedField.field === "Entry" ? (
                         <span className="text-black dark:text-white text-xs bg-transparent">
                           Copied!
                         </span>
@@ -664,7 +665,7 @@ const ClientTradeIdeas = () => {
 
                     <span className="text-red-600 font-mono flex items-center gap-2">
                       {copiedField.id === trade._id &&
-                      copiedField.field === "Stop Loss" ? (
+                        copiedField.field === "Stop Loss" ? (
                         <span className="text-dark bg-white text-xs">
                           Copied!
                         </span>
@@ -702,7 +703,7 @@ const ClientTradeIdeas = () => {
 
                         <span className="text-emerald-600 font-mono flex items-center gap-2">
                           {copiedField.id === trade._id &&
-                          copiedField.field === fieldName ? (
+                            copiedField.field === fieldName ? (
                             <span className="text-dark bg-white text-xs">
                               Copied!
                             </span>
