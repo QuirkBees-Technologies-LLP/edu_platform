@@ -641,7 +641,36 @@ const ClientTradeIdeas = () => {
 
                 {/* Trade Details */}
                 <div className="space-y-3 mb-6">
-                  {/* ENTRY */}
+                  {/* Status */}
+                  {/* <div className="flex justify-between items-center">
+                    <span className="text-gray-800 dark:text-white-200">
+                      Status
+                    </span>
+
+                    <span className="font-mono flex items-center gap-2 text-cyan-500 dark:text-cyan-500">
+                      {copiedField.id === trade._id &&
+                      copiedField.field === "status" ? (
+                        <span className="text-black dark:text-white text-xs bg-transparent">
+                          Copied!
+                        </span>
+                      ) : (
+                        trade.status && (
+                          <button
+                            onClick={() =>
+                              handleCopyField(trade._id, "status", trade.status)
+                            }
+                            className="text-gray-800 dark:text-white-200 flex items-center"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        )
+                      )}
+
+                      {LabelMap[trade.status]}
+                    
+                    </span>
+                  </div> */}
+                   {/* ENTRY */}
                   <div className="flex justify-between items-center">
                     <span className="text-gray-800 dark:text-white-200">
                       Entry
