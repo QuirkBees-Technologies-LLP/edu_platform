@@ -42,6 +42,7 @@ const LabelMap = {
   win: "Win",
   partialWin: "Partial Win",
   loss: "Loss",
+  breakEven: "Break Even",
 };
 
 const ClientTradeIdeas = () => {
@@ -587,6 +588,11 @@ const ClientTradeIdeas = () => {
                     <div className="bg-purple-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
                       <span>▲</span>
                       PARTIAL WIN {trade.pips} pips
+                    </div>
+                  )}
+                  {LabelMap[trade.status] === "Break Even" && (
+                    <div className="bg-gray-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                      Break Even
                     </div>
                   )}
                 </div>
