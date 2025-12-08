@@ -410,29 +410,13 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-12 md:col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Educator Bio<span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter bio"
-                    autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.bio && formik.touched.bio
-                        ? "border border-danger"
-                        : ""
-                    }`}
-                    {...formik.getFieldProps("bio")}
-                  />
-                  {formik.touched.bio && formik.errors.bio && (
-                    <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors.bio}
-                    </span>
-                  )}
-                </div>
-              </div>
+             
+
+
+
+
+
+
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -711,10 +695,34 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
+               <div className="col-span-12 md:col-span-12">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Profile Bio<span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter profile bio"
+                    autoComplete="off"
+                    className={`form-control input input-md w-full ${
+                      formik.errors.bio && formik.touched.bio
+                        ? "border border-danger"
+                        : ""
+                    }`}
+                    {...formik.getFieldProps("bio")}
+                  />
+                  {formik.touched.bio && formik.errors.bio && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.bio}
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Long Bio<span className="text-danger">*</span>
+                    Trading Card Bio<span className="text-danger">*</span>
                   </label>
                   <RichTextEditor
                     content={formik.values.description}
