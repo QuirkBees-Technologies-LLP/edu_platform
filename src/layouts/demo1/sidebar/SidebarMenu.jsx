@@ -119,7 +119,7 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-blue-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-blue-gradient dark:hover:border-gray-100 hover:rounded-lg dark:hover:!text-gray-50",
+              "border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg dark:hover:!text-gray-50",
               accordionLinkGap[0],
               linkPy,
               linkPl,
@@ -258,7 +258,7 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "border mt-2 border-transparent items-center grow text-gray-100 dark:text-gray-800 menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-blue-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-blue-gradient dark:hover:border-gray-100 hover:rounded-lg gap-4",
+              "border mt-2 border-transparent items-center grow text-gray-100 dark:text-gray-800 menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg gap-4",
               accordionLinkGap[level],
               accordionLinkPl,
               linkPr,

@@ -40,6 +40,10 @@ export const clientEducatorApiSlice = createApi({
       query: () => `/users/category/list`,
       providesTags: ["Educator"],
     }),
+    getCommonCategory: builder.query({
+      query: () => `/common/category`,
+      providesTags: ["Educator"],
+    }),
   }),
 });
 
@@ -47,4 +51,5 @@ export const {
   useGetEducatorsListQuery,
   useToggleFollowMutation,
   useGetClientEducatorAcademyCategoryQuery,
+  useGetCommonCategoryQuery,
 } = clientEducatorApiSlice;

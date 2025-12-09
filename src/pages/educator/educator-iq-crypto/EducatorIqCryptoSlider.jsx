@@ -2,7 +2,6 @@ import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import ShowMoreLess from "../../../components/ui/showmoreless";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function PrevArrow(props) {
@@ -31,7 +30,7 @@ function NextArrow(props) {
   );
 }
 
-export default function EducatorTradeSlider({
+export default function EducatorIqCryptoSlider({
   sliderImages,
   setIsLightBoxOpen,
   selectedIdea,
@@ -64,7 +63,7 @@ export default function EducatorTradeSlider({
                 <img
                   className="w-full h-96 object-cover rounded-lg"
                   src={image}
-                  alt={`Idea image ${index}`}
+                  alt={`Trade image ${index}`}
                 />
               </div>
             ))}
@@ -75,36 +74,43 @@ export default function EducatorTradeSlider({
           </div>
         )}
 
-        <div className="mt-6 space-y-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 font-normal text-sm">Entry</span>
-            <span className="font-medium text-gray-800">
-              {selectedIdea?.entry ?? "N/A"}
-            </span>
-          </div>
-
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
-            <span className="font-medium text-gray-800">
-              {selectedIdea?.invalidation ?? "N/A"}
-            </span>
-          </div>
-
-          {[0, 1, 2].map((idx) => (
-            <div key={idx} className="flex justify-between text-sm">
-              <span className="text-gray-600 font-normal text-sm">
-                {`Exit ${idx + 1}`}
-              </span>
-              <span className="font-medium text-gray-800">
-                {selectedIdea?.exits?.[idx] ?? "N/A"}
+        <div className="flex flex-col gap-2 py-4.5">
+          <div className="flex gap-5 sm:gap-10 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-gray-800 uppercase">Entry</div>
+              <span className="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">
+                {selectedIdea?.entry ?? "-"}
               </span>
             </div>
-          ))}
+            <div className="flex items-center gap-3">
+              <div className="text-2sm text-gray-800 uppercase">
+                Invalidation
+              </div>
+              <span className="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
+                {selectedIdea?.invalidation ?? "-"}
+              </span>
+            </div>
+          </div>
 
-          <ShowMoreLess
-            html={selectedIdea?.description || "No description"}
-            limit={95}
-          />
+          <div>
+            <div className="text-2sm text-gray-800 uppercase mb-3">Exits</div>
+            <div className="flex items-center flex-wrap gap-2">
+              {selectedIdea?.exits?.length > 0 ? (
+                selectedIdea.exits.map((exit, index) => (
+                  <div key={index} className="flex items-center gap-2 mt-1">
+                    <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">
+                      {index + 1}
+                    </div>
+                    <div className="text-sm text-gray-900 font-semibold">
+                      {exit}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-gray-500 text-sm">No exits</div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

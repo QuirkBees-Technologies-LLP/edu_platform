@@ -151,6 +151,9 @@ import Task from "../pages/admin/task-management/Task";
 import AdminRating from "../pages/admin/admin-educator-rating/AdminRating";
 import EducatorRating from "../pages/educator/educator-rating/EducatoRating";
 import AdminEducatorRatings from "../pages/admin/admin-educator-rating/AdminEducatorRatings";
+import EducatorIqCrypto from "../pages/educator/educator-iq-crypto/EducatorIqCrypto";
+import IqCrypto from "../pages/student/iq-crypto/IqCrypto";
+import AdminIqCrypto from "../pages/admin/admin-iq-crypto/AdminIqCrypto";
 
 
 
@@ -182,12 +185,14 @@ const routes = {
     { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
     { path: "/iq-insight", element: <IqInsight /> },
+    { path: "/iq-crypto", element: <IqCrypto /> },
     { path: "/iq-social", element: <CommunityFeed /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
     { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
+    { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
     { path: "/educator/courses", element: <Courses /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/recordings", element: <EducatorRecording /> },
@@ -247,6 +252,7 @@ const routes = {
       path: "/admin/educator-rating/:educatorId",
       element: <AdminEducatorRatings />,
     },
+    { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
   ],
   super_admin: [
     { path: "/", element: <DefaultPage /> },
@@ -277,6 +283,7 @@ const routes = {
       path: "/admin/educator-rating/:educatorId",
       element: <AdminEducatorRatings />,
     },
+    { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
   ],
   marketer: [
     { path: "/", element: <DefaultPage /> },

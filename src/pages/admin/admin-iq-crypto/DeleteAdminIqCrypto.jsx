@@ -1,29 +1,30 @@
 import React, { forwardRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useDeleteTradeIdeaMutation } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import { toast } from "sonner";
-import { useDeleteEducatorTradeIdeaMutation } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
+import { useDeleteAdminCryptoAnalysisMutation } from "../../../store/api/admin/adminCryptoAnalysisApiSlice";
+import { set } from "date-fns";
 
 // Delete eductor trade idea
 
-const DeleteAdminTradeIdeas = forwardRef(
+const DeleteAdminIqCrypto = forwardRef(
   (
-    { isDeleteOpen, handleDeleteClose, selectedRow, setSelectedRow, refetch },
+    { isDeleteOpen, handleDeleteClose, setSelectedRow, selectedRow, refetch },
     ref
   ) => {
-    const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] =
-      useDeleteEducatorTradeIdeaMutation();
+    const [DeleteCryptoAnalysis, { isLoading, isSuccess, isError, error }] =
+      useDeleteAdminCryptoAnalysisMutation();
 
     const handleDelete = async () => {
       try {
-        await deleteTradeIdea(selectedRow?._id).unwrap();
+        await DeleteCryptoAnalysis(selectedRow?._id).unwrap();
         refetch();
-        setSelectedRow(null);
-        toast.success("Ideas deleted successfully!");
+        toast.success("IQ Crypto deleted successfully!");
+
+        setSelectedRow({});
         handleDeleteClose();
-      } catch (error) {
-        toast.error(err.data.message);
+      } catch (err) {
+        toast.error(err?.data?.message || "Delete failed");
       }
     };
 
@@ -31,6 +32,7 @@ const DeleteAdminTradeIdeas = forwardRef(
       <Dialog
         open={isDeleteOpen}
         onOpenChange={() => {
+          setSelectedRow({});
           handleDeleteClose();
         }}
       >
@@ -48,6 +50,7 @@ const DeleteAdminTradeIdeas = forwardRef(
             <button
               className="btn btn-light"
               onClick={() => {
+                setSelectedRow({});
                 handleDeleteClose();
               }}
             >
@@ -57,6 +60,7 @@ const DeleteAdminTradeIdeas = forwardRef(
               type="submit"
               className="btn btn-danger"
               onClick={() => {
+                setSelectedRow({});
                 handleDelete();
               }}
               disabled={isLoading}
@@ -70,4 +74,4 @@ const DeleteAdminTradeIdeas = forwardRef(
   }
 );
 
-export default DeleteAdminTradeIdeas;
+export default DeleteAdminIqCrypto;

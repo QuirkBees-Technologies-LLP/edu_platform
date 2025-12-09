@@ -14,8 +14,14 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      backgroundSize: {
+        '300': '300% 300%',
+      },
       backgroundImage: {
         'blue-gradient': 'linear-gradient(11deg, #7f80ff, #5b4bff, #1e0066)',
+      },
+      backgroundImage: {
+        'animated-gradient': 'linear-gradient(230deg, #383987, #5b4bff, #1e0066)',
       },
       utilities: {
         '.bg-blue-gradient': {
@@ -214,45 +220,45 @@ module.exports = {
       colors: {
         //begin: Shadcn UI Colors
         background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
-  			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			},
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))'
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))'
+        },
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))'
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))'
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))'
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))'
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))'
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        chart: {
+          '1': 'hsl(var(--chart-1))',
+          '2': 'hsl(var(--chart-2))',
+          '3': 'hsl(var(--chart-3))',
+          '4': 'hsl(var(--chart-4))',
+          '5': 'hsl(var(--chart-5))'
+        },
         //end
         gray: {
           100: 'var(--tw-gray-100)',
@@ -452,13 +458,19 @@ module.exports = {
         'collapsible-up': {
           from: { height: 'var(--radix-collapsible-content-height)' },
           to: { height: 'o' }
-        }
+        },
+        'gradientMove': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'collapsible-down': 'collapsible-down 0.2s ease-out',
-        'collapsible-up': 'collapsible-up 0.2s ease-out'
+        'collapsible-up': 'collapsible-up 0.2s ease-out',
+        'gradientMove': 'gradientMove 3s infinite ease-in-out',
       }
       //end
     },
@@ -535,20 +547,20 @@ module.exports = {
           }
         },
         container: {
-					fixed: {
-						px: {
-							DEFAULT: theme('spacing')['6'],
-							xl: theme('spacing')['7.5']
-						},
-						'max-width': theme('screens.xl')
-					},
-					fluid: {
-						px: {
-							DEFAULT: theme('spacing')['6'],
-							xl: theme('spacing')['7.5']
-						}
-					}
-				},
+          fixed: {
+            px: {
+              DEFAULT: theme('spacing')['6'],
+              xl: theme('spacing')['7.5']
+            },
+            'max-width': theme('screens.xl')
+          },
+          fluid: {
+            px: {
+              DEFAULT: theme('spacing')['6'],
+              xl: theme('spacing')['7.5']
+            }
+          }
+        },
         btn: {
           xs: {
             height: '1.75rem',
@@ -730,7 +742,7 @@ module.exports = {
       });
     },
     // require('@tailwindcss/line-clamp'),
-    require('tailwindcss-animate'), 
+    require('tailwindcss-animate'),
     require('./src/plugins/plugin'),
     require('./src/plugins/components/theme'),
     require('./src/plugins/components/breakpoints'),

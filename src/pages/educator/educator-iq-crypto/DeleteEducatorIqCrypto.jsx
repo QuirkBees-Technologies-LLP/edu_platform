@@ -1,26 +1,25 @@
 import React, { forwardRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useDeleteTradeIdeaMutation } from "../../../store/api/admin/adminTradeIdeasApiSlice";
+import { useDeleteEducatorCryptoAnalysisMutation } from "../../../store/api/educator/educatorCryptoAnalysisApiSlice";
 import { toast } from "sonner";
-import { useDeleteEducatorTradeIdeaMutation } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
 
 // Delete eductor trade idea
 
-const DeleteAdminTradeIdeas = forwardRef(
+const DeleteEducatorIqCrypto = forwardRef(
   (
     { isDeleteOpen, handleDeleteClose, selectedRow, setSelectedRow, refetch },
     ref
   ) => {
-    const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] =
-      useDeleteEducatorTradeIdeaMutation();
+    const [DeleteCryptoAnalysis, { isLoading }] =
+      useDeleteEducatorCryptoAnalysisMutation();
 
     const handleDelete = async () => {
       try {
-        await deleteTradeIdea(selectedRow?._id).unwrap();
+        await DeleteCryptoAnalysis(selectedRow?._id).unwrap();
         refetch();
+        toast.success("IQ Crypto deleted successfully!");
         setSelectedRow(null);
-        toast.success("Ideas deleted successfully!");
         handleDeleteClose();
       } catch (error) {
         toast.error(err.data.message);
@@ -70,4 +69,4 @@ const DeleteAdminTradeIdeas = forwardRef(
   }
 );
 
-export default DeleteAdminTradeIdeas;
+export default DeleteEducatorIqCrypto;

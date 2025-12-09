@@ -303,65 +303,56 @@ const IqEducators = () => {
         </div>
       )}
 
-      <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
-        {/* Image + Name */}
+      {/* <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
         <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center flex-wrap justify-center gap-4">
             <img
               src={response?.data?.educator?.image}
               alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
               className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
             />
-            <div className="text-center sm:text-start">
-              <h3 className="text-white font-semibold text-base sm:text-lg mb-1">
+            <div className="text-center">
+              <h3 className="text-white font-semibold text-base sm:text-lg mb-3">
                 {response?.data?.educator?.first_name}{" "}
                 {response?.data?.educator?.last_name}
               </h3>
-              {/* <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
-          Forex Day Trading, Price Action, Risk Management
-        </p> */}
+              <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm w-fit">
+                <button
+                  onClick={toggleMute}
+                  className="text-white hover:text-yellow-300 transition p-1"
+                >
+                  {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                </button>
+
+                <button
+                  onClick={decVolume}
+                  className="text-white text-lg px-1 hover:text-yellow-300 transition"
+                >
+                  –
+                </button>
+
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={isMuted ? 0 : volume}
+                  onChange={(e) => onSliderChange(e.target.value)}
+                  className="w-24 accent-blue-500 cursor-pointer"
+                />
+
+                <button
+                  onClick={incVolume}
+                  className="text-white text-lg px-1 hover:text-yellow-300 transition"
+                >
+                  +
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm">
-            {/* Mute Toggle */}
-            <button
-              onClick={toggleMute}
-              className="text-white hover:text-yellow-300 transition p-1"
-            >
-              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-            </button>
-
-            {/* Volume Down */}
-            <button
-              onClick={decVolume}
-              className="text-white text-lg px-1 hover:text-yellow-300 transition"
-            >
-              –
-            </button>
-
-            {/* Slider */}
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={isMuted ? 0 : volume}
-              onChange={(e) => onSliderChange(e.target.value)}
-              className="w-24 accent-blue-500 cursor-pointer"
-            />
-
-            {/* Volume Up */}
-            <button
-              onClick={incVolume}
-              className="text-white text-lg px-1 hover:text-yellow-300 transition"
-            >
-              +
-            </button>
           </div>
         </div>
 
-        {/* Buttons side by side */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsOpen(true)}
@@ -397,13 +388,6 @@ const IqEducators = () => {
                   >
                     Or follow the video tutorial
                   </span>
-                  {/* <p className="text-gray-700 mb-1">
-                    <strong>Specialization:</strong> Forex Day Trading, Price
-                    Action
-                  </p> */}
-                  {/* <p className="text-gray-700 mb-4">
-                <strong>Experience:</strong> 5+ Years
-              </p> */}
                   <div className="overflow-hidden rounded-lg mx-auto block w-fit">
                     <video width="500" height="240" muted loop controls>
                       <source src={videotutorial} type="video/mp4" />
@@ -430,13 +414,130 @@ const IqEducators = () => {
           </div>
           <button
             onClick={() => setShowRatingModal(true)}
-            className="border border-primary bg-primary text-white ml-auto px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors w-fit"
+            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors w-fit"
+          >
+            ⭐ Rate Me
+          </button>
+        </div>
+      </div> */}
+
+      {/* speaker center */}
+      <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
+        <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
+          <div className="flex items-center flex-wrap justify-center gap-4">
+            <img
+              src={response?.data?.educator?.image}
+              alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
+              className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
+            />
+            <div className="text-center">
+              <h3 className="text-white font-semibold text-base sm:text-lg mb-3">
+                {response?.data?.educator?.first_name}{" "}
+                {response?.data?.educator?.last_name}
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm w-fit">
+          <button
+            onClick={toggleMute}
+            className="text-white hover:text-yellow-300 transition p-1"
+          >
+            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
+
+          <button
+            onClick={decVolume}
+            className="text-white text-lg px-1 hover:text-yellow-300 transition"
+          >
+            –
+          </button>
+
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={isMuted ? 0 : volume}
+            onChange={(e) => onSliderChange(e.target.value)}
+            className="w-24 accent-blue-500 cursor-pointer"
+          />
+
+          <button
+            onClick={incVolume}
+            className="text-white text-lg px-1 hover:text-yellow-300 transition"
+          >
+            +
+          </button>
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsOpen(true)}
+              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+            >
+              <Volume2 size={18} />
+            </button>
+
+            {isOpen && (
+              <div
+                className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+                onClick={() => setIsOpen(false)}
+              >
+                <div
+                  className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
+                  onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
+                >
+                  <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
+                    Change in Sound Option from Automatic (Default) to Allow,{" "}
+                    <br /> like in the Image
+                  </span>
+                  <div
+                    className="overflow-hidden rounded-lg cursor-pointer"
+                    onClick={() => isVolumeOpen(true)}
+                  >
+                    <img src={InfoImage} alt="Info" />
+                  </div>
+
+                  <span
+                    className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+
+  "
+                  >
+                    Or follow the video tutorial
+                  </span>
+                  <div className="overflow-hidden rounded-lg mx-auto block w-fit">
+                    <video width="500" height="240" muted loop controls>
+                      <source src={videotutorial} type="video/mp4" />
+                    </video>
+                  </div>
+
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => handleShare()}
+              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+            >
+              <Share2 size={16} />
+              Share
+            </button>
+          </div>
+          <button
+            onClick={() => setShowRatingModal(true)}
+            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors w-fit"
           >
             ⭐ Rate Me
           </button>
         </div>
       </div>
-
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
           <ClientViewLiveSession
@@ -675,11 +776,11 @@ const IqEducators = () => {
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -712,11 +813,11 @@ const IqEducators = () => {
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -778,11 +879,11 @@ const IqEducators = () => {
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -815,11 +916,11 @@ const IqEducators = () => {
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
@@ -1243,7 +1344,7 @@ const IqEducators = () => {
                             image={course?.thumbnail}
                             defaultImage={response?.data?.educator?.bannerImage}
                             onRecordingClick={() => handleOpen(course?.url)}
-                            // onRecordingClick={() => handleOpen(course?.url)}
+                          // onRecordingClick={() => handleOpen(course?.url)}
                           />
                         </div>
                         <div className="p-4">
