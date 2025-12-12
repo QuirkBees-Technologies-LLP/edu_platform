@@ -81,7 +81,13 @@ const ClientTradeIdeas = () => {
     });
 
   const { data: categoryList } = useGetCommonCategoryQuery();
-  const categories = categoryList?.data || [];
+  const categories =
+    [
+      { name: "Forex", _id: "1" },
+      { name: "Crypto", _id: "2" },
+      { name: "Indices", _id: "3" },
+      { name: "Commodities", _id: "4" },
+    ] || [];
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -453,15 +459,15 @@ const ClientTradeIdeas = () => {
                       }}
                     />
 
-                    {/* <button
-                          onClick={() => {
-                            setSelectedIdea(trade);
-                            setIsLightBoxOpen(true);
-                          }}
-                          className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
-                        >
-                          <Eye size={20} />
-                        </button> */}
+                    <button
+                      onClick={() => {
+                        setSelectedIdea(trade);
+                        setIsLightBoxOpen(true);
+                      }}
+                      className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow z-30"
+                    >
+                      <Eye size={20} />
+                    </button>
 
                     {trade.image.length > 1 && (
                       <>
@@ -670,7 +676,7 @@ const ClientTradeIdeas = () => {
                     
                     </span>
                   </div> */}
-                   {/* ENTRY */}
+                  {/* ENTRY */}
                   <div className="flex justify-between items-center">
                     <span className="text-gray-800 dark:text-white-200">
                       Entry
