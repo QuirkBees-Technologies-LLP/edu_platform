@@ -347,12 +347,12 @@ export default function IqVault() {
                       </h1>
 
                       <p className="text-lg sm:text-xl tracking-widest">
-                        ACADEMY
+                        Academy in { language ? language : selectedLanguage}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gray-100 dark:bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
+                  <div className="bg-gray-100in  dark:bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
                     <div className="text-center">
                       <h1 className="text-4xl font-bold tracking-wider pb-2 text-gray-600 dark:text-gray-300">
                         {selectedLanguage}

@@ -431,10 +431,10 @@ const IqInsight = () => {
                 >
                   <div
                     className="relative overflow-hidden cursor-pointer"
-                    onClick={() => {
-                      setSelectedIdea(idea);
-                      setIsViewOpen(true);
-                    }}
+                    // onClick={() => {
+                    //   setSelectedIdea(idea);
+                    //   setIsViewOpen(true);
+                    // }}
                     ref={
                       index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
                     }
@@ -456,7 +456,7 @@ const IqInsight = () => {
 
                         <button
                           onClick={() => {
-                            setSelectedIdea(trade);
+                            // setSelectedIdea(trade);
                             setIsLightBoxOpen(true);
                           }}
                           className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"

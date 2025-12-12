@@ -17,7 +17,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
     content,
     images = [],
     author,
-    videos=[],
+    videos = [],
     createdAt,
     likeCount = 0,
     commentCount = 0,
@@ -69,7 +69,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
             )}&background=random&color=fff&size=80`
           }
           alt={author?.first_name}
-          className="w-12 h-12 rounded-full object-cover border border-gray-300 dark:border-[#2C2F36] cursor-pointer hover:opacity-90 transition-all"
+          className="w-12 h-12 rounded-full object-contain border border-gray-300 dark:border-[#2C2F36] cursor-pointer hover:opacity-90 transition-all"
         />
         <div className="ml-3">
           <p
@@ -79,7 +79,8 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
             {author?.first_name} {author?.last_name}
           </p>
           <p className="text-xs text-gray-500 dark:text-[#9CA3AF]">
-            Educator • {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+            Educator •{" "}
+            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
           </p>
         </div>
       </div>
@@ -104,13 +105,27 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
             images.length === 1 ? "grid-cols-1" : "grid-cols-2"
           } gap-3 mt-3`}
         >
-          {images.map((img) => (
+          {/* {images.map((img) => (
             <div key={img._id || img.url} className="relative group">
               <img
                 src={img.url}
                 alt="post"
-                className="w-full h-56 rounded-xl object-cover border border-gray-200 dark:border-[#22242A] cursor-pointer hover:opacity-90 transition-all"
+                className="w-full h-60 rounded-xl object-contain border border-gray-200 dark:border-[#22242A] cursor-pointer hover:opacity-90 transition-all"
                 onClick={() => setSelectedImage(img.url)}
+              />
+            </div>
+          ))} */}
+
+          {images.map((img) => (
+            <div
+              key={img._id || img.url}
+              className="relative w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 group cursor-pointer"
+              onClick={() => setSelectedImage(img.url)}
+            >
+              <img
+                src={img.url}
+                alt="post"
+                className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
               />
             </div>
           ))}
@@ -127,14 +142,14 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
               <video
                 src={vid.url}
                 alt="post"
-                 controls
+                controls
                 className="w-full h-56 rounded-xl object-cover border border-gray-200 dark:border-[#22242A] cursor-pointer hover:opacity-90 transition-all"
                 // onClick={() => setSelectedImage(img.url)}
               />
             </div>
           ))}
         </div>
-      )}  
+      )}
 
       {/* Image Modal */}
       {selectedImage && (
@@ -160,7 +175,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
 
       {/* Action Bar */}
       {/* <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-[#22242A] text-gray-600 dark:text-[#9CA3AF] text-sm"> */}
-        {/* <div className="flex items-center gap-5">
+      {/* <div className="flex items-center gap-5">
           <button className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-[#8B5CF6] transition-all">
             <Heart size={16} /> {likeCount}
           </button>
@@ -172,7 +187,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
           </button>
         </div> */}
 
-        {/* {onEdit && (
+      {/* {onEdit && (
           <button
             onClick={() => onEdit(post)}
             className="flex items-center gap-1 text-xs text-blue-500 dark:text-[#8B5CF6] hover:underline transition"
