@@ -347,7 +347,7 @@ export default function IqVault() {
                       </h1>
 
                       <p className="text-lg sm:text-xl tracking-widest">
-                        Academy in { language ? language : selectedLanguage}
+                        Academy in {language ? language : selectedLanguage}
                       </p>
                     </div>
                   </div>
@@ -368,8 +368,8 @@ export default function IqVault() {
               {/* Sidebar - Course + Lectures */}
               <div className="order-2 md:order-1 mb-6">
                 {data?.ActiveCategory &&
-                  data.ActiveCategory.length > 0 &&
-                  activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
+                data.ActiveCategory.length > 0 &&
+                activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
                   <>
                     {currentCourse?.length > 0 ? (
                       <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
@@ -387,10 +387,11 @@ export default function IqVault() {
                                   key={t._id}
                                   onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
                                   className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
-                                   ${activeLectureId === t._id
-                                      ? "bg-gray-300 dark:bg-slate-800"
-                                      : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                    }`}
+                                   ${
+                                     activeLectureId === t._id
+                                       ? "bg-gray-300 dark:bg-slate-800"
+                                       : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                   }`}
                                 >
                                   <CirclePlay className="mr-2 text-gray-400" />
                                   <span className="text-gray-800 font-medium text-xs">
@@ -443,10 +444,11 @@ export default function IqVault() {
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}
-                          className={`pb-4 border-b-2 ${activeTab === tab._id
-                            ? "border-black dark:border-white text-gray-900"
-                            : "border-transparent text-gray-500 hover:text-gray-900"
-                            }`}
+                          className={`pb-4 border-b-2 ${
+                            activeTab === tab._id
+                              ? "border-black dark:border-white text-gray-900"
+                              : "border-transparent text-gray-500 hover:text-gray-900"
+                          }`}
                           onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
@@ -464,8 +466,8 @@ export default function IqVault() {
                       >
                         {/* Dynamic content for active tab */}
                         {data?.ActiveCategory &&
-                          data.ActiveCategory.length > 0 &&
-                          activeTab ===
+                        data.ActiveCategory.length > 0 &&
+                        activeTab ===
                           `${data.ActiveCategory[0]?.categoryId}` ? (
                           currentCourse?.length > 0 && lecture ? (
                             <div className="card">
@@ -564,79 +566,80 @@ export default function IqVault() {
                   </div>
                 </div>
               </div>
-
-              {/* IQ Vault Section */}
             </div>
-            {data?.ActiveCategory &&
-              data.ActiveCategory.length > 0 &&
-              data?.upcomingCourse?.length > 0 && (
-                <div className="col-span-full">
-                  <div className="text-gray-900">
-                    <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <h2 className="text-xl font-medium">IQ Vault</h2>
-                        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                          <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
-                            <option>Experience</option>
-                            <option>Beginner</option>
-                            <option>Advanced</option>
-                          </select>
-                          <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
-                            <option>Style</option>
-                            <option>Technical</option>
-                            <option>Fundamental</option>
-                          </select>
+            <div className="grid grid-cols-1 gap-6">
+              {/* IQ Vault Section */}
+              {data?.ActiveCategory &&
+                data.ActiveCategory.length > 0 &&
+                data?.upcomingCourse?.length > 0 && (
+                  <div className="col-span-full">
+                    <div className="text-gray-900">
+                      <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <h2 className="text-xl font-medium">IQ Vault</h2>
+                          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                            <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
+                              <option>Experience</option>
+                              <option>Beginner</option>
+                              <option>Advanced</option>
+                            </select>
+                            <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
+                              <option>Style</option>
+                              <option>Technical</option>
+                              <option>Fundamental</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="card rounded-t-none">
-                      <div className="rounded-t-none rounded-b-2xl pb-2 m-6 overflow-x-auto">
-                        <div className="flex gap-4 pb-0">
-                          {/* Static Course Cards - Optional, not connected to lecture data */}
-                          {data?.upcomingCourse?.map((i) => (
-                            <div
-                              key={i}
-                              className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
-                            >
+                      <div className="card rounded-t-none">
+                        <div className="rounded-t-none rounded-b-2xl pb-2 m-6 overflow-x-auto">
+                          <div className="flex gap-4 pb-0">
+                            {/* Static Course Cards - Optional, not connected to lecture data */}
+                            {data?.upcomingCourse?.map((i) => (
                               <div
-                                className="rounded-t-xl overflow-hidden"
-                                onClick={() => handleClick(i?._id)}
+                                key={i}
+                                className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
                               >
-                                <img
-                                  src={
-                                    i.imageUrl
-                                      ? i.imageUrl
-                                      : "public/media/images/video-thumbail.jpg"
-                                  }
-                                  alt="Course Title"
-                                  className="w-full object-cover h-44 rounded-t-xl "
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src =
-                                      "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-                                  }}
-                                />
-                              </div>
-                              <div className="p-5">
-                                <div className="flex items-center justify-between">
-                                  <h3 className="text-md text-gray-800 font-medium mb-2">
-                                    {i?.title}
-                                  </h3>
+                                <div
+                                  className="rounded-t-xl overflow-hidden"
+                                  onClick={() => handleClick(i?._id)}
+                                >
+                                  <img
+                                    src={
+                                      i.imageUrl
+                                        ? i.imageUrl
+                                        : "public/media/images/video-thumbail.jpg"
+                                    }
+                                    alt="Course Title"
+                                    className="w-full object-cover h-44 rounded-t-xl "
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src =
+                                        "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
+                                    }}
+                                  />
                                 </div>
-                                <ShowMoreLess
-                                  className="text-gray-900 text-sm mt-2 leading-relaxed"
-                                  html={i?.description || "No description"}
-                                  limit={60}
-                                />
+                                <div className="p-5">
+                                  <div className="flex items-center justify-between">
+                                    <h3 className="text-md text-gray-800 font-medium mb-2">
+                                      {i?.title}
+                                    </h3>
+                                  </div>
+                                  <ShowMoreLess
+                                    className="text-gray-900 text-sm mt-2 leading-relaxed"
+                                    html={i?.description || "No description"}
+                                    limit={60}
+                                  />
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+            </div>
           </div>
         )}
       </div>
