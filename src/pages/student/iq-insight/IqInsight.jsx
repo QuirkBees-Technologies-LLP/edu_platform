@@ -141,6 +141,9 @@ const IqInsight = () => {
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
+  const handleCloseImageView = () => {
+    setSelectedIdea({});
+  };
 
   const marketData = [
     {
@@ -456,7 +459,7 @@ const IqInsight = () => {
 
                         <button
                           onClick={() => {
-                            // setSelectedIdea(trade);
+                            setSelectedIdea(idea);
                             setIsLightBoxOpen(true);
                           }}
                           className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
@@ -679,6 +682,7 @@ const IqInsight = () => {
           isLightBoxOpen={isLightBoxOpen}
           setIsLightBoxOpen={setIsLightBoxOpen}
           selectedIdea={selectedIdea}
+          handleCloseView={handleCloseImageView}
         />
       </div>
     </div>
