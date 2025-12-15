@@ -58,6 +58,7 @@ const IqEducators = () => {
   const [courseAll, setCourseAll] = useState(false);
   const [recording, setRecording] = useState(null);
   const [idea, setIdea] = useState(null);
+  const [liveIdea, setLiveIdea] = useState(null);
   const [insight, setInsight] = useState(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
@@ -620,6 +621,110 @@ const IqEducators = () => {
               </div>
             </div>
           </div> */}
+          {/* Live Idea  */}
+  
+
+          <div className="text-gray-900">
+            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Live Ideas</h2>
+                <button
+                  onClick={() => setLiveIdea((prev) => !prev)}
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                >
+                  {liveIdea ? "Show Less" : "View All"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.liveIdea?.length > 0 ? (
+                liveIdea ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.liveIdea?.map((liveIdeaData) => (
+                      <div
+                        key={liveIdeaData._id}
+                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedIdea(liveIdeaData);
+                          setIsViewOpen(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${liveIdeaData.section}&language=${liveIdeaData.language}&categoryId=${liveIdeaData.category._id}&liveIdeaDataId=${liveIdeaData._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={liveIdeaData.image[0]}
+                            alt={liveIdeaData.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {liveIdeaData.name}
+                          </h3>
+                          {/* <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={liveIdeaData?.description || "No description"}
+                            limit={65}
+                          /> */}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.liveIdea?.map((liveIdeaData) => (
+                      <div
+                        key={liveIdeaData._id}
+                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        onClick={() => {
+                          setSelectedIdea(liveIdeaData);
+                          setIsViewOpen(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${liveIdeaData.section}&language=${liveIdeaData.language}&categoryId=${liveIdeaData.category._id}&liveIdeaDataId=${liveIdeaData._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={liveIdeaData.image[0]}
+                            alt={liveIdeaData.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4 d-flex">
+                          <div className="justify-between">
+                            <h3 className="text-md font-normal mb-2">
+                              {liveIdeaData.name}
+                            </h3>
+                          </div>
+
+                          {/* <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={liveIdeaData?.description || "No description"}
+                            limit={65}
+                          /> */}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Live idea Found</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+
           {/* Course  */}
           <div className="text-gray-900 ">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
@@ -709,46 +814,7 @@ const IqEducators = () => {
             </div>
           </div>
 
-          {/* <div className="text-gray-900 mb-28">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Courses</h2>
-                <Link className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary">
-                  View All
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              <div className="flex gap-4">
-                {response?.data?.courses?.map((course) => (
-                  <div
-                    key={course.id}
-                    className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                    onClick={() =>
-                      navigate(
-                        `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      )
-                    }
-                  >
-                    <div className="rounded-t-xl overflow-hidden">
-                      <img
-                        src={course.imageUrl}
-                        alt={course.title}
-                        className="w-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-md font-normal mb-2">
-                        {course.title}
-                      </h3>
-                      <p className="text-xs text-gray-600">{course.address}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div> */}
+  
 
           {/* Idea  */}
           <div className="text-gray-900 mb-28">
