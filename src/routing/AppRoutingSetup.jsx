@@ -154,6 +154,8 @@ import AdminEducatorRatings from "../pages/admin/admin-educator-rating/AdminEduc
 import EducatorIqCrypto from "../pages/educator/educator-iq-crypto/EducatorIqCrypto";
 import IqCrypto from "../pages/student/iq-crypto/IqCrypto";
 import AdminIqCrypto from "../pages/admin/admin-iq-crypto/AdminIqCrypto";
+import EducatorLiveTradeIdeas from "../pages/educator/educator-live-trade-ideas/EducatorTradeIdeas";
+import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTradeIdeas";
 
 const routes = {
   student: [
@@ -189,6 +191,7 @@ const routes = {
   educator: [
     { path: "/", element: <DefaultPage /> },
     { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
+    { path: "/educator/live-ideas", element: <EducatorLiveTradeIdeas /> },
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
     { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
     { path: "/educator/courses", element: <Courses /> },
@@ -225,6 +228,7 @@ const routes = {
   admin: [
     { path: "/", element: <DefaultPage /> },
     { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/admin/live-ideas", element: <AdminLiveTradeIdeas /> },
     { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
     { path: "/admin/courses", element: <Courses /> },
     { path: "/admin/live-session", element: <LiveSession /> },

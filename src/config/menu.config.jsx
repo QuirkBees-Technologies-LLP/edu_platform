@@ -1521,6 +1521,11 @@ export const sideMenus = {
       path: "/admin/ideas",
     },
     {
+      title: "IQ Live Ideas",
+      icon: <Lightbulb />,
+      path: "/admin/live-ideas",
+    },
+    {
       title: "IQ Strategies",
       icon: <ChartNoAxesCombined />,
       children: [
@@ -1748,6 +1753,11 @@ export const sideMenus = {
       title: "IQ Ideas",
       icon: <Lightbulb />,
       path: "/educator/ideas",
+    },
+    {
+      title: "IQ Live Ideas",
+      icon: <Lightbulb />,
+      path: "/educator/live-ideas",
     },
     {
       title: "IQ Strategies",

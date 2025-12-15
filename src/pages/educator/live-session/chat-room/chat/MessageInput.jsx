@@ -191,12 +191,19 @@ import {
   CooldownTimer,
   useMessageInputContext,
 } from "stream-chat-react";
+import { useParams } from "react-router-dom";
 
 import { useEventContext } from "../context/EventContext";
 import { useGiphyContext } from "../context/GiphyContext";
 import EmojiPicker from "emoji-picker-react";
+import CreateLiveTradeIdea from "../../../educator-live-trade-ideas/CreateLiveTradeIdea";
 
 export const MessageInputUI = () => {
+  const [isCreateIdeaOpen, setIsCreateIdeaOpen] = useState(false);
+
+  const { callId } = useParams();
+
+
   const {
     closeCommandsList,
     cooldownInterval,
@@ -257,7 +264,7 @@ export const MessageInputUI = () => {
     const emoji = emojiData.emoji;
     const newEvent = {
       target: { value: text + emoji },
-      preventDefault: () => {},
+      preventDefault: () => { },
     };
     handleChange(newEvent);
   };
@@ -267,117 +274,144 @@ export const MessageInputUI = () => {
     setShowEmojiPicker(false);
   };
 
- return (
-  <div
-    style={{
-      position: "relative",
-      display: "flex",
-      flexDirection: "column",
-      width: "100%",
-    }}
-  >
-    {/* Input Row */}
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "8px", // optional spacing
-      }}
-    >
-      {/* Buttons */}
-      {chatType !== "qa" && (
+  return (
+    <>
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+        }}
+      >
+        {/* Input Row */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px",
+            justifyContent: "space-between",
+            gap: "8px", // optional spacing
           }}
         >
-          {/* Emoji Button */}
-          <div
-            onClick={() => setShowEmojiPicker((prev) => !prev)}
-            style={{
-              fontSize: "22px",
-              cursor: "pointer",
-              transition: "transform 0.2s",
-              userSelect: "none",
-            }}
-            onMouseOver={(e) => (e.target.style.transform = "scale(1.2)")}
-            onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-          >
-            😊
+          {/* Buttons */}
+          {chatType !== "qa" && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              {/* Emoji Button */}
+              <div
+                onClick={() => setShowEmojiPicker((prev) => !prev)}
+                style={{
+                  fontSize: "22px",
+                  cursor: "pointer",
+                  transition: "transform 0.2s",
+                  userSelect: "none",
+                }}
+                onMouseOver={(e) => (e.target.style.transform = "scale(1.2)")}
+                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
+              >
+                😊
+              </div>
+            </div>
+          )}
+
+          {/* Chat Input */}
+          <div style={{ flex: 1 }}>
+            <ChatAutoComplete
+              style={{
+                width: "100%",
+              }}
+              onChange={onChange}
+              value={text}
+              placeholder="Say anything."
+            />
           </div>
         </div>
-      )}
 
-      {/* Chat Input */}
-      <div style={{ flex: 1 }}>
-        <ChatAutoComplete
-          style={{
-            width: "100%",
-          }}
-          onChange={onChange}
-          value={text}
-          placeholder="Say something..."
-        />
-      </div>
-    </div>
+        {/* Emoji Picker Popup */}
+        {showEmojiPicker && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "60px",
+              left: "0",
+              zIndex: 50,
+              boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+              borderRadius: "10px",
+            }}
+          >
+            <EmojiPicker
+              onEmojiClick={onEmojiClick}
+              theme="light"
+              height={350}
+              width={300}
+            />
+          </div>
+        )}
 
-    {/* Emoji Picker Popup */}
-    {showEmojiPicker && (
-      <div
-        style={{
-          position: "absolute",
-          bottom: "60px",
-          left: "0",
-          zIndex: 50,
-          boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-          borderRadius: "10px",
-        }}
-      >
-        <EmojiPicker
-          onEmojiClick={onEmojiClick}
-          theme="light"
-          height={350}
-          width={300}
-        />
-      </div>
-    )}
-
-    {/* Send Button */}
-    <button
-      className={`btn btn-sm btn-primary mt-3 input-ui-send-button ${
-        text ? "text" : ""
-      } ${cooldownRemaining ? "cooldown" : ""}`}
-      disabled={!text}
-      onClick={handleSend}
-      style={{
-        alignSelf: "flex-end",
-        marginTop: "10px",
-        opacity: !text ? 0.6 : 1,
-        cursor: !text ? "not-allowed" : "pointer",
-        transition: "opacity 0.3s",
-      }}
-    >
-      {giphyState ? (
-        <></>
-      ) : cooldownRemaining ? (
-        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-          <CooldownTimer
-            cooldownInterval={cooldownInterval}
-            setCooldownRemaining={setCooldownRemaining}
-          />
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+          <button
+            className="btn btn-sm btn-primary mt-3"
+            style={{
+              outline: "none",
+              border: "none",
+            }}
+            onClick={() => setIsCreateIdeaOpen(true)}
+          >
+            Create Live Idea
+          </button>
+          {/* Send Button */}
+          <button
+            className={`btn btn-sm btn-primary mt-3 input-ui-send-button ${text ? "text" : ""
+              } ${cooldownRemaining ? "cooldown" : ""}`}
+            disabled={!text}
+            onClick={handleSend}
+            style={{
+              alignSelf: "flex-end",
+              marginTop: "10px",
+              opacity: !text ? 0.6 : 1,
+              cursor: !text ? "not-allowed" : "pointer",
+              transition: "opacity 0.3s",
+            }}
+          >
+            {giphyState ? (
+              <></>
+            ) : cooldownRemaining ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <CooldownTimer
+                  cooldownInterval={cooldownInterval}
+                  setCooldownRemaining={setCooldownRemaining}
+                />
+              </div>
+            ) : (
+              <>
+                <i className="ki-filled ki-arrow-right"></i>
+                <div style={{ marginLeft: "5px" }}>{269 - text.length}</div>
+              </>
+            )}
+          </button>
         </div>
-      ) : (
-        <>
-          <i className="ki-filled ki-arrow-right"></i>
-          <div style={{ marginLeft: "5px" }}>{269 - text.length}</div>
-        </>
-      )}
-    </button>
-  </div>
-);
+      </div>
+      {
+        isCreateIdeaOpen && (
+          <CreateLiveTradeIdea
+            onClose={() => setIsCreateIdeaOpen(false)}
+            callId={callId}
+            isCreateOpen={isCreateIdeaOpen}
+            handleCloseCreate={() => setIsCreateIdeaOpen(false)}
+
+          />
+        )
+      }
+    </>
+
+
+
+  );
 
 };
 
