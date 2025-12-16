@@ -70,15 +70,8 @@ export const clientTradeIdeasApiSlice = createApi({
       },
     }),
     getLiveTradeIdea: builder.query({
-      query: ({ page = 1, limit = 9, id }) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-          id,
-        });
-        return `/users/live-idea?${params.toString()}`;
-      }
-    })
+      query: ({ id, page = 1, limit = 9 }) => `/users/live-idea/${id}?page=${page}&limit=${limit}`,
+    }),
   }),
 });
 

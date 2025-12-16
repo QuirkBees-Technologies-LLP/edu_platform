@@ -11,7 +11,7 @@ import {
   VolumeX,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
-import { Sparkles, TrendingUpDown } from "lucide-react";
+import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -34,31 +34,6 @@ import { useLayout } from "../../../providers";
 import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 
 const IqEducators = () => {
-  const navigate = useNavigate();
-  const { auth } = useAuthContext();
-
-  const userName = auth?.user?.name;
-
-  const { id } = useParams();
-  const { data: response } = useGetEducatorWithCoursesQuery(id);
-  const { data: liveTradeIdeas } = useGetLiveTradeIdeaQuery({
-    page: 1,
-    limit: 10,
-    id: id,
-  });
-
-  console.log("Live Trade Ideas:", liveTradeIdeas);
-
-  const { volume, setVolume, isMuted, setIsMuted } = useLayout();
-
-  const toggleMute = () => setIsMuted((v) => !v);
-  const decVolume = () => setVolume((v) => Math.max(0, +(v - 0.1).toFixed(2)));
-  const incVolume = () => setVolume((v) => Math.min(1, +(v + 0.1).toFixed(2)));
-  const onSliderChange = (val) => {
-    setVolume(Number(val));
-    if (isMuted && Number(val) > 0) setIsMuted(false);
-  };
-
   const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
@@ -78,6 +53,51 @@ const IqEducators = () => {
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const navigate = useNavigate();
+  const { auth } = useAuthContext();
+
+  const userName = auth?.user?.name;
+
+  const { id } = useParams();
+  const {
+    data: response,
+    refetch: refetchEducator,
+    isFetching: isFetchingEducator,
+  } = useGetEducatorWithCoursesQuery(id);
+  const {
+    data: liveTradeIdeas,
+    refetch: refetchLiveIdeas,
+    isFetching: isFetchingLiveIdeas,
+  } = useGetLiveTradeIdeaQuery({
+    page: 1,
+    limit: 10,
+    id: id,
+  });
+
+  useEffect(() => {
+
+    if (liveTradeIdeas && liveTradeIdeas?.data) {
+      setLiveIdea(liveTradeIdeas?.data);
+    }
+
+  }, [liveTradeIdeas, liveIdea]);
+
+  const handleRefresh = () => {
+    // refetchEducator();
+    refetchLiveIdeas();
+  };
+
+  const { volume, setVolume, isMuted, setIsMuted } = useLayout();
+
+  const toggleMute = () => setIsMuted((v) => !v);
+  const decVolume = () => setVolume((v) => Math.max(0, +(v - 0.1).toFixed(2)));
+  const incVolume = () => setVolume((v) => Math.min(1, +(v + 0.1).toFixed(2)));
+  const onSliderChange = (val) => {
+    setVolume(Number(val));
+    if (isMuted && Number(val) > 0) setIsMuted(false);
+  };
+
+
 
   const handleCloseView = () => {
     setIsViewOpen(false);
@@ -635,95 +655,72 @@ const IqEducators = () => {
           <div className="text-gray-900">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Live Ideas</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-medium">Live Ideas</h2>
+
+                </div>
                 <button
-                  onClick={() => setLiveIdea((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => {
+                    setLiveIdea((prev) => !prev)
+                    handleRefresh()
+                  }}
+                  disabled={isFetchingLiveIdeas}
+                  className="text-white hover:text-gray-300 transition-colors"
                 >
-                  {liveIdea ? "Show Less" : "View All"}
+                  <RotateCw
+                    size={18}
+                    className={
+                      isFetchingLiveIdeas
+                        ? "animate-spin"
+                        : ""
+                    }
+
+                  />
+
                 </button>
               </div>
             </div>
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.liveIdea?.length > 0 ? (
-                liveIdea ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.liveIdea?.map((liveIdeaData) => (
-                      <div
-                        key={liveIdeaData._id}
-                        className="w-full border rounded-xl shadow-sm cursor-pointer"
-                        onClick={() => {
-                          setSelectedIdea(liveIdeaData);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${liveIdeaData.section}&language=${liveIdeaData.language}&categoryId=${liveIdeaData.category._id}&liveIdeaDataId=${liveIdeaData._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={liveIdeaData.image[0]}
-                            alt={liveIdeaData.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
+              {liveIdea?.length > 0 ? (
+                <div className="flex gap-4">
+                  {liveIdea?.map((liveIdeaData) => (
+                    <div
+                      key={liveIdeaData._id}
+                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                      onClick={() => {
+                        setSelectedIdea(liveIdeaData);
+                        setIsViewOpen(true);
+                      }}
+                    // onClick={() =>
+                    //   navigate(
+                    //     `/iq-vault?mainSection=${liveIdeaData.section}&language=${liveIdeaData.language}&categoryId=${liveIdeaData.category._id}&liveIdeaDataId=${liveIdeaData._id}`
+                    //   )
+                    // }
+                    >
+                      <div className="rounded-t-xl overflow-hidden">
+                        <img
+                          src={liveIdeaData.image[0]}
+                          alt={liveIdeaData.name}
+                          className="w-full h-36 object-cover"
+                        />
+                      </div>
+                      <div className="p-4 d-flex">
+                        <div className="justify-between">
                           <h3 className="text-md font-normal mb-2">
                             {liveIdeaData.name}
                           </h3>
-                          {/* <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={liveIdeaData?.description || "No description"}
-                            limit={65}
-                          /> */}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.liveIdea?.map((liveIdeaData) => (
-                      <div
-                        key={liveIdeaData._id}
-                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                        onClick={() => {
-                          setSelectedIdea(liveIdeaData);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${liveIdeaData.section}&language=${liveIdeaData.language}&categoryId=${liveIdeaData.category._id}&liveIdeaDataId=${liveIdeaData._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={liveIdeaData.image[0]}
-                            alt={liveIdeaData.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4 d-flex">
-                          <div className="justify-between">
-                            <h3 className="text-md font-normal mb-2">
-                              {liveIdeaData.name}
-                            </h3>
-                          </div>
 
-                          {/* <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={liveIdeaData?.description || "No description"}
-                            limit={65}
-                          /> */}
-                        </div>
+                        {/* <ShowMoreLess
+                          className="text-xs text-gray-600"
+                          html={liveIdeaData?.description || "No description"}
+                          limit={65}
+                        /> */}
                       </div>
-                    ))}
-                  </div>
-                )
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center">
                   <span className="text-sm text-gray-600">No Live idea Found</span>

@@ -6,14 +6,8 @@ export default function ClientTradeSlider({
   setIsLightBoxOpen,
   selectedIdea,
 }) {
-  const settings = {
-    dots: true,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    adaptiveHeight: true,
-  };
+
+
 
   return (
     <>
@@ -58,26 +52,30 @@ export default function ClientTradeSlider({
             <div className="flex justify-between text-sm">
               <span className="text-gray-600 font-normal text-sm"></span>
               <span className="font-medium text-gray-800">
-               {format(selectedIdea?.createdAt, "MMM dd, yyyy, hh:mm a")}
+                {format(selectedIdea?.createdAt, "MMM dd, yyyy, hh:mm a")}
               </span>
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 font-normal text-sm">Entry</span>
-              <span className="font-medium text-gray-800">
-                {selectedIdea?.entry}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 font-normal text-sm">
-                Stop Loss
-              </span>
-              <span className="font-medium text-gray-800">
-                {selectedIdea?.invalidation}
-              </span>
-            </div>
+            {selectedIdea?.entry && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 font-normal text-sm">Entry</span>
+                <span className="font-medium text-gray-800">
+                  {selectedIdea?.entry}
+                </span>
+              </div>
+            )}
+            {selectedIdea?.invalidation && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 font-normal text-sm">
+                  Stop Loss
+                </span>
+                <span className="font-medium text-gray-800">
+                  {selectedIdea?.invalidation}
+                </span>
+              </div>
+            )}
 
-            {[0, 1, 2].map((idx) => (
+            {selectedIdea?.exits?.length > 0 && [0, 1, 2].map((idx) => (
               <div key={idx} className="flex justify-between text-sm">
                 <span className="text-gray-600 font-normal text-sm">
                   {`Exit ${idx + 1}`}
@@ -87,10 +85,12 @@ export default function ClientTradeSlider({
                 </span>
               </div>
             ))}
-            <ShowMoreLess
-              html={selectedIdea?.description || "No description"}
-              limit={95}
-            />
+            {selectedIdea?.description && (
+              <ShowMoreLess
+                html={selectedIdea?.description || "No description"}
+                limit={95}
+              />
+            )}
           </div>
         </div>
         {/* </div> */}
