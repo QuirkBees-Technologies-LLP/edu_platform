@@ -139,12 +139,12 @@ const EducatorTradeCards = () => {
                       >
                         {trade.status.toUpperCase()}
                       </span>
-                      <span
+                      {/* <span
                         className={`bg-gray-100 text-${statusColorMap[trade.status]}-700 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                       // className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                       >
                         {trade.timeFrame}
-                      </span>
+                      </span> */}
 
                     </div>
                   </div>

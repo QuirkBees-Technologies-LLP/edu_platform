@@ -306,12 +306,12 @@ const AdminTradeCards = () => {
                       >
                         {trade.status.toUpperCase()}
                       </span>
-                      <span
+                      {/* <span
                         className={`bg-gray-100 text-${statusColorMap[trade.status]}-700 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                       // className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                       >
                         {trade.timeFrame}
-                      </span>
+                      </span> */}
                       {/* {copiedId === trade._id ? (
                                 <span className="text-dark text-sm">
                                   Copied!
@@ -328,23 +328,23 @@ const AdminTradeCards = () => {
                   </div>
 
                   <div className="mt-6 space-y-4">
-                    <div className="flex justify-between text-sm">
+                    {/* <div className="flex justify-between text-sm">
                       <span className="text-gray-600 font-normal text-sm">
                         Entry
                       </span>
                       <span className="font-medium text-gray-800">
                         {trade.entry}
                       </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
+                    </div> */}
+                    {/* <div className="flex justify-between text-sm">
                       <span className="text-gray-600 font-normal text-sm">
                         Stop Loss
                       </span>
                       <span className="font-medium text-gray-800">
                         {trade.invalidation}
                       </span>
-                    </div>
-                    {[0, 1, 2].map((idx) => {
+                    </div> */}
+                    {/* {[0, 1, 2].map((idx) => {
                       const exitValue = trade?.exits?.[idx] ?? "N/A";
                       const fieldName = `Exit ${idx + 1}`;
 
@@ -358,7 +358,7 @@ const AdminTradeCards = () => {
                           </span>
                         </div>
                       );
-                    })}
+                    })} */}
                     <button
                       onClick={() => {
                         setSelectedIdea(trade);

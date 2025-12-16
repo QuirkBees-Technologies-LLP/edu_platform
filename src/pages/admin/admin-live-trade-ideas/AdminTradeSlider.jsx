@@ -78,21 +78,21 @@ export default function AdminTradeSlider({
 
         {/* ✅ Trade Info */}
         <div className="mt-6 space-y-4">
-          <div className="flex justify-between text-sm">
+          {/* <div className="flex justify-between text-sm">
             <span className="text-gray-600 font-normal">Entry</span>
             <span className="font-medium text-gray-800">
               {selectedIdea?.entry ?? "N/A"}
             </span>
-          </div>
+          </div> */}
 
-          <div className="flex justify-between text-sm">
+          {/* <div className="flex justify-between text-sm">
             <span className="text-gray-600 font-normal">Stop Loss</span>
             <span className="font-medium text-gray-800">
               {selectedIdea?.invalidation ?? "N/A"}
             </span>
-          </div>
+          </div> */}
 
-          {[0, 1, 2].map((idx) => (
+          {/* {[0, 1, 2].map((idx) => (
             <div key={idx} className="flex justify-between text-sm">
               <span className="text-gray-600 font-normal">{`Exit ${
                 idx + 1
@@ -101,7 +101,7 @@ export default function AdminTradeSlider({
                 {selectedIdea?.exits?.[idx] ?? "N/A"}
               </span>
             </div>
-          ))}
+          ))} */}
 
           <ShowMoreLess
             html={selectedIdea?.description || "No description"}

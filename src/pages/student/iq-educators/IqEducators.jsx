@@ -31,6 +31,7 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import RatingModal from "./RatingModel";
 import { useLayout } from "../../../providers";
+import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 
 const IqEducators = () => {
   const navigate = useNavigate();
@@ -40,6 +41,13 @@ const IqEducators = () => {
 
   const { id } = useParams();
   const { data: response } = useGetEducatorWithCoursesQuery(id);
+  const { data: liveTradeIdeas } = useGetLiveTradeIdeaQuery({
+    page: 1,
+    limit: 10,
+    id: id,
+  });
+
+  console.log("Live Trade Ideas:", liveTradeIdeas);
 
   const { volume, setVolume, isMuted, setIsMuted } = useLayout();
 
@@ -622,7 +630,7 @@ const IqEducators = () => {
             </div>
           </div> */}
           {/* Live Idea  */}
-  
+
 
           <div className="text-gray-900">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
@@ -814,7 +822,7 @@ const IqEducators = () => {
             </div>
           </div>
 
-  
+
 
           {/* Idea  */}
           <div className="text-gray-900 mb-28">

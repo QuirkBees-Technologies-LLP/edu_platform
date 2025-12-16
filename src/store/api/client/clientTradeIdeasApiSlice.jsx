@@ -69,6 +69,16 @@ export const clientTradeIdeasApiSlice = createApi({
         return `/users/crypto-analysis/list?${params.toString()}`;
       },
     }),
+    getLiveTradeIdea: builder.query({
+      query: ({ page = 1, limit = 9, id }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+          id,
+        });
+        return `/users/live-idea?${params.toString()}`;
+      }
+    })
   }),
 });
 
@@ -76,4 +86,5 @@ export const {
   useGetClientTradeIdeasQuery,
   useGetClientTradeAnalysisQuery,
   useGetClientCryptoAnalysisQuery,
+  useGetLiveTradeIdeaQuery,
 } = clientTradeIdeasApiSlice;
