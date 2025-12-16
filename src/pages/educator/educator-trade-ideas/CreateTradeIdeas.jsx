@@ -83,7 +83,11 @@ const CreateTradeIdeas = forwardRef(
         )
         .min(1, "At least one exit is required"),
       category: Yup.string().required("Category is required"),
-      pips: numberField(),
+      pips: Yup.number()
+        .typeError("Pips must be a number")
+        .required("Pips is required")
+        .notOneOf([0], "Pips cannot be zero") // 0 nahi allowed
+        .test("non-zero", "Pips must be non-zero", (value) => value !== 0),
     });
 
     const formik = useFormik({
