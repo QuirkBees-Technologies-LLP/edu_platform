@@ -10,7 +10,7 @@ function SearchFilterInput({ searchText, handleSearchChange, className }) {
   const handleReset = () => handleSearchChange({ target: { value: "" } });
 
   return (
-    <div className="relative w-full">
+    <div className="relative">
       <input
         type="text"
         placeholder="Search"
