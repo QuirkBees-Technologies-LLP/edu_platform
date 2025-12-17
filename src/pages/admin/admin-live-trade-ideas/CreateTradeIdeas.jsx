@@ -18,13 +18,13 @@ import { ImageInput } from "@/components/image-input";
 import { toast } from "sonner";
 import { useAuthContext } from "../../../auth/useAuthContext";
 import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
-import { useCreateAdminLiveTradeIdeaMutation, useUpdateAdminLiveTradeIdeaMutation } from "../../../store/api/admin/adminLiveTradeIdeasApiSlice";
+import {
+  useCreateAdminLiveTradeIdeaMutation,
+  useUpdateAdminLiveTradeIdeaMutation,
+} from "../../../store/api/admin/adminLiveTradeIdeasApiSlice";
 
 const CreateLiveTradeIdea = forwardRef(
-  (
-    { isCreateOpen, handleCloseCreate, callId, selectedRow, refetch },
-    ref
-  ) => {
+  ({ isCreateOpen, handleCloseCreate, callId, selectedRow, refetch }, ref) => {
     const { auth } = useAuthContext();
     const [createAdminLiveTradeIdea] = useCreateAdminLiveTradeIdeaMutation();
     const [updateAdminLiveTradeIdea] = useUpdateAdminLiveTradeIdeaMutation();
@@ -32,19 +32,15 @@ const CreateLiveTradeIdea = forwardRef(
     const educatorId = auth?.user?._id ?? null;
     const { data } = useGetCommonCategoryQuery();
 
-
     const initialValues = {
       name: "",
       files: [],
       type: "",
-      image_Url: "",
       educatorId: "",
       category: "",
       status: "",
       pips: 0,
-
-
-
+      timeFrame: "",
     };
     const numberField = () =>
       Yup.number()
@@ -65,7 +61,7 @@ const CreateLiveTradeIdea = forwardRef(
       educatorId: Yup.string().required("Educator ID is required"),
       category: Yup.string().required("Category is required"),
       pips: numberField(),
-      image_Url: Yup.string().optional(),
+      timeFrame: Yup.string().required("Time Frame is required"),
     });
 
     const formik = useFormik({
@@ -84,8 +80,8 @@ const CreateLiveTradeIdea = forwardRef(
         formData.append("educatorId", educatorId);
         formData.append("status", values.status);
         formData.append("category", values.category);
-        formData.append("image_Url", values.image_Url);
         formData.append("streamCallId", callId);
+        formData.append("timeFrame", values.timeFrame);
         formData.append("isLiveIdea", true);
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
@@ -93,7 +89,10 @@ const CreateLiveTradeIdea = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            await updateAdminLiveTradeIdea({ id: selectedRow?._id, formData }).unwrap();
+            await updateAdminLiveTradeIdea({
+              id: selectedRow?._id,
+              formData,
+            }).unwrap();
 
             toast.success("Live Trade Idea updated successfully!");
           } else {
@@ -134,16 +133,14 @@ const CreateLiveTradeIdea = forwardRef(
           status: selectedRow?.status,
           category: selectedRow?.category?._id,
           pips: selectedRow?.pips,
-          image_Url: selectedRow?.image_Url,
           educatorId: selectedRow?.educatorId,
           streamCallId: selectedRow?.streamCallId,
           isLiveIdea: selectedRow?.isLiveIdea,
-
+          timeFrame: selectedRow?.timeFrame,
         };
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
-
 
     // Handle multiple image selection
     const handleImageChange = (selectedFiles) => {
@@ -184,7 +181,9 @@ const CreateLiveTradeIdea = forwardRef(
           <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id ? "Update Live Trade Idea" : "Create Live Trade Idea"}
+                {selectedRow?._id
+                  ? "Update Live Trade Idea"
+                  : "Create Live Trade Idea"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">
@@ -387,29 +386,6 @@ const CreateLiveTradeIdea = forwardRef(
                       </div>
                     </div>
                   )}
-
-                <div className="col-span-12 md:col-span-6">
-                  <div className="flex flex-col w-full gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Url
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter url"
-                      autoComplete="off"
-                      className={`form-control input input-md w-full ${formik.errors.image_Url && formik.touched.image_Url
-                        ? "border border-danger"
-                        : ""
-                        }`}
-                      {...formik.getFieldProps("image_Url")}
-                    />
-                    {formik.touched.image_Url && formik.errors.image_Url && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.image_Url}
-                      </span>
-                    )}
-                  </div>
-                </div>
 
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">

@@ -155,6 +155,29 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
       {
+        accessorFn: (row) => row.streamTitle,
+        id: "streamTitle",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Stream Title" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              <a
+                className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
+                href="#"
+              >
+                {info.row.original.streamTitle}
+              </a>
+            </div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
+      {
         accessorFn: (row) => row.name,
         id: "name",
         header: ({ column }) => (
@@ -175,6 +198,22 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         ),
         meta: {
           headerClassName: "min-w-[200px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.timeFrame,
+        id: "timeFrame",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Type" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex flex-col">
+            {info.row.original.timeFrame}
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[125px]",
         },
       },
       {
