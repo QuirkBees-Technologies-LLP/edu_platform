@@ -625,14 +625,14 @@ const EducatorKpi = () => {
         ),
       },
       {
-        accessorFn: (row) => row.datetime,
-        id: "datetime",
+        accessorFn: (row) => row.createdAt,
+        id: "createdAt",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Scheduled Date" column={column} />
+          <DataGridColumnHeader title="Created Date" column={column} />
         ),
         cell: (info) =>
-          info.row.original.datetime
-            ? format(info.row.original.datetime, "MMM dd, yyyy hh:mm a")
+          info.row.original.createdAt
+            ? format(info.row.original.createdAt, "MMM dd, yyyy hh:mm a")
             : "N/A",
       },
       {
