@@ -96,7 +96,7 @@ const Educators = ({ title = "Educators" }) => {
       enableSorting: true,
       cell: info => <div className="flex items-center gap-2.5">
         <div className="flex flex-col gap-0.5">
-            {info.getValue()}
+          {info.getValue()}
         </div>
       </div>,
       meta: {
@@ -112,7 +112,7 @@ const Educators = ({ title = "Educators" }) => {
       enableSorting: true,
       cell: info => <div className="flex items-center gap-2.5">
         <div className="flex flex-col gap-0.5">
-            {info.getValue()}
+          {info.getValue()}
         </div>
       </div>,
       meta: {
@@ -262,12 +262,19 @@ const Educators = ({ title = "Educators" }) => {
         </ToolbarActions>
       </Toolbar>
       <DataGrid
-        key={tableKey}
+        key={searchTerm}
+        reloadTrigger={tableKey}
         serverSide={true}
-        loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
+        loading={isLoading}
+        columns={columns}
+        rowSelection={true}
+        onRowSelectionChange={handleRowSelection}
+        pagination={{
           size: 10,
-        }} toolbar={<ToolbarTable />} layout={{
-          card: true
+        }}
+        toolbar={<ToolbarTable />}
+        layout={{
+          card: true,
         }}
         onFetchData={handleFetchData}
       />

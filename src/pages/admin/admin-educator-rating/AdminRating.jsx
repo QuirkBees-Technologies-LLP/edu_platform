@@ -260,7 +260,8 @@ const AdminRating = () => {
       </Toolbar>
 
       <DataGrid
-        key={tableKey}
+        key={searchTextInput}
+        reloadTrigger={tableKey}
         serverSide
         loading={isLoadingRatings}
         columns={columns}

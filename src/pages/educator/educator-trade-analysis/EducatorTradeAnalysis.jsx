@@ -391,7 +391,8 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
         </Toolbar>
 
         <DataGrid
-          key={tableKey}
+          key={category?._id || ""}
+          reloadTrigger={tableKey}
           serverSide={true}
           loading={isLoading}
           columns={columns}

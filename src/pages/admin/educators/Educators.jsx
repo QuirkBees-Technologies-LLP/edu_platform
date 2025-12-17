@@ -67,7 +67,7 @@ const Educators = ({ title = "Educators" }) => {
   const [selectedRow, setSelectedRow] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getEducators, { data : educators, isLoading }] = useLazyGetEducatorsQuery();
+  const [getEducators, { data: educators, isLoading }] = useLazyGetEducatorsQuery();
   const [selectedEducator, setSelectedEducator] = useState(null);
 
   // const [tableKey, setTableKey] = useState(0);
@@ -321,7 +321,8 @@ const Educators = ({ title = "Educators" }) => {
       </Toolbar>
 
       <DataGrid
-        key={tableKey}
+        key={`${searchTerm}-${selectedEducator?._id || ""}`}
+        reloadTrigger={tableKey}
         serverSide={true}
         loading={isLoading}
         columns={columns}

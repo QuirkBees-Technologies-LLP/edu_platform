@@ -32,7 +32,7 @@ import VideoThumbnail from "../live-session/VideoThumbnail";
 import { PlayCircle } from "lucide-react";
 
 const EducatorRecording = ({ title = "Session Recordings" }) => {
- 
+
   const handleThumbnailClick = () => {
     window.open(videoUrl, "_blank");
   };
@@ -328,7 +328,8 @@ const EducatorRecording = ({ title = "Session Recordings" }) => {
         </ToolbarActions> */}
       </Toolbar>
       <DataGrid
-        key={tableKey}
+        key={searchTerm}
+        reloadTrigger={tableKey}
         serverSide={true}
         loading={isLoading}
         columns={columns}

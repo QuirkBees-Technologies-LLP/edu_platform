@@ -85,7 +85,7 @@ export const DataGridProvider = props => {
   // Trigger debounced fetch for server-side data; load local data if serverSide is false
   useEffect(() => {
     loadData();
-  }, [pagination, sorting, columnFilters, mergedProps.data, mergedProps.serverSide]);
+  }, [pagination, sorting, columnFilters, mergedProps.data, mergedProps.serverSide, mergedProps.reloadTrigger]);
   const handleRowSelectionChange = updaterOrValue => {
     setRowSelection(prev => typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue);
     if (mergedProps.onRowSelectionChange) {
@@ -107,8 +107,20 @@ export const DataGridProvider = props => {
     getRowId: mergedProps.getRowId || ((row, index) => String(index)),
     enableRowSelection: mergedProps.rowSelection,
     onRowSelectionChange: handleRowSelectionChange,
-    onSortingChange: newSorting => !loading && setSorting(newSorting),
-    onColumnFiltersChange: newFilters => !loading && setColumnFilters(newFilters),
+    onSortingChange: newSorting => {
+      !loading && setSorting(newSorting);
+      setPagination(prev => ({
+        ...prev,
+        pageIndex: 0
+      }));
+    },
+    onColumnFiltersChange: newFilters => {
+      !loading && setColumnFilters(newFilters);
+      setPagination(prev => ({
+        ...prev,
+        pageIndex: 0
+      }));
+    },
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: newPagination => !loading && setPagination(newPagination),
     getCoreRowModel: getCoreRowModel(),
@@ -119,7 +131,8 @@ export const DataGridProvider = props => {
     getFacetedUniqueValues: getFacetedUniqueValues(),
     manualPagination: mergedProps.serverSide,
     // manualSorting: mergedProps.serverSide,
-    manualFiltering: mergedProps.serverSide
+    manualFiltering: mergedProps.serverSide,
+    autoResetPageIndex: false
   });
   return <DataGridContext.Provider value={{
     props: mergedProps,
@@ -129,6 +142,6 @@ export const DataGridProvider = props => {
     setLoading,
     reload: loadData
   }}>
-      <DataGridInner />
-    </DataGridContext.Provider>;
+    <DataGridInner />
+  </DataGridContext.Provider>;
 };

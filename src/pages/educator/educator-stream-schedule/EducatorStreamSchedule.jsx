@@ -254,13 +254,12 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span
-              className={`badge capitalize badge-outline ${
-                info.row.original.status === "active"
-                  ? "badge-primary"
-                  : info.row.original.status === "pending"
-                    ? "badge-warning"
-                    : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ${info.row.original.status === "active"
+                ? "badge-primary"
+                : info.row.original.status === "pending"
+                  ? "badge-warning"
+                  : "badge-danger"
+                }`}
             >
               {info.row.original.status}
             </span>
@@ -288,9 +287,8 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span
-              className={`badge capitalize badge-outline ml-9 ${
-                info.row.original.isRecurent ? "badge-success" : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ml-9 ${info.row.original.isRecurent ? "badge-success" : "badge-danger"
+                }`}
             >
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>
@@ -502,8 +500,9 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         </div>
       </Toolbar>
       <DataGrid
+        key={searchTextInput}
         serverSide={true}
-        key={tableKey}
+        reloadTrigger={tableKey}
         loading={isLoading}
         columns={columns}
         rowSelection={true}
