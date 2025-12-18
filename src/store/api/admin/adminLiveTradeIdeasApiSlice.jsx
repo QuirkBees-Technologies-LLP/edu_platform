@@ -32,7 +32,7 @@ export const adminLiveTradeIdeasApiSlice = createApi({
     ideaExport: builder.mutation({
       query: (payload) => ({
         url: "/admin/live-idea/export-excel", // backend endpoint
-        method: "GET",
+        method: "POST",
         body: payload,
         responseHandler: async (response) => {
           const blob = await response.blob();

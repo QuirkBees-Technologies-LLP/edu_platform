@@ -351,9 +351,9 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
       a.download = "liveIdea_report.xlsx";
       a.click();
       window.URL.revokeObjectURL(url);
-
       toast("Export successful");
-    } catch {
+    } catch(e) {
+    console.log()
       toast("Export failed");
     }
   };
