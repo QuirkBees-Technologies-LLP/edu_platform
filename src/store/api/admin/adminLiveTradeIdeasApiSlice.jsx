@@ -29,7 +29,18 @@ export const adminLiveTradeIdeasApiSlice = createApi({
         method: 'DELETE',
       }),
     }),
+    ideaExport: builder.mutation({
+      query: (payload) => ({
+        url: "/admin/live-idea/export-excel", // backend endpoint
+        method: "GET",
+        body: payload,
+        responseHandler: async (response) => {
+          const blob = await response.blob();
+          return blob;
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetAdminLiveTradeIdeasQuery, useLazyGetAdminLiveTradeIdeasQuery, useCreateAdminLiveTradeIdeaMutation, useUpdateAdminLiveTradeIdeaMutation, useDeleteAdminLiveTradeIdeaMutation } = adminLiveTradeIdeasApiSlice;
+export const { useGetAdminLiveTradeIdeasQuery, useLazyGetAdminLiveTradeIdeasQuery, useCreateAdminLiveTradeIdeaMutation, useUpdateAdminLiveTradeIdeaMutation, useDeleteAdminLiveTradeIdeaMutation,useIdeaExportMutation  } = adminLiveTradeIdeasApiSlice;

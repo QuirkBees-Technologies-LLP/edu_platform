@@ -25,7 +25,10 @@ import CreateTradeIdeas from "./CreateTradeIdeas";
 import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import TradeImageSlider from "./TradeImageSlider";
-import { useLazyGetAdminLiveTradeIdeasQuery } from "../../../store/api/admin/adminLiveTradeIdeasApiSlice";
+import {
+  useIdeaExportMutation,
+  useLazyGetAdminLiveTradeIdeasQuery,
+} from "../../../store/api/admin/adminLiveTradeIdeasApiSlice";
 import { TruncatedText } from "../../../lib/utils";
 import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
 import AdminTradeCards from "./AdminTradeCards";
@@ -40,6 +43,7 @@ import debounce from "lodash.debounce";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import SearchFilterInput from "@/components/SearchFilterInput";
 import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import { Loader2 } from "lucide-react";
 
 const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -54,14 +58,12 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
   const [searchText, setSearchText] = useState("");
   const [selectedType, setSelectedType] = useState("");
 
-
-
   const [fetchTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetAdminLiveTradeIdeasQuery();
 
   const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
-
+  const [exportIdea, { isLoading: exportLoading }] = useIdeaExportMutation();
 
   const debouncedSearch = useMemo(
     () =>
@@ -104,7 +106,6 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
       />
     );
   };
-
 
   const LabelMap = {
     active: "Active",
@@ -236,9 +237,7 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
         ),
         enableSorting: true,
         cell: (info) => (
-          <div className="flex flex-col">
-            {info.row.original.type}
-          </div>
+          <div className="flex flex-col">{info.row.original.type}</div>
         ),
         meta: {
           headerClassName: "min-w-[125px]",
@@ -252,9 +251,7 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
         ),
         enableSorting: true,
         cell: (info) => (
-          <div className="flex flex-col">
-            {info.row.original.timeFrame}
-          </div>
+          <div className="flex flex-col">{info.row.original.timeFrame}</div>
         ),
         meta: {
           headerClassName: "min-w-[125px]",
@@ -338,6 +335,28 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
     [isRTL]
   );
 
+  const handleExport = async () => {
+    try {
+      const payload = data?.data?.map((row) => ({
+        category: row.category,
+        search: row.search,
+        status: row.status,
+        educator: row.educator,
+      }));
+
+      const blob = await exportIdea(payload).unwrap();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "liveIdea_report.xlsx";
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      toast("Export successful");
+    } catch {
+      toast("Export failed");
+    }
+  };
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || "";
@@ -382,6 +401,7 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
             /> */}
           </div>
           <DataGridColumnVisibility table={table} />
+          
         </div>
       </div>
     );
@@ -428,19 +448,21 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("TableView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "TableView"
-              ? "bg-gray-100 text-gray-900 shadow"
-              : "text-gray-600"
-              }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "TableView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             Table View
           </button>
           <button
             onClick={() => setActiveTab("UserView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "UserView"
-              ? "bg-gray-100 text-gray-900 shadow"
-              : "text-gray-600"
-              }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "UserView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             User View
           </button>
@@ -454,10 +476,17 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
               <ToolbarHeading>
                 <ToolbarPageTitle text="Live IQ Ideas" />
                 <ToolbarDescription>
-                  Generate, analyze, and execute profitable trading opportunities
-                  with smart insights, market trends, and data-driven strategies
+                  Generate, analyze, and execute profitable trading
+                  opportunities with smart insights, market trends, and
+                  data-driven strategies
                 </ToolbarDescription>
               </ToolbarHeading>
+              <button
+            onClick={handleExport}
+            className="px-3 py-2 bg-green-500 text-white rounded"
+          >
+            {exportLoading ? <Loader2 /> : "Export Live Ideas"}
+          </button>
 
               <ToolbarActions />
             </Toolbar>
