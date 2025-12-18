@@ -6,7 +6,7 @@ export const adminLiveTradeIdeasApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getAdminLiveTradeIdeas: builder.query({
-      query: ({ page = 1, limit = 10, isview = true, category = "" }) => `/admin/live-idea?page=${page}&limit=${limit}&isview=${isview}&category=${category}`,
+      query: ({ page = 1, limit = 10, isview = true, category = "", search = "", educator = "", status = "" }) => `/admin/live-idea?page=${page}&limit=${limit}&isview=${isview}&category=${category}&search=${search}&educator=${educator}&status=${status}`,
     }),
     createAdminLiveTradeIdea: builder.mutation({
       query: (data) => ({

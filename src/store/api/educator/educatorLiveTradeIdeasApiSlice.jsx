@@ -6,7 +6,7 @@ export const educatorLiveTradeIdeasApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getEducatorLiveTradeIdeas: builder.query({
-            query: ({ page = 1, limit = 10, isview = true, category = "" }) => `/educator/live-idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}`,
+            query: ({ page = 1, limit = 10, isview = true, category = "", status = "", search = "" }) => `/educator/live-idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}&status=${status}&search=${search}`,
         }),
         createEducatorLiveTradeIdea: builder.mutation({
             query: (data) => ({

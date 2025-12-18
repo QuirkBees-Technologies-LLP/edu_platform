@@ -22,22 +22,37 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import CreateLiveTradeIdeas from "./CreateLiveTradeIdea";
 import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 import EducatorTradeCards from "./EducatorTradeCards";
 import { useLazyGetEducatorLiveTradeIdeasQuery } from "../../../store/api/educator/educatorLiveTradeIdeasApiSlice";
+import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { debounce } from "lodash";
+import SearchFilterInput from "../../../components/SearchFilterInput";
 
 const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [category, setCategory] = useState(null);
+  const [category, setCategory] = useState("");
+  const [selectedEducator, setSelectedEducator] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+
+
   const [getEducatorTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetEducatorLiveTradeIdeasQuery();
-  const { data: categoryList } = useLazyGetEducatorLiveTradeIdeasQuery();
+  const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
 
   const handleCloseView = () => {
     setIsLightBoxOpen(false);
@@ -49,6 +64,22 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   // const handleDeleteOpen = () => {
   //   setIsDeleteOpen(true);
   // };
+
+
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        // setSearchText(value);
+        reloadTable();
+      }, 500),
+    []
+  );
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
 
   const handleDeleteClose = () => {
     setSelectedRow(null);
@@ -377,7 +408,9 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
       const response = await getEducatorTradeIdeas({
         page: newPage,
         limit: newLimit,
-        category: category?._id || "",
+        category: category || "",
+        status: selectedType || "",
+        search: searchText || "",
       }).unwrap();
 
       return {
@@ -425,22 +458,97 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
 
       {activeTab === "TableView" && (
         <>
-          <Toolbar>
-            <ToolbarHeading>
-              <ToolbarPageTitle text="Live IQ Ideas" />
-              <ToolbarDescription>
-                Generate, analyze, and execute profitable trading opportunities
-                with smart insights, market trends, and data-driven strategies
-              </ToolbarDescription>
-            </ToolbarHeading>
-            <ToolbarActions>
-              {/* <div className="text-end">
-                <button className="btn btn-primary" onClick={handleClickOpen}>
-                  Create IQ Idea
-                </button>
-              </div> */}
-            </ToolbarActions>
-          </Toolbar>
+          <div className="flex flex-col mb-5">
+            {/* TOP: Toolbar */}
+            <Toolbar>
+              <ToolbarHeading>
+                <ToolbarPageTitle text="Live IQ Ideas" />
+                <ToolbarDescription>
+                  Generate, analyze, and execute profitable trading opportunities
+                  with smart insights, market trends, and data-driven strategies
+                </ToolbarDescription>
+              </ToolbarHeading>
+
+              <ToolbarActions />
+            </Toolbar>
+
+            {/* BOTTOM: Button */}
+            <div className="flex flex-wrap gap-2">
+              <div>
+                <SearchFilterInput
+                  searchText={searchText}
+                  handleSearchChange={handleSearchChange}
+                />
+              </div>
+              <div className="flex items-center gap-2  relative">
+                <Select
+                  value={category}
+                  onValueChange={(value) => {
+                    setCategory(value);
+                    reloadTable();
+                  }}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryList?.data?.map((e) => (
+                      <SelectItem key={e._id} value={e._id}>
+                        {e.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {category && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory("");
+                      reloadTable();
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    ✖
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2  relative">
+                <Select
+                  value={selectedType}
+                  onValueChange={(value) => {
+                    setSelectedType(value);
+                    reloadTable();
+                  }}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="win">Win</SelectItem>
+                    <SelectItem value="partialWin">Partial Win</SelectItem>
+                    <SelectItem value="breakEven">Break Even</SelectItem>
+                    <SelectItem value="loss">Loss</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {selectedType && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedType("");
+                      reloadTable();
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    ✖
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
 
           <DataGrid
             key={category?._id || ""}
