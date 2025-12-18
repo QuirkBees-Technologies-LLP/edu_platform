@@ -102,11 +102,11 @@ export default function AdminTradeSlider({
               </span>
             </div>
           ))} */}
-
+          {/* 
           <ShowMoreLess
             html={selectedIdea?.description || "No description"}
             limit={95}
-          />
+          /> */}
         </div>
       </div>
     </div>
