@@ -376,82 +376,7 @@ const KpisDashboard = () => {
         </div>
       ) : (
         <>
-          <div className="mb-8">
-            <div className="bg-white dark:bg-coal-300 shadow-sm border dark:border-coal-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              {/* Left section - IDs */}
-              <div className="space-y-2 sm:space-y-0 sm:space-x-6 flex flex-col sm:flex-row text-sm text-gray-700 dark:text-gray-300">
-                <div className="flex items-center">
-                  <span className="font-semibold text-gray-900 dark:text-white mr-2">
-                    Session ID:
-                  </span>
-                  <span className="truncate text-gray-500">{data?.sessionId || "—"}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="font-semibold text-gray-900 dark:text-white mr-2">Call ID:</span>
-                  <span className="truncate text-gray-500">{data?.callId || "—"}</span>
-                </div>
-              </div>
-
-              {/* Right section - Status */}
-              <div className="mt-3 sm:mt-0">
-                <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${data?.ended
-                    ? "bg-red-100 text-red-700 border border-red-200"
-                    : "bg-green-100 text-green-700 border border-green-200"
-                    }`}
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full mr-2 ${data?.ended ? "bg-red-500" : "bg-green-500 animate-pulse"
-                      }`}
-                  />
-                  {data?.ended ? "Ended" : "Live"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <MetricCard
-              icon={Users}
-              title="Active Users"
-              value={data?.uniqueUsers}
-              // subtitle="Last 7 days"
-              color="green"
-            />
-            <MetricCard
-              icon={Eye}
-              title="Peak Concurrent"
-              value={data?.peakConcurrent}
-              // subtitle="Compared to last week"
-              color="purple"
-            />
-            <MetricCard
-              icon={UserCheck}
-              title="Total Sessions"
-              value={data?.totalSessions}
-              color="purple"
-            />
-            <MetricCard
-              icon={UserPlus}
-              title="Subscribers"
-              value={data?.subscribers}
-              color="indigo"
-            />
-            <MetricCard
-              icon={Clock}
-              title="Total Watch Time"
-              value={data?.totalWatchTime}
-              // subtitle="This month"
-              color="blue"
-            />
-            <MetricCard
-              icon={Star}
-              title="User Ratings"
-              value={data?.userRatings}
-              color="yellow"
-            />
-          </div>
+         
 
           {/* Timeline Chart */}
           <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6 mb-8 mt-8">
@@ -631,6 +556,83 @@ const KpisDashboard = () => {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </div>
+
+           <div className="mb-8">
+            <div className="bg-white dark:bg-coal-300 shadow-sm border dark:border-coal-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              {/* Left section - IDs */}
+              <div className="space-y-2 sm:space-y-0 sm:space-x-6 flex flex-col sm:flex-row text-sm text-gray-700 dark:text-gray-300">
+                <div className="flex items-center">
+                  <span className="font-semibold text-gray-900 dark:text-white mr-2">
+                    Session ID:
+                  </span>
+                  <span className="truncate text-gray-500">{data?.sessionId || "—"}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-semibold text-gray-900 dark:text-white mr-2">Call ID:</span>
+                  <span className="truncate text-gray-500">{data?.callId || "—"}</span>
+                </div>
+              </div>
+
+              {/* Right section - Status */}
+              <div className="mt-3 sm:mt-0">
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${data?.ended
+                    ? "bg-red-100 text-red-700 border border-red-200"
+                    : "bg-green-100 text-green-700 border border-green-200"
+                    }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full mr-2 ${data?.ended ? "bg-red-500" : "bg-green-500 animate-pulse"
+                      }`}
+                  />
+                  {data?.ended ? "Ended" : "Live"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <MetricCard
+              icon={Users}
+              title="Unique Users"
+              value={data?.uniqueUsers}
+              // subtitle="Last 7 days"
+              color="green"
+            />
+            <MetricCard
+              icon={Eye}
+              title="Peak Concurrent Viewers"
+              value={data?.peakConcurrent}
+              // subtitle="Compared to last week"
+              color="purple"
+            />
+            <MetricCard
+              icon={UserCheck}
+              title="Total Views"
+              value={data?.totalSessions}
+              color="purple"
+            />
+            {/* <MetricCard
+              icon={UserPlus}
+              title="Subscribers"
+              value={data?.subscribers}
+              color="indigo"
+            /> */}
+            <MetricCard
+              icon={Clock}
+              title="Total Watch Time"
+              value={data?.totalWatchTime}
+              // subtitle="This month"
+              color="blue"
+            />
+            <MetricCard
+              icon={Star}
+              title="User Ratings"
+              value={data?.userRatings}
+              color="yellow"
+            />
           </div>
         </>
       )}
