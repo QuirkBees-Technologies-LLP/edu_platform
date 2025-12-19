@@ -27,7 +27,7 @@ export default function IqAcademy() {
 
 
   const days = Array.from({ length: 7 }).map((_, i) =>
-   addDays(displayedWeekStart, i)
+    addDays(displayedWeekStart, i)
   );
 
   const { data: categoryData, isLoading: isCategoryLoading } =
@@ -37,17 +37,20 @@ export default function IqAcademy() {
 
   useEffect(() => {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
-      setActiveCategoryId(categoryData.data[0]._id);
+      const categoryList = categoryData.data;
+      if (!activeCategoryId || !categoryList.some((cat) => cat._id === activeCategoryId)) {
+        setActiveCategoryId(categoryList[0]._id);
+      }
     }
-  }, [isCategoryLoading, categoryData, selectedLanguage]);
+  }, [isCategoryLoading, categoryData]);
 
   const { data: singleCategoryData, isLoading: isDetailLoading } =
     useGetAcademySingleCategoryQuery(
       {
         id: activeCategoryId,
         language: selectedLanguage,
-         startDate: displayedWeekStart.toISOString(),
-      endDate: displayedWeekEnd.toISOString(),
+        startDate: displayedWeekStart.toISOString(),
+        endDate: displayedWeekEnd.toISOString(),
       },
       {
         skip: !activeCategoryId,
@@ -89,11 +92,10 @@ export default function IqAcademy() {
               <button
                 key={cat._id}
                 onClick={() => setActiveCategoryId(cat._id)}
-                className={`pb-4 border-b-2 ${
-                  activeCategoryId === cat._id
-                    ? "border-black dark:border-white text-gray-900"
-                    : "border-transparent text-gray-500 hover:text-gray-900"
-                }`}
+                className={`pb-4 border-b-2 ${activeCategoryId === cat._id
+                  ? "border-black dark:border-white text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-900"
+                  }`}
               >
                 {cat.name}
               </button>
@@ -104,21 +106,19 @@ export default function IqAcademy() {
       {/* Week Switch */}
       <div className="flex border-b mb-4 space-x-4">
         <button
-          className={`px-4 py-2 ${
-            weekOffset === 0
-              ? "text-primary font-semibold border-b-2 border-primary"
-              : "text-gray-600"
-          }`}
+          className={`px-4 py-2 ${weekOffset === 0
+            ? "text-primary font-semibold border-b-2 border-primary"
+            : "text-gray-600"
+            }`}
           onClick={() => setWeekOffset(0)}
         >
           Current Week
         </button>
         <button
-          className={`px-4 py-2 ${
-            weekOffset === 1
-              ? "text-primary font-semibold border-b-2 border-primary"
-              : "text-gray-600"
-          }`}
+          className={`px-4 py-2 ${weekOffset === 1
+            ? "text-primary font-semibold border-b-2 border-primary"
+            : "text-gray-600"
+            }`}
           onClick={() => setWeekOffset(1)}
         >
           Next Week
@@ -130,7 +130,7 @@ export default function IqAcademy() {
             <div className="bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
               <div className="text-center">
                 <p className="text-lg sm:text-xl tracking-widest text-gray-500">
-                  No Schedule Found 
+                  No Schedule Found
                 </p>
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function IqAcademy() {
                       <img
                         src={educator.image}
                         alt={educator.first_name}
-                        onClick={()=>navigate(`/iq-educators/${educator._id}`)}
+                        onClick={() => navigate(`/iq-educators/${educator._id}`)}
                         className="cursor-pointer w-12 h-12 rounded-full mb-2 object-cover object-top"
                       />
                       <span className="text-xs font-normal text-gray-800 text-center">
@@ -187,12 +187,11 @@ export default function IqAcademy() {
                             filtered.map((s, i) => (
                               <div
                                 key={i}
-                                onClick={()=>navigate(`/iq-educators/${educator._id}`)}
-                                className={`text-xs rounded-lg p-2 text-center cursor-pointer ${
-                                  isToday(s.datetime)
-                                    ? "bg-[#4E34E3] text-white font-medium shadow-lg"
-                                    : "bg-[#E5DEFF] text-[#4E34E3]"
-                                }`}
+                                onClick={() => navigate(`/iq-educators/${educator._id}`)}
+                                className={`text-xs rounded-lg p-2 text-center cursor-pointer ${isToday(s.datetime)
+                                  ? "bg-[#4E34E3] text-white font-medium shadow-lg"
+                                  : "bg-[#E5DEFF] text-[#4E34E3]"
+                                  }`}
                               >
                                 {s.title}
                                 <br />
