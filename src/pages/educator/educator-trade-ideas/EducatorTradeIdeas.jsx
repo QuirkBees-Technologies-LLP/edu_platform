@@ -425,21 +425,19 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("TableView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === "TableView"
-                ? "bg-gray-100 text-gray-900 shadow"
-                : "text-gray-600"
-            }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "TableView"
+              ? "bg-gray-100 text-gray-900 shadow"
+              : "text-gray-600"
+              }`}
           >
             Table View
           </button>
           <button
             onClick={() => setActiveTab("UserView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === "UserView"
-                ? "bg-gray-100 text-gray-900 shadow"
-                : "text-gray-600"
-            }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "UserView"
+              ? "bg-gray-100 text-gray-900 shadow"
+              : "text-gray-600"
+              }`}
           >
             User View
           </button>
@@ -512,7 +510,8 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </Toolbar>
 
           <DataGrid
-            key={tableKey}
+            key={category?._id || ""}
+            reloadTrigger={tableKey}
             serverSide={true}
             loading={isLoading}
             columns={columns}

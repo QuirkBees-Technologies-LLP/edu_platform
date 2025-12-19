@@ -1420,17 +1420,17 @@ const ClientDashboard = () => {
                           </div>
 
                           <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <p className="dark:text-white font-medium">
+                            <div className="flex items-center justify-between ">
+                              <p className="dark:text-white font-medium font-medium text-[11px]">
                                 {post.author?.first_name || "IQNOIC"}{" "}
                                 {post.author?.last_name || "EDUCATOR"}
                               </p>
-                              <p className="text-xs text-gray-600 dark:text-gray-800">
+                              <p className="text-xs text-gray-600 dark:text-gray-800 font-medium font-medium text-[11px]">
                                 {timeAgo(post.createdAt || new Date())}
                               </p>
                             </div>
 
-                            <p className="text-xs text-gray-700 dark:text-gray-600 mt-1">
+                            <p className="text-xs text-gray-700 dark:text-gray-600 mt-1 font-medium text-[14px] ">
                               {getShortContent(post.content)}
                               {htmlToPlainText(post.content).length > 120 && (
                                 <span

@@ -2,6 +2,7 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { useLanguage } from "@/i18n";
+
 import {
   DataGrid,
   DataGridColumnHeader,
@@ -21,14 +22,6 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
-import CreateTradeIdeas from "./CreateTradeIdeas";
-import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
-import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
-import TradeImageSlider from "./TradeImageSlider";
-import { useLazyGetAdminTradeIdeasQuery } from "../../../store/api/admin/adminTradeIdeasApiSlice";
-import { TruncatedText } from "../../../lib/utils";
-import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
-import AdminTradeCards from "./AdminTradeCards";
 import {
   Select,
   SelectContent,
@@ -36,34 +29,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import CreateLiveTradeIdeas from "./CreateLiveTradeIdea";
+import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
+import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
+import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
+import EducatorTradeCards from "./EducatorTradeCards";
+import { useLazyGetEducatorLiveTradeIdeasQuery } from "../../../store/api/educator/educatorLiveTradeIdeasApiSlice";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { debounce } from "lodash";
+import SearchFilterInput from "../../../components/SearchFilterInput";
 
-const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
+const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [tradeIdeas, setTradeIdeas] = useState([]);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedIdea, setSelectedIdea] = useState({});
-  const [category, setCategory] = useState(null);
-  const [fetchTradeIdeas, { data, isLoading, refetch }] =
-    useLazyGetAdminTradeIdeasQuery();
+  const [category, setCategory] = useState("");
+  const [selectedEducator, setSelectedEducator] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+
+
+  const [getEducatorTradeIdeas, { data, isLoading, refetch }] =
+    useLazyGetEducatorLiveTradeIdeasQuery();
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
+
+  const handleCloseView = () => {
+    setIsLightBoxOpen(false);
+  };
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
 
-  const handleDeleteOpen = () => {
-    setIsDeleteOpen(true);
+  // const handleDeleteOpen = () => {
+  //   setIsDeleteOpen(true);
+  // };
+
+
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        // setSearchText(value);
+        reloadTable();
+      }, 500),
+    []
+  );
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
   };
 
   const handleDeleteClose = () => {
+    setSelectedRow(null);
     setIsDeleteOpen(false);
-  };
-
-  const handleCloseView = () => {
-    setIsLightBoxOpen(false);
   };
 
   const { isRTL } = useLanguage();
@@ -100,10 +120,15 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
     loss: "badge-danger",
   };
 
-  const ActionMenu = () => {
+  const ActionMenu = (raw) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem
+          onClick={() => {
+            setSelectedRow(raw);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
@@ -111,7 +136,12 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             <MenuTitle>Edit</MenuTitle>
           </MenuLink>
         </MenuItem>
-        <MenuItem onClick={handleDeleteOpen}>
+        <MenuItem
+          onClick={() => {
+            setSelectedRow(raw);
+            setIsDeleteOpen(true);
+          }}
+        >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="trash" />
@@ -135,7 +165,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         header: ({ column }) => (
           <DataGridColumnHeader title="Images" column={column} />
         ),
-        enableSorting: true,
+        enableSorting: false,
         cell: ({ row }) => (
           <div
             className="flex flex-col justify-center items-center gap-0.5"
@@ -153,6 +183,29 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         ),
         meta: {
           headerClassName: "min-w-[100px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.streamTitle,
+        id: "streamTitle",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Stream Title" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              <a
+                className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
+                href="#"
+              >
+                {info.row.original.streamTitle}
+              </a>
+            </div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
         },
       },
       {
@@ -179,6 +232,22 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
       {
+        accessorFn: (row) => row.timeFrame,
+        id: "timeFrame",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Type" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex flex-col">
+            {info.row.original.timeFrame}
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[125px]",
+        },
+      },
+      {
         accessorFn: (row) => row.type,
         id: "type",
         header: ({ column }) => (
@@ -196,6 +265,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           headerClassName: "min-w-[100px]",
         },
       },
+
       {
         accessorFn: (row) => row.status,
         id: "status",
@@ -219,36 +289,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           headerClassName: "w-[100px]",
         },
       },
-      {
-        accessorFn: (row) => row.timeFrame,
-        id: "timeFrame",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Type" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => (
-          <div className="flex flex-col">
-            {info.getValue()?.map((exit, index) => (
-              <span key={index}>{LabelMap[exit]}</span>
-            ))}
-          </div>
-        ),
-        meta: {
-          headerClassName: "min-w-[125px]",
-        },
-      },
-      {
-        accessorFn: (row) => row.entry,
-        id: "entry",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Entry" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => info.getValue(),
-        meta: {
-          headerClassName: "min-w-[125px]",
-        },
-      },
+
       {
         accessorFn: (row) => row.name,
         id: "Category",
@@ -264,7 +305,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
@@ -275,7 +316,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           <Menu className="items-stretch">
             <MenuItem
               toggle="dropdown"
-              onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+              // onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
               trigger="click"
               dropdownProps={{
                 placement: isRTL() ? "bottom-start" : "bottom-end",
@@ -292,7 +333,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {ActionMenu()}
+              {ActionMenu(row.original)}
             </MenuItem>
           </Menu>
         ),
@@ -354,6 +395,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   };
 
   const handleCloseCreate = () => {
+    setSelectedRow(null);
     setIsCreateOpen(false);
   };
 
@@ -363,10 +405,12 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
 
     try {
       // Fetch API Data
-      const response = await fetchTradeIdeas({
+      const response = await getEducatorTradeIdeas({
         page: newPage,
         limit: newLimit,
-        category: category?._id || "",
+        category: category || "",
+        status: selectedType || "",
+        search: searchText || "",
       }).unwrap();
 
       return {
@@ -374,7 +418,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ ideas:", error);
+      console.error("Error fetching IQ Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -384,10 +428,11 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
+
   const [activeTab, setActiveTab] = useState("TableView");
 
   return (
-    <div className="container-fluid pb-5">
+    <div className="container-fluid">
       <div className="pb-10">
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
@@ -410,45 +455,46 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           </button>
         </div>
       </div>
+
       {activeTab === "TableView" && (
         <>
-          <Toolbar>
-            <ToolbarHeading>
-              <ToolbarPageTitle text="IQ Ideas" />
-              <ToolbarDescription>
-                Generate, analyze, and execute profitable trading opportunities
-                with smart insights, market trends, and data-driven strategies
-              </ToolbarDescription>
-            </ToolbarHeading>
-            <ToolbarActions>
-              {/* <div className="flex-1 min-w-[150px] md:min-w-[200px] relative">
+          <div className="flex flex-col mb-5">
+            {/* TOP: Toolbar */}
+            <Toolbar>
+              <ToolbarHeading>
+                <ToolbarPageTitle text="Live IQ Ideas" />
+                <ToolbarDescription>
+                  Generate, analyze, and execute profitable trading opportunities
+                  with smart insights, market trends, and data-driven strategies
+                </ToolbarDescription>
+              </ToolbarHeading>
+
+              <ToolbarActions />
+            </Toolbar>
+
+            {/* BOTTOM: Button */}
+            <div className="flex flex-wrap gap-2">
+              <div>
+                <SearchFilterInput
+                  searchText={searchText}
+                  handleSearchChange={handleSearchChange}
+                />
+              </div>
+              <div className="flex items-center gap-2  relative">
                 <Select
-                  value={category?._id || ""}
+                  value={category}
                   onValueChange={(value) => {
-                    const selected = categoryList?.data?.find(
-                      (item) => item._id === value
-                    );
-                    if (selected) {
-                      setCategory({
-                        _id: selected._id,
-                        name: `${selected.name}`,
-                      });
-                      reloadTable();
-                    }
+                    setCategory(value);
+                    reloadTable();
                   }}
                 >
-                  <SelectTrigger className="pr-5">
-                    <SelectValue
-                      placeholder="Select Category"
-                      value={category?._id || ""}
-                    >
-                      {category ? category.name : "Select Category"}
-                    </SelectValue>
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categoryList?.data?.map((item) => (
-                      <SelectItem key={item._id} value={item._id}>
-                        {item.name}
+                    {categoryList?.data?.map((e) => (
+                      <SelectItem key={e._id} value={e._id}>
+                        {e.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -458,22 +504,52 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
                   <button
                     type="button"
                     onClick={() => {
-                      setCategory(null);
+                      setCategory("");
                       reloadTable();
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                   >
                     ✖
                   </button>
                 )}
-              </div> */}
-              <div className="text-end ">
-                <button className="btn btn-primary" onClick={handleClickOpen}>
-                  Create IQ Idea
-                </button>
               </div>
-            </ToolbarActions>
-          </Toolbar>
+              <div className="flex items-center gap-2  relative">
+                <Select
+                  value={selectedType}
+                  onValueChange={(value) => {
+                    setSelectedType(value);
+                    reloadTable();
+                  }}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="win">Win</SelectItem>
+                    <SelectItem value="partialWin">Partial Win</SelectItem>
+                    <SelectItem value="breakEven">Break Even</SelectItem>
+                    <SelectItem value="loss">Loss</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {selectedType && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedType("");
+                      reloadTable();
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    ✖
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <DataGrid
             key={category?._id || ""}
             reloadTrigger={tableKey}
@@ -482,29 +558,20 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             columns={columns}
             rowSelection={true}
             onRowSelectionChange={handleRowSelection}
-            pagination={{
-              size: 10,
-            }}
+            pagination={{ size: 10 }}
             toolbar={<ToolbarTable />}
-            layout={{
-              card: true,
-            }}
+            layout={{ card: true }}
             onFetchData={handleFetchData}
           />
-          {/* <TradeImageSlider
-        isLightBoxOpen={isLightBoxOpen}
-        setIsLightBoxOpen={setIsLightBoxOpen}
-        selectedRow={selectedRow}
-      /> */}
 
-          <ViewAdminTradeIdeas
+          <ViewEducatorTradeIdeas
             isViewOpen={isLightBoxOpen}
             setIsLightBoxOpen={setIsLightBoxOpen}
             handleCloseView={handleCloseView}
             selectedIdea={selectedRow}
           />
 
-          <CreateTradeIdeas
+          <CreateLiveTradeIdeas
             setSelectedRow={setSelectedRow}
             handleCloseCreate={handleCloseCreate}
             refetch={reloadTable}
@@ -512,18 +579,20 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             setIsCreateOpen={setIsCreateOpen}
             selectedRow={selectedRow}
           />
+
           {isDeleteOpen && (
             <DeleteAdminTradeIdeas
               refetch={reloadTable}
               isDeleteOpen={isDeleteOpen}
               handleDeleteClose={handleDeleteClose}
               selectedRow={selectedRow}
+              setSelectedRow={setSelectedRow}
             />
           )}
         </>
       )}
-      {activeTab === "UserView" && <AdminTradeCards />}
+      {activeTab === "UserView" && <EducatorTradeCards />}
     </div>
   );
 };
-export default AdminTradeIdeas;
+export default EducatorTradeIdeas;

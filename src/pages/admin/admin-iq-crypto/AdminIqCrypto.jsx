@@ -283,7 +283,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto Projects" }) => {
         </Toolbar>
 
         <DataGrid
-          key={tableKey}
+          reloadTrigger={tableKey}
           serverSide={true}
           loading={isLoading}
           columns={columns}

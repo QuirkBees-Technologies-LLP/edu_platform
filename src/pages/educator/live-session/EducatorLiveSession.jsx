@@ -538,8 +538,9 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
       </Toolbar>
 
       <DataGrid
+        key={searchTextInput}
         serverSide={true}
-        key={tableKey}
+        reloadTrigger={tableKey}
         loading={isLoading}
         columns={columns}
         rowSelection={true}

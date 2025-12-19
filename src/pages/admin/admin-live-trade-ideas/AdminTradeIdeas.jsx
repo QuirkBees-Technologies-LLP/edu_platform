@@ -25,7 +25,10 @@ import CreateTradeIdeas from "./CreateTradeIdeas";
 import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import TradeImageSlider from "./TradeImageSlider";
-import { useLazyGetAdminTradeIdeasQuery } from "../../../store/api/admin/adminTradeIdeasApiSlice";
+import {
+  useIdeaExportMutation,
+  useLazyGetAdminLiveTradeIdeasQuery,
+} from "../../../store/api/admin/adminLiveTradeIdeasApiSlice";
 import { TruncatedText } from "../../../lib/utils";
 import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
 import AdminTradeCards from "./AdminTradeCards";
@@ -36,9 +39,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import debounce from "lodash.debounce";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import SearchFilterInput from "@/components/SearchFilterInput";
+import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
+import { Loader2 } from "lucide-react";
 
-const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
+const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -46,10 +53,31 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
-  const [category, setCategory] = useState(null);
+  const [category, setCategory] = useState("");
+  const [selectedEducator, setSelectedEducator] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+
   const [fetchTradeIdeas, { data, isLoading, refetch }] =
-    useLazyGetAdminTradeIdeasQuery();
+    useLazyGetAdminLiveTradeIdeasQuery();
+
+  const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
+  const [exportIdea, { isLoading: exportLoading }] = useIdeaExportMutation();
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        // setSearchText(value);
+        reloadTable();
+      }, 500),
+    []
+  );
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchText(value);
+    debouncedSearch(value);
+  };
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
@@ -156,6 +184,29 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
       {
+        accessorFn: (row) => row.streamTitle,
+        id: "streamTitle",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Stream Title" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              <a
+                className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
+                href="#"
+              >
+                {info.row.original.streamTitle}
+              </a>
+            </div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
+      {
         accessorFn: (row) => row.name,
         id: "name",
         header: ({ column }) => (
@@ -186,14 +237,24 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         ),
         enableSorting: true,
         cell: (info) => (
-          <div className="flex items-center gap-1.5">
-            <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.type}
-            </span>
-          </div>
+          <div className="flex flex-col">{info.row.original.type}</div>
         ),
         meta: {
-          headerClassName: "min-w-[100px]",
+          headerClassName: "min-w-[125px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.timeFrame,
+        id: "timeFrame",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Type" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex flex-col">{info.row.original.timeFrame}</div>
+        ),
+        meta: {
+          headerClassName: "min-w-[125px]",
         },
       },
       {
@@ -217,36 +278,6 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
         meta: {
           headerClassName: "w-[100px]",
-        },
-      },
-      {
-        accessorFn: (row) => row.timeFrame,
-        id: "timeFrame",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Type" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => (
-          <div className="flex flex-col">
-            {info.getValue()?.map((exit, index) => (
-              <span key={index}>{LabelMap[exit]}</span>
-            ))}
-          </div>
-        ),
-        meta: {
-          headerClassName: "min-w-[125px]",
-        },
-      },
-      {
-        accessorFn: (row) => row.entry,
-        id: "entry",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Entry" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => info.getValue(),
-        meta: {
-          headerClassName: "min-w-[125px]",
         },
       },
       {
@@ -304,6 +335,28 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
     [isRTL]
   );
 
+  const handleExport = async () => {
+    try {
+      const payload = data?.data?.map((row) => ({
+        category: row.category,
+        search: row.search,
+        status: row.status,
+        educator: row.educator,
+      }));
+
+      const blob = await exportIdea(payload).unwrap();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "liveIdea_report.xlsx";
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast("Export successful");
+    } catch(e) {
+    console.log()
+      toast("Export failed");
+    }
+  };
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || "";
@@ -348,6 +401,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             /> */}
           </div>
           <DataGridColumnVisibility table={table} />
+          
         </div>
       </div>
     );
@@ -360,13 +414,15 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const handleFetchData = async ({ pageIndex, pageSize }) => {
     const newPage = pageIndex + 1;
     const newLimit = pageSize;
-
     try {
       // Fetch API Data
       const response = await fetchTradeIdeas({
         page: newPage,
         limit: newLimit,
-        category: category?._id || "",
+        category: category || "",
+        educator: selectedEducator || "",
+        status: selectedType || "",
+        search: searchText || "",
       }).unwrap();
 
       return {
@@ -392,19 +448,21 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("TableView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "TableView"
-              ? "bg-gray-100 text-gray-900 shadow"
-              : "text-gray-600"
-              }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "TableView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             Table View
           </button>
           <button
             onClick={() => setActiveTab("UserView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "UserView"
-              ? "bg-gray-100 text-gray-900 shadow"
-              : "text-gray-600"
-              }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "UserView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             User View
           </button>
@@ -412,43 +470,82 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
       </div>
       {activeTab === "TableView" && (
         <>
-          <Toolbar>
-            <ToolbarHeading>
-              <ToolbarPageTitle text="IQ Ideas" />
-              <ToolbarDescription>
-                Generate, analyze, and execute profitable trading opportunities
-                with smart insights, market trends, and data-driven strategies
-              </ToolbarDescription>
-            </ToolbarHeading>
-            <ToolbarActions>
-              {/* <div className="flex-1 min-w-[150px] md:min-w-[200px] relative">
+          <div className="flex flex-col mb-5">
+            {/* TOP: Toolbar */}
+            <Toolbar>
+              <ToolbarHeading>
+                <ToolbarPageTitle text="Live IQ Ideas" />
+                <ToolbarDescription>
+                  Generate, analyze, and execute profitable trading
+                  opportunities with smart insights, market trends, and
+                  data-driven strategies
+                </ToolbarDescription>
+              </ToolbarHeading>
+              <button
+            onClick={handleExport}
+            className="px-3 py-2 bg-green-500 text-white rounded"
+          >
+            {exportLoading ? <Loader2 /> : "Export Live Ideas"}
+          </button>
+
+              <ToolbarActions />
+            </Toolbar>
+
+            {/* BOTTOM: Button */}
+            <div className="flex flex-wrap gap-2">
+              <div>
+                <SearchFilterInput
+                  searchText={searchText}
+                  handleSearchChange={handleSearchChange}
+                />
+              </div>
+              <div className="flex items-center gap-2  relative">
                 <Select
-                  value={category?._id || ""}
+                  value={selectedEducator}
                   onValueChange={(value) => {
-                    const selected = categoryList?.data?.find(
-                      (item) => item._id === value
-                    );
-                    if (selected) {
-                      setCategory({
-                        _id: selected._id,
-                        name: `${selected.name}`,
-                      });
-                      reloadTable();
-                    }
+                    setSelectedEducator(value);
+                    reloadTable();
                   }}
                 >
-                  <SelectTrigger className="pr-5">
-                    <SelectValue
-                      placeholder="Select Category"
-                      value={category?._id || ""}
-                    >
-                      {category ? category.name : "Select Category"}
-                    </SelectValue>
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select Educator" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categoryList?.data?.map((item) => (
-                      <SelectItem key={item._id} value={item._id}>
-                        {item.name}
+                    {educators?.data?.map((e) => (
+                      <SelectItem key={e._id} value={e._id}>
+                        {e.first_name} {e.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedEducator && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedEducator("");
+                      reloadTable();
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    ✖
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2  relative">
+                <Select
+                  value={category}
+                  onValueChange={(value) => {
+                    setCategory(value);
+                    reloadTable();
+                  }}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryList?.data?.map((e) => (
+                      <SelectItem key={e._id} value={e._id}>
+                        {e.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -458,22 +555,52 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
                   <button
                     type="button"
                     onClick={() => {
-                      setCategory(null);
+                      setCategory("");
                       reloadTable();
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                   >
                     ✖
                   </button>
                 )}
-              </div> */}
-              <div className="text-end ">
-                <button className="btn btn-primary" onClick={handleClickOpen}>
-                  Create IQ Idea
-                </button>
               </div>
-            </ToolbarActions>
-          </Toolbar>
+              <div className="flex items-center gap-2  relative">
+                <Select
+                  value={selectedType}
+                  onValueChange={(value) => {
+                    setSelectedType(value);
+                    reloadTable();
+                  }}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="win">Win</SelectItem>
+                    <SelectItem value="partialWin">Partial Win</SelectItem>
+                    <SelectItem value="breakEven">Break Even</SelectItem>
+                    <SelectItem value="loss">Loss</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {selectedType && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedType("");
+                      reloadTable();
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    ✖
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <DataGrid
             key={category?._id || ""}
             reloadTrigger={tableKey}

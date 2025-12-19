@@ -1,24 +1,44 @@
 /* eslint-disable prettier/prettier */
-import * as React from 'react';
-import { useMemo, useState } from 'react';
-import { useLanguage } from '@/i18n';
-import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle } from '@/components';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
-import { MenuIcon, MenuLink, MenuSub, MenuTitle } from '@/components';
-import { TruncatedText } from '../../../lib/utils';
-import CreateAdminAcademyCategory from './CreateAdminAcademyCategory';
-import DeleteAdminAcademyCategory from './DeleteAdminAcademyCategory';
-import { useLazyGetAdminAcademyCategoryQuery, useUpdateAdminAcademyCategoryMutation } from '../../../store/api/admin/adminAcademyCategoryApiSlice';
-import { Switch } from '../../../components/ui/switch';
+import * as React from "react";
+import { useMemo, useState } from "react";
+import { useLanguage } from "@/i18n";
+import {
+  DataGrid,
+  DataGridColumnHeader,
+  DataGridColumnVisibility,
+  KeenIcon,
+  useDataGrid,
+  Menu,
+  MenuItem,
+  MenuToggle,
+} from "@/components";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import {
+  Toolbar,
+  ToolbarActions,
+  ToolbarDescription,
+  ToolbarHeading,
+  ToolbarPageTitle,
+} from "@/partials/toolbar";
+import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
+import { TruncatedText } from "../../../lib/utils";
+import CreateAdminAcademyCategory from "./CreateAdminAcademyCategory";
+import DeleteAdminAcademyCategory from "./DeleteAdminAcademyCategory";
+import {
+  useLazyGetAdminAcademyCategoryQuery,
+  useUpdateAdminAcademyCategoryMutation,
+} from "../../../store/api/admin/adminAcademyCategoryApiSlice";
+import { Switch } from "../../../components/ui/switch";
 
 const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
-  const [getAdminAcademyCategory, { data, isLoading, refetch }] = useLazyGetAdminAcademyCategoryQuery();
+  const [getAdminAcademyCategory, { data, isLoading, refetch }] =
+    useLazyGetAdminAcademyCategoryQuery();
   const [toggleStatusData, setToggleStatusData] = useState([]);
+  const [toggleHideData, setToggleHideData] = useState([]);
   const [updateAdminAcademyCategory] = useUpdateAdminAcademyCategoryMutation();
 
   const handleClickOpen = () => {
@@ -31,16 +51,19 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
 
   const handleDeleteClose = () => {
     setIsDeleteOpen(false);
-  }
+  };
 
-  const {
-    isRTL
-  } = useLanguage();
-  const storageFilterId = 'members-filter';
-  const ColumnInputFilter = ({
-    column
-  }) => {
-    return <Input placeholder="Filter..." value={column.getFilterValue() ?? ''} onChange={event => column.setFilterValue(event.target.value)} className="h-9 w-full max-w-40" />;
+  const { isRTL } = useLanguage();
+  const storageFilterId = "members-filter";
+  const ColumnInputFilter = ({ column }) => {
+    return (
+      <Input
+        placeholder="Filter..."
+        value={column.getFilterValue() ?? ""}
+        onChange={(event) => column.setFilterValue(event.target.value)}
+        className="h-9 w-full max-w-40"
+      />
+    );
   };
 
   const ActionMenu = () => {
@@ -63,8 +86,8 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
           </MenuLink>
         </MenuItem>
       </MenuSub>
-    )
-  }
+    );
+  };
 
   const truncateText = (text, maxLength) => {
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
@@ -74,115 +97,220 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
     try {
       const newVisibility = !Boolean(currentVisibility);
 
-      setToggleStatusData(toggleStatusData.map(type => type._id === typeId ? { ...type, status: newVisibility } : type));
-      const payload = toggleStatusData.find(type => type._id === typeId);
+      setToggleStatusData(
+        toggleStatusData.map((type) =>
+          type._id === typeId ? { ...type, status: newVisibility } : type
+        )
+      );
+      const payload = toggleStatusData.find((type) => type._id === typeId);
       // Make API call
-      await updateAdminAcademyCategory({ id: payload?._id, data: { status: String(newVisibility), name: payload?.name }}).unwrap();
-      toast.success(`Academy status updated to ${newVisibility ? 'Active' : 'Inactive'}`);
+      await updateAdminAcademyCategory({
+        id: payload?._id,
+        data: { status: String(newVisibility), name: payload?.name },
+      }).unwrap();
+      toast.success(
+        `Academy status updated to ${newVisibility ? "Active" : "Inactive"}`
+      );
     } catch (error) {
-      toast.error(error?.data?.message || 'Failed to update test visibility');
+      toast.error(error?.data?.message || "Failed to update test visibility");
+    }
+  };
+  const handleHideVisibilityToggle = async (typeId, currentVisibility) => {
+    try {
+      const newVisibility = !Boolean(currentVisibility);
+
+      setToggleHideData(
+        toggleHideData.map((type) =>
+          type._id === typeId ? { ...type, hide: newVisibility } : type
+        )
+      );
+      const payload = toggleHideData.find((type) => type._id === typeId);
+      // Make API call
+      await updateAdminAcademyCategory({
+        id: payload?._id,
+        data: { hide: String(newVisibility), name: payload?.name },
+      }).unwrap();
+      toast.success(
+        `Academy hide field updated to ${newVisibility ? "Active" : "Inactive"}`
+      );
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update test visibility");
     }
   };
 
-  const columns = useMemo(() => [
-    {
-      accessorFn: row => row.icon,
-      id: 'icon',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Icon' column={column} />,
-      enableSorting: true,
-      cell: ({ row }) =>
-        <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
-          setSelectedRow(row.original)
-          setIsLightBoxOpen(true);
-        }}>
-          <img src={row.original.icon?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.icon} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
-        </div>,
-      meta: {
-        headerClassName: 'min-w-[100px]'
-      }
-    },
-    {
-      accessorFn: row => row.image,
-      id: 'image',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Images' column={column} />,
-      enableSorting: true,
-      cell: ({ row }) =>
-        <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
-          setSelectedRow(row.original)
-          setIsLightBoxOpen(true);
-        }}>
-          <img src={row.original.image?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.image} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
-        </div>,
-      meta: {
-        headerClassName: 'min-w-[100px]'
-      }
-    },
-    {
-      accessorFn: row => row.name,
-      id: 'name',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Name' column={column} />,
-      enableSorting: true,
-      cell: info => <div className="flex items-center gap-2.5">
-        <div className="flex flex-col gap-0.5">
-          {info.row.original.name}
-        </div>
-      </div>,
-      meta: {
-        headerClassName: 'min-w-[200px]'
-      }
-    },
-    {
-      id: 'status',
-      header: () => 'Status',
-      enableSorting: false,
-      cell: ({ row }) => {
-      
-
-        return (
-          <Switch
-            checked={toggleStatusData.find(test => test._id === row?.original?._id)?.status}
-            onCheckedChange={() => handleVisibilityToggle(row?.original?._id, toggleStatusData.find(type => type._id === row?.original?._id)?.status)}
-          />
-        );
-      },
-    },
-    {
-      id: 'click',
-      header: () => '',
-      enableSorting: false,
-      cell: ({ row }) => <Menu className="items-stretch">
-        <MenuItem toggle="dropdown"
-          onClick={() => setSelectedRow(toggleStatusData.find(type => type._id === row?.original?._id))}
-          trigger="click" dropdownProps={{
-            placement: isRTL() ? 'bottom-start' : 'bottom-end',
-            modifiers: [{
-              name: 'offset',
-              options: {
-                offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
+  const columns = useMemo(
+    () => [
+      {
+        accessorFn: (row) => row.icon,
+        id: "icon",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Icon" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <div
+            className="flex flex-col justify-center items-center gap-0.5"
+            onClick={() => {
+              setSelectedRow(row.original);
+              setIsLightBoxOpen(true);
+            }}
+          >
+            <img
+              src={
+                row.original.icon?.includes("undefined")
+                  ? toAbsoluteUrl(`/media/avatars/blank.png`)
+                  : row.original.icon
               }
-            }]
-          }}>
-          <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-            <KeenIcon icon="dots-vertical" />
-          </MenuToggle>
-          {ActionMenu()}
-        </MenuItem>
-      </Menu>,
-      meta: {
-        headerClassName: 'w-[60px]'
-      }
-    }
-  ], [isRTL, toggleStatusData, handleVisibilityToggle]);
+              class="rounded-full cursor-pointer size-9 shrink-0"
+              alt=""
+            />
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[100px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.image,
+        id: "image",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Images" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <div
+            className="flex flex-col justify-center items-center gap-0.5"
+            onClick={() => {
+              setSelectedRow(row.original);
+              setIsLightBoxOpen(true);
+            }}
+          >
+            <img
+              src={
+                row.original.image?.includes("undefined")
+                  ? toAbsoluteUrl(`/media/avatars/blank.png`)
+                  : row.original.image
+              }
+              class="rounded-full cursor-pointer size-9 shrink-0"
+              alt=""
+            />
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[100px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.name,
+        id: "name",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Name" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              {info.row.original.name}
+            </div>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
+      {
+        id: "status",
+        header: () => "Status",
+        enableSorting: false,
+        cell: ({ row }) => {
+          return (
+            <Switch
+              checked={
+                toggleStatusData.find((test) => test._id === row?.original?._id)
+                  ?.status
+              }
+              onCheckedChange={() =>
+                handleVisibilityToggle(
+                  row?.original?._id,
+                  toggleStatusData.find(
+                    (type) => type._id === row?.original?._id
+                  )?.status
+                )
+              }
+            />
+          );
+        },
+      },
+
+      {
+        id: "hide",
+        header: () => "Hide Field from ideas",
+        enableSorting: false,
+        cell: ({ row }) => {
+          return (
+            <Switch
+              checked={
+                toggleHideData.find((test) => test._id === row?.original?._id)
+                  ?.hide
+              }
+              onCheckedChange={() =>
+                handleHideVisibilityToggle(
+                  row?.original?._id,
+                  toggleHideData.find((type) => type._id === row?.original?._id)
+                    ?.hide
+                )
+              }
+            />
+          );
+        },
+      },
+
+      {
+        id: "click",
+        header: () => "",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <Menu className="items-stretch">
+            <MenuItem
+              toggle="dropdown"
+              onClick={() =>
+                setSelectedRow(
+                  toggleStatusData.find(
+                    (type) => type._id === row?.original?._id
+                  )
+                )
+              }
+              trigger="click"
+              dropdownProps={{
+                placement: isRTL() ? "bottom-start" : "bottom-end",
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: {
+                      offset: isRTL() ? [0, -10] : [0, 10], // [skid, distance]
+                    },
+                  },
+                ],
+              }}
+            >
+              <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+                <KeenIcon icon="dots-vertical" />
+              </MenuToggle>
+              {ActionMenu()}
+            </MenuItem>
+          </Menu>
+        ),
+        meta: {
+          headerClassName: "w-[60px]",
+        },
+      },
+    ],
+    [isRTL, toggleHideData, handleHideVisibilityToggle,toggleStatusData,setToggleStatusData]
+  );
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
-    return localStorage.getItem(storageFilterId) || '';
+    return localStorage.getItem(storageFilterId) || "";
   });
 
   // Filtered data based on search term
@@ -191,34 +319,42 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
 
     // return data.filter(member => member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, data?.data]);
-  const handleRowSelection = state => {
+  const handleRowSelection = (state) => {
     const selectedRowIds = Object.keys(state);
     if (selectedRowIds.length > 0) {
       toast(`Total ${selectedRowIds.length} are selected.`, {
         description: `Selected row IDs: ${selectedRowIds}`,
         action: {
-          label: 'Undo',
-          onClick: () => console.log('Undo')
-        }
+          label: "Undo",
+          onClick: () => console.log("Undo"),
+        },
       });
     }
   };
   const ToolbarTable = () => {
-    const {
-      table
-    } = useDataGrid();
-    return <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
-      <h3 className="card-title">{title}</h3>
+    const { table } = useDataGrid();
+    return (
+      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+        <h3 className="card-title">{title}</h3>
 
-      <div className="flex flex-wrap items-center gap-2.5">
-        <div className="relative">
-          <KeenIcon icon="magnifier" className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3" />
-          <input type="text" placeholder="Search Members" className="input input-md ps-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} // Update search term
-          />
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="relative">
+            <KeenIcon
+              icon="magnifier"
+              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
+            />
+            <input
+              type="text"
+              placeholder="Search Members"
+              className="input input-md ps-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+            />
+          </div>
+          <DataGridColumnVisibility table={table} />
         </div>
-        <DataGridColumnVisibility table={table} />
       </div>
-    </div>;
+    );
   };
 
   const handleCloseCreate = () => {
@@ -231,8 +367,12 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
 
     try {
       // Fetch API Data
-      const response = await getAdminAcademyCategory({ page: newPage, limit: newLimit }).unwrap();
+      const response = await getAdminAcademyCategory({
+        page: newPage,
+        limit: newLimit,
+      }).unwrap();
       setToggleStatusData(response.data);
+      setToggleHideData(response.data);
       return {
         data: response.data || [],
         totalCount: response.pagination?.totalRecords || 0,
@@ -245,22 +385,23 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
 
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
 
-
   const reloadTable = () => {
-    setTableKey(prevKey => prevKey + 1); // ✅ Change key to force re-fetch
+    setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
 
   return (
-    <div className='container-fluid p-0 mt-5'>
+    <div className="container-fluid p-0 mt-5">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Academy Category" />
           <ToolbarDescription>
-            Learn, Master, and Apply Trading Skills with Expert-Led IQ Vault, Practical Strategies, and Real-World Market Insights.          </ToolbarDescription>
+            Learn, Master, and Apply Trading Skills with Expert-Led IQ Vault,
+            Practical Strategies, and Real-World Market Insights.{" "}
+          </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
-            <button className='btn btn-primary' onClick={handleClickOpen}>
+            <button className="btn btn-primary" onClick={handleClickOpen}>
               Create Academy Category
             </button>
           </div>
@@ -269,17 +410,37 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
       <DataGrid
         key={tableKey}
         serverSide={true}
-        loading={isLoading} columns={columns} rowSelection={true} onRowSelectionChange={handleRowSelection} pagination={{
+        loading={isLoading}
+        columns={columns}
+        rowSelection={true}
+        onRowSelectionChange={handleRowSelection}
+        pagination={{
           size: 10,
-        }} toolbar={<ToolbarTable />} layout={{
-          card: true
+        }}
+        toolbar={<ToolbarTable />}
+        layout={{
+          card: true,
         }}
         onFetchData={handleFetchData}
       />
-      <CreateAdminAcademyCategory setSelectedRow={setSelectedRow} handleCloseCreate={handleCloseCreate} refetch={reloadTable} isCreateOpen={isCreateOpen} setIsCreateOpen={setIsCreateOpen} selectedRow={selectedRow} />
-      {isDeleteOpen && <DeleteAdminAcademyCategory refetch={reloadTable} isDeleteOpen={isDeleteOpen} handleDeleteClose={handleDeleteClose} selectedRow={selectedRow} />}
+      <CreateAdminAcademyCategory
+        setSelectedRow={setSelectedRow}
+        handleCloseCreate={handleCloseCreate}
+        refetch={reloadTable}
+        isCreateOpen={isCreateOpen}
+        setIsCreateOpen={setIsCreateOpen}
+        selectedRow={selectedRow}
+      />
+      {isDeleteOpen && (
+        <DeleteAdminAcademyCategory
+          refetch={reloadTable}
+          isDeleteOpen={isDeleteOpen}
+          handleDeleteClose={handleDeleteClose}
+          selectedRow={selectedRow}
+        />
+      )}
     </div>
-  )
+  );
 };
 
 export default AdminAcademyCategory;

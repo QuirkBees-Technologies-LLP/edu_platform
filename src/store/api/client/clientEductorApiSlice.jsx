@@ -41,7 +41,7 @@ export const clientEducatorApiSlice = createApi({
       providesTags: ["Educator"],
     }),
     getCommonCategory: builder.query({
-      query: () => `/common/category`,
+      query: () => `/common/category/get`,
       providesTags: ["Educator"],
     }),
   }),

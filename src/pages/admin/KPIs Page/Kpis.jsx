@@ -25,259 +25,22 @@ import { Users, Eye, Clock, UserCheck, UserPlus, Star } from "lucide-react";
 import { useEducatorKpisQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
 import { useNavigate, useParams } from "react-router";
 import { icon } from "leaflet";
-import Spinner from "@/components/common/LoadingSpinner"; 
+import Spinner from "@/components/common/LoadingSpinner";
 
 const KpisDashboard = () => {
   const navigate = useNavigate();
 
   const { callId } = useParams();
 
-  const { data, isLoading, isError , isFetching } = useEducatorKpisQuery(
+  const { data, isLoading, isError, isFetching } = useEducatorKpisQuery(
     { callId },
     {
       refetchOnMountOrArgChange: true,
     }
   );
 
-  //     callId: "call-e29fce41-4080-47d9-aa20-1f4b0ccbc9da",
-  //     sessionId: "b22a6ab9-f537-443b-9790-53b7efd10e31",
-  //     ended: true,
-  //     uniqueUsers: 73,
-  //     peakConcurrent: 65,
-  //     totalSessions: 137,
-  //     subscribers: 73,
-  //     publishers: 1,
-  //     userRatings: 0,
-  //     totalWatchTime: "1260m",
-
-  //     timeline: [
-  //       { time: "2025-09-16T13:08:00.000Z", first: 0, last: 2, max: 2, min: 0 },
-  //       { time: "2025-09-16T13:09:00.000Z", first: 2, last: 3, max: 3, min: 2 },
-  //       { time: "2025-09-16T13:10:00.000Z", first: 3, last: 6, max: 6, min: 3 },
-  //       { time: "2025-09-16T13:11:00.000Z", first: 6, last: 9, max: 9, min: 6 },
-  //       { time: "2025-09-16T13:12:00.000Z", first: 9, last: 10, max: 10, min: 9 },
-  //       {
-  //         time: "2025-09-16T13:13:00.000Z",
-  //         first: 10,
-  //         last: 12,
-  //         max: 12,
-  //         min: 10,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:14:00.000Z",
-  //         first: 12,
-  //         last: 16,
-  //         max: 16,
-  //         min: 12,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:15:00.000Z",
-  //         first: 16,
-  //         last: 21,
-  //         max: 21,
-  //         min: 16,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:16:00.000Z",
-  //         first: 21,
-  //         last: 27,
-  //         max: 27,
-  //         min: 20,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:17:00.000Z",
-  //         first: 27,
-  //         last: 30,
-  //         max: 30,
-  //         min: 27,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:18:00.000Z",
-  //         first: 30,
-  //         last: 39,
-  //         max: 39,
-  //         min: 29,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:19:00.000Z",
-  //         first: 39,
-  //         last: 44,
-  //         max: 44,
-  //         min: 39,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:20:00.000Z",
-  //         first: 44,
-  //         last: 44,
-  //         max: 45,
-  //         min: 43,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:21:00.000Z",
-  //         first: 44,
-  //         last: 45,
-  //         max: 45,
-  //         min: 44,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:22:00.000Z",
-  //         first: 45,
-  //         last: 44,
-  //         max: 45,
-  //         min: 44,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:23:00.000Z",
-  //         first: 44,
-  //         last: 45,
-  //         max: 46,
-  //         min: 43,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:24:00.000Z",
-  //         first: 45,
-  //         last: 44,
-  //         max: 45,
-  //         min: 44,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:25:00.000Z",
-  //         first: 44,
-  //         last: 54,
-  //         max: 54,
-  //         min: 44,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:26:00.000Z",
-  //         first: 54,
-  //         last: 56,
-  //         max: 57,
-  //         min: 53,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:27:00.000Z",
-  //         first: 56,
-  //         last: 57,
-  //         max: 59,
-  //         min: 56,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:28:00.000Z",
-  //         first: 57,
-  //         last: 61,
-  //         max: 61,
-  //         min: 55,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:29:00.000Z",
-  //         first: 61,
-  //         last: 62,
-  //         max: 63,
-  //         min: 61,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:30:00.000Z",
-  //         first: 62,
-  //         last: 61,
-  //         max: 63,
-  //         min: 59,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:31:00.000Z",
-  //         first: 61,
-  //         last: 60,
-  //         max: 62,
-  //         min: 59,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:32:00.000Z",
-  //         first: 60,
-  //         last: 59,
-  //         max: 60,
-  //         min: 58,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:33:00.000Z",
-  //         first: 59,
-  //         last: 64,
-  //         max: 64,
-  //         min: 58,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:34:00.000Z",
-  //         first: 64,
-  //         last: 63,
-  //         max: 65,
-  //         min: 63,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:35:00.000Z",
-  //         first: 63,
-  //         last: 63,
-  //         max: 65,
-  //         min: 61,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:36:00.000Z",
-  //         first: 63,
-  //         last: 61,
-  //         max: 64,
-  //         min: 61,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:37:00.000Z",
-  //         first: 61,
-  //         last: 60,
-  //         max: 61,
-  //         min: 59,
-  //       },
-  //       {
-  //         time: "2025-09-16T13:38:00.000Z",
-  //         first: 60,
-  //         last: 57,
-  //         max: 61,
-  //         min: 57,
-  //       },
-  //       { time: "2025-09-16T13:39:00.000Z", first: 57, last: 0, max: 57, min: 0 },
-  //     ],
-  //     countryBreakdown: [
-  //       { name: "DE", unique: 1 },
-  //       { name: "MX", unique: 1 },
-  //       { name: "VE", unique: 3 },
-  //       { name: "CZ", unique: 2 },
-  //       { name: "EC", unique: 24 },
-  //       { name: "ES", unique: 2 },
-  //       { name: "PA", unique: 1 },
-  //       { name: "PE", unique: 2 },
-  //       { name: "SK", unique: 1 },
-  //       { name: "US", unique: 4 },
-  //       { name: "CO", unique: 22 },
-  //       { name: "NI", unique: 1 },
-  //       { name: "PY", unique: 1 },
-  //       { name: "AR", unique: 2 },
-  //       { name: "BO", unique: 6 },
-  //     ],
-  //     browserBreakdown: [
-  //       { name: "Safari", unique: 4 },
-  //       { name: "Firefox", unique: 4 },
-  //       { name: "Mobile Safari", unique: 4 },
-  //       { name: "Samsung Internet", unique: 1 },
-  //       { name: "Edge", unique: 11 },
-  //       { name: "Brave", unique: 2 },
-  //       { name: "Chrome", unique: 50 },
-  //     ],
-  //     osBreakdown: [
-  //       { name: "Linux", unique: 4 },
-  //       { name: "linux", unique: 1 },
-  //       { name: "macOS", unique: 4 },
-  //       { name: "Mac OS", unique: 4 },
-  //       { name: "Android", unique: 23 },
-  //       { name: "Windows", unique: 35 },
-  //       { name: "iOS", unique: 5 },
-  //     ],
-  //   };
   const timelineData = Array.isArray(data?.timeline)
-  ? data.timeline.map((item) => ({
+    ? data.timeline.map((item) => ({
       time: new Date(item.time).toLocaleTimeString("en-US", {
         hour12: false,
         hour: "2-digit",
@@ -288,7 +51,7 @@ const KpisDashboard = () => {
       first: item.first,
       min: item.min,
     }))
-  : [];
+    : [];
 
   const countryNames = {
     AF: "Afghanistan",
@@ -491,8 +254,8 @@ const KpisDashboard = () => {
     ZW: "Zimbabwe",
   };
 
-const countryData = Array.isArray(data?.countryBreakdown)
-  ? [...data?.countryBreakdown]
+  const countryData = Array.isArray(data?.countryBreakdown)
+    ? [...data?.countryBreakdown]
       .sort((a, b) => b.unique - a.unique)
       .map((country) => ({
         name: countryNames[country.name] || country.name,
@@ -500,30 +263,30 @@ const countryData = Array.isArray(data?.countryBreakdown)
         users: country.unique,
         percentage: ((country.unique / (data?.uniqueUsers || 1)) * 100).toFixed(1),
       }))
-  : [];
+    : [];
 
-// Browser breakdown
-const browserData = Array.isArray(data?.browserBreakdown)
-  ? [...data?.browserBreakdown]
+  // Browser breakdown
+  const browserData = Array.isArray(data?.browserBreakdown)
+    ? [...data?.browserBreakdown]
       .sort((a, b) => b.unique - a.unique)
       .map((browser) => ({
         name: browser.name,
         users: browser.unique,
       }))
-  : [];
+    : [];
 
-// OS breakdown
-const osDataRaw = Array.isArray(data?.osBreakdown)
-  ? data?.osBreakdown.reduce((acc, os) => {
+  // OS breakdown
+  const osDataRaw = Array.isArray(data?.osBreakdown)
+    ? data?.osBreakdown.reduce((acc, os) => {
       const osName = os.name.toLowerCase() === "linux" ? "Linux" : os.name;
       const existing = acc.find((item) => item.name === osName);
       if (existing) existing.users += os.unique;
       else acc.push({ name: osName, users: os.unique });
       return acc;
     }, [])
-  : [];
+    : [];
 
-const osData = osDataRaw.sort((a, b) => b.users - a.users);
+  const osData = osDataRaw.sort((a, b) => b.users - a.users);
 
   const COLORS = [
     "#3B82F6",
@@ -542,19 +305,19 @@ const osData = osDataRaw.sort((a, b) => b.users - a.users);
     color = "blue",
   }) => {
     const colorMap = {
-      blue: { bg: "bg-blue-50", text: "text-blue-600" },
-      green: { bg: "bg-green-50", text: "text-green-600" },
-      purple: { bg: "bg-purple-50", text: "text-purple-600" },
-      red: { bg: "bg-red-50", text: "text-red-600" },
-      yellow: { bg: "bg-yellow-50", text: "text-yellow-600" },
-      indigo: { bg: "bg-indigo-50", text: "text-indigo-600" },
-      gray: { bg: "bg-gray-50", text: "text-gray-600" },
+      blue: { bg: "bg-blue-50 dark:bg-blue-500/10", text: "text-blue-600 dark:text-blue-400" },
+      green: { bg: "bg-green-50 dark:bg-green-500/10", text: "text-green-600 dark:text-green-400" },
+      purple: { bg: "bg-purple-50 dark:bg-purple-500/10", text: "text-purple-600 dark:text-purple-400" },
+      red: { bg: "bg-red-50 dark:bg-red-500/10", text: "text-red-600 dark:text-red-400" },
+      yellow: { bg: "bg-yellow-50 dark:bg-yellow-500/10", text: "text-yellow-600 dark:text-yellow-400" },
+      indigo: { bg: "bg-indigo-50 dark:bg-indigo-500/10", text: "text-indigo-600 dark:text-indigo-400" },
+      gray: { bg: "bg-gray-50 dark:bg-gray-500/10", text: "text-gray-600 dark:text-gray-400" },
     };
 
     const selected = colorMap[color] || colorMap.blue;
 
     return (
-      <div className="bg-white rounded-lg shadow-sm border p-6 flex items-center">
+      <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6 flex items-center">
         {/* Icon */}
         <div className={`p-3 rounded-xl ${selected.bg}`}>
           {Icon && <Icon className={`h-6 w-6 ${selected.text}`} />}
@@ -562,15 +325,15 @@ const osData = osDataRaw.sort((a, b) => b.users - a.users);
 
         {/* Content */}
         <div className="ml-4 flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+          {subtitle && <p className="text-sm text-gray-500 dark:text-gray-500">{subtitle}</p>}
         </div>
       </div>
     );
   };
 
-  if (isError  ) {
+  if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 max-w-md shadow-sm">
@@ -608,272 +371,272 @@ const osData = osDataRaw.sort((a, b) => b.users - a.users);
       </Toolbar>
       {/* Header */}
       {isFetching ? (
-          <div className="flex justify-center py-8 text-gray-500">
-                    <Spinner />
-                  </div>
+        <div className="flex justify-center py-8 text-gray-500 dark:text-gray-400">
+          <Spinner />
+        </div>
       ) : (
         <>
-          <div className="mb-8">
-        <div className="bg-white shadow-sm border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          {/* Left section - IDs */}
-          <div className="space-y-2 sm:space-y-0 sm:space-x-6 flex flex-col sm:flex-row text-sm text-gray-700">
-            <div className="flex items-center">
-              <span className="font-semibold text-gray-900 mr-2">
-                Session ID:
-              </span>
-              <span className="truncate">{data?.sessionId || "—"}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="font-semibold text-gray-900 mr-2">Call ID:</span>
-              <span className="truncate">{data?.callId || "—"}</span>
-            </div>
-          </div>
+         
 
-          {/* Right section - Status */}
-          <div className="mt-3 sm:mt-0">
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                data?.ended
-                  ? "bg-red-100 text-red-700 border border-red-200"
-                  : "bg-green-100 text-green-700 border border-green-200"
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full mr-2 ${
-                  data?.ended ? "bg-red-500" : "bg-green-500 animate-pulse"
-                }`}
-              />
-              {data?.ended ? "Ended" : "Live"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MetricCard
-          icon={Users}
-          title="Active Users"
-          value={data?.uniqueUsers}
-          // subtitle="Last 7 days"
-          color="green"
-        />
-        <MetricCard
-          icon={Eye}
-          title="Peak Concurrent"
-          value={data?.peakConcurrent}
-          // subtitle="Compared to last week"
-          color="purple"
-        />
-        <MetricCard
-          icon={UserCheck}
-          title="Total Sessions"
-          value={data?.totalSessions}
-          color="purple"
-        />
-        <MetricCard
-          icon={UserPlus}
-          title="Subscribers"
-          value={data?.subscribers}
-          color="indigo"
-        />
-        <MetricCard
-          icon={Clock}
-          title="Total Watch Time"
-          value={data?.totalWatchTime}
-          // subtitle="This month"
-          color="blue"
-        />
-        <MetricCard
-          icon={Star}
-          title="User Ratings"
-          value={data?.userRatings}
-          color="yellow"
-        />
-      </div>
-
-      {/* Timeline Chart */}
-      <div className="bg-white rounded-lg shadow-sm border p-6 mb-8 mt-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          👥 Concurrent Users Timeline
-        </h2>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={timelineData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" tick={{ fontSize: 12 }} interval={10} />
-              <YAxis />
-              <Tooltip
-                labelFormatter={(value) => `Time: ${value}`}
-                formatter={(value, name) => {
-                  const labels = {
-                    max: "Max Users",
-                    last: "End Users",
-                    first: "Start Users",
-                    min: "Min Users",
-                  };
-                  return [value, labels[name] || name];
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="max"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                name="max"
-                dot={{ fill: "#3B82F6", strokeWidth: 2, r: 3 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="last"
-                stroke="#10B981"
-                strokeWidth={2}
-                name="last"
-                dot={{ fill: "#10B981", strokeWidth: 2, r: 3 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="min"
-                stroke="#F59E0B"
-                strokeWidth={1}
-                strokeDasharray="5 5"
-                name="min"
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex items-center justify-center space-x-6 mt-4 text-sm">
-          <div className="flex items-center">
-            <div className="w-4 h-0.5 bg-blue-500 mr-2"></div>
-            <span>Peak Users</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-0.5 bg-green-500 mr-2"></div>
-            <span>End Users</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-0.5 bg-yellow-500 border-dashed border-t mr-2"></div>
-            <span>Min Users</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Breakdown Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        {/* Geographic Distribution */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            🌍 Geographic Distribution
-          </h2>
-          <div className="h-64 mb-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={countryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  //   label={({ name, percentage }) => `${name} ${percentage}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="users"
-                >
-                  {countryData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [value, "Users"]} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="space-y-2">
-            {countryData.map((country, index) => (
-              <div
-                key={country.code}
-                className="flex items-center justify-between text-sm"
-              >
-                <div className="flex items-center">
-                  <div
-                    className="w-3 h-3 rounded-full mr-2"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+          {/* Timeline Chart */}
+          <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6 mb-8 mt-8">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              👥 Concurrent Users Timeline
+            </h2>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={timelineData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="time" tick={{ fontSize: 12 }} interval={10} />
+                  <YAxis />
+                  <Tooltip
+                    labelFormatter={(value) => `Time: ${value}`}
+                    formatter={(value, name) => {
+                      const labels = {
+                        max: "Max Users",
+                        last: "End Users",
+                        first: "Start Users",
+                        min: "Min Users",
+                      };
+                      return [value, labels[name] || name];
+                    }}
                   />
-                  <span>{country.name}</span>
-                </div>
-                <span className="font-medium">{country.users} users</span>
+                  <Line
+                    type="monotone"
+                    dataKey="max"
+                    stroke="#3B82F6"
+                    strokeWidth={2}
+                    name="max"
+                    dot={{ fill: "#3B82F6", strokeWidth: 2, r: 3 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="last"
+                    stroke="#10B981"
+                    strokeWidth={2}
+                    name="last"
+                    dot={{ fill: "#10B981", strokeWidth: 2, r: 3 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="min"
+                    stroke="#F59E0B"
+                    strokeWidth={1}
+                    strokeDasharray="5 5"
+                    name="min"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex items-center justify-center space-x-6 mt-4 text-sm dark:text-gray-300">
+              <div className="flex items-center">
+                <div className="w-4 h-0.5 bg-blue-500 mr-2"></div>
+                <span>Peak Users</span>
               </div>
-            ))}
+              <div className="flex items-center">
+                <div className="w-4 h-0.5 bg-green-500 mr-2"></div>
+                <span>End Users</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-0.5 bg-yellow-500 border-dashed border-t mr-2"></div>
+                <span>Min Users</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Browser Distribution */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            🖥️ Browser Distribution
-          </h2>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={browserData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 50 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12 }}
-                  interval={0}
-                  angle={-30}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis />
-                <Tooltip formatter={(value) => [`${value} Users`, ""]} />
-                <Bar dataKey="users" radius={[6, 6, 0, 0]}>
-                  {browserData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={
-                        [
-                          "#6366F1",
-                          "#10B981",
-                          "#F59E0B",
-                          "#EF4444",
-                          "#3B82F6",
-                          "#8B5CF6",
-                        ][index % 6]
-                      }
+          {/* Breakdown Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Geographic Distribution */}
+            <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                🌍 Geographic Distribution
+              </h2>
+              <div className="h-64 mb-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={countryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      //   label={({ name, percentage }) => `${name} ${percentage}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="users"
+                    >
+                      {countryData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [value, "Users"]} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-2">
+                {countryData.map((country, index) => (
+                  <div
+                    key={country.code}
+                    className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span>{country.name}</span>
+                    </div>
+                    <span className="font-medium text-gray-900 dark:text-white">{country.users} users</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Browser Distribution */}
+            <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                🖥️ Browser Distribution
+              </h2>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={browserData}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 50 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 12 }}
+                      interval={0}
+                      angle={-30}
+                      textAnchor="end"
+                      height={60}
                     />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`${value} Users`, ""]} />
+                    <Bar dataKey="users" radius={[6, 6, 0, 0]}>
+                      {browserData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            [
+                              "#6366F1",
+                              "#10B981",
+                              "#F59E0B",
+                              "#EF4444",
+                              "#3B82F6",
+                              "#8B5CF6",
+                            ][index % 6]
+                          }
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* OS Distribution */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          💻 Operating System Distribution
-        </h2>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={osData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis />
-              <Tooltip formatter={(value) => [value, "Users"]} />
-              <Bar dataKey="users" fill="#8B5CF6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      </>
+          {/* OS Distribution */}
+          <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              💻 Operating System Distribution
+            </h2>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={osData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [value, "Users"]} />
+                  <Bar dataKey="users" fill="#8B5CF6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+           <div className="mb-8">
+            <div className="bg-white dark:bg-coal-300 shadow-sm border dark:border-coal-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              {/* Left section - IDs */}
+              <div className="space-y-2 sm:space-y-0 sm:space-x-6 flex flex-col sm:flex-row text-sm text-gray-700 dark:text-gray-300">
+                <div className="flex items-center">
+                  <span className="font-semibold text-gray-900 dark:text-white mr-2">
+                    Session ID:
+                  </span>
+                  <span className="truncate text-gray-500">{data?.sessionId || "—"}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-semibold text-gray-900 dark:text-white mr-2">Call ID:</span>
+                  <span className="truncate text-gray-500">{data?.callId || "—"}</span>
+                </div>
+              </div>
+
+              {/* Right section - Status */}
+              <div className="mt-3 sm:mt-0">
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${data?.ended
+                    ? "bg-red-100 text-red-700 border border-red-200"
+                    : "bg-green-100 text-green-700 border border-green-200"
+                    }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full mr-2 ${data?.ended ? "bg-red-500" : "bg-green-500 animate-pulse"
+                      }`}
+                  />
+                  {data?.ended ? "Ended" : "Live"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <MetricCard
+              icon={Users}
+              title="Unique Users"
+              value={data?.uniqueUsers}
+              // subtitle="Last 7 days"
+              color="green"
+            />
+            <MetricCard
+              icon={Eye}
+              title="Peak Concurrent Viewers"
+              value={data?.peakConcurrent}
+              // subtitle="Compared to last week"
+              color="purple"
+            />
+            <MetricCard
+              icon={UserCheck}
+              title="Total Views"
+              value={data?.totalSessions}
+              color="purple"
+            />
+            {/* <MetricCard
+              icon={UserPlus}
+              title="Subscribers"
+              value={data?.subscribers}
+              color="indigo"
+            /> */}
+            <MetricCard
+              icon={Clock}
+              title="Total Watch Time"
+              value={data?.totalWatchTime}
+              // subtitle="This month"
+              color="blue"
+            />
+            <MetricCard
+              icon={Star}
+              title="User Ratings"
+              value={data?.userRatings}
+              color="yellow"
+            />
+          </div>
+        </>
       )}
-    
+
     </div>
   );
 };

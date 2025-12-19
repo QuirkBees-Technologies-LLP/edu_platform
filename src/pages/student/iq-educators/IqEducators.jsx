@@ -9,9 +9,11 @@ import {
   Calendar,
   Clock3,
   VolumeX,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
-import { Sparkles, TrendingUpDown } from "lucide-react";
+import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
 import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -24,22 +26,78 @@ import RecordingThumbnail from "./RecordingThumbnail";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import RatingModal from "./RatingModel";
 import { useLayout } from "../../../providers";
+import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 
 const IqEducators = () => {
+  const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
+  const [callId, setCallId] = useState(null);
+  const [showShareToast, setShowShareToast] = useState(false); // Add toast state
+  const [showAll, setShowAll] = useState(false);
+  const [courseAll, setCourseAll] = useState(false);
+  const [recording, setRecording] = useState(null);
+  const [idea, setIdea] = useState(null);
+  const [liveIdea, setLiveIdea] = useState(null);
+  const [insight, setInsight] = useState(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState({});
+  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [isViewOpen1, setIsViewOpen1] = useState(false);
+  const [selectedInsight, setSelectedInsight] = useState({});
+  const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [isVolumeOpen, setIsVolumeOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
   const { auth } = useAuthContext();
+  const LabelMap = {
+    active: "Active",
+    pending: "Pending",
+    win: "Win",
+    partialWin: "Partial Win",
+    loss: "Loss",
+    breakEven: "Break Even",
+  };
 
   const userName = auth?.user?.name;
 
   const { id } = useParams();
-  const { data: response } = useGetEducatorWithCoursesQuery(id);
+  const {
+    data: response,
+    refetch: refetchEducator,
+    isFetching: isFetchingEducator,
+  } = useGetEducatorWithCoursesQuery(id);
+  const {
+    data: liveTradeIdeas,
+    refetch: refetchLiveIdeas,
+    isFetching: isFetchingLiveIdeas,
+  } = useGetLiveTradeIdeaQuery({
+    page: 1,
+    limit: 10,
+    id: id,
+  });
+
+  useEffect(() => {
+
+    if (liveTradeIdeas && liveTradeIdeas?.data) {
+      setLiveIdea(liveTradeIdeas?.data);
+    }
+
+  }, [liveTradeIdeas, liveIdea]);
+
+  const handleRefresh = () => {
+    // refetchEducator();
+    refetchLiveIdeas();
+  };
 
   const { volume, setVolume, isMuted, setIsMuted } = useLayout();
 
@@ -51,24 +109,7 @@ const IqEducators = () => {
     if (isMuted && Number(val) > 0) setIsMuted(false);
   };
 
-  const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
-  const [callId, setCallId] = useState(null);
-  const [showShareToast, setShowShareToast] = useState(false); // Add toast state
-  const [showAll, setShowAll] = useState(false);
-  const [courseAll, setCourseAll] = useState(false);
-  const [recording, setRecording] = useState(null);
-  const [idea, setIdea] = useState(null);
-  const [insight, setInsight] = useState(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedIdea, setSelectedIdea] = useState({});
-  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [isViewOpen1, setIsViewOpen1] = useState(false);
-  const [selectedInsight, setSelectedInsight] = useState({});
-  const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showRatingModal, setShowRatingModal] = useState(false);
+
 
   const handleCloseView = () => {
     setIsViewOpen(false);
@@ -292,6 +333,24 @@ const IqEducators = () => {
       const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
       return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
     });
+
+  const getRelativeTime = (date) => {
+    if (!date) return "";
+
+    const now = new Date();
+    const past = new Date(date);
+    const diffInSeconds = Math.floor((now - past) / 1000);
+
+    const minutes = Math.floor(diffInSeconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (diffInSeconds < 60) return "Just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hr ago`;
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+  };
+
 
   return (
     <div className="container-fluid pb-10">
@@ -620,6 +679,153 @@ const IqEducators = () => {
               </div>
             </div>
           </div> */}
+          {/* Live Idea  */}
+
+
+          <div className="text-gray-900">
+            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-medium">Live Ideas</h2>
+
+                </div>
+                <button
+                  onClick={() => {
+                    setLiveIdea((prev) => !prev)
+                    handleRefresh()
+                  }}
+                  disabled={isFetchingLiveIdeas}
+                  className="text-white hover:text-gray-300 transition-colors"
+                >
+                  <RotateCw
+                    size={18}
+                    className={
+                      isFetchingLiveIdeas
+                        ? "animate-spin"
+                        : ""
+                    }
+
+                  />
+
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {liveIdea?.length > 0 ? (
+                <div className="flex gap-4">
+                  {liveIdea?.map((liveIdeaData) => (
+                    <div
+                      key={liveIdeaData?._id}
+                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                      onClick={() => {
+                        setSelectedIdea(liveIdeaData);
+                        setIsLightBoxOpen(true);
+                      }}
+                    >
+                      {/* IMAGE CONTAINER */}
+                      <div className="relative rounded-t-xl overflow-hidden">
+                        <img
+                          src={liveIdeaData?.image?.[0]}
+                          alt={liveIdeaData?.name}
+                          className="w-full h-36 object-cover"
+                        />
+
+                        {/* 🔥 OVERLAY START */}
+                        <div className="absolute top-2 left-2 right-2 flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${liveIdeaData?.type === "buy"
+                                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                                : "bg-red-500 hover:bg-red-600 text-white"
+                                }`}
+                            >
+                              {liveIdeaData?.type === "buy" ? (
+                                <TrendingUp size={16} />
+                              ) : (
+                                <TrendingDown size={16} />
+                              )}
+                              {liveIdeaData?.type?.toUpperCase()}
+                            </button>
+
+                            <div className="bg-gray-800 px-2 py-1 rounded-lg font-semibold text-xs text-white">
+                              {liveIdeaData?.name}
+                            </div>
+                          </div>
+
+                          {LabelMap[liveIdeaData?.status] === "Active" && (
+                            <div className="bg-cyan-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                              Active
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Pending" && (
+                            <div className="bg-purple-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                              Pending
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Win" && (
+                            <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              ★ WIN +{liveIdeaData?.pips} pips
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Loss" && (
+                            <div className="bg-red-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              ▲ LOSS -{liveIdeaData?.pips} pips
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Partial Win" && (
+                            <div className="bg-purple-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              ▲ PARTIAL WIN {liveIdeaData?.pips} pips
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Break Even" && (
+                            <div className="bg-blue-500 text-white px-2 py-1 rounded-lg font-semibold text-xs">
+                              Break Even
+                            </div>
+                          )}
+
+                        </div>
+                        {/* 🔥 OVERLAY END */}
+                      </div>
+
+                      {/* DATE */}
+                      <div className="p-4 flex items-center justify-between">
+                        {/* LEFT: Full Date */}
+                        <div className="text-sm text-gray-600">
+                          {format(new Date(liveIdeaData?.createdAt), "dd/MM/yyyy hh:mm a")}
+                        </div>
+
+                        {/* RIGHT: Relative Time */}
+                        <div
+                          className="text-sm text-gray-600"
+                          title={format(new Date(liveIdeaData?.createdAt), "dd MMM yyyy, hh:mm a")}
+                        >
+                          {getRelativeTime(liveIdeaData?.createdAt)}
+                        </div>
+                      </div>
+
+
+                    </div>
+
+                  ))}
+                </div>
+
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Live idea Found</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+
           {/* Course  */}
           <div className="text-gray-900 ">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
@@ -709,46 +915,7 @@ const IqEducators = () => {
             </div>
           </div>
 
-          {/* <div className="text-gray-900 mb-28">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Courses</h2>
-                <Link className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary">
-                  View All
-                </Link>
-              </div>
-            </div>
 
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              <div className="flex gap-4">
-                {response?.data?.courses?.map((course) => (
-                  <div
-                    key={course.id}
-                    className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                    onClick={() =>
-                      navigate(
-                        `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      )
-                    }
-                  >
-                    <div className="rounded-t-xl overflow-hidden">
-                      <img
-                        src={course.imageUrl}
-                        alt={course.title}
-                        className="w-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-md font-normal mb-2">
-                        {course.title}
-                      </h3>
-                      <p className="text-xs text-gray-600">{course.address}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div> */}
 
           {/* Idea  */}
           <div className="text-gray-900 mb-28">
@@ -1408,6 +1575,15 @@ const IqEducators = () => {
           educatorId={id}
         />
       )}
+      {
+        isLightBoxOpen && (
+          <ImageLightBox
+            isLightBoxOpen={isLightBoxOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            selectedIdea={selectedIdea}
+          />
+        )
+      }
     </div>
   );
 };

@@ -173,9 +173,8 @@ const Admin = ({ title = "Admins" }) => {
         enableSorting: true,
         cell: (info) => (
           <span
-            className={`badge badge-sm badge-outline capitalize ${
-              info.getValue() === "true" ? "badge-success" : "badge-danger"
-            }`}
+            className={`badge badge-sm badge-outline capitalize ${info.getValue() === "true" ? "badge-success" : "badge-danger"
+              }`}
           >
             {info.getValue() === "true" ? "Active" : "Inactive"}
           </span>
@@ -257,7 +256,8 @@ const Admin = ({ title = "Admins" }) => {
       </Toolbar>
 
       <DataGrid
-        key={tableKey}
+        key={searchTerm}
+        reloadTrigger={tableKey}
         serverSide={true}
         loading={isLoading}
         columns={columns}
