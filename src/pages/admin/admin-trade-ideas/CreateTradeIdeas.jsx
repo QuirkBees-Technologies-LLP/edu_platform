@@ -87,10 +87,15 @@ const CreateTradeIdeas = forwardRef(
       description: Yup.string().required("Description is required"),
       category: Yup.string().required("Category is required"),
       pips: Yup.number()
-        .typeError("Pips must be a number")
-        .required("Pips is required")
-        .notOneOf([0], "Pips cannot be zero") // 0 nahi allowed
-        .test("non-zero", "Pips must be non-zero", (value) => value !== 0),
+              .typeError("Pips must be a number")
+              .when("status", {
+                is: (status) => ["win", "loss", "partialWin"].includes(status),
+                then: (schema) =>
+                  schema
+                    .required("Pips is required")
+                    .notOneOf([0], "Pips cannot be zero"),
+                otherwise: (schema) => schema.notRequired().default(0),
+              }),
     });
 
     const formik = useFormik({
@@ -556,7 +561,7 @@ const CreateTradeIdeas = forwardRef(
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
-                      Pips <span className="text-danger"></span>
+                      Pips <span className="text-danger">*</span>
                     </label>
 
                     <input

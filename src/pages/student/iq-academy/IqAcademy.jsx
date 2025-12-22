@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -16,8 +12,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import { Navigation } from "swiper/modules";
 import { Calendar, Clock } from "lucide-react";
-
-
 
 function toEST(date) {
   return new Date(
@@ -71,12 +65,9 @@ export default function IqAcademy() {
     }
   }, [educators]);
 
-  const activeEducator = educators.find(
-    (e) => e._id === activeEducatorId
-  );
+  const activeEducator = educators.find((e) => e._id === activeEducatorId);
 
-  const isToday = (datetime) =>
-    isSameDay(new Date(), new Date(datetime));
+  const isToday = (datetime) => isSameDay(new Date(), new Date(datetime));
 
   const isInitialLoading =
     isCategoryLoading || isDetailLoading || !activeCategoryId;
@@ -84,7 +75,6 @@ export default function IqAcademy() {
 
   return (
     <div className="container-fluid">
-
       {isInitialLoading && (
         <div className="py-10 flex justify-center">
           <Loader />
@@ -100,10 +90,11 @@ export default function IqAcademy() {
               setActiveCategoryId(cat._id);
               setActiveEducatorId(null);
             }}
-            className={`pb-2 border-b-2 text-sm ${activeCategoryId === cat._id
-              ? "border-black text-black"
-              : "border-transparent text-gray-500"
-              }`}
+            className={`pb-2 border-b-2 text-sm ${
+              activeCategoryId === cat._id
+                ? "border-gray-500 text-black dark:text-gray-500"
+                : "border-transparent text-gray-500"
+            }`}
           >
             {cat.name}
           </button>
@@ -114,19 +105,21 @@ export default function IqAcademy() {
       <div className="flex gap-6 border-b mb-6">
         <button
           onClick={() => setWeekOffset(0)}
-          className={`pb-3 ${weekOffset === 0
-            ? "border-b-2 border-primary text-primary font-semibold"
-            : "text-gray-500"
-            }`}
+          className={`pb-3 ${
+            weekOffset === 0
+              ? "border-b-2 border-primary text-primary font-semibold"
+              : "text-gray-500"
+          }`}
         >
           Current Week
         </button>
         <button
           onClick={() => setWeekOffset(1)}
-          className={`pb-3 ${weekOffset === 1
-            ? "border-b-2 border-primary text-primary font-semibold"
-            : "text-gray-500"
-            }`}
+          className={`pb-3 ${
+            weekOffset === 1
+              ? "border-b-2 border-primary text-primary font-semibold"
+              : "text-gray-500"
+          }`}
         >
           Next Week
         </button>
@@ -157,47 +150,46 @@ export default function IqAcademy() {
                 },
               }}
             >
-
-              {educators?.length && educators.map((educator, index) => (
-                <div
-                  key={index}
-                  onClick={() => setActiveEducatorId(educator._id)}
-                  className="flex flex-col items-center cursor-pointer"
-                >
-                  <SwiperSlide key={educator._id}>
-                    <div
-                      onClick={() => setActiveEducatorId(educator._id)}
-                      className="flex flex-col items-center cursor-pointer select-none"
-                    >
+              {educators?.length &&
+                educators.map((educator, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setActiveEducatorId(educator._id)}
+                    className="flex flex-col items-center cursor-pointer"
+                  >
+                    <SwiperSlide key={educator._id}>
                       <div
-                        className={`w-20 h-20 rounded-full p-[4px] transition-all ${activeEducatorId === educator._id
-                            ? "bg-[#4E34E3]"
-                            : "bg-gray-300"
-                          }`}
+                        onClick={() => setActiveEducatorId(educator._id)}
+                        className="flex flex-col items-center cursor-pointer select-none"
                       >
-                        <img
-                          src={educator.image}
-                          alt={educator.first_name}
-                          className="w-full h-full rounded-full object-cover bg-white pointer-events-none"
-                        />
+                        <div
+                          className={`w-20 h-20 rounded-full p-[4px] transition-all ${
+                            activeEducatorId === educator._id
+                              ? "bg-[#4E34E3]"
+                              : "bg-gray-300"
+                          }`}
+                        >
+                          <img
+                            src={educator.image}
+                            alt={educator.first_name}
+                            className="w-full h-full rounded-full object-cover bg-white pointer-events-none"
+                          />
+                        </div>
+
+                        <p className="mt-2 text-xs font-medium text-gray-800 text-center truncate w-20">
+                          {educator.first_name}
+                        </p>
                       </div>
-
-                      <p className="mt-2 text-xs font-medium text-gray-800 text-center truncate w-20">
-                        {educator.first_name}
-                      </p>
-                    </div>
-                  </SwiperSlide>
-
-                </div>
-              ))}
+                    </SwiperSlide>
+                  </div>
+                ))}
             </Swiper>
           </div>
         )}
 
-
         {/* 🔥 EDUCATOR DETAILS (UNDER TABS) */}
         {activeEducator && (
-          <div className="bg-white rounded-2xl shadow p-5 mb-8">
+          <div className="card rounded-2xl shadow p-5 mb-8">
             <div className="flex items-center gap-4 mb-4">
               <img
                 src={activeEducator.image}
@@ -217,10 +209,11 @@ export default function IqAcademy() {
                     onClick={() =>
                       navigate(`/iq-educators/${activeEducator._id}`)
                     }
-                    className={`p-3 rounded-xl flex justify-between items-center flex-wrap gap-4 cursor-pointer ${isToday(s.datetime)
-                      ? "bg-[#4E34E3] text-white"
-                      : "bg-[#E5DEFF] text-[#4E34E3]"
-                      }`}
+                    className={`p-3 rounded-xl flex justify-between items-center flex-wrap gap-4 cursor-pointer ${
+                      isToday(s.datetime)
+                        ? "bg-[#4E34E3] text-white"
+                        : "bg-[#E5DEFF] text-[#4E34E3]"
+                    }`}
                   >
                     <span className="text-sm font-medium">{s.title}</span>
                     <div className="flex items-center gap-5">
@@ -236,19 +229,19 @@ export default function IqAcademy() {
                       <div className="flex items-center gap-2 text-xs font-medium">
                         <Calendar size={18} />
                         <span className="text-xs">
-                          {new Date(s.datetime).toLocaleDateString("en-GB", {
-                            day: "2-digit",
-                            weekday: "short",
-                          }).replace(",", "-")}
+                          {new Date(s.datetime)
+                            .toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              weekday: "short",
+                            })
+                            .replace(",", "-")}
                         </span>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-gray-500">
-                  No sessions scheduled.
-                </p>
+                <p className="text-sm text-gray-500">No sessions scheduled.</p>
               )}
             </div>
           </div>
@@ -293,7 +286,9 @@ export default function IqAcademy() {
                         <img
                           src={educator.image}
                           alt={educator.first_name}
-                          onClick={() => navigate(`/iq-educators/${educator._id}`)}
+                          onClick={() =>
+                            navigate(`/iq-educators/${educator._id}`)
+                          }
                           className="cursor-pointer w-12 h-12 rounded-full mb-2 object-cover object-top"
                         />
                         <span className="text-xs font-normal text-gray-800 text-center">
@@ -316,21 +311,21 @@ export default function IqAcademy() {
                               filtered.map((s, i) => (
                                 <div
                                   key={i}
-                                  onClick={() => navigate(`/iq-educators/${educator._id}`)}
-                                  className={`text-xs rounded-lg p-2 text-center cursor-pointer ${isToday(s.datetime)
-                                    ? "bg-[#4E34E3] text-white font-medium shadow-lg"
-                                    : "bg-[#E5DEFF] text-[#4E34E3]"
-                                    }`}
+                                  onClick={() =>
+                                    navigate(`/iq-educators/${educator._id}`)
+                                  }
+                                  className={`text-xs rounded-lg p-2 text-center cursor-pointer ${
+                                    isToday(s.datetime)
+                                      ? "bg-[#4E34E3] text-white font-medium shadow-lg"
+                                      : "bg-[#E5DEFF] text-[#4E34E3]"
+                                  }`}
                                 >
                                   {s.title}
                                   <br />
-                                  {new Date(s.datetime).toLocaleTimeString(
-                                    [],
-                                    {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )}
+                                  {new Date(s.datetime).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                                 </div>
                               ))
                             ) : (
