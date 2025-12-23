@@ -9,4 +9,12 @@ const isMacDevice = () => {
 const isWindowsDevice = () => {
   return navigator.userAgent.includes('Windows');
 };
-export { isMacDevice, isMobileDevice, isWindowsDevice };
+const isSafari = () => {
+  if (typeof window === 'undefined') return false;
+  const userAgent = navigator.userAgent;
+  // Check for Safari specifically (not Chrome/Chromium/Edge)
+  const isSafariUA = /^((?!chrome|android).)*safari/i.test(userAgent);
+  const isSafariVendor = /Safari/.test(userAgent) && !/Chrome/.test(userAgent) && !/Chromium/.test(userAgent) && !/Edg/.test(userAgent);
+  return isSafariUA || isSafariVendor;
+};
+export { isMacDevice, isMobileDevice, isWindowsDevice, isSafari };
