@@ -1636,3 +1636,26 @@ chat */
     background-position: 0% 50%;
   }
 }
+.swiper.swiper-initialized.swiper-horizontal.mySwiper {
+    width: calc(100vw - 96px);
+    overflow: hidden;
+}
+.swiper.swiper-initialized.swiper-horizontal.mySwiper .swiper-slide{
+      display: flex;
+    flex-direction: column;
+    align-content: space-between;
+    justify-content: flex-start;
+    align-items: center;
+}
+/* .mySwiper .swiper-button-next,
+.mySwiper .swiper-button-prev {
+  color: #4e34e3;
+  width: 32px;
+  height: 32px;
+}
+
+.mySwiper .swiper-button-next::after,
+.mySwiper .swiper-button-prev::after {
+  font-size: 18px;
+  font-weight: bold;
+} */
