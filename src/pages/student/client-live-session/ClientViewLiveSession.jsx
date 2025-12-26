@@ -11,6 +11,7 @@ import { EventProvider } from "./chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "./ClientLiveSessionWrapper";
 import StreamWrapper from "../../admin/live-session/StreamWrapper";
 import { format } from "date-fns";
+import { isSafari } from "../../../utils/Devices";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
@@ -48,33 +49,71 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
       if (!token || client || isInitializing.current || !callId) return;
       isInitializing.current = true;
 
+      const isSafariBrowser = isSafari();
       let newClient;
       try {
         newClient = new StreamVideoClient({ apiKey });
         await newClient.connectUser({ id: userId }, token); // Authenticate FIRST
+        
+        // For Safari, add a delay to ensure WebRTC initialization completes
+        if (isSafariBrowser) {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+        
         const newCall = newClient.call("livestream", callId);
-        // await newCall.get(); // Verify call exists
-        await newCall.getOrCreate({
-          data: {
-            settings: {
-              recording: {
-                mode: "available", // recording available
-                audio_only: false,
-                quality: "1080p",
-                layout: {
-                  name: "single_participant",
-                  options: {
-                    video_border_radius: "0",
+        
+        // For Safari, use get() instead of getOrCreate to avoid reconnection issues
+        if (isSafariBrowser) {
+          try {
+            await newCall.get();
+          } catch (getError) {
+            // If get() fails, fallback to getOrCreate
+            console.warn("[Safari] Call get() failed, using getOrCreate:", getError);
+            await newCall.getOrCreate({
+              data: {
+                settings: {
+                  recording: {
+                    mode: "available",
+                    audio_only: false,
+                    quality: "1080p",
+                    layout: {
+                      name: "single_participant",
+                      options: {
+                        video_border_radius: "0",
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          }
+        } else {
+          await newCall.getOrCreate({
+            data: {
+              settings: {
+                recording: {
+                  mode: "available", // recording available
+                  audio_only: false,
+                  quality: "1080p",
+                  layout: {
+                    name: "single_participant",
+                    options: {
+                      video_border_radius: "0",
+                    },
                   },
                 },
               },
             },
-          },
-        });
+          });
+        }
+        
         setClient(newClient);
         setCall(newCall);
       } catch (err) {
         console.error("Stream init failed:", err);
+        if (isSafariBrowser) {
+          console.error("[Safari] If connection issues persist, try refreshing the page.");
+        }
         if (newClient) await newClient.disconnectUser(); // Cleanup on failure
       } finally {
         isInitializing.current = false;

@@ -7,6 +7,7 @@ import { useAuthContext } from "../../../auth/useAuthContext";
 import { EventProvider } from "./chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "./ClientLiveSessionWrapper";
 import StreamWrapper from "../../admin/live-session/StreamWrapper";
+import { isSafari } from "../../../utils/Devices";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
@@ -46,14 +47,24 @@ const ClientViewLiveSession = () => {
           return;
         }
 
+        const isSafariBrowser = isSafari();
         const newClient = new StreamVideoClient({ apiKey });
-        const newCall = newClient.call("livestream", callId);
         await newClient.connectUser({ id: userId }, token);
+        
+        // For Safari, add a delay to ensure WebRTC initialization completes
+        if (isSafariBrowser) {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+        
+        const newCall = newClient.call("livestream", callId);
         await newCall.get();
         setClient(newClient);
         setCall(newCall);
       } catch (error) {
         console.error("Error initializing Stream client:", error);
+        if (isSafari()) {
+          console.error("[Safari] If connection issues persist, try refreshing the page.");
+        }
       }
     };
 
