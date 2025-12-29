@@ -39,6 +39,7 @@ const CreatePackageModel = forwardRef(
       { label: "/iq-crypto", value: "/iq-crypto" },
       { label: "/iq-academy", value: "/iq-academy" },
       { label: "/ideas", value: "/ideas" },
+      { label: "/live-ideas", value: "/live-ideas" },
       { label: "/iq-educators/:id", value: "/iq-educators/:id" },
       { label: "/iq-academy-educators", value: "/iq-academy-educators" },
       { label: "/iq-social", value: "/iq-social" },
