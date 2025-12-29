@@ -83,9 +83,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     initialData?.imageUrl || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
-  const { data } = useGetEducatorAcademyCategoryQuery();
+  const [sectionSelect, setSectionSelect] = useState("");
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetCoursesTypesQuery();
+  const { data } = useGetEducatorAcademyCategoryQuery(sectionSelect);
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
@@ -140,6 +141,14 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 
   const selectedTier = watch("tier");
   const selectedSection = watch("section");
+  console.log("selectedSection", selectedSection);
+  useEffect(() => {
+    if (selectedSection) {
+      setSectionSelect(selectedSection);
+    } else {
+      setSectionSelect(""); // optional: ALL case
+    }
+  }, [selectedSection]);
   const selectedLanguage = watch("language");
   const submitHandler = async (data) => {
     const formData = new FormData();
@@ -275,7 +284,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             render={({ field }) => (
               <Select
                 value={field.value}
-                onValueChange={field.onChange}
+                onValueChange={(value) => {
+                  field.onChange(value); // 👈 RHF update
+                }}
                 className={`form-control input input-md w-full ${errors.section ? "border border-danger" : ""}`}
               >
                 <SelectTrigger>
