@@ -39,6 +39,7 @@ export const clientTradeIdeasApiSlice = createApi({
         status = "",
         categoryName = [],
         activeIdea = "",
+        educator = "",
         startDate = "",
         endDate = "",
       }) => {
@@ -48,6 +49,7 @@ export const clientTradeIdeasApiSlice = createApi({
 
         if (status) params.set("status", status);
         if (activeIdea) params.set("ideaType", activeIdea);
+        if (educator) params.set("educator", educator);
         if (startDate) params.set("startDate", startDate);
         if (endDate) params.set("endDate", endDate);
 

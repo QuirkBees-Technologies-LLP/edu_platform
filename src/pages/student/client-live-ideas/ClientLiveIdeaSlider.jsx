@@ -126,7 +126,7 @@ const handleCopyField = async (ideaId, fieldName, value) => {
         <div className="mt-6 space-y-4">
 
   {/* Entry */}
-  <div className="flex justify-between text-sm items-center">
+  {/* <div className="flex justify-between text-sm items-center">
     <span className="text-gray-600">Entry</span>
 
     <span className="font-medium text-gray-800 flex items-center gap-2">
@@ -148,10 +148,10 @@ const handleCopyField = async (ideaId, fieldName, value) => {
 
       {selectedIdea?.entry}
     </span>
-  </div>
+  </div> */}
 
   {/* Stop Loss */}
-  <div className="flex justify-between text-sm items-center">
+  {/* <div className="flex justify-between text-sm items-center">
     <span className="text-gray-600">Stop Loss</span>
 
     <span className="font-medium text-gray-800 flex items-center gap-2">
@@ -177,10 +177,10 @@ const handleCopyField = async (ideaId, fieldName, value) => {
 
       {selectedIdea?.invalidation}
     </span>
-  </div>
+  </div> */}
 
   {/* Exit 1 / Exit 2 / Exit 3 */}
-  {[0, 1, 2].map((idx) => {
+  {/* {[0, 1, 2].map((idx) => {
     const value = selectedIdea?.exits?.[idx] ?? "N/A";
     const fieldName = `Exit ${idx + 1}`;
 
@@ -209,12 +209,12 @@ const handleCopyField = async (ideaId, fieldName, value) => {
         </span>
       </div>
     );
-  })}
+  })} */}
 
-  <ShowMoreLess
+  {/* <ShowMoreLess
     html={selectedIdea?.description || "No description"}
     limit={95}
-  />
+  /> */}
 </div>
 
       </div>

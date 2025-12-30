@@ -78,7 +78,7 @@ const ClientLiveIdeas = () => {
       status,
       categoryName: category.length > 0 ? category : undefined,
       activeIdea: activeIdea ? activeIdea : "all",
-      educator:educator?educator:undefined,
+      educator,
       startDate: selectedDateRange.start
         ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
         : "",
@@ -88,8 +88,7 @@ const ClientLiveIdeas = () => {
     });
 
   const { data: categoryList } = useGetCommonCategoryQuery();
-  const { data: educatorsData, } =
-  useGetAllEducatorsQuery();
+  const { data: educatorsData } = useGetAllEducatorsQuery();
   const categories =
     [
       { name: "Forex", _id: "1" },
@@ -225,7 +224,7 @@ const ClientLiveIdeas = () => {
         }
       `}
                 >
-                  {(idea === "all" && "All Ideas") ||
+                  {(idea === "all" && "All Live Ideas") ||
                     idea.charAt(0).toUpperCase() + idea.slice(1)}
                 </button>
               ))}
@@ -280,7 +279,8 @@ const ClientLiveIdeas = () => {
                 <SelectTrigger className="w-[190px] h-11">
                   <SelectValue placeholder="Select educator">
                     {educator
-                      ? educatorsData?.data?.find((e) => e._id === educator)?.first_name ?.last_name
+                      ? educatorsData?.data?.find((e) => e._id === educator)
+                          ?.first_name?.last_name
                       : "Select educator"}
                   </SelectValue>
                 </SelectTrigger>
