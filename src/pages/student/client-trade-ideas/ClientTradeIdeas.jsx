@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { useGetAllEducatorsQuery, useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
@@ -57,6 +57,8 @@ const ClientTradeIdeas = () => {
   const [category, setCategory] = useState([]);
   const [status, setStatus] = useState("");
   const [activeIdea, setActiveIdea] = useState("all");
+  const [educator, setEducator] = useState("");
+
   const [selectedDateRange, setSelectedDateRange] = useState({
     start: null,
     end: null,
@@ -70,6 +72,7 @@ const ClientTradeIdeas = () => {
       page,
       limit,
       status,
+      educator,
       categoryName: category.length > 0 ? category : undefined,
       activeIdea: activeIdea ? activeIdea : "all",
       startDate: selectedDateRange.start
@@ -80,6 +83,7 @@ const ClientTradeIdeas = () => {
         : "",
     });
 
+    const { data: educatorsData } = useGetAllEducatorsQuery();
   const { data: categoryList } = useGetCommonCategoryQuery();
   const categories =
     [
@@ -255,6 +259,47 @@ const ClientTradeIdeas = () => {
                   onClick={() => {
                     setStatus("");
                   }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2 relative">
+              <Select
+                value={educator || ""}
+                onValueChange={(val) => {
+                  setEducator(val);
+                }}
+              >
+                <SelectTrigger className="w-[190px] h-11">
+                  <SelectValue placeholder="Select educator">
+                    {educator
+                      ? educatorsData?.data?.find((e) => e._id === educator)
+                          ?.first_name?.last_name
+                      : "Select educator"}
+                  </SelectValue>
+                </SelectTrigger>
+
+                <SelectContent>
+                  {isLoading && (
+                    <SelectItem value="loading" disabled>
+                      Loading...
+                    </SelectItem>
+                  )}
+
+                  {educatorsData?.data?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.first_name} {item.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {educator && (
+                <button
+                  type="button"
+                  onClick={() => setEducator("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 >
                   ✖
@@ -647,8 +692,7 @@ const ClientTradeIdeas = () => {
 
                 {/* Trade Details */}
                 <div className="space-y-3 mb-6">
-                  
-                   {/* ENTRY */}
+                  {/* ENTRY */}
                   <div className="flex justify-between items-center">
                     <span className="text-gray-800 dark:text-white-200">
                       Entry

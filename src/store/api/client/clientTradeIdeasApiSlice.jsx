@@ -10,6 +10,7 @@ export const clientTradeIdeasApiSlice = createApi({
         page = 1,
         limit = 9,
         status = "",
+        educator="",
         categoryName = [],
         activeIdea = "",
         startDate = "",
@@ -20,6 +21,7 @@ export const clientTradeIdeasApiSlice = createApi({
         params.set("limit", limit);
 
         if (status) params.set("status", status);
+        if (educator) params.set("educator", educator);
         if (activeIdea) params.set("ideaType", activeIdea);
         if (startDate) params.set("startDate", startDate);
         if (endDate) params.set("endDate", endDate);
@@ -65,6 +67,7 @@ export const clientTradeIdeasApiSlice = createApi({
         page = 1,
         limit = 9,
         search = "",
+        educator = "",
         // timeframe = "",
         markets = "",
       }) => {
@@ -72,6 +75,7 @@ export const clientTradeIdeasApiSlice = createApi({
           page,
           limit,
           search,
+          educator,
           //   timeframe,
           markets,
         });
