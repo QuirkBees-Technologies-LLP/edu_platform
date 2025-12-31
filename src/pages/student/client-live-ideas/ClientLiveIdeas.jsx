@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useGetAllEducatorsQuery, useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import {
+  useGetAllEducatorsQuery,
+  useGetClientLiveIdeasQuery,
+  useGetClientTradeIdeasQuery,
+} from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
-import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
+import ViewClientTradeIdeas from "./ViewClientLiveIdeas";
 import ImageLightBox from "./ImageLightBox";
 import {
   ArrowDownRight,
@@ -36,6 +40,7 @@ import Loader from "../../../components/ui/loader";
 import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import CustomDateRangePicker from "../../../components/CustomDateRangePicker";
+import ViewClientLiveIdeas from "./ViewClientLiveIdeas";
 const LabelMap = {
   active: "Active",
   pending: "Pending",
@@ -45,7 +50,7 @@ const LabelMap = {
   breakEven: "Break Even",
 };
 
-const ClientTradeIdeas = () => {
+const ClientLiveIdeas = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(9);
   const [tradeIdeas, setTradeIdeas] = useState([]);
@@ -58,7 +63,6 @@ const ClientTradeIdeas = () => {
   const [status, setStatus] = useState("");
   const [activeIdea, setActiveIdea] = useState("all");
   const [educator, setEducator] = useState("");
-
   const [selectedDateRange, setSelectedDateRange] = useState({
     start: null,
     end: null,
@@ -68,13 +72,13 @@ const ClientTradeIdeas = () => {
   const observer = useRef();
 
   const { data, isFetching, isLoading, isError, refetch } =
-    useGetClientTradeIdeasQuery({
+    useGetClientLiveIdeasQuery({
       page,
       limit,
       status,
-      educator,
       categoryName: category.length > 0 ? category : undefined,
       activeIdea: activeIdea ? activeIdea : "all",
+      educator,
       startDate: selectedDateRange.start
         ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
         : "",
@@ -83,8 +87,8 @@ const ClientTradeIdeas = () => {
         : "",
     });
 
-    const { data: educatorsData } = useGetAllEducatorsQuery();
   const { data: categoryList } = useGetCommonCategoryQuery();
+  const { data: educatorsData } = useGetAllEducatorsQuery();
   const categories =
     [
       { name: "Forex", _id: "1" },
@@ -190,7 +194,7 @@ const ClientTradeIdeas = () => {
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Ideas" />
+          <ToolbarPageTitle text="IQ Live Ideas" />
           <ToolbarDescription>
             {/* Oversee educator profiles, manage their sessions, and ensure quality
             trade and course content across the platform. */}
@@ -220,7 +224,7 @@ const ClientTradeIdeas = () => {
         }
       `}
                 >
-                  {(idea === "all" && "All Ideas") ||
+                  {(idea === "all" && "All Live Ideas") ||
                     idea.charAt(0).toUpperCase() + idea.slice(1)}
                 </button>
               ))}
@@ -306,6 +310,7 @@ const ClientTradeIdeas = () => {
                 </button>
               )}
             </div>
+
             <div className="flex items-center gap-2 relative ">
               <Popover>
                 <PopoverTrigger asChild>
@@ -603,10 +608,6 @@ const ClientTradeIdeas = () => {
                       )}
                       {trade.type.toUpperCase()}
                     </button>
-
-                    <div className="bg-gray-800 px-2 py-1 rounded-lg font-semibold text-xs text-white">
-                      {trade.name}
-                    </div>
                   </div>
 
                   {LabelMap[trade.status] === "Active" && (
@@ -681,9 +682,9 @@ const ClientTradeIdeas = () => {
                   </div>
 
                   <div className="text-gray-600 text-sm">
-                    {trade.createAt
+                    {trade.createdAt
                       ? format(
-                          new Date(trade.createAt),
+                          new Date(trade.createdAt),
                           "MMM dd, yyyy, hh:mm a"
                         )
                       : ""}
@@ -692,101 +693,11 @@ const ClientTradeIdeas = () => {
 
                 {/* Trade Details */}
                 <div className="space-y-3 mb-6">
-                  {/* ENTRY */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-800 dark:text-white-200">
-                      Entry
-                    </span>
-
-                    <span className="font-mono flex items-center gap-2 text-dark dark:text-white">
-                      {copiedField.id === trade._id &&
-                      copiedField.field === "Entry" ? (
-                        <span className="text-black dark:text-white text-xs bg-transparent">
-                          Copied!
-                        </span>
-                      ) : (
-                        trade.entry && (
-                          <button
-                            onClick={() =>
-                              handleCopyField(trade._id, "Entry", trade.entry)
-                            }
-                            className="text-gray-800 dark:text-white-200 flex items-center"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        )
-                      )}
-
-                      {trade.entry}
-                    </span>
+                  <div className="flex item-center justify-between mb-2 min-h-10">
+                    <div className="font-bold mr-3 text-black dark:text-white">
+                      {trade?.name}
+                    </div>
                   </div>
-
-                  {/* STOP LOSS */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-800">Invalidation</span>
-
-                    <span className="text-red-600 font-mono flex items-center gap-2">
-                      {copiedField.id === trade._id &&
-                      copiedField.field === "Stop Loss" ? (
-                        <span className="text-dark bg-white text-xs">
-                          Copied!
-                        </span>
-                      ) : (
-                        trade.invalidation && (
-                          <button
-                            onClick={() =>
-                              handleCopyField(
-                                trade._id,
-                                "Stop Loss",
-                                trade.invalidation
-                              )
-                            }
-                            className="text-red-600 flex items-center"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        )
-                      )}
-
-                      {trade.invalidation}
-                    </span>
-                  </div>
-
-                  {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
-                    const tpValue = trade?.exits?.[idx] ?? "N/A";
-                    const fieldName = `Exit ${idx + 1}`;
-
-                    return (
-                      <div
-                        className="flex justify-between items-center"
-                        key={tpField}
-                      >
-                        <span className="text-gray-800">{fieldName}</span>
-
-                        <span className="text-emerald-600 font-mono flex items-center gap-2">
-                          {copiedField.id === trade._id &&
-                          copiedField.field === fieldName ? (
-                            <span className="text-dark bg-white text-xs">
-                              Copied!
-                            </span>
-                          ) : (
-                            tpValue !== "N/A" && (
-                              <button
-                                onClick={() =>
-                                  handleCopyField(trade._id, fieldName, tpValue)
-                                }
-                                className="text-gray-800 flex items-center"
-                              >
-                                <Copy size={14} />
-                              </button>
-                            )
-                          )}
-
-                          {tpValue}
-                        </span>
-                      </div>
-                    );
-                  })}
                 </div>
 
                 {/* View Details Button */}
@@ -804,7 +715,7 @@ const ClientTradeIdeas = () => {
             </div>
           ))}
 
-          <ViewClientTradeIdeas
+          <ViewClientLiveIdeas
             isViewOpen={isViewOpen}
             setIsLightBoxOpen={setIsLightBoxOpen}
             handleCloseView={handleCloseView}
@@ -826,4 +737,4 @@ const ClientTradeIdeas = () => {
   );
 };
 
-export default ClientTradeIdeas;
+export default ClientLiveIdeas;

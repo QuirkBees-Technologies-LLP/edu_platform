@@ -1848,6 +1848,11 @@ export const sideMenus = {
       icon: <Lightbulb />,
       path: "/ideas",
     },
+    {
+      title: "IQ Live Ideas",
+      icon: <Lightbulb />,
+      path: "/live-ideas",
+    },
 
     // {
     //   title: 'IQ Academy',

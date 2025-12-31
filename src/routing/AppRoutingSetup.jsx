@@ -156,6 +156,7 @@ import IqCrypto from "../pages/student/iq-crypto/IqCrypto";
 import AdminIqCrypto from "../pages/admin/admin-iq-crypto/AdminIqCrypto";
 import EducatorLiveTradeIdeas from "../pages/educator/educator-live-trade-ideas/EducatorTradeIdeas";
 import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTradeIdeas";
+import ClientLiveIdeas from "../pages/student/client-live-ideas/ClientLiveIdeas";
 
 
 
@@ -165,6 +166,7 @@ const routes = {
     { path: "/live-session", element: <ClientLiveSession /> },
     { path: "/live-session/:callId", element: <ClientViewLiveSession /> },
     { path: "/ideas", element: <ClientTradeIdeas /> },
+    { path: "/live-ideas", element: <ClientLiveIdeas /> },
     { path: "/video-library", element: <VideoLibrary /> },
     { path: "/profile", element: <ClientProfile /> },
     { path: "/academy", element: <StudentLiveSessionCategory /> },

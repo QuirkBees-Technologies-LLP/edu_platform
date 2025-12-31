@@ -83,7 +83,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     initialData?.imageUrl || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
-  const [sectionSelect, setSectionSelect] = useState("");
+  const [sectionSelect, setSectionSelect] = useState();
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetCoursesTypesQuery();
   const { data } = useGetEducatorAcademyCategoryQuery(sectionSelect);
@@ -120,11 +120,11 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         setThumbnailPreview(initialData.imageUrl);
         // setValue("imageFile", initialData.imageUrl);
       }
-      if (initialData.category?._id) {
+      if (initialData?.category?._id && data?.data?.length > 0) {
         setValue("category", initialData.category._id);
       }
     }
-  }, [initialData, setValue]);
+  }, [initialData, data, setValue]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

@@ -46,7 +46,7 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
   const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const [selectedEducator, setSelectedEducator] = useState(null);
   const [searchText, setSearchText] = useState("");
-  const [searchTextInput,setSearchTextInput] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
   const ColumnInputFilter = ({ column }) => {
     return (
       <Input
@@ -67,7 +67,7 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
   };
 
   const handleRedirect = (callId, row) => {
-    navigate(`/educator/live-session/${callId}`, { state: row });
+    navigate(`/admin/live-session/${callId}`, { state: row });
   };
 
   // Columns definition
@@ -88,14 +88,14 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
           return (
             <span>
               <p
-                className={
-                  isClickable ? "cursor-pointer hover:text-primary" : ""
-                }
-                onClick={
-                  isClickable
-                    ? () => handleRedirect(callId, info.row.original)
-                    : undefined
-                }
+                // className={
+                //   isClickable ? "cursor-pointer hover:text-primary" : ""
+                // }
+                // onClick={
+                //   isClickable
+                //     ? () => handleRedirect(callId, info.row.original)
+                //     : undefined
+                // }
               >
                 {title}
               </p>
@@ -141,36 +141,36 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
           headerClassName: "min-w-[200px]",
         },
       },
-      {
-        accessorFn: (row) => row.status,
-        id: "status",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Status" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => {
-          const row = info.row.original;
+      // {
+      //   accessorFn: (row) => row.status,
+      //   id: "status",
+      //   header: ({ column }) => (
+      //     <DataGridColumnHeader title="Status" column={column} />
+      //   ),
+      //   enableSorting: true,
+      //   cell: (info) => {
+      //     const row = info.row.original;
 
-          return (
-            <div className="flex items-center gap-2.5">
-              {row.status === "ended" && (
-                <button className="badge capitalize badge-outline badge-danger">
-                  Ended
-                </button>
-              )}
-            </div>
-          );
-        },
-        meta: {
-          headerClassName: "min-w-[120px]",
-        },
-      },
+      //     return (
+      //       <div className="flex items-center gap-2.5">
+      //         {row.status === "ended" && (
+      //           <button className="badge capitalize badge-outline badge-danger">
+      //             Ended
+      //           </button>
+      //         )}
+      //       </div>
+      //     );
+      //   },
+      //   meta: {
+      //     headerClassName: "min-w-[120px]",
+      //   },
+      // },
       {
         accessorFn: (row) => row.datetime,
         id: "datetime",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Scheduled from this date"
+            title="Session from this date"
             column={column}
           />
         ),
@@ -235,7 +235,6 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
       }).unwrap();
 
       const endedData = response.data.filter((row) => row.status === "ended");
-     
 
       return {
         data: endedData || [],
@@ -253,16 +252,15 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
   //   [reloadKey]
   // );
 
- const debouncedSearch = useMemo(
-  () =>
-    debounce((value) => {
-      setSearchTextInput(value); 
-      reloadTable(); 
-    }, 500),
-  []
-);
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchTextInput(value);
+        reloadTable();
+      }, 500),
+    []
+  );
   const handleSearchChange = (event) => {
-
     const value = event.target.value;
     setSearchText(value);
     debouncedSearch(value);

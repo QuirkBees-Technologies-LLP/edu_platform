@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
 import {
+  useGetAllEducatorsQuery,
   useGetClientTradeAnalysisQuery,
   useGetClientTradeIdeasQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
@@ -35,6 +36,13 @@ import Loader from "../../../components/ui/loader";
 import { Eye, ThumbsUp, MessageCircle, Share2, FileText } from "lucide-react";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import debounce from "lodash.debounce";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ShowMoreLess = ({
   text = "",
@@ -86,6 +94,7 @@ const IqInsight = () => {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [activeMarket, setActiveMarket] = useState("All");
+  const [educator, setEducator] = useState("");
   const [activeTimeframe, setActiveTimeframe] = useState("WEEKLY");
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -96,10 +105,12 @@ const IqInsight = () => {
       page: page,
       limit: limit,
       search: searchText,
+      educator,
       // timeframe: activeTimeframe,
       markets: activeMarket,
       refreshKey,
     });
+    const { data: educatorsData } = useGetAllEducatorsQuery();
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -342,6 +353,48 @@ const IqInsight = () => {
             ))}
           </div> */}
         </div>
+
+          <div className="flex items-center gap-2 relative">
+              <Select
+                value={educator || ""}
+                onValueChange={(val) => {
+                  setEducator(val);
+                }}
+              >
+                <SelectTrigger className="w-[190px] h-11">
+                  <SelectValue placeholder="Select educator">
+                    {educator
+                      ? educatorsData?.data?.find((e) => e._id === educator)
+                          ?.first_name?.last_name
+                      : "Select educator"}
+                  </SelectValue>
+                </SelectTrigger>
+
+                <SelectContent>
+                  {isLoading && (
+                    <SelectItem value="loading" disabled>
+                      Loading...
+                    </SelectItem>
+                  )}
+
+                  {educatorsData?.data?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.first_name} {item.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {educator && (
+                <button
+                  type="button"
+                  onClick={() => setEducator("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
 
         <div className="flex gap-3 sm:gap-6 flex-wrap mr-3">
           <SearchFilterInput
