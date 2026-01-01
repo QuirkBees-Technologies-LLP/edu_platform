@@ -514,7 +514,7 @@ const ClientLiveIdeas = () => {
                         setSelectedIdea(trade);
                         setIsLightBoxOpen(true);
                       }}
-                      className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow z-30"
+                      className="absolute left-2 bottom-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow z-30"
                     >
                       <Eye size={20} />
                     </button>
