@@ -681,9 +681,9 @@ const ClientTradeIdeas = () => {
                   </div>
 
                   <div className="text-gray-600 text-sm">
-                    {trade.createdAt
+                    {trade.updatedAt
                       ? format(
-                          new Date(trade.createdAt),
+                          new Date(trade.updatedAt),
                           "MMM dd, yyyy, hh:mm a"
                         )
                       : ""}
