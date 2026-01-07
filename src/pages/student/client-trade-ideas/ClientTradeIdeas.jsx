@@ -509,7 +509,7 @@ const ClientTradeIdeas = () => {
                         setSelectedIdea(trade);
                         setIsLightBoxOpen(true);
                       }}
-                      className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow z-30"
+                      className="absolute left-2 bottom-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow z-30"
                     >
                       <Eye size={20} />
                     </button>
@@ -681,9 +681,9 @@ const ClientTradeIdeas = () => {
                   </div>
 
                   <div className="text-gray-600 text-sm">
-                    {trade.createAt
+                    {trade.updatedAt
                       ? format(
-                          new Date(trade.createAt),
+                          new Date(trade.updatedAt),
                           "MMM dd, yyyy, hh:mm a"
                         )
                       : ""}
