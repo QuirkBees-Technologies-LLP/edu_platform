@@ -1,4 +1,4 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
 import { X } from "lucide-react";
@@ -18,14 +18,36 @@ import {
 
 // Components
 import CourseForm from "./forms/CourseForm";
+import StrategyForm from "./forms/StrategyForm";
 import { useAuthContext } from "../../../../../../auth/useAuthContext";
-import { languages } from "eslint-plugin-prettier";
+
+import {
+  useCreateAdminStrategyMutation,
+  useUpdateAdminStrategyMutation
+} from "@/store/api/admin/adminStrategyApiSlice";
 
 const CreateCourseModal = forwardRef(
   ({ isOpen, onClose, onSubmit, initialData }, ref) => {
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { auth } = useAuthContext();
+    const [activeTab, setActiveTab] = useState("course");
+
+    const [createStrategyMutation] = useCreateAdminStrategyMutation();
+    const [updateStrategyMutation] = useUpdateAdminStrategyMutation();
+
+    // Update active tab when initialData changes (for editing)
+    useEffect(() => {
+      if (initialData) {
+        // If we have a way to distinguish strategy from course in initialData, set it here
+        // For now defaulting to course or checking section if available
+        if (initialData?.isStrategy || initialData?.section === "Strategy") {
+          setActiveTab("strategies");
+        } else {
+          setActiveTab("course");
+        }
+      }
+    }, [initialData]);
 
     if (!isOpen) return null;
 
@@ -51,6 +73,8 @@ const CreateCourseModal = forwardRef(
         console.log("No auth token available");
       }
     };
+
+    const labelPrefix = activeTab === "strategies" ? "Strategy" : "Course";
 
     const handleSubmit = async (formData) => {
       setIsSubmitting(true);
@@ -93,7 +117,7 @@ const CreateCourseModal = forwardRef(
         if (initialData) {
           await dispatch(
             updateExistingCourse({
-              id: initialData._id,
+              id: initialData?._id,
               courseData: requestData,
               token: localStorage.getItem("token"),
             })
@@ -109,8 +133,8 @@ const CreateCourseModal = forwardRef(
 
         toast.success(
           initialData
-            ? "Course updated successfully!"
-            : "Course created successfully!"
+            ? `${labelPrefix} updated successfully!`
+            : `${labelPrefix} created successfully!`
         );
         // ✅ Only close if the above succeeded
         onClose();
@@ -120,13 +144,42 @@ const CreateCourseModal = forwardRef(
       } catch (error) {
         console.error("Submission error:", error);
         toast.error(
-          error ? error : error.essage || "Operation failed. Please try again."
+          error?.data?.message || error?.message || "Operation failed. Please try again."
         );
-        setIsSubmitting(true);
       } finally {
         setIsSubmitting(false);
       }
     };
+
+    const handleSubmitStrategy = async (formData) => {
+      setIsSubmitting(true);
+      try {
+        if (initialData) {
+          await updateStrategyMutation({
+            id: initialData?._id,
+            formData: formData,
+          }).unwrap();
+        } else {
+          await createStrategyMutation(formData).unwrap();
+        }
+
+        toast.success(
+          initialData
+            ? `Strategy updated successfully!`
+            : `Strategy created successfully!`
+        );
+        onClose();
+        await fetchAllCourses();
+      } catch (error) {
+        console.error("Submission error:", error);
+        toast.error(
+          error?.data?.message || typeof error === "string" ? error : error?.message || "Operation failed. Please try again."
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
     return (
       <Dialog
         open={isOpen}
@@ -140,11 +193,46 @@ const CreateCourseModal = forwardRef(
               {initialData ? "Edit IQ Vault" : "Create New IQ Vault"}
             </DialogTitle>
           </DialogHeader>
-          <CourseForm
-            onSubmit={handleSubmit}
-            initialData={initialData}
-            isSubmitting={isSubmitting}
-          />
+
+          {/* Tab Switcher */}
+          {!initialData && (
+            <div className="flex border-b mb-6 border-gray-100">
+              <button
+                onClick={() => setActiveTab("course")}
+                className={`pb-3 px-8 text-sm font-semibold transition-all relative ${activeTab === "course"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-gray-400 hover:text-gray-600"
+                  }`}
+              >
+                Course
+              </button>
+              <button
+                onClick={() => setActiveTab("strategies")}
+                className={`pb-3 px-8 text-sm font-semibold transition-all relative ${activeTab === "strategies"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-gray-400 hover:text-gray-600"
+                  }`}
+              >
+                Strategies
+              </button>
+            </div>
+          )}
+
+          {activeTab === "course" ? (
+            <CourseForm
+              key="course-form"
+              onSubmit={handleSubmit}
+              initialData={initialData}
+              isSubmitting={isSubmitting}
+            />
+          ) : (
+            <StrategyForm
+              key="strategy-form"
+              onSubmit={handleSubmitStrategy}
+              initialData={initialData}
+              isSubmitting={isSubmitting}
+            />
+          )}
         </DialogContent>
       </Dialog>
     );

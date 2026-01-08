@@ -114,6 +114,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     },
   });
 
+
+
   useEffect(() => {
     if (initialData) {
       if (initialData.imageUrl) {
@@ -121,7 +123,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         // setValue("imageFile", initialData.imageUrl);
       }
       if (initialData?.category?._id && data?.data?.length > 0) {
-        setValue("category", initialData.category._id);
+        setValue("category", initialData?.category?._id);
       }
     }
   }, [initialData, data, setValue]);
@@ -200,8 +202,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           placeholder="Enter course title"
           {...register("title")}
         />
-        {errors.title && (
-          <p className="text-sm text-red-600">{errors.title.message}</p>
+        {errors?.title && (
+          <p className="text-sm text-red-600">{errors?.title?.message}</p>
         )}
       </div>
 
@@ -218,8 +220,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           placeholder="Enter course description"
           {...register("description")}
         />
-        {errors.description && (
-          <p className="text-sm text-red-600">{errors.description.message}</p>
+        {errors?.description && (
+          <p className="text-sm text-red-600">{errors?.description?.message}</p>
         )}
       </div>
 
@@ -263,9 +265,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         )}
 
         {/* Error message for thumbnail */}
-        {errors.imageFile && (
+        {errors?.imageFile && (
           <p className="text-sm text-red-600 mt-2">
-            {errors.imageFile.message}
+            {errors?.imageFile?.message}
           </p>
         )}
       </div>
@@ -308,8 +310,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               </Select>
             )}
           />
-          {errors.section && (
-            <p className="text-sm text-red-600">{errors.section.message}</p>
+          {errors?.section && (
+            <p className="text-sm text-red-600">{errors?.section?.message}</p>
           )}
         </div>
 
@@ -327,7 +329,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <Select
                 value={field.value}
                 onValueChange={field.onChange}
-                className={`form-control input input-md w-full ${errors.language ? "border border-danger" : ""}`}
+                className={`form-control input input-md w-full ${errors.language ? "border border-danger " : ""}`}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
@@ -348,8 +350,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               </Select>
             )}
           />
-          {errors.language && (
-            <p className="text-sm text-red-600">{errors.language.message}</p>
+          {errors?.language && (
+            <p className="text-sm text-red-600">{errors?.language?.message}</p>
           )}
         </div>
       </div>
@@ -384,8 +386,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               </Select>
             )}
           />
-          {errors.category && (
-            <p className="text-sm text-red-600">{errors.category.message}</p>
+          {errors?.category && (
+            <p className="text-sm text-red-600">{errors?.category?.message}</p>
           )}
         </div>
 
@@ -409,8 +411,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <SelectItem value="PREMIUM">Pro</SelectItem>
             </SelectContent>
           </Select>
-          {errors.tier && (
-            <p className="text-sm text-red-600">{errors.tier.message}</p>
+          {errors?.tier && (
+            <p className="text-sm text-red-600">{errors?.tier?.message}</p>
           )}
         </div>
       </div>
