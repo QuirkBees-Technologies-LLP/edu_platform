@@ -6,6 +6,8 @@ import { useAuthContext } from "../../../../../auth/useAuthContext";
 // Store
 import {
   fetchCourses,
+  fetchStrategies,
+  fetchCoursesByEducatorId,
   selectAllCourses,
   selectCoursesStatus,
   selectCoursesError,
@@ -28,38 +30,56 @@ const SettingsSection = () => {
   const [selectedCourseId, setSelectedCourseId] = useState(() =>
     localStorage.getItem("selectedCourseId")
   );
+  const isAdmin = auth?.user?.role === "admin" || auth?.user?.role === "super_admin";
+  const [activeTab, setActiveTab] = useState(() => {
+    const savedTab = localStorage.getItem("settingsTab");
+    if (savedTab === "strategies" && !isAdmin) return "courses";
+    return savedTab || "courses";
+  });
 
   // Selectors
   const courses = useSelector(selectAllCourses);
   const status = useSelector(selectCoursesStatus);
   const error = useSelector(selectCoursesError);
 
-  // Fetch courses on mount and when token changes
+  // Fetch courses/strategies on mount and when token or activeTab changes
   useEffect(() => {
     if (auth?.token) {
-      dispatch(
-        fetchCourses({
-          params: {
-            isDeleted: false,
-          },
-          token: auth.token,
-        })
-      )
+      let action;
+      let payload = { params: { isDeleted: false }, token: auth.token };
+
+      if (activeTab === "strategies") {
+        action = fetchStrategies;
+      } else {
+        // For courses tab
+        if (auth?.user?.role === "educator") {
+          action = fetchCoursesByEducatorId;
+          payload = { id: auth.user._id, token: auth.token };
+        } else {
+          action = fetchCourses;
+        }
+      }
+
+      dispatch(action(payload))
         .unwrap()
-         .then((response) => {
-          console.log("IQ Vault fetched successfully:", response);
+        .then((response) => {
+          console.log(`${activeTab === "courses" ? "Courses" : "Strategies"} fetched successfully:`, response);
         })
         .catch((error) => {
-          console.error("Error fetching IQ Vault:", error);
+          console.error(`Error fetching ${activeTab}:`, error);
         });
     } else {
       console.log("No auth token available");
     }
-  }, [dispatch, auth?.token]);
+  }, [dispatch, auth?.token, auth?.user?._id, auth?.user?.role, activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem("settingsTab", activeTab);
+  }, [activeTab]);
 
   // Handle course select
   const handleCourseSelect = (course) => {
-    setSelectedCourseId(course._id);
+    setSelectedCourseId(course?._id);
     setContent("content");
     localStorage.setItem("selectedCourseId", course._id);
     localStorage.setItem("courseView", "content");
@@ -95,18 +115,30 @@ const SettingsSection = () => {
     if (error) {
       return (
         <ErrorMessages
-          heading={"No IQ Vault Yet"}
+          heading={
+            activeTab === "courses" ? "No IQ Vault Yet" : "No Strategies Yet"
+          }
           message={
-            "You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."
+            activeTab === "courses"
+              ? "You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."
+              : "You haven’t created any strategies yet. Let’s get your first one set up and ready to go."
           }
-          onRetry={() =>
-            dispatch(
-              fetchCourses({
-                params: { isDeleted: false },
-                token: auth.token,
-              })
-            )
-          }
+          onRetry={() => {
+            let action;
+            let payload = { params: { isDeleted: false }, token: auth?.token };
+
+            if (activeTab === "strategies") {
+              action = fetchStrategies;
+            } else {
+              if (auth?.user?.role === "educator") {
+                action = fetchCoursesByEducatorId;
+                payload = { id: auth?.user?._id, token: auth?.token };
+              } else {
+                action = fetchCourses;
+              }
+            }
+            dispatch(action(payload));
+          }}
           onDismiss={handleErrorClear}
         />
       );
@@ -114,12 +146,16 @@ const SettingsSection = () => {
 
     if (content === "list") {
       return (
-        <CourseList courses={courses} onCourseSelect={handleCourseSelect} />
+        <CourseList
+          courses={courses}
+          onCourseSelect={handleCourseSelect}
+          activeTab={activeTab}
+        />
       );
     }
 
     if (content === "content" && selectedCourseId) {
-      return <CourseContent courseId={selectedCourseId} />;
+      return <CourseContent courseId={selectedCourseId} activeTab={activeTab} />;
     }
 
     return null;
@@ -132,22 +168,46 @@ const SettingsSection = () => {
         {/* Top Navigation */}
         <div className="shadow-sm">
           <div className="flex items-center justify-between py-4">
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
               {selectedCourseId && (
                 <button
                   onClick={handleBack}
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to IQ Vault
+                  Back to {activeTab === "courses" ? "IQ Vault" : "Strategies"}
                 </button>
+              )}
+              {!selectedCourseId && (
+                <div className="flex bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setActiveTab("courses")}
+                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "courses"
+                      ? "bg-white text-primary shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                      }`}
+                  >
+                    Courses
+                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => setActiveTab("strategies")}
+                      className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "strategies"
+                        ? "bg-white text-primary shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                        }`}
+                    >
+                      Strategies
+                    </button>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">
                 {selectedCourseId
-                  ? courses.find((c) => c._id === selectedCourseId)?.title
-                  : "All IQ Vault"}
+                  ? courses?.find((c) => c?._id === selectedCourseId)?.title
+                  : `All ${activeTab === "courses" ? "IQ Vault" : "Strategies"}`}
               </span>
             </div>
           </div>

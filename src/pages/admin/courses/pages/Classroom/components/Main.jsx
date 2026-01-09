@@ -20,6 +20,7 @@ import {
 // Store
 import {
   fetchCourses,
+  fetchStrategies,
   selectAllCourses,
   selectCoursesStatus,
   selectCoursesError,
@@ -32,6 +33,8 @@ const Main = ({ onSelectCourse }) => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const isAdmin = auth?.user?.role === "admin" || auth?.user?.role === "super_admin";
+  const [activeTab, setActiveTab] = useState("courses"); // "courses" or "strategies"
   const dispatch = useDispatch();
 
   // Selectors
@@ -45,12 +48,13 @@ const Main = ({ onSelectCourse }) => {
   useEffect(() => {
     if (auth?.token) {
       setIsLoading(true);
+      const action = activeTab === "courses" ? fetchCourses : fetchStrategies;
       dispatch(
-        fetchCourses({
+        action({
           params: {
             isPublished: true,
           },
-          token: auth.token,
+          token: auth?.token,
         })
       )
         .unwrap()
@@ -58,15 +62,15 @@ const Main = ({ onSelectCourse }) => {
           setCoursesList(response);
 
           const instructorsWithCourses = Object.values(
-            response?.reduce((acc, course) => {
-              const instructor = course.instructor;
+            response?.reduce((acc, item) => {
+              const instructor = item?.instructor;
               if (!instructor?._id) return acc;
 
               if (!acc[instructor._id]) {
                 acc[instructor._id] = { ...instructor, courses: [] };
               }
 
-              acc[instructor._id].courses.push(course);
+              acc[instructor._id].courses.push(item);
               return acc;
             }, {})
           );
@@ -76,7 +80,7 @@ const Main = ({ onSelectCourse }) => {
           // Extract unique categories
           const uniqueCategories = [
             ...new Map(
-              response.map((c) => [c.category?._id, c.category])
+              response?.map((c) => [c?.category?._id, c?.category])
             ).values(),
           ];
 
@@ -88,7 +92,7 @@ const Main = ({ onSelectCourse }) => {
           setIsLoading(false);
         });
     }
-  }, [dispatch, auth?.token]);
+  }, [dispatch, auth?.token, activeTab]);
 
   // Filter courses based on search term and selected category
   const filteredCourses = coursesList.filter((course) => {
@@ -105,7 +109,7 @@ const Main = ({ onSelectCourse }) => {
 
   // Get featured courses (highest rated or marked as featured)
   const featuredCourses = coursesList
-    .filter((course) => course.published)
+    ?.filter((course) => course?.published)
     .slice(0, 5); // Take first 5 for FeaturedSection
 
   // Section component for consistent styling
@@ -159,11 +163,10 @@ const Main = ({ onSelectCourse }) => {
   // Category badge component
   const CategoryBadge = ({ category, isSelected, onClick }) => (
     <motion.button
-      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-        isSelected
-          ? "bg-primary-clarity text-primary border-2 border-primary-light"
-          : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-      }`}
+      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${isSelected
+        ? "bg-primary-clarity text-primary border-2 border-primary-light"
+        : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
+        }`}
       onClick={() => onClick(category)}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -194,29 +197,54 @@ const Main = ({ onSelectCourse }) => {
 
   return (
     <div className="">
-      {/* Hero Banner */}
+      {/* Hero Banner with Tabs */}
       <div className="relative bg-gray-200 rounded-2xl p-8 mb-10 overflow-hidden">
         <div className="absolute right-0 top-0 w-64 h-64 bg-primary rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
         <div className="absolute left-20 bottom-0 w-40 h-40 bg-primary rounded-full blur-3xl opacity-20 -mb-20"></div>
-        <div className="relative max-w-xl">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Explore Our IQ Vault
-          </h1>
-          <p className="text-gray-900 mb-6">
-            Enhance your skills with our industry-leading instructors and
-            expertly crafted IQ Vault.
-          </p>
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="max-w-xl">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Explore Our IQ Vault
+            </h1>
+            <p className="text-gray-900 mb-6">
+              Enhance your skills with our industry-leading instructors and
+              expertly crafted IQ Vault.
+            </p>
 
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search for IQ Vault..."
-              className="w-full backdrop-blur-sm text-gray-800 rounded-lg px-4 py-3 pl-10 input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Search className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={`Search for ${activeTab === "courses" ? "Courses" : "Strategies"}...`}
+                className="w-full backdrop-blur-sm text-gray-800 rounded-lg px-4 py-3 pl-10 input bg-white/50"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
+            </div>
           </div>
+
+          {isAdmin && (
+            <div className="flex bg-white/80 backdrop-blur-sm p-1.5 rounded-xl border border-white/20 shadow-sm self-end">
+              <button
+                onClick={() => setActiveTab("courses")}
+                className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === "courses"
+                  ? "bg-primary text-white shadow-lg translate-y-[-1px]"
+                  : "text-gray-600 hover:text-primary hover:bg-white"
+                  }`}
+              >
+                Courses
+              </button>
+              <button
+                onClick={() => setActiveTab("strategies")}
+                className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === "strategies"
+                  ? "bg-primary text-white shadow-lg translate-y-[-1px]"
+                  : "text-gray-600 hover:text-primary hover:bg-white"
+                  }`}
+              >
+                Strategies
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -238,7 +266,7 @@ const Main = ({ onSelectCourse }) => {
         <div className="flex flex-wrap gap-3">
           {categories.map((category) => (
             <CategoryBadge
-              key={category._id}
+              key={category?._id}
               category={category}
               isSelected={selectedCategory?._id === category?._id}
               onClick={handleCategoryClick}
@@ -262,8 +290,8 @@ const Main = ({ onSelectCourse }) => {
         viewAllLink="#instructors"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {instructors.slice(0, 6).map((instructor) => (
-            <InstructorCard key={instructor._id} instructor={instructor} />
+          {instructors?.slice(0, 6).map((instructor) => (
+            <InstructorCard key={instructor?._id} instructor={instructor} />
           ))}
         </div>
       </Section>
@@ -272,17 +300,17 @@ const Main = ({ onSelectCourse }) => {
       <Section
         title={
           selectedCategory
-            ? `${selectedCategory?.name} IQ Vault`
-            : "All IQ Vault"
+            ? `${selectedCategory?.name} ${activeTab === "courses" ? "Courses" : "Strategies"}`
+            : `All ${activeTab === "courses" ? "Courses" : "Strategies"}`
         }
         icon={<BookOpen className="w-5 h-5" />}
       >
         {filteredCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => (
+            {filteredCourses?.map((course) => (
               <CourseCard
-                key={course._id}
-                course={{ ...course, id: course._id }}
+                key={course?._id}
+                course={{ ...course, id: course?._id }}
                 onSelectCourse={onSelectCourse}
               />
             ))}
@@ -293,7 +321,7 @@ const Main = ({ onSelectCourse }) => {
               <Search className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-700">
-              No IQ Vault found
+              No {activeTab === "courses" ? "Courses" : "Strategies"} found
             </h3>
             <p className="text-gray-500 mt-2 max-w-md mx-auto">
               {searchTerm

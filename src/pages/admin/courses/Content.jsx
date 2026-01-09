@@ -23,7 +23,7 @@ const Content = () => {
 
   const navItems = [
     ...baseNavItems,
-    ...(auth?.user?.role === "educator" || auth?.user?.role === "admin"
+    ...(auth?.user?.role === "educator" || auth?.user?.role === "admin" || auth?.user?.role === "super_admin"
       ? adminNavItems
       : []),
   ];
@@ -76,11 +76,10 @@ const Content = () => {
                         onClick={() =>
                           handleNavigation(item.label.toLowerCase())
                         }
-                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                          activePage === item.label.toLowerCase()
-                            ? "bg-primary-light text-primary"
-                            : "bg-light text-gray-700 hover:bg-gray-50 dark:hover:bg-dark"
-                        }`}
+                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${activePage === item.label.toLowerCase()
+                          ? "bg-primary-light text-primary"
+                          : "bg-light text-gray-700 hover:bg-gray-50 dark:hover:bg-dark"
+                          }`}
                       >
                         {item.label}
                       </a>
@@ -102,18 +101,16 @@ const Content = () => {
                       key={item.label}
                       href={item.href}
                       onClick={() => handleNavigation(item.label.toLowerCase())}
-                      className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                        activePage === item.label.toLowerCase()
-                          ? "bg-primary-light text-primary"
-                          : " bg-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-dark"
-                      }`}
+                      className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${activePage === item.label.toLowerCase()
+                        ? "bg-primary-light text-primary"
+                        : " bg-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-dark"
+                        }`}
                     >
                       <item.icon
-                        className={`h-5 w-5 mr-2 ${
-                          activePage === item.label.toLowerCase()
-                            ? "text-blue-600"
-                            : ""
-                        }`}
+                        className={`h-5 w-5 mr-2 ${activePage === item.label.toLowerCase()
+                          ? "text-blue-600"
+                          : ""
+                          }`}
                       />
                       {item.label}
                     </a>

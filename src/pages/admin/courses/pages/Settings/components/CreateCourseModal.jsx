@@ -14,6 +14,8 @@ import {
   createNewCourse,
   updateExistingCourse,
   fetchCourses,
+  fetchStrategies,
+  fetchCoursesByEducatorId,
 } from "@/store/reducer/courseSlice";
 
 // Components
@@ -27,11 +29,26 @@ import {
 } from "@/store/api/admin/adminStrategyApiSlice";
 
 const CreateCourseModal = forwardRef(
-  ({ isOpen, onClose, onSubmit, initialData }, ref) => {
+  ({ isOpen, onClose, onSubmit, initialData, activeTab: parentActiveTab }, ref) => {
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { auth } = useAuthContext();
-    const [activeTab, setActiveTab] = useState("course");
+    const isAdmin = auth?.user?.role === "admin" || auth?.user?.role === "super_admin";
+    const [activeTab, setActiveTab] = useState(() => {
+      if (parentActiveTab === "strategies" && isAdmin) return "strategies";
+      return "course";
+    });
+
+    // Update active tab when parent's activeTab changes
+    useEffect(() => {
+      if (!initialData) {
+        if (parentActiveTab === "strategies" && isAdmin) {
+          setActiveTab("strategies");
+        } else {
+          setActiveTab("course");
+        }
+      }
+    }, [parentActiveTab, initialData]);
 
     const [createStrategyMutation] = useCreateAdminStrategyMutation();
     const [updateStrategyMutation] = useUpdateAdminStrategyMutation();
@@ -54,14 +71,21 @@ const CreateCourseModal = forwardRef(
     // Fetch courses on mount and when token changes
     const fetchAllCourses = async () => {
       if (auth?.token) {
-        dispatch(
-          fetchCourses({
-            params: {
-              isDeleted: false,
-            },
-            token: auth.token,
-          })
-        )
+        let action;
+        let payload = { params: { isDeleted: false }, token: auth?.token };
+
+        if (activeTab === "strategies") {
+          action = fetchStrategies;
+        } else {
+          if (auth?.user?.role === "educator") {
+            action = fetchCoursesByEducatorId;
+            payload = { id: auth?.user?._id, token: auth?.token };
+          } else {
+            action = fetchCourses;
+          }
+        }
+
+        dispatch(action(payload))
           .unwrap()
           .then((response) => {
             console.log("Courses fetched successfully:", response);
@@ -173,7 +197,7 @@ const CreateCourseModal = forwardRef(
       } catch (error) {
         console.error("Submission error:", error);
         toast.error(
-          error?.data?.message || typeof error === "string" ? error : error?.message || "Operation failed. Please try again."
+          error?.data?.message || (typeof error === "string" ? error : error?.message) || "Operation failed. Please try again."
         );
       } finally {
         setIsSubmitting(false);
@@ -206,15 +230,17 @@ const CreateCourseModal = forwardRef(
               >
                 Course
               </button>
-              <button
-                onClick={() => setActiveTab("strategies")}
-                className={`pb-3 px-8 text-sm font-semibold transition-all relative ${activeTab === "strategies"
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-gray-400 hover:text-gray-600"
-                  }`}
-              >
-                Strategies
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setActiveTab("strategies")}
+                  className={`pb-3 px-8 text-sm font-semibold transition-all relative ${activeTab === "strategies"
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-gray-400 hover:text-gray-600"
+                    }`}
+                >
+                  Strategies
+                </button>
+              )}
             </div>
           )}
 

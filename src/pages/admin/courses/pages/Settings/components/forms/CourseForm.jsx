@@ -296,9 +296,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                 </SelectTrigger>
                 <SelectContent>
                   {courseTypesList?.data?.length > 0 ? (
-                    courseTypesList.data.map((type) => (
-                      <SelectItem key={type._id} value={type.name}>
-                        {type.name}
+                    courseTypesList?.data?.map((type) => (
+                      <SelectItem key={type?._id} value={type?.name}>
+                        {type?.name}
                       </SelectItem>
                     ))
                   ) : (
@@ -336,9 +336,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                 </SelectTrigger>
                 <SelectContent>
                   {languagesList?.data?.length > 0 ? (
-                    languagesList.data.map((lang) => (
-                      <SelectItem key={lang._id} value={lang.name}>
-                        {lang.name}
+                    languagesList?.data?.map((lang) => (
+                      <SelectItem key={lang?._id} value={lang?.name}>
+                        {lang?.name}
                       </SelectItem>
                     ))
                   ) : (
@@ -378,8 +378,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                 </SelectTrigger>
                 <SelectContent>
                   {data?.data?.map((item) => (
-                    <SelectItem key={item._id} value={item._id}>
-                      {item.name}
+                    <SelectItem key={item?._id} value={item?._id}>
+                      {item?.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

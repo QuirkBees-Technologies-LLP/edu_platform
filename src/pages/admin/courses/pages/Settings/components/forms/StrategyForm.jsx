@@ -29,29 +29,21 @@ const strategySchema = z.object({
     aboutStrategy: z.string().min(10, "About Strategy  must be at least 10 characters"),
     selectedEducators: z.array(z.string()).min(1, "Please select at least one educator"),
     iconThumbnail: z
-        .instanceof(File, { message: "Icon thumbnail is required" })
+        .any()
         .optional()
-        .refine(
-            (file) => {
-                if (!file) return true;
-                return file.size > 0;
-            },
-            {
-                message: "Please select a valid icon thumbnail",
-            }
-        ),
+        .refine((val) => {
+            if (!val) return true;
+            if (typeof val === 'string') return true;
+            return val instanceof File && val.size > 0;
+        }, { message: "Please select a valid icon thumbnail" }),
     strategyBanner: z
-        .instanceof(File, { message: "Strategy banner is required" })
+        .any()
         .optional()
-        .refine(
-            (file) => {
-                if (!file) return true;
-                return file.size > 0;
-            },
-            {
-                message: "Please select a valid strategy banner",
-            }
-        ),
+        .refine((val) => {
+            if (!val) return true;
+            if (typeof val === 'string') return true;
+            return val instanceof File && val.size > 0;
+        }, { message: "Please select a valid strategy banner" }),
     category: z.string().min(1, "Please select a category"),
     tags: z.array(z.string()).optional(),
     published: z.boolean().default(false),
@@ -106,30 +98,62 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
     useEffect(() => {
         if (initialData) {
-            if (initialData.iconThumbnail) setIconPreview(initialData.iconThumbnail);
-            if (initialData.strategyBanner) setBannerPreview(initialData.strategyBanner);
+            // Backend strategyBanner is the Icon, imageUrl is the Banner
+            if (initialData?.strategyBanner) {
+                setIconPreview(initialData?.strategyBanner);
+                setValue("iconThumbnail", initialData?.strategyBanner);
+            }
+            if (initialData?.imageUrl) {
+                setBannerPreview(initialData?.imageUrl);
+                setValue("strategyBanner", initialData?.imageUrl);
+            }
 
             if (initialData?.category?._id && categories?.data?.length > 0) {
-                setValue("category", initialData.category._id);
+                setValue("category", initialData?.category?._id);
             }
-            if (initialData?.selectedEducators?.length > 0) {
-                const educatorIds = initialData.selectedEducators.map(e => typeof e === 'object' ? e._id : e);
+
+            // Backend sends 'educators', frontend uses 'selectedEducators'
+            const backendEducators = initialData?.educators || initialData?.selectedEducators;
+            if (backendEducators?.length > 0) {
+                const educatorIds = backendEducators?.map(e => typeof e === 'object' ? e?._id : e);
                 setValue("selectedEducators", educatorIds);
             }
-            if (initialData?.tags?.length > 0) {
-                setValue("tags", initialData.tags);
+
+            // Improved tag parsing for various backend formats
+            if (initialData?.tags) {
+                let tagsArray = [];
+                if (Array.isArray(initialData?.tags)) {
+                    // Check if the array contains a stringified version of another array
+                    if (initialData?.tags?.length === 1 && typeof initialData?.tags?.[0] === 'string' && initialData?.tags?.[0]?.startsWith('[')) {
+                        try {
+                            tagsArray = JSON.parse(initialData?.tags?.[0]);
+                        } catch (e) {
+                            tagsArray = initialData?.tags;
+                        }
+                    } else {
+                        tagsArray = initialData?.tags;
+                    }
+                } else if (typeof initialData?.tags === 'string') {
+                    try {
+                        const parsed = JSON.parse(initialData?.tags);
+                        tagsArray = Array.isArray(parsed) ? parsed : [initialData?.tags];
+                    } catch (e) {
+                        tagsArray = initialData?.tags?.split(',')?.map(tag => tag?.trim());
+                    }
+                }
+                setValue("tags", tagsArray);
             }
         }
     }, [initialData, categories, setValue]);
 
     const handleFileChange = (e, field) => {
-        const file = e.target.files[0];
+        const file = e?.target?.files?.[0];
         if (file) {
             setValue(field, file, { shouldValidate: true });
             const reader = new FileReader();
             reader.onloadend = () => {
-                if (field === "iconThumbnail") setIconPreview(reader.result);
-                if (field === "strategyBanner") setBannerPreview(reader.result);
+                if (field === "iconThumbnail") setIconPreview(reader?.result);
+                if (field === "strategyBanner") setBannerPreview(reader?.result);
             };
             reader.readAsDataURL(file);
         }
@@ -150,15 +174,18 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             "title", "description", "aboutStrategy", "category", "published",
             "isFeatured", "tier", "section", "language", "isStrategy"
         ].forEach(key => {
-            formData.append(key, values[key]);
+            formData.append(key, values?.[key]);
         });
 
-        formData.append("selectedEducators", JSON.stringify(values.selectedEducators));
-        formData.append("tags", JSON.stringify(values.tags));
+
+        console.log(values, "values");
+
+        formData.append("educators", JSON.stringify(values?.selectedEducators));
+        formData.append("tags", JSON.stringify(values?.tags));
         formData.append("isStrategies", true);
 
-        if (values.iconThumbnail instanceof File) formData.append("icon", values.iconThumbnail);
-        if (values.strategyBanner instanceof File) formData.append("image", values.strategyBanner);
+        if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
+        if (values?.strategyBanner instanceof File) formData.append("image", values?.strategyBanner);
 
         await onSubmit(formData);
     };
@@ -175,7 +202,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                             className="w-full dark:bg-[#1a1c23] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all"
                             placeholder="Enter Strategy Title"
                         />
-                        {errors?.title && <p className="text-xs text-rose-500 mt-1">{errors.title.message}</p>}
+                        {errors?.title && <p className="text-xs text-rose-500 mt-1">{errors?.title?.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -185,7 +212,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                             className="w-full dark:bg-[#1a1c23] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all min-h-[45px]"
                             placeholder="Enter short description..."
                         />
-                        {errors?.description && <p className="text-xs text-rose-500 mt-1">{errors.description.message}</p>}
+                        {errors?.description && <p className="text-xs text-rose-500 mt-1">{errors?.description?.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -195,7 +222,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                             className="w-full dark:bg-[#1a1c23] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all min-h-[120px]"
                             placeholder="Enter about strategy..."
                         />
-                        {errors?.aboutStrategy && <p className="text-xs text-rose-500 mt-1">{errors.aboutStrategy.message}</p>}
+                        {errors?.aboutStrategy && <p className="text-xs text-rose-500 mt-1">{errors?.aboutStrategy?.message}</p>}
                     </div>
                 </div>
 
@@ -208,7 +235,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 {iconPreview && (
                                     <button
                                         type="button"
-                                        onClick={(e) => { e.stopPropagation(); removeFile("iconThumbnail"); }}
+                                        onClick={(e) => { e?.stopPropagation(); removeFile("iconThumbnail"); }}
                                         className="absolute top-2 right-2 z-20 p-1.5 bg-rose-500/90 text-gray-700 rounded-lg hover:bg-rose-600 transition-all shadow-lg backdrop-blur-sm"
                                     >
                                         <CloseIcon className="w-3.5 h-3.5" />
@@ -236,7 +263,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                     </div>
                                 )}
                             </div>
-                            {errors?.iconThumbnail && <p className="text-xs text-rose-500 mt-1">{errors.iconThumbnail.message}</p>}
+                            {errors?.iconThumbnail && <p className="text-xs text-rose-500 mt-1">{errors?.iconThumbnail?.message}</p>}
                         </div>
 
                         <div className="space-y-2">
@@ -245,7 +272,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 {bannerPreview && (
                                     <button
                                         type="button"
-                                        onClick={(e) => { e.stopPropagation(); removeFile("strategyBanner"); }}
+                                        onClick={(e) => { e?.stopPropagation(); removeFile("strategyBanner"); }}
                                         className="absolute top-2 right-2 z-20 p-1.5 bg-rose-500/90 text-gray-700 rounded-lg hover:bg-rose-600 transition-all shadow-lg backdrop-blur-sm"
                                     >
                                         <CloseIcon className="w-3.5 h-3.5" />
@@ -273,7 +300,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                     </div>
                                 )}
                             </div>
-                            {errors?.strategyBanner && <p className="text-xs text-rose-500 mt-1">{errors.strategyBanner.message}</p>}
+                            {errors?.strategyBanner && <p className="text-xs text-rose-500 mt-1">{errors?.strategyBanner?.message}</p>}
                         </div>
                     </div>
 
@@ -284,57 +311,57 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                             <PopoverTrigger asChild>
                                 <button
                                     type="button"
-                                    className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-4 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26] text-sm text-gray-700 dark:text-gray-200"
+                                    className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]"
                                 >
-                                    <span className="truncate text-gray-500">
-                                        {(watch("selectedEducators") || []).length > 0
-                                            ? `${(watch("selectedEducators") || []).length} Educator Selected`
-                                            : "Select Educator"}
+                                    <span className="truncate text-sm text-gray-700 ">
+                                        {(watch("selectedEducators") || [])?.length > 0
+                                            ? `${(watch("selectedEducators") || [])?.length} Educators Selected`
+                                            : "Select Educators"}
                                     </span>
                                     <ChevronDown size={16} className="text-gray-500" />
                                 </button>
                             </PopoverTrigger>
 
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-white border border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26] dark: shadow-2xl rounded-xl overflow-hidden" align="start">
-                                <Command className="bg-transparent">
-                                    <CommandList className="max-h-72 overflow-y-auto scrollbar-thin">
-                                        <CommandEmpty className="py-6 text-sm text-gray-500 text-center">No Educator found</CommandEmpty>
-                                        <CommandGroup className="p-1">
+                            <PopoverContent className="w-[524px] p-0" align="start" side="bottom">
+                                <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
+                                    <CommandList className="max-h-[300px] overflow-y-auto">
+                                        <CommandEmpty>No educators found.</CommandEmpty>
+                                        <CommandGroup>
                                             {educatorsData?.data?.map((item) => {
                                                 const currentSelected = watch("selectedEducators") || [];
-                                                const itemId = String(item._id);
-                                                const isSelected = currentSelected.includes(itemId);
-
+                                                const selected = currentSelected?.includes(item?._id);
                                                 return (
                                                     <CommandItem
-                                                        key={itemId}
-                                                        value={`${item.first_name} ${item.last_name} ${itemId}`}
-                                                        onSelect={() => {
-                                                            const current = watch("selectedEducators") || [];
-                                                            const updated = isSelected
-                                                                ? current.filter((id) => id !== itemId)
-                                                                : [...current, itemId];
+                                                        key={item?._id}
+                                                        value={`${item?.first_name} ${item?.last_name}`}
+                                                        // Using onPointerDown to bypass potential cmdk focus issues
+                                                        onPointerDown={(e) => {
+                                                            e?.preventDefault();
+                                                            e?.stopPropagation();
+
+                                                            const updated = selected
+                                                                ? currentSelected?.filter((id) => id !== item?._id)
+                                                                : [...currentSelected, item?._id];
 
                                                             setValue("selectedEducators", updated, { shouldValidate: true });
                                                         }}
-                                                        className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
+                                                        className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
                                                     >
                                                         <div
                                                             className={cn(
                                                                 "h-4 w-4 border rounded flex items-center justify-center transition-all",
-                                                                isSelected
+                                                                selected
                                                                     ? "bg-indigo-600 border-indigo-600 text-white"
-                                                                    : "bg-transparent border-gray-300 dark:"
+                                                                    : "bg-transparent border-gray-300 dark:border-gray-600"
                                                             )}
                                                         >
-                                                            {isSelected && <Check size={14} className="stroke-[3]" />}
+                                                            {selected && <Check size={14} className="stroke-[3]" />}
                                                         </div>
-
                                                         <span className={cn(
                                                             "text-sm capitalize transition-colors",
-                                                            isSelected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-800"
+                                                            selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
                                                         )}>
-                                                            {item.first_name} {item.last_name}
+                                                            {item?.first_name} {item?.last_name}
                                                         </span>
                                                     </CommandItem>
                                                 );
@@ -344,19 +371,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 </Command>
                             </PopoverContent>
                         </Popover>
-
-                        {(watch("selectedEducators") || []).length > 0 && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setValue("selectedEducators", [], { shouldValidate: true });
-                                }}
-                                className="absolute right-10 top-[42px] text-gray-500 hover:text-rose-500"
-                            >
-                                ✖
-                            </button>
-                        )}
-                        {errors?.selectedEducators && <p className="text-xs text-rose-500 mt-1">{errors.selectedEducators.message}</p>}
+                        {errors?.selectedEducators && <p className="text-xs text-rose-500 mt-1">{errors?.selectedEducators?.message}</p>}
                     </div>
 
                     {/* Tags Input */}
@@ -367,14 +382,14 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                             control={control}
                             render={({ field }) => (
                                 <TagInput
-                                    value={field.value || []}
-                                    onChange={field.onChange}
-                                    touched={!!errors.tags}
-                                    error={errors.tags?.message}
+                                    value={field?.value || []}
+                                    onChange={field?.onChange}
+                                    touched={!!errors?.tags}
+                                    error={errors?.tags?.message}
                                 />
                             )}
                         />
-                        {errors?.tags && <p className="text-xs text-rose-500 mt-1">{errors.tags.message}</p>}
+                        {errors?.tags && <p className="text-xs text-rose-500 mt-1">{errors?.tags?.message}</p>}
                     </div>
                 </div>
             </div>
@@ -387,19 +402,19 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         name="language"
                         control={control}
                         render={({ field }) => (
-                            <Select value={field.value} onValueChange={field.onChange}>
+                            <Select value={field?.value} onValueChange={field?.onChange}>
                                 <SelectTrigger className="w-full   text-gray-700 rounded-lg h-11">
                                     <SelectValue placeholder="Select Language" />
                                 </SelectTrigger>
                                 <SelectContent className="  text-gray-700">
                                     {languagesList?.data?.map((lang) => (
-                                        <SelectItem key={lang._id} value={lang.name} className="focus:bg-indigo-600 focus:text-gray-700">{lang.name}</SelectItem>
+                                        <SelectItem key={lang?._id} value={lang?.name} className="focus:bg-indigo-600 focus:text-gray-700">{lang?.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         )}
                     />
-                    {errors?.language && <p className="text-xs text-rose-500 mt-1">{errors.language.message}</p>}
+                    {errors?.language && <p className="text-xs text-rose-500 mt-1">{errors?.language?.message}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -408,19 +423,19 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         name="category"
                         control={control}
                         render={({ field }) => (
-                            <Select value={field.value} onValueChange={field.onChange}>
+                            <Select value={field?.value} onValueChange={field?.onChange}>
                                 <SelectTrigger className="w-full   text-gray-700 rounded-lg h-11">
                                     <SelectValue placeholder="Select Category" />
                                 </SelectTrigger>
                                 <SelectContent className="  text-gray-700">
                                     {categories?.data?.map((item) => (
-                                        <SelectItem key={item._id} value={item._id} className="focus:bg-indigo-600 focus:text-gray-700">{item.name}</SelectItem>
+                                        <SelectItem key={item?._id} value={item?._id} className="focus:bg-indigo-600 focus:text-gray-700">{item?.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         )}
                     />
-                    {errors?.category && <p className="text-xs text-rose-500 mt-1">{errors.category.message}</p>}
+                    {errors?.category && <p className="text-xs text-rose-500 mt-1">{errors?.category?.message}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -429,7 +444,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         name="tier"
                         control={control}
                         render={({ field }) => (
-                            <Select value={field.value} onValueChange={field.onChange}>
+                            <Select value={field?.value} onValueChange={field?.onChange}>
                                 <SelectTrigger className="w-full   text-gray-700 rounded-lg h-11">
                                     <SelectValue placeholder="Select Tier" />
                                 </SelectTrigger>
@@ -440,7 +455,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                             </Select>
                         )}
                     />
-                    {errors?.tier && <p className="text-xs text-rose-500 mt-1">{errors.tier.message}</p>}
+                    {errors?.tier && <p className="text-xs text-rose-500 mt-1">{errors?.tier?.message}</p>}
                 </div>
             </div>
 
@@ -457,8 +472,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         render={({ field }) => (
                             <Checkbox
                                 id="published"
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
+                                checked={field?.value}
+                                onCheckedChange={field?.onChange}
                                 className="w-6 h-6 rounded-md  data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                             />
                         )}
@@ -476,8 +491,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         render={({ field }) => (
                             <Checkbox
                                 id="isFeatured"
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
+                                checked={field?.value}
+                                onCheckedChange={field?.onChange}
                                 className="w-6 h-6 rounded-md  data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                             />
                         )}

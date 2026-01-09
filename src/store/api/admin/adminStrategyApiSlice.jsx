@@ -8,7 +8,7 @@ export const adminStrategyApiSlice = createApi({
     endpoints: (builder) => ({
         getAdminStrategies: builder.query({
             query: (params = {}) => ({
-                url: '/admin/strategy',
+                url: '/admin/strategies',
                 params: {
                     isDeleted: false,
                     isStrategies: true,
@@ -25,7 +25,7 @@ export const adminStrategyApiSlice = createApi({
         }),
         createAdminStrategy: builder.mutation({
             query: (formData) => ({
-                url: '/admin/strategy',
+                url: '/admin/strategies',
                 method: 'POST',
                 body: formData,
             }),
@@ -35,7 +35,7 @@ export const adminStrategyApiSlice = createApi({
         }),
         updateAdminStrategy: builder.mutation({
             query: ({ id, formData }) => ({
-                url: `/admin/strategy/${id}`,
+                url: `/admin/strategies/${id}`,
                 method: 'PUT',
                 body: formData,
             }),
@@ -46,7 +46,7 @@ export const adminStrategyApiSlice = createApi({
         }),
         deleteAdminStrategy: builder.mutation({
             query: (id) => ({
-                url: `/admin/strategy/${id}`,
+                url: `/admin/strategies/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: [
