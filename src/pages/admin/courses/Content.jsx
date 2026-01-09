@@ -96,7 +96,7 @@ const Content = () => {
             {/* Mobile Navigation */}
             {isMobileMenuOpen && (
               <div className="md:hidden">
-                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <div className="px-2 pt-2 pb-3 space-y-2 sm:px-3">
                   {navItems.map((item) => (
                     <a
                       key={item.label}
@@ -104,8 +104,8 @@ const Content = () => {
                       onClick={() => handleNavigation(item.label.toLowerCase())}
                       className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                         activePage === item.label.toLowerCase()
-                          ? "bg-blue-50 text-blue-700"
-                          : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                          ? "bg-primary-light text-primary"
+                          : " bg-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-dark"
                       }`}
                     >
                       <item.icon

@@ -164,7 +164,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit(submitHandler)} className="space-y-6 bg-[#0f1117] p-6 rounded-2xl shadow-2xl border border-white/5" encType="multipart/form-data">
+        <form onSubmit={handleSubmit(submitHandler)} className="space-y-6 py-6 rounded-2xl" encType="multipart/form-data">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Basic Info */}
                 <div className="space-y-6">
@@ -172,7 +172,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         <label className="block text-sm font-medium text-gray-700">Strategy Title <span className="text-rose-500">*</span></label>
                         <input
                             {...register("title")}
-                            className="w-full bg-[#1a1c23] border-[#2d3139] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all"
+                            className="w-full dark:bg-[#1a1c23] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all"
                             placeholder="Enter Strategy Title"
                         />
                         {errors?.title && <p className="text-xs text-rose-500 mt-1">{errors.title.message}</p>}
@@ -182,7 +182,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         <label className="block text-sm font-medium text-gray-700">Short Description <span className="text-rose-500">*</span></label>
                         <textarea
                             {...register("description")}
-                            className="w-full bg-[#1a1c23] border-[#2d3139] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all min-h-[45px]"
+                            className="w-full dark:bg-[#1a1c23] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all min-h-[45px]"
                             placeholder="Enter short description..."
                         />
                         {errors?.description && <p className="text-xs text-rose-500 mt-1">{errors.description.message}</p>}
@@ -192,7 +192,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         <label className="block text-sm font-medium text-gray-700">About Strategy <span className="text-rose-500">*</span></label>
                         <textarea
                             {...register("aboutStrategy")}
-                            className="w-full bg-[#1a1c23] border-[#2d3139] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all min-h-[120px]"
+                            className="w-full dark:bg-[#1a1c23] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all min-h-[120px]"
                             placeholder="Enter about strategy..."
                         />
                         {errors?.aboutStrategy && <p className="text-xs text-rose-500 mt-1">{errors.aboutStrategy.message}</p>}
@@ -204,7 +204,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                     <div className="grid grid-cols-2 gap-5">
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-gray-700">Icon Thumbnail <span className="text-rose-500">*</span></label>
-                            <div className="relative group border-2 border-dashed border-[#2d3139] rounded-xl p-4 transition-all hover:border-indigo-500/50 bg-[#1a1c23]/30">
+                            <div className="relative group border-2 border-dashed  rounded-xl p-4 transition-all hover:border-indigo-500/50 /30">
                                 {iconPreview && (
                                     <button
                                         type="button"
@@ -241,7 +241,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-gray-700">Strategy Banner <span className="text-rose-500">*</span></label>
-                            <div className="relative group border-2 border-dashed border-[#2d3139] rounded-xl p-4 transition-all hover:border-indigo-500/50 bg-[#1a1c23]/30 text-center">
+                            <div className="relative group border-2 border-dashed  rounded-xl p-4 transition-all hover:border-indigo-500/50 /30 text-center">
                                 {bannerPreview && (
                                     <button
                                         type="button"
@@ -286,7 +286,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                     type="button"
                                     className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-4 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26] text-sm text-gray-700 dark:text-gray-200"
                                 >
-                                    <span className="truncate">
+                                    <span className="truncate text-gray-500">
                                         {(watch("selectedEducators") || []).length > 0
                                             ? `${(watch("selectedEducators") || []).length} Educator Selected`
                                             : "Select Educator"}
@@ -295,7 +295,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 </button>
                             </PopoverTrigger>
 
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-white dark:bg-[#1a1c23] border border-[#dce0e9] dark:border-[#2d3139] shadow-2xl rounded-xl overflow-hidden" align="start">
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-white border border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26] dark: shadow-2xl rounded-xl overflow-hidden" align="start">
                                 <Command className="bg-transparent">
                                     <CommandList className="max-h-72 overflow-y-auto scrollbar-thin">
                                         <CommandEmpty className="py-6 text-sm text-gray-500 text-center">No Educator found</CommandEmpty>
@@ -324,7 +324,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                                                 "h-4 w-4 border rounded flex items-center justify-center transition-all",
                                                                 isSelected
                                                                     ? "bg-indigo-600 border-indigo-600 text-white"
-                                                                    : "bg-transparent border-gray-300 dark:border-[#2d3139]"
+                                                                    : "bg-transparent border-gray-300 dark:"
                                                             )}
                                                         >
                                                             {isSelected && <Check size={14} className="stroke-[3]" />}
@@ -332,7 +332,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
                                                         <span className={cn(
                                                             "text-sm capitalize transition-colors",
-                                                            isSelected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-400"
+                                                            isSelected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-800"
                                                         )}>
                                                             {item.first_name} {item.last_name}
                                                         </span>
@@ -380,7 +380,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             </div>
 
             {/* Selects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 border-t border-[#2d3139] pt-8 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 border-t  pt-8 mt-4">
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">Language <span className="text-rose-500">*</span></label>
                     <Controller
@@ -388,10 +388,10 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         control={control}
                         render={({ field }) => (
                             <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger className="w-full bg-[#1a1c23] border-[#2d3139] text-gray-700 rounded-lg h-11">
+                                <SelectTrigger className="w-full   text-gray-700 rounded-lg h-11">
                                     <SelectValue placeholder="Select Language" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#1a1c23] border-[#2d3139] text-gray-700">
+                                <SelectContent className="  text-gray-700">
                                     {languagesList?.data?.map((lang) => (
                                         <SelectItem key={lang._id} value={lang.name} className="focus:bg-indigo-600 focus:text-gray-700">{lang.name}</SelectItem>
                                     ))}
@@ -409,10 +409,10 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         control={control}
                         render={({ field }) => (
                             <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger className="w-full bg-[#1a1c23] border-[#2d3139] text-gray-700 rounded-lg h-11">
+                                <SelectTrigger className="w-full   text-gray-700 rounded-lg h-11">
                                     <SelectValue placeholder="Select Category" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#1a1c23] border-[#2d3139] text-gray-700">
+                                <SelectContent className="  text-gray-700">
                                     {categories?.data?.map((item) => (
                                         <SelectItem key={item._id} value={item._id} className="focus:bg-indigo-600 focus:text-gray-700">{item.name}</SelectItem>
                                     ))}
@@ -430,10 +430,10 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         control={control}
                         render={({ field }) => (
                             <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger className="w-full bg-[#1a1c23] border-[#2d3139] text-gray-700 rounded-lg h-11">
+                                <SelectTrigger className="w-full   text-gray-700 rounded-lg h-11">
                                     <SelectValue placeholder="Select Tier" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#1a1c23] border-[#2d3139] text-gray-700">
+                                <SelectContent className="  text-gray-700">
                                     <SelectItem value="FREE" className="focus:bg-indigo-600 focus:text-gray-700">Free</SelectItem>
                                     <SelectItem value="PREMIUM" className="focus:bg-indigo-600 focus:text-gray-700">Pro</SelectItem>
                                 </SelectContent>
@@ -445,8 +445,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             </div>
 
             {/* Toggle Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-[#2d3139] text-right">
-                <div className="bg-[#1a1c23] border border-[#2d3139] p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t  text-right">
+                <div className=" border  p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
                     <div className="text-left space-y-1">
                         <label htmlFor="published" className="text-sm font-bold text-gray-700cursor-pointer">Publish Strategy</label>
                         <p className="text-xs text-gray-500">Visible to students immediately.</p>
@@ -459,13 +459,13 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 id="published"
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
-                                className="w-6 h-6 rounded-md border-[#2d3139] data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                                className="w-6 h-6 rounded-md  data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                             />
                         )}
                     />
                 </div>
 
-                <div className="bg-[#1a1c23] border border-[#2d3139] p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
+                <div className=" border  p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
                     <div className="text-left space-y-1">
                         <label htmlFor="isFeatured" className="text-sm font-bold text-gray-700 cursor-pointer">Feature Strategy</label>
                         <p className="text-xs text-gray-500">Highlight on platform home.</p>
@@ -478,7 +478,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 id="isFeatured"
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
-                                className="w-6 h-6 rounded-md border-[#2d3139] data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                                className="w-6 h-6 rounded-md  data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                             />
                         )}
                     />
@@ -486,7 +486,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             </div>
 
             {/* Submit Actions */}
-            <div className="flex justify-end gap-5 pt-8 mt-2 border-t border-[#2d3139]">
+            <div className="flex justify-end gap-5 pt-8 mt-2 border-t ">
                 <button
                     type="button"
                     onClick={() => reset()}
