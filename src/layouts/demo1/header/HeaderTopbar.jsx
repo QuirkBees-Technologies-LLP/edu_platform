@@ -32,6 +32,7 @@ import { useGetLanguageQuery } from "../../../store/api/client/clientLanguageApi
 const HeaderTopbar = () => {
   const STUDENT_ALLOWED_ROUTES = [
     "/fast-start-training",
+    "/trading-strategies",
     "/iq-vault",
     "/iq-academy",
     "/iq-academy-educators",

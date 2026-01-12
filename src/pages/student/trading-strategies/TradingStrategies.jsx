@@ -1,167 +1,303 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container } from '@/components/container';
+import { useGetStrategiesQuery, useLazyGetStrategyByIdQuery } from '@/store/api/client/clientStrategiesApiSlice';
+import { useSelector } from 'react-redux';
+import { selectSelectedLanguage } from '../../../store/reducer/studentLanagugeSlice';
+import { Loader2, CirclePlay } from 'lucide-react';
+import { Accordion, AccordionItem } from '@/components/accordion';
+
+/**
+ * Utility function to convert various video URLs to embeddable format
+ */
+const getEmbedUrl = (url) => {
+    if (!url) return "";
+
+    // YouTube
+    if (url.includes("youtube.com/watch?v=")) {
+        const videoId = url.split("v=")[1].split("&")[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.includes("youtu.be/")) {
+        const videoId = url.split("youtu.be/")[1].split("?")[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // Vimeo
+    if (url.includes("vimeo.com/")) {
+        const parts = url.split("vimeo.com/")[1].split("/");
+        const videoId = parts[0].split("?")[0];
+        const hash = parts[1] ? parts[1].split("?")[0] : null;
+        return hash
+            ? `https://player.vimeo.com/video/${videoId}?h=${hash}`
+            : `https://player.vimeo.com/video/${videoId}`;
+    }
+
+    // Dailymotion
+    if (url.includes("dailymotion.com/video/")) {
+        const videoId = url.split("dailymotion.com/video/")[1].split("?")[0];
+        return `https://www.dailymotion.com/embed/video/${videoId}`;
+    }
+
+    // Loom
+    if (url.includes("loom.com/share/")) {
+        const videoId = url.split("loom.com/share/")[1].split("?")[0];
+        return `https://www.loom.com/embed/${videoId}`;
+    }
+
+    // Dyntube - Case 1: app.dyntube.com/#/video
+    if (url.includes("app.dyntube.com/#/video/")) {
+        const match = url.match(/video\/([^/]+)/);
+        if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
+    }
+
+    // Dyntube - Case 2: videos.dyntube.com/iframes
+    if (url.includes("videos.dyntube.com/iframes/")) {
+        const match = url.match(/iframes\/([^/?#]+)/);
+        if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
+    }
+
+    // Dyntube - Case 3: player.dyntube.com/video
+    if (url.includes("player.dyntube.com/video/")) {
+        const match = url.match(/video\/([^/?#]+)/);
+        if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
+    }
+
+    // Dyntube - Case 4: fallback generic
+    if (url.includes("dyntube.com/")) return url;
+
+    return url;
+};
+
+const Banner = () => (
+    <div className="card rounded-2xl px-6 md:px-12 py-10 md:py-20 border border-gray-300 md:min-h-[400px] flex items-center justify-center dark:bg-[#05091a]">
+        <div>
+            <h1 className="text-2xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-500 via-orange-500 to-cyan-400 bg-clip-text text-transparent leading-[1.5]">
+                Trading Strategies
+            </h1>
+            <p className="text-xl text-gray-900">
+                Master proven strategies from industry experts • Elevation is a Lifestyle
+            </p>
+        </div>
+    </div>
+);
 
 const TradingStrategies = () => {
-    const strategies = [
-        {
-            id: 'killshot',
-            name: 'Killshot Strategy',
-            icon: 'https://via.placeholder.com/80/8a2be2/ffffff?text=K',
-            markets: 'Crypto • Forex',
-            students: '2.4K',
-            videos: '15',
-            description: 'Advanced momentum-based strategy for high-volatility markets. Combines RSI, MACD, and volume analysis.',
-            about: 'The Killshot Strategy is a comprehensive momentum-based trading approach specifically designed for traders who thrive in high-volatility environments. This advanced strategy has been refined over years of real-world testing in both cryptocurrency and forex markets. At its core, Killshot combines multiple technical indicators including RSI (Relative Strength Index), MACD (Moving Average Convergence Divergence), and custom volume analysis to identify explosive momentum opportunities with high probability entries.',
-            details: ['Forex', 'Crypto', 'Scalping', 'Day Trading', 'High Volatility', 'Momentum Trading'],
-            educators: [
-                { name: 'Filipe Forner', photo: 'https://via.placeholder.com/80/8a2be2/ffffff?text=FF' },
-                { name: 'Manny Quinones', photo: 'https://via.placeholder.com/80/ff8c00/ffffff?text=MQ' },
-                { name: 'Jay Bonham', photo: 'https://via.placeholder.com/80/00cec9/ffffff?text=JB' },
-                { name: 'Calvin Becerra', photo: 'https://via.placeholder.com/80/667eea/ffffff?text=CB' }
-            ],
-            lessons: [
-                { title: 'Killshot Introduction & Setup', duration: '12:45', views: '15K' },
-                { title: 'Understanding Market Structure', duration: '18:30', views: '12K' },
-                { title: 'Advanced Entry Techniques', duration: '22:15', views: '9.8K' },
-                { title: 'Risk Management Guide', duration: '16:20', views: '11K' },
-                { title: 'Exit Strategies & Take Profits', duration: '19:45', views: '8.5K' }
-            ]
-        },
-        {
-            id: 'smartshot',
-            name: 'SmartShot Strategy',
-            icon: 'https://via.placeholder.com/80/ff8c00/ffffff?text=S',
-            markets: 'Forex • Stocks',
-            students: '3.1K',
-            videos: '12',
-            description: 'Swing trading strategy focusing on medium-term trends using smart money concepts and order flow.',
-            about: 'SmartShot revolutionizes swing trading by incorporating institutional-level smart money concepts with retail trader accessibility. This sophisticated strategy teaches you to read market manipulation, identify where big money is positioned, and ride medium-term trends with confidence and precision.',
-            details: ['Forex', 'Stocks', 'Swing Trading', 'Smart Money', 'Order Flow', 'Position Trading'],
-            educators: [
-                { name: 'Filipe Forner', photo: 'https://via.placeholder.com/80/8a2be2/ffffff?text=FF' },
-                { name: 'Manny Quinones', photo: 'https://via.placeholder.com/80/ff8c00/ffffff?text=MQ' },
-                { name: 'Jay Bonham', photo: 'https://via.placeholder.com/80/00cec9/ffffff?text=JB' },
-                { name: 'Calvin Becerra', photo: 'https://via.placeholder.com/80/667eea/ffffff?text=CB' }
-            ],
-            lessons: [
-                { title: 'SmartShot Fundamentals', duration: '14:20', views: '11K' },
-                { title: 'Order Flow Analysis', duration: '19:45', views: '8.5K' },
-                { title: 'Smart Money Concepts', duration: '22:30', views: '10K' },
-                { title: 'Swing Trading Setups', duration: '16:30', views: '13K' }
-            ]
-        },
-        {
-            id: 'supernova',
-            name: 'SuperNova Strategy',
-            icon: 'https://via.placeholder.com/80/00cec9/ffffff?text=SN',
-            markets: 'All Markets',
-            students: '5.2K',
-            videos: '18',
-            description: 'Beginner-friendly trend-following strategy with clear rules. Works across all timeframes and markets.',
-            about: 'SuperNova is designed as the perfect entry point for aspiring traders who want to build a solid foundation in technical analysis and systematic trading. This beginner-friendly strategy removes complexity and focuses on proven trend-following principles with crystal-clear entry and exit rules.',
-            details: ['All Markets', 'Forex', 'Crypto', 'Stocks', 'Trend Following', 'Beginner Friendly'],
-            educators: [
-                { name: 'Filipe Forner', photo: 'https://via.placeholder.com/80/8a2be2/ffffff?text=FF' },
-                { name: 'Manny Quinones', photo: 'https://via.placeholder.com/80/ff8c00/ffffff?text=MQ' },
-                { name: 'Jay Bonham', photo: 'https://via.placeholder.com/80/00cec9/ffffff?text=JB' },
-                { name: 'Calvin Becerra', photo: 'https://via.placeholder.com/80/667eea/ffffff?text=CB' }
-            ],
-            lessons: [
-                { title: 'SuperNova Basics', duration: '10:15', views: '22K' },
-                { title: 'Trend Identification', duration: '13:40', views: '19K' },
-                { title: 'Entry & Exit Rules', duration: '15:50', views: '16K' },
-                { title: 'Indicator Setup Guide', duration: '12:20', views: '18K' }
-            ]
+    // ==================== STATE MANAGEMENT ====================
+    const [selectedStrategyId, setSelectedStrategyId] = useState(null);
+    const [activeLectureId, setActiveLectureId] = useState(null);
+    const [activeLecture, setActiveLecture] = useState(null);
+
+    // Get selected language from Redux
+    const selectedLanguage = useSelector(selectSelectedLanguage);
+
+    // ==================== API CALLS ====================
+    // Fetch all strategies
+    const {
+        data: strategiesData,
+        isLoading: strategiesLoading,
+        error: strategiesError,
+    } = useGetStrategiesQuery({ language: selectedLanguage });
+
+    // Lazy query for fetching individual strategy details
+    const [fetchStrategy, {
+        data: strategyData,
+        isLoading: strategyLoading,
+        error: strategyError
+    }] = useLazyGetStrategyByIdQuery();
+
+    // ==================== DATA EXTRACTION ====================
+    const strategies = strategiesData?.data || [];
+    const currentStrategy = strategyData?.data || null;
+
+    // ==================== SIDE EFFECTS ====================
+    /**
+     * When a strategy is selected, fetch its detailed data
+     */
+    useEffect(() => {
+        if (selectedStrategyId) {
+            fetchStrategy(selectedStrategyId);
         }
-    ];
+    }, [selectedStrategyId, fetchStrategy]);
 
-    const [currentStrategy, setCurrentStrategy] = useState(null);
-    const [selectedLesson, setSelectedLesson] = useState(0);
+    /**
+     * Auto-select the first lecture from the first section when strategy is loaded
+     */
+    useEffect(() => {
+        if (currentStrategy?.sections?.length > 0) {
+            const firstSection = currentStrategy.sections[0];
+            if (firstSection?.lectures?.length > 0) {
+                const firstLecture = firstSection.lectures[0];
+                setActiveLectureId(firstLecture?._id);
+                setActiveLecture(firstLecture);
+            }
+        }
+    }, [currentStrategy]);
 
+    // ==================== EVENT HANDLERS ====================
     const selectStrategy = (strategyId) => {
-        const strategy = strategies.find(s => s.id === strategyId);
-        setCurrentStrategy(strategy);
-        setSelectedLesson(0);
+        setSelectedStrategyId(strategyId);
+        setActiveLectureId(null);
+        setActiveLecture(null);
     };
 
+    /**
+     * Handle lecture selection
+     */
+    const handleLectureClick = (lecture) => {
+        setActiveLectureId(lecture._id);
+        setActiveLecture(lecture);
+    };
+
+    // ==================== LOADING STATE ====================
+    if (strategiesLoading) {
+        return (
+            <div className="min-h-screen">
+                <Container width="fluid" className="mx-auto px-5">
+                    <Banner />
+
+                    {/* Loading State */}
+                    <div className="flex items-center justify-center h-96">
+                        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                        <span className="ml-3 text-gray-600">Loading strategies...</span>
+                    </div>
+                </Container>
+            </div>
+        );
+    }
+
+    // ==================== ERROR STATE ====================
+    if (strategiesError) {
+        return (
+            <div className="min-h-screen">
+                <Container width="fluid" className="mx-auto px-5">
+                    <Banner />
+
+                    {/* Error State */}
+                    <div className="flex flex-col items-center justify-center h-96">
+                        <div className="text-red-500 text-lg mb-4">Failed to load strategies</div>
+                        <p className="text-gray-600">
+                            {strategiesError?.data?.message || 'Something went wrong. Please try again later.'}
+                        </p>
+                    </div>
+                </Container>
+            </div>
+        );
+    }
+
+    // ==================== MAIN RENDER ====================
     return (
         <div className="min-h-screen">
             <Container width="fluid" className="mx-auto px-5">
-                {/* Banner */}
-                <div className="card rounded-2xl px-6 md:px-12 py-10 md:py-20 border border-gray-300 md:min-h-[400px] flex items-center justify-center">
-                    <div>
-                        <h1 className="text-2xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-500 via-orange-500 to-cyan-400 bg-clip-text text-transparent leading-[1.5]">
-                            Trading Strategies
-                        </h1>
-                        <p className="text-xl text-gray-900">
-                            Master proven strategies from industry experts • Elevation is a Lifestyle
-                        </p>
-                    </div>
-                </div>
+                {/* Banner - Static, never changes */}
+                <Banner />
 
-                {/* Language Filter */}
-                <div className="flex justify-end items-center gap-3 my-5">
-                    <span className="text-sm font-medium text-gray-800">Language:</span>
-                    <select className="px-5 py-3 bg-gray-200 border border-gray-300 rounded-full text-sm cursor-pointer min-w-[180px] !outline-none">
-                        <option>Us English</option>
-                        <option>🇪🇸 Español</option>
-                        <option>🇧🇷 Português</option>
-                        <option>🇫🇷 Français</option>
-                    </select>
-                </div>
-
-                {/* Video and Lessons Container */}
-                <div className="flex flex-col md:flex-row gap-6 mb-8">
-                    {/* Lessons Panel */}
-                    {currentStrategy && (
-                        <div className="md:w-[350px] card rounded-2xl border border-gray-300 h-[600px] flex flex-col">
-                            <div className="p-6 border-b border-gray-300">
-                                <h3 className="text-lg font-semibold">{currentStrategy.name}</h3>
-                                <p className="text-sm text-gray-900 mt-2">{currentStrategy.lessons.length} Lessons</p>
-                            </div>
-                            <div className="flex-1 overflow-y-auto p-3">
-                                {currentStrategy.lessons.map((lesson, i) => (
-                                    <div
-                                        key={i}
-                                        onClick={() => setSelectedLesson(i)}
-                                        className={`p-4 rounded-xl mb-2 cursor-pointer ${selectedLesson === i
-                                                ? 'bg-blue-500/20 border border-blue-500'
-                                                : 'bg-gray-200 hover:bg-gray-300'
-                                            }`}
-                                    >
-                                        <div className="text-xs text-gray-800 mb-1">Lesson {i + 1}</div>
-                                        <div className="text-sm mb-1">{lesson.title}</div>
-                                        <div className="text-xs text-gray-800">⏱️ {lesson.duration}</div>
-                                    </div>
-                                ))}
+                {/* ========== DYNAMIC CONTENT AREA ========== */}
+                {/* This section updates when a strategy is selected */}
+                <div className="flex flex-col md:flex-row gap-6 mb-8 mt-5">
+                    {/* ========== LESSONS PANEL (LEFT SIDEBAR) ========== */}
+                    {currentStrategy?.sections?.length > 0 ? (
+                        <div className="md:w-[430px]">
+                            <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
+                                {/* <div className="p-6 border-b border-gray-300">
+                                    <h3 className="text-lg font-semibold">{currentStrategy.title}</h3>
+                                    <p className="text-sm text-gray-900 mt-2">
+                                        {currentStrategy.sections.reduce((total, section) => total + (section.lectures?.length || 0), 0)} Lessons
+                                    </p>
+                                </div> */}
+                                <Accordion allowMultiple={false} defaultIndex={0}>
+                                    {currentStrategy.sections.map((section, index) => (
+                                        <AccordionItem
+                                            key={section?._id || index}
+                                            title={`${index + 1}. ${section?.title || 'Section'}`}
+                                        >
+                                            {section?.lectures?.map((lecture) => (
+                                                <div
+                                                    key={lecture?._id}
+                                                    onClick={() => handleLectureClick(lecture)}
+                                                    className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
+                                                        ${activeLectureId === lecture?._id
+                                                            ? "bg-gray-300 dark:bg-slate-800"
+                                                            : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                                        }`}
+                                                >
+                                                    <CirclePlay className="mr-2 text-gray-400" />
+                                                    <span className="text-gray-800 font-medium text-xs">
+                                                        {lecture?.title}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
                             </div>
                         </div>
-                    )}
+                    ) : currentStrategy ? (
+                        <div className="md:w-[350px]">
+                            <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
+                                <div className="flex flex-col items-center justify-center py-12 px-6">
+                                    <div className="text-center">
+                                        <div className="text-4xl mb-4"></div>
+                                        <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
+                                            Coming Soon
+                                        </h3>
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                                            Lessons will be added soon
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
 
-                    {/* Video Player */}
+                    {/* ========== VIDEO PLAYER AREA (MAIN CONTENT) ========== */}
                     <div className="flex-1">
                         <div className="card rounded-2xl border border-gray-300 overflow-hidden">
-                            <div className="w-full h-[500px] flex items-center justify-center rounded-t-2xl">
-                                {currentStrategy ? (
+                            <div className="w-full h-[500px] bg-black flex items-center justify-center">
+                                {/* Show loading while fetching strategy details */}
+                                {strategyLoading ? (
                                     <div className="text-center">
+                                        <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
+                                        <h3 className="text-xl text-gray-200">Loading strategy details...</h3>
+                                    </div>
+                                ) : activeLecture?.content ? (
+                                    <iframe
+                                        src={getEmbedUrl(activeLecture?.content)}
+                                        className="w-full h-full"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        title={activeLecture?.title || "Video Player"}
+                                    />
+                                ) : currentStrategy?.sections?.length > 0 ? (
+                                    <div className="text-center">
+                                        <div className="text-8xl mb-5 opacity-30 text-white">▶</div>
+                                        <h3 className="text-xl text-white">
+                                            Select a lecture to start watching
+                                        </h3>
+                                    </div>
+                                ) : currentStrategy ? (
+                                    // Strategy selected but no sections/lessons available
+                                    <div className="text-center text-gray-400">
                                         <div className="text-8xl mb-5 opacity-30">▶</div>
-                                        <h3 className="text-xl">Playing: {currentStrategy.lessons[selectedLesson].title}</h3>
+                                        <h3 className="text-xl text-gray-200">No lessons available for this strategy</h3>
+                                        <p className="text-sm text-gray-400 mt-2">Lessons will be added soon</p>
                                     </div>
                                 ) : (
-                                    <div className="text-center text-gray-500">
+                                    // No strategy selected
+                                    <div className="text-center text-gray-400">
                                         <div className="text-8xl mb-5 opacity-30">▶</div>
-                                        <h3 className="text-xl text-gray-800">Select a strategy to start learning</h3>
+                                        <h3 className="text-xl text-gray-200">Select a strategy to start learning</h3>
                                     </div>
                                 )}
                             </div>
-                            {currentStrategy && (
-                                <div className="p-6 bg-gray-200 rounded-b-2xl">
-                                    <h2 className="text-2xl mb-2">{currentStrategy.lessons[selectedLesson].title}</h2>
-                                    <div className="text-sm text-gray-900">
-                                        {currentStrategy.name} • {currentStrategy.lessons[selectedLesson].duration}
+                            {/* Video Info Bar - Only show if active lecture exists */}
+                            {/* {activeLecture && (
+                                <div className="p-6 bg-gray-200 dark:bg-gray-700">
+                                    <h2 className="text-2xl mb-2 dark:text-gray-200">{activeLecture.title}</h2>
+                                    <div className="text-sm text-gray-900 dark:text-gray-400">
+                                        {currentStrategy?.category?.name || 'Category N/A'} • {activeLecture.duration || 'Duration N/A'}
                                     </div>
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>
@@ -171,9 +307,15 @@ const TradingStrategies = () => {
                     <div className="card rounded-2xl border border-gray-300 p-8 mb-8">
                         {/* Header */}
                         <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-300">
-                            <img src={currentStrategy.icon} alt={currentStrategy.name} className="w-16 h-16 rounded-xl" />
+                            {currentStrategy.imageUrl && (
+                                <img
+                                    src={currentStrategy.imageUrl}
+                                    alt={currentStrategy.title}
+                                    className="w-16 h-16 rounded-xl object-cover"
+                                />
+                            )}
                             <div>
-                                <h3 className="text-2xl font-semibold">{currentStrategy.name}</h3>
+                                <h3 className="text-2xl font-semibold">{currentStrategy.title}</h3>
                             </div>
                         </div>
 
@@ -184,7 +326,7 @@ const TradingStrategies = () => {
                                     About This Strategy
                                 </div>
                                 <p className="text-[15px] leading-relaxed text-gray-900">
-                                    {currentStrategy.about}
+                                    {currentStrategy.aboutStrategy || currentStrategy.description}
                                 </p>
                             </div>
                             <div>
@@ -192,71 +334,109 @@ const TradingStrategies = () => {
                                     Strategy Details
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    {currentStrategy.details.map((detail, i) => (
+                                    {/* Display tags with alternating colors */}
+                                    {currentStrategy.tags?.map((tag, i) => (
                                         <span
                                             key={i}
                                             className={`px-4 py-2 rounded-full text-xs font-medium ${i < 2
-                                                    ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
-                                                    : 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400'
+                                                ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
+                                                : 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400'
                                                 }`}
                                         >
-                                            {detail}
+                                            {tag}
                                         </span>
                                     ))}
+
+                                    {/* Display category badge */}
+                                    {currentStrategy.category && (
+                                        <span className="px-4 py-2 rounded-full text-xs font-medium bg-purple-500/20 border border-purple-500/40 text-purple-400">
+                                            {currentStrategy.category.name}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
                         {/* Educators Section */}
-                        <div className="pt-8 border-t border-white/10">
-                            <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-6">
-                                Strategy Educators
+                        {currentStrategy.educators && currentStrategy.educators.length > 0 && (
+                            <div className="pt-8 border-t border-gray-300">
+                                <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-6">
+                                    Strategy Educators
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                                    {currentStrategy.educators.map((educator, i) => (
+                                        <div key={educator._id || i} className="flex flex-col items-center text-center">
+                                            <img
+                                                src={educator.image || `https://ui-avatars.com/api/?name=${educator.first_name}+${educator.last_name}`}
+                                                alt={`${educator.first_name} ${educator.last_name}`}
+                                                className="w-20 h-20 rounded-full mb-3 border-2 border-gray-300 object-cover"
+                                            />
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {educator.first_name} {educator.last_name}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                {currentStrategy.educators.map((educator, i) => (
-                                    <div key={i} className="flex flex-col items-center text-center">
-                                        <img
-                                            src={educator.photo}
-                                            alt={educator.name}
-                                            className="w-20 h-20 rounded-full mb-3 border-2 border-white/10 object-cover"
-                                        />
-                                        <div className="text-sm font-medium text-gray-900">{educator.name}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
 
-                {/* Strategy Cards */}
+                {/* ========== AVAILABLE STRATEGIES GRID ========== */}
+                {/* This section is always visible */}
                 <div className="mt-10 pb-12">
                     <h2 className="text-2xl font-semibold mb-6">Available Strategies</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                        {strategies.map((strategy) => (
-                            <div
-                                key={strategy.id}
-                                onClick={() => selectStrategy(strategy.id)}
-                                className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 ${currentStrategy?.id === strategy.id
+
+                    {/* Show message if no strategies found */}
+                    {strategies.length === 0 ? (
+                        <div className="text-center py-12 text-gray-600">
+                            No strategies available at the moment.
+                        </div>
+                    ) : (
+                        // Display strategy cards in a responsive grid
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                            {strategies.map((strategy) => (
+                                <div
+                                    key={strategy._id}
+                                    onClick={() => selectStrategy(strategy._id)}
+                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 ${selectedStrategyId === strategy._id
                                         ? 'border-purple-500 shadow-lg shadow-purple-500/30'
                                         : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                            >
-                                <div className="flex flex-col md:flex-row gap-4 mb-4">
-                                    <img src={strategy.icon} alt={strategy.name} className="w-20 h-20 rounded-xl" />
-                                    <div>
-                                        <div className="text-xl font-semibold mb-2">{strategy.name}</div>
-                                        <div className="text-sm text-gray-900">{strategy.markets}</div>
+                                        }`}
+                                >
+                                    {/* Strategy Card Content */}
+                                    <div className="flex flex-col md:flex-row gap-4 mb-4">
+                                        {/* Strategy Image */}
+                                        {strategy.imageUrl && (
+                                            <img
+                                                src={strategy.imageUrl}
+                                                alt={strategy.title}
+                                                className="w-20 h-20 rounded-xl object-cover"
+                                            />
+                                        )}
+
+                                        {/* Strategy Title and Category */}
+                                        <div>
+                                            <div className="text-xl font-semibold mb-2">{strategy.title}</div>
+                                            <div className="text-sm text-gray-900">
+                                                {strategy.category?.name || 'All Markets'}
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    {/* Strategy Description (limited to 2 lines) */}
+                                    <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
+                                        {strategy.description}
+                                    </p>
+
+                                    {/* Call-to-Action Button */}
+                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+                                        Start Learning
+                                    </button>
                                 </div>
-                                <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
-                                    {strategy.description}
-                                </p>
-                                <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity">
-                                    Start Learning
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </Container>
         </div>

@@ -1809,12 +1809,18 @@ export const sideMenus = {
           icon: <Dot />,
           path: "/fast-start-training",
         },
+
       ],
     },
     {
       title: "Academy",
       icon: <School />,
       path: "/iq-vault",
+    },
+    {
+      title: "Trading Strategies",
+      icon: <ChartNoAxesCombined />,
+      path: "/trading-strategies",
     },
     {
       title: "IQ Live",
@@ -1831,8 +1837,10 @@ export const sideMenus = {
           icon: <Dot />,
           path: "/iq-academy-educators",
         },
+
       ],
     },
+
     {
       title: "IQ Insight",
       icon: <ChartLine />,
@@ -1869,11 +1877,11 @@ export const sideMenus = {
     //   icon: <Dot />,
     //   path: '/iq-educators'
     // },
-    // {
-    //   title: 'IQ Vault',
-    //   icon: <Clapperboard />,
-    //   path: '/video-library'
-    // },
+    {
+      title: 'IQ Vault',
+      icon: <Clapperboard />,
+      path: '/video-library'
+    },
     // {
     //   title: 'IQ Academy',
     //   icon: <PlayCircle />,

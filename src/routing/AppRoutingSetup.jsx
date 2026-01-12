@@ -331,8 +331,6 @@ const AppRoutingSetup = () => {
       ? getStudentRoutesByPlan(plan)
       : routes[userRole] || [];
 
-  console.log("roleRoutes", roleRoutes);
-  console.log("auth", auth);
 
   // const roleRoutes = routes[userRole] || [];
 

@@ -17,7 +17,7 @@ import CustomSelect from "../../../components/CustomSelect";
 
 const CreatePackageModel = forwardRef(
   (
-    { isOpen, handleClose, selectedRow, setSelectedRow = () => {}, refetch },
+    { isOpen, handleClose, selectedRow, setSelectedRow = () => { }, refetch },
     ref
   ) => {
     const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
@@ -43,6 +43,7 @@ const CreatePackageModel = forwardRef(
       { label: "/iq-educators/:id", value: "/iq-educators/:id" },
       { label: "/iq-academy-educators", value: "/iq-academy-educators" },
       { label: "/iq-social", value: "/iq-social" },
+      { label: "/trading-strategies", value: "/trading-strategies" },
       {
         label: "https://www.iqcharts.com/",
         value: "https://www.iqcharts.com/",
@@ -129,11 +130,10 @@ const CreatePackageModel = forwardRef(
                       type="text"
                       placeholder="Enter package name"
                       autoComplete="off"
-                      className={`form-control input dark:bg-[#2b2b2b] input-md w-full ${
-                        formik.errors.name && formik.touched.name
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input dark:bg-[#2b2b2b] input-md w-full ${formik.errors.name && formik.touched.name
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("name")}
                     />
                     {formik.touched.name && formik.errors.name && (
