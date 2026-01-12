@@ -69,7 +69,7 @@ const getEmbedUrl = (url) => {
 };
 
 const Banner = () => (
-    <div className="card rounded-2xl px-6 md:px-12 py-10 md:py-20 border border-gray-300 md:min-h-[400px] flex items-center justify-center dark:bg-[#05091a]">
+    <div className="card rounded-2xl px-6 md:px-12 py-10 md:py-20 border border-gray-300 md:min-h-[400px] flex items-center justify-center dark:bg-[#05091a] bg-gray-200">
         <div>
             <h1 className="text-2xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-500 via-orange-500 to-cyan-400 bg-clip-text text-transparent leading-[1.5]">
                 Trading Strategies
@@ -252,7 +252,7 @@ const TradingStrategies = () => {
                     {/* ========== VIDEO PLAYER AREA (MAIN CONTENT) ========== */}
                     <div className="flex-1">
                         <div className="card rounded-2xl border border-gray-300 overflow-hidden">
-                            <div className="w-full h-[500px] bg-black flex items-center justify-center">
+                            <div className="w-full h-[500px] dark:bg-black flex items-center justify-center bg-gray-200">
                                 {/* Show loading while fetching strategy details */}
                                 {strategyLoading ? (
                                     <div className="text-center">
@@ -283,9 +283,9 @@ const TradingStrategies = () => {
                                     </div>
                                 ) : (
                                     // No strategy selected
-                                    <div className="text-center text-gray-400">
-                                        <div className="text-8xl mb-5 opacity-30">▶</div>
-                                        <h3 className="text-xl text-gray-200">Select a strategy to start learning</h3>
+                                    <div className="text-center dark:text-gray-400 text-gray-900">
+                                        <div className="text-8xl mb-5 dark:opacity-100 opacity-50">▶</div>
+                                        <h3 className="text-xl dark:text-gray-800 text-gray-900">Select a strategy to start learning</h3>
                                     </div>
                                 )}
                             </div>
