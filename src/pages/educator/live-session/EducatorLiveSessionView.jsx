@@ -48,10 +48,10 @@ const EducatorLiveSessionView = () => {
       });
 
       const newCall = newClient.call("livestream", callId);
-
+      
       // Check if already joined before joining
       if (!newCall.state.joined) {
-        await newCall.join();
+        // await newCall.join();
         await newCall.get();
       }
 
