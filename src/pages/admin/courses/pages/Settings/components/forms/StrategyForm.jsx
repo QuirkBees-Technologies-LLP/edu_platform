@@ -66,7 +66,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
     const { data: languagesList } = useGetLanguageListQuery();
     const { data: categories } = useGetEducatorAcademyCategoryQuery();
-    const { data: educatorsData } = useGetEducatorsQuery({ limit: 100 });
+    const { data: educatorsData, isLoading: isEducatorsLoading, isFetching: isEducatorsFetching } = useGetEducatorsQuery({ limit: 100 });
 
     const {
         control,
@@ -349,47 +349,57 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                         className="[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full"
                                         style={{ maxHeight: '300px', overflowY: 'auto', pointerEvents: 'auto' }}
                                     >
-                                        <CommandEmpty>No educators found.</CommandEmpty>
                                         <CommandGroup>
-                                            {educatorsData?.data?.map((item) => {
-                                                const currentSelected = watch("selectedEducators") || [];
-                                                const selected = currentSelected?.includes(item?._id);
-                                                return (
-                                                    <CommandItem
-                                                        key={item?._id}
-                                                        value={`${item?.first_name} ${item?.last_name}`}
-                                                        // Using onPointerDown to bypass potential cmdk focus issues
-                                                        onPointerDown={(e) => {
-                                                            e?.preventDefault();
-                                                            e?.stopPropagation();
+                                            {(isEducatorsLoading || isEducatorsFetching) ? (
+                                                <div className="flex items-center justify-center py-6">
+                                                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                                                    <span className="ml-2 text-sm text-gray-500">Loading educators...</span>
+                                                </div>
+                                            ) : educatorsData?.data?.length === 0 ? (
+                                                <div className="py-6 text-center text-sm text-gray-500">
+                                                    No educators found.
+                                                </div>
+                                            ) : (
+                                                educatorsData?.data?.map((item) => {
+                                                    const currentSelected = watch("selectedEducators") || [];
+                                                    const selected = currentSelected?.includes(item?._id);
+                                                    return (
+                                                        <CommandItem
+                                                            key={item?._id}
+                                                            value={`${item?.first_name} ${item?.last_name}`}
+                                                            // Using onPointerDown to bypass potential cmdk focus issues
+                                                            onPointerDown={(e) => {
+                                                                e?.preventDefault();
+                                                                e?.stopPropagation();
 
-                                                            const updated = selected
-                                                                ? currentSelected?.filter((id) => id !== item?._id)
-                                                                : [...currentSelected, item?._id];
+                                                                const updated = selected
+                                                                    ? currentSelected?.filter((id) => id !== item?._id)
+                                                                    : [...currentSelected, item?._id];
 
-                                                            setValue("selectedEducators", updated, { shouldValidate: true });
-                                                        }}
-                                                        className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
-                                                    >
-                                                        <div
-                                                            className={cn(
-                                                                "h-4 w-4 border rounded flex items-center justify-center transition-all",
-                                                                selected
-                                                                    ? "bg-indigo-600 border-indigo-600 text-white"
-                                                                    : "bg-transparent border-gray-300 dark:border-gray-600"
-                                                            )}
+                                                                setValue("selectedEducators", updated, { shouldValidate: true });
+                                                            }}
+                                                            className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
                                                         >
-                                                            {selected && <Check size={14} className="stroke-[3]" />}
-                                                        </div>
-                                                        <span className={cn(
-                                                            "text-sm capitalize transition-colors",
-                                                            selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
-                                                        )}>
-                                                            {item?.first_name} {item?.last_name}
-                                                        </span>
-                                                    </CommandItem>
-                                                );
-                                            })}
+                                                            <div
+                                                                className={cn(
+                                                                    "h-4 w-4 border rounded flex items-center justify-center transition-all",
+                                                                    selected
+                                                                        ? "bg-indigo-600 border-indigo-600 text-white"
+                                                                        : "bg-transparent border-gray-300 dark:border-gray-600"
+                                                                )}
+                                                            >
+                                                                {selected && <Check size={14} className="stroke-[3]" />}
+                                                            </div>
+                                                            <span className={cn(
+                                                                "text-sm capitalize transition-colors",
+                                                                selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
+                                                            )}>
+                                                                {item?.first_name} {item?.last_name}
+                                                            </span>
+                                                        </CommandItem>
+                                                    );
+                                                })
+                                            )}
                                         </CommandGroup>
                                     </CommandList>
                                 </Command>
