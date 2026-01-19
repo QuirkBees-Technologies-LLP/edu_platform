@@ -30,20 +30,20 @@ const strategySchema = z.object({
     selectedEducators: z.array(z.string()).min(1, "Please select at least one educator"),
     iconThumbnail: z
         .any()
-        .optional()
-        .refine((val) => {
-            if (!val) return true;
-            if (typeof val === 'string') return true;
-            return val instanceof File && val.size > 0;
-        }, { message: "Please select a valid icon thumbnail" }),
+        .refine(
+            (file) => (file instanceof File && file.size > 0) || (typeof file === 'string' && file.length > 0),
+            {
+                message: "Strategy icon thumbnail is required",
+            }
+        ),
     strategyBanner: z
         .any()
-        .optional()
-        .refine((val) => {
-            if (!val) return true;
-            if (typeof val === 'string') return true;
-            return val instanceof File && val.size > 0;
-        }, { message: "Please select a valid strategy banner" }),
+        .refine(
+            (file) => (file instanceof File && file.size > 0) || (typeof file === 'string' && file.length > 0),
+            {
+                message: "Strategy banner is required",
+            }
+        ),
     category: z.string().min(1, "Please select a category"),
     tags: z.array(z.string()).optional(),
     published: z.boolean().default(false),
@@ -59,8 +59,8 @@ const strategySchema = z.object({
 const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     const [iconPreview, setIconPreview] = useState(initialData?.iconThumbnail || null);
     const [bannerPreview, setBannerPreview] = useState(initialData?.strategyBanner || null);
-
-
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     const [isEducatorOpen, setIsEducatorOpen] = useState(false);
 
@@ -98,6 +98,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
     useEffect(() => {
         if (initialData) {
+            console.log(initialData);
             // Backend strategyBanner is the Icon, imageUrl is the Banner
             if (initialData?.strategyBanner) {
                 setIconPreview(initialData?.strategyBanner);
@@ -168,26 +169,45 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     };
 
     const submitHandler = async (values) => {
-        const formData = new FormData();
+        setIsSubmitting(true);
+        setUploadProgress(0);
 
-        [
-            "title", "description", "aboutStrategy", "category", "published",
-            "isFeatured", "tier", "section", "language", "isStrategy"
-        ].forEach(key => {
-            formData.append(key, values?.[key]);
-        });
+        // Start fake progress animation
+        const progressInterval = setInterval(() => {
+            setUploadProgress(prev => {
+                if (prev >= 90) {
+                    return prev; // Stop at 90% until actual completion
+                }
+                return prev + Math.random() * 15;
+            });
+        }, 200);
 
+        try {
+            const formData = new FormData();
 
-        console.log(values, "values");
+            [
+                "title", "description", "aboutStrategy", "category", "published",
+                "isFeatured", "tier", "section", "language", "isStrategy"
+            ].forEach(key => {
+                formData.append(key, values?.[key]);
+            });
 
-        formData.append("educators", JSON.stringify(values?.selectedEducators));
-        formData.append("tags", JSON.stringify(values?.tags));
-        formData.append("isStrategies", true);
+            formData.append("educators", JSON.stringify(values?.selectedEducators));
+            formData.append("tags", JSON.stringify(values?.tags));
+            formData.append("isStrategies", true);
 
-        if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
-        if (values?.strategyBanner instanceof File) formData.append("image", values?.strategyBanner);
+            if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
+            if (values?.strategyBanner instanceof File) formData.append("image", values?.strategyBanner);
 
-        await onSubmit(formData);
+            await onSubmit(formData);
+            setUploadProgress(100); // Complete on success
+        } finally {
+            clearInterval(progressInterval);
+            setTimeout(() => {
+                setIsSubmitting(false);
+                setUploadProgress(0);
+            }, 500); // Brief delay to show 100%
+        }
     };
 
     return (
@@ -277,6 +297,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                     >
                                         <CloseIcon className="w-3.5 h-3.5" />
                                     </button>
+
                                 )}
                                 <input
                                     type="file"
@@ -505,18 +526,21 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                 <button
                     type="button"
                     onClick={() => reset()}
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                     className="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-light text-gray-700 hover:bg-gray-50 dark:hover:bg-dark"
                 >
                     Reset
                 </button>
                 <button
                     type="submit"
-                    disabled={isLoading}
-                    className="flex items-center px-3 h-[40px] py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-primary-light text-primary hover:bg-primary hover:text-white"
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2 px-4 h-[40px] py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-primary-light text-primary hover:bg-primary hover:text-white min-w-[140px] justify-center"
                 >
-                    {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>{Math.min(Math.round(uploadProgress), 100)}%</span>
+                        </>
                     ) : (
                         initialData ? "Update Strategy" : "Save Strategy"
                     )}
