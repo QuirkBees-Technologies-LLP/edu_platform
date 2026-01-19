@@ -12,7 +12,9 @@ import {
   reorderCourses,
   reorderStrategies,
   selectAllCourses,
+  fetchStrategies,
 } from "@/store/reducer/courseSlice";
+import { useDeleteAdminStrategyMutation } from "@/store/api/admin/adminStrategyApiSlice";
 
 // Components
 import CreateCourseModal from "./CreateCourseModal";
@@ -24,6 +26,9 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  // RTK Query mutation for deleting strategies
+  const [deleteStrategy] = useDeleteAdminStrategyMutation();
 
   const handleUpdateCourse = async (courseData) => {
     if (!selectedCourse) return;
@@ -40,7 +45,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
       setSelectedCourse(null);
       setIsEditMode(false);
     } catch (error) {
-      toast.error(error.message || "Failed to update course");
+      toast.error(error?.message || "Failed to update course");
     }
   };
 
@@ -51,21 +56,30 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
   };
 
   const handleDeleteCourse = async (course) => {
+    const itemType = activeTab === "strategies" ? "Strategy" : "Course";
     if (
       window.confirm(
         `Are you sure you want to delete "${course?.title}"? This action cannot be undone.`
       )
     ) {
       try {
-        await dispatch(
-          deleteExistingCourse({
-            id: course?._id,
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
-        toast.success("Course deleted successfully!");
+        if (activeTab === "strategies") {
+          // Use RTK Query mutation for strategies
+          await deleteStrategy(course?._id).unwrap();
+          // Refresh strategies list after deletion
+          dispatch(fetchStrategies({ params: { isDeleted: false }, token: localStorage.getItem("token") }));
+        } else {
+          // Use Redux thunk for courses
+          await dispatch(
+            deleteExistingCourse({
+              id: course?._id,
+              token: localStorage.getItem("token"),
+            })
+          ).unwrap();
+        }
+        toast.success(`${itemType} deleted successfully!`);
       } catch (error) {
-        toast.error(error.message || "Failed to delete course");
+        toast.error(error?.data?.message || error?.message || `Failed to delete ${itemType.toLowerCase()}`);
       }
     }
   };
@@ -79,8 +93,8 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
       newCourses.splice(hoverIndex, 0, draggedCourse);
 
       // Prepare the order data for the API
-      const courseOrders = newCourses.map((course, index) => ({
-        id: course._id,
+      const courseOrders = newCourses?.map((course, index) => ({
+        id: course?._id,
         order: index,
       }));
 
@@ -103,7 +117,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
 
       toast.success("Course order updated successfully!");
     } catch (error) {
-      toast.error(error.message || "Failed to update course order");
+      toast.error(error?.message || "Failed to update course order");
     }
   };
 
@@ -115,7 +129,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
     <DndProvider backend={HTML5Backend}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/** Course Cards */}
-        {courses.length > 0 ? (
+        {courses?.length > 0 ? (
           courses.map((course, index) => (
             <div key={course?._id} className="relative group">
               <DraggableCourseCard
