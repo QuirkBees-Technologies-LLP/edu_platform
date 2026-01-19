@@ -343,9 +343,12 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 </button>
                             </PopoverTrigger>
 
-                            <PopoverContent className="w-[524px] p-0" align="start" side="bottom">
+                            <PopoverContent className="w-[524px] p-0 pointer-events-auto" align="start" side="bottom">
                                 <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
-                                    <CommandList className="max-h-[300px] overflow-y-auto">
+                                    <CommandList
+                                        className="[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-blue-500 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                        style={{ maxHeight: '300px', overflowY: 'auto', pointerEvents: 'auto' }}
+                                    >
                                         <CommandEmpty>No educators found.</CommandEmpty>
                                         <CommandGroup>
                                             {educatorsData?.data?.map((item) => {
