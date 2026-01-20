@@ -23,7 +23,7 @@ const Content = () => {
 
   const navItems = [
     ...baseNavItems,
-    ...(auth?.user?.role === "educator" || auth?.user?.role === "admin"
+    ...(auth?.user?.role === "educator" || auth?.user?.role === "admin" || auth?.user?.role === "super_admin"
       ? adminNavItems
       : []),
   ];
@@ -76,11 +76,10 @@ const Content = () => {
                         onClick={() =>
                           handleNavigation(item.label.toLowerCase())
                         }
-                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                          activePage === item.label.toLowerCase()
-                            ? "bg-primary-light text-primary"
-                            : "bg-light text-gray-700 hover:bg-gray-50 dark:hover:bg-dark"
-                        }`}
+                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${activePage === item.label.toLowerCase()
+                          ? "bg-primary-light text-primary"
+                          : "bg-light text-gray-700 hover:bg-gray-50 dark:hover:bg-dark"
+                          }`}
                       >
                         {item.label}
                       </a>
@@ -96,24 +95,22 @@ const Content = () => {
             {/* Mobile Navigation */}
             {isMobileMenuOpen && (
               <div className="md:hidden">
-                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <div className="px-2 pt-2 pb-3 space-y-2 sm:px-3">
                   {navItems.map((item) => (
                     <a
                       key={item.label}
                       href={item.href}
                       onClick={() => handleNavigation(item.label.toLowerCase())}
-                      className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                        activePage === item.label.toLowerCase()
-                          ? "bg-blue-50 text-blue-700"
-                          : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                      }`}
+                      className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${activePage === item.label.toLowerCase()
+                        ? "bg-primary-light text-primary"
+                        : " bg-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-dark"
+                        }`}
                     >
                       <item.icon
-                        className={`h-5 w-5 mr-2 ${
-                          activePage === item.label.toLowerCase()
-                            ? "text-blue-600"
-                            : ""
-                        }`}
+                        className={`h-5 w-5 mr-2 ${activePage === item.label.toLowerCase()
+                          ? "text-blue-600"
+                          : ""
+                          }`}
                       />
                       {item.label}
                     </a>

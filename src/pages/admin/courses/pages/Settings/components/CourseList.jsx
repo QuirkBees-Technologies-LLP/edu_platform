@@ -10,26 +10,32 @@ import {
   updateExistingCourse,
   deleteExistingCourse,
   reorderCourses,
+  reorderStrategies,
   selectAllCourses,
+  fetchStrategies,
 } from "@/store/reducer/courseSlice";
+import { useDeleteAdminStrategyMutation } from "@/store/api/admin/adminStrategyApiSlice";
 
 // Components
 import CreateCourseModal from "./CreateCourseModal";
 import DraggableCourseCard from "./DraggableCourseCard";
 
-const CourseList = ({ onCourseSelect }) => {
+const CourseList = ({ onCourseSelect, activeTab }) => {
   const dispatch = useDispatch();
   const courses = useSelector(selectAllCourses);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // RTK Query mutation for deleting strategies
+  const [deleteStrategy] = useDeleteAdminStrategyMutation();
+
   const handleUpdateCourse = async (courseData) => {
     if (!selectedCourse) return;
     try {
       await dispatch(
         updateExistingCourse({
-          id: selectedCourse._id,
+          id: selectedCourse?._id,
           courseData,
           token: localStorage.getItem("token"),
         })
@@ -39,7 +45,7 @@ const CourseList = ({ onCourseSelect }) => {
       setSelectedCourse(null);
       setIsEditMode(false);
     } catch (error) {
-      toast.error(error.message || "Failed to update course");
+      toast.error(error?.message || "Failed to update course");
     }
   };
 
@@ -50,21 +56,30 @@ const CourseList = ({ onCourseSelect }) => {
   };
 
   const handleDeleteCourse = async (course) => {
+    const itemType = activeTab === "strategies" ? "Strategy" : "Course";
     if (
       window.confirm(
-        `Are you sure you want to delete "${course.title}"? This action cannot be undone.`
+        `Are you sure you want to delete "${course?.title}"? This action cannot be undone.`
       )
     ) {
       try {
-        await dispatch(
-          deleteExistingCourse({
-            id: course._id,
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
-        toast.success("Course deleted successfully!");
+        if (activeTab === "strategies") {
+          // Use RTK Query mutation for strategies
+          await deleteStrategy(course?._id).unwrap();
+          // Refresh strategies list after deletion
+          dispatch(fetchStrategies({ params: { isDeleted: false }, token: localStorage.getItem("token") }));
+        } else {
+          // Use Redux thunk for courses
+          await dispatch(
+            deleteExistingCourse({
+              id: course?._id,
+              token: localStorage.getItem("token"),
+            })
+          ).unwrap();
+        }
+        toast.success(`${itemType} deleted successfully!`);
       } catch (error) {
-        toast.error(error.message || "Failed to delete course");
+        toast.error(error?.data?.message || error?.message || `Failed to delete ${itemType.toLowerCase()}`);
       }
     }
   };
@@ -78,15 +93,18 @@ const CourseList = ({ onCourseSelect }) => {
       newCourses.splice(hoverIndex, 0, draggedCourse);
 
       // Prepare the order data for the API
-      const courseOrders = newCourses.map((course, index) => ({
-        id: course._id,
+      const courseOrders = newCourses?.map((course, index) => ({
+        id: course?._id,
         order: index,
       }));
 
       // Dispatch the reorder action
+      const strategyAction = activeTab === "courses" ? reorderCourses : reorderStrategies;
+      const payloadKey = activeTab === "courses" ? "courses" : "strategies";
+
       const result = await dispatch(
-        reorderCourses({
-          courses: courseOrders,
+        strategyAction({
+          [payloadKey]: courseOrders,
           token: localStorage.getItem("token"),
         })
       ).unwrap();
@@ -99,7 +117,7 @@ const CourseList = ({ onCourseSelect }) => {
 
       toast.success("Course order updated successfully!");
     } catch (error) {
-      toast.error(error.message || "Failed to update course order");
+      toast.error(error?.message || "Failed to update course order");
     }
   };
 
@@ -111,9 +129,9 @@ const CourseList = ({ onCourseSelect }) => {
     <DndProvider backend={HTML5Backend}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/** Course Cards */}
-        {courses.length > 0 ? (
+        {courses?.length > 0 ? (
           courses.map((course, index) => (
-            <div key={course._id} className="relative group">
+            <div key={course?._id} className="relative group">
               <DraggableCourseCard
                 course={course}
                 index={index}
@@ -121,13 +139,14 @@ const CourseList = ({ onCourseSelect }) => {
                 onDelete={handleDeleteCourse}
                 onMove={handleMoveCourse}
                 onSelect={handleSelectCourse}
+                activeTab={activeTab}
               />
             </div>
           ))
         ) : (
           <div className="col-span-full">
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No IQ Vault found</p>
+              <p className="text-gray-500">No {activeTab === "courses" ? "IQ Vault" : "Strategies"} found</p>
             </div>
           </div>
         )}
@@ -144,10 +163,10 @@ const CourseList = ({ onCourseSelect }) => {
           <div className="flex flex-col items-center justify-center h-full">
             <Plus className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-700">
-              Create New IQ Vault
+              Create New {activeTab === "courses" ? "IQ Vault" : "Strategy"}
             </h3>
             <p className="text-sm text-gray-500 mt-2">
-              Start building your IQ Vault
+              Start building your {activeTab === "courses" ? "IQ Vault" : "Strategy"}
             </p>
           </div>
         </div>
@@ -162,6 +181,7 @@ const CourseList = ({ onCourseSelect }) => {
           }}
           onSubmit={isEditMode ? handleUpdateCourse : undefined}
           initialData={isEditMode ? selectedCourse : undefined}
+          activeTab={activeTab}
         />
       </div>
     </DndProvider>

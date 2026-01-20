@@ -1809,6 +1809,7 @@ export const sideMenus = {
           icon: <Dot />,
           path: "/fast-start-training",
         },
+
       ],
     },
     {
@@ -1831,8 +1832,10 @@ export const sideMenus = {
           icon: <Dot />,
           path: "/iq-academy-educators",
         },
+
       ],
     },
+
     {
       title: "IQ Insight",
       icon: <ChartLine />,
@@ -1869,11 +1872,11 @@ export const sideMenus = {
     //   icon: <Dot />,
     //   path: '/iq-educators'
     // },
-    // {
-    //   title: 'IQ Vault',
-    //   icon: <Clapperboard />,
-    //   path: '/video-library'
-    // },
+    {
+      title: 'IQ Vault',
+      icon: <Clapperboard />,
+      path: '/video-library'
+    },
     // {
     //   title: 'IQ Academy',
     //   icon: <PlayCircle />,
@@ -1888,13 +1891,26 @@ export const sideMenus = {
       title: "IQ Strategies",
       icon: <ChartNoAxesCombined />,
       children: [
+        // {
+        //   title: "Strategies Academy",
+        //   icon: <ChartNoAxesCombined />,
+        //   path: "/trading-strategies",
+        // },
         {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
+          title: "Strategy Access",
+          icon: <ChartNoAxesCombined />,
+          path: "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
           externalLink: true,
           newTab: true,
+
         },
+        // {
+        //   title: "IQ Charts",
+        //   icon: <Dot />,
+        //   path: "https://www.iqcharts.com/",
+        //   externalLink: true,
+        //   newTab: true,
+        // },
       ],
     },
     {

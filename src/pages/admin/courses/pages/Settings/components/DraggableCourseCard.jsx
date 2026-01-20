@@ -32,6 +32,7 @@ const DraggableCourseCard = ({
   onMove,
   onDelete,
   onSelect,
+  activeTab,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -47,7 +48,7 @@ const DraggableCourseCard = ({
     tier,
     instructor,
     section,
-  } = course;
+  } = course || {};
 
   // Fallback image URL
   const fallbackImage =
@@ -56,7 +57,7 @@ const DraggableCourseCard = ({
   // Drag and drop configuration
   const [{ isDragging }, drag] = useDrag({
     type: "COURSE_CARD",
-    item: { id: course._id, index },
+    item: { id: course?._id, index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -122,15 +123,14 @@ const DraggableCourseCard = ({
   return (
     <div
       ref={ref}
-      className={`relative rounded-xl shadow-md overflow-hidden transition-all duration-300 ${
-        isDragging
-          ? "opacity-50 scale-105 rotate-1 shadow-xl"
-          : isHovered
-            ? "shadow-lg transform translate-y-[-4px]"
-            : "opacity-100 hover:shadow-lg"
-      }`}
+      className={`relative rounded-xl shadow-md overflow-hidden transition-all duration-300 ${isDragging
+        ? "opacity-50 scale-105 rotate-1 shadow-xl"
+        : isHovered
+          ? "shadow-lg transform translate-y-[-4px]"
+          : "opacity-100 hover:shadow-lg"
+        }`}
       role="article"
-      aria-label={`Course: ${title}`}
+      aria-label={`${activeTab === "courses" ? "Course" : "Strategy"}: ${title}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -141,9 +141,8 @@ const DraggableCourseCard = ({
             <img
               src={imageError ? fallbackImage : imageUrl}
               alt={title}
-              className={`w-full h-full object-cover transition-transform duration-500 ${
-                isHovered ? "scale-110" : ""
-              }`}
+              className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? "scale-110" : ""
+                }`}
               onError={handleImageError}
               loading="lazy"
             />
@@ -155,9 +154,8 @@ const DraggableCourseCard = ({
 
           {/* Overlay when hovered */}
           <div
-            className={`absolute inset-0 bg-black transition-opacity duration-300 ${
-              isHovered ? "bg-opacity-20" : "bg-opacity-0"
-            }`}
+            className={`absolute inset-0 bg-black transition-opacity duration-300 ${isHovered ? "bg-opacity-20" : "bg-opacity-0"
+              }`}
           >
             {isHovered && (
               <div className="absolute bottom-4 right-4 p-2 bg-white bg-opacity-90 rounded-full shadow-md animate-fadeIn">
@@ -227,8 +225,7 @@ const DraggableCourseCard = ({
             <div className="flex items-center gap-1.5 text-gray-500">
               <Users className="w-4 h-4" />
               <span>
-                {instructor?.first_name + " " + instructor?.last_name ||
-                  "Unknown Instructor"}
+                {(instructor?.first_name && instructor?.last_name) ? `${instructor.first_name} ${instructor.last_name}` : "Unknown Instructor"}
               </span>
             </div>
           </div>
@@ -236,15 +233,14 @@ const DraggableCourseCard = ({
 
         {/** Action Buttons */}
         <div
-          className={`absolute top-2 left-2 flex flex-col gap-2 transition-opacity duration-300 ${
-            isHovered ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute top-2 left-2 flex flex-col gap-2 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+            }`}
         >
           <button
             onClick={handleEdit}
             className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title="Edit IQ Vault"
-            aria-label="Edit IQ Vault"
+            title={`Edit ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
+            aria-label={`Edit ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
           >
             <Edit2 className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>
@@ -252,8 +248,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleDelete}
             className="p-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title="Delete IQ Vault"
-            aria-label="Delete IQ Vault"
+            title={`Delete ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
+            aria-label={`Delete ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
           >
             <Trash className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>
@@ -262,9 +258,8 @@ const DraggableCourseCard = ({
 
       {/* Bottom border indicator */}
       <div
-        className={`h-1 w-full bg-gradient-to-r bg-primary to-indigo-600 transition-opacity duration-300 ${
-          isHovered ? "opacity-100" : "opacity-0"
-        }`}
+        className={`h-1 w-full bg-gradient-to-r bg-primary to-indigo-600 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+          }`}
       ></div>
     </div>
   );
@@ -273,10 +268,10 @@ const DraggableCourseCard = ({
 
 
 DraggableCourseCard.defaultProps = {
-  onEdit: () => {},
-  onMove: () => {},
-  onDelete: () => {},
-  onSelect: () => {},
+  onEdit: () => { },
+  onMove: () => { },
+  onDelete: () => { },
+  onSelect: () => { },
 };
 
 export default DraggableCourseCard;

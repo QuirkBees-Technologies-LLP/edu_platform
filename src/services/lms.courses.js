@@ -150,3 +150,47 @@ export const reorderCourses = async (courses, token = null) => {
     throw error;
   }
 };
+
+/**
+ * Get all strategies with optional filters
+ * @param {Object} params - Query parameters
+ * @param {boolean} params.isPublished - Filter by publication status
+ * @param {string} token - Auth token
+ * @returns {Promise<Object>} Response with strategies
+ */
+export const getAllStrategies = async (params = {}, token = null) => {
+  try {
+    const response = await api.get("/admin/strategies", {
+      params,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Reorder strategies
+ * @param {Array<Object>} strategies - Array of strategy objects with id and order
+ * @param {string} token - Auth token
+ * @returns {Promise<Object>} Reordering confirmation
+ */
+export const reorderStrategies = async (strategies, token = null) => {
+  try {
+    const response = await api.put(
+      "/admin/strategies/reorder",
+      { courses: strategies },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
