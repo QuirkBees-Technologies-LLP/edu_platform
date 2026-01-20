@@ -22,6 +22,27 @@ export const clientStrategiesApiSlice = createApi({
             query: (id) => `/users/strategies/${id}`,
             providesTags: (result, error, id) => [{ type: "Strategy", id }],
         }),
+
+        // Get category-wise strategy data
+        getCategoryWiseStrategy: builder.query({
+            query: (params) => {
+                const queryParams = new URLSearchParams();
+                if (params?.language) queryParams.append("language", params.language);
+                if (params?.type) queryParams.append("type", params.type);
+                if (params?.search) queryParams.append("search", params.search);
+                if (params?.tier) queryParams.append("tier", params.tier);
+                if (params?.isFeatured !== undefined) queryParams.append("isFeatured", params.isFeatured);
+                if (params?.published !== undefined) queryParams.append("published", params.published);
+                if (params?.tradingType) queryParams.append("tradingType", params.tradingType);
+                if (params?.tradingMethod) queryParams.append("tradingMethod", params.tradingMethod);
+                if (params?.timeZone) queryParams.append("timeZone", params.timeZone);
+                if (params?.startDate) queryParams.append("startDate", params.startDate);
+                if (params?.endDate) queryParams.append("endDate", params.endDate);
+                const queryString = queryParams.toString();
+                return `/users/course/strategy/${params.id}${queryString ? `?${queryString}` : ''}`;
+            },
+            providesTags: ["Strategy"],
+        }),
     }),
 });
 
@@ -29,4 +50,5 @@ export const {
     useGetStrategiesQuery,
     useGetStrategyByIdQuery,
     useLazyGetStrategyByIdQuery,
+    useGetCategoryWiseStrategyQuery,
 } = clientStrategiesApiSlice;
