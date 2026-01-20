@@ -48,6 +48,10 @@ const CreatePackageModel = forwardRef(
         label: "https://www.iqcharts.com/",
         value: "https://www.iqcharts.com/",
       },
+      {
+        label: "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
+        value: "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
+      },
     ];
 
     const validationSchema = Yup.object({
