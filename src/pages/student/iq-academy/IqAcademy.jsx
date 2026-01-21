@@ -50,7 +50,7 @@ export default function IqAcademy() {
 
   useEffect(() => {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
-      setActiveCategoryId(categoryData.data[0]._id);
+      setActiveCategoryId(categoryData?.data?.[0]?._id);
     }
   }, [isCategoryLoading, categoryData]);
 
@@ -77,6 +77,7 @@ export default function IqAcademy() {
         tradingMethod: tradingMethod.length > 0 ? tradingMethod.join(",") : undefined,
         timeZone: timeZone.length > 0 ? timeZone.join(",") : undefined,
         type: statusType,
+        strategyId: activeStrategyId !== "all" ? activeStrategyId : undefined,
       },
       { skip: !activeCategoryId || viewType !== "list" }
     );

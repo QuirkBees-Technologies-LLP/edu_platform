@@ -167,48 +167,57 @@ export default function ListView({
                                     onClick={() => setActiveStrategyId("all")}
                                     className="flex flex-col items-center cursor-pointer select-none"
                                 >
-                                    <div className={`w-20 h-20 mt-4 rounded-xl p-[4px] transition-all ${activeStrategyId === "all"
-                                        ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 ring-2 ring-offset-2 ring-indigo-500"
-                                        : "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500"
+                                    <div className={`w-20 h-20 mt-4 rounded-xl p-[3px] transition-all ${activeStrategyId === "all"
+                                        ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
+                                        : "bg-gray-300 dark:bg-gray-600 hover:bg-primary/70"
                                         }`}>
-                                        <div className="w-full h-full rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center">
-                                            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">
+                                        <div className={`w-full h-full rounded-[10px] flex items-center justify-center transition-all ${activeStrategyId === "all"
+                                            ? "bg-white dark:bg-gray-800"
+                                            : "bg-white dark:bg-gray-800"
+                                            }`}>
+                                            <span className={`text-xl font-bold transition-all ${activeStrategyId === "all"
+                                                ? "text-primary"
+                                                : "text-gray-500 dark:text-gray-400"
+                                                }`}>
                                                 All
                                             </span>
                                         </div>
                                     </div>
-                                    <p className="mt-2 text-xs font-medium text-gray-800 dark:text-gray-200 text-center truncate w-20">
+                                    <p className={`mt-2 text-xs font-medium text-center truncate w-20 ${activeStrategyId === "all"
+                                        ? "text-primary font-semibold"
+                                        : "text-gray-800 dark:text-gray-200"
+                                        }`}>
                                         All
                                     </p>
                                 </div>
                             </SwiperSlide>
 
-                            {strategies.map((strategy) => (
-                                <SwiperSlide key={strategy._id}>
+                            {strategies?.map((strategy) => (
+                                <SwiperSlide key={strategy?._id}>
                                     <div
-                                        onClick={() => setActiveStrategyId(strategy._id)}
+                                        onClick={() => setActiveStrategyId(strategy?._id)}
                                         className="flex flex-col items-center cursor-pointer select-none"
                                     >
-                                        <div className={`w-20 h-20 mt-4 rounded-xl p-[4px] transition-all ${activeStrategyId === strategy._id
+                                        <div className={`w-20 h-20 mt-4 rounded-xl p-[4px] transition-all ${activeStrategyId === strategy?._id
                                             ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 ring-2 ring-offset-2 ring-indigo-500"
                                             : "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500"
                                             }`}>
-                                            {strategy.imageUrl ? (
+                                            {strategy?.imageUrl ? (
                                                 <img
-                                                    src={strategy.imageUrl}
-                                                    alt={strategy.title}
+                                                    src={strategy?.imageUrl}
+                                                    alt={strategy?.title}
                                                     className="w-full h-full rounded-lg object-cover bg-white pointer-events-none"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center">
                                                     <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">
-                                                        {strategy.title?.charAt(0)?.toUpperCase()}
+                                                        {strategy?.title?.charAt(0)?.toUpperCase()}
                                                     </span>
                                                 </div>
                                             )}
                                         </div>
                                         <p className="mt-2 text-xs font-medium text-gray-800 dark:text-gray-200 text-center truncate w-20">
-                                            {strategy.title}
+                                            {strategy?.title}
                                         </p>
                                     </div>
                                 </SwiperSlide>
@@ -424,18 +433,24 @@ export default function ListView({
                                     className="flex flex-col items-center cursor-pointer select-none"
                                 >
                                     <div
-                                        className={`w-20 h-20 mt-10 rounded-full p-[4px] transition-all bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 ${activeEducatorId === "all"
-                                            ? "ring-2 ring-offset-2 ring-white"
-                                            : ""
+                                        className={`w-20 h-20 mt-10 rounded-full p-[3px] transition-all ${activeEducatorId === "all"
+                                            ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
+                                            : "bg-gray-300 dark:bg-gray-600 hover:bg-primary/70"
                                             }`}
                                     >
                                         <div className="w-full h-full rounded-full bg-white dark:bg-gray-800 flex items-center justify-center">
-                                            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+                                            <span className={`text-xl font-bold transition-all ${activeEducatorId === "all"
+                                                ? "text-primary"
+                                                : "text-gray-500 dark:text-gray-400"
+                                                }`}>
                                                 All
                                             </span>
                                         </div>
                                     </div>
-                                    <p className="mt-2 text-xs font-medium text-gray-800 text-center truncate w-20">
+                                    <p className={`mt-2 text-xs font-medium text-center truncate w-20 ${activeEducatorId === "all"
+                                        ? "text-primary font-semibold"
+                                        : "text-gray-800 dark:text-gray-200"
+                                        }`}>
                                         All
                                     </p>
                                 </div>

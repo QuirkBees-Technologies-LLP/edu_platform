@@ -38,6 +38,7 @@ export const clientStrategiesApiSlice = createApi({
                 if (params?.timeZone) queryParams.append("timeZone", params.timeZone);
                 if (params?.startDate) queryParams.append("startDate", params.startDate);
                 if (params?.endDate) queryParams.append("endDate", params.endDate);
+                if (params?.strategyId) queryParams.append("strategyId", params.strategyId);
                 const queryString = queryParams.toString();
                 return `/users/course/strategy/${params.id}${queryString ? `?${queryString}` : ''}`;
             },
