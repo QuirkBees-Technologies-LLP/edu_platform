@@ -1891,11 +1891,11 @@ export const sideMenus = {
       title: "IQ Strategies",
       icon: <ChartNoAxesCombined />,
       children: [
-        // {
-        //   title: "Strategies Academy",
-        //   icon: <ChartNoAxesCombined />,
-        //   path: "/trading-strategies",
-        // },
+        {
+          title: "Strategies Academy",
+          icon: <ChartNoAxesCombined />,
+          path: "/trading-strategies",
+        },
         {
           title: "Strategy Access",
           icon: <ChartNoAxesCombined />,
