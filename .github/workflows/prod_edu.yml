@@ -1,0 +1,66 @@
+name: Build and Deploy Vite App to Azure Web App - edu (prod)
+
+on:
+  push:
+    branches:
+      - prod
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+
+      # 3️⃣ Install dependencies and build Vite
+      - name: Install dependencies and build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
+          VITE_APP_NAME: ${{ secrets.VITE_APP_NAME }}
+          VITE_APP_VERSION: ${{ secrets.VITE_APP_VERSION }}
+          GENERATE_SOURCEMAP: ${{ secrets.GENERATE_SOURCEMAP }}
+          VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
+          VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
+        run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          npm ci
+          npm run build
+
+          # Create a runtime folder (not just dist)
+          mkdir runtime
+          cp -r dist runtime/dist
+          cp server.js runtime/
+          echo '{"name":"edu-app","version":"1.0.0","type":"module","main":"server.js","dependencies":{"express":"^4.21.2"},"scripts":{"start":"node server.js"}}' > runtime/package.json
+          
+          cd runtime
+          npm install --production
+          zip -r ../site.zip *
+
+      # 4️⃣ Login to Azure
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_88D21AAB24FB453183DD18FA2E8CB5A4 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76075C8D564542E2B56E0A2DC5156C6B }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CCB2529DDE84406A4CB3A4D67D43139 }}
+
+      # 5️⃣ Deploy to Azure
+      - name: Deploy to Azure Web App (Production)
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'edu'
+          slot-name: 'Production'
+          package: site.zip

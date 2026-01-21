@@ -31,20 +31,20 @@ const testUsers = {
       expire_at: new Date("2027-10-29"),
     },
   },
-  // "daud@student.com": {
-  //   password: "Daud123!",
-  //   data: {
-  //     name: "Daud",
-  //     email: "daud@student.com",
-  //     crm_id: 67890,
-  //     first_name: "Daud",
-  //     last_name: "Student",
-  //     status: "Active",
-  //     role: "student",
-  //     plan: "iq-max",
-  //     expire_at: new Date("2027-10-29"),
-  //   },
-  // },
+  "daud@student.com": {
+    password: "Daud123!",
+    data: {
+      name: "Daud",
+      email: "daud@student.com",
+      crm_id: 67890,
+      first_name: "Daud",
+      last_name: "Student",
+      status: "Active",
+      role: "student",
+      plan: "iq-max",
+      expire_at: new Date("2027-12-29"),
+    },
+  },
   // "daud1@student.com": {
   //   password: "Daud1234!",
   //   data: {

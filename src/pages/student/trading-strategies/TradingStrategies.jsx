@@ -69,15 +69,12 @@ const getEmbedUrl = (url) => {
 };
 
 const Banner = () => (
-    <div className="card rounded-2xl px-6 md:px-12 py-10 md:py-20 border border-gray-300 md:min-h-[400px] flex items-center justify-center dark:bg-[#05091a] bg-gray-200">
-        <div>
-            <h1 className="text-2xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-500 via-orange-500 to-cyan-400 bg-clip-text text-transparent leading-[1.5]">
-                Trading Strategies
-            </h1>
-            <p className="text-xl text-gray-900">
-                Master proven strategies from industry experts • Elevation is a Lifestyle
-            </p>
-        </div>
+    <div className="card rounded-2xl overflow-hidden border border-gray-300">
+        <img
+            src="/media/banners/Welcome Banner_Strategy.jpg.jpeg"
+            alt="Trading Strategies Banner"
+            className="w-full h-auto object-cover"
+        />
     </div>
 );
 
@@ -186,7 +183,7 @@ const TradingStrategies = () => {
 
     // ==================== MAIN RENDER ====================
     return (
-        <div className="min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 pb-10">
             <Container width="fluid" className="mx-auto px-5">
                 {/* Banner - Static, never changes */}
                 <Banner />
@@ -282,10 +279,16 @@ const TradingStrategies = () => {
                                         <p className="text-sm text-gray-400 mt-2">Lessons will be added soon</p>
                                     </div>
                                 ) : (
-                                    // No strategy selected
-                                    <div className="text-center dark:text-gray-400 text-gray-900">
-                                        <div className="text-8xl mb-5 dark:opacity-100 opacity-50">▶</div>
-                                        <h3 className="text-xl dark:text-gray-800 text-gray-900">Select a strategy to start learning</h3>
+                                    // No strategy selected - Show welcome banner with play overlay
+                                    <div className="relative w-full h-full">
+                                        <img
+                                            src="/media/banners/Strategy-Page-Banner_Strategy1.jpg.jpeg"
+                                            alt="Your Strategy Journey Starts Here"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="text-8xl dark:opacity-100 opacity-50 text-white drop-shadow-lg">▶</div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
