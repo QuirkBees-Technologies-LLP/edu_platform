@@ -99,14 +99,18 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     useEffect(() => {
         if (initialData) {
             console.log(initialData);
+
+            console.log(initialData?.strategyBanner);
+            console.log(initialData?.imageUrl);
+
             // Backend strategyBanner is the Icon, imageUrl is the Banner
-            if (initialData?.strategyBanner) {
-                setIconPreview(initialData?.strategyBanner);
-                setValue("iconThumbnail", initialData?.strategyBanner);
-            }
             if (initialData?.imageUrl) {
-                setBannerPreview(initialData?.imageUrl);
+                setIconPreview(initialData?.imageUrl);
                 setValue("strategyBanner", initialData?.imageUrl);
+            }
+            if (initialData?.strategyBanner) {
+                setBannerPreview(initialData?.strategyBanner);
+                setValue("iconThumbnail", initialData?.strategyBanner);
             }
 
             if (initialData?.category?._id && categories?.data?.length > 0) {
