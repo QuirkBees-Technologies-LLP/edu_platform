@@ -1260,9 +1260,7 @@ const ClientDashboard = () => {
                   <div
                     className="h-full flex flex-col"
                     onClick={() =>
-                      allowedRoutes.includes("https://www.iqcharts.com")
-                        ? window.open("https://www.iqcharts.com", "_blank")
-                        : handleRouteClick()
+                      window.open("https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html", "_blank")
                     }
                   >
                     <div className="relative overflow-hidden">
@@ -1351,11 +1349,10 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("company")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${
-              socialType === "company"
-                ? "bg-purple-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-700/50"
-            }
+            ${socialType === "company"
+                            ? "bg-purple-600 text-white shadow-md"
+                            : "text-gray-600 hover:bg-gray-700/50"
+                          }
           `}
                       >
                         Corporate
@@ -1365,11 +1362,10 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("social")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${
-              socialType === "social"
-                ? "bg-blue-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-700/50"
-            }
+            ${socialType === "social"
+                            ? "bg-blue-600 text-white shadow-md"
+                            : "text-gray-600 hover:bg-gray-700/50"
+                          }
           `}
                       >
                         Social

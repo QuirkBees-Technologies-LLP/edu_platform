@@ -282,13 +282,13 @@ const TradingStrategies = () => {
                                     // No strategy selected - Show welcome banner with play overlay
                                     <div className="relative w-full h-full">
                                         <img
-                                            src="/media/banners/Strategy-Page-Banner_Strategy1.jpg.jpeg"
+                                            src="/media/banners/Strategy Page Banner_Strategy.jpg.jpeg"
                                             alt="Your Strategy Journey Starts Here"
                                             className="w-full h-full object-cover"
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center">
+                                        {/* <div className="absolute inset-0 flex items-center justify-center">
                                             <div className="text-8xl dark:opacity-100 opacity-50 text-white drop-shadow-lg">▶</div>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 )}
                             </div>
@@ -391,18 +391,18 @@ const TradingStrategies = () => {
                     <h2 className="text-2xl font-semibold mb-6">Available Strategies</h2>
 
                     {/* Show message if no strategies found */}
-                    {strategies.length === 0 ? (
+                    {strategies?.length === 0 ? (
                         <div className="text-center py-12 text-gray-600">
                             No strategies available at the moment.
                         </div>
                     ) : (
                         // Display strategy cards in a responsive grid
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                            {strategies.map((strategy) => (
+                            {strategies?.map((strategy) => (
                                 <div
-                                    key={strategy._id}
-                                    onClick={() => selectStrategy(strategy._id)}
-                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 ${selectedStrategyId === strategy._id
+                                    key={strategy?._id}
+                                    onClick={() => selectStrategy(strategy?._id)}
+                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy?._id
                                         ? 'border-purple-500 shadow-lg shadow-purple-500/30'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }`}
@@ -410,30 +410,32 @@ const TradingStrategies = () => {
                                     {/* Strategy Card Content */}
                                     <div className="flex flex-col md:flex-row gap-4 mb-4">
                                         {/* Strategy Image */}
-                                        {strategy.imageUrl && (
+                                        {strategy?.imageUrl && (
                                             <img
-                                                src={strategy.imageUrl}
-                                                alt={strategy.title}
+                                                src={strategy?.imageUrl}
+                                                alt={strategy?.title}
                                                 className="w-20 h-20 rounded-xl object-cover"
                                             />
                                         )}
 
                                         {/* Strategy Title and Category */}
                                         <div>
-                                            <div className="text-xl font-semibold mb-2">{strategy.title}</div>
+                                            <div className="text-xl font-semibold mb-2">{strategy?.title}</div>
                                             <div className="text-sm text-gray-900">
-                                                {strategy.category?.name || 'All Markets'}
+                                                {strategy?.category?.name || 'All Markets'}
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Strategy Description (limited to 2 lines) */}
-                                    <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
-                                        {strategy.description}
-                                    </p>
+                                    <div className="flex-grow">
+                                        <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
+                                            {strategy?.description}
+                                        </p>
+                                    </div>
 
                                     {/* Call-to-Action Button */}
-                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto">
                                         Start Learning
                                     </button>
                                 </div>
