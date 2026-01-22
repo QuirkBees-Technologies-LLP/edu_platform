@@ -282,13 +282,13 @@ const TradingStrategies = () => {
                                     // No strategy selected - Show welcome banner with play overlay
                                     <div className="relative w-full h-full">
                                         <img
-                                            src="/media/banners/Strategy-Page-Banner_Strategy1.jpg.jpeg"
+                                            src="/media/banners/Strategy Page Banner_Strategy.jpg.jpeg"
                                             alt="Your Strategy Journey Starts Here"
                                             className="w-full h-full object-cover"
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center">
+                                        {/* <div className="absolute inset-0 flex items-center justify-center">
                                             <div className="text-8xl dark:opacity-100 opacity-50 text-white drop-shadow-lg">▶</div>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 )}
                             </div>
@@ -402,7 +402,7 @@ const TradingStrategies = () => {
                                 <div
                                     key={strategy._id}
                                     onClick={() => selectStrategy(strategy._id)}
-                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 ${selectedStrategyId === strategy._id
+                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy._id
                                         ? 'border-purple-500 shadow-lg shadow-purple-500/30'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }`}
@@ -428,12 +428,14 @@ const TradingStrategies = () => {
                                     </div>
 
                                     {/* Strategy Description (limited to 2 lines) */}
-                                    <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
-                                        {strategy.description}
-                                    </p>
+                                    <div className="flex-grow">
+                                        <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
+                                            {strategy.description}
+                                        </p>
+                                    </div>
 
                                     {/* Call-to-Action Button */}
-                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto">
                                         Start Learning
                                     </button>
                                 </div>
