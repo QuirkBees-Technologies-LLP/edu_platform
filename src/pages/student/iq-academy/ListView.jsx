@@ -36,8 +36,7 @@ const tradingMethodOptions = [
 const timeZoneOptions = [
     { value: "new_york", label: "New York" },
     { value: "london", label: "London" },
-    { value: "sydney", label: "Sydney" },
-    { value: "tokyo", label: "Tokyo" },
+    { value: "asian", label: "Asian" },
 ];
 
 // Status type options
@@ -49,26 +48,23 @@ const statusTypeOptions = [
 
 // Timezone color mapping
 const timeZoneColors = {
-    new_york: "bg-[#4E34E3]",    // Blue/Purple
-    london: "bg-[#14B8A6]",      // Teal
-    sydney: "bg-[#34E34E]",      // Green
-    tokyo: "bg-[#E3A534]",       // Orange
+    new_york: "bg-[#b2a3e9]",
+    london: "bg-[#FFE5E5]",
+    asian: "bg-[#FFF5E5]",
 };
 
 // Timezone light background colors for course list
 const timeZoneLightBgColors = {
-    new_york: "bg-[#E5DEFF]",    // Light Blue/Purple
-    london: "bg-[#CCFBF1]",      // Light Teal
-    sydney: "bg-[#E5FFE5]",      // Light Green
-    tokyo: "bg-[#FFF5E5]",       // Light Orange
+    new_york: "bg-[#E5DEFF]",
+    london: "bg-[#CCFBF1]",
+    asian: "bg-[#FFF5E5]",
 };
 
 // Timezone text colors
 const timeZoneTextColors = {
-    new_york: "text-[#4E34E3]",  // Blue/Purple text
-    london: "text-[#14B8A6]",    // Teal text
-    sydney: "text-[#34E34E]",    // Green text
-    tokyo: "text-[#E3A534]",     // Orange text
+    new_york: "text-[#4E34E3]",
+    london: "text-[#14B8A6]",
+    asian: "text-[#E3A534]",
 };
 
 export default function ListView({

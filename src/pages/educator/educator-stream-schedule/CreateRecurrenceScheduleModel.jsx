@@ -54,8 +54,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
     const timeZoneOptions = [
       { value: "new_york", label: "New York" },
       { value: "london", label: "London" },
-      { value: "sydney", label: "Sydney" },
-      { value: "tokyo", label: "Tokyo" },
+      { value: "asian", label: "Asian" },
     ];
 
     const initialValues = {
