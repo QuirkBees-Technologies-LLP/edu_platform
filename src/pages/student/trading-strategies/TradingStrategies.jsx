@@ -249,7 +249,7 @@ const TradingStrategies = () => {
                     {/* ========== VIDEO PLAYER AREA (MAIN CONTENT) ========== */}
                     <div className="flex-1">
                         <div className="card rounded-2xl border border-gray-300 overflow-hidden">
-                            <div className="w-full h-[500px] dark:bg-black flex items-center justify-center bg-gray-200">
+                            <div className="w-full h-[425px] dark:bg-black flex items-center justify-center bg-gray-200">
                                 {/* Show loading while fetching strategy details */}
                                 {strategyLoading ? (
                                     <div className="text-center">
