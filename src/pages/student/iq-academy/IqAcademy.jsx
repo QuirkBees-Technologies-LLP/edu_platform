@@ -114,7 +114,7 @@ export default function IqAcademy() {
     !activeCategoryId;
 
   return (
-    <div className="container-fluid">
+    <div className="max-w-7xl mx-auto px-4 pb-10">
       {isInitialLoading && (
         <div className="py-10 flex justify-center">
           <Loader />
