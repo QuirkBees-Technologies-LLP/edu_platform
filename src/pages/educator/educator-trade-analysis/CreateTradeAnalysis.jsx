@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,7 @@ const CreateTradeAnalysis = forwardRef(
       description: "",
       url: "",
       category: "",
+      checkTime: false,
     };
 
     const createSchema = Yup.object().shape({
@@ -77,6 +79,7 @@ const CreateTradeAnalysis = forwardRef(
         formData.append("description", values.description);
         formData.append("category", values.category);
         formData.append("url", values.url);
+        formData.append("checkTime", values.checkTime);
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -124,6 +127,7 @@ const CreateTradeAnalysis = forwardRef(
           description: selectedRow?.description,
           category: selectedRow?.category?._id,
           url: selectedRow?.url,
+          checkTime: selectedRow?.isUpdatedAnalysis || false,
         };
         formik.setValues(initData);
       }
@@ -314,6 +318,26 @@ const CreateTradeAnalysis = forwardRef(
                     )}
                   </div>
                 </div>
+
+                {selectedRow?._id && (
+                  <div className="col-span-12">
+                    <div className="flex items-center gap-2 h-full ">
+                      <Checkbox
+                        id="checkTime"
+                        checked={formik.values.checkTime}
+                        onCheckedChange={(checked) =>
+                          formik.setFieldValue("checkTime", checked)
+                        }
+                      />
+                      <label
+                        htmlFor="checkTime"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                       Do Not Update TimeStamp
+                      </label>
+                    </div>
+                  </div>
+                )}
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
                     {/* Upload Box - always shown */}
