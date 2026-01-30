@@ -151,7 +151,7 @@ export default function IqAcademy() {
               : "text-gray-500 hover:text-gray-700"
               }`}
           >
-            Current Week
+            {viewType === "list" ? "Today's Schedule" : "Current Week"}
           </button>
 
           {viewType !== "list" && (

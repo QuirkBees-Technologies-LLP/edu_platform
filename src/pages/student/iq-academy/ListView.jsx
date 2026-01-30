@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { isSameDay } from "date-fns";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-import { Calendar, Clock, ChevronDown, Check } from "lucide-react";
+import { Calendar, Clock, ChevronDown, Check, RotateCcw } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -169,18 +169,16 @@ export default function ListView({
                   className="flex flex-col items-center cursor-pointer select-none"
                 >
                   <div
-                    className={`w-20 h-20 mt-4 rounded-xl p-[3px] transition-all ${
-                      activeStrategyId === "all"
-                        ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
-                        : ""
-                    }`}
+                    className={`w-20 h-20 mt-4 rounded-xl p-[3px] transition-all ${activeStrategyId === "all"
+                      ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
+                      : ""
+                      }`}
                   >
                     <div
-                      className={`w-full h-full rounded-[10px] flex items-center justify-center transition-all ${
-                        activeStrategyId === "all"
-                          ? "bg-white dark:bg-gray-800"
-                          : "bg-white dark:bg-gray-800"
-                      }`}
+                      className={`w-full h-full rounded-[10px] flex items-center justify-center transition-all ${activeStrategyId === "all"
+                        ? "bg-white dark:bg-gray-800"
+                        : "bg-white dark:bg-gray-800"
+                        }`}
                     >
                       {/* <span
                         className={`text-xl font-bold transition-all ${
@@ -199,11 +197,10 @@ export default function ListView({
                     </div>
                   </div>
                   <p
-                    className={`mt-2 text-xs font-medium text-center truncate w-20 ${
-                      activeStrategyId === "all"
-                        ? "text-primary font-semibold"
-                        : "text-gray-800 dark:text-white-200"
-                    }`}
+                    className={`mt-2 text-xs font-medium text-center truncate w-20 ${activeStrategyId === "all"
+                      ? "text-primary font-semibold"
+                      : "text-gray-800 dark:text-white-200"
+                      }`}
                   >
                     All
                   </p>
@@ -217,11 +214,10 @@ export default function ListView({
                     className="flex flex-col items-center cursor-pointer select-none"
                   >
                     <div
-                      className={`w-20 h-20 mt-4 rounded-xl p-[4px] transition-all ${
-                        activeStrategyId === strategy?._id
-                          ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
-                          : ""
-                      }`}
+                      className={`w-20 h-20 mt-4 rounded-xl p-[4px] transition-all ${activeStrategyId === strategy?._id
+                        ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
+                        : ""
+                        }`}
                     >
                       {strategy?.imageUrl ? (
                         <img
@@ -281,11 +277,10 @@ export default function ListView({
                         className="flex items-center gap-2 cursor-pointer"
                       >
                         <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${
-                            selected
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-[#1c1f26]"
-                          }`}
+                          className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white dark:bg-[#1c1f26]"
+                            }`}
                         >
                           {selected && <Check size={14} />}
                         </div>
@@ -339,11 +334,10 @@ export default function ListView({
                         className="flex items-center gap-2 cursor-pointer"
                       >
                         <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${
-                            selected
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-[#1c1f26]"
-                          }`}
+                          className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white dark:bg-[#1c1f26]"
+                            }`}
                         >
                           {selected && <Check size={14} />}
                         </div>
@@ -393,11 +387,10 @@ export default function ListView({
                         className="flex items-center gap-2 cursor-pointer"
                       >
                         <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${
-                            selected
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-[#1c1f26]"
-                          }`}
+                          className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                            ? "bg-primary text-white border-primary"
+                            : "bg-white dark:bg-[#1c1f26]"
+                            }`}
                         >
                           {selected && <Check size={14} />}
                         </div>
@@ -419,6 +412,24 @@ export default function ListView({
             </button>
           )}
         </div>
+
+        {/* 🔥 RESET ALL FILTERS BUTTON */}
+        {
+          <button
+            type="button"
+            onClick={() => {
+              setTradingType([]);
+              setTradingMethod([]);
+              setTimeZone([]);
+              setActiveStrategyId("all");
+              setActiveEducatorId("all");
+            }}
+            className="h-11 px-4 flex items-center gap-2   dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-700 bg-slate-400 hover:bg-slate-700 text-white rounded-md font-medium transition-colors"
+          >
+            <RotateCcw size={16} />
+            Reset
+          </button>
+        }
       </div>
 
       {/* 🔥 EDUCATOR SLIDER */}
@@ -465,11 +476,10 @@ export default function ListView({
                   className="flex flex-col items-center cursor-pointer select-none"
                 >
                   <div
-                    className={`w-20 h-20 mt-10 rounded-full p-[3px] transition-all ${
-                      activeEducatorId === "all"
-                        ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
-                        : "bg-gray-300 dark:bg-gray-600 hover:bg-primary/70"
-                    }`}
+                    className={`w-20 h-20 mt-10 rounded-full p-[3px] transition-all ${activeEducatorId === "all"
+                      ? "bg-primary ring-2 ring-offset-2 ring-primary shadow-lg"
+                      : "bg-gray-300 dark:bg-gray-600 hover:bg-primary/70"
+                      }`}
                   >
                     <div className="w-full h-full rounded-full bg-transparent flex items-center justify-center overflow-hidden">
                       <img
@@ -481,13 +491,12 @@ export default function ListView({
                   </div>
 
                   <p
-                    className={`mt-2 text-xs font-medium text-center truncate w-20 ${
-                      activeEducatorId === "all"
-                        ? "text-primary font-semibold"
-                        : "text-gray-800 dark:text-white-200"
-                    }`}
+                    className={`mt-2 text-xs font-medium text-center truncate w-20 ${activeEducatorId === "all"
+                      ? "text-primary font-semibold"
+                      : "text-gray-800 dark:text-white-200"
+                      }`}
                   >
-                    All 
+                    All
                   </p>
                 </div>
               </SwiperSlide>
@@ -499,11 +508,10 @@ export default function ListView({
                     className="flex flex-col items-center cursor-pointer select-none"
                   >
                     <div
-                      className={`w-20 h-20 mt-10 rounded-full p-[4px] transition-all ${
-                        activeEducatorId === educator?._id
-                          ? `${getTimeZoneColor(educator?.timeZone)} ring-2 ring-offset-2 ring-white`
-                          : getTimeZoneColor(educator?.timeZone)
-                      }`}
+                      className={`w-20 h-20 mt-10 rounded-full p-[4px] transition-all ${activeEducatorId === educator?._id
+                        ? `${getTimeZoneColor(educator?.timeZone)} ring-2 ring-offset-2 ring-white`
+                        : getTimeZoneColor(educator?.timeZone)
+                        }`}
                     >
                       <img
                         src={educator?.image}
@@ -512,8 +520,8 @@ export default function ListView({
                       />
                     </div>
 
-                    <p className="mt-2 text-xs font-medium text-gray-800 text-center truncate w-20">
-                      {educator?.first_name}
+                    <p className="mt-2 text-xs font-medium text-gray-800 text-center truncate w-24">
+                      {educator?.first_name} {educator?.last_name}
                     </p>
                   </div>
                 </SwiperSlide>
@@ -531,6 +539,26 @@ export default function ListView({
         </div>
       )}
 
+      {/* 🔥 TIMEZONE LEGEND HEADER */}
+      {strategyEducators.length > 0 && (
+        <div className="card rounded-2xl shadow p-5 mb-6">
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-800">Asian Session</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-800">London Session</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-800">New York Session</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 🔥 ONGOING CARD */}
       <div className="card rounded-2xl shadow p-5 mb-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -539,12 +567,12 @@ export default function ListView({
         <div className="flex flex-col gap-4">
           {activeEducatorId === "all" ? (
             strategyEducators?.flatMap((edu) => edu?.ongoing || [])?.length >
-            0 ? (
+              0 ? (
               strategyEducators?.flatMap((edu) =>
                 (edu?.ongoing || []).map((course, i) => (
                   <div
                     key={`${edu._id}-ongoing-${i}`}
-                    className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3"
+                    className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
                   >
                     {/* Educator Card */}
                     <div
@@ -556,8 +584,29 @@ export default function ListView({
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <span className="text-sm font-medium truncate">
-                        {edu?.first_name}
+                        {edu?.first_name} {edu?.last_name}
                       </span>
+                    </div>
+                    {/* Educator Info Card - Badges */}
+                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
+                      {edu?.strategies?.map((s, idx) => (
+                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                          {s?.title}
+                        </span>
+                      ))}
+                      {edu?.tradingStyle?.map((s, idx) => (
+                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                          {s?.replace("_", " ")}
+                        </span>
+                      ))}
+                      {edu?.tradingMethod?.map((m, idx) => (
+                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                          {m?.replace("_", " ")}
+                        </span>
+                      ))}
+                      {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
+                        <span className="text-gray-400 italic">No info</span>
+                      )}
                     </div>
                     {/* Schedule Card */}
                     <div
@@ -604,7 +653,7 @@ export default function ListView({
             activeEducator.ongoing.map((course, i) => (
               <div
                 key={i}
-                className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3"
+                className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
               >
                 {/* Educator Card */}
                 <div
@@ -616,8 +665,29 @@ export default function ListView({
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <span className="text-sm font-medium truncate">
-                    {activeEducator?.first_name}
+                    {activeEducator?.first_name} {activeEducator?.last_name}
                   </span>
+                </div>
+                {/* Educator Info Card - Badges */}
+                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
+                  {activeEducator?.strategies?.map((s, idx) => (
+                    <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                      {s?.title}
+                    </span>
+                  ))}
+                  {activeEducator?.tradingStyle?.map((s, idx) => (
+                    <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                      {s?.replace("_", " ")}
+                    </span>
+                  ))}
+                  {activeEducator?.tradingMethod?.map((m, idx) => (
+                    <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                      {m?.replace("_", " ")}
+                    </span>
+                  ))}
+                  {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
+                    <span className="text-gray-400 italic">No info</span>
+                  )}
                 </div>
                 {/* Schedule Card */}
                 <div
@@ -670,12 +740,12 @@ export default function ListView({
         <div className="flex flex-col gap-4">
           {activeEducatorId === "all" ? (
             strategyEducators?.flatMap((edu) => edu?.upcoming || [])?.length >
-            0 ? (
+              0 ? (
               strategyEducators?.flatMap((edu) =>
                 (edu?.upcoming || []).map((course, i) => (
                   <div
                     key={`${edu?._id}-upcoming-${i}`}
-                    className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3"
+                    className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
                   >
                     {/* Educator Card */}
                     <div
@@ -686,9 +756,30 @@ export default function ListView({
                         alt={edu?.first_name}
                         className="w-10 h-10 rounded-full object-cover"
                       />
-                      <span className="text-sm font-medium truncate">
-                        {edu?.first_name}
+                      <span className="text-sm font-medium ">
+                        {edu?.first_name} {edu?.last_name}
                       </span>
+                    </div>
+                    {/* Educator Info Card - Badges */}
+                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
+                      {edu?.strategies?.map((s, idx) => (
+                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                          {s?.title}
+                        </span>
+                      ))}
+                      {edu?.tradingStyle?.map((s, idx) => (
+                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                          {s?.replace("_", " ")}
+                        </span>
+                      ))}
+                      {edu?.tradingMethod?.map((m, idx) => (
+                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                          {m?.replace("_", " ")}
+                        </span>
+                      ))}
+                      {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
+                        <span className="text-gray-400 italic">No info</span>
+                      )}
                     </div>
                     {/* Schedule Card */}
                     <div
@@ -735,7 +826,7 @@ export default function ListView({
             activeEducator.upcoming.map((course, i) => (
               <div
                 key={i}
-                className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3"
+                className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
               >
                 {/* Educator Card */}
                 <div
@@ -749,6 +840,27 @@ export default function ListView({
                   <span className="text-sm font-medium truncate">
                     {activeEducator?.first_name} {activeEducator?.last_name}
                   </span>
+                </div>
+                {/* Educator Info Card - Badges */}
+                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
+                  {activeEducator?.strategies?.map((s, idx) => (
+                    <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                      {s?.title}
+                    </span>
+                  ))}
+                  {activeEducator?.tradingStyle?.map((s, idx) => (
+                    <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                      {s?.replace("_", " ")}
+                    </span>
+                  ))}
+                  {activeEducator?.tradingMethod?.map((m, idx) => (
+                    <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                      {m?.replace("_", " ")}
+                    </span>
+                  ))}
+                  {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
+                    <span className="text-gray-400 italic">No info</span>
+                  )}
                 </div>
                 {/* Schedule Card */}
                 <div
@@ -805,7 +917,7 @@ export default function ListView({
                 (edu?.past || []).map((course, i) => (
                   <div
                     key={`${edu?._id}-past-${i}`}
-                    className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3"
+                    className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
                   >
                     {/* Educator Card */}
                     <div
@@ -817,8 +929,29 @@ export default function ListView({
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <span className="text-sm font-medium truncate">
-                        {edu?.first_name}
+                        {edu?.first_name} {edu?.last_name}
                       </span>
+                    </div>
+                    {/* Educator Info Card - Badges */}
+                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
+                      {edu?.strategies?.map((s, idx) => (
+                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                          {s?.title}
+                        </span>
+                      ))}
+                      {edu?.tradingStyle?.map((s, idx) => (
+                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                          {s?.replace("_", " ")}
+                        </span>
+                      ))}
+                      {edu?.tradingMethod?.map((m, idx) => (
+                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                          {m?.replace("_", " ")}
+                        </span>
+                      ))}
+                      {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
+                        <span className="text-gray-400 italic">No info</span>
+                      )}
                     </div>
                     {/* Schedule Card */}
                     <div
@@ -865,7 +998,7 @@ export default function ListView({
             activeEducator.past.map((course, i) => (
               <div
                 key={i}
-                className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3"
+                className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
               >
                 {/* Educator Card */}
                 <div
@@ -879,6 +1012,27 @@ export default function ListView({
                   <span className="text-sm font-medium truncate">
                     {activeEducator?.first_name} {activeEducator?.last_name}
                   </span>
+                </div>
+                {/* Educator Info Card - Badges */}
+                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
+                  {activeEducator?.strategies?.map((s, idx) => (
+                    <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                      {s?.title}
+                    </span>
+                  ))}
+                  {activeEducator?.tradingStyle?.map((s, idx) => (
+                    <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                      {s?.replace("_", " ")}
+                    </span>
+                  ))}
+                  {activeEducator?.tradingMethod?.map((m, idx) => (
+                    <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                      {m?.replace("_", " ")}
+                    </span>
+                  ))}
+                  {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
+                    <span className="text-gray-400 italic">No info</span>
+                  )}
                 </div>
                 {/* Schedule Card */}
                 <div

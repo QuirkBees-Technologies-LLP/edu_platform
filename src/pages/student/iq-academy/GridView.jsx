@@ -53,16 +53,31 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                     </div>
                 </div>
             ) : (
-                <div className="card forex_calender rounded-t-2xl shadow">
+                <div className="card forex_calender rounded-2xl shadow overflow-hidden">
+                    {/* Timezone Legend Header */}
+                    <div className="flex items-center justify-center gap-8 py-4  bg-[#07041f]">
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
+                            <span className="text-sm text-gray-100 dark:text-gray-800">Asian Session</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
+                            <span className="text-sm text-gray-100 dark:text-gray-800">London Session</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
+                            <span className="text-sm text-gray-100 dark:text-gray-800">New York Session</span>
+                        </div>
+                    </div>
                     <div className="calender">
                         <div className="grid grid-cols-8 text-center table_head">
-                            <div className="bg-[#1A1446] text-gray-100 dark:text-gray-800 py-5 px-4 font-normal rounded-tl-2xl">
+                            <div className="bg-[#1A1446] text-gray-100 dark:text-gray-800 py-5 px-4 font-normal ">
                                 Educators
                             </div>
                             {days.map((day, dayIndex) => (
                                 <div
                                     key={day.toISOString()}
-                                    className="bg-[#1A1446] text-gray-100 dark:text-gray-800 py-5 px-4 font-normal last:rounded-tr-2xl"
+                                    className="bg-[#1A1446] text-gray-100 dark:text-gray-800 py-5 px-4 font-normal"
                                 >
                                     {day.toLocaleDateString("en-US", {
                                         weekday: "short",
@@ -140,24 +155,6 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                 </div>
             )}
 
-            {/* Timezone Legend Footer */}
-            {educators.length > 0 && (
-                <div className="flex items-center justify-center gap-8 py-4 dark:bg-[#1a1446] rounded-b-xl shadow">
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
-                        <span className="text-sm text-gray-700">Asian Session</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
-                        <span className="text-sm text-gray-700">London Session</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
-                        <span className="text-sm text-gray-700">New York Session</span>
-                    </div>
-                </div>
-            )
-            }
             {/* Educator Cards */}
             {educators.length > 0 && (
                 <div className="py-8">
