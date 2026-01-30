@@ -588,22 +588,37 @@ export default function ListView({
                       </span>
                     </div>
                     {/* Educator Info Card - Badges */}
-                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
-                      {edu?.strategies?.map((s, idx) => (
-                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
-                          {s?.title}
-                        </span>
-                      ))}
-                      {edu?.tradingStyle?.map((s, idx) => (
-                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
-                        </span>
-                      ))}
-                      {edu?.tradingMethod?.map((m, idx) => (
-                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
-                        </span>
-                      ))}
+                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-col gap-2 text-sm min-h-[100px] justify-center">
+                      {/* Row 1: Strategies */}
+                      {edu?.strategies?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.strategies?.map((s, idx) => (
+                            <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                              {s?.title}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Row 2: Trading Styles */}
+                      {edu?.tradingStyle?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.tradingStyle?.map((s, idx) => (
+                            <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                              {s?.replace("_", " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Row 3: Trading Methods */}
+                      {edu?.tradingMethod?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.tradingMethod?.map((m, idx) => (
+                            <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                              {m?.replace("_", " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
                         <span className="text-gray-400 italic">No info</span>
                       )}
@@ -669,22 +684,37 @@ export default function ListView({
                   </span>
                 </div>
                 {/* Educator Info Card - Badges */}
-                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
-                  {activeEducator?.strategies?.map((s, idx) => (
-                    <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
-                      {s?.title}
-                    </span>
-                  ))}
-                  {activeEducator?.tradingStyle?.map((s, idx) => (
-                    <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                      {s?.replace("_", " ")}
-                    </span>
-                  ))}
-                  {activeEducator?.tradingMethod?.map((m, idx) => (
-                    <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                      {m?.replace("_", " ")}
-                    </span>
-                  ))}
+                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-col gap-2 text-sm min-h-[100px] justify-center">
+                  {/* Row 1: Strategies */}
+                  {activeEducator?.strategies?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.strategies?.map((s, idx) => (
+                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                          {s?.title}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Row 2: Trading Styles */}
+                  {activeEducator?.tradingStyle?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.tradingStyle?.map((s, idx) => (
+                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                          {s?.replace("_", " ")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Row 3: Trading Methods */}
+                  {activeEducator?.tradingMethod?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.tradingMethod?.map((m, idx) => (
+                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                          {m?.replace("_", " ")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
                     <span className="text-gray-400 italic">No info</span>
                   )}
@@ -761,22 +791,37 @@ export default function ListView({
                       </span>
                     </div>
                     {/* Educator Info Card - Badges */}
-                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
-                      {edu?.strategies?.map((s, idx) => (
-                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
-                          {s?.title}
-                        </span>
-                      ))}
-                      {edu?.tradingStyle?.map((s, idx) => (
-                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
-                        </span>
-                      ))}
-                      {edu?.tradingMethod?.map((m, idx) => (
-                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
-                        </span>
-                      ))}
+                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-col gap-2 text-sm min-h-[100px] justify-center">
+                      {/* Row 1: Strategies */}
+                      {edu?.strategies?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.strategies?.map((s, idx) => (
+                            <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                              {s?.title}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Row 2: Trading Styles */}
+                      {edu?.tradingStyle?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.tradingStyle?.map((s, idx) => (
+                            <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                              {s?.replace("_", " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Row 3: Trading Methods */}
+                      {edu?.tradingMethod?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.tradingMethod?.map((m, idx) => (
+                            <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                              {m?.replace("_", " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
                         <span className="text-gray-400 italic">No info</span>
                       )}
@@ -842,22 +887,37 @@ export default function ListView({
                   </span>
                 </div>
                 {/* Educator Info Card - Badges */}
-                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
-                  {activeEducator?.strategies?.map((s, idx) => (
-                    <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
-                      {s?.title}
-                    </span>
-                  ))}
-                  {activeEducator?.tradingStyle?.map((s, idx) => (
-                    <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                      {s?.replace("_", " ")}
-                    </span>
-                  ))}
-                  {activeEducator?.tradingMethod?.map((m, idx) => (
-                    <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                      {m?.replace("_", " ")}
-                    </span>
-                  ))}
+                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-col gap-2 text-sm min-h-[100px] justify-center">
+                  {/* Row 1: Strategies */}
+                  {activeEducator?.strategies?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.strategies?.map((s, idx) => (
+                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                          {s?.title}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Row 2: Trading Styles */}
+                  {activeEducator?.tradingStyle?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.tradingStyle?.map((s, idx) => (
+                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                          {s?.replace("_", " ")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Row 3: Trading Methods */}
+                  {activeEducator?.tradingMethod?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.tradingMethod?.map((m, idx) => (
+                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                          {m?.replace("_", " ")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
                     <span className="text-gray-400 italic">No info</span>
                   )}
@@ -933,22 +993,37 @@ export default function ListView({
                       </span>
                     </div>
                     {/* Educator Info Card - Badges */}
-                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
-                      {edu?.strategies?.map((s, idx) => (
-                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
-                          {s?.title}
-                        </span>
-                      ))}
-                      {edu?.tradingStyle?.map((s, idx) => (
-                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
-                        </span>
-                      ))}
-                      {edu?.tradingMethod?.map((m, idx) => (
-                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
-                        </span>
-                      ))}
+                    <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-col gap-2 text-sm min-h-[100px] justify-center">
+                      {/* Row 1: Strategies */}
+                      {edu?.strategies?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.strategies?.map((s, idx) => (
+                            <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                              {s?.title}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Row 2: Trading Styles */}
+                      {edu?.tradingStyle?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.tradingStyle?.map((s, idx) => (
+                            <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                              {s?.replace("_", " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Row 3: Trading Methods */}
+                      {edu?.tradingMethod?.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {edu?.tradingMethod?.map((m, idx) => (
+                            <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                              {m?.replace("_", " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
                         <span className="text-gray-400 italic">No info</span>
                       )}
@@ -1014,22 +1089,37 @@ export default function ListView({
                   </span>
                 </div>
                 {/* Educator Info Card - Badges */}
-                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-wrap gap-2 text-sm min-h-[100px] items-center content-center">
-                  {activeEducator?.strategies?.map((s, idx) => (
-                    <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
-                      {s?.title}
-                    </span>
-                  ))}
-                  {activeEducator?.tradingStyle?.map((s, idx) => (
-                    <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                      {s?.replace("_", " ")}
-                    </span>
-                  ))}
-                  {activeEducator?.tradingMethod?.map((m, idx) => (
-                    <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                      {m?.replace("_", " ")}
-                    </span>
-                  ))}
+                <div className="p-3 rounded-xl bg-indigo-900 dark:bg-indigo-950 flex flex-col gap-2 text-sm min-h-[100px] justify-center">
+                  {/* Row 1: Strategies */}
+                  {activeEducator?.strategies?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.strategies?.map((s, idx) => (
+                        <span key={`strategy-${idx}`} className="px-3 py-1 rounded-full bg-indigo-500 text-white text-xs font-medium">
+                          {s?.title}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Row 2: Trading Styles */}
+                  {activeEducator?.tradingStyle?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.tradingStyle?.map((s, idx) => (
+                        <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
+                          {s?.replace("_", " ")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Row 3: Trading Methods */}
+                  {activeEducator?.tradingMethod?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {activeEducator?.tradingMethod?.map((m, idx) => (
+                        <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
+                          {m?.replace("_", " ")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
                     <span className="text-gray-400 italic">No info</span>
                   )}
