@@ -23,6 +23,25 @@ const timeZoneTextColors = {
     asian: "text-[#E3A534]",
 };
 
+// Digital Marketing category colors (Sky Blue theme)
+const digitalMarketingColors = {
+    solid: "bg-[#2196F3]",
+    light: "bg-[#E3F2FD]",
+    text: "text-[#2196F3]",
+};
+
+// Helper function to check if schedule belongs to Digital Marketing category
+const isDigitalMarketingCategory = (schedule) => {
+    const categoryName = schedule?.category?.name?.toLowerCase() || "";
+    const categorySlug = schedule?.category?.slug?.toLowerCase() || "";
+    return (
+        categoryName === "digital marketing" ||
+        categoryName === "digitalmarketing" ||
+        categorySlug === "digital-marketing" ||
+        categorySlug === "digitalmarketing"
+    );
+};
+
 // Helper function to get timezone key from schedule
 const getTimeZoneKey = (schedule) => {
     const tz = schedule?.timeZone?.toLowerCase() || "";
@@ -54,20 +73,34 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                 </div>
             ) : (
                 <div className="card forex_calender rounded-2xl shadow overflow-hidden">
-                    {/* Timezone Legend Header */}
-                    <div className="flex items-center justify-center gap-8 py-4  bg-[#07041f]">
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
-                            <span className="text-sm text-gray-100 dark:text-gray-800">Asian Session</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
-                            <span className="text-sm text-gray-100 dark:text-gray-800">London Session</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
-                            <span className="text-sm text-gray-100 dark:text-gray-800">New York Session</span>
-                        </div>
+                    {/* Timezone/Category Legend Header */}
+                    <div className="flex items-center justify-center gap-8 py-4 bg-[#07041f] flex-wrap">
+                        {(singleCategoryData?.data?.category?.name?.toLowerCase() === "digital marketing" ||
+                            singleCategoryData?.data?.category?.name?.toLowerCase() === "digitalmarketing" ||
+                            singleCategoryData?.data?.category?.slug?.toLowerCase() === "digital-marketing" ||
+                            singleCategoryData?.data?.category?.slug?.toLowerCase() === "digitalmarketing") ? (
+                            // Digital Marketing category selected - show only Digital Marketing color
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded bg-[#2196F3] border border-[#E3F2FD]"></div>
+                                <span className="text-sm text-gray-100 dark:text-gray-800">Digital Marketing</span>
+                            </div>
+                        ) : (
+                            // Other categories - show timezone colors
+                            <>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
+                                    <span className="text-sm text-gray-100 dark:text-gray-800">Asian Session</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
+                                    <span className="text-sm text-gray-100 dark:text-gray-800">London Session</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
+                                    <span className="text-sm text-gray-100 dark:text-gray-800">New York Session</span>
+                                </div>
+                            </>
+                        )}
                     </div>
                     <div className="calender">
                         <div className="grid grid-cols-8 text-center table_head">
@@ -117,9 +150,21 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                         >
                                             {filtered.length > 0 ? (
                                                 filtered.map((s, i) => {
-                                                    const tzKey = getTimeZoneKey(s);
-                                                    const todayClass = `${timeZoneColors[tzKey]} text-white font-medium shadow-lg`;
-                                                    const defaultClass = `${timeZoneLightBgColors[tzKey]} ${timeZoneTextColors[tzKey]}`;
+                                                    // Check if Digital Marketing category
+                                                    const isDigitalMkt = isDigitalMarketingCategory(s);
+
+                                                    let todayClass, defaultClass;
+
+                                                    if (isDigitalMkt) {
+                                                        // Use Digital Marketing colors (Pink/Magenta)
+                                                        todayClass = `${digitalMarketingColors.solid} text-white font-medium shadow-lg`;
+                                                        defaultClass = `${digitalMarketingColors.light} ${digitalMarketingColors.text}`;
+                                                    } else {
+                                                        // Use timezone-based colors
+                                                        const tzKey = getTimeZoneKey(s);
+                                                        todayClass = `${timeZoneColors[tzKey]} text-white font-medium shadow-lg`;
+                                                        defaultClass = `${timeZoneLightBgColors[tzKey]} ${timeZoneTextColors[tzKey]}`;
+                                                    }
 
                                                     return (
                                                         <div

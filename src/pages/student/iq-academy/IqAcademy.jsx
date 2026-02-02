@@ -218,6 +218,7 @@ export default function IqAcademy() {
             setTimeZone={setTimeZone}
             statusType={statusType}
             setStatusType={setStatusType}
+            activeCategoryData={categoryData?.data?.find(c => c._id === activeCategoryId)}
           />
         )}
       </div>
@@ -240,6 +241,7 @@ export default function IqAcademy() {
           setTimeZone={setTimeZone}
           statusType={statusType}
           setStatusType={setStatusType}
+          activeCategoryData={categoryData?.data?.find(c => c._id === activeCategoryId)}
         />
       </div>
     </div>

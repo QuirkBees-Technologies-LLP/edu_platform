@@ -28,8 +28,8 @@ const tradingTypeOptions = [
 const tradingMethodOptions = [
   { value: "price_action", label: "Price Action" },
   { value: "institutional", label: "Institutional" },
-  { value: "wyckoff", label: "Wyckoff" },
-  { value: "elliot", label: "Elliot" },
+  // { value: "wyckoff", label: "Wyckoff" },
+  // { value: "elliot", label: "Elliot" },
   { value: "harmonics", label: "Harmonics" },
 ];
 
@@ -67,6 +67,25 @@ const timeZoneTextColors = {
   asian: "text-[#E3A534]",
 };
 
+// Digital Marketing category colors (Sky Blue theme)
+const digitalMarketingColors = {
+  solid: "bg-[#2196F3]",
+  light: "bg-[#E3F2FD]",
+  text: "text-[#2196F3]",
+};
+
+// Helper function to check if category is Digital Marketing
+const isDigitalMarketingCategory = (categoryData) => {
+  const categoryName = categoryData?.name?.toLowerCase() || "";
+  const categorySlug = categoryData?.slug?.toLowerCase() || "";
+  return (
+    categoryName === "digital marketing" ||
+    categoryName === "digitalmarketing" ||
+    categorySlug === "digital-marketing" ||
+    categorySlug === "digitalmarketing"
+  );
+};
+
 export default function ListView({
   strategyEducators,
   strategies,
@@ -83,10 +102,14 @@ export default function ListView({
   setTimeZone,
   statusType,
   setStatusType,
+  activeCategoryData,
 }) {
   const navigate = useNavigate();
 
   const isToday = (datetime) => isSameDay(new Date(), new Date(datetime));
+
+  // Check if current category is Digital Marketing
+  const isDigitalMkt = isDigitalMarketingCategory(activeCategoryData);
 
   const handleMultiSelect = (value, currentValues, setValues) => {
     const exists = currentValues.includes(value);
@@ -96,8 +119,11 @@ export default function ListView({
     setValues(updated);
   };
 
-  // Get color based on educator's timezone
+  // Get color based on educator's timezone or Digital Marketing category
   const getTimeZoneColor = (educatorTimeZone) => {
+    // If Digital Marketing category, use Digital Marketing color
+    if (isDigitalMkt) return digitalMarketingColors.solid;
+
     if (!educatorTimeZone) return "bg-gray-300";
     // Handle if timeZone is an array (take first value)
     const tz = Array.isArray(educatorTimeZone)
@@ -106,8 +132,16 @@ export default function ListView({
     return timeZoneColors[tz?.toLowerCase()] || "bg-gray-300";
   };
 
-  // Get course colors based on educator's timezone
+  // Get course colors based on educator's timezone or Digital Marketing category
   const getTimeZoneCourseColors = (educatorTimeZone, isHighlighted) => {
+    // If Digital Marketing category, use Digital Marketing colors
+    if (isDigitalMkt) {
+      if (isHighlighted) {
+        return `${digitalMarketingColors.solid} text-white`;
+      }
+      return `${digitalMarketingColors.light} ${digitalMarketingColors.text}`;
+    }
+
     if (!educatorTimeZone)
       return isHighlighted
         ? "bg-gray-500 text-white"
@@ -253,8 +287,8 @@ export default function ListView({
               <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
                 <span className="truncate text-sm">
                   {tradingType.length > 0
-                    ? `${tradingType.length} Trading Type Selected`
-                    : "Select Trading Type"}
+                    ? `${tradingType.length} Trading Style Selected`
+                    : "Select Trading Style"}
                 </span>
                 <ChevronDown size={16} />
               </button>
@@ -539,22 +573,33 @@ export default function ListView({
         </div>
       )}
 
-      {/* 🔥 TIMEZONE LEGEND HEADER */}
+      {/* 🔥 TIMEZONE/CATEGORY LEGEND HEADER */}
       {strategyEducators.length > 0 && (
         <div className="card rounded-2xl shadow p-5 mb-6">
           <div className="flex flex-wrap items-center justify-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
-              <span className="text-sm font-medium text-gray-900 dark:text-gray-800">Asian Session</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
-              <span className="text-sm font-medium text-gray-900 dark:text-gray-800">London Session</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
-              <span className="text-sm font-medium text-gray-900 dark:text-gray-800">New York Session</span>
-            </div>
+            {isDigitalMkt ? (
+              // Digital Marketing category selected - show only Digital Marketing color
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded bg-[#2196F3] border border-[#E3F2FD]"></div>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-800">Digital Marketing</span>
+              </div>
+            ) : (
+              // Other categories - show timezone colors
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-800">Asian Session</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-800">London Session</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-800">New York Session</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
