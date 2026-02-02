@@ -264,8 +264,6 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
       },
     });
 
-    console.log("formik.values", formik);
-
     // Get selected educator data and check if it's Digital Marketing category
     const selectedEducatorData = educators?.data?.find(
       (edu) => edu._id === formik.values.educator
