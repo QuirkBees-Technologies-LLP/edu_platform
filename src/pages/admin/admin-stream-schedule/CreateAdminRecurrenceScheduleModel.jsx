@@ -55,9 +55,23 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
     const timeZoneOptions = [
       { value: "new_york", label: "New York" },
       { value: "london", label: "London" },
-      { value: "sydney", label: "Sydney" },
-      { value: "tokyo", label: "Tokyo" },
+      { value: "asian", label: "Asian" },
     ];
+
+    // Helper function to check if educator belongs to Digital Marketing category
+    const isDigitalMarketingEducator = (educatorData) => {
+      if (!educatorData?.categories?.length) return false;
+      return educatorData.categories.some((cat) => {
+        const categoryName = cat?.name?.toLowerCase() || "";
+        const categorySlug = cat?.slug?.toLowerCase() || "";
+        return (
+          categoryName === "digital marketing" ||
+          categoryName === "digitalmarketing" ||
+          categorySlug === "digital-marketing" ||
+          categorySlug === "digitalmarketing"
+        );
+      });
+    };
 
     const initialValues = {
       title: "",
@@ -81,13 +95,15 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
 
     };
 
+    // Validation schema - timeZone is optional here, validated in onSubmit based on educator
     const createSchema = Yup.object().shape({
       title: Yup.string().required("Title is required"),
       description: Yup.string().required("Description is required"),
       datetime: Yup.date()
         .required("Start date is required")
         .min(new Date(), "Start date must be in the future"),
-      timeZone: Yup.string().required("Timezone is required"),
+      // TimeZone validation is handled in onSubmit based on selected educator's category
+      timeZone: Yup.string().notRequired(),
       category: Yup.string().required("Category is required"),
       language: Yup.string().required("Language is required"),
       tags: Yup.array().min(1, "At least one tag is required"),
@@ -134,6 +150,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
     const formik = useFormik({
       initialValues,
       enableReinitialize: true,
+      // TimeZone validation is optional in schema - validated in onSubmit based on educator
       validationSchema: createSchema,
       validateOnMount: true,
       context: {
@@ -144,18 +161,30 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
         try {
           const { recurrenceRule } = values;
 
-          let frequency = recurrenceRule.frequency;
-          let interval = recurrenceRule.interval || 1;
-          let byWeekday = recurrenceRule.byWeekday || [];
+          // Check if selected educator is Digital Marketing
+          const selectedEdu = educators?.data?.find(
+            (edu) => edu._id === values.educator
+          );
+          const isDigitalMarketingEdu = isDigitalMarketingEducator(selectedEdu);
 
-          let endType = recurrenceRule.endType;
-          let occurrences = recurrenceRule.occurrences || 10;
-          let endDateTime = recurrenceRule.endDateTime;
+          // Validate timeZone only for non-Digital Marketing educators
+          if (!isDigitalMarketingEdu && !values.timeZone) {
+            formik.setFieldError("timeZone", "Timezone is required");
+            return;
+          }
+
+          let frequency = recurrenceRule?.frequency;
+          let interval = recurrenceRule?.interval || 1;
+          let byWeekday = recurrenceRule?.byWeekday || [];
+
+          let endType = recurrenceRule?.endType;
+          let occurrences = recurrenceRule?.occurrences || 10;
+          let endDateTime = recurrenceRule?.endDateTime;
 
           if (frequency === "NONE") {
             endType = "OCCURRENCES";
             occurrences = 1;
-          } else if (recurrenceRule.hasEndLimit) {
+          } else if (recurrenceRule?.hasEndLimit) {
             if (endType === "DATE" && !!endDateTime) {
               occurrences = null;
             }
@@ -175,10 +204,13 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           formData.append("datetime", values.datetime);
           formData.append("category", values.category);
           formData.append("language", values.language);
-          formData.append("timeZone", values.timeZone);
+          // TimeZone is optional for Digital Marketing educators
+          if (values.timeZone) {
+            formData.append("timeZone", values.timeZone);
+          }
           formData.append("educator", values?.educator);
 
-          values.tags.forEach((tag) => {
+          values?.tags?.forEach((tag) => {
             formData.append("tags[]", tag);
           });
 
@@ -231,6 +263,22 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
         }
       },
     });
+
+    // Get selected educator data and check if it's Digital Marketing category
+    const selectedEducatorData = educators?.data?.find(
+      (edu) => edu._id === formik.values.educator
+    );
+    const isDigitalMkt = isDigitalMarketingEducator(selectedEducatorData);
+
+    // Clear timeZone field when Digital Marketing educator is selected
+    useEffect(() => {
+      if (isDigitalMkt && formik.values.timeZone) {
+        // Clear timeZone for Digital Marketing educators
+        formik.setFieldValue("timeZone", "");
+      }
+      // Re-validate when educator changes
+      formik.validateForm();
+    }, [formik.values.educator, isDigitalMkt]);
 
     useEffect(() => {
       if (selectedRow?._id) {
@@ -359,42 +407,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-12">
-                <div className="col-span-6">
-                  <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Time Zone<span className="text-danger">*</span>
-                    </label>
-                    <Select
-                      value={formik.values.timeZone}
-                      onValueChange={(value) =>
-                        formik.setFieldValue("timeZone", value)
-                      }
-                      className={`form-control input input-md w-full ${formik.errors.timeZone && formik.touched.timeZone
-                        ? "border border-danger"
-                        : ""
-                        }`}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {timeZoneOptions.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
 
-                    {formik.touched.timeZone && formik.errors.timeZone && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.timeZone}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
               <div className="col-span-12">
                 <div className="col-span-6">
                   <div className="flex flex-col gap-1">
@@ -402,7 +415,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                       Assign to Educator<span className="text-danger">*</span>
                     </label>
                     <Select
-                      defaultValue={formik.values.educator}
+                      value={formik.values.educator}
                       onValueChange={(value) =>
                         formik.setFieldValue("educator", value)
                       }
@@ -412,12 +425,12 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                         }`}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder="Select Educator" />
                       </SelectTrigger>
                       <SelectContent>
                         {educators?.data?.map((item) => (
                           <SelectItem key={item._id} value={item._id}>
-                            {item.first_name + " " + item.last_name}
+                            {(item?.first_name || "") + " " + (item?.last_name || "")}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -430,6 +443,47 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                   </div>
                 </div>
               </div>
+
+              {/* Time Zone - Hidden for Digital Marketing educators */}
+              {!isDigitalMkt && (
+                <div className="col-span-12">
+                  <div className="col-span-6">
+                    <div className="flex flex-col gap-1">
+                      <label className="form-label text-gray-900 gap-1">
+                        Time Zone<span className="text-danger">*</span>
+                      </label>
+                      <Select
+                        value={formik.values.timeZone}
+                        onValueChange={(value) =>
+                          formik.setFieldValue("timeZone", value)
+                        }
+                        className={`form-control input input-md w-full ${formik.errors.timeZone && formik.touched.timeZone
+                          ? "border border-danger"
+                          : ""
+                          }`}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeZoneOptions?.map((item) => (
+                            <SelectItem key={item?.value} value={item?.value}>
+                              {item?.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {formik.touched.timeZone && formik.errors.timeZone && (
+                        <span role="alert" className="text-danger text-xs mt-1">
+                          {formik.errors.timeZone}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="col-span-12">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -447,10 +501,10 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                     </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(languagesList?.data) &&
-                        languagesList.data.length > 0 ? (
-                        languagesList.data.map((item) => (
-                          <SelectItem key={item._id} value={item.name}>
-                            {item.name}
+                        languagesList?.data?.length > 0 ? (
+                        languagesList?.data?.map((item) => (
+                          <SelectItem key={item?._id} value={item?.name}>
+                            {item?.name}
                           </SelectItem>
                         ))
                       ) : (
@@ -488,8 +542,8 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                       </SelectTrigger>
                       <SelectContent>
                         {categoryList?.data?.map((item) => (
-                          <SelectItem key={item._id} value={item._id}>
-                            {item.name}
+                          <SelectItem key={item?._id} value={item?._id}>
+                            {item?.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

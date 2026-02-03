@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,7 @@ const CreateLiveTradeIdea = forwardRef(
       timeFrame: "",
       status: "",
       pips: 0,
+      checkTime: false,
     };
     const numberField = () =>
       Yup.number()
@@ -85,6 +87,7 @@ const CreateLiveTradeIdea = forwardRef(
         formData.append("streamCallId", callId);
         formData.append("isLiveIdea", true);
         formData.append("timeFrame", values.timeFrame);
+        formData.append("checkTime", values.checkTime);
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -137,8 +140,9 @@ const CreateLiveTradeIdea = forwardRef(
           pips: selectedRow?.pips,
           educatorId: selectedRow?.educatorId,
           streamCallId: selectedRow?.streamCallId,
-          isLiveIdea: selectedRow?.isLiveIdea,
+           isLiveIdea: selectedRow?.isLiveIdea,
           timeFrame: selectedRow?.timeFrame,
+          checkTime: selectedRow?.isUpdatedLiveIdea || false,
         };
         formik.setValues(initData);
       }
@@ -359,6 +363,26 @@ const CreateLiveTradeIdea = forwardRef(
                     )}
                   </div>
                 </div>
+
+                {selectedRow?._id && (
+                  <div className="col-span-12 md:col-span-6">
+                    <div className="flex items-center gap-2 h-full">
+                      <Checkbox
+                        id="checkTime"
+                        checked={formik.values.checkTime}
+                        onCheckedChange={(checked) =>
+                          formik.setFieldValue("checkTime", checked)
+                        }
+                      />
+                      <label
+                        htmlFor="checkTime"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                       Do Not Update TimeStamp
+                      </label>
+                    </div>
+                  </div>
+                )}
 
                 {["win", "loss", "partialWin"].includes(
                   formik.values.status

@@ -249,7 +249,7 @@ const TradingStrategies = () => {
                     {/* ========== VIDEO PLAYER AREA (MAIN CONTENT) ========== */}
                     <div className="flex-1">
                         <div className="card rounded-2xl border border-gray-300 overflow-hidden">
-                            <div className="w-full h-[500px] dark:bg-black flex items-center justify-center bg-gray-200">
+                            <div className="w-full h-[425px] dark:bg-black flex items-center justify-center bg-gray-200">
                                 {/* Show loading while fetching strategy details */}
                                 {strategyLoading ? (
                                     <div className="text-center">
@@ -435,7 +435,7 @@ const TradingStrategies = () => {
                                     </div>
 
                                     {/* Call-to-Action Button */}
-                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto">
+                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity">
                                         Start Learning
                                     </button>
                                 </div>

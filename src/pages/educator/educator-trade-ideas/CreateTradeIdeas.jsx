@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ const CreateTradeIdeas = forwardRef(
       description: "",
       category: "",
       pips: 0,
+      checkTime: false,
     };
     const numberField = () =>
       Yup.number()
@@ -120,6 +122,7 @@ const CreateTradeIdeas = forwardRef(
         formData.append("invalidation", values.invalidation);
         formData.append("description", values.description);
         formData.append("category", values.category);
+        formData.append("checkTime", values.checkTime);
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
@@ -176,6 +179,7 @@ const CreateTradeIdeas = forwardRef(
           description: selectedRow?.description,
           exits: selectedRow?.exits,
           pips: selectedRow?.pips,
+          checkTime: selectedRow?.isUpdatedIdea || false,
         };
         formik.setValues(initData);
       }
@@ -545,6 +549,26 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
+
+                {selectedRow?._id && (
+                  <div className="col-span-12 md:col-span-6">
+                    <div className="flex items-center gap-2 h-full ">
+                      <Checkbox
+                        id="checkTime"
+                        checked={formik.values.checkTime}
+                        onCheckedChange={(checked) =>
+                          formik.setFieldValue("checkTime", checked)
+                        }
+                      />
+                      <label
+                        htmlFor="checkTime"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                       Do Not Update TimeStamp
+                      </label>
+                    </div>
+                  </div>
+                )}
                 {/* <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">

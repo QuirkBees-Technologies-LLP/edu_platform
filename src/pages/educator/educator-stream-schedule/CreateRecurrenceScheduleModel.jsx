@@ -40,7 +40,16 @@ const CreateRecurrenceScheduleModel = forwardRef(
     ref
   ) => {
     const { auth } = useAuthContext();
+
     const educatorId = auth?.user?._id ?? null;
+
+    // Check if educator belongs to Digital Marketing category
+    const isDigitalMarketing = auth?.user?.categories?.some(
+      (cat) =>
+        cat?.slug?.toLowerCase() === "digital-marketing" ||
+        cat?.name?.toLowerCase() === "digital marketing" ||
+        cat?.name?.toLowerCase() === "digitalmarketing"
+    );
 
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
@@ -54,8 +63,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
     const timeZoneOptions = [
       { value: "new_york", label: "New York" },
       { value: "london", label: "London" },
-      { value: "sydney", label: "Sydney" },
-      { value: "tokyo", label: "Tokyo" },
+      { value: "asian", label: "Asian" },
     ];
 
     const initialValues = {
@@ -83,7 +91,9 @@ const CreateRecurrenceScheduleModel = forwardRef(
       datetime: Yup.date()
         .required("Start date is required")
         .min(new Date(), "Start date must be in the future"),
-      timeZone: Yup.string().required("Timezone is required"),
+      timeZone: isDigitalMarketing
+        ? Yup.string().notRequired()
+        : Yup.string().required("Timezone is required"),
       category: Yup.string().required("Category is required"),
       language: Yup.string().required("Language is required"),
       tags: Yup.array().min(1, "At least one tag is required"),
@@ -356,42 +366,45 @@ const CreateRecurrenceScheduleModel = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-12">
-                <div className="col-span-6">
-                  <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Time Zone<span className="text-danger">*</span>
-                    </label>
-                    <Select
-                      value={formik.values.timeZone}
-                      onValueChange={(value) =>
-                        formik.setFieldValue("timeZone", value)
-                      }
-                      className={`form-control input input-md w-full ${formik.errors.timeZone && formik.touched.timeZone
-                        ? "border border-danger"
-                        : ""
-                        }`}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {timeZoneOptions.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              {/* Time Zone field - Hidden for Digital Marketing educators */}
+              {!isDigitalMarketing && (
+                <div className="col-span-12">
+                  <div className="col-span-6">
+                    <div className="flex flex-col gap-1">
+                      <label className="form-label text-gray-900 gap-1">
+                        Time Zone<span className="text-danger">*</span>
+                      </label>
+                      <Select
+                        value={formik.values.timeZone}
+                        onValueChange={(value) =>
+                          formik.setFieldValue("timeZone", value)
+                        }
+                        className={`form-control input input-md w-full ${formik.errors.timeZone && formik.touched.timeZone
+                          ? "border border-danger"
+                          : ""
+                          }`}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeZoneOptions.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-                    {formik.touched.timeZone && formik.errors.timeZone && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.timeZone}
-                      </span>
-                    )}
+                      {formik.touched.timeZone && formik.errors.timeZone && (
+                        <span role="alert" className="text-danger text-xs mt-1">
+                          {formik.errors.timeZone}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
               <div className="col-span-12">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
