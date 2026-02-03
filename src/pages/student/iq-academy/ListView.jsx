@@ -86,6 +86,14 @@ const isDigitalMarketingCategory = (categoryData) => {
   );
 };
 
+// Helper function to capitalize words (replaces underscores and capitalizes each word)
+const capitalizeWords = (str) => {
+  if (!str) return "";
+  return str
+    ?.replace(/_/g, " ")
+    ?.replace(/\b\w/g, (char) => char?.toUpperCase()) || "";
+};
+
 export default function ListView({
   strategyEducators,
   strategies,
@@ -649,7 +657,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingStyle?.map((s, idx) => (
                             <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                              {s?.replace("_", " ")}
+                              {capitalizeWords(s)}
                             </span>
                           ))}
                         </div>
@@ -659,7 +667,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingMethod?.map((m, idx) => (
                             <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                              {m?.replace("_", " ")}
+                              {capitalizeWords(m)}
                             </span>
                           ))}
                         </div>
@@ -745,7 +753,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingStyle?.map((s, idx) => (
                         <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
+                          {capitalizeWords(s)}
                         </span>
                       ))}
                     </div>
@@ -755,7 +763,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingMethod?.map((m, idx) => (
                         <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
+                          {capitalizeWords(m)}
                         </span>
                       ))}
                     </div>
@@ -852,7 +860,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingStyle?.map((s, idx) => (
                             <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                              {s?.replace("_", " ")}
+                              {capitalizeWords(s)}
                             </span>
                           ))}
                         </div>
@@ -862,7 +870,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingMethod?.map((m, idx) => (
                             <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                              {m?.replace("_", " ")}
+                              {capitalizeWords(m)}
                             </span>
                           ))}
                         </div>
@@ -948,7 +956,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingStyle?.map((s, idx) => (
                         <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
+                          {capitalizeWords(s)}
                         </span>
                       ))}
                     </div>
@@ -958,7 +966,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingMethod?.map((m, idx) => (
                         <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
+                          {capitalizeWords(m)}
                         </span>
                       ))}
                     </div>
@@ -1054,7 +1062,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingStyle?.map((s, idx) => (
                             <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                              {s?.replace("_", " ")}
+                              {capitalizeWords(s)}
                             </span>
                           ))}
                         </div>
@@ -1064,7 +1072,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingMethod?.map((m, idx) => (
                             <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                              {m?.replace("_", " ")}
+                              {capitalizeWords(m)}
                             </span>
                           ))}
                         </div>
@@ -1150,7 +1158,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingStyle?.map((s, idx) => (
                         <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
+                          {capitalizeWords(s)}
                         </span>
                       ))}
                     </div>
@@ -1160,7 +1168,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingMethod?.map((m, idx) => (
                         <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
+                          {capitalizeWords(m)}
                         </span>
                       ))}
                     </div>
