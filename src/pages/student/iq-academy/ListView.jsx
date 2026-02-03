@@ -679,7 +679,7 @@ export default function ListView({
                         </div>
                       )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
-                        <span className="text-gray-900 italic">No info</span>
+                        <span className="text-gray-900">No info</span>
                       )}
                     </div>
                     {/* Schedule Card */}
@@ -775,7 +775,7 @@ export default function ListView({
                     </div>
                   )}
                   {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
-                    <span className="text-gray-400 italic">No info</span>
+                    <span className="text-gray-900">No info</span>
                   )}
                 </div>
                 {/* Schedule Card */}
@@ -882,7 +882,7 @@ export default function ListView({
                         </div>
                       )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
-                        <span className="text-gray-800">No info</span>
+                        <span className="text-gray-900">No info</span>
                       )}
                     </div>
                     {/* Schedule Card */}
@@ -978,7 +978,7 @@ export default function ListView({
                     </div>
                   )}
                   {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
-                    <span className="text-gray-400 italic">No info</span>
+                    <span className="text-gray-900">No info</span>
                   )}
                 </div>
                 {/* Schedule Card */}
@@ -1084,7 +1084,7 @@ export default function ListView({
                         </div>
                       )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
-                        <span className="text-gray-400 italic">No info</span>
+                        <span className="text-gray-900">No info</span>
                       )}
                     </div>
                     {/* Schedule Card */}
@@ -1180,7 +1180,7 @@ export default function ListView({
                     </div>
                   )}
                   {(!activeEducator?.strategies?.length && !activeEducator?.tradingStyle?.length && !activeEducator?.tradingMethod?.length) && (
-                    <span className="text-gray-400 italic">No info</span>
+                    <span className="text-gray-900">No info</span>
                   )}
                 </div>
                 {/* Schedule Card */}
