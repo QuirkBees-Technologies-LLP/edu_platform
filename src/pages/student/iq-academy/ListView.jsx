@@ -200,8 +200,11 @@ export default function ListView({
               breakpoints={{
                 0: { slidesPerView: 2 },
                 550: { slidesPerView: 3 },
-                640: { slidesPerView: 5 },
-                1199: { slidesPerView: 6 },
+                640: { slidesPerView: 4 },
+                900: { slidesPerView: 5 },
+                1200: { slidesPerView: 6 },
+                1400: { slidesPerView: 7 },
+                1600: { slidesPerView: 8 },
               }}
             >
               {/* All Strategies Button */}
@@ -494,7 +497,7 @@ export default function ListView({
           >
             ❯
           </button>
-          <div className="w-fulloverflow-hidden">
+          <div className="w-full overflow-hidden">
             <Swiper
               slidesPerView={3}
               spaceBetween={10}
@@ -507,8 +510,11 @@ export default function ListView({
               breakpoints={{
                 0: { slidesPerView: 2 },
                 550: { slidesPerView: 3 },
-                640: { slidesPerView: 5 },
-                1199: { slidesPerView: 6 },
+                640: { slidesPerView: 4 },
+                900: { slidesPerView: 5 },
+                1200: { slidesPerView: 6 },
+                1400: { slidesPerView: 7 },
+                1600: { slidesPerView: 8 },
               }}
             >
               {/* All Educators Button */}
