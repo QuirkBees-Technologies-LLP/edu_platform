@@ -140,6 +140,33 @@ export default function IqAcademy() {
         ))}
       </div>
 
+
+      {/* Mobile View Toggle Buttons - Center */}
+
+      <div className="flex md:hidden justify-center mb-6">
+        <div className="bg-gray-200 dark:bg-gray-100 rounded-xl p-1.5 flex">
+          <button
+            onClick={() => setViewType("list")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm transition ${viewType === "list"
+              ? "bg-primary text-white shadow-lg font-semibold"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+          >
+            <List size={18} />
+          </button>
+
+          <button
+            onClick={() => setViewType("grid")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm transition ${viewType === "grid"
+              ? "bg-primary text-white shadow-lg font-semibold"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+          >
+            <CalendarDays size={18} />
+          </button>
+        </div>
+      </div>
+
       {/* WEEK TABS */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         {/* Left: Week Tabs */}
@@ -167,7 +194,7 @@ export default function IqAcademy() {
           )}
         </div>
 
-        {/* Right: View Tabs */}
+        {/* Right: View Tabs - Desktop */}
         <div className="hidden md:flex bg-gray-100 rounded-lg p-1 w-fit">
           <button
             onClick={() => setViewType("list")}
@@ -191,6 +218,8 @@ export default function IqAcademy() {
         </div>
       </div>
 
+
+
       {/* Desktop View */}
       <div className="hidden md:block">
         {viewType === "grid" ? (
@@ -200,6 +229,8 @@ export default function IqAcademy() {
             isLoading={isInitialLoading}
             activeCategoryId={activeCategoryId}
             singleCategoryData={singleCategoryData}
+            activeEducatorId={activeEducatorId}
+            setActiveEducatorId={setActiveEducatorId}
           />
         ) : (
           <ListView
@@ -223,26 +254,38 @@ export default function IqAcademy() {
         )}
       </div>
 
-      {/* Mobile View - Always shows ListView */}
+      {/* Mobile View - Switch between List and Grid */}
       <div className="block md:hidden">
-        <ListView
-          strategyEducators={strategyEducators}
-          strategies={strategyData?.data?.strategy || []}
-          activeEducatorId={activeEducatorId}
-          setActiveEducatorId={setActiveEducatorId}
-          activeStrategyId={activeStrategyId}
-          setActiveStrategyId={setActiveStrategyId}
-          activeEducator={activeEducator}
-          tradingType={tradingType}
-          setTradingType={setTradingType}
-          tradingMethod={tradingMethod}
-          setTradingMethod={setTradingMethod}
-          timeZone={timeZone}
-          setTimeZone={setTimeZone}
-          statusType={statusType}
-          setStatusType={setStatusType}
-          activeCategoryData={categoryData?.data?.find(c => c._id === activeCategoryId)}
-        />
+        {viewType === "grid" ? (
+          <GridView
+            educators={educators}
+            days={days}
+            isLoading={isInitialLoading}
+            activeCategoryId={activeCategoryId}
+            singleCategoryData={singleCategoryData}
+            activeEducatorId={activeEducatorId}
+            setActiveEducatorId={setActiveEducatorId}
+          />
+        ) : (
+          <ListView
+            strategyEducators={strategyEducators}
+            strategies={strategyData?.data?.strategy || []}
+            activeEducatorId={activeEducatorId}
+            setActiveEducatorId={setActiveEducatorId}
+            activeStrategyId={activeStrategyId}
+            setActiveStrategyId={setActiveStrategyId}
+            activeEducator={activeEducator}
+            tradingType={tradingType}
+            setTradingType={setTradingType}
+            tradingMethod={tradingMethod}
+            setTradingMethod={setTradingMethod}
+            timeZone={timeZone}
+            setTimeZone={setTimeZone}
+            statusType={statusType}
+            setStatusType={setStatusType}
+            activeCategoryData={categoryData?.data?.find(c => c._id === activeCategoryId)}
+          />
+        )}
       </div>
     </div>
   );

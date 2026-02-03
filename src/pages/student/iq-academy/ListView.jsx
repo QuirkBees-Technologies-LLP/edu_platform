@@ -86,6 +86,14 @@ const isDigitalMarketingCategory = (categoryData) => {
   );
 };
 
+// Helper function to capitalize words (replaces underscores and capitalizes each word)
+const capitalizeWords = (str) => {
+  if (!str) return "";
+  return str
+    ?.replace(/_/g, " ")
+    ?.replace(/\b\w/g, (char) => char?.toUpperCase()) || "";
+};
+
 export default function ListView({
   strategyEducators,
   strategies,
@@ -192,8 +200,11 @@ export default function ListView({
               breakpoints={{
                 0: { slidesPerView: 2 },
                 550: { slidesPerView: 3 },
-                640: { slidesPerView: 5 },
-                1199: { slidesPerView: 6 },
+                640: { slidesPerView: 4 },
+                900: { slidesPerView: 5 },
+                1200: { slidesPerView: 6 },
+                1400: { slidesPerView: 7 },
+                1600: { slidesPerView: 8 },
               }}
             >
               {/* All Strategies Button */}
@@ -486,7 +497,7 @@ export default function ListView({
           >
             ❯
           </button>
-          <div className="w-fulloverflow-hidden">
+          <div className="w-full overflow-hidden">
             <Swiper
               slidesPerView={3}
               spaceBetween={10}
@@ -499,8 +510,11 @@ export default function ListView({
               breakpoints={{
                 0: { slidesPerView: 2 },
                 550: { slidesPerView: 3 },
-                640: { slidesPerView: 5 },
-                1199: { slidesPerView: 6 },
+                640: { slidesPerView: 4 },
+                900: { slidesPerView: 5 },
+                1200: { slidesPerView: 6 },
+                1400: { slidesPerView: 7 },
+                1600: { slidesPerView: 8 },
               }}
             >
               {/* All Educators Button */}
@@ -567,7 +581,7 @@ export default function ListView({
         <div className="bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full mb-6">
           <div className="text-center">
             <p className="text-lg sm:text-xl tracking-widest text-gray-500">
-              No Schedule Found
+              No Session Found
             </p>
           </div>
         </div>
@@ -649,7 +663,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingStyle?.map((s, idx) => (
                             <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                              {s?.replace("_", " ")}
+                              {capitalizeWords(s)}
                             </span>
                           ))}
                         </div>
@@ -659,13 +673,13 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingMethod?.map((m, idx) => (
                             <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                              {m?.replace("_", " ")}
+                              {capitalizeWords(m)}
                             </span>
                           ))}
                         </div>
                       )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
-                        <span className="text-gray-400 italic">No info</span>
+                        <span className="text-gray-900 italic">No info</span>
                       )}
                     </div>
                     {/* Schedule Card */}
@@ -707,7 +721,7 @@ export default function ListView({
                 )),
               )
             ) : (
-              <p className="text-sm text-gray-500">No ongoing schedule.</p>
+              <p className="text-sm text-gray-500">No ongoing sessions.</p>
             )
           ) : activeEducator?.ongoing?.length > 0 ? (
             activeEducator.ongoing.map((course, i) => (
@@ -745,7 +759,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingStyle?.map((s, idx) => (
                         <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
+                          {capitalizeWords(s)}
                         </span>
                       ))}
                     </div>
@@ -755,7 +769,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingMethod?.map((m, idx) => (
                         <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
+                          {capitalizeWords(m)}
                         </span>
                       ))}
                     </div>
@@ -802,7 +816,7 @@ export default function ListView({
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">No ongoing schedule.</p>
+            <p className="text-sm text-gray-500">No ongoing sessions.</p>
           )}
         </div>
       </div>
@@ -852,7 +866,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingStyle?.map((s, idx) => (
                             <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                              {s?.replace("_", " ")}
+                              {capitalizeWords(s)}
                             </span>
                           ))}
                         </div>
@@ -862,13 +876,13 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingMethod?.map((m, idx) => (
                             <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                              {m?.replace("_", " ")}
+                              {capitalizeWords(m)}
                             </span>
                           ))}
                         </div>
                       )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
-                        <span className="text-gray-400 italic">No info</span>
+                        <span className="text-gray-800">No info</span>
                       )}
                     </div>
                     {/* Schedule Card */}
@@ -910,7 +924,7 @@ export default function ListView({
                 )),
               )
             ) : (
-              <p className="text-sm text-gray-500">No upcoming schedule.</p>
+              <p className="text-sm text-gray-500">No upcoming sessions.</p>
             )
           ) : activeEducator?.upcoming?.length > 0 ? (
             activeEducator.upcoming.map((course, i) => (
@@ -948,7 +962,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingStyle?.map((s, idx) => (
                         <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
+                          {capitalizeWords(s)}
                         </span>
                       ))}
                     </div>
@@ -958,7 +972,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingMethod?.map((m, idx) => (
                         <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
+                          {capitalizeWords(m)}
                         </span>
                       ))}
                     </div>
@@ -1005,7 +1019,7 @@ export default function ListView({
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">No upcoming schedule.</p>
+            <p className="text-sm text-gray-500">No upcoming sessions.</p>
           )}
         </div>
       </div>
@@ -1054,7 +1068,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingStyle?.map((s, idx) => (
                             <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                              {s?.replace("_", " ")}
+                              {capitalizeWords(s)}
                             </span>
                           ))}
                         </div>
@@ -1064,7 +1078,7 @@ export default function ListView({
                         <div className="flex flex-wrap gap-2">
                           {edu?.tradingMethod?.map((m, idx) => (
                             <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                              {m?.replace("_", " ")}
+                              {capitalizeWords(m)}
                             </span>
                           ))}
                         </div>
@@ -1112,7 +1126,7 @@ export default function ListView({
                 )),
               )
             ) : (
-              <p className="text-sm text-gray-500">No past schedule.</p>
+              <p className="text-sm text-gray-500">No past sessions.</p>
             )
           ) : activeEducator?.past?.length > 0 ? (
             activeEducator.past.map((course, i) => (
@@ -1150,7 +1164,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingStyle?.map((s, idx) => (
                         <span key={`style-${idx}`} className="px-3 py-1 rounded-full bg-violet-500 text-white text-xs font-medium">
-                          {s?.replace("_", " ")}
+                          {capitalizeWords(s)}
                         </span>
                       ))}
                     </div>
@@ -1160,7 +1174,7 @@ export default function ListView({
                     <div className="flex flex-wrap gap-2">
                       {activeEducator?.tradingMethod?.map((m, idx) => (
                         <span key={`method-${idx}`} className="px-3 py-1 rounded-full bg-sky-500 text-white text-xs font-medium">
-                          {m?.replace("_", " ")}
+                          {capitalizeWords(m)}
                         </span>
                       ))}
                     </div>
@@ -1207,7 +1221,7 @@ export default function ListView({
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">No past schedule.</p>
+            <p className="text-sm text-gray-500">No past sessions.</p>
           )}
         </div>
       </div>
