@@ -71,8 +71,8 @@ const CreateEducator = forwardRef(
     const tradingMethodOptions = [
       { value: "price_action", label: "Price Action" },
       { value: "institutional", label: "Institutional" },
-      { value: "wyckoff", label: "Wyckoff" },
-      { value: "elliot", label: "Elliot" },
+      // { value: "wyckoff", label: "Wyckoff" },
+      // { value: "elliot", label: "Elliot" },
       { value: "harmonics", label: "Harmonics" },
     ];
 

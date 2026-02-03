@@ -567,7 +567,7 @@ export default function ListView({
         <div className="bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full mb-6">
           <div className="text-center">
             <p className="text-lg sm:text-xl tracking-widest text-gray-500">
-              No Schedule Found
+              No Session Found
             </p>
           </div>
         </div>
@@ -665,7 +665,7 @@ export default function ListView({
                         </div>
                       )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
-                        <span className="text-gray-400 italic">No info</span>
+                        <span className="text-gray-900 italic">No info</span>
                       )}
                     </div>
                     {/* Schedule Card */}
@@ -707,7 +707,7 @@ export default function ListView({
                 )),
               )
             ) : (
-              <p className="text-sm text-gray-500">No ongoing schedule.</p>
+              <p className="text-sm text-gray-500">No ongoing sessions.</p>
             )
           ) : activeEducator?.ongoing?.length > 0 ? (
             activeEducator.ongoing.map((course, i) => (
@@ -802,7 +802,7 @@ export default function ListView({
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">No ongoing schedule.</p>
+            <p className="text-sm text-gray-500">No ongoing sessions.</p>
           )}
         </div>
       </div>
@@ -868,7 +868,7 @@ export default function ListView({
                         </div>
                       )}
                       {(!edu?.strategies?.length && !edu?.tradingStyle?.length && !edu?.tradingMethod?.length) && (
-                        <span className="text-gray-400 italic">No info</span>
+                        <span className="text-gray-800">No info</span>
                       )}
                     </div>
                     {/* Schedule Card */}
@@ -910,7 +910,7 @@ export default function ListView({
                 )),
               )
             ) : (
-              <p className="text-sm text-gray-500">No upcoming schedule.</p>
+              <p className="text-sm text-gray-500">No upcoming sessions.</p>
             )
           ) : activeEducator?.upcoming?.length > 0 ? (
             activeEducator.upcoming.map((course, i) => (
@@ -1005,7 +1005,7 @@ export default function ListView({
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">No upcoming schedule.</p>
+            <p className="text-sm text-gray-500">No upcoming sessions.</p>
           )}
         </div>
       </div>
@@ -1112,7 +1112,7 @@ export default function ListView({
                 )),
               )
             ) : (
-              <p className="text-sm text-gray-500">No past schedule.</p>
+              <p className="text-sm text-gray-500">No past sessions.</p>
             )
           ) : activeEducator?.past?.length > 0 ? (
             activeEducator.past.map((course, i) => (
@@ -1207,7 +1207,7 @@ export default function ListView({
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">No past schedule.</p>
+            <p className="text-sm text-gray-500">No past sessions.</p>
           )}
         </div>
       </div>
