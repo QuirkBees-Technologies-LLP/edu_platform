@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isSameDay } from "date-fns";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -56,21 +56,24 @@ const getTimeZoneKey = (schedule) => {
     return "new_york"; // default
 };
 
-export default function GridView({ educators, days, isLoading, activeCategoryId, singleCategoryData, activeEducatorId, setActiveEducatorId }) {
+export default function GridView({ educators, days, isLoading, activeCategoryId, singleCategoryData }) {
     const navigate = useNavigate();
+
+    // Internal state for mobile educator selection - does NOT affect parent state
+    const [selectedEducatorIdInternal, setSelectedEducatorIdInternal] = useState(null);
 
     const isToday = (datetime) => isSameDay(new Date(), new Date(datetime));
     const isTodayColumn = (day) => isSameDay(new Date(), day);
 
-    // Set first educator as default when educators load
+    // Set first educator as default for mobile slider when educators load
     useEffect(() => {
-        if (educators?.length > 0 && (!activeEducatorId || activeEducatorId === "all")) {
-            setActiveEducatorId(educators[0]?._id);
+        if (educators?.length > 0 && !selectedEducatorIdInternal) {
+            setSelectedEducatorIdInternal(educators[0]?._id);
         }
-    }, [educators, activeEducatorId, setActiveEducatorId]);
+    }, [educators, selectedEducatorIdInternal]);
 
-    // Get the selected educator
-    const selectedEducator = educators?.find(e => e?._id === activeEducatorId) || educators?.[0];
+    // Get the selected educator for mobile view
+    const selectedEducator = educators?.find(e => e?._id === selectedEducatorIdInternal) || educators?.[0];
 
     if (isLoading || !activeCategoryId || !singleCategoryData) {
         return null;
@@ -248,13 +251,13 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                     {educators?.map((educator) => (
                                         <SwiperSlide key={educator?._id}>
                                             <div
-                                                onClick={() => setActiveEducatorId(educator?._id)}
+                                                onClick={() => setSelectedEducatorIdInternal(educator?._id)}
                                                 className="flex flex-col 
                                                 mt-3
                                                 items-center cursor-pointer select-none"
                                             >
                                                 <div
-                                                    className={`w-16 h-16 rounded-full p-[3px] transition-all ${activeEducatorId === educator?._id
+                                                    className={`w-16 h-16 rounded-full p-[3px] transition-all ${selectedEducatorIdInternal === educator?._id
                                                         ? "bg-[#4E34E3] ring-2 ring-offset-2 ring-[#4E34E3] shadow-lg"
                                                         : "bg-gray-300 dark:bg-gray-600"
                                                         }`}
@@ -265,7 +268,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                         className="w-full h-full rounded-full object-cover bg-white pointer-events-none"
                                                     />
                                                 </div>
-                                                <p className={`mt-2 text-xs font-medium text-center truncate w-16 ${activeEducatorId === educator?._id
+                                                <p className={`mt-2 text-xs font-medium text-center truncate w-16 ${selectedEducatorIdInternal === educator?._id
                                                     ? "text-[#4E34E3] font-semibold"
                                                     : "text-gray-800 dark:text-gray-200"
                                                     }`}>

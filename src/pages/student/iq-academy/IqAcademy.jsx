@@ -229,8 +229,6 @@ export default function IqAcademy() {
             isLoading={isInitialLoading}
             activeCategoryId={activeCategoryId}
             singleCategoryData={singleCategoryData}
-            activeEducatorId={activeEducatorId}
-            setActiveEducatorId={setActiveEducatorId}
           />
         ) : (
           <ListView
@@ -263,8 +261,6 @@ export default function IqAcademy() {
             isLoading={isInitialLoading}
             activeCategoryId={activeCategoryId}
             singleCategoryData={singleCategoryData}
-            activeEducatorId={activeEducatorId}
-            setActiveEducatorId={setActiveEducatorId}
           />
         ) : (
           <ListView
