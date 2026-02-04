@@ -70,6 +70,54 @@ const IqEducators = () => {
 
   const userName = auth?.user?.name;
 
+  // Get gradient background based on educator's first category from API response
+  const getHeaderGradient = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      // Crypto - Purple gradient
+      return "bg-gradient-to-r from-[#7C3AED] to-[#1a0a2e]";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      // Digital Marketing - Light Blue gradient
+      return "bg-gradient-to-r from-[#38BDF8] to-[#0c4a6e]";
+    } else {
+      // Forex (default) - Blue gradient
+      return "bg-gradient-to-r from-[#2B44D3] to-[#0D0D21]";
+    }
+  };
+
+  // Get button color based on educator's first category
+  const getButtonColor = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      // Crypto - Purple
+      return "border-[#7C3AED] bg-[#7C3AED] hover:bg-[#6D28D9]";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      // Digital Marketing - Light Blue
+      return "border-[#38BDF8] bg-[#38BDF8] hover:bg-[#0EA5E9]";
+    } else {
+      // Forex (default) - Blue
+      return "border-[#2B44D3] bg-[#2B44D3] hover:bg-[#1E3A8A]";
+    }
+  };
+
+  // Get slider accent color based on educator's first category
+  const getSliderAccent = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      return "accent-[#7C3AED]";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      return "accent-[#38BDF8]";
+    } else {
+      return "accent-[#2B44D3]";
+    }
+  };
+
   const { id } = useParams();
   const {
     data: response,
@@ -148,96 +196,6 @@ const IqEducators = () => {
     }
   }, [response]);
 
-  const updates = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-    {
-      id: 2,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-15.png",
-    },
-    {
-      id: 3,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-  ];
-
-  const feedData = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-    {
-      id: 2,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-15.png",
-    },
-    {
-      id: 3,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-    {
-      id: 4,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-  ];
-
-  const ideasData = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-  ];
-  const trades = [
-    {
-      id: 1,
-      pair: "EUR/USD",
-      date: "WED, FEB 16, 12:30 CET",
-      status: "Partial Win",
-      statusColor: "green",
-      entry: 3639.234,
-      stopLoss: 3323.989,
-      exit1: 3639.234,
-      exit2: 3639.234,
-      image: "/media/images/2600x1600/chart.jpg",
-    },
-    {
-      id: 2,
-      pair: "GBP/USD",
-      date: "THU, FEB 17, 14:00 CET",
-      status: "Full Win",
-      statusColor: "blue",
-      entry: 4450.5,
-      stopLoss: 4300.25,
-      exit1: 4500.0,
-      exit2: 4550.0,
-      image: "/media/images/2600x1600/chart.jpg",
-    },
-  ];
 
   const [messages, setMessages] = useState([
     {
@@ -293,8 +251,6 @@ const IqEducators = () => {
     ]);
     setNewMessage(""); // Clear the input field
   };
-  const [activeTab, setActiveTab] = useState("feed");
-  const data = activeTab === "feed" ? feedData : ideasData;
 
   const handleOpen = async (videoKey) => {
     // const { data } = await triggerSecureVideo(videoKey);
@@ -362,131 +318,14 @@ const IqEducators = () => {
         </div>
       )}
 
-      {/* <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
-        <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
-          <div className="flex items-center flex-wrap justify-center gap-4">
-            <img
-              src={response?.data?.educator?.image}
-              alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
-              className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
-            />
-            <div className="text-center">
-              <h3 className="text-white font-semibold text-base sm:text-lg mb-3">
-                {response?.data?.educator?.first_name}{" "}
-                {response?.data?.educator?.last_name}
-              </h3>
-              <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm w-fit">
-                <button
-                  onClick={toggleMute}
-                  className="text-white hover:text-yellow-300 transition p-1"
-                >
-                  {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                </button>
-
-                <button
-                  onClick={decVolume}
-                  className="text-white text-lg px-1 hover:text-yellow-300 transition"
-                >
-                  –
-                </button>
-
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={isMuted ? 0 : volume}
-                  onChange={(e) => onSliderChange(e.target.value)}
-                  className="w-24 accent-blue-500 cursor-pointer"
-                />
-
-                <button
-                  onClick={incVolume}
-                  className="text-white text-lg px-1 hover:text-yellow-300 transition"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsOpen(true)}
-              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
-            >
-              <Volume2 size={18} />
-            </button>
-
-            {isOpen && (
-              <div
-                className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-                onClick={() => setIsOpen(false)}
-              >
-                <div
-                  className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
-                  onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
-                >
-                  <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
-                    Change in Sound Option from Automatic (Default) to Allow,{" "}
-                    <br /> like in the Image
-                  </span>
-                  <div
-                    className="overflow-hidden rounded-lg cursor-pointer"
-                    onClick={() => isVolumeOpen(true)}
-                  >
-                    <img src={InfoImage} alt="Info" />
-                  </div>
-
-                  <span
-                    className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
-
-  "
-                  >
-                    Or follow the video tutorial
-                  </span>
-                  <div className="overflow-hidden rounded-lg mx-auto block w-fit">
-                    <video width="500" height="240" muted loop controls>
-                      <source src={videotutorial} type="video/mp4" />
-                    </video>
-                  </div>
-
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={() => handleShare()}
-              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
-            >
-              <Share2 size={16} />
-              Share
-            </button>
-          </div>
-          <button
-            onClick={() => setShowRatingModal(true)}
-            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors w-fit"
-          >
-            ⭐ Rate Me
-          </button>
-        </div>
-      </div> */}
 
       {/* speaker center */}
-      <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
+      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4`}>
         <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
           <div className="flex items-center flex-wrap justify-center gap-4">
             <img
               src={response?.data?.educator?.image}
-              alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
+              alt="Educator Profile"
               className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
             />
             <div className="text-center">
@@ -519,7 +358,7 @@ const IqEducators = () => {
             step="0.05"
             value={isMuted ? 0 : volume}
             onChange={(e) => onSliderChange(e.target.value)}
-            className="w-24 accent-blue-500 cursor-pointer"
+            className={`w-24 ${getSliderAccent()} cursor-pointer`}
           />
 
           <button
@@ -533,7 +372,7 @@ const IqEducators = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsOpen(true)}
-              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors`}
             >
               <Volume2 size={18} />
             </button>
@@ -573,7 +412,7 @@ const IqEducators = () => {
 
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
+                    className={`absolute top-3 right-3 ${getButtonColor()} text-white px-3 py-1 rounded-lg shadow`}
                   >
                     ✕
                   </button>
@@ -583,7 +422,7 @@ const IqEducators = () => {
 
             <button
               onClick={() => handleShare()}
-              className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors`}
             >
               <Share2 size={16} />
               Share
@@ -591,7 +430,7 @@ const IqEducators = () => {
           </div>
           <button
             onClick={() => setShowRatingModal(true)}
-            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors w-fit"
+            className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors w-fit`}
           >
             ⭐ Rate Me
           </button>
@@ -607,78 +446,9 @@ const IqEducators = () => {
         </div>
       </div>
 
-      {/* {callId && (
-        <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4 h-full">
-          <div className="w-full flex flex-col items-start">
-            <h3 className="text-white font-semibold text-base sm:text-lg mb-3">
-              About Me
-            </h3>
-
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl w-full max-h-64 overflow-y-auto">
-              <p className="text-white text-sm leading-relaxed whitespace-pre-line">
-                {response?.data?.educator?.description || `No bio available.`}
-              </p>
-            </div>
-          </div>
-        </div>
-      )} */}
-
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">
-          {/* <div className="">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-y-8 lg:gap-x-8 md:gap-y-8">
-              <div className="col-span-12 lg:col-span-12">
-                <div className="card rounded-none rounded-b-xl">
-                  <img
-                    src="/media/images/2600x1600/iq_educators.jpg"
-                    alt=""
-                    className="w-full h-full rounded-xl object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div> */}
-          {/* <ClientViewLiveSession /> */}
 
-          {/* <div className="text-gray-900 mb-2">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <Link className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary">
-                  View All
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              <div className="flex gap-4">
-                {response?.data?.recordings?.map((course) => (
-                  <div
-                    key={course.id}
-                    className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                  >
-                    <div className="rounded-t-xl overflow-hidden" onClick={() => setRecording(course)}>
-                      
-                      <RecordingThumbnail
-                        videoUrl={course?.url}
-                        seekTime={2}
-                        image={course?.thumbnail}
-                        onRecordingClick={() => handleOpen(course?.url)}
-                      />
-
-                  
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-md font-normal mb-2">
-                        {course.call_title}
-                      </h3>
-                      <p className="text-xs text-gray-600">{course.address}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div> */}
           {/* Live Idea  */}
 
 
