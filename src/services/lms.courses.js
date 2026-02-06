@@ -172,6 +172,22 @@ export const getAllStrategies = async (params = {}, token = null) => {
   }
 };
 
+export const getAllMasterClasses = async (params = {}, token = null) => {
+  try {
+    const response = await api.get("/common/master-class", {
+      params,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
 /**
  * Reorder strategies
  * @param {Array<Object>} strategies - Array of strategy objects with id and order

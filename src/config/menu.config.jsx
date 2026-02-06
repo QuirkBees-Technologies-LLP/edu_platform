@@ -21,6 +21,7 @@ import {
   ListTodo,
   Star,
   BadgeCent,
+  GraduationCap,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1706,6 +1707,11 @@ export const sideMenus = {
       icon: <BookOpen />,
       path: "/educator/courses",
     },
+    {
+      title: "Master Class",
+      icon: <GraduationCap />,
+      path: "/educator/master-class",
+    },
 
     {
       title: "IQ Live",
@@ -1912,6 +1918,11 @@ export const sideMenus = {
         //   newTab: true,
         // },
       ],
+    },
+    {
+      title: "Master Class",
+      icon: <GraduationCap />,
+      path: "/master-class",
     },
     {
       title: "IQ Social",

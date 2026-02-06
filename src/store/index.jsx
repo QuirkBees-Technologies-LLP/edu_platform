@@ -44,6 +44,8 @@ import { educatorLiveTradeIdeasApiSlice } from "./api/educator/educatorLiveTrade
 import { adminLiveTradeIdeasApiSlice } from "./api/admin/adminLiveTradeIdeasApiSlice"
 import { adminStrategyApiSlice } from "./api/admin/adminStrategyApiSlice";
 import { clientStrategiesApiSlice } from "./api/client/clientStrategiesApiSlice";
+import { educatorMasterClassApiSlice } from "./api/educator/educatorMasterClassApiSlice";
+import { clientMasterClassApiSlice } from "./api/client/clientMasterClassApiSlice";
 
 const languagePersistConfig = {
   key: "language",
@@ -116,6 +118,8 @@ export const store = configureStore({
       adminLiveTradeIdeasApiSlice.reducer,
     [adminStrategyApiSlice.reducerPath]: adminStrategyApiSlice.reducer,
     [clientStrategiesApiSlice.reducerPath]: clientStrategiesApiSlice.reducer,
+    [educatorMasterClassApiSlice.reducerPath]: educatorMasterClassApiSlice.reducer,
+    [clientMasterClassApiSlice.reducerPath]: clientMasterClassApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -156,6 +160,8 @@ export const store = configureStore({
       adminLiveTradeIdeasApiSlice.middleware,
       adminStrategyApiSlice.middleware,
       clientStrategiesApiSlice.middleware,
+      educatorMasterClassApiSlice.middleware,
+      clientMasterClassApiSlice.middleware,
     ),
 });
 

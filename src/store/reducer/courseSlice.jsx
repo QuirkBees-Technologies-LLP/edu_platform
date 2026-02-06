@@ -8,6 +8,7 @@ import {
   reorderCourses as reorderCoursesApi,
   getAllStrategies,
   reorderStrategies as reorderStrategiesApi,
+  getAllMasterClasses,
 } from "@/services/lms.courses";
 import { getCourseByEducatorId } from "../../services/lms.courses";
 
@@ -43,6 +44,20 @@ export const fetchStrategies = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch strategies"
+      );
+    }
+  }
+);
+
+export const fetchMasterClasses = createAsyncThunk(
+  "master-classes/fetchAll",
+  async ({ params = {}, token }, { rejectWithValue }) => {
+    try {
+      const response = await getAllMasterClasses(params, token);
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch master classes"
       );
     }
   }
@@ -214,6 +229,26 @@ const courseSlice = createSlice({
         };
       })
       .addCase(fetchStrategies.rejected, (state, action) => {
+        state.status = COURSE_STATUS.FAILED;
+        state.error = action.payload;
+      })
+
+      // Fetch All Master Classes
+      .addCase(fetchMasterClasses.pending, (state) => {
+        state.status = COURSE_STATUS.LOADING;
+        state.error = null;
+      })
+      .addCase(fetchMasterClasses.fulfilled, (state, action) => {
+        state.status = COURSE_STATUS.SUCCEEDED;
+        state.courses = action?.payload || [];
+        state.pagination = {
+          currentPage: 1,
+          limit: action?.payload?.length || 0,
+          totalPages: 1,
+          totalRecords: action?.payload?.length || 0,
+        };
+      })
+      .addCase(fetchMasterClasses.rejected, (state, action) => {
         state.status = COURSE_STATUS.FAILED;
         state.error = action.payload;
       })

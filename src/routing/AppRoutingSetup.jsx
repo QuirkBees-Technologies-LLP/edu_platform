@@ -158,7 +158,8 @@ import EducatorLiveTradeIdeas from "../pages/educator/educator-live-trade-ideas/
 import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTradeIdeas";
 import ClientLiveIdeas from "../pages/student/client-live-ideas/ClientLiveIdeas";
 import TradingStrategies from "../pages/student/trading-strategies/TradingStrategies";
-
+import MasterClass from "../pages/educator/master-class/MasterClass";
+import MasterClassStudent from "../pages/student/MasterClass/MasterClass.jsx";
 const routes = {
   student: [
     { path: "/", element: <DefaultPage /> },
@@ -175,6 +176,7 @@ const routes = {
     { path: "/tranding-platform", element: <TrandingPlatform /> },
     { path: "/dashboard", element: <ClientDashboard /> },
     { path: "/recording-session", element: <RecordingSession /> },
+    { path: "/master-class", element: <MasterClassStudent /> },
     {
       path: "/educator-recording-session/:id",
       element: <UserRecordingSession />,
@@ -199,6 +201,7 @@ const routes = {
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
     { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
     { path: "/educator/courses", element: <Courses /> },
+    { path: "/educator/master-class", element: <MasterClass /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/recordings", element: <EducatorRecording /> },
     {
