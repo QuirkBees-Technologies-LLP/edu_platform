@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, BookOpen, ArrowRight } from "lucide-react";
 import {
   useGetClientEducatorAcademyCategoryQuery,
   useGetEducatorsListQuery,
@@ -152,12 +152,12 @@ const IqAcademyEducators = () => {
       prev.map((item) =>
         item._id === eduId
           ? {
-              ...item,
-              isFollowing: !item.isFollowing,
-              followingCount: item.isFollowing
-                ? Math.max(0, (item.followingCount || 0) - 1)
-                : (item.followingCount || 0) + 1,
-            }
+            ...item,
+            isFollowing: !item.isFollowing,
+            followingCount: item.isFollowing
+              ? Math.max(0, (item.followingCount || 0) - 1)
+              : (item.followingCount || 0) + 1,
+          }
           : item
       )
     );
@@ -171,12 +171,12 @@ const IqAcademyEducators = () => {
         prev.map((item) =>
           item._id === eduId
             ? {
-                ...item,
-                isFollowing: res.isFollowing,
-                followingCount: res.isFollowing
-                  ? (item.followingCount || 0) + 1
-                  : Math.max(0, (item.followingCount || 0) - 1),
-              }
+              ...item,
+              isFollowing: res.isFollowing,
+              followingCount: res.isFollowing
+                ? (item.followingCount || 0) + 1
+                : Math.max(0, (item.followingCount || 0) - 1),
+            }
             : item
         )
       );
@@ -200,12 +200,25 @@ const IqAcademyEducators = () => {
     refetch();
   }, [activeTab, category, searchText]);
 
-  //   const filteredEducators = useMemo(() => {
-  //   if (activeTab === "following") {
-  //     return safeArray(educatorList).filter((e) => e.isFollowing === true);
-  //   }
   //   return educatorList;
   // }, [activeTab, educatorList]);
+
+  // Helper to get button style based on category
+  const getMasterClassButtonStyle = (categories) => {
+    const firstCategory = categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      return "bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border-[#7C3AED]/50 hover:shadow-[#7C3AED]/30";
+    } else if (
+      categoryName.includes("digital marketing") ||
+      categoryName.includes("digitalmarketing")
+    ) {
+      return "bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border-[#38BDF8]/50 hover:shadow-[#38BDF8]/30";
+    } else {
+      return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -228,11 +241,10 @@ const IqAcademyEducators = () => {
                   setActiveTab("all");
                   setPage(1);
                 }}
-                className={`px-4 h-[40px] flex items-center rounded-lg text-sm font-medium transition-all ${
-                  activeTab === "all"
-                    ? "bg-[#4F46E5] text-white shadow"
-                    : "border border-gray-400 dark:border-gray-600 text-gray-700"
-                }`}
+                className={`px-4 h-[40px] flex items-center rounded-lg text-sm font-medium transition-all ${activeTab === "all"
+                  ? "bg-[#4F46E5] text-white shadow"
+                  : "border border-gray-400 dark:border-gray-600 text-gray-700"
+                  }`}
               >
                 All
               </button>
@@ -242,11 +254,10 @@ const IqAcademyEducators = () => {
                   setActiveTab("following");
                   setPage(1);
                 }}
-                className={`px-4 h-[40px] flex items-center rounded-lg text-sm font-medium transition-all ${
-                  activeTab === "following"
-                    ? "bg-[#4F46E5] text-white shadow"
-                    : "border border-gray-400 dark:border-gray-600 text-gray-700"
-                }`}
+                className={`px-4 h-[40px] flex items-center rounded-lg text-sm font-medium transition-all ${activeTab === "following"
+                  ? "bg-[#4F46E5] text-white shadow"
+                  : "border border-gray-400 dark:border-gray-600 text-gray-700"
+                  }`}
               >
                 Following
               </button>
@@ -330,9 +341,9 @@ const IqAcademyEducators = () => {
                       : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg")
                   }
                   onError={(e) =>
-                    (e.currentTarget.src = toAbsoluteUrl(
-                      "/media/images/2600x1600/live_banner.jpg"
-                    ))
+                  (e.currentTarget.src = toAbsoluteUrl(
+                    "/media/images/2600x1600/live_banner.jpg"
+                  ))
                   }
                   className="w-full h-full object-cover"
                   alt="banner"
@@ -352,13 +363,13 @@ const IqAcademyEducators = () => {
                       n.image
                         ? n.image
                         : toAbsoluteUrl(
-                            "/media/images/2600x1600/live_banner.jpg"
-                          )
+                          "/media/images/2600x1600/live_banner.jpg"
+                        )
                     }
                     onError={(e) =>
-                      (e.currentTarget.src = toAbsoluteUrl(
-                        "/media/images/2600x1600/live_banner.jpg"
-                      ))
+                    (e.currentTarget.src = toAbsoluteUrl(
+                      "/media/images/2600x1600/live_banner.jpg"
+                    ))
                     }
                     alt="profile"
                     className="w-20 h-20 rounded-full object-cover"
@@ -415,15 +426,13 @@ const IqAcademyEducators = () => {
                     <button
                       onClick={() => handleToggle(n)}
                       disabled={followLoadingId === n._id}
-                      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all w-full ${
-                        n.isFollowing
-                          ? "bg-[#4F46E5] text-white border border-[#4F46E5]"
-                          : "bg-[#4F46E5]/10 text-[#4F46E5] border border-[#4F46E5] dark:text-gray-900"
-                      } ${
-                        followLoadingId === n._id
+                      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all w-full ${n.isFollowing
+                        ? "bg-[#4F46E5] text-white border border-[#4F46E5]"
+                        : "bg-[#4F46E5]/10 text-[#4F46E5] border border-[#4F46E5] dark:text-gray-900"
+                        } ${followLoadingId === n._id
                           ? "opacity-60 cursor-not-allowed"
                           : ""
-                      }`}
+                        }`}
                     >
                       {followLoadingId === n._id ? (
                         <Loader2 className="animate-spin" size={18} />
@@ -464,6 +473,25 @@ const IqAcademyEducators = () => {
                       View Profile
                     </button>
                   </div>
+
+                  {/* MasterClass Button */}
+                  <button
+                    onClick={() => navigate(`/master-class/${n?._id}`)}
+                    className={`group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 mt-3 w-full ${getMasterClassButtonStyle(
+                      n?.categories
+                    )} text-gray-800 dark:text-white border rounded-full text-sm font-medium overflow-hidden`}
+                  >
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <BookOpen
+                      size={18}
+                      className="text-yellow-600 dark:text-yellow-400 group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <span className="relative">Go to My MasterClass</span>
+                    <ArrowRight
+                      size={16}
+                      className="text-gray-600 dark:text-white/70 group-hover:text-gray-900 dark:group-hover:text-white group-hover:translate-x-1 transition-all duration-300"
+                    />
+                  </button>
                 </div>
               </div>
             </div>

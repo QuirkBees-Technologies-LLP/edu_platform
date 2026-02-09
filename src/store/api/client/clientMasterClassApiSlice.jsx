@@ -8,11 +8,12 @@ export const clientMasterClassApiSlice = createApi({
     endpoints: (builder) => ({
         // Get all MasterClass
         getMasterClass: builder.query({
-            query: (params) => {
+            query: ({ id, params }) => {
                 const queryParams = new URLSearchParams();
                 if (params?.language) queryParams.append("language", params.language);
                 if (params?.search) queryParams.append("search", params.search);
-                return `/users/master-class?${queryParams.toString()}`;
+
+                return `/users/master-class/educator/${id}?${queryParams.toString()}`;
             },
             providesTags: ["MasterClass"],
         }),

@@ -14,7 +14,7 @@ import {
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
-import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
+import { Bitcoin, BarChart3, ArrowRight, BookOpen } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   useGetEducatorWithCoursesQuery,
@@ -118,6 +118,20 @@ const IqEducators = () => {
     }
   };
 
+
+  const getMasterClassButtonStyle = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      return "bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border-[#7C3AED]/50 hover:shadow-[#7C3AED]/30";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      return "bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border-[#38BDF8]/50 hover:shadow-[#38BDF8]/30";
+    } else {
+      return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
+    }
+  };
+
   const { id } = useParams();
   const {
     data: response,
@@ -195,6 +209,10 @@ const IqEducators = () => {
       setCallId(response.data.schedules[0].callId);
     }
   }, [response]);
+
+  const handleShowMasterClasses = () => {
+    navigate(`/master-class/${id}`);
+  };
 
 
   const [messages, setMessages] = useState([
@@ -322,17 +340,31 @@ const IqEducators = () => {
       {/* speaker center */}
       <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4`}>
         <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
-          <div className="flex items-center flex-wrap justify-center gap-4">
-            <img
-              src={response?.data?.educator?.image}
-              alt="Educator Profile"
-              className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
-            />
-            <div className="text-center">
-              <h3 className="text-white font-semibold text-base sm:text-lg mb-3">
+          <div className="flex items-center flex-wrap justify-center sm:justify-start gap-6">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <img
+                src={response?.data?.educator?.image}
+                alt="Educator Profile"
+                className="relative w-24 h-24 sm:w-28 sm:h-28 object-cover object-top rounded-full border-4 border-white shadow-xl"
+              />
+            </div>
+
+            <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
+              <h3 className="text-white font-bold text-md sm:text-xl mb-3 tracking-tight drop-shadow-md">
                 {response?.data?.educator?.first_name}{" "}
                 {response?.data?.educator?.last_name}
               </h3>
+
+              <button
+                onClick={handleShowMasterClasses}
+                className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:-translate-y-0.5 overflow-hidden`}
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <BookOpen size={18} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
+                <span className="relative">Go to My MasterClass</span>
+                <ArrowRight size={16} className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
+              </button>
             </div>
           </div>
         </div>
@@ -427,6 +459,8 @@ const IqEducators = () => {
               <Share2 size={16} />
               Share
             </button>
+
+
           </div>
           <button
             onClick={() => setShowRatingModal(true)}
@@ -594,6 +628,9 @@ const IqEducators = () => {
               )}
             </div>
           </div>
+
+
+
 
 
           {/* Course  */}

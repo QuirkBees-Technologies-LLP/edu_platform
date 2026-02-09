@@ -1919,11 +1919,11 @@ export const sideMenus = {
         // },
       ],
     },
-    {
-      title: "Master Class",
-      icon: <GraduationCap />,
-      path: "/master-class",
-    },
+    // {
+    //   title: "Master Class",
+    //   icon: <GraduationCap />,
+    //   path: "/master-class",
+    // },
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,

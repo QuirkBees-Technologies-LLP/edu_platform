@@ -176,7 +176,7 @@ const routes = {
     { path: "/tranding-platform", element: <TrandingPlatform /> },
     { path: "/dashboard", element: <ClientDashboard /> },
     { path: "/recording-session", element: <RecordingSession /> },
-    { path: "/master-class", element: <MasterClassStudent /> },
+    { path: "/master-class/:id", element: <MasterClassStudent /> },
     {
       path: "/educator-recording-session/:id",
       element: <UserRecordingSession />,

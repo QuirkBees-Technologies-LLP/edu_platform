@@ -5,6 +5,7 @@ import { selectSelectedLanguage } from '../../../store/reducer/studentLanagugeSl
 import { Loader2, CirclePlay } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
 import { useGetMasterClassQuery, useLazyGetMasterClassByIdQuery } from '@/store/api/client/clientMasterClassApiSlice';
+import { useLocation, useParams } from 'react-router';
 
 /**
  * Utility function to convert various video URLs to embeddable format
@@ -81,6 +82,15 @@ const Banner = () => (
 
 const MasterClass = () => {
     // ==================== STATE MANAGEMENT ====================
+
+
+    const { id } = useParams(); // Get ID from URL
+
+    const educatorId = id
+
+    console.log(educatorId, "educatorId");
+
+    // Initialize selectedStrategyId: URL param > location state > null
     const [selectedStrategyId, setSelectedStrategyId] = useState(null);
     const [activeLectureId, setActiveLectureId] = useState(null);
     const [activeLecture, setActiveLecture] = useState(null);
@@ -94,7 +104,11 @@ const MasterClass = () => {
         data: strategiesData,
         isLoading: strategiesLoading,
         error: strategiesError,
-    } = useGetMasterClassQuery({ language: selectedLanguage });
+        refetch: refetchStrategies,
+    } = useGetMasterClassQuery(
+        { id: educatorId, params: { language: selectedLanguage } },
+        { skip: !educatorId }
+    );
 
     // Lazy query for fetching individual strategy details
     const [fetchStrategy, {
