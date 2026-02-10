@@ -110,7 +110,7 @@ const IqInsight = () => {
       markets: activeMarket,
       refreshKey,
     });
-    const { data: educatorsData } = useGetAllEducatorsQuery();
+  const { data: educatorsData } = useGetAllEducatorsQuery();
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -125,7 +125,7 @@ const IqInsight = () => {
         // Append new unique items only
         setTradeIdeas((prevIdeas) => {
           const newIdeas = data.data.filter(
-            (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
+            (idea) => !prevIdeas.some((prev) => prev._id === idea._id),
           );
           return [...prevIdeas, ...newIdeas];
         });
@@ -146,7 +146,7 @@ const IqInsight = () => {
 
       if (node) observer.current.observe(node);
     },
-    [isFetching, page, totalPages]
+    [isFetching, page, totalPages],
   );
 
   const handleCloseView = () => {
@@ -247,7 +247,7 @@ const IqInsight = () => {
         setSearchText(value);
         setPage(1);
       }, 500),
-    []
+    [],
   );
 
   // bg - teal - 800;
@@ -301,14 +301,6 @@ const IqInsight = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
-      <Toolbar>
-        <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Insight" />
-          <ToolbarDescription>
-            {/* Oversee educator profiles, manage their sessions, and ensure quality trade and course content across the platform. */}
-          </ToolbarDescription>
-        </ToolbarHeading>
-      </Toolbar>
       <div className="flex justify-between items-center flex-wrap mb-8 gap-5">
         <div className="flex gap-3.5 flex-wrap">
           <div className="sm:px-3 p-2 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md border-purple-200 dark:border-gray-200">
@@ -354,47 +346,47 @@ const IqInsight = () => {
           </div> */}
         </div>
 
-          <div className="flex items-center gap-2 relative">
-              <Select
-                value={educator || ""}
-                onValueChange={(val) => {
-                  setEducator(val);
-                }}
-              >
-                <SelectTrigger className="w-[190px] h-11">
-                  <SelectValue placeholder="Select educator">
-                    {educator
-                      ? educatorsData?.data?.find((e) => e._id === educator)
-                          ?.first_name?.last_name
-                      : "Select educator"}
-                  </SelectValue>
-                </SelectTrigger>
+        <div className="flex items-center gap-2 relative">
+          <Select
+            value={educator || ""}
+            onValueChange={(val) => {
+              setEducator(val);
+            }}
+          >
+            <SelectTrigger className="w-[190px] h-11">
+              <SelectValue placeholder="Select educator">
+                {educator
+                  ? educatorsData?.data?.find((e) => e._id === educator)
+                      ?.first_name?.last_name
+                  : "Select educator"}
+              </SelectValue>
+            </SelectTrigger>
 
-                <SelectContent>
-                  {isLoading && (
-                    <SelectItem value="loading" disabled>
-                      Loading...
-                    </SelectItem>
-                  )}
-
-                  {educatorsData?.data?.map((item) => (
-                    <SelectItem key={item._id} value={item._id}>
-                      {item.first_name} {item.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {educator && (
-                <button
-                  type="button"
-                  onClick={() => setEducator("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                >
-                  ✖
-                </button>
+            <SelectContent>
+              {isLoading && (
+                <SelectItem value="loading" disabled>
+                  Loading...
+                </SelectItem>
               )}
-            </div>
+
+              {educatorsData?.data?.map((item) => (
+                <SelectItem key={item._id} value={item._id}>
+                  {item.first_name} {item.last_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {educator && (
+            <button
+              type="button"
+              onClick={() => setEducator("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              ✖
+            </button>
+          )}
+        </div>
 
         <div className="flex gap-3 sm:gap-6 flex-wrap mr-3">
           <SearchFilterInput
@@ -538,8 +530,8 @@ const IqInsight = () => {
                                   prev.map((t) =>
                                     t._id === idea?._id
                                       ? { ...t, isLoading: true }
-                                      : t
-                                  )
+                                      : t,
+                                  ),
                                 );
 
                                 // Preload next image
@@ -554,8 +546,8 @@ const IqInsight = () => {
                                             currentIndex: newIndex,
                                             isLoading: false,
                                           }
-                                        : t
-                                    )
+                                        : t,
+                                    ),
                                   );
                                 };
                               }}
@@ -580,8 +572,8 @@ const IqInsight = () => {
                                   prev.map((t) =>
                                     t._id === idea._id
                                       ? { ...t, isLoading: true }
-                                      : t
-                                  )
+                                      : t,
+                                  ),
                                 );
 
                                 // Preload next image
@@ -596,8 +588,8 @@ const IqInsight = () => {
                                             currentIndex: newIndex,
                                             isLoading: false,
                                           }
-                                        : t
-                                    )
+                                        : t,
+                                    ),
                                   );
                                 };
                               }}
@@ -622,8 +614,8 @@ const IqInsight = () => {
                                     prev.map((t) =>
                                       t._id === idea._id
                                         ? { ...t, isLoading: true }
-                                        : t
-                                    )
+                                        : t,
+                                    ),
                                   );
 
                                   const img = new Image();
@@ -637,8 +629,8 @@ const IqInsight = () => {
                                               currentIndex: idx,
                                               isLoading: false,
                                             }
-                                          : t
-                                      )
+                                          : t,
+                                      ),
                                     );
                                   };
                                 }}

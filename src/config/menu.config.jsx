@@ -1801,38 +1801,27 @@ export const sideMenus = {
   ],
   student: [
     {
-      title: "Dashboard",
+      title: "Home",
       icon: <LayoutDashboard />,
-      // path: '/dashboard',
+      path: '/dashboard',
       children: [
-        {
-          title: "Home",
-          icon: <Dot />,
-          path: "/dashboard",
-        },
         {
           title: "Fast Start Training",
           icon: <Dot />,
           path: "/fast-start-training",
         },
-
       ],
     },
     {
-      title: "Academy",
+      title: "Academy Courses",
       icon: <School />,
       path: "/iq-vault",
     },
     {
-      title: "IQ Live",
+      title: "Live Streams",
       icon: <LayoutDashboard />,
-      // path: '/dashboard',
+      path: "/iq-academy",
       children: [
-        {
-          title: "Live Sessions",
-          icon: <Dot />,
-          path: "/iq-academy",
-        },
         {
           title: "Educators",
           icon: <Dot />,
@@ -1843,24 +1832,14 @@ export const sideMenus = {
     },
 
     {
-      title: "IQ Insight",
-      icon: <ChartLine />,
-      path: "/iq-insight",
-    },
-    {
       title: "IQ Crypto Projects",
       icon: <BadgeCent />,
       path: "/iq-crypto",
     },
     {
-      title: "IQ Ideas",
+      title: "Ideas & Insights",
       icon: <Lightbulb />,
-      path: "/ideas",
-    },
-    {
-      title: "IQ Live Ideas",
-      icon: <Lightbulb />,
-      path: "/live-ideas",
+      path: "/ideas"
     },
 
     // {
@@ -1894,14 +1873,10 @@ export const sideMenus = {
     //   path: "/iq-strategies",
     // },
     {
-      title: "IQ Strategies",
+      title: "Strategies",
       icon: <ChartNoAxesCombined />,
+      path: "/trading-strategies",
       children: [
-        {
-          title: "Strategies Academy",
-          icon: <ChartNoAxesCombined />,
-          path: "/trading-strategies",
-        },
         {
           title: "Strategy Access",
           icon: <ChartNoAxesCombined />,
