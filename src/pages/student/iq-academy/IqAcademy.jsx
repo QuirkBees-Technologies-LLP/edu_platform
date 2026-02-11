@@ -7,6 +7,7 @@ import {
   useGetAcademySingleCategoryQuery,
 } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import { useGetCategoryWiseStrategyQuery } from "../../../store/api/client/clientStrategiesApiSlice";
+import { useGetStrategiesNameQuery } from "../../../store/api/client/clientStrategiesApiSlice";
 import Loader from "../../../components/ui/loader";
 import { addDays, startOfWeek } from "date-fns";
 import { CalendarDays, List } from "lucide-react";
@@ -27,7 +28,7 @@ export default function IqAcademy() {
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeEducatorId, setActiveEducatorId] = useState("all");
   const [activeStrategyId, setActiveStrategyId] = useState("all");
-  const [viewType, setViewType] = useState("list");
+  const [viewType, setViewType] = useState("grid");
 
   // Filter states for list view (arrays for multi-select)
   const [tradingType, setTradingType] = useState([]);
@@ -47,6 +48,9 @@ export default function IqAcademy() {
 
   const { data: categoryData, isLoading: isCategoryLoading } =
     useGetAcademyCategoryQuery();
+
+  const { data: strategiesName, isLoading: isStrategNameLoading } =
+    useGetStrategiesNameQuery();
 
   useEffect(() => {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
@@ -121,23 +125,52 @@ export default function IqAcademy() {
         </div>
       )}
 
+      {isStrategNameLoading && (
+        <div className="py-10 flex justify-center">
+          <Loader />
+        </div>
+      )}
+
+
       {/* CATEGORY TABS */}
-      <div className="flex gap-4 mb-6 flex-wrap">
-        {categoryData?.data?.map((cat) => (
-          <button
-            key={cat._id}
-            onClick={() => {
-              setActiveCategoryId(cat._id);
-              setActiveEducatorId("all");
-            }}
-            className={`pb-2 border-b-2 text-sm ${activeCategoryId === cat._id
-              ? "border-gray-500 text-black dark:text-gray-500"
-              : "border-transparent text-gray-500"
-              }`}
-          >
-            {cat.name}
-          </button>
-        ))}
+      <div className="flex gap-4 mb-6 justify-between">
+        {viewType == "grid" && (
+          <div className="flex gap-4">
+            {
+              strategiesName?.data?.map((strategy) => (
+                <button
+                  key={strategy._id}
+                  onClick={() => {
+                    setActiveStrategyId(strategy._id);
+                  }}
+                  className={`pb-2 border-b-2 text-sm ${activeStrategyId === strategy._id
+                    ? "border-gray-500 text-black dark:text-gray-500"
+                    : "border-transparent text-gray-500"
+                    }`}
+                >
+                  {strategy.title}
+                </button>
+              ))
+            }
+          </div>
+        )}
+        <div className="flex gap-4">
+          {categoryData?.data?.map((cat) => (
+            <button
+              key={cat._id}
+              onClick={() => {
+                setActiveCategoryId(cat._id);
+                setActiveEducatorId("all");
+              }}
+              className={`pb-2 border-b-2 text-sm ${activeCategoryId === cat._id
+                ? "border-gray-500 text-black dark:text-gray-500"
+                : "border-transparent text-gray-500"
+                }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
       </div>
 
 
@@ -196,15 +229,6 @@ export default function IqAcademy() {
 
         {/* Right: View Tabs - Desktop */}
         <div className="hidden md:flex bg-gray-100 rounded-lg p-1 w-fit">
-          <button
-            onClick={() => setViewType("list")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm transition ${viewType === "list"
-              ? "bg-primary text-white shadow font-semibold"
-              : "text-gray-500 hover:text-gray-700"
-              }`}
-          >
-            <List size={20} />
-          </button>
 
           <button
             onClick={() => setViewType("grid")}
@@ -215,6 +239,18 @@ export default function IqAcademy() {
           >
             <CalendarDays size={20} />
           </button>
+
+          <button
+            onClick={() => setViewType("list")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm transition ${viewType === "list"
+              ? "bg-primary text-white shadow font-semibold"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
+          >
+            <List size={20} />
+          </button>
+
+
         </div>
       </div>
 

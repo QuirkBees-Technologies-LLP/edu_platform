@@ -21,6 +21,7 @@ import {
   ListTodo,
   Star,
   BadgeCent,
+  MonitorPlay,
   GraduationCap,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
@@ -1819,7 +1820,7 @@ export const sideMenus = {
     },
     {
       title: "Live Streams",
-      icon: <LayoutDashboard />,
+      icon: <MonitorPlay />,
       path: "/iq-academy",
       children: [
         {

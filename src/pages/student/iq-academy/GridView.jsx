@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { isSameDay } from "date-fns";
+import { isSameDay, format } from "date-fns";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { Calendar, Clock } from "lucide-react";
@@ -72,8 +72,35 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
         }
     }, [educators, selectedEducatorIdInternal]);
 
+
     // Get the selected educator for mobile view
     const selectedEducator = educators?.find(e => e?._id === selectedEducatorIdInternal) || educators?.[0];
+
+    // Flatten all schedules for Desktop Grid View
+    // Flatten all schedules for Desktop Grid View
+    const allSchedules = useMemo(() => {
+        if (!educators) return [];
+        return educators.flatMap(educator =>
+            (educator.schedules || []).map(schedule => ({
+                ...schedule,
+                educator
+            }))
+        );
+    }, [educators]);
+
+    // Calculate active hours based on schedules within the current days view
+    const activeHours = useMemo(() => {
+        const hoursSet = new Set();
+        allSchedules.forEach(schedule => {
+            const sDate = new Date(schedule.datetime);
+            // Check if this schedule falls on any of the currently displayed days
+            const isRelevantDay = days.some(day => isSameDay(day, sDate));
+            if (isRelevantDay) {
+                hoursSet.add(sDate.getHours());
+            }
+        });
+        return Array.from(hoursSet).sort((a, b) => a - b);
+    }, [allSchedules, days]);
 
     if (isLoading || !activeCategoryId || !singleCategoryData) {
         return null;
@@ -121,14 +148,15 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                             )}
                         </div>
                         <div className="calender">
-                            <div className="grid grid-cols-8 text-center table_head">
-                                <div className="bg-[#1A1446] text-gray-100 dark:text-gray-800 py-5 px-4 font-normal ">
-                                    Educators
+                            {/* --- HEADER: Time + Days --- */}
+                            <div className="grid grid-cols-8 text-center table_head sticky top-0 z-10">
+                                <div className="bg-[#1A1446] text-white py-5 px-4 font-normal flex items-center justify-center border-r border-[#2d2d3f]">
+                                    Time
                                 </div>
-                                {days.map((day, dayIndex) => (
+                                {days.map((day) => (
                                     <div
                                         key={day.toISOString()}
-                                        className="bg-[#1A1446] text-gray-100 dark:text-gray-800 py-5 px-4 font-normal"
+                                        className={`bg-[#1A1446] text-white py-5 px-4 font-normal border-r border-[#2d2d3f] last:border-r-0 ${isSameDay(day, new Date()) ? "bg-[#252538]" : ""}`}
                                     >
                                         {day.toLocaleDateString("en-US", {
                                             weekday: "short",
@@ -138,76 +166,109 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                 ))}
                             </div>
 
-                            {educators?.map((educator, index) => (
-                                <div key={index} className="grid grid-cols-8 border-t">
-                                    <div className="flex flex-col items-center justify-center p-4 bg-gray-200 border-r">
-                                        <img
-                                            src={educator?.image}
-                                            alt={educator?.first_name}
-                                            onClick={() =>
-                                                navigate(`/iq-educators/${educator?._id}`)
-                                            }
-                                            className="cursor-pointer w-12 h-12 rounded-full mb-2 object-cover object-top"
-                                        />
-                                        <span className="text-xs font-normal text-gray-800 text-center">
-                                            {educator?.first_name} {educator?.last_name}
-                                        </span>
-                                    </div>
-
-                                    {days.map((day) => {
-                                        const filtered =
-                                            educator.schedules?.filter((s) =>
-                                                isSameDay(new Date(s.datetime), day)
-                                            ) || [];
-
+                            {/* --- BODY: Hours Rows --- */}
+                            <div className="bg-[#0f0f15]">
+                                {activeHours.length === 0 ? (
+                                    <div className="text-gray-500 text-center py-10">No sessions scheduled for this week.</div>
+                                ) : (
+                                    activeHours.map((hour) => {
                                         return (
-                                            <div
-                                                key={day.toISOString()}
-                                                className={`p-2 min-h-[80px] border-r flex flex-col justify-center gap-2 ${isTodayColumn(day) ? "bg-gray-300" : ""
-                                                    }`}
-                                            >
-                                                {filtered.length > 0 ? (
-                                                    filtered.map((s, i) => {
-                                                        const isDigitalMkt = isDigitalMarketingCategory(s);
-                                                        let todayClass, defaultClass;
-                                                        if (isDigitalMkt) {
-                                                            todayClass = `${digitalMarketingColors.solid} text-white font-medium shadow-lg`;
-                                                            defaultClass = `${digitalMarketingColors.light} ${digitalMarketingColors.text}`;
-                                                        } else {
-                                                            const tzKey = getTimeZoneKey(s);
-                                                            todayClass = `${timeZoneColors[tzKey]} text-white font-medium shadow-lg`;
-                                                            defaultClass = `${timeZoneLightBgColors[tzKey]} ${timeZoneTextColors[tzKey]}`;
-                                                        }
-                                                        return (
-                                                            <div
-                                                                key={i}
-                                                                onClick={() =>
-                                                                    navigate(`/iq-educators/${educator?._id}`)
-                                                                }
-                                                                className={`text-xs rounded-lg p-2 text-center cursor-pointer ${isToday(s?.datetime)
-                                                                    ? todayClass
-                                                                    : defaultClass
-                                                                    }`}
-                                                            >
-                                                                {s?.title}
-                                                                <br />
-                                                                {new Date(s?.datetime).toLocaleTimeString([], {
-                                                                    hour: "2-digit",
-                                                                    minute: "2-digit",
+                                            <div key={hour} className="grid grid-cols-8 min-h-[100px] border-b border-[#2d2d3f]">
+                                                {/* Time Column */}
+                                                <div className="flex items-center justify-center bg-[#151520] border-r border-[#2d2d3f] text-gray-400 font-semibold text-sm">
+                                                    {format(new Date().setHours(hour, 0), "h a")}
+                                                </div>
+
+                                                {/* Day Columns */}
+                                                {days.map((day) => {
+                                                    // Find schedules for this Day + Hour
+                                                    // We need to flatten props.educators to search efficiently? 
+                                                    // Or just iterate educators here (might be slow if many educators).
+                                                    // Let's flatten once above return or inside useMemo.
+                                                    // Since we are inside the map, we can't useMemo efficiently here. 
+                                                    // WE SHOULD MOVE FLATTENING UP.
+                                                    // See 'Insertion 2' below.
+
+                                                    const cellSchedules = allSchedules.filter(s =>
+                                                        isSameDay(new Date(s.datetime), day) &&
+                                                        new Date(s.datetime).getHours() === hour
+                                                    );
+
+                                                    const isDayToday = isSameDay(day, new Date());
+
+                                                    return (
+                                                        <div key={day.toISOString()} className={`p-2 border-r border-[#2d2d3f] last:border-r-0 relative group ${isDayToday ? "bg-[#181824]" : ""}`}>
+                                                            <div className="flex flex-col gap-2 h-full">
+                                                                {cellSchedules.map((schedule, idx) => {
+                                                                    const isDigi = isDigitalMarketingCategory(schedule);
+                                                                    const tzKey = getTimeZoneKey(schedule);
+                                                                    const isScheduleToday = isSameDay(new Date(schedule.datetime), new Date());
+
+                                                                    let cardClasses;
+
+                                                                    if (isDigi) {
+                                                                        if (isScheduleToday) {
+                                                                            cardClasses = `${digitalMarketingColors.solid} text-white shadow-md`;
+                                                                        } else {
+                                                                            cardClasses = `${digitalMarketingColors.light} ${digitalMarketingColors.text}`;
+                                                                        }
+                                                                    } else {
+                                                                        if (isScheduleToday) {
+                                                                            cardClasses = `${timeZoneColors[tzKey]} text-white shadow-md`;
+                                                                        } else {
+                                                                            cardClasses = `${timeZoneLightBgColors[tzKey]} ${timeZoneTextColors[tzKey]}`;
+                                                                        }
+                                                                    }
+
+                                                                    const nameColor = isScheduleToday ? "text-white" : "text-gray-800";
+
+                                                                    return (
+                                                                        <div
+                                                                            key={schedule._id || idx}
+                                                                            onClick={() => navigate(`/iq-educators/${schedule.educator?._id}`)}
+                                                                            className={`
+                                                                            relative p-2 rounded-lg cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]
+                                                                            ${cardClasses} border border-transparent
+                                                                        `}
+                                                                        >
+                                                                            {/* Header: Img + Name */}
+                                                                            <div className="flex items-center gap-2 mb-1">
+                                                                                <img
+                                                                                    src={schedule.educator?.image}
+                                                                                    alt={schedule.educator?.first_name}
+                                                                                    className="w-6 h-6 rounded-full object-cover border border-white shadow-sm"
+                                                                                />
+                                                                                <div className="min-w-0">
+                                                                                    <p className={`text-[11px] font-bold truncate leading-tight ${nameColor}`}>
+                                                                                        {schedule.educator?.first_name}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Title */}
+                                                                            <p className={`text-[10px] truncate opacity-90 mb-1 ${isScheduleToday ? "text-white/90" : "text-gray-600"}`}>
+                                                                                {schedule.title}
+                                                                            </p>
+
+                                                                            {/* Time Badge */}
+                                                                            <div className={`flex items-center gap-1 ${isScheduleToday ? "bg-white/20" : "bg-white/60"} px-1.5 py-0.5 rounded w-fit`}>
+                                                                                <Clock size={10} className={isScheduleToday ? "text-white" : "text-gray-600"} />
+                                                                                <span className={`text-[10px] font-semibold ${isScheduleToday ? "text-white" : "text-gray-700"}`}>
+                                                                                    {format(new Date(schedule.datetime), "h:mm a")}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
                                                                 })}
                                                             </div>
-                                                        );
-                                                    })
-                                                ) : (
-                                                    <div className="text-xs text-gray-700 text-center">
-                                                        –
-                                                    </div>
-                                                )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         );
-                                    })}
-                                </div>
-                            ))}
+                                    })
+                                )}
+                            </div>
                         </div>
                     </div>
 

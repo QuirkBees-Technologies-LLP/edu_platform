@@ -478,9 +478,9 @@ export default function ListView({
       </div>
 
       {/* 🔥 EDUCATOR SLIDER */}
-      {strategyEducators.length > 0 ? (
+      {/* {strategyEducators.length > 0 ? (
         <div className="mb-6 relative">
-          {/* Left Arrow */}
+        
           <button
             className="swiper-button-prev-custom absolute left-0 top-1/2 -translate-y-1/2 z-10 
              w-9 h-9 flex items-center justify-center rounded-full 
@@ -489,14 +489,13 @@ export default function ListView({
             ❮
           </button>
 
-          {/* Right Arrow */}
           <button
             className="swiper-button-next-custom absolute right-0 top-1/2 -translate-y-1/2 z-10 
              w-9 h-9 flex items-center justify-center rounded-full 
              bg-white dark:bg-gray-200 shadow hover:bg-gray-100 dark:hover:bg-gray-100"
           >
             ❯
-          </button>
+          </button> 
           <div className="w-full overflow-hidden">
             <Swiper
               slidesPerView={3}
@@ -517,7 +516,6 @@ export default function ListView({
                 1600: { slidesPerView: 8 },
               }}
             >
-              {/* All Educators Button */}
               <SwiperSlide>
                 <div
                   onClick={() => setActiveEducatorId("all")}
@@ -585,7 +583,7 @@ export default function ListView({
             </p>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* 🔥 TIMEZONE/CATEGORY LEGEND HEADER */}
       {strategyEducators.length > 0 && (

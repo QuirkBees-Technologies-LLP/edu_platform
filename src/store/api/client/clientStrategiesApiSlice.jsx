@@ -23,6 +23,12 @@ export const clientStrategiesApiSlice = createApi({
             providesTags: (result, error, id) => [{ type: "Strategy", id }],
         }),
 
+        // Get strategies name
+        getStrategiesName: builder.query({
+            query: () => `/users/strategies/list`,
+            providesTags: ["Strategy"],
+        }),
+
         // Get category-wise strategy data
         getCategoryWiseStrategy: builder.query({
             query: (params) => {
@@ -52,4 +58,5 @@ export const {
     useGetStrategyByIdQuery,
     useLazyGetStrategyByIdQuery,
     useGetCategoryWiseStrategyQuery,
+    useGetStrategiesNameQuery,
 } = clientStrategiesApiSlice;
