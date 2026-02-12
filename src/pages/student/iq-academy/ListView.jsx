@@ -120,10 +120,10 @@ export default function ListView({
   const isDigitalMkt = isDigitalMarketingCategory(activeCategoryData);
 
   const handleMultiSelect = (value, currentValues, setValues) => {
-    const exists = currentValues.includes(value);
+    const exists = currentValues?.includes(value);
     const updated = exists
-      ? currentValues.filter((v) => v !== value)
-      : [...currentValues, value];
+      ? currentValues?.filter((v) => v !== value)
+      : [...(currentValues || []), value];
     setValues(updated);
   };
 
@@ -135,7 +135,7 @@ export default function ListView({
     if (!educatorTimeZone) return "bg-gray-300";
     // Handle if timeZone is an array (take first value)
     const tz = Array.isArray(educatorTimeZone)
-      ? educatorTimeZone[0]
+      ? educatorTimeZone?.[0]
       : educatorTimeZone;
     return timeZoneColors[tz?.toLowerCase()] || "bg-gray-300";
   };
@@ -155,7 +155,7 @@ export default function ListView({
         ? "bg-gray-500 text-white"
         : "bg-gray-200 text-gray-700";
     const tz = Array.isArray(educatorTimeZone)
-      ? educatorTimeZone[0]
+      ? educatorTimeZone?.[0]
       : educatorTimeZone;
     const tzLower = tz?.toLowerCase();
 
@@ -297,8 +297,8 @@ export default function ListView({
             <PopoverTrigger asChild>
               <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
                 <span className="truncate text-sm">
-                  {tradingType.length > 0
-                    ? `${tradingType.length} Trading Style Selected`
+                  {tradingType?.length > 0
+                    ? `${tradingType?.length} Trading Style Selected`
                     : "Select Trading Style"}
                 </span>
                 <ChevronDown size={16} />
@@ -308,7 +308,7 @@ export default function ListView({
               <Command>
                 <CommandGroup>
                   {tradingTypeOptions.map((item) => {
-                    const selected = tradingType.includes(item.value);
+                    const selected = tradingType?.includes(item?.value);
                     return (
                       <CommandItem
                         key={item.value}
@@ -337,7 +337,7 @@ export default function ListView({
               </Command>
             </PopoverContent>
           </Popover>
-          {tradingType.length > 0 && (
+          {tradingType?.length > 0 && (
             <button
               type="button"
               onClick={() => setTradingType([])}
@@ -354,8 +354,8 @@ export default function ListView({
             <PopoverTrigger asChild>
               <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
                 <span className="truncate text-sm">
-                  {tradingMethod.length > 0
-                    ? `${tradingMethod.length} Trading Method Selected`
+                  {tradingMethod?.length > 0
+                    ? `${tradingMethod?.length} Trading Method Selected`
                     : "Select Trading Method"}
                 </span>
                 <ChevronDown size={16} />
@@ -365,7 +365,7 @@ export default function ListView({
               <Command>
                 <CommandGroup>
                   {tradingMethodOptions.map((item) => {
-                    const selected = tradingMethod.includes(item.value);
+                    const selected = tradingMethod?.includes(item?.value);
                     return (
                       <CommandItem
                         key={item.value}
@@ -394,7 +394,7 @@ export default function ListView({
               </Command>
             </PopoverContent>
           </Popover>
-          {tradingMethod.length > 0 && (
+          {tradingMethod?.length > 0 && (
             <button
               type="button"
               onClick={() => setTradingMethod([])}
@@ -411,8 +411,8 @@ export default function ListView({
             <PopoverTrigger asChild>
               <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
                 <span className="truncate text-sm">
-                  {timeZone.length > 0
-                    ? `${timeZone.length} Time Zone Selected`
+                  {timeZone?.length > 0
+                    ? `${timeZone?.length} Time Zone Selected`
                     : "Select Time Zone"}
                 </span>
                 <ChevronDown size={16} />
@@ -422,7 +422,7 @@ export default function ListView({
               <Command>
                 <CommandGroup>
                   {timeZoneOptions.map((item) => {
-                    const selected = timeZone.includes(item.value);
+                    const selected = timeZone?.includes(item?.value);
                     return (
                       <CommandItem
                         key={item.value}
@@ -447,7 +447,7 @@ export default function ListView({
               </Command>
             </PopoverContent>
           </Popover>
-          {timeZone.length > 0 && (
+          {timeZone?.length > 0 && (
             <button
               type="button"
               onClick={() => setTimeZone([])}
@@ -626,9 +626,9 @@ export default function ListView({
             strategyEducators?.flatMap((edu) => edu?.ongoing || [])?.length >
               0 ? (
               strategyEducators?.flatMap((edu) =>
-                (edu?.ongoing || []).map((course, i) => (
+                (edu?.ongoing || [])?.map((course, i) => (
                   <div
-                    key={`${edu._id}-ongoing-${i}`}
+                    key={`${edu?._id}-ongoing-${i}`}
                     className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
                   >
                     {/* Educator Card */}
@@ -694,7 +694,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Clock size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime).toLocaleTimeString(
+                                {new Date(course?.datetime).toLocaleTimeString(
                                   [],
                                   { hour: "2-digit", minute: "2-digit" },
                                 )}
@@ -703,7 +703,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Calendar size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime)
+                                {new Date(course?.datetime)
                                   .toLocaleDateString("en-GB", {
                                     day: "2-digit",
                                     weekday: "short",
@@ -722,7 +722,7 @@ export default function ListView({
               <p className="text-sm text-gray-500">No ongoing sessions.</p>
             )
           ) : activeEducator?.ongoing?.length > 0 ? (
-            activeEducator.ongoing.map((course, i) => (
+            activeEducator?.ongoing?.map((course, i) => (
               <div
                 key={i}
                 className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -790,7 +790,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Clock size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime).toLocaleTimeString([], {
+                            {new Date(course?.datetime).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
@@ -799,7 +799,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Calendar size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime)
+                            {new Date(course?.datetime)
                               .toLocaleDateString("en-GB", {
                                 day: "2-digit",
                                 weekday: "short",
@@ -829,7 +829,7 @@ export default function ListView({
             strategyEducators?.flatMap((edu) => edu?.upcoming || [])?.length >
               0 ? (
               strategyEducators?.flatMap((edu) =>
-                (edu?.upcoming || []).map((course, i) => (
+                (edu?.upcoming || [])?.map((course, i) => (
                   <div
                     key={`${edu?._id}-upcoming-${i}`}
                     className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -897,7 +897,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Clock size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime).toLocaleTimeString(
+                                {new Date(course?.datetime).toLocaleTimeString(
                                   [],
                                   { hour: "2-digit", minute: "2-digit" },
                                 )}
@@ -906,7 +906,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Calendar size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime)
+                                {new Date(course?.datetime)
                                   .toLocaleDateString("en-GB", {
                                     day: "2-digit",
                                     weekday: "short",
@@ -925,7 +925,7 @@ export default function ListView({
               <p className="text-sm text-gray-500">No upcoming sessions.</p>
             )
           ) : activeEducator?.upcoming?.length > 0 ? (
-            activeEducator.upcoming.map((course, i) => (
+            activeEducator?.upcoming?.map((course, i) => (
               <div
                 key={i}
                 className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -993,7 +993,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Clock size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime).toLocaleTimeString([], {
+                            {new Date(course?.datetime).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
@@ -1002,7 +1002,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Calendar size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime)
+                            {new Date(course?.datetime)
                               .toLocaleDateString("en-GB", {
                                 day: "2-digit",
                                 weekday: "short",
@@ -1031,7 +1031,7 @@ export default function ListView({
           {activeEducatorId === "all" ? (
             strategyEducators?.flatMap((edu) => edu?.past || [])?.length > 0 ? (
               strategyEducators?.flatMap((edu) =>
-                (edu?.past || []).map((course, i) => (
+                (edu?.past || [])?.map((course, i) => (
                   <div
                     key={`${edu?._id}-past-${i}`}
                     className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -1099,7 +1099,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Clock size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime).toLocaleTimeString(
+                                {new Date(course?.datetime).toLocaleTimeString(
                                   [],
                                   { hour: "2-digit", minute: "2-digit" },
                                 )}
@@ -1108,7 +1108,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Calendar size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime)
+                                {new Date(course?.datetime)
                                   .toLocaleDateString("en-GB", {
                                     day: "2-digit",
                                     weekday: "short",
@@ -1127,7 +1127,7 @@ export default function ListView({
               <p className="text-sm text-gray-500">No past sessions.</p>
             )
           ) : activeEducator?.past?.length > 0 ? (
-            activeEducator.past.map((course, i) => (
+            activeEducator?.past?.map((course, i) => (
               <div
                 key={i}
                 className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"

@@ -50,9 +50,9 @@ const isDigitalMarketingCategory = (schedule) => {
 // Helper function to get timezone key from schedule
 const getTimeZoneKey = (schedule) => {
     const tz = schedule?.timeZone?.toLowerCase() || "";
-    if (tz.includes("new_york") || tz.includes("new york") || tz.includes("america")) return "new_york";
-    if (tz.includes("london") || tz.includes("europe")) return "london";
-    if (tz.includes("asian") || tz.includes("asia") || tz.includes("tokyo") || tz.includes("sydney")) return "asian";
+    if (tz?.includes("new_york") || tz?.includes("new york") || tz?.includes("america")) return "new_york";
+    if (tz?.includes("london") || tz?.includes("europe")) return "london";
+    if (tz?.includes("asian") || tz?.includes("asia") || tz?.includes("tokyo") || tz?.includes("sydney")) return "asian";
     return "new_york"; // default
 };
 
@@ -80,8 +80,8 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
     // Flatten all schedules for Desktop Grid View
     const allSchedules = useMemo(() => {
         if (!educators) return [];
-        return educators.flatMap(educator =>
-            (educator.schedules || []).map(schedule => ({
+        return educators?.flatMap(educator =>
+            (educator?.schedules || [])?.map(schedule => ({
                 ...schedule,
                 educator
             }))
@@ -91,10 +91,10 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
     // Calculate active hours based on schedules within the current days view
     const activeHours = useMemo(() => {
         const hoursSet = new Set();
-        allSchedules.forEach(schedule => {
-            const sDate = new Date(schedule.datetime);
+        allSchedules?.forEach(schedule => {
+            const sDate = new Date(schedule?.datetime);
             // Check if this schedule falls on any of the currently displayed days
-            const isRelevantDay = days.some(day => isSameDay(day, sDate));
+            const isRelevantDay = days?.some(day => isSameDay(day, sDate));
             if (isRelevantDay) {
                 hoursSet.add(sDate.getHours());
             }
@@ -149,125 +149,234 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                         </div>
                         <div className="calender">
                             {/* --- HEADER: Time + Days --- */}
-                            <div className="grid grid-cols-8 text-center table_head sticky top-0 z-10">
-                                <div className="bg-[#1A1446] text-white py-5 px-4 font-normal flex items-center justify-center border-r border-[#2d2d3f]">
-                                    Time
-                                </div>
-                                {days.map((day) => (
-                                    <div
-                                        key={day.toISOString()}
-                                        className={`bg-[#1A1446] text-white py-5 px-4 font-normal border-r border-[#2d2d3f] last:border-r-0 ${isSameDay(day, new Date()) ? "bg-[#252538]" : ""}`}
-                                    >
-                                        {day.toLocaleDateString("en-US", {
-                                            weekday: "short",
-                                            day: "numeric",
-                                        })}
+                            <div className="flex sticky top-0 z-10">
+                                <div className="w-10 min-w-[40px] shrink-0 bg-[#1A1446]"></div>
+                                <div className="grid grid-cols-8 text-center table_head flex-1">
+                                    <div className="bg-[#1A1446] text-white py-5 px-4 font-normal flex items-center justify-center border-r border-[#2d2d3f]">
+                                        Time
                                     </div>
-                                ))}
+                                    {days.map((day) => (
+                                        <div
+                                            key={day.toISOString()}
+                                            className={`bg-[#1A1446] text-white py-5 px-4 font-normal border-r border-[#2d2d3f] last:border-r-0 ${isSameDay(day, new Date()) ? "bg-[#252538]" : ""}`}
+                                        >
+                                            {day.toLocaleDateString("en-US", {
+                                                weekday: "short",
+                                                day: "numeric",
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
-                            {/* --- BODY: Hours Rows --- */}
+                            {/* --- BODY: Hours Rows Grouped by Session --- */}
                             <div className="bg-[#0f0f15]">
-                                {activeHours.length === 0 ? (
-                                    <div className="text-gray-500 text-center py-10">No sessions scheduled for this week.</div>
-                                ) : (
-                                    activeHours.map((hour) => {
+                                {(() => {
+                                    const isDigiView = singleCategoryData?.data?.category?.name?.toLowerCase()?.includes("digital") ||
+                                        singleCategoryData?.data?.category?.slug?.toLowerCase()?.includes("digital");
+
+                                    // --- OPTION A: DIGITAL MARKETING VIEW (ORIGINAL STYLE) ---
+                                    if (isDigiView) {
+                                        if (activeHours?.length === 0) {
+                                            return <div className="text-gray-500 text-center py-10">No sessions scheduled for this week.</div>;
+                                        }
+
+                                        const sessionLabel = "Digital Marketing";
+                                        const labelBgColor = digitalMarketingColors.solid; // bg-[#2196F3]
+
                                         return (
-                                            <div key={hour} className="grid grid-cols-8 min-h-[100px] border-b border-[#2d2d3f]">
-                                                {/* Time Column */}
-                                                <div className="flex items-center justify-center bg-[#151520] border-r border-[#2d2d3f] text-gray-400 font-semibold text-sm">
-                                                    {format(new Date().setHours(hour, 0), "h a")}
+                                            <div className="flex">
+                                                {/* Vertical Category Label */}
+                                                <div className={`${labelBgColor} flex items-center justify-center w-10 min-w-[40px] shrink-0 py-4`}>
+                                                    <span className="text-white text-[13px] font-bold uppercase tracking-wider whitespace-nowrap" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                                                        {sessionLabel}
+                                                    </span>
                                                 </div>
 
-                                                {/* Day Columns */}
-                                                {days.map((day) => {
-                                                    // Find schedules for this Day + Hour
-                                                    // We need to flatten props.educators to search efficiently? 
-                                                    // Or just iterate educators here (might be slow if many educators).
-                                                    // Let's flatten once above return or inside useMemo.
-                                                    // Since we are inside the map, we can't useMemo efficiently here. 
-                                                    // WE SHOULD MOVE FLATTENING UP.
-                                                    // See 'Insertion 2' below.
-
-                                                    const cellSchedules = allSchedules.filter(s =>
-                                                        isSameDay(new Date(s.datetime), day) &&
-                                                        new Date(s.datetime).getHours() === hour
-                                                    );
-
-                                                    const isDayToday = isSameDay(day, new Date());
-
-                                                    return (
-                                                        <div key={day.toISOString()} className={`p-2 border-r border-[#2d2d3f] last:border-r-0 relative group ${isDayToday ? "bg-[#181824]" : ""}`}>
-                                                            <div className="flex flex-col gap-2 h-full">
-                                                                {cellSchedules.map((schedule, idx) => {
-                                                                    const isDigi = isDigitalMarketingCategory(schedule);
-                                                                    const tzKey = getTimeZoneKey(schedule);
-                                                                    const isScheduleToday = isSameDay(new Date(schedule.datetime), new Date());
-
-                                                                    let cardClasses;
-
-                                                                    if (isDigi) {
-                                                                        if (isScheduleToday) {
-                                                                            cardClasses = `${digitalMarketingColors.solid} text-white shadow-md`;
-                                                                        } else {
-                                                                            cardClasses = `${digitalMarketingColors.light} ${digitalMarketingColors.text}`;
-                                                                        }
-                                                                    } else {
-                                                                        if (isScheduleToday) {
-                                                                            cardClasses = `${timeZoneColors[tzKey]} text-white shadow-md`;
-                                                                        } else {
-                                                                            cardClasses = `${timeZoneLightBgColors[tzKey]} ${timeZoneTextColors[tzKey]}`;
-                                                                        }
-                                                                    }
-
-                                                                    const nameColor = isScheduleToday ? "text-white" : "text-gray-800";
-
-                                                                    return (
-                                                                        <div
-                                                                            key={schedule._id || idx}
-                                                                            onClick={() => navigate(`/iq-educators/${schedule.educator?._id}`)}
-                                                                            className={`
-                                                                            relative p-2 rounded-lg cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]
-                                                                            ${cardClasses} border border-transparent
-                                                                        `}
-                                                                        >
-                                                                            {/* Header: Img + Name */}
-                                                                            <div className="flex items-center gap-2 mb-1">
-                                                                                <img
-                                                                                    src={schedule.educator?.image}
-                                                                                    alt={schedule.educator?.first_name}
-                                                                                    className="w-6 h-6 rounded-full object-cover border border-white shadow-sm"
-                                                                                />
-                                                                                <div className="min-w-0">
-                                                                                    <p className={`text-[11px] font-bold truncate leading-tight ${nameColor}`}>
-                                                                                        {schedule.educator?.first_name}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            {/* Title */}
-                                                                            <p className={`text-[10px] truncate opacity-90 mb-1 ${isScheduleToday ? "text-white/90" : "text-gray-600"}`}>
-                                                                                {schedule.title}
-                                                                            </p>
-
-                                                                            {/* Time Badge */}
-                                                                            <div className={`flex items-center gap-1 ${isScheduleToday ? "bg-white/20" : "bg-white/60"} px-1.5 py-0.5 rounded w-fit`}>
-                                                                                <Clock size={10} className={isScheduleToday ? "text-white" : "text-gray-600"} />
-                                                                                <span className={`text-[10px] font-semibold ${isScheduleToday ? "text-white" : "text-gray-700"}`}>
-                                                                                    {format(new Date(schedule.datetime), "h:mm a")}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                })}
+                                                {/* Time + Days Grid */}
+                                                <div className="flex-1">
+                                                    {activeHours?.map((hour) => (
+                                                        <div key={hour} className="grid grid-cols-8 min-h-[100px] border-b border-[#2d2d3f]">
+                                                            {/* Time Column */}
+                                                            <div className="flex items-center justify-center bg-[#151520] border-r border-[#2d2d3f] text-gray-800 font-semibold text-sm">
+                                                                <span className={digitalMarketingColors.text}>
+                                                                    {format(new Date().setHours(hour, 0), "h a")}
+                                                                </span>
                                                             </div>
+
+                                                            {/* Day Columns */}
+                                                            {days?.map((day) => {
+                                                                const cellSchedules = allSchedules?.filter(s =>
+                                                                    isSameDay(new Date(s?.datetime), day) &&
+                                                                    new Date(s?.datetime).getHours() === hour
+                                                                );
+                                                                const isDayToday = isSameDay(day, new Date());
+
+                                                                return (
+                                                                    <div key={day.toISOString()} className={`p-2 border-r border-[#2d2d3f] last:border-r-0 relative group ${isDayToday ? "bg-[#181824]" : ""}`}>
+                                                                        <div className="flex flex-col gap-2 h-full">
+                                                                            {cellSchedules?.map((schedule, idx) => {
+                                                                                const isScheduleToday = isSameDay(new Date(schedule?.datetime), new Date());
+                                                                                let cardClasses, nameColor;
+
+                                                                                // Digital Marketing Style Logic
+                                                                                if (isScheduleToday) {
+                                                                                    cardClasses = `${digitalMarketingColors.solid} shadow-md`;
+                                                                                    nameColor = "text-white";
+                                                                                } else {
+                                                                                    cardClasses = `${digitalMarketingColors.light} shadow-md`;
+                                                                                    nameColor = digitalMarketingColors.text;
+                                                                                }
+
+                                                                                return (
+                                                                                    <div
+                                                                                        key={schedule?._id || idx}
+                                                                                        onClick={() => navigate(`/iq-educators/${schedule?.educator?._id}`)}
+                                                                                        className={`relative p-2 rounded-lg cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${cardClasses} border border-transparent`}
+                                                                                    >
+                                                                                        <div className="flex items-center gap-2 mb-1">
+                                                                                            <img
+                                                                                                src={schedule?.educator?.image}
+                                                                                                alt={schedule?.educator?.first_name}
+                                                                                                className="w-8 h-8 rounded-full object-cover border border-white shadow-sm flex-shrink-0"
+                                                                                            />
+                                                                                            <div className="min-w-0 flex-1">
+                                                                                                <p className={`text-[11px] font-bold leading-tight line-clamp-2 ${nameColor}`}>
+                                                                                                    {schedule?.title}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
                                                         </div>
-                                                    );
-                                                })}
+                                                    ))}
+                                                </div>
                                             </div>
                                         );
-                                    })
-                                )}
+                                    }
+
+                                    // --- OPTION B: STANDARD TIMEZONE VIEW (GROUPED SESSIONS) ---
+                                    // 1. Define Session Order
+                                    const sessionOrder = ["new_york", "asian", "london"];
+
+                                    // 2. Check if we have schedules
+                                    if (activeHours?.length === 0) {
+                                        return <div className="text-gray-500 text-center py-10">No sessions scheduled for this week.</div>;
+                                    }
+
+                                    // 3. Render each session block
+                                    return sessionOrder?.map((sessionKey) => {
+                                        const sessionSchedules = allSchedules?.filter(s => getTimeZoneKey(s) === sessionKey);
+                                        if (sessionSchedules?.length === 0) return null;
+
+                                        // Calculate active hours for THIS session
+                                        const currentSessionHours = new Set();
+                                        sessionSchedules?.forEach(s => {
+                                            const sDate = new Date(s?.datetime);
+                                            // Only if relevant day
+                                            if (days?.some(day => isSameDay(day, sDate))) {
+                                                currentSessionHours.add(sDate.getHours());
+                                            }
+                                        });
+                                        const sortedHours = Array.from(currentSessionHours).sort((a, b) => a - b);
+
+                                        if (sortedHours?.length === 0) return null;
+
+                                        // Determine Row Background Color based on Session
+                                        const rowBgColor = timeZoneLightBgColors[sessionKey] || "bg-[#151520]";
+                                        const timeColText = "text-black";
+                                        const gridBorderColor = sessionKey === "new_york" ? "border-[#9F90D4]" :
+                                            sessionKey === "asian" ? "border-[#FCD385]" :
+                                                "border-[#99F6E4]";
+
+                                        const sessionLabel = sessionKey === "new_york" ? "New York Session" : sessionKey === "london" ? "London Session" : "Asian Session";
+                                        const labelBgColor = timeZoneColors[sessionKey] || "bg-gray-500";
+
+                                        return (
+                                            <div key={sessionKey} className="flex">
+                                                {/* Vertical TimeZone Label */}
+                                                <div className={`${labelBgColor} flex items-center justify-center w-10 min-w-[40px] shrink-0 py-4`}>
+                                                    <span className="text-white text-[13px] font-bold uppercase tracking-wider whitespace-nowrap" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                                                        {sessionLabel}
+                                                    </span>
+                                                </div>
+                                                {/* Time + Days Grid */}
+                                                <div className="flex-1">
+                                                    {sortedHours?.map((hour) => (
+                                                        <div key={`${sessionKey}-${hour}`} className={`grid grid-cols-8 min-h-[100px] border-b ${gridBorderColor} ${rowBgColor}`}>
+                                                            {/* Time Column */}
+                                                            <div className={`flex items-center justify-center border-r ${gridBorderColor} ${timeColText} font-bold text-sm`}>
+                                                                {format(new Date().setHours(hour, 0), "h a")}
+                                                            </div>
+
+                                                            {/* Day Columns */}
+                                                            {days?.map((day) => {
+                                                                const cellSchedules = sessionSchedules?.filter(s =>
+                                                                    isSameDay(new Date(s?.datetime), day) &&
+                                                                    new Date(s?.datetime).getHours() === hour
+                                                                );
+                                                                const isDayToday = isSameDay(day, new Date());
+                                                                const todayClass = isDayToday ? "bg-white/40" : "";
+
+                                                                return (
+                                                                    <div key={day.toISOString()} className={`p-2 border-r ${gridBorderColor} last:border-r-0 relative group ${todayClass}`}>
+                                                                        <div className="flex flex-col gap-2 h-full">
+                                                                            {cellSchedules?.map((schedule, idx) => {
+                                                                                const tzKey = getTimeZoneKey(schedule);
+                                                                                const isScheduleToday = isSameDay(new Date(schedule?.datetime), new Date());
+                                                                                let cardClasses, nameColor, infoColor, timeIconColor, pillClass;
+
+                                                                                if (isScheduleToday) {
+                                                                                    cardClasses = `${timeZoneColors[tzKey]} shadow-md`;
+                                                                                    nameColor = "text-white";
+                                                                                    infoColor = "text-white/90";
+                                                                                    timeIconColor = "text-white/80";
+                                                                                    pillClass = "bg-white/20";
+                                                                                } else {
+                                                                                    cardClasses = "bg-white shadow-sm";
+                                                                                    nameColor = timeZoneTextColors[tzKey];
+                                                                                    pillClass = timeZoneColors[tzKey];
+                                                                                    infoColor = "text-white";
+                                                                                    timeIconColor = "text-white";
+                                                                                }
+
+                                                                                return (
+                                                                                    <div
+                                                                                        key={schedule?._id || idx}
+                                                                                        onClick={() => navigate(`/iq-educators/${schedule?.educator?._id}`)}
+                                                                                        className={`relative p-2 rounded-lg cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${cardClasses} border border-transparent`}
+                                                                                    >
+                                                                                        <div className="flex items-center gap-2 mb-1">
+                                                                                            <img
+                                                                                                src={schedule?.educator?.image}
+                                                                                                alt={schedule?.educator?.first_name}
+                                                                                                className="w-8 h-8 rounded-full object-cover border border-white shadow-sm flex-shrink-0"
+                                                                                            />
+                                                                                            <div className="min-w-0 flex-1">
+                                                                                                <p className={`text-[11px] font-bold leading-tight line-clamp-2 ${nameColor}`}>
+                                                                                                    {schedule?.title}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                                })()}
                             </div>
                         </div>
                     </div>
@@ -390,32 +499,49 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                 {/* All Schedules List */}
                                 <div className="flex flex-col gap-3">
                                     {selectedEducator?.schedules?.length > 0 ? (
-                                        selectedEducator.schedules.map((schedule, i) => {
-                                            const scheduleDate = new Date(schedule.datetime);
+                                        selectedEducator?.schedules?.map((schedule, i) => {
+                                            const scheduleDate = new Date(schedule?.datetime);
                                             const isTodaySchedule = isSameDay(scheduleDate, new Date());
 
+                                            // Get timezone-based colors same as desktop
                                             // Get timezone-based colors same as desktop
                                             const isDigitalMkt = isDigitalMarketingCategory(schedule);
                                             let bgColor, textColor;
 
+                                            // FORCE UNIFORM STYLING REDUX: 
+                                            // Today = Solid Dark BG + White Text
+                                            // Not Today = Light BG + Colored Text
                                             if (isDigitalMkt) {
-                                                bgColor = isTodaySchedule ? digitalMarketingColors.solid : digitalMarketingColors.light;
-                                                textColor = isTodaySchedule ? "text-white" : digitalMarketingColors.text;
+                                                if (isTodaySchedule) {
+                                                    bgColor = digitalMarketingColors.solid;
+                                                    textColor = "text-white";
+                                                } else {
+                                                    bgColor = digitalMarketingColors.light;
+                                                    textColor = digitalMarketingColors.text;
+                                                }
                                             } else {
                                                 const tzKey = getTimeZoneKey(schedule);
-                                                bgColor = isTodaySchedule ? timeZoneColors[tzKey] : timeZoneLightBgColors[tzKey];
-                                                textColor = isTodaySchedule ? "text-white" : timeZoneTextColors[tzKey];
+                                                if (isTodaySchedule) {
+                                                    bgColor = timeZoneColors[tzKey];
+                                                    textColor = "text-white";
+                                                } else {
+                                                    bgColor = timeZoneLightBgColors[tzKey];
+                                                    textColor = timeZoneTextColors[tzKey];
+                                                }
                                             }
+
+                                            // Add ring if today
+                                            const extraClasses = isTodaySchedule ? "ring-2 ring-primary/50" : "";
 
                                             return (
                                                 <div
                                                     key={i}
                                                     onClick={() => navigate(`/iq-educators/${selectedEducator?._id}`)}
-                                                    className={`p-3 rounded-xl flex justify-between items-center flex-wrap gap-4 cursor-pointer ${bgColor} ${textColor}`}
+                                                    className={`p-3 rounded-xl flex justify-between items-center flex-wrap gap-4 cursor-pointer ${bgColor} ${textColor} ${extraClasses}`}
                                                 >
                                                     {/* Schedule Title */}
                                                     <span className="text-sm font-medium">
-                                                        {schedule.title}
+                                                        {schedule?.title}
                                                     </span>
 
                                                     {/* Time and Date */}
