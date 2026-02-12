@@ -16,9 +16,9 @@ const timeZoneColors = {
 
 // Timezone light background colors for schedule list
 const timeZoneLightBgColors = {
-    new_york: "bg-[#b2a3e9]",
-    london: "bg-[#CCFBF1]",
-    asian: "bg-[#FFF5E5]",
+    new_york: "bg-[#b2a3e9]/80",
+    london: "bg-[#CCFBF1]/80",
+    asian: "bg-[#FFF5E5]/80",
 };
 
 // Timezone text colors
@@ -244,7 +244,11 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                                                 <p className={`text-[11px] font-bold leading-tight line-clamp-2 ${nameColor}`}>
                                                                                                     {schedule?.title}
                                                                                                 </p>
+                                                                                                <div className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium leading-tight mt-1 ${isScheduleToday ? "bg-white/20 text-white" : digitalMarketingColors.solid + " text-white"}`}>
+                                                                                                    {format(new Date(schedule?.datetime), "h:mm")}
+                                                                                                </div>
                                                                                             </div>
+
                                                                                         </div>
                                                                                     </div>
                                                                                 );
@@ -361,6 +365,9 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                                                 <p className={`text-[11px] font-bold leading-tight line-clamp-2 ${nameColor}`}>
                                                                                                     {schedule?.title}
                                                                                                 </p>
+                                                                                                <div className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium leading-tight mt-1 ${pillClass} ${isScheduleToday ? "text-white" : "text-white"}`}>
+                                                                                                    {format(new Date(schedule?.datetime), "h:mm")}
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>

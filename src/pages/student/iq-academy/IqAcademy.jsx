@@ -73,6 +73,8 @@ export default function IqAcademy() {
     setActiveEducatorId("all");
   }, [viewType]);
 
+
+
   // Filter states for list view (arrays for multi-select)
   const [tradingType, setTradingType] = useState([]);
   const [tradingMethod, setTradingMethod] = useState([]);
@@ -103,6 +105,26 @@ export default function IqAcademy() {
 
   const { data: strategiesName, isLoading: isStrategNameLoading } =
     useGetStrategiesNameQuery();
+
+  const activeCategory = categoryData?.data?.find(
+    (c) => c?._id === activeCategoryId
+  );
+
+  const isDigitalMarketing =
+    activeCategory?.name?.toLowerCase()?.includes("digital") ||
+    activeCategory?.slug?.toLowerCase()?.includes("digital");
+
+  // Reset filters when category changes to Digital Marketing
+  useEffect(() => {
+    if (isDigitalMarketing) {
+      setTradingType([]);
+      setTradingMethod([]);
+      setTimeZone([]);
+      setStatusType("");
+      setActiveStrategyId("all");
+      setActiveEducatorId("all");
+    }
+  }, [activeCategoryId, isDigitalMarketing]);
 
   useEffect(() => {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
@@ -428,7 +450,7 @@ export default function IqAcademy() {
 
       {/* CATEGORY TABS */}
       <div className="flex gap-4 mb-6 justify-between flex-wrap">
-        {viewType == "grid" && (
+        {viewType == "grid" && !isDigitalMarketing && (
           <div className="flex gap-4 overflow-x-auto pb-4 items-start">
             {/* All Strategies Option */}
             <button
@@ -544,7 +566,7 @@ export default function IqAcademy() {
           {/* Right: Filters + View Toggle */}
           {viewType === "grid" && (
             <div className="flex items-center gap-3">
-              {renderFiltersAndReset()}
+              {!isDigitalMarketing && renderFiltersAndReset()}
               {renderViewToggle()}
             </div>
           )}
