@@ -13,7 +13,7 @@ const DateTimePicker = ({
   const handleChange = (date) => {
     onChange(date);
     // Only close when time is selected (not just date)
-    if (date instanceof Date && date.getHours() !== 0 && date.getMinutes() !== 0) {
+    if (date instanceof Date && date.getHours() !== 0) {
       setIsPickerOpen(false);
     }
   };
@@ -25,10 +25,10 @@ const DateTimePicker = ({
       onInputClick={() => setIsPickerOpen(true)} // Open on input click
       open={isPickerOpen} // Control open / close state
       showTimeSelect
-      timeFormat="HH:mm"
-      timeIntervals={5}
+      timeFormat="h aa"
+      timeIntervals={60}
       timeCaption="Time"
-      dateFormat="MMMM d, yyyy h:mm aa"
+      dateFormat="MMMM d, yyyy h aa"
       placeholderText={placeholder}
       className={`form-control ${className}`}
       {...options}

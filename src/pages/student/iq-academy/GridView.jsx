@@ -151,7 +151,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                             {/* --- HEADER: Time + Days --- */}
                             <div className="flex sticky top-0 z-10">
                                 <div className="w-10 min-w-[40px] shrink-0 bg-[#1A1446]"></div>
-                                <div className="grid grid-cols-8 text-center table_head flex-1">
+                                <div className="grid grid-cols-[70px_repeat(7,1fr)] text-center table_head flex-1">
                                     <div className="bg-[#1A1446] text-white py-5 px-4 font-normal flex items-center justify-center border-r border-[#2d2d3f]">
                                         Time
                                     </div>
@@ -196,7 +196,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                 {/* Time + Days Grid */}
                                                 <div className="flex-1">
                                                     {activeHours?.map((hour) => (
-                                                        <div key={hour} className="grid grid-cols-8 min-h-[100px] border-b border-[#2d2d3f]">
+                                                        <div key={hour} className="grid grid-cols-[70px_repeat(7,1fr)] min-h-[100px] border-b border-[#2d2d3f]">
                                                             {/* Time Column */}
                                                             <div className="flex items-center justify-center bg-[#151520] border-r border-[#2d2d3f] text-gray-800 font-semibold text-sm">
                                                                 <span className={digitalMarketingColors.text}>
@@ -213,7 +213,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                 const isDayToday = isSameDay(day, new Date());
 
                                                                 return (
-                                                                    <div key={day.toISOString()} className={`p-2 border-r border-[#2d2d3f] last:border-r-0 relative group ${isDayToday ? "bg-[#181824]" : ""}`}>
+                                                                    <div key={day.toISOString()} className={`p-1 border-r border-[#2d2d3f] last:border-r-0 relative group ${isDayToday ? "bg-[#181824]" : ""}`}>
                                                                         <div className="flex flex-col gap-2 h-full">
                                                                             {cellSchedules?.map((schedule, idx) => {
                                                                                 const isScheduleToday = isSameDay(new Date(schedule?.datetime), new Date());
@@ -232,23 +232,30 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                                     <div
                                                                                         key={schedule?._id || idx}
                                                                                         onClick={() => navigate(`/iq-educators/${schedule?.educator?._id}`)}
-                                                                                        className={`relative p-2 rounded-lg cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${cardClasses} border border-transparent`}
+                                                                                        className={`relative p-2 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${cardClasses} border border-transparent`}
                                                                                     >
-                                                                                        <div className="flex items-center gap-2 mb-1">
-                                                                                            <img
-                                                                                                src={schedule?.educator?.image}
-                                                                                                alt={schedule?.educator?.first_name}
-                                                                                                className="w-8 h-8 rounded-full object-cover border border-white shadow-sm flex-shrink-0"
-                                                                                            />
-                                                                                            <div className="min-w-0 flex-1">
-                                                                                                <p className={`text-[11px] font-bold leading-tight line-clamp-2 ${nameColor}`}>
+                                                                                        <div className="flex gap-2 items-center">
+                                                                                            <div className="flex flex-col items-center gap-1.5 shrink-0">
+                                                                                                <div className="relative">
+                                                                                                    <img
+                                                                                                        src={schedule?.educator?.image}
+                                                                                                        alt={schedule?.educator?.first_name}
+                                                                                                        className="w-10 h-10 rounded-full object-cover border-2 border-white/30 shadow-sm"
+                                                                                                    />
+                                                                                                    {/* <p className={`inline-flex items-center justify-center py-0.5 rounded-full text-[9px] font-bold tracking-wide shadow-sm w-full text-center ${isScheduleToday ? "bg-white/20 backdrop-blur-sm text-white border border-white/20" : digitalMarketingColors.solid + " text-white"}`}>
+                                                                                                        {format(new Date(schedule?.datetime), "h:mm")}
+                                                                                                    </p> */}
+                                                                                                </div>
+
+                                                                                            </div>
+                                                                                            <div className="flex flex-col min-w-0 pl-2 ">
+                                                                                                <div className={`text-[10px] font-semibold line-clamp-2 leading-3 ${isScheduleToday ? "text-[#000000]" : "text-gray-900 dark:text-gray-200 opacity-90"}`}>
+                                                                                                    {schedule?.educator?.first_name} {schedule?.educator?.last_name}
+                                                                                                </div>
+                                                                                                <div className={`text-[10px] mt-1 font-bold leading-snug line-clamp-3 ${nameColor}`}>
                                                                                                     {schedule?.title}
-                                                                                                </p>
-                                                                                                <div className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium leading-tight mt-1 ${isScheduleToday ? "bg-white/20 text-white" : digitalMarketingColors.solid + " text-white"}`}>
-                                                                                                    {format(new Date(schedule?.datetime), "h:mm")}
                                                                                                 </div>
                                                                                             </div>
-
                                                                                         </div>
                                                                                     </div>
                                                                                 );
@@ -312,7 +319,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                 {/* Time + Days Grid */}
                                                 <div className="flex-1">
                                                     {sortedHours?.map((hour) => (
-                                                        <div key={`${sessionKey}-${hour}`} className={`grid grid-cols-8 min-h-[100px] border-b ${gridBorderColor} ${rowBgColor}`}>
+                                                        <div key={`${sessionKey}-${hour}`} className={`grid grid-cols-[70px_repeat(7,1fr)] min-h-[100px] border-b ${gridBorderColor} ${rowBgColor}`}>
                                                             {/* Time Column */}
                                                             <div className={`flex items-center justify-center border-r ${gridBorderColor} ${timeColText} font-bold text-sm`}>
                                                                 {format(new Date().setHours(hour, 0), "h a")}
@@ -328,8 +335,8 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                 const todayClass = isDayToday ? "bg-white/40" : "";
 
                                                                 return (
-                                                                    <div key={day.toISOString()} className={`p-2 border-r ${gridBorderColor} last:border-r-0 relative group ${todayClass}`}>
-                                                                        <div className="flex flex-col gap-2 h-full">
+                                                                    <div key={day.toISOString()} className={`p-1.5 border-r ${gridBorderColor} last:border-r-0 relative group ${todayClass}`}>
+                                                                        <div className="flex flex-col gap-1 h-full">
                                                                             {cellSchedules?.map((schedule, idx) => {
                                                                                 const tzKey = getTimeZoneKey(schedule);
                                                                                 const isScheduleToday = isSameDay(new Date(schedule?.datetime), new Date());
@@ -353,20 +360,27 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                                     <div
                                                                                         key={schedule?._id || idx}
                                                                                         onClick={() => navigate(`/iq-educators/${schedule?.educator?._id}`)}
-                                                                                        className={`relative p-2 rounded-lg cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] ${cardClasses} border border-transparent`}
+                                                                                        className={`relative p-1 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${cardClasses} border border-transparent`}
                                                                                     >
-                                                                                        <div className="flex items-center gap-2 mb-1">
-                                                                                            <img
-                                                                                                src={schedule?.educator?.image}
-                                                                                                alt={schedule?.educator?.first_name}
-                                                                                                className="w-8 h-8 rounded-full object-cover border border-white shadow-sm flex-shrink-0"
-                                                                                            />
-                                                                                            <div className="min-w-0 flex-1">
-                                                                                                <p className={`text-[11px] font-bold leading-tight line-clamp-2 ${nameColor}`}>
-                                                                                                    {schedule?.title}
-                                                                                                </p>
-                                                                                                <div className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium leading-tight mt-1 ${pillClass} ${isScheduleToday ? "text-white" : "text-white"}`}>
+                                                                                        <div className="flex gap-1 items-center p-1  ">
+                                                                                            <div className="flex flex-col items-center shrink-0">
+                                                                                                <div className="relative">
+                                                                                                    <img
+                                                                                                        src={schedule?.educator?.image}
+                                                                                                        alt={schedule?.educator?.first_name}
+                                                                                                        className="w-10 h-10 rounded-full object-cover border-1 border-white/30 shadow-sm"
+                                                                                                    />
+                                                                                                </div>
+                                                                                                {/* <div className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[9px] font-bold tracking-wide shadow-sm w-full text-center ${pillClass} ${isScheduleToday ? "bg-white/20 backdrop-blur-sm text-white border border-white/20" : "text-white"}`}>
                                                                                                     {format(new Date(schedule?.datetime), "h:mm")}
+                                                                                                </div> */}
+                                                                                            </div>
+                                                                                            <div className="flex flex-col min-w-0 pl-2 ">
+                                                                                                <div className={`text-[10px] font-semibold line-clamp-2 leading-3 ${isScheduleToday ? `text-[#00f8f1]` : "text-gray-900 dark:text-gray-200 opacity-90"}`}>
+                                                                                                    {schedule?.educator?.first_name} {schedule?.educator?.last_name}
+                                                                                                </div>
+                                                                                                <div className={`text-[10px] mt-1 font-bold leading-snug line-clamp-3 ${nameColor}`}>
+                                                                                                    {schedule?.title}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
