@@ -73,13 +73,20 @@ const getEmbedUrl = (url) => {
 const Banner = () => (
     <div className="card rounded-2xl overflow-hidden border border-gray-300">
         <img
-            src="/media/banners/MasterClass-Banner-image.png"
+            src="/media/images/1400x400 banner.jpg"
             alt="MasterClass Banner"
             className="w-full h-auto object-cover"
         />
     </div>
 );
 
+
+<div
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat "
+    style={{
+        backgroundImage: "url('/media/images/1400x400 banner.jpg')",
+    }}
+></div>
 const MasterClass = () => {
     // ==================== STATE MANAGEMENT ====================
 
@@ -88,7 +95,6 @@ const MasterClass = () => {
 
     const educatorId = id
 
-    console.log(educatorId, "educatorId");
 
     // Initialize selectedStrategyId: URL param > location state > null
     const [selectedStrategyId, setSelectedStrategyId] = useState(null);
