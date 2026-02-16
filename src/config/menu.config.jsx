@@ -1832,11 +1832,11 @@ export const sideMenus = {
       ],
     },
 
-    {
-      title: "IQ Crypto Projects",
-      icon: <BadgeCent />,
-      path: "/iq-crypto",
-    },
+    // {
+    //   title: "IQ Crypto Projects",
+    //   icon: <BadgeCent />,
+    //   path: "/iq-crypto",
+    // },
     {
       title: "Ideas & Insights",
       icon: <Lightbulb />,

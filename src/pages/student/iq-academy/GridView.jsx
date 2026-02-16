@@ -273,7 +273,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
 
                                     // --- OPTION B: STANDARD TIMEZONE VIEW (GROUPED SESSIONS) ---
                                     // 1. Define Session Order
-                                    const sessionOrder = ["new_york", "asian", "london"];
+                                    const sessionOrder = ["london", "new_york", "asian",];
 
                                     // 2. Check if we have schedules
                                     if (activeHours?.length === 0) {
