@@ -81,12 +81,6 @@ const Banner = () => (
 );
 
 
-<div
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat "
-    style={{
-        backgroundImage: "url('/media/images/1400x400 banner.jpg')",
-    }}
-></div>
 const MasterClass = () => {
     // ==================== STATE MANAGEMENT ====================
 
