@@ -132,10 +132,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                 </div>
                             ) : (
                                 <>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
-                                        <span className="text-sm text-gray-100 dark:text-gray-800">Asian Session</span>
-                                    </div>
+
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 rounded bg-[#14B8A6] border border-[#CCFBF1]"></div>
                                         <span className="text-sm text-gray-100 dark:text-gray-800">London Session</span>
@@ -143,6 +140,10 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 rounded bg-[#b2a3e9] border border-[#E5DEFF]"></div>
                                         <span className="text-sm text-gray-100 dark:text-gray-800">New York Session</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded bg-[#E3A534] border border-[#FFF5E5]"></div>
+                                        <span className="text-sm text-gray-100 dark:text-gray-800">Asian Session</span>
                                     </div>
                                 </>
                             )}
