@@ -18,6 +18,18 @@ export const clientMasterClassApiSlice = createApi({
             providesTags: ["MasterClass"],
         }),
 
+        // Get all MasterClass
+        getAllMasterClass: builder.query({
+            query: ({ params }) => {
+                const queryParams = new URLSearchParams();
+                if (params?.language) queryParams.append("language", params.language);
+                if (params?.search) queryParams.append("search", params.search);
+
+                return `/users/master-class/all?${queryParams.toString()}`;
+            },
+            providesTags: ["MasterClass"],
+        }),
+
         // Get single MasterClass by ID
         getMasterClassById: builder.query({
             query: (id) => `/users/master-class/${id}`,
@@ -28,6 +40,7 @@ export const clientMasterClassApiSlice = createApi({
 
 export const {
     useGetMasterClassQuery,
+    useGetAllMasterClassQuery,
     useGetMasterClassByIdQuery,
     useLazyGetMasterClassByIdQuery,
 } = clientMasterClassApiSlice;

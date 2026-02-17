@@ -4,8 +4,7 @@ import { useSelector } from 'react-redux';
 import { selectSelectedLanguage } from '../../../store/reducer/studentLanagugeSlice';
 import { Loader2, CirclePlay } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
-import { useGetMasterClassQuery, useLazyGetMasterClassByIdQuery } from '@/store/api/client/clientMasterClassApiSlice';
-import { useLocation, useParams } from 'react-router';
+import { useGetAllMasterClassQuery, useLazyGetMasterClassByIdQuery } from '../../../store/api/client/clientMasterClassApiSlice';
 
 /**
  * Utility function to convert various video URLs to embeddable format
@@ -81,13 +80,8 @@ const Banner = () => (
 );
 
 
-const MasterClass = () => {
-    // ==================== STATE MANAGEMENT ====================
-
-
-    const { id } = useParams(); // Get ID from URL
-
-    const educatorId = id
+const MasterClassForStudent = () => {
+    // ==================== STATE MANAGEMENT ===================
 
 
     // Initialize selectedStrategyId: URL param > location state > null
@@ -105,9 +99,9 @@ const MasterClass = () => {
         isLoading: strategiesLoading,
         error: strategiesError,
         refetch: refetchStrategies,
-    } = useGetMasterClassQuery(
-        { id: educatorId, params: { language: selectedLanguage } },
-        { skip: !educatorId }
+    } = useGetAllMasterClassQuery(
+        { params: { language: selectedLanguage } },
+        // { refetchOnMountOrArgChange: true }
     );
 
     // Lazy query for fetching individual strategy details
@@ -150,6 +144,7 @@ const MasterClass = () => {
         setSelectedStrategyId(strategyId);
         setActiveLectureId(null);
         setActiveLecture(null);
+        // window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     /**
@@ -455,4 +450,4 @@ const MasterClass = () => {
     );
 }
 
-export default MasterClass
+export default MasterClassForStudent

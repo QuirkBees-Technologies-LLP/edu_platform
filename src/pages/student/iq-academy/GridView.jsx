@@ -318,9 +318,9 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                     </span>
                                                 </div>
                                                 {/* Time + Days Grid */}
-                                                <div className="flex-1">
+                                                <div className={`flex-1 ${rowBgColor}`}>
                                                     {sortedHours?.map((hour) => (
-                                                        <div key={`${sessionKey}-${hour}`} className={`grid grid-cols-[70px_repeat(7,1fr)] min-h-[100px] border-b ${gridBorderColor} ${rowBgColor}`}>
+                                                        <div key={`${sessionKey}-${hour}`} className={`grid grid-cols-[70px_repeat(7,1fr)] min-h-[100px] border-b ${gridBorderColor}`}>
                                                             {/* Time Column */}
                                                             <div className={`flex items-center justify-center border-r ${gridBorderColor} ${timeColText} font-bold text-sm`}>
                                                                 {format(new Date().setHours(hour, 0), "h a")}
@@ -333,10 +333,13 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                     new Date(s?.datetime).getHours() === hour
                                                                 );
                                                                 const isDayToday = isSameDay(day, new Date());
-                                                                const todayClass = isDayToday ? "bg-white/40" : "";
+                                                                const hasSchedule = cellSchedules?.length > 0;
+
+                                                                // Today column gets subtle white overlay, empty cells show session row color
+                                                                const todayHighlight = isDayToday ? "bg-white/10" : "";
 
                                                                 return (
-                                                                    <div key={day.toISOString()} className={`p-1.5 border-r ${gridBorderColor} last:border-r-0 relative group ${todayClass}`}>
+                                                                    <div key={day.toISOString()} className={`p-1.5 border-r ${gridBorderColor} last:border-r-0 relative group ${todayHighlight}`}>
                                                                         <div className="flex flex-col gap-1 h-full">
                                                                             {cellSchedules?.map((schedule, idx) => {
                                                                                 const tzKey = getTimeZoneKey(schedule);

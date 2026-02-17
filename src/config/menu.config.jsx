@@ -1814,10 +1814,18 @@ export const sideMenus = {
       ],
     },
     {
-      title: "Academy Courses",
+      title: "Academy",
       icon: <School />,
-      path: "/iq-vault",
+      path: '/iq-vault',
+      children: [
+        {
+          title: "Masterclasses",
+          icon: <Dot />,
+          path: "/master-class",
+        },
+      ],
     },
+
     {
       title: "Live Streams",
       icon: <MonitorPlay />,
