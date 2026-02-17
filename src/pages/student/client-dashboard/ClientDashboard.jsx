@@ -56,7 +56,7 @@ const ClientDashboard = () => {
     isError: isPostsError,
   } = usePostQuery(
     { page, limit, socialType },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true },
   );
 
   useEffect(() => {
@@ -1093,7 +1093,10 @@ const ClientDashboard = () => {
 
                                 <div className="absolute bottom-0 left-0 right-0 p-4">
                                   <p className="text-xs text-gray-300 dark:text-gray-900 mb-1">
-                                    Trading Live
+                                    {slide?.educator?.categories?.[0]?.name ===
+                                    "Digital Marketing"
+                                      ? "Live Training"
+                                      : "Trading Live"}
                                   </p>
 
                                   <h3 className="text-white  font-bold mb-1">
@@ -1260,7 +1263,10 @@ const ClientDashboard = () => {
                   <div
                     className="h-full flex flex-col"
                     onClick={() =>
-                      window.open("https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html", "_blank")
+                      window.open(
+                        "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
+                        "_blank",
+                      )
                     }
                   >
                     <div className="relative overflow-hidden">
@@ -1349,10 +1355,11 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("company")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${socialType === "company"
-                            ? "bg-purple-600 text-white shadow-md"
-                            : "text-gray-600 hover:bg-gray-700/50"
-                          }
+            ${
+              socialType === "company"
+                ? "bg-purple-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-700/50"
+            }
           `}
                       >
                         Corporate
@@ -1362,10 +1369,11 @@ const ClientDashboard = () => {
                         onClick={() => setSocialType("social")}
                         className={`
             px-4 py-2 rounded-md text-sm font-medium transition-all
-            ${socialType === "social"
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "text-gray-600 hover:bg-gray-700/50"
-                          }
+            ${
+              socialType === "social"
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-700/50"
+            }
           `}
                       >
                         Social
@@ -1433,7 +1441,7 @@ const ClientDashboard = () => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(
-                                      `/iq-social?socialType=${socialType}`
+                                      `/iq-social?socialType=${socialType}`,
                                     );
                                   }}
                                   className="ml-1 text-blue-600 dark:text-purple-400 font-medium cursor-pointer"
@@ -1516,7 +1524,7 @@ const ClientDashboard = () => {
                         onClick={() =>
                           window.open(
                             "https://play.google.com/store/apps/details?id=com.eductionplatform&pcampaignid=web_share",
-                            "_blank"
+                            "_blank",
                           )
                         }
                         className="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
@@ -1528,7 +1536,7 @@ const ClientDashboard = () => {
                         onClick={() =>
                           window.open(
                             "https://testflight.apple.com/join/qynfgnna",
-                            "_blank"
+                            "_blank",
                           )
                         }
                         className="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
