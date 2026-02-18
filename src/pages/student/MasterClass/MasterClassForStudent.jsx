@@ -257,20 +257,17 @@ const MasterClassForStudent = () => {
             <Command>
               <CommandGroup>
                 {tradingTypeOptions?.map((item) => {
-                    console.log("item->",item.value)
-                    console.log("tradingType",tradingType)
                   const selected = tradingType?.includes(item?.value);
-                  console.log("selected",selected)
                   return (
                     <CommandItem
                       key={item?.value}
-                    //   onSelect={() =>
-                    //     handleMultiSelect(
-                    //       item?.value,
-                    //       tradingType,
-                    //       setTradingType,
-                    //     )
-                    //   }
+                      onSelect={() =>
+                        handleMultiSelect(
+                          item?.value,
+                          tradingType,
+                          setTradingType,
+                        )
+                      }
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <div
