@@ -14,6 +14,7 @@ import 'react-quill/dist/quill.snow.css';
 import "react-datepicker/dist/react-datepicker.css";
 import { PersistGate } from 'redux-persist/integration/react';
 
+
 const {
   BASE_URL
 } = import.meta.env;
