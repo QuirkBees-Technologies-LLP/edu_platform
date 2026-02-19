@@ -117,8 +117,8 @@ const MasterClassForStudent = () => {
   const [activeLectureId, setActiveLectureId] = useState(null);
   const [activeLecture, setActiveLecture] = useState(null);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
-  const [activeEducatorId, setActiveEducatorId] = useState("all");
-  const [activeStrategyId, setActiveStrategyId] = useState("all");
+  const [activeEducatorId, setActiveEducatorId] = useState(null);
+  const [activeStrategyId, setActiveStrategyId] = useState(null);
   const [viewType, setViewType] = useState("grid");
   const [category, setCategory] = useState([]);
   const [tradingType, setTradingType] = useState([]);
@@ -143,13 +143,24 @@ const MasterClassForStudent = () => {
 
   // ==================== API CALLS ====================
   // Fetch all strategies
+
   const {
     data: strategiesData,
     isLoading: strategiesLoading,
     error: strategiesError,
     refetch: refetchStrategies,
   } = useGetAllMasterClassQuery(
-    { params: { language: selectedLanguage } },
+    {
+      params: {
+        language: selectedLanguage,
+        tradingType,
+        tradingMethod,
+        timeZone,
+        category: activeCategoryId,
+        educatorId: educator,
+        strategies: activeStrategyId,
+      },
+    },
     // { refetchOnMountOrArgChange: true }
   );
 
@@ -159,8 +170,8 @@ const MasterClassForStudent = () => {
     { data: strategyData, isLoading: strategyLoading, error: strategyError },
   ] = useLazyGetMasterClassByIdQuery();
 
-   const { data: strategiesName, isLoading: isStrategNameLoading } =
-      useGetStrategiesNameQuery();
+  const { data: strategiesName, isLoading: isStrategNameLoading } =
+    useGetStrategiesNameQuery();
 
   // ==================== DATA EXTRACTION ====================
   const strategies = strategiesData?.data || [];
@@ -229,7 +240,7 @@ const MasterClassForStudent = () => {
 
   const handleMultiSelect = (value, currentSelected, setSelected) => {
 
-      console.log(value, currentSelected, setSelected)
+    console.log(value, currentSelected, setSelected)
 
     if (currentSelected.includes(value)) {
       setSelected(currentSelected.filter((item) => item !== value));
@@ -240,190 +251,194 @@ const MasterClassForStudent = () => {
 
   const renderFiltersAndReset = () => (
     <>
-      {/* Trading Type Multi-Select */}
-      <div className="flex items-center gap-2 relative">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-              <span className="truncate text-sm">
-                {tradingType?.length > 0
-                  ? `${tradingType?.length} Style Selected`
-                  : "Select Trading Style"}
-              </span>
-              <ChevronDown size={16} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[225px] p-0">
-            <Command>
-              <CommandGroup>
-                {tradingTypeOptions?.map((item) => {
-                  const selected = tradingType?.includes(item?.value);
-                  return (
-                    <CommandItem
-                      key={item?.value}
-                      onSelect={() =>
-                        handleMultiSelect(
-                          item?.value,
-                          tradingType,
-                          setTradingType,
-                        )
-                      }
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <div
-                        className={`h-4 w-4 border rounded flex items-center justify-center ${
-                          selected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-[#1c1f26]"
-                        }`}
-                      >
-                        {selected && <Check size={14} />}
-                      </div>
-                      {item?.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        {tradingType?.length > 0 && (
+      {!isDigitalMarketing && (
+        <>
+          {/* Trading Type Multi-Select */}
+          <div className="flex items-center gap-2 relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
+                  <span className="truncate text-sm">
+                    {tradingType?.length > 0
+                      ? `${tradingType?.length} Style Selected`
+                      : "Select Trading Style"}
+                  </span>
+                  <ChevronDown size={16} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[225px] p-0">
+                <Command>
+                  <CommandGroup>
+                    {tradingTypeOptions?.map((item) => {
+                      const selected = tradingType?.includes(item?.value);
+                      return (
+                        <CommandItem
+                          key={item?.value}
+                          onSelect={() =>
+                            handleMultiSelect(
+                              item?.value,
+                              tradingType,
+                              setTradingType,
+                            )
+                          }
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <div
+                            className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-[#1c1f26]"
+                              }`}
+                          >
+                            {selected && <Check size={14} />}
+                          </div>
+                          {item?.label}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {tradingType?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTradingType([])}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Trading Method Multi-Select */}
+          <div className="flex items-center gap-2 relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
+                  <span className="truncate text-sm">
+                    {tradingMethod?.length > 0
+                      ? `${tradingMethod?.length} Method Selected`
+                      : "Select Trading Method"}
+                  </span>
+                  <ChevronDown size={16} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[225px] p-0">
+                <Command>
+                  <CommandGroup>
+                    {tradingMethodOptions?.map((item) => {
+                      const selected = tradingMethod?.includes(item?.value);
+                      return (
+                        <CommandItem
+                          key={item?.value}
+                          onSelect={() =>
+                            handleMultiSelect(
+                              item?.value,
+                              tradingMethod,
+                              setTradingMethod,
+                            )
+                          }
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <div
+                            className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-[#1c1f26]"
+                              }`}
+                          >
+                            {selected && <Check size={14} />}
+                          </div>
+                          {item?.label}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {tradingMethod?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTradingMethod([])}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Time Zone Multi-Select */}
+          <div className="flex items-center gap-2 relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
+                  <span className="truncate text-sm">
+                    {timeZone?.length > 0
+                      ? `${timeZone?.length} Zone Selected`
+                      : "Select Time Zone"}
+                  </span>
+                  <ChevronDown size={16} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[225px] p-0">
+                <Command>
+                  <CommandGroup>
+                    {timeZoneOptions?.map((item) => {
+                      const selected = timeZone?.includes(item?.value);
+                      return (
+                        <CommandItem
+                          key={item?.value}
+                          onSelect={() =>
+                            handleMultiSelect(item?.value, timeZone, setTimeZone)
+                          }
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <div
+                            className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-[#1c1f26]"
+                              }`}
+                          >
+                            {selected && <Check size={14} />}
+                          </div>
+                          {item?.label}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {timeZone?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTimeZone([])}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Reset Button */}
           <button
             type="button"
-            onClick={() => setTradingType([])}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            onClick={() => {
+              setTradingType([]);
+              setTradingMethod([]);
+              setTimeZone([]);
+              setEducator("");
+              setActiveEducatorId("all");
+              setActiveStrategyId("all");
+              setActiveCategoryId(null);
+            }}
+            className="h-11 px-4 flex items-center gap-2 dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-700 bg-slate-400 hover:bg-slate-700 text-white rounded-md font-medium transition-colors"
           >
-            ✖
+            <RotateCcw size={16} />
+            Reset
           </button>
-        )}
-      </div>
-
-      {/* Trading Method Multi-Select */}
-      <div className="flex items-center gap-2 relative">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-              <span className="truncate text-sm">
-                {tradingMethod?.length > 0
-                  ? `${tradingMethod?.length} Method Selected`
-                  : "Select Trading Method"}
-              </span>
-              <ChevronDown size={16} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[225px] p-0">
-            <Command>
-              <CommandGroup>
-                {tradingMethodOptions?.map((item) => {
-                  const selected = tradingMethod?.includes(item?.value);
-                  return (
-                    <CommandItem
-                      key={item?.value}
-                      onSelect={() =>
-                        handleMultiSelect(
-                          item?.value,
-                          tradingMethod,
-                          setTradingMethod,
-                        )
-                      }
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <div
-                        className={`h-4 w-4 border rounded flex items-center justify-center ${
-                          selected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-[#1c1f26]"
-                        }`}
-                      >
-                        {selected && <Check size={14} />}
-                      </div>
-                      {console.log("clg---->",item)}
-                      {item?.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        {tradingMethod?.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setTradingMethod([])}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-          >
-            ✖
-          </button>
-        )}
-      </div>
-
-      {/* Time Zone Multi-Select */}
-      <div className="flex items-center gap-2 relative">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-              <span className="truncate text-sm">
-                {timeZone?.length > 0
-                  ? `${timeZone?.length} Zone Selected`
-                  : "Select Time Zone"}
-              </span>
-              <ChevronDown size={16} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[225px] p-0">
-            <Command>
-              <CommandGroup>
-                {timeZoneOptions?.map((item) => {
-                  const selected = timeZone?.includes(item?.value);
-                  return (
-                    <CommandItem
-                      key={item?.value}
-                      onSelect={() =>
-                        handleMultiSelect(item?.value, timeZone, setTimeZone)
-                      }
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <div
-                        className={`h-4 w-4 border rounded flex items-center justify-center ${
-                          selected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-[#1c1f26]"
-                        }`}
-                      >
-                        {selected && <Check size={14} />}
-                      </div>
-                      {item?.label}
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        {timeZone?.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setTimeZone([])}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-          >
-            ✖
-          </button>
-        )}
-      </div>
-
-      {/* Reset Button */}
-      <button
-        type="button"
-        onClick={() => {
-          setTradingType([]);
-          setTradingMethod([]);
-          setTimeZone([]);
-        }}
-        className="h-11 px-4 flex items-center gap-2 dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-700 bg-slate-400 hover:bg-slate-700 text-white rounded-md font-medium transition-colors"
-      >
-        <RotateCcw size={16} />
-        Reset
-      </button>
+        </>
+      )}
     </>
   );
 
@@ -470,77 +485,7 @@ const MasterClassForStudent = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <Container width="fluid" className="mx-auto px-5">
-        {/* <div className="flex justify-end items-center gap-2 relative p-5 ">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-                <span className="truncate text-sm">
-                  {category.length > 0
-                    ? `${category.length} Asset Class Selected`
-                    : "Select Asset Class"}
-                </span>
-                <ChevronDown size={16} />
-              </button>
-            </PopoverTrigger>
 
-            <PopoverContent className="w-[225px] p-0">
-              <Command>
-                {categories.length === 0 ? (
-                  <div className="p-3 text-sm text-gray-500 text-center">
-                    No Asset lass found
-                  </div>
-                ) : (
-                  <CommandGroup>
-                    {categories.map((item) => {
-                      const selected = category.includes(item.name);
-
-                      return (
-                        <CommandItem
-                          key={item._id}
-                          onSelect={() => {
-                            setCategory((prev) => {
-                              const exists = prev.includes(item.name);
-                              const updated = exists
-                                ? prev.filter((name) => name !== item.name)
-                                : [...prev, item.name];
-
-                              return updated;
-                            });
-                          }}
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <div
-                            className={`h-4 w-4 border rounded flex items-center justify-center ${
-                              selected
-                                ? "bg-primary text-white border-primary"
-                                : "bg-white dark:bg-[#1c1f26]"
-                            }`}
-                          >
-                            {selected && <Check size={14} />}
-                          </div>
-
-                          {item.name}
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                )}
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          {category?.length > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setCategory([]);
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              ✖
-            </button>
-          )}
-        </div> */}
 
         <div className="flex gap-4 mb-6 justify-between flex-wrap">
           {viewType == "grid" && !isDigitalMarketing && (
@@ -551,11 +496,10 @@ const MasterClassForStudent = () => {
                 className="flex flex-col items-center gap-2 group min-w-[72px]"
               >
                 <div
-                  className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all bg-white dark:bg-gray-800 ${
-                    activeStrategyId === "all"
-                      ? "border-2 border-primary scale-110 shadow-sm mt-1"
-                      : "border-2 border-transparent group-hover:border-gray-200"
-                  }`}
+                  className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all bg-white dark:bg-gray-800 ${activeStrategyId === "all"
+                    ? "border-2 border-primary scale-110 shadow-sm mt-1"
+                    : "border-2 border-transparent group-hover:border-gray-200"
+                    }`}
                 >
                   <img
                     src="/media/Icons/All.jpeg"
@@ -564,11 +508,10 @@ const MasterClassForStudent = () => {
                   />
                 </div>
                 <span
-                  className={`text-xs font-medium text-center whitespace-nowrap transition-colors ${
-                    activeStrategyId === "all"
-                      ? "text-primary"
-                      : "text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300"
-                  }`}
+                  className={`text-xs font-medium text-center whitespace-nowrap transition-colors ${activeStrategyId === "all"
+                    ? "text-primary"
+                    : "text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300"
+                    }`}
                 >
                   All
                 </span>
@@ -582,11 +525,10 @@ const MasterClassForStudent = () => {
                   className="flex flex-col items-center gap-2 group min-w-[72px]"
                 >
                   <div
-                    className={`relative w-14 h-14 rounded-full p-0.5 border-2 transition-all duration-200 ${
-                      activeStrategyId === strategy?._id
-                        ? "border-primary scale-110 shadow-sm mt-1"
-                        : "border-transparent group-hover:border-gray-200"
-                    }`}
+                    className={`relative w-14 h-14 rounded-full p-0.5 border-2 transition-all duration-200 ${activeStrategyId === strategy?._id
+                      ? "border-primary scale-110 shadow-sm mt-1"
+                      : "border-transparent group-hover:border-gray-200"
+                      }`}
                   >
                     <img
                       src={strategy?.imageUrl}
@@ -595,11 +537,10 @@ const MasterClassForStudent = () => {
                     />
                   </div>
                   <span
-                    className={`text-xs font-medium text-center whitespace-nowrap transition-colors ${
-                      activeStrategyId === strategy?._id
-                        ? "text-primary"
-                        : "text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300"
-                    }`}
+                    className={`text-xs font-medium text-center whitespace-nowrap transition-colors ${activeStrategyId === strategy?._id
+                      ? "text-primary"
+                      : "text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300"
+                      }`}
                   >
                     {strategy?.title}
                   </span>
@@ -615,11 +556,10 @@ const MasterClassForStudent = () => {
                   setActiveCategoryId(cat?._id);
                   setActiveEducatorId("all");
                 }}
-                className={`border-b-2 text-md whitespace-nowrap ${
-                  activeCategoryId === cat?._id
-                    ? "border-gray-500 text-black dark:text-gray-500"
-                    : "border-transparent text-gray-500"
-                }`}
+                className={`border-b-2 text-md whitespace-nowrap ${activeCategoryId === cat?._id
+                  ? "border-gray-500 text-black dark:text-gray-500"
+                  : "border-transparent text-gray-500"
+                  }`}
               >
                 {cat?.name}
               </button>
@@ -640,7 +580,7 @@ const MasterClassForStudent = () => {
                 <SelectValue placeholder="Select educator">
                   {educator
                     ? educatorsData?.data?.find((e) => e._id === educator)
-                        ?.first_name?.last_name
+                      ?.first_name?.last_name
                     : "Select educator"}
                 </SelectValue>
               </SelectTrigger>
@@ -672,174 +612,6 @@ const MasterClassForStudent = () => {
           </div>
         </div>
 
-        {/* <div className="flex items-center gap-2 relative pb-5">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-                <span className="truncate text-sm">
-                  {tradingType?.length > 0
-                    ? `${tradingType?.length} Style Selected`
-                    : "Select Trading Style"}
-                </span>
-                <ChevronDown size={16} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[225px] p-0">
-              <Command>
-                <CommandGroup>
-                  {tradingTypeOptions?.map((item) => {
-                    const selected = tradingType?.includes(item?.value);
-                    return (
-                      <CommandItem
-                        key={item?.value}
-                        onSelect={() =>
-                          handleMultiSelect(
-                            item?.value,
-                            tradingType,
-                            setTradingType,
-                          )
-                        }
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${
-                            selected
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-[#1c1f26]"
-                          }`}
-                        >
-                          {selected && <Check size={14} />}
-                        </div>
-                        {item?.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {tradingType?.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setTradingType([])}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              ✖
-            </button>
-          )}
-        </div> */}
-
-        {/* Trading Method Multi-Select */}
-        {/* <div className="flex items-center gap-2 relative">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-                <span className="truncate text-sm">
-                  {tradingMethod?.length > 0
-                    ? `${tradingMethod?.length} Method Selected`
-                    : "Select Trading Method"}
-                </span>
-                <ChevronDown size={16} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[225px] p-0">
-              <Command>
-                <CommandGroup>
-                  {tradingMethodOptions?.map((item) => {
-                    const selected = tradingMethod?.includes(item?.value);
-                    return (
-                      <CommandItem
-                        key={item?.value}
-                        onSelect={() =>
-                          handleMultiSelect(
-                            item?.value,
-                            tradingMethod,
-                            setTradingMethod,
-                          )
-                        }
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${
-                            selected
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-[#1c1f26]"
-                          }`}
-                        >
-                          {selected && <Check size={14} />}
-                        </div>
-                        {item?.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {tradingMethod?.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setTradingMethod([])}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              ✖
-            </button>
-          )}
-        </div> */}
-
-        {/* Time Zone Multi-Select */}
-        {/* <div className="flex items-center gap-2 relative">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-                <span className="truncate text-sm">
-                  {timeZone?.length > 0
-                    ? `${timeZone?.length} Zone Selected`
-                    : "Select Time Zone"}
-                </span>
-                <ChevronDown size={16} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[225px] p-0">
-              <Command>
-                <CommandGroup>
-                  {timeZoneOptions?.map((item) => {
-                    const selected = timeZone?.includes(item?.value);
-                    return (
-                      <CommandItem
-                        key={item?.value}
-                        onSelect={() =>
-                          handleMultiSelect(item?.value, timeZone, setTimeZone)
-                        }
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${
-                            selected
-                              ? "bg-primary text-white border-primary"
-                              : "bg-white dark:bg-[#1c1f26]"
-                          }`}
-                        >
-                          {selected && <Check size={14} />}
-                        </div>
-                        {item?.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {timeZone?.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setTimeZone([])}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              ✖
-            </button>
-          )}
-        </div> */}
         {/* Banner - Static, never changes */}
         <Banner />
 
@@ -850,12 +622,6 @@ const MasterClassForStudent = () => {
           {currentStrategy?.sections?.length > 0 ? (
             <div className="md:w-[430px]">
               <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
-                {/* <div className="p-6 border-b border-gray-300">
-                                    <h3 className="text-lg font-semibold">{currentStrategy.title}</h3>
-                                    <p className="text-sm text-gray-900 mt-2">
-                                        {currentStrategy.sections.reduce((total, section) => total + (section.lectures?.length || 0), 0)} Lessons
-                                    </p>
-                                </div> */}
                 <Accordion allowMultiple={false} defaultIndex={0}>
                   {currentStrategy.sections.map((section, index) => (
                     <AccordionItem
@@ -867,12 +633,11 @@ const MasterClassForStudent = () => {
                           key={lecture?._id}
                           onClick={() => handleLectureClick(lecture)}
                           className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
-                                                        ${
-                                                          activeLectureId ===
-                                                          lecture?._id
-                                                            ? "bg-gray-300 dark:bg-slate-800"
-                                                            : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                                        }`}
+                                                        ${activeLectureId ===
+                              lecture?._id
+                              ? "bg-gray-300 dark:bg-slate-800"
+                              : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                            }`}
                         >
                           <CirclePlay className="mr-2 text-gray-400" />
                           <span className="text-gray-800 font-medium text-xs">
@@ -946,15 +711,7 @@ const MasterClassForStudent = () => {
                     </div>
                   ) : null}
                 </div>
-                {/* Video Info Bar - Only show if active lecture exists */}
-                {/* {activeLecture && (
-                                <div className="p-6 bg-gray-200 dark:bg-gray-700">
-                                    <h2 className="text-2xl mb-2 dark:text-gray-200">{activeLecture.title}</h2>
-                                    <div className="text-sm text-gray-900 dark:text-gray-400">
-                                        {currentStrategy?.category?.name || 'Category N/A'} • {activeLecture.duration || 'Duration N/A'}
-                                    </div>
-                                </div>
-                            )} */}
+
               </div>
             </div>
           )}
@@ -999,11 +756,10 @@ const MasterClassForStudent = () => {
                   {currentStrategy.tags?.map((tag, i) => (
                     <span
                       key={i}
-                      className={`px-4 py-2 rounded-full text-xs font-medium ${
-                        i < 2
-                          ? "bg-orange-500/20 border border-orange-500/40 text-orange-400"
-                          : "bg-cyan-500/20 border border-cyan-500/40 text-cyan-400"
-                      }`}
+                      className={`px-4 py-2 rounded-full text-xs font-medium ${i < 2
+                        ? "bg-orange-500/20 border border-orange-500/40 text-orange-400"
+                        : "bg-cyan-500/20 border border-cyan-500/40 text-cyan-400"
+                        }`}
                     >
                       {tag}
                     </span>
@@ -1019,28 +775,7 @@ const MasterClassForStudent = () => {
               </div>
             </div>
 
-            {/* Educators Section */}
-            {/* {currentStrategy?.educators && currentStrategy?.educators?.length > 0 && (
-                            <div className="pt-8 border-t border-gray-300">
-                                <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-6">
-                                    Strategy Educators
-                                </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                    {currentStrategy?.educators?.map((educator, i) => (
-                                        <div key={educator?._id || i} className="flex flex-col items-center text-center">
-                                            <img
-                                                src={educator?.image || `https://ui-avatars.com/api/?name=${educator?.first_name || 'User'}+${educator?.last_name || ''}`}
-                                                alt={`${educator?.first_name || ''} ${educator?.last_name || ''}`}
-                                                className="w-20 h-20 rounded-full mb-3 border-2 border-gray-300 object-cover"
-                                            />
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {educator?.first_name} {educator?.last_name}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )} */}
+
           </div>
         )}
 
@@ -1063,11 +798,10 @@ const MasterClassForStudent = () => {
                 <div
                   key={strategy?._id}
                   onClick={() => selectStrategy(strategy?._id)}
-                  className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${
-                    selectedStrategyId === strategy?._id
-                      ? "border-purple-500 shadow-lg shadow-purple-500/30"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy?._id
+                    ? "border-purple-500 shadow-lg shadow-purple-500/30"
+                    : "border-gray-300 hover:border-gray-400"
+                    }`}
                 >
                   {/* Strategy Card Content */}
                   <div className="flex flex-col md:flex-row gap-4 mb-4">

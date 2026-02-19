@@ -7,7 +7,7 @@ import {
     useGetEducatorAcademyCategoryQuery,
     useGetLanguageListQuery,
 } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
-import { useGetEducatorsQuery } from "../../../../../../../store/api/admin/adminEducatorsApiSlice";
+import { useGetStrategiesNameQuery } from "../../../../../../../store/api/client/clientStrategiesApiSlice";
 import {
     Select,
     SelectContent,
@@ -28,7 +28,7 @@ const strategySchema = z.object({
     title: z.string().min(3, "Title must be at least 3 characters"),
     description: z.string().min(10, "Description must be at least 10 characters"),
     aboutStrategy: z.string().min(10, "About masterclass  must be at least 10 characters"),
-    // selectedEducators: z.array(z.string()).min(1, "Please select at least one educator"),
+    selectedStrategies: z.array(z.string()).min(1, "Please select at least one strategy"),
     iconThumbnail: z
         .any()
         .refine(
@@ -63,11 +63,11 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
-    const [isEducatorOpen, setIsEducatorOpen] = useState(false);
+    const [isStrategyOpen, setIsStrategyOpen] = useState(false);
 
     const { data: languagesList } = useGetLanguageListQuery();
     const { data: categories } = useGetEducatorAcademyCategoryQuery();
-    // const { data: educatorsData, isLoading: isEducatorsLoading, isFetching: isEducatorsFetching } = useGetEducatorsQuery({ limit: 100 });
+    const { data: strategiesData, isLoading: isStrategiesLoading, isFetching: isStrategiesFetching } = useGetStrategiesNameQuery();
 
     const { auth } = useAuthContext();
 
@@ -87,8 +87,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             title: "",
             description: "",
             aboutStrategy: "",
-            educators: "",
-            // selectedEducators: [],
+            selectedStrategies: [],
             iconThumbnail: undefined,
             strategyBanner: undefined,
             category: "",
@@ -123,12 +122,12 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                 setValue("category", initialData?.category?._id);
             }
 
-            // Backend sends 'educators', frontend uses 'selectedEducators'
-            // const backendEducators = initialData?.educators || initialData?.selectedEducators;
-            // if (backendEducators?.length > 0) {
-            //     const educatorIds = backendEducators?.map(e => typeof e === 'object' ? e?._id : e);
-            //     setValue("selectedEducators", educatorIds);
-            // }
+            // Restore selected strategies from initialData
+            const backendStrategies = initialData?.strategies || initialData?.selectedStrategies;
+            if (backendStrategies?.length > 0) {
+                const strategyIds = backendStrategies?.map(s => typeof s === 'object' ? s?._id : s);
+                setValue("selectedStrategies", strategyIds);
+            }
 
             // Improved tag parsing for various backend formats
             if (initialData?.tags) {
@@ -202,10 +201,11 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                 formData.append(key, values?.[key]);
             });
 
-            // formData.append("educators", JSON.stringify(values?.selectedEducators));
             formData.append("tags", JSON.stringify(values?.tags));
             formData.append("educators", JSON.stringify([educatorId]));
             formData.append("isStrategies", false);
+            // Send selected strategy IDs as a JSON array in formData
+            formData.append("strategies", JSON.stringify(values?.selectedStrategies));
 
             if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
             if (values?.strategyBanner instanceof File) formData.append("image", values?.strategyBanner);
@@ -336,19 +336,19 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         </div>
                     </div>
 
-                    {/* Educators Dropdown (Multi-select) */}
-                    {/* <div className="space-y-2 relative">
-                        <label className="block text-sm font-medium text-gray-700">Select Educators <span className="text-rose-500">*</span></label>
-                        <Popover open={isEducatorOpen} onOpenChange={setIsEducatorOpen}>
+                    {/* Strategies Dropdown (Multi-select) */}
+                    <div className="space-y-2 relative">
+                        <label className="block text-sm font-medium text-gray-700">Select Strategies <span className="text-rose-500">*</span></label>
+                        <Popover open={isStrategyOpen} onOpenChange={setIsStrategyOpen}>
                             <PopoverTrigger asChild>
                                 <button
                                     type="button"
                                     className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]"
                                 >
-                                    <span className="truncate text-sm text-gray-700 ">
-                                        {(watch("selectedEducators") || [])?.length > 0
-                                            ? `${(watch("selectedEducators") || [])?.length} Educators Selected`
-                                            : "Select Educators"}
+                                    <span className="truncate text-sm text-gray-700">
+                                        {(watch("selectedStrategies") || [])?.length > 0
+                                            ? `${(watch("selectedStrategies") || [])?.length} ${(watch("selectedStrategies") || [])?.length === 1 ? 'Strategy' : 'Strategies'} Selected`
+                                            : "Select Strategies"}
                                     </span>
                                     <ChevronDown size={16} className="text-gray-500" />
                                 </button>
@@ -356,29 +356,29 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
                             <PopoverContent className="w-[524px] p-0 pointer-events-auto" align="start" side="bottom">
                                 <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
+                                    <CommandInput placeholder="Search strategies..." className="h-9 border-b" />
                                     <CommandList
                                         className="[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full"
                                         style={{ maxHeight: '300px', overflowY: 'auto', pointerEvents: 'auto' }}
                                     >
                                         <CommandGroup>
-                                            {(isEducatorsLoading || isEducatorsFetching) ? (
+                                            {(isStrategiesLoading || isStrategiesFetching) ? (
                                                 <div className="flex items-center justify-center py-6">
                                                     <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
-                                                    <span className="ml-2 text-sm text-gray-500">Loading educators...</span>
+                                                    <span className="ml-2 text-sm text-gray-500">Loading strategies...</span>
                                                 </div>
-                                            ) : educatorsData?.data?.length === 0 ? (
+                                            ) : strategiesData?.data?.length === 0 ? (
                                                 <div className="py-6 text-center text-sm text-gray-500">
-                                                    No educators found.
+                                                    No strategies found.
                                                 </div>
                                             ) : (
-                                                educatorsData?.data?.map((item) => {
-                                                    const currentSelected = watch("selectedEducators") || [];
+                                                strategiesData?.data?.map((item) => {
+                                                    const currentSelected = watch("selectedStrategies") || [];
                                                     const selected = currentSelected?.includes(item?._id);
                                                     return (
                                                         <CommandItem
                                                             key={item?._id}
-                                                            value={`${item?.first_name} ${item?.last_name}`}
-                                                            // Using onPointerDown to bypass potential cmdk focus issues
+                                                            value={item?.title}
                                                             onPointerDown={(e) => {
                                                                 e?.preventDefault();
                                                                 e?.stopPropagation();
@@ -387,7 +387,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                                                     ? currentSelected?.filter((id) => id !== item?._id)
                                                                     : [...currentSelected, item?._id];
 
-                                                                setValue("selectedEducators", updated, { shouldValidate: true });
+                                                                setValue("selectedStrategies", updated, { shouldValidate: true });
                                                             }}
                                                             className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
                                                         >
@@ -405,7 +405,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                                                 "text-sm capitalize transition-colors",
                                                                 selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
                                                             )}>
-                                                                {item?.first_name} {item?.last_name}
+                                                                {item?.title}
                                                             </span>
                                                         </CommandItem>
                                                     );
@@ -416,8 +416,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 </Command>
                             </PopoverContent>
                         </Popover>
-                        {errors?.selectedEducators && <p className="text-xs text-rose-500 mt-1">{errors?.selectedEducators?.message}</p>}
-                    </div> */}
+                        {errors?.selectedStrategies && <p className="text-xs text-rose-500 mt-1">{errors?.selectedStrategies?.message}</p>}
+                    </div>
 
                     {/* Tags Input */}
                     <div className="space-y-2">
