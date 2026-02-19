@@ -120,11 +120,9 @@ const MasterClassForStudent = () => {
   const [activeEducatorId, setActiveEducatorId] = useState(null);
   const [activeStrategyId, setActiveStrategyId] = useState(null);
   const [viewType, setViewType] = useState("grid");
-  const [category, setCategory] = useState([]);
   const [tradingType, setTradingType] = useState([]);
   const [tradingMethod, setTradingMethod] = useState([]);
   const [timeZone, setTimeZone] = useState([]);
-  const [statusType, setStatusType] = useState(""); // ONGOING, UPCOMING, PAST
   const [educator, setEducator] = useState("");
 
   const { data: categoryData, isLoading: isCategoryLoading } =
@@ -427,9 +425,9 @@ const MasterClassForStudent = () => {
               setTradingType([]);
               setTradingMethod([]);
               setTimeZone([]);
-              setEducator("");
-              setActiveEducatorId("all");
-              setActiveStrategyId("all");
+              setEducator(null);
+              setActiveEducatorId(null);
+              setActiveStrategyId(null);
               setActiveCategoryId(null);
             }}
             className="h-11 px-4 flex items-center gap-2 dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-700 bg-slate-400 hover:bg-slate-700 text-white rounded-md font-medium transition-colors"
@@ -492,11 +490,11 @@ const MasterClassForStudent = () => {
             <div className="flex gap-4 overflow-x-auto pb-4 items-start">
               {/* All Strategies Option */}
               <button
-                onClick={() => setActiveStrategyId("all")}
+                onClick={() => setActiveStrategyId(null)}
                 className="flex flex-col items-center gap-2 group min-w-[72px]"
               >
                 <div
-                  className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all bg-white dark:bg-gray-800 ${activeStrategyId === "all"
+                  className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all bg-white dark:bg-gray-800 ${activeStrategyId === null
                     ? "border-2 border-primary scale-110 shadow-sm mt-1"
                     : "border-2 border-transparent group-hover:border-gray-200"
                     }`}
@@ -508,7 +506,7 @@ const MasterClassForStudent = () => {
                   />
                 </div>
                 <span
-                  className={`text-xs font-medium text-center whitespace-nowrap transition-colors ${activeStrategyId === "all"
+                  className={`text-xs font-medium text-center whitespace-nowrap transition-colors ${activeStrategyId === null
                     ? "text-primary"
                     : "text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300"
                     }`}
@@ -554,7 +552,7 @@ const MasterClassForStudent = () => {
                 key={cat?._id}
                 onClick={() => {
                   setActiveCategoryId(cat?._id);
-                  setActiveEducatorId("all");
+                  setActiveEducatorId(null);
                 }}
                 className={`border-b-2 text-md whitespace-nowrap ${activeCategoryId === cat?._id
                   ? "border-gray-500 text-black dark:text-gray-500"
