@@ -1512,11 +1512,11 @@ export const sideMenus = {
       icon: <ChartCandlestick />,
       path: "/admin/trade-analysis",
     },
-    {
-      title: "IQ Crypto Projects",
-      icon: <BadgeCent />,
-      path: "/admin/iq-crypto",
-    },
+    // {
+    //   title: "IQ Crypto Projects",
+    //   icon: <BadgeCent />,
+    //   path: "/admin/iq-crypto",
+    // },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
@@ -1751,11 +1751,11 @@ export const sideMenus = {
       icon: <ChartCandlestick />,
       path: "/educator/trade-analysis",
     },
-    {
-      title: "IQ Crypto Projects",
-      icon: <BadgeCent />,
-      path: "/educator/iq-crypto",
-    },
+    // {
+    //   title: "IQ Crypto Projects",
+    //   icon: <BadgeCent />,
+    //   path: "/educator/iq-crypto",
+    // },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
