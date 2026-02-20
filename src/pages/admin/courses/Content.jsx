@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BookOpen, Users, Settings, Menu, X } from "lucide-react";
+import { BookOpen, Settings, Menu, X } from "lucide-react";
 import { useAuthContext } from "../../../auth/useAuthContext";
 
 // components

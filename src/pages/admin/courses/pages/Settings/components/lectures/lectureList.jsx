@@ -26,6 +26,7 @@ const LectureList = ({
   onLectureUpdate,
   forceUpdateLectureList,
   setForceUpdateLectureList,
+  readOnly = false,
 }) => {
   const [isCreatingLecture, setIsCreatingLecture] = useState(false);
   const [lectures, setLectures] = useState([]);
@@ -146,15 +147,17 @@ const LectureList = ({
           </div>
           <p className="text-sm text-gray-500 mb-1">No lectures yet</p>
           <p className="text-xs text-gray-400 mb-3">
-            Add your first lecture to get started
+            {readOnly ? "This section has no lectures." : "Add your first lecture to get started"}
           </p>
-          <button
-            onClick={() => setIsCreatingLecture(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary-light text-primary hover:bg-primary-light rounded-md transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add First Lecture
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setIsCreatingLecture(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary-light text-primary hover:bg-primary-light rounded-md transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add First Lecture
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
@@ -170,11 +173,10 @@ const LectureList = ({
                 onMouseLeave={() => setHoveredLectureId(null)}
               >
                 <div
-                  className={`flex items-center gap-2 p-2.5 rounded-md cursor-pointer transition-all ${
-                    selectedLectureId === lecture._id
+                  className={`flex items-center gap-2 p-2.5 rounded-md cursor-pointer transition-all ${selectedLectureId === lecture._id
                       ? "bg-primary-light border-l-4 border-l-primary"
                       : "hover:bg-primary-light border-l-4 border-l-transparent"
-                  }`}
+                    }`}
                   onClick={() => handleLectureSelect(lecture)}
                 >
                   {/* Lecture icon */}
@@ -203,9 +205,9 @@ const LectureList = ({
                       )}
                     </p>
                     )} */}
-            {/* {lecture.description ? <ShowMoreLess html={lecture.description} limit={10} />: "No description provided"} */}
+                    {/* {lecture.description ? <ShowMoreLess html={lecture.description} limit={10} />: "No description provided"} */}
 
-                    
+
                   </div>
 
                   {/* Preview indicator */}
@@ -215,41 +217,42 @@ const LectureList = ({
                     </span>
                   )}
 
-                  {/* Actions - only show on hover or when selected */}
-                  <div
-                    className={`flex items-center gap-1 transition-opacity ${
-                      hoveredLectureId === lecture._id ||
-                      selectedLectureId === lecture._id
-                        ? "opacity-100"
-                        : "opacity-0"
-                    }`}
-                  >
-                    <button
-                      className="p-1.5 text-gray-700 hover:text-primary rounded-md transition-colors"
-                      title="Edit lecture"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLectureSelect(lecture);
-                      }}
+                  {/* Actions - only show on hover or when selected, hidden in readOnly mode */}
+                  {!readOnly && (
+                    <div
+                      className={`flex items-center gap-1 transition-opacity ${hoveredLectureId === lecture._id ||
+                          selectedLectureId === lecture._id
+                          ? "opacity-100"
+                          : "opacity-0"
+                        }`}
                     >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteLecture(lecture._id);
-                      }}
-                      disabled={deleteLoading === lecture._id}
-                      className="p-1.5 text-gray-700 hover:text-red-500 rounded-md transition-colors disabled:opacity-50"
-                      title="Delete lecture"
-                    >
-                      {deleteLoading === lecture._id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
+                      <button
+                        className="p-1.5 text-gray-700 hover:text-primary rounded-md transition-colors"
+                        title="Edit lecture"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLectureSelect(lecture);
+                        }}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteLecture(lecture._id);
+                        }}
+                        disabled={deleteLoading === lecture._id}
+                        className="p-1.5 text-gray-700 hover:text-red-500 rounded-md transition-colors disabled:opacity-50"
+                        title="Delete lecture"
+                      >
+                        {deleteLoading === lecture._id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Selected indicator */}
                   {selectedLectureId === lecture._id && (
@@ -264,42 +267,44 @@ const LectureList = ({
         </div>
       )}
 
-      {/* Create lecture form or button */}
-      <div className="mt-4">
-        <AnimatePresence>
-          {isCreatingLecture ? (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="border border-gray-200 rounded-md bg-light p-3 mb-2">
-                <CreateLectureForm
-                  sectionId={sectionId}
-                  onCancel={() => setIsCreatingLecture(false)}
-                  onSuccess={handleLectureCreated}
-                />
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <button
-                onClick={() => setIsCreatingLecture(true)}
-                className="flex items-center gap-2 w-full py-2 px-3 text-sm text-center justify-center hover:bg-gray-100 text-gray-700 rounded-md transition-colors border border-dashed border-gray-200"
-                title="Add new lecture"
+      {/* Create lecture form or button - hidden in readOnly mode */}
+      {!readOnly && (
+        <div className="mt-4">
+          <AnimatePresence>
+            {isCreatingLecture ? (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
               >
-                <Plus className="w-4 h-4" />
-                Add Lecture
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                <div className="border border-gray-200 rounded-md bg-light p-3 mb-2">
+                  <CreateLectureForm
+                    sectionId={sectionId}
+                    onCancel={() => setIsCreatingLecture(false)}
+                    onSuccess={handleLectureCreated}
+                  />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <button
+                  onClick={() => setIsCreatingLecture(true)}
+                  className="flex items-center gap-2 w-full py-2 px-3 text-sm text-center justify-center hover:bg-gray-100 text-gray-700 rounded-md transition-colors border border-dashed border-gray-200"
+                  title="Add new lecture"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Lecture
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 };

@@ -21,6 +21,7 @@ import {
 import {
   fetchCourses,
   fetchStrategies,
+  fetchMasterClasses,
   selectAllCourses,
   selectCoursesStatus,
   selectCoursesError,
@@ -48,7 +49,11 @@ const Main = ({ onSelectCourse }) => {
   useEffect(() => {
     if (auth?.token) {
       setIsLoading(true);
-      const action = activeTab === "courses" ? fetchCourses : fetchStrategies;
+      let action;
+      if (activeTab === "courses") action = fetchCourses;
+      else if (activeTab === "strategies") action = fetchStrategies;
+      else action = fetchMasterClasses;
+
       dispatch(
         action({
           params: {
@@ -62,15 +67,15 @@ const Main = ({ onSelectCourse }) => {
           setCoursesList(response);
 
           const instructorsWithCourses = Object.values(
-            response?.reduce((acc, item) => {
+            (response ?? [])?.reduce((acc, item) => {
               const instructor = item?.instructor;
               if (!instructor?._id) return acc;
 
-              if (!acc[instructor._id]) {
-                acc[instructor._id] = { ...instructor, courses: [] };
+              if (!acc[instructor?._id]) {
+                acc[instructor?._id] = { ...instructor, courses: [] };
               }
 
-              acc[instructor._id].courses.push(item);
+              acc[instructor?._id]?.courses?.push(item);
               return acc;
             }, {})
           );
@@ -95,11 +100,11 @@ const Main = ({ onSelectCourse }) => {
   }, [dispatch, auth?.token, activeTab]);
 
   // Filter courses based on search term and selected category
-  const filteredCourses = coursesList.filter((course) => {
+  const filteredCourses = coursesList?.filter((course) => {
     const matchesSearch =
       !searchTerm ||
-      course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      course?.title?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+      course?.description?.toLowerCase().includes(searchTerm?.toLowerCase());
 
     const matchesCategory =
       !selectedCategory || course?.category?._id === selectedCategory?._id;
@@ -110,7 +115,7 @@ const Main = ({ onSelectCourse }) => {
   // Get featured courses (highest rated or marked as featured)
   const featuredCourses = coursesList
     ?.filter((course) => course?.published)
-    .slice(0, 5); // Take first 5 for FeaturedSection
+    ?.slice(0, 5); // Take first 5 for FeaturedSection
 
   // Section component for consistent styling
   const Section = ({ title, icon, children, viewAllLink }) => (
@@ -214,7 +219,7 @@ const Main = ({ onSelectCourse }) => {
             <div className="relative">
               <input
                 type="text"
-                placeholder={`Search for ${activeTab === "courses" ? "Courses" : "Strategies"}...`}
+                placeholder={`Search for ${activeTab === "courses" ? "Courses" : activeTab === "strategies" ? "Strategies" : "Master Classes"}...`}
                 className="w-full backdrop-blur-sm text-gray-800 rounded-lg px-4 py-3 pl-10 input bg-white/50"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -242,6 +247,15 @@ const Main = ({ onSelectCourse }) => {
                   }`}
               >
                 Strategies
+              </button>
+              <button
+                onClick={() => setActiveTab("master-class")}
+                className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === "master-class"
+                  ? "bg-primary text-white shadow-lg translate-y-[-1px]"
+                  : "text-gray-600 hover:text-primary hover:bg-white"
+                  }`}
+              >
+                Master Class
               </button>
             </div>
           )}
@@ -300,12 +314,12 @@ const Main = ({ onSelectCourse }) => {
       <Section
         title={
           selectedCategory
-            ? `${selectedCategory?.name} ${activeTab === "courses" ? "Courses" : "Strategies"}`
-            : `All ${activeTab === "courses" ? "Courses" : "Strategies"}`
+            ? `${selectedCategory?.name} ${activeTab === "courses" ? "Courses" : activeTab === "strategies" ? "Strategies" : "Master Classes"}`
+            : `All ${activeTab === "courses" ? "Courses" : activeTab === "strategies" ? "Strategies" : "Master Classes"}`
         }
         icon={<BookOpen className="w-5 h-5" />}
       >
-        {filteredCourses.length > 0 ? (
+        {filteredCourses?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredCourses?.map((course) => (
               <CourseCard
@@ -321,7 +335,7 @@ const Main = ({ onSelectCourse }) => {
               <Search className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-700">
-              No {activeTab === "courses" ? "Courses" : "Strategies"} found
+              No {activeTab === "courses" ? "Courses" : activeTab === "strategies" ? "Strategies" : "Master Classes"} found
             </h3>
             <p className="text-gray-500 mt-2 max-w-md mx-auto">
               {searchTerm

@@ -7,6 +7,7 @@ import { useAuthContext } from "../../../../../auth/useAuthContext";
 import {
   fetchCourses,
   fetchStrategies,
+  fetchMasterClasses,
   fetchCoursesByEducatorId,
   selectAllCourses,
   selectCoursesStatus,
@@ -50,6 +51,8 @@ const SettingsSection = () => {
 
       if (activeTab === "strategies") {
         action = fetchStrategies;
+      } else if (activeTab === "master-class") {
+        action = fetchMasterClasses;
       } else {
         // For courses tab
         if (auth?.user?.role === "educator") {
@@ -63,7 +66,7 @@ const SettingsSection = () => {
       dispatch(action(payload))
         .unwrap()
         .then((response) => {
-          console.log(`${activeTab === "courses" ? "Courses" : "Strategies"} fetched successfully:`, response);
+          console.log(`${activeTab} fetched successfully:`, response);
         })
         .catch((error) => {
           console.error(`Error fetching ${activeTab}:`, error);
@@ -116,7 +119,7 @@ const SettingsSection = () => {
       return (
         <ErrorMessages
           heading={
-            activeTab === "courses" ? "No IQ Vault Yet" : "No Strategies Yet"
+            activeTab === "courses" ? "No IQ Vault Yet" : activeTab === "strategies" ? "No Strategies Yet" : "No Master Classes Yet"
           }
           message={
             activeTab === "courses"
@@ -129,6 +132,8 @@ const SettingsSection = () => {
 
             if (activeTab === "strategies") {
               action = fetchStrategies;
+            } else if (activeTab === "master-class") {
+              action = fetchMasterClasses;
             } else {
               if (auth?.user?.role === "educator") {
                 action = fetchCoursesByEducatorId;
@@ -175,7 +180,7 @@ const SettingsSection = () => {
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to {activeTab === "courses" ? "IQ Vault" : "Strategies"}
+                  Back to {activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategies" : "Master Classes"}
                 </button>
               )}
               {!selectedCourseId && (
@@ -200,6 +205,17 @@ const SettingsSection = () => {
                       Strategies
                     </button>
                   )}
+                  {isAdmin && (
+                    <button
+                      onClick={() => setActiveTab("master-class")}
+                      className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "master-class"
+                        ? "bg-white text-primary shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                        }`}
+                    >
+                      Master Class
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -207,7 +223,7 @@ const SettingsSection = () => {
               <span className="text-sm text-gray-500">
                 {selectedCourseId
                   ? courses?.find((c) => c?._id === selectedCourseId)?.title
-                  : `All ${activeTab === "courses" ? "IQ Vault" : "Strategies"}`}
+                  : `All ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategies" : "Master Classes"}`}
               </span>
             </div>
           </div>

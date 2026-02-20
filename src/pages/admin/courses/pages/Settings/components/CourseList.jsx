@@ -146,43 +146,47 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
         ) : (
           <div className="col-span-full">
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No {activeTab === "courses" ? "IQ Vault" : "Strategies"} found</p>
+              <p className="text-gray-500">No {activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategies" : "Master Classes"} found</p>
             </div>
           </div>
         )}
 
-        {/** Create New Course Card */}
-        <div
-          onClick={() => {
-            setIsEditMode(false);
-            setSelectedCourse(null);
-            setIsModalOpen(true);
-          }}
-          className="rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300 hover:border-primary cursor-pointer transition-colors duration-200"
-        >
-          <div className="flex flex-col items-center justify-center h-full">
-            <Plus className="w-12 h-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700">
-              Create New {activeTab === "courses" ? "IQ Vault" : "Strategy"}
-            </h3>
-            <p className="text-sm text-gray-500 mt-2">
-              Start building your {activeTab === "courses" ? "IQ Vault" : "Strategy"}
-            </p>
+        {/** Create New Course Card - hidden for master-class tab */}
+        {activeTab !== "master-class" && (
+          <div
+            onClick={() => {
+              setIsEditMode(false);
+              setSelectedCourse(null);
+              setIsModalOpen(true);
+            }}
+            className="rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300 hover:border-primary cursor-pointer transition-colors duration-200"
+          >
+            <div className="flex flex-col items-center justify-center h-full">
+              <Plus className="w-12 h-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700">
+                Create New {activeTab === "courses" ? "IQ Vault" : "Strategy"}
+              </h3>
+              <p className="text-sm text-gray-500 mt-2">
+                Start building your {activeTab === "courses" ? "IQ Vault" : "Strategy"}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/** Modal for Course Creation/Editing */}
-        <CreateCourseModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedCourse(null);
-            setIsEditMode(false);
-          }}
-          onSubmit={isEditMode ? handleUpdateCourse : undefined}
-          initialData={isEditMode ? selectedCourse : undefined}
-          activeTab={activeTab}
-        />
+        {/** Modal for Course Creation/Editing - hidden for master-class tab */}
+        {activeTab !== "master-class" && (
+          <CreateCourseModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedCourse(null);
+              setIsEditMode(false);
+            }}
+            onSubmit={isEditMode ? handleUpdateCourse : undefined}
+            initialData={isEditMode ? selectedCourse : undefined}
+            activeTab={activeTab}
+          />
+        )}
       </div>
     </DndProvider>
   );
