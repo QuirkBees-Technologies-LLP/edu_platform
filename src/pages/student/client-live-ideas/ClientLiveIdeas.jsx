@@ -108,7 +108,7 @@ const ClientLiveIdeas = () => {
         // Append new unique items only
         setTradeIdeas((prevIdeas) => {
           const newIdeas = data.data.filter(
-            (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
+            (idea) => !prevIdeas.some((prev) => prev._id === idea._id),
           );
           return [...prevIdeas, ...newIdeas];
         });
@@ -129,7 +129,7 @@ const ClientLiveIdeas = () => {
 
       if (node) observer.current.observe(node);
     },
-    [isFetching, page, totalPages]
+    [isFetching, page, totalPages],
   );
   useEffect(() => {
     // setTradeIdeas([]);
@@ -192,16 +192,6 @@ const ClientLiveIdeas = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
-      <Toolbar>
-        <ToolbarHeading>
-          <ToolbarPageTitle text="IQ Live Ideas" />
-          <ToolbarDescription>
-            {/* Oversee educator profiles, manage their sessions, and ensure quality
-            trade and course content across the platform. */}
-          </ToolbarDescription>
-        </ToolbarHeading>
-      </Toolbar>
-
       <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
         <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
           <div className="flex flex-wrap items-center sm:justify-start gap-3 mb-2">
@@ -533,8 +523,8 @@ const ClientLiveIdeas = () => {
                                           ? t.image.length - 1
                                           : (t.currentIndex ?? 0) - 1,
                                     }
-                                  : t
-                              )
+                                  : t,
+                              ),
                             );
                           }}
                           className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
@@ -555,8 +545,8 @@ const ClientLiveIdeas = () => {
                                           ? 0
                                           : (t.currentIndex ?? 0) + 1,
                                     }
-                                  : t
-                              )
+                                  : t,
+                              ),
                             );
                           }}
                           className="absolute right-2 top-1/2 -translate-y-1/2!right-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md -translate-y-1/2"
@@ -573,8 +563,8 @@ const ClientLiveIdeas = () => {
                                   prev.map((t) =>
                                     t._id === trade._id
                                       ? { ...t, currentIndex: idx }
-                                      : t
-                                  )
+                                      : t,
+                                  ),
                                 );
                               }}
                               className={`w-2.5 h-2.5 rounded-full transition-colors ${
@@ -685,7 +675,7 @@ const ClientLiveIdeas = () => {
                     {trade.createdAt
                       ? format(
                           new Date(trade.createdAt),
-                          "MMM dd, yyyy, hh:mm a"
+                          "MMM dd, yyyy, hh:mm a",
                         )
                       : ""}
                   </div>

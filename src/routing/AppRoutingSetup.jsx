@@ -158,14 +158,23 @@ import EducatorLiveTradeIdeas from "../pages/educator/educator-live-trade-ideas/
 import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTradeIdeas";
 import ClientLiveIdeas from "../pages/student/client-live-ideas/ClientLiveIdeas";
 import TradingStrategies from "../pages/student/trading-strategies/TradingStrategies";
-
+import MasterClass from "../pages/educator/master-class/MasterClass";
+import StudentMasterClass from "../pages/student/MasterClass/MasterClass.jsx";
+import MasterClassStudent from "../pages/student/MasterClass/MasterClassForStudent.jsx";
+import { IdeasLayout } from "../layouts/ideas/IdeasLayout";
 const routes = {
   student: [
     { path: "/", element: <DefaultPage /> },
     { path: "/live-session", element: <ClientLiveSession /> },
     { path: "/live-session/:callId", element: <ClientViewLiveSession /> },
-    { path: "/ideas", element: <ClientTradeIdeas /> },
-    { path: "/live-ideas", element: <ClientLiveIdeas /> },
+    {
+      element: <IdeasLayout />,
+      children: [
+        { path: "/ideas", element: <ClientTradeIdeas /> },
+        { path: "/live-ideas", element: <ClientLiveIdeas /> },
+        { path: "/iq-insight", element: <IqInsight /> },
+      ],
+    },
     { path: "/video-library", element: <VideoLibrary /> },
     { path: "/profile", element: <ClientProfile /> },
     { path: "/academy", element: <StudentLiveSessionCategory /> },
@@ -175,6 +184,8 @@ const routes = {
     { path: "/tranding-platform", element: <TrandingPlatform /> },
     { path: "/dashboard", element: <ClientDashboard /> },
     { path: "/recording-session", element: <RecordingSession /> },
+    { path: "/master-class", element: <MasterClassStudent /> },
+    { path: "/master-class/:id", element: <StudentMasterClass /> },
     {
       path: "/educator-recording-session/:id",
       element: <UserRecordingSession />,
@@ -187,7 +198,6 @@ const routes = {
     { path: "/iq-academy-educators", element: <IqAcademyEducators /> },
     { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
-    { path: "/iq-insight", element: <IqInsight /> },
     { path: "/iq-crypto", element: <IqCrypto /> },
     { path: "/iq-social", element: <CommunityFeed /> },
     { path: "/trading-strategies", element: <TradingStrategies /> },
@@ -199,6 +209,7 @@ const routes = {
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
     { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
     { path: "/educator/courses", element: <Courses /> },
+    { path: "/educator/master-class", element: <MasterClass /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/recordings", element: <EducatorRecording /> },
     {
@@ -318,7 +329,22 @@ const routes = {
 
 const getStudentRoutesByPlan = (plan) => {
   const allowedPaths = plan?.allowedSideBar || [];
-  return routes.student.filter((route) => allowedPaths.includes(route.path));
+
+  return routes.student.reduce((acc, route) => {
+    if (route.children) {
+      const allowedChildren = route.children.filter((child) =>
+        allowedPaths.includes(child.path),
+      );
+      if (allowedChildren.length > 0) {
+        acc.push({ ...route, children: allowedChildren });
+      }
+    } else {
+      if (allowedPaths.includes(route.path)) {
+        acc.push(route);
+      }
+    }
+    return acc;
+  }, []);
 };
 
 const AppRoutingSetup = () => {
@@ -331,9 +357,7 @@ const AppRoutingSetup = () => {
       ? getStudentRoutesByPlan(plan)
       : routes[userRole] || [];
 
-
   // const roleRoutes = routes[userRole] || [];
-
 
   return (
     <Routes>
@@ -345,7 +369,19 @@ const AppRoutingSetup = () => {
 
       {roleRoutes.map((route, index) => (
         <Route key={index} element={<Demo1Layout />}>
-          <Route path={route.path} element={route.element} />
+          {route.children ? (
+            <Route element={route.element}>
+              {route.children.map((child, childIndex) => (
+                <Route
+                  key={childIndex}
+                  path={child.path}
+                  element={child.element}
+                />
+              ))}
+            </Route>
+          ) : (
+            <Route path={route.path} element={route.element} />
+          )}
         </Route>
       ))}
 

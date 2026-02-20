@@ -10,27 +10,32 @@ const MenuLink = ({
   handleClick,
   children
 }) => {
-  if (!hasItemSub && path) {
+  if (path) {
+    const Component = externalLink ? 'a' : Link;
+    const props = {
+      className: clsx('menu-link', className && className),
+      onClick: hasItemSub ? handleToggle : handleClick
+    };
+
     if (externalLink) {
-      const target = newTab ? '_blank' : '_self';
-      return <a href={path} target={target} rel="noopener" onClick={handleClick} className={clsx('menu-link', className && className)}>
-          {children}
-        </a>;
+      props.href = path;
+      props.target = newTab ? '_blank' : '_self';
+      props.rel = "noopener";
     } else {
-      return <Link to={path} onClick={handleClick} className={clsx('menu-link', className && className)}>
-          {children}
-        </Link>;
+      props.to = path;
     }
+
+    return (
+      <Component {...props}>
+        {children}
+      </Component>
+    );
   } else {
-    if (hasItemSub) {
-      return <div className={clsx('menu-link', className && className)} onClick={handleToggle}>
-          {children}
-        </div>;
-    } else {
-      return <div className={clsx('menu-link', className && className)} onClick={handleClick}>
-          {children}
-        </div>;
-    }
+    return (
+      <div className={clsx('menu-link', className && className)} onClick={hasItemSub ? handleToggle : handleClick}>
+        {children}
+      </div>
+    );
   }
 };
 export { MenuLink };

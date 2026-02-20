@@ -28,6 +28,7 @@ const SectionItem = ({
   forceUpdateLectureList,
   setForceUpdateLectureList,
   reorderMode,
+  readOnly = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -175,11 +176,10 @@ const SectionItem = ({
 
             <button
               onClick={handleToggleExpand}
-              className={`p-1.5 rounded-full transition-colors ${
-                isExpanded
+              className={`p-1.5 rounded-full transition-colors ${isExpanded
                   ? "text-primary bg-primary-light hover:bg-primary-clarity"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
               aria-label={isExpanded ? "Collapse section" : "Expand section"}
             >
               {isExpanded ? (
@@ -249,11 +249,10 @@ const SectionItem = ({
             )}
           </div>
 
-          {!isEditing && !reorderMode && (
+          {!isEditing && !reorderMode && !readOnly && (
             <div
-              className={`flex items-center gap-1 transition-opacity ${
-                isHovered ? "opacity-100" : "opacity-0"
-              }`}
+              className={`flex items-center gap-1 transition-opacity ${isHovered ? "opacity-100" : "opacity-0"
+                }`}
             >
               <button
                 onClick={handleStartEditing}
@@ -289,6 +288,7 @@ const SectionItem = ({
               onLectureUpdate={onLectureUpdate}
               forceUpdateLectureList={forceUpdateLectureList}
               setForceUpdateLectureList={setForceUpdateLectureList}
+              readOnly={readOnly}
             />
           </div>
         </div>

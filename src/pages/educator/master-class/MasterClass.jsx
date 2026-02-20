@@ -1,0 +1,46 @@
+import React from "react";
+import { useAuthContext } from "@/auth/useAuthContext";
+import { UserProfileHero } from "@/partials/heros";
+import { toAbsoluteUrl } from "@/utils";
+import Content from "./Content";
+
+const MasterClass = () => {
+    const { auth } = useAuthContext();
+
+    const name =
+        auth?.user?.first_name && auth?.user?.last_name
+            ? `${auth.user.first_name} ${auth.user.last_name}`
+            : auth?.user?.name;
+
+    const userName = name || "User";
+
+    const image = (
+        <img
+            src={toAbsoluteUrl(auth?.user?.image)}
+            className="rounded-full border-3 border-success size-[100px] shrink-0 object-cover object-top"
+        />
+    );
+
+    return (
+        <div className="min-h-screen">
+            <UserProfileHero
+                name={userName}
+                image={image}
+                info={[
+                    {
+                        label: `${userName}`,
+                        icon: "abstract-41",
+                    },
+                    { label: `${auth?.user?.role}`, icon: "geolocation" },
+                    { email: `${auth?.user?.email}`, icon: "sms" },
+                ]}
+            />
+
+            <div className="container-fluid">
+                <Content defaultActiveTab="master-class" defaultView="classroom" />
+            </div>
+        </div>
+    );
+};
+
+export default MasterClass;

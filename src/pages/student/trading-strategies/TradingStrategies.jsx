@@ -130,6 +130,15 @@ const TradingStrategies = () => {
         }
     }, [currentStrategy]);
 
+    /**
+     * Auto-select the first strategy when strategies are loaded
+     */
+    // useEffect(() => {
+    //     if (strategies?.length > 0 && !selectedStrategyId) {
+    //         setSelectedStrategyId(strategies[0]._id);
+    //     }
+    // }, [strategies, selectedStrategyId]);
+
     // ==================== EVENT HANDLERS ====================
     const selectStrategy = (strategyId) => {
         setSelectedStrategyId(strategyId);
@@ -150,7 +159,7 @@ const TradingStrategies = () => {
         return (
             <div className="min-h-screen">
                 <Container width="fluid" className="mx-auto px-5">
-                    <Banner />
+                    {/* <Banner /> */}
 
                     {/* Loading State */}
                     <div className="flex items-center justify-center h-96">
@@ -247,53 +256,42 @@ const TradingStrategies = () => {
                     ) : null}
 
                     {/* ========== VIDEO PLAYER AREA (MAIN CONTENT) ========== */}
-                    <div className="flex-1">
-                        <div className="card rounded-2xl border border-gray-300 overflow-hidden">
-                            <div className="w-full h-[425px] dark:bg-black flex items-center justify-center bg-gray-200">
-                                {/* Show loading while fetching strategy details */}
-                                {strategyLoading ? (
-                                    <div className="text-center">
-                                        <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
-                                        <h3 className="text-xl text-gray-200">Loading strategy details...</h3>
-                                    </div>
-                                ) : activeLecture?.content ? (
-                                    <iframe
-                                        src={getEmbedUrl(activeLecture?.content)}
-                                        className="w-full h-full"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        title={activeLecture?.title || "Video Player"}
-                                    />
-                                ) : currentStrategy?.sections?.length > 0 ? (
-                                    <div className="text-center">
-                                        <div className="text-8xl mb-5 opacity-30 text-white">▶</div>
-                                        <h3 className="text-xl text-white">
-                                            Select a lecture to start watching
-                                        </h3>
-                                    </div>
-                                ) : currentStrategy ? (
-                                    // Strategy selected but no sections/lessons available
-                                    <div className="text-center text-gray-400">
-                                        <div className="text-8xl mb-5 opacity-30">▶</div>
-                                        <h3 className="text-xl text-gray-200">No lessons available for this strategy</h3>
-                                        <p className="text-sm text-gray-400 mt-2">Lessons will be added soon</p>
-                                    </div>
-                                ) : (
-                                    // No strategy selected - Show welcome banner with play overlay
-                                    <div className="relative w-full h-full">
-                                        <img
-                                            src="/media/banners/Strategy Page Banner_Strategy.jpg.jpeg"
-                                            alt="Your Strategy Journey Starts Here"
-                                            className="w-full h-full object-cover"
+                    {currentStrategy && (
+                        <div className="flex-1">
+                            <div className="card rounded-2xl border border-gray-300 overflow-hidden">
+                                <div className="w-full h-[425px] dark:bg-black flex items-center justify-center bg-gray-200">
+                                    {/* Show loading while fetching strategy details */}
+                                    {strategyLoading ? (
+                                        <div className="text-center">
+                                            <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
+                                            <h3 className="text-xl text-gray-200">Loading strategy details...</h3>
+                                        </div>
+                                    ) : activeLecture?.content ? (
+                                        <iframe
+                                            src={getEmbedUrl(activeLecture?.content)}
+                                            className="w-full h-full"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            title={activeLecture?.title || "Video Player"}
                                         />
-                                        {/* <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="text-8xl dark:opacity-100 opacity-50 text-white drop-shadow-lg">▶</div>
-                                        </div> */}
-                                    </div>
-                                )}
-                            </div>
-                            {/* Video Info Bar - Only show if active lecture exists */}
-                            {/* {activeLecture && (
+                                    ) : currentStrategy?.sections?.length > 0 ? (
+                                        <div className="text-center">
+                                            <div className="text-8xl mb-5 opacity-30 text-white">▶</div>
+                                            <h3 className="text-xl text-white">
+                                                Select a lecture to start watching
+                                            </h3>
+                                        </div>
+                                    ) : currentStrategy ? (
+                                        // Strategy selected but no sections/lessons available
+                                        <div className="text-center text-gray-400">
+                                            <div className="text-8xl mb-5 opacity-30">▶</div>
+                                            <h3 className="text-xl text-gray-200">No lessons available for this strategy</h3>
+                                            <p className="text-sm text-gray-400 mt-2">Lessons will be added soon</p>
+                                        </div>
+                                    ) : null}
+                                </div>
+                                {/* Video Info Bar - Only show if active lecture exists */}
+                                {/* {activeLecture && (
                                 <div className="p-6 bg-gray-200 dark:bg-gray-700">
                                     <h2 className="text-2xl mb-2 dark:text-gray-200">{activeLecture.title}</h2>
                                     <div className="text-sm text-gray-900 dark:text-gray-400">
@@ -301,8 +299,9 @@ const TradingStrategies = () => {
                                     </div>
                                 </div>
                             )} */}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* About Strategy */}

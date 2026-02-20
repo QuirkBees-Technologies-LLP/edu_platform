@@ -21,6 +21,8 @@ import {
   ListTodo,
   Star,
   BadgeCent,
+  MonitorPlay,
+  GraduationCap,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1510,11 +1512,11 @@ export const sideMenus = {
       icon: <ChartCandlestick />,
       path: "/admin/trade-analysis",
     },
-    {
-      title: "IQ Crypto Projects",
-      icon: <BadgeCent />,
-      path: "/admin/iq-crypto",
-    },
+    // {
+    //   title: "IQ Crypto Projects",
+    //   icon: <BadgeCent />,
+    //   path: "/admin/iq-crypto",
+    // },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
@@ -1706,6 +1708,11 @@ export const sideMenus = {
       icon: <BookOpen />,
       path: "/educator/courses",
     },
+    {
+      title: "Master Class",
+      icon: <GraduationCap />,
+      path: "/educator/master-class",
+    },
 
     {
       title: "IQ Live",
@@ -1744,11 +1751,11 @@ export const sideMenus = {
       icon: <ChartCandlestick />,
       path: "/educator/trade-analysis",
     },
-    {
-      title: "IQ Crypto Projects",
-      icon: <BadgeCent />,
-      path: "/educator/iq-crypto",
-    },
+    // {
+    //   title: "IQ Crypto Projects",
+    //   icon: <BadgeCent />,
+    //   path: "/educator/iq-crypto",
+    // },
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
@@ -1795,38 +1802,35 @@ export const sideMenus = {
   ],
   student: [
     {
-      title: "Dashboard",
+      title: "Home",
       icon: <LayoutDashboard />,
-      // path: '/dashboard',
+      path: '/dashboard',
       children: [
-        {
-          title: "Home",
-          icon: <Dot />,
-          path: "/dashboard",
-        },
         {
           title: "Fast Start Training",
           icon: <Dot />,
           path: "/fast-start-training",
         },
-
       ],
     },
     {
       title: "Academy",
       icon: <School />,
-      path: "/iq-vault",
-    },
-    {
-      title: "IQ Live",
-      icon: <LayoutDashboard />,
-      // path: '/dashboard',
+      path: '/iq-vault',
       children: [
         {
-          title: "Live Sessions",
+          title: "Masterclasses",
           icon: <Dot />,
-          path: "/iq-academy",
+          path: "/master-class",
         },
+      ],
+    },
+
+    {
+      title: "Live Streams",
+      icon: <MonitorPlay />,
+      path: "/iq-academy",
+      children: [
         {
           title: "Educators",
           icon: <Dot />,
@@ -1836,25 +1840,15 @@ export const sideMenus = {
       ],
     },
 
+    // {
+    //   title: "IQ Crypto Projects",
+    //   icon: <BadgeCent />,
+    //   path: "/iq-crypto",
+    // },
     {
-      title: "IQ Insight",
-      icon: <ChartLine />,
-      path: "/iq-insight",
-    },
-    {
-      title: "IQ Crypto Projects",
-      icon: <BadgeCent />,
-      path: "/iq-crypto",
-    },
-    {
-      title: "IQ Ideas",
+      title: "Ideas & Insights",
       icon: <Lightbulb />,
-      path: "/ideas",
-    },
-    {
-      title: "IQ Live Ideas",
-      icon: <Lightbulb />,
-      path: "/live-ideas",
+      path: "/ideas"
     },
 
     // {
@@ -1888,14 +1882,10 @@ export const sideMenus = {
     //   path: "/iq-strategies",
     // },
     {
-      title: "IQ Strategies",
+      title: "Strategies",
       icon: <ChartNoAxesCombined />,
+      path: "/trading-strategies",
       children: [
-        {
-          title: "Strategies Academy",
-          icon: <ChartNoAxesCombined />,
-          path: "/trading-strategies",
-        },
         {
           title: "Strategy Access",
           icon: <ChartNoAxesCombined />,
@@ -1913,6 +1903,11 @@ export const sideMenus = {
         // },
       ],
     },
+    // {
+    //   title: "Master Class",
+    //   icon: <GraduationCap />,
+    //   path: "/master-class",
+    // },
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,

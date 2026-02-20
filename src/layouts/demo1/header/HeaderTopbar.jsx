@@ -36,6 +36,8 @@ const HeaderTopbar = () => {
     "/iq-vault",
     "/iq-academy",
     "/iq-academy-educators",
+    "/master-class",
+    "/master-class/:id"
   ];
   const location = useLocation();
   const { isRTL } = useLanguage();

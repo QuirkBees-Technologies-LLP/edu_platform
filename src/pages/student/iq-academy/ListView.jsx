@@ -120,10 +120,10 @@ export default function ListView({
   const isDigitalMkt = isDigitalMarketingCategory(activeCategoryData);
 
   const handleMultiSelect = (value, currentValues, setValues) => {
-    const exists = currentValues.includes(value);
+    const exists = currentValues?.includes(value);
     const updated = exists
-      ? currentValues.filter((v) => v !== value)
-      : [...currentValues, value];
+      ? currentValues?.filter((v) => v !== value)
+      : [...(currentValues || []), value];
     setValues(updated);
   };
 
@@ -135,7 +135,7 @@ export default function ListView({
     if (!educatorTimeZone) return "bg-gray-300";
     // Handle if timeZone is an array (take first value)
     const tz = Array.isArray(educatorTimeZone)
-      ? educatorTimeZone[0]
+      ? educatorTimeZone?.[0]
       : educatorTimeZone;
     return timeZoneColors[tz?.toLowerCase()] || "bg-gray-300";
   };
@@ -155,7 +155,7 @@ export default function ListView({
         ? "bg-gray-500 text-white"
         : "bg-gray-200 text-gray-700";
     const tz = Array.isArray(educatorTimeZone)
-      ? educatorTimeZone[0]
+      ? educatorTimeZone?.[0]
       : educatorTimeZone;
     const tzLower = tz?.toLowerCase();
 
@@ -168,7 +168,7 @@ export default function ListView({
   return (
     <div className="block list_view">
       {/* 🔥 STRATEGY SLIDER */}
-      {strategies?.length > 0 && (
+      {strategies?.length > 0 && !isDigitalMkt && (
         <div className="mb-6 relative">
           {/* Left Arrow */}
           <button
@@ -290,197 +290,199 @@ export default function ListView({
       )}
 
       {/* 🔥 FILTER SELECTS */}
-      <div className="flex flex-wrap justify-center gap-4 mb-6">
-        {/* Trading Type Multi-Select */}
-        <div className="flex items-center gap-2 relative">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-                <span className="truncate text-sm">
-                  {tradingType.length > 0
-                    ? `${tradingType.length} Trading Style Selected`
-                    : "Select Trading Style"}
-                </span>
-                <ChevronDown size={16} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[225px] p-0">
-              <Command>
-                <CommandGroup>
-                  {tradingTypeOptions.map((item) => {
-                    const selected = tradingType.includes(item.value);
-                    return (
-                      <CommandItem
-                        key={item.value}
-                        onSelect={() =>
-                          handleMultiSelect(
-                            item.value,
-                            tradingType,
-                            setTradingType,
-                          )
-                        }
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${selected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-[#1c1f26]"
-                            }`}
+      {!isDigitalMkt && (
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
+          {/* Trading Type Multi-Select */}
+          <div className="flex items-center gap-2 relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
+                  <span className="truncate text-sm">
+                    {tradingType?.length > 0
+                      ? `${tradingType?.length} Trading Style Selected`
+                      : "Select Trading Style"}
+                  </span>
+                  <ChevronDown size={16} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[225px] p-0">
+                <Command>
+                  <CommandGroup>
+                    {tradingTypeOptions.map((item) => {
+                      const selected = tradingType?.includes(item?.value);
+                      return (
+                        <CommandItem
+                          key={item.value}
+                          onSelect={() =>
+                            handleMultiSelect(
+                              item.value,
+                              tradingType,
+                              setTradingType,
+                            )
+                          }
+                          className="flex items-center gap-2 cursor-pointer"
                         >
-                          {selected && <Check size={14} />}
-                        </div>
-                        {item.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {tradingType.length > 0 && (
+                          <div
+                            className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-[#1c1f26]"
+                              }`}
+                          >
+                            {selected && <Check size={14} />}
+                          </div>
+                          {item.label}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {tradingType?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTradingType([])}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Trading Method Multi-Select */}
+          <div className="flex items-center gap-2 relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
+                  <span className="truncate text-sm">
+                    {tradingMethod?.length > 0
+                      ? `${tradingMethod?.length} Trading Method Selected`
+                      : "Select Trading Method"}
+                  </span>
+                  <ChevronDown size={16} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[225px] p-0">
+                <Command>
+                  <CommandGroup>
+                    {tradingMethodOptions.map((item) => {
+                      const selected = tradingMethod?.includes(item?.value);
+                      return (
+                        <CommandItem
+                          key={item.value}
+                          onSelect={() =>
+                            handleMultiSelect(
+                              item.value,
+                              tradingMethod,
+                              setTradingMethod,
+                            )
+                          }
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <div
+                            className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-[#1c1f26]"
+                              }`}
+                          >
+                            {selected && <Check size={14} />}
+                          </div>
+                          {item.label}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {tradingMethod?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTradingMethod([])}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Time Zone Multi-Select */}
+          <div className="flex items-center gap-2 relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
+                  <span className="truncate text-sm">
+                    {timeZone?.length > 0
+                      ? `${timeZone?.length} Time Zone Selected`
+                      : "Select Time Zone"}
+                  </span>
+                  <ChevronDown size={16} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[225px] p-0">
+                <Command>
+                  <CommandGroup>
+                    {timeZoneOptions.map((item) => {
+                      const selected = timeZone?.includes(item?.value);
+                      return (
+                        <CommandItem
+                          key={item.value}
+                          onSelect={() =>
+                            handleMultiSelect(item.value, timeZone, setTimeZone)
+                          }
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <div
+                            className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-[#1c1f26]"
+                              }`}
+                          >
+                            {selected && <Check size={14} />}
+                          </div>
+                          {item.label}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {timeZone?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setTimeZone([])}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* 🔥 RESET ALL FILTERS BUTTON */}
+          {
             <button
               type="button"
-              onClick={() => setTradingType([])}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              onClick={() => {
+                setTradingType([]);
+                setTradingMethod([]);
+                setTimeZone([]);
+                setActiveStrategyId("all");
+                setActiveEducatorId("all");
+              }}
+              className="h-11 px-4 flex items-center gap-2   dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-700 bg-slate-400 hover:bg-slate-700 text-white rounded-md font-medium transition-colors"
             >
-              ✖
+              <RotateCcw size={16} />
+              Reset
             </button>
-          )}
+          }
         </div>
-
-        {/* Trading Method Multi-Select */}
-        <div className="flex items-center gap-2 relative">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-                <span className="truncate text-sm">
-                  {tradingMethod.length > 0
-                    ? `${tradingMethod.length} Trading Method Selected`
-                    : "Select Trading Method"}
-                </span>
-                <ChevronDown size={16} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[225px] p-0">
-              <Command>
-                <CommandGroup>
-                  {tradingMethodOptions.map((item) => {
-                    const selected = tradingMethod.includes(item.value);
-                    return (
-                      <CommandItem
-                        key={item.value}
-                        onSelect={() =>
-                          handleMultiSelect(
-                            item.value,
-                            tradingMethod,
-                            setTradingMethod,
-                          )
-                        }
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${selected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-[#1c1f26]"
-                            }`}
-                        >
-                          {selected && <Check size={14} />}
-                        </div>
-                        {item.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {tradingMethod.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setTradingMethod([])}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              ✖
-            </button>
-          )}
-        </div>
-
-        {/* Time Zone Multi-Select */}
-        <div className="flex items-center gap-2 relative">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
-                <span className="truncate text-sm">
-                  {timeZone.length > 0
-                    ? `${timeZone.length} Time Zone Selected`
-                    : "Select Time Zone"}
-                </span>
-                <ChevronDown size={16} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[225px] p-0">
-              <Command>
-                <CommandGroup>
-                  {timeZoneOptions.map((item) => {
-                    const selected = timeZone.includes(item.value);
-                    return (
-                      <CommandItem
-                        key={item.value}
-                        onSelect={() =>
-                          handleMultiSelect(item.value, timeZone, setTimeZone)
-                        }
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <div
-                          className={`h-4 w-4 border rounded flex items-center justify-center ${selected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-[#1c1f26]"
-                            }`}
-                        >
-                          {selected && <Check size={14} />}
-                        </div>
-                        {item.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {timeZone.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setTimeZone([])}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              ✖
-            </button>
-          )}
-        </div>
-
-        {/* 🔥 RESET ALL FILTERS BUTTON */}
-        {
-          <button
-            type="button"
-            onClick={() => {
-              setTradingType([]);
-              setTradingMethod([]);
-              setTimeZone([]);
-              setActiveStrategyId("all");
-              setActiveEducatorId("all");
-            }}
-            className="h-11 px-4 flex items-center gap-2   dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-700 bg-slate-400 hover:bg-slate-700 text-white rounded-md font-medium transition-colors"
-          >
-            <RotateCcw size={16} />
-            Reset
-          </button>
-        }
-      </div>
+      )}
 
       {/* 🔥 EDUCATOR SLIDER */}
-      {strategyEducators.length > 0 ? (
+      {/* {strategyEducators.length > 0 ? (
         <div className="mb-6 relative">
-          {/* Left Arrow */}
+        
           <button
             className="swiper-button-prev-custom absolute left-0 top-1/2 -translate-y-1/2 z-10 
              w-9 h-9 flex items-center justify-center rounded-full 
@@ -489,14 +491,13 @@ export default function ListView({
             ❮
           </button>
 
-          {/* Right Arrow */}
           <button
             className="swiper-button-next-custom absolute right-0 top-1/2 -translate-y-1/2 z-10 
              w-9 h-9 flex items-center justify-center rounded-full 
              bg-white dark:bg-gray-200 shadow hover:bg-gray-100 dark:hover:bg-gray-100"
           >
             ❯
-          </button>
+          </button> 
           <div className="w-full overflow-hidden">
             <Swiper
               slidesPerView={3}
@@ -517,7 +518,6 @@ export default function ListView({
                 1600: { slidesPerView: 8 },
               }}
             >
-              {/* All Educators Button */}
               <SwiperSlide>
                 <div
                   onClick={() => setActiveEducatorId("all")}
@@ -585,7 +585,7 @@ export default function ListView({
             </p>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* 🔥 TIMEZONE/CATEGORY LEGEND HEADER */}
       {strategyEducators.length > 0 && (
@@ -628,9 +628,9 @@ export default function ListView({
             strategyEducators?.flatMap((edu) => edu?.ongoing || [])?.length >
               0 ? (
               strategyEducators?.flatMap((edu) =>
-                (edu?.ongoing || []).map((course, i) => (
+                (edu?.ongoing || [])?.map((course, i) => (
                   <div
-                    key={`${edu._id}-ongoing-${i}`}
+                    key={`${edu?._id}-ongoing-${i}`}
                     className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
                   >
                     {/* Educator Card */}
@@ -696,7 +696,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Clock size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime).toLocaleTimeString(
+                                {new Date(course?.datetime).toLocaleTimeString(
                                   [],
                                   { hour: "2-digit", minute: "2-digit" },
                                 )}
@@ -705,7 +705,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Calendar size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime)
+                                {new Date(course?.datetime)
                                   .toLocaleDateString("en-GB", {
                                     day: "2-digit",
                                     weekday: "short",
@@ -724,7 +724,7 @@ export default function ListView({
               <p className="text-sm text-gray-500">No ongoing sessions.</p>
             )
           ) : activeEducator?.ongoing?.length > 0 ? (
-            activeEducator.ongoing.map((course, i) => (
+            activeEducator?.ongoing?.map((course, i) => (
               <div
                 key={i}
                 className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -792,7 +792,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Clock size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime).toLocaleTimeString([], {
+                            {new Date(course?.datetime).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
@@ -801,7 +801,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Calendar size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime)
+                            {new Date(course?.datetime)
                               .toLocaleDateString("en-GB", {
                                 day: "2-digit",
                                 weekday: "short",
@@ -831,7 +831,7 @@ export default function ListView({
             strategyEducators?.flatMap((edu) => edu?.upcoming || [])?.length >
               0 ? (
               strategyEducators?.flatMap((edu) =>
-                (edu?.upcoming || []).map((course, i) => (
+                (edu?.upcoming || [])?.map((course, i) => (
                   <div
                     key={`${edu?._id}-upcoming-${i}`}
                     className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -899,7 +899,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Clock size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime).toLocaleTimeString(
+                                {new Date(course?.datetime).toLocaleTimeString(
                                   [],
                                   { hour: "2-digit", minute: "2-digit" },
                                 )}
@@ -908,7 +908,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Calendar size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime)
+                                {new Date(course?.datetime)
                                   .toLocaleDateString("en-GB", {
                                     day: "2-digit",
                                     weekday: "short",
@@ -927,7 +927,7 @@ export default function ListView({
               <p className="text-sm text-gray-500">No upcoming sessions.</p>
             )
           ) : activeEducator?.upcoming?.length > 0 ? (
-            activeEducator.upcoming.map((course, i) => (
+            activeEducator?.upcoming?.map((course, i) => (
               <div
                 key={i}
                 className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -995,7 +995,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Clock size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime).toLocaleTimeString([], {
+                            {new Date(course?.datetime).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
@@ -1004,7 +1004,7 @@ export default function ListView({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <Calendar size={18} />
                           <span className="text-xs">
-                            {new Date(course.datetime)
+                            {new Date(course?.datetime)
                               .toLocaleDateString("en-GB", {
                                 day: "2-digit",
                                 weekday: "short",
@@ -1033,7 +1033,7 @@ export default function ListView({
           {activeEducatorId === "all" ? (
             strategyEducators?.flatMap((edu) => edu?.past || [])?.length > 0 ? (
               strategyEducators?.flatMap((edu) =>
-                (edu?.past || []).map((course, i) => (
+                (edu?.past || [])?.map((course, i) => (
                   <div
                     key={`${edu?._id}-past-${i}`}
                     className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
@@ -1101,7 +1101,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Clock size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime).toLocaleTimeString(
+                                {new Date(course?.datetime).toLocaleTimeString(
                                   [],
                                   { hour: "2-digit", minute: "2-digit" },
                                 )}
@@ -1110,7 +1110,7 @@ export default function ListView({
                             <div className="flex items-center gap-2 text-xs font-medium">
                               <Calendar size={18} />
                               <span className="text-xs">
-                                {new Date(course.datetime)
+                                {new Date(course?.datetime)
                                   .toLocaleDateString("en-GB", {
                                     day: "2-digit",
                                     weekday: "short",
@@ -1129,7 +1129,7 @@ export default function ListView({
               <p className="text-sm text-gray-500">No past sessions.</p>
             )
           ) : activeEducator?.past?.length > 0 ? (
-            activeEducator.past.map((course, i) => (
+            activeEducator?.past?.map((course, i) => (
               <div
                 key={i}
                 className="grid grid-cols-1 md:grid-cols-[200px_250px_1fr] gap-3 items-stretch"
