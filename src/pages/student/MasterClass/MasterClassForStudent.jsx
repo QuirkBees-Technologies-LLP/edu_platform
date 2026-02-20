@@ -791,51 +791,118 @@ const MasterClassForStudent = () => {
             </div>
           ) : (
             // Display strategy cards in a responsive grid
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {strategies?.map((strategy) => (
-                <div
-                  key={strategy?._id}
-                  onClick={() => selectStrategy(strategy?._id)}
-                  className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy?._id
-                    ? "border-purple-500 shadow-lg shadow-purple-500/30"
-                    : "border-gray-300 hover:border-gray-400"
-                    }`}
-                >
-                  {/* Strategy Card Content */}
-                  <div className="flex flex-col md:flex-row gap-4 mb-4">
-                    {/* Strategy Image */}
-                    {strategy?.strategyBanner && (
-                      <img
-                        src={strategy?.strategyBanner}
-                        alt={strategy?.title || "Strategy"}
-                        className="w-20 h-20 rounded-xl object-cover"
-                      />
-                    )}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {strategies?.map((strategy) => {
+                const educator = strategy?.educators?.[0];
+                const educatorName = educator
+                  ? `${educator?.first_name?.trim() || ""} ${educator?.last_name?.trim() || ""}`.trim()
+                  : null;
+                const hasMoreEducators = (strategy?.educators?.length || 0) > 1;
+                return (
+                  <div
+                    key={strategy?._id}
+                    onClick={() => selectStrategy(strategy?._id)}
+                    className={`group card rounded-2xl overflow-hidden border cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${selectedStrategyId === strategy?._id
+                      ? "border-purple-500 shadow-2xl shadow-purple-500/30 ring-2 ring-purple-400/60"
+                      : "border-gray-200 hover:border-purple-300 hover:shadow-sm hover:shadow-purple-100/60"
+                      }`}
+                  >
+                    {/* ── Banner with gradient overlay + educator info ── */}
+                    <div className="relative w-full h-48 overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-900 via-purple-700 to-orange-500">
+                      {strategy?.strategyBanner ? (
+                        <img
+                          src={strategy?.strategyBanner}
+                          alt={strategy?.title || "Strategy"}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-16 h-16 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
 
-                    {/* Strategy Title and Category */}
-                    <div>
-                      <div className="text-xl font-semibold mb-2">
+                      {/* Dark gradient scrim */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+                      {/* Selected checkmark badge */}
+                      {/* {selectedStrategyId === strategy?._id && (
+                        <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center shadow-lg shadow-purple-500/60 ring-2 ring-white/30">
+                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )} */}
+
+                      {/* Category pill — top left */}
+                      {strategy?.category?.name && (
+                        <div className="absolute top-3 left-3">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-white border border-white/25">
+                            {strategy?.category?.name}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Educator info — bottom of banner */}
+                      {educatorName && (
+                        <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5">
+                          {/* Avatar stack */}
+                          <div className="flex -space-x-2">
+                            {strategy?.educators?.slice(0, 3)?.map((edu, i) =>
+                              edu?.image ? (
+                                <img
+                                  key={edu?._id || i}
+                                  src={edu?.image}
+                                  alt={`${edu?.first_name} ${edu?.last_name}`}
+                                  className="w-8 h-8 rounded-full object-cover border-2 border-white/60 shadow-md"
+                                />
+                              ) : (
+                                <div
+                                  key={edu?._id || i}
+                                  className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 border-2 border-white/60 flex items-center justify-center shadow-md"
+                                >
+                                  <span className="text-white text-xs font-bold">
+                                    {edu?.first_name?.charAt(0)?.toUpperCase() || "?"}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
+                          {/* Name + role */}
+                          <div className="flex flex-col leading-tight">
+                            <span className="text-white text-xs font-semibold drop-shadow-sm line-clamp-1">
+                              {educatorName}{hasMoreEducators && ` +${strategy?.educators?.length - 1}`}
+                            </span>
+                            {/* <span className="text-white/65 text-[10px]">Instructor</span> */}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Card Body ── */}
+                    <div className="flex flex-col flex-grow p-5">
+                      {/* Title */}
+                      <h3 className="text-[15px] font-bold text-gray-900 mb-1.5 line-clamp-1 group-hover:text-purple-600 transition-colors duration-200">
                         {strategy?.title}
-                      </div>
-                      <div className="text-sm text-gray-900">
-                        {strategy?.category?.name || "All Markets"}
-                      </div>
+                      </h3>
+
+                      {/* Description */}
+                      <p className="text-sm text-gray-400 leading-relaxed line-clamp-2 flex-grow mb-4">
+                        {strategy?.description || "Explore this master class and enhance your trading skills."}
+                      </p>
+
+                      {/* Divider */}
+                      <div className="border-t border-gray-100 mb-4" />
+
+                      {/* CTA Button */}
+                      <button className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/40 active:scale-[0.97]">
+                        Start Learning →
+                      </button>
                     </div>
                   </div>
-
-                  {/* Strategy Description (limited to 2 lines) */}
-                  <div className="flex-grow">
-                    <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
-                      {strategy?.description}
-                    </p>
-                  </div>
-
-                  {/* Call-to-Action Button */}
-                  <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto">
-                    Start Learning
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
