@@ -804,9 +804,9 @@ const MasterClassForStudent = () => {
                   {/* Strategy Card Content */}
                   <div className="flex flex-col md:flex-row gap-4 mb-4">
                     {/* Strategy Image */}
-                    {strategy?.imageUrl && (
+                    {strategy?.strategyBanner && (
                       <img
-                        src={strategy?.imageUrl}
+                        src={strategy?.strategyBanner}
                         alt={strategy?.title || "Strategy"}
                         className="w-20 h-20 rounded-xl object-cover"
                       />
