@@ -159,6 +159,7 @@ import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTrad
 import ClientLiveIdeas from "../pages/student/client-live-ideas/ClientLiveIdeas";
 import TradingStrategies from "../pages/student/trading-strategies/TradingStrategies";
 import MasterClass from "../pages/educator/master-class/MasterClass";
+import StudentMasterClass from "../pages/student/MasterClass/MasterClass.jsx";
 import MasterClassStudent from "../pages/student/MasterClass/MasterClassForStudent.jsx";
 import { IdeasLayout } from "../layouts/ideas/IdeasLayout";
 const routes = {
@@ -184,7 +185,7 @@ const routes = {
     { path: "/dashboard", element: <ClientDashboard /> },
     { path: "/recording-session", element: <RecordingSession /> },
     { path: "/master-class", element: <MasterClassStudent /> },
-    { path: "/master-class/:id", element: <MasterClassStudent /> },
+    { path: "/master-class/:id", element: <StudentMasterClass /> },
     {
       path: "/educator-recording-session/:id",
       element: <UserRecordingSession />,

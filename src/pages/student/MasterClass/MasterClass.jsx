@@ -81,7 +81,7 @@ const Banner = () => (
 );
 
 
-const MasterClass = () => {
+const StudentMasterClass = () => {
     // ==================== STATE MANAGEMENT ====================
 
 
@@ -107,7 +107,7 @@ const MasterClass = () => {
         refetch: refetchStrategies,
     } = useGetMasterClassQuery(
         { id: educatorId, params: { language: selectedLanguage } },
-        { skip: !educatorId }
+        // { skip: !educatorId }
     );
 
     // Lazy query for fetching individual strategy details
@@ -417,9 +417,9 @@ const MasterClass = () => {
                                     {/* Strategy Card Content */}
                                     <div className="flex flex-col md:flex-row gap-4 mb-4">
                                         {/* Strategy Image */}
-                                        {strategy?.imageUrl && (
+                                        {strategy?.strategyBanner && (
                                             <img
-                                                src={strategy?.imageUrl}
+                                                src={strategy?.strategyBanner}
                                                 alt={strategy?.title || 'Strategy'}
                                                 className="w-20 h-20 rounded-xl object-cover"
                                             />
@@ -455,4 +455,4 @@ const MasterClass = () => {
     );
 }
 
-export default MasterClass
+export default StudentMasterClass
