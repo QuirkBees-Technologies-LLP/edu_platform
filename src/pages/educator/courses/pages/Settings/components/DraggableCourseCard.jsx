@@ -42,7 +42,7 @@ const DraggableCourseCard = ({
     id,
     title,
     description,
-    imageUrl,
+    strategyBanner: imageUrl,
     category,
     published,
     tier,

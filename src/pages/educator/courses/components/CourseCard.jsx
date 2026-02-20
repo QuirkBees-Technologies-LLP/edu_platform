@@ -8,7 +8,7 @@ const CourseCard = (props) => {
     id,
     title,
     description,
-    imageUrl,
+    strategyBanner: imageUrl,
     category,
     published,
     tier,
