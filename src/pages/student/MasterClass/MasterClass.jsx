@@ -73,7 +73,7 @@ const getEmbedUrl = (url) => {
 const Banner = () => (
     <div className="card rounded-2xl overflow-hidden border border-gray-300">
         <img
-            src="/media/images/1400x400 banner.jpg"
+            src="/media/images/2026-0218-MasterclassBanner-Desktop.webp"
             alt="MasterClass Banner"
             className="w-full h-auto object-cover"
         />
