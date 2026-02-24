@@ -62,7 +62,29 @@ const Demo1LayoutProvider = ({ children }) => {
       setMenuConfig("primary", filteredMenu);
       setMenuConfig("secondary", secondaryMenu);
     } else {
-      const fullMenu = sideMenus[userRole] || [];
+      let fullMenu = sideMenus[userRole] || [];
+
+      // ✅ Hide finance-specific routes for Digital Marketing educators
+      if (userRole === "educator") {
+        const isDigitalMarketing = auth.user?.categories?.some(
+          (cat) =>
+            cat?.slug?.toLowerCase() === "digital-marketing" ||
+            cat?.name?.toLowerCase() === "digital marketing" ||
+            cat?.name?.toLowerCase() === "digitalmarketing"
+        );
+
+        if (isDigitalMarketing) {
+          const hiddenPaths = [
+            "/educator/trade-analysis",
+            "/educator/ideas",
+            "/educator/live-ideas",
+          ];
+          fullMenu = fullMenu.filter(
+            (item) => !hiddenPaths.includes(item.path)
+          );
+        }
+      }
+
       const secondaryMenu = useMenuChildren(pathname, fullMenu, 0);
 
       setMenuConfig("primary", fullMenu);
