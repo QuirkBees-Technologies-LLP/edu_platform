@@ -317,13 +317,13 @@ const StudentMasterClass = () => {
                     <div className="card rounded-2xl border border-gray-300 p-8 mb-8">
                         {/* Header */}
                         <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-300">
-                            {currentStrategy?.imageUrl && (
+                            {/* {currentStrategy?.imageUrl && (
                                 <img
                                     src={currentStrategy?.imageUrl}
                                     alt={currentStrategy?.title || 'MasterClass'}
                                     className="w-16 h-16 rounded-xl object-cover"
                                 />
-                            )}
+                            )} */}
                             <div>
                                 <h3 className="text-2xl font-semibold">{currentStrategy?.title}</h3>
                             </div>

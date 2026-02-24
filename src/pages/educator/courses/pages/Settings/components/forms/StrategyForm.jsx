@@ -28,15 +28,15 @@ const strategySchema = z.object({
     title: z.string().min(3, "Title must be at least 3 characters"),
     description: z.string().min(10, "Description must be at least 10 characters"),
     aboutStrategy: z.string().min(10, "About masterclass  must be at least 10 characters"),
-    selectedStrategies: z.array(z.string()).min(1, "Please select at least one strategy"),
-    iconThumbnail: z
-        .any()
-        .refine(
-            (file) => (file instanceof File && file.size > 0) || (typeof file === 'string' && file.length > 0),
-            {
-                message: "Masterclass icon thumbnail is required",
-            }
-        ),
+    selectedStrategies: z.array(z.string()).optional(),
+    // iconThumbnail: z
+    //     .any()
+    //     .refine(
+    //         (file) => (file instanceof File && file.size > 0) || (typeof file === 'string' && file.length > 0),
+    //         {
+    //             message: "Masterclass icon thumbnail is required",
+    //         }
+    //     ),
     strategyBanner: z
         .any()
         .refine(
@@ -58,7 +58,7 @@ const strategySchema = z.object({
 });
 
 const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
-    const [iconPreview, setIconPreview] = useState(initialData?.iconThumbnail || null);
+    // const [iconPreview, setIconPreview] = useState(initialData?.iconThumbnail || null);
     const [bannerPreview, setBannerPreview] = useState(initialData?.strategyBanner || null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -88,7 +88,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             description: "",
             aboutStrategy: "",
             selectedStrategies: [],
-            iconThumbnail: undefined,
+            // iconThumbnail: undefined,
             strategyBanner: undefined,
             category: "",
             tags: [],
@@ -110,13 +110,13 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
             // Backend strategyBanner is the Icon, imageUrl is the Banner
             if (initialData?.imageUrl) {
-                setIconPreview(initialData?.imageUrl);
+                // setIconPreview(initialData?.imageUrl);
                 setValue("strategyBanner", initialData?.imageUrl);
             }
-            if (initialData?.strategyBanner) {
-                setBannerPreview(initialData?.strategyBanner);
-                setValue("iconThumbnail", initialData?.strategyBanner);
-            }
+            // if (initialData?.strategyBanner) {
+            //     setBannerPreview(initialData?.strategyBanner);
+            //     // setValue("iconThumbnail", initialData?.strategyBanner);
+            // }
 
             if (initialData?.category?._id && categories?.data?.length > 0) {
                 setValue("category", initialData?.category?._id);
@@ -162,7 +162,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             setValue(field, file, { shouldValidate: true });
             const reader = new FileReader();
             reader.onloadend = () => {
-                if (field === "iconThumbnail") setIconPreview(reader?.result);
+                // if (field === "iconThumbnail") setIconPreview(reader?.result);
                 if (field === "strategyBanner") setBannerPreview(reader?.result);
             };
             reader.readAsDataURL(file);
@@ -173,7 +173,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
     const removeFile = (field) => {
         setValue(field, undefined, { shouldValidate: true });
-        if (field === "iconThumbnail") setIconPreview(null);
+        // if (field === "iconThumbnail") setIconPreview(null);
         if (field === "strategyBanner") setBannerPreview(null);
     };
 
@@ -207,7 +207,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             // Send selected strategy IDs as a JSON array in formData
             formData.append("strategies", JSON.stringify(values?.selectedStrategies));
 
-            if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
+            // if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
             if (values?.strategyBanner instanceof File) formData.append("image", values?.strategyBanner);
 
             await onSubmit(formData);
@@ -260,8 +260,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                 {/* Media & Configuration */}
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-5">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">Icon Thumbnail <span className="text-rose-500">*</span></label>
+                        {/* <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Icon <span className="text-rose-500">*</span></label>
                             <div className="relative group border-2 border-dashed  rounded-xl p-4 transition-all hover:border-indigo-500/50 /30">
                                 {iconPreview && (
                                     <button
@@ -295,7 +295,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                                 )}
                             </div>
                             {errors?.iconThumbnail && <p className="text-xs text-rose-500 mt-1">{errors?.iconThumbnail?.message}</p>}
-                        </div>
+                        </div> */}
 
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-gray-700">Strategy Banner <span className="text-rose-500">*</span></label>
@@ -338,7 +338,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
                     {/* Strategies Dropdown (Multi-select) */}
                     <div className="space-y-2 relative">
-                        <label className="block text-sm font-medium text-gray-700">Select Strategies <span className="text-rose-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">Select Strategies</label>
                         <Popover open={isStrategyOpen} onOpenChange={setIsStrategyOpen}>
                             <PopoverTrigger asChild>
                                 <button
