@@ -138,6 +138,11 @@ const IqEducators = () => {
     refetch: refetchEducator,
     isFetching: isFetchingEducator,
   } = useGetEducatorWithCoursesQuery(id);
+
+  // Check if educator's first category is Digital Marketing
+  const educatorCategoryName = response?.data?.educator?.categories?.[0]?.name?.toLowerCase() ?? "";
+  const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing");
+
   const {
     data: liveTradeIdeas,
     refetch: refetchLiveIdeas,
@@ -483,10 +488,10 @@ const IqEducators = () => {
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">
 
-          {/* Live Idea  */}
+          {/* Live Idea - Hide for Digital Marketing */}
 
 
-          <div className="text-gray-900">
+          {!isDigitalMarketing && <div className="text-gray-900">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -627,7 +632,7 @@ const IqEducators = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div>}
 
 
 
@@ -724,8 +729,8 @@ const IqEducators = () => {
 
 
 
-          {/* Idea  */}
-          <div className="text-gray-900 mb-28">
+          {/* Idea - Hide for Digital Marketing */}
+          {!isDigitalMarketing && <div className="text-gray-900 mb-28">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Idea</h2>
@@ -823,11 +828,11 @@ const IqEducators = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div>}
 
-          {/* Insight  */}
+          {/* Insight - Hide for Digital Marketing */}
 
-          <div className="text-gray-900 mb-28">
+          {!isDigitalMarketing && <div className="text-gray-900 mb-28">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Insights</h2>
@@ -925,7 +930,7 @@ const IqEducators = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* Sidebar */}
