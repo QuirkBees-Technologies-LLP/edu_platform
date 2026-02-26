@@ -85,10 +85,7 @@ const MasterClassForm = ({ onSubmit, initialData, isLoading }) => {
     useEffect(() => {
         if (initialData) {
             // Image: backend stores in imageUrl
-            if (initialData?.imageUrl) {
-                setBannerPreview(initialData?.imageUrl);
-                setValue("strategyBanner", initialData?.imageUrl);
-            } else if (initialData?.strategyBanner) {
+            if (initialData?.strategyBanner) {
                 setBannerPreview(initialData?.strategyBanner);
                 setValue("strategyBanner", initialData?.strategyBanner);
             }
