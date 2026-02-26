@@ -231,31 +231,29 @@ const DraggableCourseCard = ({
           </div>
         </div>
 
-        {/** Action Buttons - hidden for master-class tab */}
-        {activeTab !== "master-class" && (
-          <div
-            className={`absolute top-2 left-2 flex flex-col gap-2 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
-              }`}
+        {/** Action Buttons - Edit & Delete for all tabs */}
+        <div
+          className={`absolute top-2 left-2 flex flex-col gap-2 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+            }`}
+        >
+          <button
+            onClick={handleEdit}
+            className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
+            title={`Edit ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            aria-label={`Edit ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
           >
-            <button
-              onClick={handleEdit}
-              className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-              title={`Edit ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
-              aria-label={`Edit ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
-            >
-              <Edit2 className="w-5 h-5 text-white group-hover:animate-pulse" />
-            </button>
+            <Edit2 className="w-5 h-5 text-white group-hover:animate-pulse" />
+          </button>
 
-            <button
-              onClick={handleDelete}
-              className="p-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-              title={`Delete ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
-              aria-label={`Delete ${activeTab === "courses" ? "IQ Vault" : "Strategy"}`}
-            >
-              <Trash className="w-5 h-5 text-white group-hover:animate-pulse" />
-            </button>
-          </div>
-        )}
+          <button
+            onClick={handleDelete}
+            className="p-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
+            title={`Delete ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            aria-label={`Delete ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+          >
+            <Trash className="w-5 h-5 text-white group-hover:animate-pulse" />
+          </button>
+        </div>
       </div>
 
       {/* Bottom border indicator */}
