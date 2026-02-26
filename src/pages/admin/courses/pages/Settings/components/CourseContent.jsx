@@ -111,7 +111,7 @@ const CourseContent = ({ courseId, activeTab }) => {
                 forceUpdateLectureList={forceUpdateLectureList}
                 setForceUpdateLectureList={setForceUpdateLectureList}
                 isLoading={isLoading}
-                readOnly={activeTab === "master-class"}
+                readOnly={false}
               />
             </div>
           </div>

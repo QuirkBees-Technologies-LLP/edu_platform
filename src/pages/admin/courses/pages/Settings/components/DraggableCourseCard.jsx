@@ -43,12 +43,18 @@ const DraggableCourseCard = ({
     title,
     description,
     imageUrl,
+    strategyBanner,
     category,
     published,
     tier,
     instructor,
     section,
   } = course || {};
+
+  // For master-class tab prefer strategyBanner, fallback to imageUrl
+  const displayImage = activeTab === "master-class"
+    ? (strategyBanner || imageUrl)
+    : imageUrl;
 
   // Fallback image URL
   const fallbackImage =
@@ -137,9 +143,9 @@ const DraggableCourseCard = ({
       <div onClick={handleSelect} className="cursor-pointer">
         {/** Thumbnail Section */}
         <div className="relative aspect-video overflow-hidden">
-          {imageUrl ? (
+          {displayImage ? (
             <img
-              src={imageError ? fallbackImage : imageUrl}
+              src={imageError ? fallbackImage : displayImage}
               alt={title}
               className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? "scale-110" : ""
                 }`}

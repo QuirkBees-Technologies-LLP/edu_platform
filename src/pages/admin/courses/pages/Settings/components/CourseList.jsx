@@ -177,7 +177,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
                 onEdit={activeTab === "master-class" ? handleEditMC : handleEditCourse}
                 onDelete={activeTab === "master-class" ? handleDeleteMC : handleDeleteCourse}
                 onMove={activeTab === "master-class" ? undefined : handleMoveCourse}
-                onSelect={activeTab === "master-class" ? undefined : handleSelectCourse}
+                onSelect={handleSelectCourse}
                 activeTab={activeTab}
               />
             </div>
