@@ -679,7 +679,7 @@ const ClientDashboard = () => {
                       <button
                         onClick={() =>
                           window.open(
-                            "https://testflight.apple.com/join/qynfgnna",
+                            "https://apps.apple.com/in/app/iq-social/id6752330121",
                             "_blank",
                           )
                         }
