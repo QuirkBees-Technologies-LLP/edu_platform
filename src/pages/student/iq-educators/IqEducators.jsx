@@ -729,6 +729,147 @@ const IqEducators = () => {
 
 
 
+          {/* Recordings - Show for Digital Marketing only (after Courses) */}
+          {isDigitalMarketing && <div className="text-gray-900 mb-8">
+            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Recordings</h2>
+                <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => setShowAll((prev) => !prev)}
+                >
+                  {showAll ? "Show Less" : "View All"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.recordings?.length > 0 ? (
+                showAll ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.recordings?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className="w-full cursor-pointer border rounded-xl shadow-sm"
+                      >
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.call_title}
+                          </h3>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex gap-4">
+                    {response?.data?.recordings?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
+                      >
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.call_title}
+                          </h3>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Recordings Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Master Classes - Show for Digital Marketing only, below Recordings, only if data exists */}
+          {isDigitalMarketing && response?.data?.masterClasses?.length > 0 && (
+            <div className="text-gray-900 mb-8">
+              <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-medium">Master Classes</h2>
+                  <button
+                    className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                    onClick={() => navigate(`/master-class/${id}`)}
+                  >
+                    View All
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+                <div className="flex gap-4">
+                  {response?.data?.masterClasses?.map((mc) => (
+                    <div
+                      key={mc?._id}
+                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                      onClick={() => navigate(`/master-class/${id}`)}
+                    >
+                      <div className="rounded-t-xl overflow-hidden">
+                        <img
+                          src={mc?.imageUrl}
+                          alt={mc?.title}
+                          className="w-full h-36 object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {mc?.title}
+                        </h3>
+                        {mc?.category?.name && (
+                          <p className="text-xs text-gray-500 mb-1">{mc?.category?.name}</p>
+                        )}
+                        {mc?.language && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {mc?.language}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Idea - Hide for Digital Marketing */}
           {!isDigitalMarketing && <div className="text-gray-900 mb-28">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
@@ -749,7 +890,7 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.idea?.map((course) => (
                       <div
-                        key={course._id}
+                        key={course?._id}
                         className="w-full border rounded-xl shadow-sm cursor-pointer"
                         onClick={() => {
                           setSelectedIdea(course);
@@ -763,14 +904,14 @@ const IqEducators = () => {
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course.image[0]}
-                            alt={course.name}
+                            src={course?.image?.[0]}
+                            alt={course?.name}
                             className="w-full h-36 object-cover"
                           />
                         </div>
                         <div className="p-4">
                           <h3 className="text-md font-normal mb-2">
-                            {course.name}
+                            {course?.name}
                           </h3>
                           <ShowMoreLess
                             className="text-xs text-gray-600"
@@ -786,7 +927,7 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.idea?.map((course) => (
                       <div
-                        key={course._id}
+                        key={course?._id}
                         className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
                         onClick={() => {
                           setSelectedIdea(course);
@@ -800,15 +941,15 @@ const IqEducators = () => {
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course.image[0]}
-                            alt={course.name}
+                            src={course?.image?.[0]}
+                            alt={course?.name}
                             className="w-full h-36 object-cover"
                           />
                         </div>
                         <div className="p-4 d-flex">
                           <div className="justify-between">
                             <h3 className="text-md font-normal mb-2">
-                              {course.name}
+                              {course?.name}
                             </h3>
                           </div>
 
@@ -852,7 +993,7 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.insight?.map((course) => (
                       <div
-                        key={course._id}
+                        key={course?._id}
                         className="w-full border rounded-xl shadow-sm cursor-pointer"
                         onClick={() => {
                           setSelectedInsight(course);
@@ -866,7 +1007,7 @@ const IqEducators = () => {
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course?.photos[0]}
+                            src={course?.photos?.[0]}
                             alt={course?.title}
                             className="w-full h-36 object-cover"
                           />
@@ -889,7 +1030,7 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.insight?.map((course) => (
                       <div
-                        key={course._id}
+                        key={course?._id}
                         className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
                         onClick={() => {
                           setSelectedInsight(course);
@@ -903,7 +1044,7 @@ const IqEducators = () => {
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course?.photos[0]}
+                            src={course?.photos?.[0]}
                             alt={course?.title}
                             className="w-full h-36 object-cover"
                           />
@@ -1029,19 +1170,19 @@ const IqEducators = () => {
                   {response?.data?.PostData?.length > 0 ? (
                     response?.data?.PostData?.map((update) => (
                       <div
-                        key={update._id}
+                        key={update?._id}
                         className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
                       >
                         <div className="flex flex-col gap-4 mb-4">
                           <img
-                            src={update.author.image}
-                            alt={update.author.name}
+                            src={update?.author?.image}
+                            alt={update?.author?.name}
                             className="w-12 h-12 rounded-full"
                           />
                           <div>
                             <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update.author.first_name}{" "}
-                              {update.author.last_name}
+                              {update?.author?.first_name}{" "}
+                              {update?.author?.last_name}
                             </h4>
                             <p className="text-xs font-normal text-gray-600">
                               {formatDistanceToNow(new Date(update.createdAt), {
@@ -1159,21 +1300,21 @@ const IqEducators = () => {
 
                   {/* Messages */}
                   {response?.data?.analysisData?.length > 0 ? (
-                    response.data.analysisData.map((update) => (
+                    response?.data?.analysisData?.map((update) => (
                       <div
-                        key={update._id}
+                        key={update?._id}
                         className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
                       >
                         <div className="flex flex-col gap-4 mb-4">
                           <img
-                            src={update.author.image}
-                            alt={update.author.name}
+                            src={update?.author?.image}
+                            alt={update?.author?.name}
                             className="w-12 h-12 rounded-full"
                           />
                           <div>
                             <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update.author.first_name}{" "}
-                              {update.author.last_name}
+                              {update?.author?.first_name}{" "}
+                              {update?.author?.last_name}
                             </h4>
                             <p className="text-xs font-normal text-gray-600">
                               {formatDistanceToNow(new Date(update.createdAt), {
@@ -1254,8 +1395,8 @@ const IqEducators = () => {
           </div>
         </div>
 
-        {/* Recording  */}
-        <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
+        {/* Recording - Hide for Digital Marketing (shown above after Courses) */}
+        {!isDigitalMarketing && <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
           <div className="text-gray-900 mb-2">
             <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
               <div className="flex justify-between items-center">
@@ -1352,7 +1493,7 @@ const IqEducators = () => {
               )}
             </div>
           </div>
-        </div>
+        </div>}
       </div>
 
       <VideoPlayerModal
