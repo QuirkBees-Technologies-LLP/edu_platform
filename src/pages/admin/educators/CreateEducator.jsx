@@ -746,8 +746,8 @@ const CreateEducator = forwardRef(
                           className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
                         >
                           <span className="truncate text-sm text-gray-700">
-                            {(formik.values.tradingStyle || [])?.length > 0
-                              ? `${(formik.values.tradingStyle || [])?.length} Trading Type(s) Selected`
+                            {(formik?.values?.tradingStyle || [])?.length > 0
+                              ? `${(formik?.values?.tradingStyle || [])?.length} Trading Type(s) Selected`
                               : "Select Trading Type"}
                           </span>
                           <ChevronDown size={16} className="text-gray-500" />
@@ -760,7 +760,7 @@ const CreateEducator = forwardRef(
                             <CommandEmpty>No trading types found.</CommandEmpty>
                             <CommandGroup>
                               {tradingTypeOptions?.map((item) => {
-                                const currentSelected = formik.values.tradingStyle || [];
+                                const currentSelected = formik?.values?.tradingStyle || [];
                                 const selected = currentSelected?.includes(item?.value);
                                 return (
                                   <CommandItem
@@ -825,8 +825,8 @@ const CreateEducator = forwardRef(
                           className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
                         >
                           <span className="truncate text-sm text-gray-700">
-                            {(formik.values.tradingMethod || [])?.length > 0
-                              ? `${(formik.values.tradingMethod || [])?.length} Trading Method(s) Selected`
+                            {(formik?.values?.tradingMethod || [])?.length > 0
+                              ? `${(formik?.values?.tradingMethod || [])?.length} Trading Method(s) Selected`
                               : "Select Trading Methods"}
                           </span>
                           <ChevronDown size={16} className="text-gray-500" />
@@ -839,7 +839,7 @@ const CreateEducator = forwardRef(
                             <CommandEmpty>No trading methods found.</CommandEmpty>
                             <CommandGroup>
                               {tradingMethodOptions?.map((item) => {
-                                const currentSelected = formik.values.tradingMethod || [];
+                                const currentSelected = formik?.values?.tradingMethod || [];
                                 const selected = currentSelected?.includes(item?.value);
                                 return (
                                   <CommandItem
@@ -904,8 +904,8 @@ const CreateEducator = forwardRef(
                           className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
                         >
                           <span className="truncate text-sm text-gray-700">
-                            {(formik.values.timeZone || [])?.length > 0
-                              ? `${(formik.values.timeZone || [])?.length} TimeZone(s) Selected`
+                            {(formik?.values?.timeZone || [])?.length > 0
+                              ? `${(formik?.values?.timeZone || [])?.length} TimeZone(s) Selected`
                               : "Select TimeZone"}
                           </span>
                           <ChevronDown size={16} className="text-gray-500" />
@@ -918,7 +918,7 @@ const CreateEducator = forwardRef(
                             <CommandEmpty>No timezones found.</CommandEmpty>
                             <CommandGroup>
                               {timeZoneOptions?.map((item) => {
-                                const currentSelected = formik.values.timeZone || [];
+                                const currentSelected = formik?.values?.timeZone || [];
                                 const selected = currentSelected?.includes(item?.value);
                                 return (
                                   <CommandItem
