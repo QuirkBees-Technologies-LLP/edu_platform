@@ -107,12 +107,12 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             // Backend strategyBanner is the Icon, imageUrl is the Banner
             if (initialData?.imageUrl) {
                 setIconPreview(initialData?.imageUrl);
-                setValue("strategyBanner", initialData?.imageUrl);
+                setValue("iconThumbnail", initialData?.imageUrl);
             }
-            if (initialData?.strategyBanner) {
-                setBannerPreview(initialData?.strategyBanner);
-                setValue("iconThumbnail", initialData?.strategyBanner);
-            }
+            // if (initialData?.strategyBanner) {
+            //     setBannerPreview(initialData?.strategyBanner);
+            //     setValue("iconThumbnail", initialData?.strategyBanner);
+            // }
 
             if (initialData?.category?._id && categories?.data?.length > 0) {
                 setValue("category", initialData?.category?._id);
