@@ -85,6 +85,7 @@ const CreateEducator = forwardRef(
 
     const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
 
+
     const initialValues = {
       first_name: "",
       last_name: "",
@@ -174,6 +175,10 @@ const CreateEducator = forwardRef(
       status: Yup.boolean().required("Status is required"),
       image: Yup.mixed().nullable(),
       icon: Yup.mixed().nullable(),
+      // Trading fields - only required when NOT Digital Marketing
+      // tradingStyle: Yup.array().nullable(),
+      // tradingMethod: Yup.array().nullable(),
+      // timeZone: Yup.array().nullable(),
     });
 
     const formik = useFormik({
@@ -275,6 +280,12 @@ const CreateEducator = forwardRef(
           toast.error(errorMessage);
         }
       },
+    });
+
+    // Check if any selected category is "Digital Marketing"
+    const isDigitalMarketing = formik?.values?.categories?.some((catId) => {
+      const cat = categoryList?.data?.find((c) => c._id === catId);
+      return cat?.name?.toLowerCase() === "digital marketing" || cat?.name?.toLowerCase() === "digitalmarketing";
     });
 
     useEffect(() => {
@@ -721,233 +732,242 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-              <div className="col-span-12 md:col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Trading Type<span className="text-danger">*</span>
-                  </label>
-                  <Popover open={isTradingTypeOpen} onOpenChange={setIsTradingTypeOpen}>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
-                      >
-                        <span className="truncate text-sm text-gray-700">
-                          {(formik.values.tradingStyle || [])?.length > 0
-                            ? `${(formik.values.tradingStyle || [])?.length} Trading Type(s) Selected`
-                            : "Select Trading Type"}
-                        </span>
-                        <ChevronDown size={16} className="text-gray-500" />
-                      </button>
-                    </PopoverTrigger>
+              {/* Trading Type - Hidden for Digital Marketing */}
+              {!isDigitalMarketing && (
+                <div className="col-span-12 md:col-span-6">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      Trading Type<span className="text-danger">*</span>
+                    </label>
+                    <Popover open={isTradingTypeOpen} onOpenChange={setIsTradingTypeOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
+                        >
+                          <span className="truncate text-sm text-gray-700">
+                            {(formik.values.tradingStyle || [])?.length > 0
+                              ? `${(formik.values.tradingStyle || [])?.length} Trading Type(s) Selected`
+                              : "Select Trading Type"}
+                          </span>
+                          <ChevronDown size={16} className="text-gray-500" />
+                        </button>
+                      </PopoverTrigger>
 
-                    <PopoverContent className="w-[495px] p-0" align="start" side="bottom">
-                      <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
-                        <CommandList className="max-h-[300px] overflow-y-auto">
-                          <CommandEmpty>No trading types found.</CommandEmpty>
-                          <CommandGroup>
-                            {tradingTypeOptions?.map((item) => {
-                              const currentSelected = formik.values.tradingStyle || [];
-                              const selected = currentSelected?.includes(item?.value);
-                              return (
-                                <CommandItem
-                                  key={item?.value}
-                                  value={item?.label}
-                                  onPointerDown={(e) => {
-                                    e?.preventDefault();
-                                    e?.stopPropagation();
+                      <PopoverContent className="w-[495px] p-0" align="start" side="bottom">
+                        <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
+                          <CommandList className="max-h-[300px] overflow-y-auto">
+                            <CommandEmpty>No trading types found.</CommandEmpty>
+                            <CommandGroup>
+                              {tradingTypeOptions?.map((item) => {
+                                const currentSelected = formik.values.tradingStyle || [];
+                                const selected = currentSelected?.includes(item?.value);
+                                return (
+                                  <CommandItem
+                                    key={item?.value}
+                                    value={item?.label}
+                                    onPointerDown={(e) => {
+                                      e?.preventDefault();
+                                      e?.stopPropagation();
 
-                                    const updated = selected
-                                      ? currentSelected?.filter((v) => v !== item?.value)
-                                      : [...currentSelected, item?.value];
+                                      const updated = selected
+                                        ? currentSelected?.filter((v) => v !== item?.value)
+                                        : [...currentSelected, item?.value];
 
-                                    formik.setFieldValue("tradingStyle", updated);
-                                  }}
-                                  className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
-                                >
-                                  <div
-                                    className={cn(
-                                      "h-4 w-4 border rounded flex items-center justify-center transition-all",
-                                      selected
-                                        ? "bg-indigo-600 border-indigo-600 text-white"
-                                        : "bg-transparent border-gray-300 dark:border-gray-600"
-                                    )}
+                                      formik.setFieldValue("tradingStyle", updated);
+                                    }}
+                                    className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
                                   >
-                                    {selected && <Check size={14} className="stroke-[3]" />}
-                                  </div>
-                                  <span className={cn(
-                                    "capitalize transition-colors",
-                                    selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
-                                  )}>
-                                    {item?.label}
-                                  </span>
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  {formik.touched?.tradingStyle && formik.errors?.tradingStyle && (
-                    <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors?.tradingStyle}
-                    </span>
-                  )}
+                                    <div
+                                      className={cn(
+                                        "h-4 w-4 border rounded flex items-center justify-center transition-all",
+                                        selected
+                                          ? "bg-indigo-600 border-indigo-600 text-white"
+                                          : "bg-transparent border-gray-300 dark:border-gray-600"
+                                      )}
+                                    >
+                                      {selected && <Check size={14} className="stroke-[3]" />}
+                                    </div>
+                                    <span className={cn(
+                                      "capitalize transition-colors",
+                                      selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
+                                    )}>
+                                      {item?.label}
+                                    </span>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {formik.touched?.tradingStyle && formik.errors?.tradingStyle && (
+                      <span role="alert" className="text-danger text-xs mt-1">
+                        {formik.errors?.tradingStyle}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="col-span-12 md:col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Trading Methods<span className="text-danger">*</span>
-                  </label>
-                  <Popover open={isTradingMethodOpen} onOpenChange={setIsTradingMethodOpen}>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
-                      >
-                        <span className="truncate text-sm text-gray-700">
-                          {(formik.values.tradingMethod || [])?.length > 0
-                            ? `${(formik.values.tradingMethod || [])?.length} Trading Method(s) Selected`
-                            : "Select Trading Methods"}
-                        </span>
-                        <ChevronDown size={16} className="text-gray-500" />
-                      </button>
-                    </PopoverTrigger>
+              {/* Trading Methods - Hidden for Digital Marketing */}
+              {!isDigitalMarketing && (
+                <div className="col-span-12 md:col-span-6">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      Trading Methods<span className="text-danger">*</span>
+                    </label>
+                    <Popover open={isTradingMethodOpen} onOpenChange={setIsTradingMethodOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
+                        >
+                          <span className="truncate text-sm text-gray-700">
+                            {(formik.values.tradingMethod || [])?.length > 0
+                              ? `${(formik.values.tradingMethod || [])?.length} Trading Method(s) Selected`
+                              : "Select Trading Methods"}
+                          </span>
+                          <ChevronDown size={16} className="text-gray-500" />
+                        </button>
+                      </PopoverTrigger>
 
-                    <PopoverContent className="w-[495px] p-0" align="start" side="bottom">
-                      <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
-                        <CommandList className="max-h-[300px] overflow-y-auto">
-                          <CommandEmpty>No trading methods found.</CommandEmpty>
-                          <CommandGroup>
-                            {tradingMethodOptions?.map((item) => {
-                              const currentSelected = formik.values.tradingMethod || [];
-                              const selected = currentSelected?.includes(item?.value);
-                              return (
-                                <CommandItem
-                                  key={item?.value}
-                                  value={item?.label}
-                                  onPointerDown={(e) => {
-                                    e?.preventDefault();
-                                    e?.stopPropagation();
+                      <PopoverContent className="w-[495px] p-0" align="start" side="bottom">
+                        <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
+                          <CommandList className="max-h-[300px] overflow-y-auto">
+                            <CommandEmpty>No trading methods found.</CommandEmpty>
+                            <CommandGroup>
+                              {tradingMethodOptions?.map((item) => {
+                                const currentSelected = formik.values.tradingMethod || [];
+                                const selected = currentSelected?.includes(item?.value);
+                                return (
+                                  <CommandItem
+                                    key={item?.value}
+                                    value={item?.label}
+                                    onPointerDown={(e) => {
+                                      e?.preventDefault();
+                                      e?.stopPropagation();
 
-                                    const updated = selected
-                                      ? currentSelected?.filter((v) => v !== item?.value)
-                                      : [...currentSelected, item?.value];
+                                      const updated = selected
+                                        ? currentSelected?.filter((v) => v !== item?.value)
+                                        : [...currentSelected, item?.value];
 
-                                    formik.setFieldValue("tradingMethod", updated);
-                                  }}
-                                  className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
-                                >
-                                  <div
-                                    className={cn(
-                                      "h-4 w-4 border rounded flex items-center justify-center transition-all",
-                                      selected
-                                        ? "bg-indigo-600 border-indigo-600 text-white"
-                                        : "bg-transparent border-gray-300 dark:border-gray-600"
-                                    )}
+                                      formik.setFieldValue("tradingMethod", updated);
+                                    }}
+                                    className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
                                   >
-                                    {selected && <Check size={14} className="stroke-[3]" />}
-                                  </div>
-                                  <span className={cn(
-                                    "capitalize transition-colors",
-                                    selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
-                                  )}>
-                                    {item?.label}
-                                  </span>
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  {formik.touched?.tradingMethod && formik.errors?.tradingMethod && (
-                    <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors?.tradingMethod}
-                    </span>
-                  )}
+                                    <div
+                                      className={cn(
+                                        "h-4 w-4 border rounded flex items-center justify-center transition-all",
+                                        selected
+                                          ? "bg-indigo-600 border-indigo-600 text-white"
+                                          : "bg-transparent border-gray-300 dark:border-gray-600"
+                                      )}
+                                    >
+                                      {selected && <Check size={14} className="stroke-[3]" />}
+                                    </div>
+                                    <span className={cn(
+                                      "capitalize transition-colors",
+                                      selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
+                                    )}>
+                                      {item?.label}
+                                    </span>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {formik.touched?.tradingMethod && formik.errors?.tradingMethod && (
+                      <span role="alert" className="text-danger text-xs mt-1">
+                        {formik.errors?.tradingMethod}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="col-span-12 md:col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    TimeZone<span className="text-danger">*</span>
-                  </label>
-                  <Popover open={isTimeZoneOpen} onOpenChange={setIsTimeZoneOpen}>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
-                      >
-                        <span className="truncate text-sm text-gray-700">
-                          {(formik.values.timeZone || [])?.length > 0
-                            ? `${(formik.values.timeZone || [])?.length} TimeZone(s) Selected`
-                            : "Select TimeZone"}
-                        </span>
-                        <ChevronDown size={16} className="text-gray-500" />
-                      </button>
-                    </PopoverTrigger>
+              {/* TimeZone - Hidden for Digital Marketing */}
+              {!isDigitalMarketing && (
+                <div className="col-span-12 md:col-span-6">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      TimeZone<span className="text-danger">*</span>
+                    </label>
+                    <Popover open={isTimeZoneOpen} onOpenChange={setIsTimeZoneOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 "
+                        >
+                          <span className="truncate text-sm text-gray-700">
+                            {(formik.values.timeZone || [])?.length > 0
+                              ? `${(formik.values.timeZone || [])?.length} TimeZone(s) Selected`
+                              : "Select TimeZone"}
+                          </span>
+                          <ChevronDown size={16} className="text-gray-500" />
+                        </button>
+                      </PopoverTrigger>
 
-                    <PopoverContent className="w-[495px] p-0" align="start" side="bottom">
-                      <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
-                        <CommandList className="max-h-[300px] overflow-y-auto">
-                          <CommandEmpty>No timezones found.</CommandEmpty>
-                          <CommandGroup>
-                            {timeZoneOptions?.map((item) => {
-                              const currentSelected = formik.values.timeZone || [];
-                              const selected = currentSelected?.includes(item?.value);
-                              return (
-                                <CommandItem
-                                  key={item?.value}
-                                  value={item?.label}
-                                  onPointerDown={(e) => {
-                                    e?.preventDefault();
-                                    e?.stopPropagation();
+                      <PopoverContent className="w-[495px] p-0" align="start" side="bottom">
+                        <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
+                          <CommandList className="max-h-[300px] overflow-y-auto">
+                            <CommandEmpty>No timezones found.</CommandEmpty>
+                            <CommandGroup>
+                              {timeZoneOptions?.map((item) => {
+                                const currentSelected = formik.values.timeZone || [];
+                                const selected = currentSelected?.includes(item?.value);
+                                return (
+                                  <CommandItem
+                                    key={item?.value}
+                                    value={item?.label}
+                                    onPointerDown={(e) => {
+                                      e?.preventDefault();
+                                      e?.stopPropagation();
 
-                                    const updated = selected
-                                      ? currentSelected?.filter((v) => v !== item?.value)
-                                      : [...currentSelected, item?.value];
+                                      const updated = selected
+                                        ? currentSelected?.filter((v) => v !== item?.value)
+                                        : [...currentSelected, item?.value];
 
-                                    formik.setFieldValue("timeZone", updated);
-                                  }}
-                                  className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
-                                >
-                                  <div
-                                    className={cn(
-                                      "h-4 w-4 border rounded flex items-center justify-center transition-all",
-                                      selected
-                                        ? "bg-indigo-600 border-indigo-600 text-white"
-                                        : "bg-transparent border-gray-300 dark:border-gray-600"
-                                    )}
+                                      formik.setFieldValue("timeZone", updated);
+                                    }}
+                                    className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
                                   >
-                                    {selected && <Check size={14} className="stroke-[3]" />}
-                                  </div>
-                                  <span className={cn(
-                                    "capitalize transition-colors",
-                                    selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
-                                  )}>
-                                    {item?.label}
-                                  </span>
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  {formik.touched?.timeZone && formik.errors?.timeZone && (
-                    <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors?.timeZone}
-                    </span>
-                  )}
+                                    <div
+                                      className={cn(
+                                        "h-4 w-4 border rounded flex items-center justify-center transition-all",
+                                        selected
+                                          ? "bg-indigo-600 border-indigo-600 text-white"
+                                          : "bg-transparent border-gray-300 dark:border-gray-600"
+                                      )}
+                                    >
+                                      {selected && <Check size={14} className="stroke-[3]" />}
+                                    </div>
+                                    <span className={cn(
+                                      "capitalize transition-colors",
+                                      selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
+                                    )}>
+                                      {item?.label}
+                                    </span>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {formik.touched?.timeZone && formik.errors?.timeZone && (
+                      <span role="alert" className="text-danger text-xs mt-1">
+                        {formik.errors?.timeZone}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="col-span-12 md:col-span-12">
                 <div className="flex flex-col gap-1">
