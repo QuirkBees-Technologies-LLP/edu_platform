@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Languages from './languages/Languages';
 import CoursesTypes from './course-type/CoursesTypes';
 import AdminAcademyCategory from '../academy-category/AdminAcademyCategory';
-import AdminStrategy from './strategies/AdminStrategy';
+import AdminStrategy from './Strategies/AdminStrategy';
 
 const GeneralSetting = () => {
   const [activeTab, setActiveTab] = useState("Language");
