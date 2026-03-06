@@ -50,6 +50,10 @@ export const clientStrategiesApiSlice = createApi({
             },
             providesTags: ["Strategy"],
         }),
+        getStrategyLanguages: builder.query({
+            query: () => `/users/strategies/language`,
+            providesTags: ["Strategy"],
+        }),
     }),
 });
 
@@ -59,4 +63,5 @@ export const {
     useLazyGetStrategyByIdQuery,
     useGetCategoryWiseStrategyQuery,
     useGetStrategiesNameQuery,
+    useGetStrategyLanguagesQuery,
 } = clientStrategiesApiSlice;
