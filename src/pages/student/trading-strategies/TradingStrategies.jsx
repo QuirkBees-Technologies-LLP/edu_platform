@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from '@/components/container';
-import { useGetStrategiesQuery, useLazyGetStrategyByIdQuery } from '@/store/api/client/clientStrategiesApiSlice';
+import { useGetStrategiesQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery } from '@/store/api/client/clientStrategiesApiSlice';
 import { useSelector } from 'react-redux';
-import { selectSelectedLanguage } from '../../../store/reducer/studentLanagugeSlice';
-import { Loader2, CirclePlay } from 'lucide-react';
+import { Loader2, CirclePlay, Globe } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
-
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 /**
  * Utility function to convert various video URLs to embeddable format
  */
@@ -83,9 +88,11 @@ const TradingStrategies = () => {
     const [selectedStrategyId, setSelectedStrategyId] = useState(null);
     const [activeLectureId, setActiveLectureId] = useState(null);
     const [activeLecture, setActiveLecture] = useState(null);
+    const [selectedLanguage, setSelectedLanguage] = useState("");
 
     // Get selected language from Redux
-    const selectedLanguage = useSelector(selectSelectedLanguage);
+    const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery();
+    console.log(strategyLanguages);
 
     // ==================== API CALLS ====================
     // Fetch all strategies
@@ -386,8 +393,50 @@ const TradingStrategies = () => {
 
                 {/* ========== AVAILABLE STRATEGIES GRID ========== */}
                 {/* This section is always visible */}
-                <div className="mt-10 pb-12">
-                    <h2 className="text-2xl font-semibold mb-6">Available Strategies</h2>
+                <div className="mt-10 pb-12 ">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-semibold mb-6">Available Strategies</h2>
+                        {!currentStrategy && (
+                            <div className="flex items-center gap-2 relative">
+                                <Select
+                                    value={selectedLanguage || ""}
+                                    onValueChange={(val) => {
+                                        setSelectedLanguage(val);
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[190px] h-11">
+                                        <SelectValue placeholder="Select Language">
+                                            {selectedLanguage || "Select Language"}
+                                        </SelectValue>
+                                    </SelectTrigger>
+
+                                    <SelectContent>
+                                        {strategyLanguagesLoading && (
+                                            <SelectItem value="loading" disabled>
+                                                Loading...
+                                            </SelectItem>
+                                        )}
+
+                                        {strategyLanguages?.data?.map((item) => (
+                                            <SelectItem key={item} value={item}>
+                                                {item}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {selectedLanguage && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedLanguage("")}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                                    >
+                                        ✖
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Show message if no strategies found */}
                     {strategies.length === 0 ? (
@@ -417,10 +466,19 @@ const TradingStrategies = () => {
                                             />
                                         )}
 
-                                        {/* Strategy Title and Category */}
-                                        <div>
-                                            <div className="text-xl font-semibold mb-2">{strategy.title}</div>
-                                            <div className="text-sm text-gray-900">
+                                        {/* Strategy Title, Category and Language */}
+                                        {/* Strategy Title, Category and Language */}
+                                        <div className="flex-1">
+                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                <div className="text-xl font-semibold text-gray-900 dark:text-gray-900">{strategy.title}</div>
+                                                {strategy.language && (
+                                                    <span className="shrink-0 mt-0.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-600 border border-sky-200 dark:bg-sky-500/10 dark:border-sky-500/20 dark:text-sky-400 tracking-wide uppercase flex items-center gap-1.5 shadow-sm transition-colors hover:bg-sky-100 dark:hover:bg-sky-500/20">
+                                                        <Globe className="w-3.5 h-3.5" />
+                                                        {strategy.language}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="text-sm font-medium text-gray-900 dark:text-gray-900">
                                                 {strategy.category?.name || 'All Markets'}
                                             </div>
                                         </div>
