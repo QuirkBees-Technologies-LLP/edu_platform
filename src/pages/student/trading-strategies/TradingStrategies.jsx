@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Container } from '@/components/container';
-import { useGetStrategiesQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery } from '@/store/api/client/clientStrategiesApiSlice';
+import { useGetAdminStrategyListQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery, useGetStrategyByNameMutation } from '@/store/api/client/clientStrategiesApiSlice';
 import { useSelector } from 'react-redux';
 import { Loader2, CirclePlay, Globe } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
@@ -11,6 +12,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 /**
  * Utility function to convert various video URLs to embeddable format
  */
@@ -89,18 +97,22 @@ const TradingStrategies = () => {
     const [activeLectureId, setActiveLectureId] = useState(null);
     const [activeLecture, setActiveLecture] = useState(null);
     const [selectedLanguage, setSelectedLanguage] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalStrategyTitle, setModalStrategyTitle] = useState("");
+    const [modalLanguage, setModalLanguage] = useState("");
+    const [manualStrategyData, setManualStrategyData] = useState(null);
 
     // Get selected language from Redux
     const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery();
     console.log(strategyLanguages);
 
     // ==================== API CALLS ====================
-    // Fetch all strategies
+    // Fetch all strategies from admin endpoint
     const {
         data: strategiesData,
         isLoading: strategiesLoading,
         error: strategiesError,
-    } = useGetStrategiesQuery({ language: selectedLanguage });
+    } = useGetAdminStrategyListQuery();
 
     // Lazy query for fetching individual strategy details
     const [fetchStrategy, {
@@ -109,19 +121,22 @@ const TradingStrategies = () => {
         error: strategyError
     }] = useLazyGetStrategyByIdQuery();
 
+    // Mutation for fetching strategy by name (title + language)
+    const [getStrategyByName, { isLoading: strategyByNameLoading }] = useGetStrategyByNameMutation();
+
     // ==================== DATA EXTRACTION ====================
     const strategies = strategiesData?.data || [];
-    const currentStrategy = strategyData?.data || null;
+    const currentStrategy = manualStrategyData || strategyData?.data || null;
 
     // ==================== SIDE EFFECTS ====================
     /**
      * When a strategy is selected, fetch its detailed data
      */
     useEffect(() => {
-        if (selectedStrategyId) {
+        if (selectedStrategyId && !manualStrategyData) {
             fetchStrategy(selectedStrategyId);
         }
-    }, [selectedStrategyId, fetchStrategy]);
+    }, [selectedStrategyId, fetchStrategy, manualStrategyData]);
 
     /**
      * Auto-select the first lecture from the first section when strategy is loaded
@@ -148,6 +163,7 @@ const TradingStrategies = () => {
 
     // ==================== EVENT HANDLERS ====================
     const selectStrategy = (strategyId) => {
+        setManualStrategyData(null); // Clear manual data so fetchStrategy takes over
         setSelectedStrategyId(strategyId);
         setActiveLectureId(null);
         setActiveLecture(null);
@@ -157,8 +173,61 @@ const TradingStrategies = () => {
      * Handle lecture selection
      */
     const handleLectureClick = (lecture) => {
-        setActiveLectureId(lecture._id);
+        setActiveLectureId(lecture?._id);
         setActiveLecture(lecture);
+    };
+
+    /**
+     * Handle "Start Learning" button click - opens modal with title & language picker
+     */
+    const handleStartLearning = (e, strategy) => {
+        e?.stopPropagation(); // Prevent card click from firing
+        setModalStrategyTitle(strategy?.title || '');
+        setModalLanguage(""); // reset language selection
+        setIsModalOpen(true);
+    };
+
+    /**
+     * Handle Apply button in modal - calls getStrategyByName API
+     */
+    const handleApplyLanguage = async () => {
+        if (!modalLanguage) return;
+        try {
+            const result = await getStrategyByName({
+                title: modalStrategyTitle,
+                language: modalLanguage,
+            }).unwrap();
+
+            // If API returns success: false, show error toast and close modal
+            if (result?.success === false) {
+                toast.error(result?.message || 'No strategy available');
+                setIsModalOpen(false);
+                return;
+            }
+
+            const strategyResult = result?.data;
+            if (strategyResult) {
+                setManualStrategyData(strategyResult);
+                setSelectedStrategyId(strategyResult?._id);
+                setActiveLectureId(null);
+                setActiveLecture(null);
+            }
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error('Failed to fetch strategy by name:', error);
+            const errorMessage = error?.data?.message || error?.message || 'No strategy available';
+            toast.error(errorMessage);
+            setIsModalOpen(false);
+        }
+    };
+
+    /**
+     * Close the modal
+     */
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setModalStrategyTitle("");
+        setModalLanguage("");
     };
 
     // ==================== LOADING STATE ====================
@@ -218,7 +287,7 @@ const TradingStrategies = () => {
                                     </p>
                                 </div> */}
                                 <Accordion allowMultiple={false} defaultIndex={0}>
-                                    {currentStrategy.sections.map((section, index) => (
+                                    {currentStrategy?.sections?.map((section, index) => (
                                         <AccordionItem
                                             key={section?._id || index}
                                             title={`${index + 1}. ${section?.title || 'Section'}`}
@@ -324,7 +393,7 @@ const TradingStrategies = () => {
                                 />
                             )}
                             <div>
-                                <h3 className="text-2xl font-semibold">{currentStrategy.title}</h3>
+                                <h3 className="text-2xl font-semibold">{currentStrategy?.title}</h3>
                             </div>
                         </div>
 
@@ -335,7 +404,7 @@ const TradingStrategies = () => {
                                     About This Strategy
                                 </div>
                                 <p className="text-[15px] leading-relaxed text-gray-900">
-                                    {currentStrategy.aboutStrategy || currentStrategy.description}
+                                    {currentStrategy?.aboutStrategy || currentStrategy?.description}
                                 </p>
                             </div>
                             <div>
@@ -357,9 +426,9 @@ const TradingStrategies = () => {
                                     ))}
 
                                     {/* Display category badge */}
-                                    {currentStrategy.category && (
+                                    {currentStrategy?.category && (
                                         <span className="px-4 py-2 rounded-full text-xs font-medium bg-purple-500/20 border border-purple-500/40 text-purple-400">
-                                            {currentStrategy.category.name}
+                                            {currentStrategy?.category?.name}
                                         </span>
                                     )}
                                 </div>
@@ -367,21 +436,21 @@ const TradingStrategies = () => {
                         </div>
 
                         {/* Educators Section */}
-                        {currentStrategy.educators && currentStrategy.educators.length > 0 && (
+                        {currentStrategy?.educators && currentStrategy?.educators?.length > 0 && (
                             <div className="pt-8 border-t border-gray-300">
                                 <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-6">
                                     Strategy Educators
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                    {currentStrategy.educators.map((educator, i) => (
-                                        <div key={educator._id || i} className="flex flex-col items-center text-center">
+                                    {currentStrategy?.educators?.map((educator, i) => (
+                                        <div key={educator?._id || i} className="flex flex-col items-center text-center">
                                             <img
-                                                src={educator.image || `https://ui-avatars.com/api/?name=${educator.first_name}+${educator.last_name}`}
-                                                alt={`${educator.first_name} ${educator.last_name}`}
+                                                src={educator?.image || `https://ui-avatars.com/api/?name=${educator?.first_name}+${educator?.last_name}`}
+                                                alt={`${educator?.first_name || ''} ${educator?.last_name || ''}`}
                                                 className="w-20 h-20 rounded-full mb-3 border-2 border-gray-300 object-cover"
                                             />
                                             <div className="text-sm font-medium text-gray-900">
-                                                {educator.first_name} {educator.last_name}
+                                                {educator?.first_name} {educator?.last_name}
                                             </div>
                                         </div>
                                     ))}
@@ -396,7 +465,7 @@ const TradingStrategies = () => {
                 <div className="mt-10 pb-12 ">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-semibold mb-6">Available Strategies</h2>
-                        {!currentStrategy && (
+                        {/* {!currentStrategy && (
                             <div className="flex items-center gap-2 relative">
                                 <Select
                                     value={selectedLanguage || ""}
@@ -435,22 +504,22 @@ const TradingStrategies = () => {
                                     </button>
                                 )}
                             </div>
-                        )}
+                        )} */}
                     </div>
 
                     {/* Show message if no strategies found */}
-                    {strategies.length === 0 ? (
+                    {strategies?.length === 0 ? (
                         <div className="text-center py-12 text-gray-600">
                             No strategies available at the moment.
                         </div>
                     ) : (
                         // Display strategy cards in a responsive grid
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                            {strategies.map((strategy) => (
+                            {strategies?.map((strategy) => (
                                 <div
-                                    key={strategy._id}
-                                    onClick={() => selectStrategy(strategy._id)}
-                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy._id
+                                    key={strategy?._id}
+                                    onClick={() => selectStrategy(strategy?._id)}
+                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy?._id
                                         ? 'border-purple-500 shadow-lg shadow-purple-500/30'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }`}
@@ -458,10 +527,10 @@ const TradingStrategies = () => {
                                     {/* Strategy Card Content */}
                                     <div className="flex flex-col md:flex-row gap-4 mb-4">
                                         {/* Strategy Image */}
-                                        {strategy.imageUrl && (
+                                        {strategy?.imageUrl && (
                                             <img
-                                                src={strategy.imageUrl}
-                                                alt={strategy.title}
+                                                src={strategy?.imageUrl}
+                                                alt={strategy?.title}
                                                 className="w-20 h-20 rounded-xl object-cover"
                                             />
                                         )}
@@ -470,13 +539,13 @@ const TradingStrategies = () => {
                                         {/* Strategy Title, Category and Language */}
                                         <div className="flex-1">
                                             <div className="flex items-start justify-between gap-3 mb-2">
-                                                <div className="text-xl font-semibold text-gray-900 dark:text-gray-900">{strategy.title}</div>
-                                                {strategy.language && (
+                                                <div className="text-xl font-semibold text-gray-900 dark:text-gray-900">{strategy?.title}</div>
+                                                {/* {strategy.language && (
                                                     <span className="shrink-0 mt-0.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-600 border border-sky-200 dark:bg-sky-500/10 dark:border-sky-500/20 dark:text-sky-400 tracking-wide uppercase flex items-center gap-1.5 shadow-sm transition-colors hover:bg-sky-100 dark:hover:bg-sky-500/20">
                                                         <Globe className="w-3.5 h-3.5" />
                                                         {strategy.language}
                                                     </span>
-                                                )}
+                                                )} */}
                                             </div>
                                             <div className="text-sm font-medium text-gray-900 dark:text-gray-900">
                                                 {strategy.category?.name || 'All Markets'}
@@ -487,12 +556,15 @@ const TradingStrategies = () => {
                                     {/* Strategy Description (limited to 2 lines) */}
                                     <div className="flex-grow">
                                         <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
-                                            {strategy.description}
+                                            {strategy?.description}
                                         </p>
                                     </div>
 
                                     {/* Call-to-Action Button */}
-                                    <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto">
+                                    <button
+                                        onClick={(e) => handleStartLearning(e, strategy)}
+                                        className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto"
+                                    >
                                         Start Learning
                                     </button>
                                 </div>
@@ -500,6 +572,75 @@ const TradingStrategies = () => {
                         </div>
                     )}
                 </div>
+
+                {/* ========== LANGUAGE SELECTION MODAL ========== */}
+                <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
+                    <DialogContent className="max-w-md w-full">
+                        <DialogHeader>
+                            <DialogTitle className="text-xl font-bold">
+                                Select Language
+                            </DialogTitle>
+                            <DialogDescription className="text-sm text-gray-500">
+                                Choose a language to start learning this strategy
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        {/* Language Dropdown */}
+                        <div className="mt-4">
+                            <label className="text-sm font-medium text-gray-700 mb-1.5 block">Language</label>
+                            <Select
+                                value={modalLanguage}
+                                onValueChange={(val) => setModalLanguage(val)}
+                            >
+                                <SelectTrigger className="w-full h-11">
+                                    <SelectValue placeholder="Select Language">
+                                        {modalLanguage || "Select Language"}
+                                    </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {strategyLanguagesLoading && (
+                                        <SelectItem value="loading" disabled>
+                                            Loading...
+                                        </SelectItem>
+                                    )}
+                                    {strategyLanguages?.data?.map((item) => (
+                                        <SelectItem key={item} value={item}>
+                                            {item}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Strategy Title (read-only) */}
+                        <div className="mt-4">
+                            <label className="text-sm font-medium text-gray-700 mb-1.5 block">Strategy</label>
+                            <div className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-200 rounded-lg text-sm font-medium text-gray-800 dark:text-gray-700">
+                                {modalStrategyTitle}
+                            </div>
+                        </div>
+
+
+
+                        {/* Apply Button */}
+                        <div className="mt-6">
+                            <button
+                                onClick={handleApplyLanguage}
+                                disabled={!modalLanguage || strategyByNameLoading}
+                                className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {strategyByNameLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Applying...
+                                    </>
+                                ) : (
+                                    'Apply'
+                                )}
+                            </button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </Container>
         </div>
     );
