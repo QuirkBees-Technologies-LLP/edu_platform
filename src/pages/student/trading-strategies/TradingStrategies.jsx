@@ -99,6 +99,7 @@ const TradingStrategies = () => {
     const [selectedLanguage, setSelectedLanguage] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalStrategyTitle, setModalStrategyTitle] = useState("");
+    const [modalStrategyId, setModalStrategyId] = useState(null);
     const [modalLanguage, setModalLanguage] = useState("");
     const [manualStrategyData, setManualStrategyData] = useState(null);
 
@@ -183,6 +184,7 @@ const TradingStrategies = () => {
     const handleStartLearning = (e, strategy) => {
         e?.stopPropagation(); // Prevent card click from firing
         setModalStrategyTitle(strategy?.title || '');
+        setModalStrategyId(strategy?._id || null);
         setModalLanguage(""); // reset language selection
         setIsModalOpen(true);
     };
@@ -191,10 +193,10 @@ const TradingStrategies = () => {
      * Handle Apply button in modal - calls getStrategyByName API
      */
     const handleApplyLanguage = async () => {
-        if (!modalLanguage) return;
+        if (!modalLanguage || !modalStrategyId) return;
         try {
             const result = await getStrategyByName({
-                title: modalStrategyTitle,
+                id: modalStrategyId,
                 language: modalLanguage,
             }).unwrap();
 
@@ -227,6 +229,7 @@ const TradingStrategies = () => {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setModalStrategyTitle("");
+        setModalStrategyId(null);
         setModalLanguage("");
     };
 
