@@ -55,12 +55,12 @@ export const clientStrategiesApiSlice = createApi({
             providesTags: ["Strategy"],
         }),
 
-        // Get strategy by name (title + language)
+        // Get strategy by id + language
         getStrategyByName: builder.mutation({
-            query: ({ title, language }) => ({
-                url: `/users/strategies/get`,
+            query: ({ id, language }) => ({
+                url: `/users/strategies/get/${id}`,
                 method: 'POST',
-                body: { title, language },
+                body: { language },
             }),
         }),
 

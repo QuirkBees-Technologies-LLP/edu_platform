@@ -6,8 +6,7 @@ import {
   useGetAcademyCategoryQuery,
   useGetAcademySingleCategoryQuery,
 } from "../../../store/api/client/clientAcademyCategoryApiSlice";
-import { useGetCategoryWiseStrategyQuery } from "../../../store/api/client/clientStrategiesApiSlice";
-import { useGetStrategiesNameQuery } from "../../../store/api/client/clientStrategiesApiSlice";
+import { useGetCategoryWiseStrategyQuery, useGetAdminStrategyListQuery } from "../../../store/api/client/clientStrategiesApiSlice";
 import Loader from "../../../components/ui/loader";
 import { addDays, startOfWeek } from "date-fns";
 import { CalendarDays, List, RotateCcw, ChevronDown, Check } from "lucide-react";
@@ -83,10 +82,10 @@ export default function IqAcademy() {
 
   /* Helper function for multi-select logic */
   const handleMultiSelect = (value, currentSelected, setSelected) => {
-    if (currentSelected.includes(value)) {
-      setSelected(currentSelected.filter((item) => item !== value));
+    if (currentSelected?.includes(value)) {
+      setSelected(currentSelected?.filter((item) => item !== value));
     } else {
-      setSelected([...currentSelected, value]);
+      setSelected([...(currentSelected || []), value]);
     }
   };
 
@@ -104,7 +103,7 @@ export default function IqAcademy() {
     useGetAcademyCategoryQuery();
 
   const { data: strategiesName, isLoading: isStrategNameLoading } =
-    useGetStrategiesNameQuery();
+    useGetAdminStrategyListQuery();
 
   const activeCategory = categoryData?.data?.find(
     (c) => c?._id === activeCategoryId
@@ -137,11 +136,11 @@ export default function IqAcademy() {
       {
         id: activeCategoryId,
         language: selectedLanguage,
-        startDate: displayedWeekStart.toISOString(),
-        endDate: displayedWeekEnd.toISOString(),
-        tradingType: tradingType.length > 0 ? tradingType.join(",") : undefined,
-        tradingMethod: tradingMethod.length > 0 ? tradingMethod.join(",") : undefined,
-        timeZone: timeZone.length > 0 ? timeZone.join(",") : undefined,
+        startDate: displayedWeekStart?.toISOString(),
+        endDate: displayedWeekEnd?.toISOString(),
+        tradingType: tradingType?.length > 0 ? tradingType?.join(",") : undefined,
+        tradingMethod: tradingMethod?.length > 0 ? tradingMethod?.join(",") : undefined,
+        timeZone: timeZone?.length > 0 ? timeZone?.join(",") : undefined,
         type: statusType,
         strategyId: activeStrategyId !== "all" ? activeStrategyId : undefined,
       },
@@ -154,11 +153,11 @@ export default function IqAcademy() {
       {
         id: activeCategoryId,
         language: selectedLanguage,
-        startDate: displayedWeekStart.toISOString(),
-        endDate: displayedWeekEnd.toISOString(),
-        tradingType: tradingType.length > 0 ? tradingType.join(",") : undefined,
-        tradingMethod: tradingMethod.length > 0 ? tradingMethod.join(",") : undefined,
-        timeZone: timeZone.length > 0 ? timeZone.join(",") : undefined,
+        startDate: displayedWeekStart?.toISOString(),
+        endDate: displayedWeekEnd?.toISOString(),
+        tradingType: tradingType?.length > 0 ? tradingType?.join(",") : undefined,
+        tradingMethod: tradingMethod?.length > 0 ? tradingMethod?.join(",") : undefined,
+        timeZone: timeZone?.length > 0 ? timeZone?.join(",") : undefined,
         type: statusType,
         strategyId: activeStrategyId !== "all" ? activeStrategyId : undefined,
       },
