@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Upload, X as CloseIcon, Check, ChevronDown } from "lucide-react";
+import { Loader2, Upload, X as CloseIcon } from "lucide-react";
 import {
-    useGetEducatorAcademyCategoryQuery,
     useGetLanguageListQuery,
 } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
-import { useGetEducatorsQuery } from "../../../../../../../store/api/admin/adminEducatorsApiSlice";
 import {
     Select,
     SelectContent,
@@ -16,18 +14,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import TagInput from "@/components/ui/tagInput";
 
 // Schema for strategy validation
 const strategySchema = z.object({
     title: z.string().min(3, "Title must be at least 3 characters"),
     description: z.string().min(10, "Description must be at least 10 characters"),
     aboutStrategy: z.string().min(10, "About Strategy  must be at least 10 characters"),
-    selectedEducators: z.array(z.string()).min(1, "Please select at least one educator"),
     iconThumbnail: z
         .any()
         .refine(
@@ -36,16 +28,6 @@ const strategySchema = z.object({
                 message: "Strategy icon thumbnail is required",
             }
         ),
-    // strategyBanner: z
-    //     .any()
-    //     .refine(
-    //         (file) => (file instanceof File && file.size > 0) || (typeof file === 'string' && file.length > 0),
-    //         {
-    //             message: "Strategy banner is required",
-    //         }
-    //     ),
-    category: z.string().min(1, "Please select a category"),
-    tags: z.array(z.string()).optional(),
     published: z.boolean().default(false),
     isFeatured: z.boolean().default(false),
     tier: z.enum(["FREE", "PREMIUM"], {
@@ -62,11 +44,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
-    const [isEducatorOpen, setIsEducatorOpen] = useState(false);
-
     const { data: languagesList } = useGetLanguageListQuery();
-    const { data: categories } = useGetEducatorAcademyCategoryQuery();
-    const { data: educatorsData, isLoading: isEducatorsLoading, isFetching: isEducatorsFetching } = useGetEducatorsQuery({ limit: 100 });
 
     const {
         control,
@@ -82,11 +60,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             title: "",
             description: "",
             aboutStrategy: "",
-            selectedEducators: [],
             iconThumbnail: undefined,
             // strategyBanner: undefined,
-            category: "",
-            tags: [],
             published: false,
             isFeatured: false,
             section: "Strategy",
@@ -113,44 +88,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             //     setBannerPreview(initialData?.strategyBanner);
             //     setValue("iconThumbnail", initialData?.strategyBanner);
             // }
-
-            if (initialData?.category?._id && categories?.data?.length > 0) {
-                setValue("category", initialData?.category?._id);
-            }
-
-            // Backend sends 'educators', frontend uses 'selectedEducators'
-            const backendEducators = initialData?.educators || initialData?.selectedEducators;
-            if (backendEducators?.length > 0) {
-                const educatorIds = backendEducators?.map(e => typeof e === 'object' ? e?._id : e);
-                setValue("selectedEducators", educatorIds);
-            }
-
-            // Improved tag parsing for various backend formats
-            if (initialData?.tags) {
-                let tagsArray = [];
-                if (Array.isArray(initialData?.tags)) {
-                    // Check if the array contains a stringified version of another array
-                    if (initialData?.tags?.length === 1 && typeof initialData?.tags?.[0] === 'string' && initialData?.tags?.[0]?.startsWith('[')) {
-                        try {
-                            tagsArray = JSON.parse(initialData?.tags?.[0]);
-                        } catch (e) {
-                            tagsArray = initialData?.tags;
-                        }
-                    } else {
-                        tagsArray = initialData?.tags;
-                    }
-                } else if (typeof initialData?.tags === 'string') {
-                    try {
-                        const parsed = JSON.parse(initialData?.tags);
-                        tagsArray = Array.isArray(parsed) ? parsed : [initialData?.tags];
-                    } catch (e) {
-                        tagsArray = initialData?.tags?.split(',')?.map(tag => tag?.trim());
-                    }
-                }
-                setValue("tags", tagsArray);
-            }
         }
-    }, [initialData, categories, setValue]);
+    }, [initialData, setValue]);
 
     const handleFileChange = (e, field) => {
         const file = e?.target?.files?.[0];
@@ -191,14 +130,12 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             const formData = new FormData();
 
             [
-                "title", "description", "aboutStrategy", "category", "published",
+                "title", "description", "aboutStrategy", "published",
                 "isFeatured", "tier", "section", "language", "isStrategy"
             ].forEach(key => {
                 formData.append(key, values?.[key]);
             });
 
-            formData.append("educators", JSON.stringify(values?.selectedEducators));
-            formData.append("tags", JSON.stringify(values?.tags));
             formData.append("isStrategies", true);
 
             if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
@@ -330,111 +267,12 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         </div> */}
                     </div>
 
-                    {/* Educators Dropdown (Multi-select) */}
-                    <div className="space-y-2 relative">
-                        <label className="block text-sm font-medium text-gray-700">Select Educators <span className="text-rose-500">*</span></label>
-                        <Popover open={isEducatorOpen} onOpenChange={setIsEducatorOpen}>
-                            <PopoverTrigger asChild>
-                                <button
-                                    type="button"
-                                    className="min-w-56 w-full h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]"
-                                >
-                                    <span className="truncate text-sm text-gray-700 ">
-                                        {(watch("selectedEducators") || [])?.length > 0
-                                            ? `${(watch("selectedEducators") || [])?.length} Educators Selected`
-                                            : "Select Educators"}
-                                    </span>
-                                    <ChevronDown size={16} className="text-gray-500" />
-                                </button>
-                            </PopoverTrigger>
 
-                            <PopoverContent className="w-[524px] p-0 pointer-events-auto" align="start" side="bottom">
-                                <Command className="bg-white dark:bg-[#1c1f26]" shouldFilter={true}>
-                                    <CommandList
-                                        className="[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full"
-                                        style={{ maxHeight: '300px', overflowY: 'auto', pointerEvents: 'auto' }}
-                                    >
-                                        <CommandGroup>
-                                            {(isEducatorsLoading || isEducatorsFetching) ? (
-                                                <div className="flex items-center justify-center py-6">
-                                                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
-                                                    <span className="ml-2 text-sm text-gray-500">Loading educators...</span>
-                                                </div>
-                                            ) : educatorsData?.data?.length === 0 ? (
-                                                <div className="py-6 text-center text-sm text-gray-500">
-                                                    No educators found.
-                                                </div>
-                                            ) : (
-                                                educatorsData?.data?.map((item) => {
-                                                    const currentSelected = watch("selectedEducators") || [];
-                                                    const selected = currentSelected?.includes(item?._id);
-                                                    return (
-                                                        <CommandItem
-                                                            key={item?._id}
-                                                            value={`${item?.first_name} ${item?.last_name}`}
-                                                            // Using onPointerDown to bypass potential cmdk focus issues
-                                                            onPointerDown={(e) => {
-                                                                e?.preventDefault();
-                                                                e?.stopPropagation();
-
-                                                                const updated = selected
-                                                                    ? currentSelected?.filter((id) => id !== item?._id)
-                                                                    : [...currentSelected, item?._id];
-
-                                                                setValue("selectedEducators", updated, { shouldValidate: true });
-                                                            }}
-                                                            className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-white/5 pointer-events-auto"
-                                                        >
-                                                            <div
-                                                                className={cn(
-                                                                    "h-4 w-4 border rounded flex items-center justify-center transition-all",
-                                                                    selected
-                                                                        ? "bg-indigo-600 border-indigo-600 text-white"
-                                                                        : "bg-transparent border-gray-300 dark:border-gray-600"
-                                                                )}
-                                                            >
-                                                                {selected && <Check size={14} className="stroke-[3]" />}
-                                                            </div>
-                                                            <span className={cn(
-                                                                "text-sm capitalize transition-colors",
-                                                                selected ? "text-indigo-600 dark:text-white font-semibold" : "text-gray-700 dark:text-gray-700"
-                                                            )}>
-                                                                {item?.first_name} {item?.last_name}
-                                                            </span>
-                                                        </CommandItem>
-                                                    );
-                                                })
-                                            )}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                        {errors?.selectedEducators && <p className="text-xs text-rose-500 mt-1">{errors?.selectedEducators?.message}</p>}
-                    </div>
-
-                    {/* Tags Input */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Tags</label>
-                        <Controller
-                            name="tags"
-                            control={control}
-                            render={({ field }) => (
-                                <TagInput
-                                    value={field?.value || []}
-                                    onChange={field?.onChange}
-                                    touched={!!errors?.tags}
-                                    error={errors?.tags?.message}
-                                />
-                            )}
-                        />
-                        {errors?.tags && <p className="text-xs text-rose-500 mt-1">{errors?.tags?.message}</p>}
-                    </div>
                 </div>
             </div>
 
             {/* Selects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 border-t  pt-8 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t  pt-8 mt-4">
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">Language <span className="text-rose-500">*</span></label>
                     <Controller
@@ -454,27 +292,6 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                         )}
                     />
                     {errors?.language && <p className="text-xs text-rose-500 mt-1">{errors?.language?.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Category <span className="text-rose-500">*</span></label>
-                    <Controller
-                        name="category"
-                        control={control}
-                        render={({ field }) => (
-                            <Select value={field?.value} onValueChange={field?.onChange}>
-                                <SelectTrigger className="w-full   text-gray-700 rounded-lg h-11">
-                                    <SelectValue placeholder="Select Category" />
-                                </SelectTrigger>
-                                <SelectContent className="  text-gray-700">
-                                    {categories?.data?.map((item) => (
-                                        <SelectItem key={item?._id} value={item?._id} className="focus:bg-indigo-600 focus:text-gray-700">{item?.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        )}
-                    />
-                    {errors?.category && <p className="text-xs text-rose-500 mt-1">{errors?.category?.message}</p>}
                 </div>
 
                 <div className="space-y-2">
