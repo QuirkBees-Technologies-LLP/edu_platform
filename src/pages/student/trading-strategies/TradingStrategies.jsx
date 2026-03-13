@@ -81,6 +81,33 @@ const getEmbedUrl = (url) => {
     return url;
 };
 
+/**
+ * Utility function to parse tags from various backend formats
+ * Handles: ["[\"KillShot\"]"], ["KillShot"], "KillShot", etc.
+ */
+const parseTags = (tags) => {
+    if (!tags || !Array.isArray(tags) || tags?.length === 0) return [];
+    
+    let result = [];
+    tags?.forEach(tag => {
+        if (typeof tag === 'string' && tag?.startsWith('[')) {
+            try {
+                const parsed = JSON.parse(tag);
+                if (Array.isArray(parsed)) {
+                    result = [...result, ...parsed];
+                } else {
+                    result?.push(String(parsed));
+                }
+            } catch (e) {
+                result?.push(tag);
+            }
+        } else {
+            result?.push(tag);
+        }
+    });
+    return result;
+};
+
 const Banner = () => (
     <div className="card rounded-2xl overflow-hidden border border-gray-300">
         <img
@@ -102,6 +129,7 @@ const TradingStrategies = () => {
     const [modalStrategyId, setModalStrategyId] = useState(null);
     const [modalLanguage, setModalLanguage] = useState("");
     const [manualStrategyData, setManualStrategyData] = useState(null);
+    const [parentStrategyId, setParentStrategyId] = useState(null);
 
     // Get selected language from Redux
     const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery();
@@ -128,6 +156,8 @@ const TradingStrategies = () => {
     // ==================== DATA EXTRACTION ====================
     const strategies = strategiesData?.data || [];
     const currentStrategy = manualStrategyData || strategyData?.data || null;
+    // Parent strategy from Available Strategies list (has tags, category, educators)
+    const parentStrategy = strategies?.find(s => s?._id === parentStrategyId) || null;
 
     // ==================== SIDE EFFECTS ====================
     /**
@@ -144,9 +174,9 @@ const TradingStrategies = () => {
      */
     useEffect(() => {
         if (currentStrategy?.sections?.length > 0) {
-            const firstSection = currentStrategy.sections[0];
+            const firstSection = currentStrategy?.sections?.[0];
             if (firstSection?.lectures?.length > 0) {
-                const firstLecture = firstSection.lectures[0];
+                const firstLecture = firstSection?.lectures?.[0];
                 setActiveLectureId(firstLecture?._id);
                 setActiveLecture(firstLecture);
             }
@@ -185,6 +215,7 @@ const TradingStrategies = () => {
         e?.stopPropagation(); // Prevent card click from firing
         setModalStrategyTitle(strategy?.title || '');
         setModalStrategyId(strategy?._id || null);
+        setParentStrategyId(strategy?._id || null); // Track parent strategy for tags/category/educators
         setModalLanguage(""); // reset language selection
         setIsModalOpen(true);
     };
@@ -388,10 +419,10 @@ const TradingStrategies = () => {
                     <div className="card rounded-2xl border border-gray-300 p-8 mb-8">
                         {/* Header */}
                         <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-300">
-                            {currentStrategy.imageUrl && (
+                            {currentStrategy?.imageUrl && (
                                 <img
-                                    src={currentStrategy.imageUrl}
-                                    alt={currentStrategy.title}
+                                    src={currentStrategy?.imageUrl}
+                                    alt={currentStrategy?.title}
                                     className="w-16 h-16 rounded-xl object-cover"
                                 />
                             )}
@@ -415,8 +446,8 @@ const TradingStrategies = () => {
                                     Strategy Details
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    {/* Display tags with alternating colors */}
-                                    {currentStrategy.tags?.map((tag, i) => (
+                                    {/* Display tags with alternating colors - from parent strategy */}
+                                    {parseTags(parentStrategy?.tags)?.map((tag, i) => (
                                         <span
                                             key={i}
                                             className={`px-4 py-2 rounded-full text-xs font-medium ${i < 2
@@ -428,24 +459,24 @@ const TradingStrategies = () => {
                                         </span>
                                     ))}
 
-                                    {/* Display category badge */}
-                                    {currentStrategy?.category && (
-                                        <span className="px-4 py-2 rounded-full text-xs font-medium bg-purple-500/20 border border-purple-500/40 text-purple-400">
-                                            {currentStrategy?.category?.name}
+                                    {/* Display category badges - from parent strategy */}
+                                    {parentStrategy?.category?.length > 0 && parentStrategy?.category?.map((cat, i) => (
+                                        <span key={cat?._id || i} className="px-4 py-2 rounded-full text-xs font-medium bg-purple-500/20 border border-purple-500/40 text-purple-400">
+                                            {cat?.name}
                                         </span>
-                                    )}
+                                    ))}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Educators Section */}
-                        {currentStrategy?.educators && currentStrategy?.educators?.length > 0 && (
+                        {/* Educators Section - from parent strategy */}
+                        {parentStrategy?.educators?.length > 0 && (
                             <div className="pt-8 border-t border-gray-300">
                                 <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-6">
                                     Strategy Educators
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                    {currentStrategy?.educators?.map((educator, i) => (
+                                    {parentStrategy?.educators?.map((educator, i) => (
                                         <div key={educator?._id || i} className="flex flex-col items-center text-center">
                                             <img
                                                 src={educator?.image || `https://ui-avatars.com/api/?name=${educator?.first_name}+${educator?.last_name}`}
@@ -468,46 +499,6 @@ const TradingStrategies = () => {
                 <div className="mt-10 pb-12 ">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-semibold mb-6">Available Strategies</h2>
-                        {/* {!currentStrategy && (
-                            <div className="flex items-center gap-2 relative">
-                                <Select
-                                    value={selectedLanguage || ""}
-                                    onValueChange={(val) => {
-                                        setSelectedLanguage(val);
-                                    }}
-                                >
-                                    <SelectTrigger className="w-[190px] h-11">
-                                        <SelectValue placeholder="Select Language">
-                                            {selectedLanguage || "Select Language"}
-                                        </SelectValue>
-                                    </SelectTrigger>
-
-                                    <SelectContent>
-                                        {strategyLanguagesLoading && (
-                                            <SelectItem value="loading" disabled>
-                                                Loading...
-                                            </SelectItem>
-                                        )}
-
-                                        {strategyLanguages?.data?.map((item) => (
-                                            <SelectItem key={item} value={item}>
-                                                {item}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-
-                                {selectedLanguage && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedLanguage("")}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                                    >
-                                        ✖
-                                    </button>
-                                )}
-                            </div>
-                        )} */}
                     </div>
 
                     {/* Show message if no strategies found */}
@@ -551,7 +542,7 @@ const TradingStrategies = () => {
                                                 )} */}
                                             </div>
                                             <div className="text-sm font-medium text-gray-900 dark:text-gray-900">
-                                                {strategy.category?.name || 'All Markets'}
+                                                {strategy?.category?.length > 0 ? strategy?.category?.map(cat => cat?.name)?.join(', ') : 'All Markets'}
                                             </div>
                                         </div>
                                     </div>
