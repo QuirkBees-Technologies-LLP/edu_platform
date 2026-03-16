@@ -128,7 +128,6 @@ import CommunityFeed from "../pages/student/iq-social/CommunityFeed";
 import IqAcademy from "../pages/student/iq-academy/IqAcademy";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
 import IqAcademyEducators from "../pages/student/iq-academy-educators/IqAcademyEducators";
-import ForexAcademy from "../pages/student/client-dashboard/forex-academy/ForexAcademy";
 import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
 import PersonalIqInsight from "../pages/student/personal-iq-insight/PersonalIqInsight";
 import IqVault from "../pages/student/iq-vault/IqVault";
@@ -196,7 +195,6 @@ const routes = {
     { path: "/iq-academy", element: <IqAcademy /> },
     { path: "/iq-educators/:id", element: <IqEducators /> },
     { path: "/iq-academy-educators", element: <IqAcademyEducators /> },
-    { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
     { path: "/iq-crypto", element: <IqCrypto /> },
     { path: "/iq-social", element: <CommunityFeed /> },

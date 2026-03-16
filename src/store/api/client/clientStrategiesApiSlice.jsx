@@ -51,7 +51,7 @@ export const clientStrategiesApiSlice = createApi({
             providesTags: ["Strategy"],
         }),
         getStrategyLanguages: builder.query({
-            query: () => `/users/strategies/language`,
+            query: (id) => `/users/strategies/language/${id}`,
             providesTags: ["Strategy"],
         }),
 

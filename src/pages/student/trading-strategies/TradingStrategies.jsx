@@ -87,7 +87,7 @@ const getEmbedUrl = (url) => {
  */
 const parseTags = (tags) => {
     if (!tags || !Array.isArray(tags) || tags?.length === 0) return [];
-    
+
     let result = [];
     tags?.forEach(tag => {
         if (typeof tag === 'string' && tag?.startsWith('[')) {
@@ -132,8 +132,10 @@ const TradingStrategies = () => {
     const [parentStrategyId, setParentStrategyId] = useState(null);
 
     // Get selected language from Redux
-    const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery();
-    console.log(strategyLanguages);
+    const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery(modalStrategyId, {
+        skip: !modalStrategyId
+    });
+
 
     // ==================== API CALLS ====================
     // Fetch all strategies from admin endpoint
