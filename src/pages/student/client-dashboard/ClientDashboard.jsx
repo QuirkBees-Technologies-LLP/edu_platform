@@ -659,7 +659,7 @@ const ClientDashboard = () => {
                           IQ Social
                         </p>
                         <p className="text-xs text-purple-400">
-                          10K+ Beta Users
+                          10K+ Users
                         </p>
                       </div>
                     </div>
