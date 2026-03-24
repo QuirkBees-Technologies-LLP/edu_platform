@@ -32,13 +32,7 @@ const ViewClientLiveIdeas = forwardRef(
                     {selectedIdea?.name}
                   </div>
                 </div>
-                {/* <div className="flex px-4">
-                                <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Buy</div>
-                                <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
-                                <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">5m</div>
-                                <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
-                                <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Scalp</div>
-                            </div> */}
+
                 <div className="">
                   <ClientTradeSlider
                     sliderImages={selectedIdea?.image}
@@ -50,7 +44,7 @@ const ViewClientLiveIdeas = forwardRef(
                 <div className="flex items-center mt-5">
                   <EducatorImage
                     educator={selectedIdea?.educatorDetails}
-                    // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                  // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
                   />
                   <div className="">
                     <Link
@@ -68,10 +62,10 @@ const ViewClientLiveIdeas = forwardRef(
                           ? selectedIdea?.categories?.name
                           : "Category not assigned"} */}
                     {Array.isArray(selectedIdea?.educatorDetails?.categories) &&
-                    selectedIdea?.educatorDetails?.categories?.length > 0
+                      selectedIdea?.educatorDetails?.categories?.length > 0
                       ? selectedIdea?.educatorDetails?.categories
-                          .map((cat) => cat)
-                          .join(", ")
+                        .map((cat) => cat)
+                        .join(", ")
                       : "Category not assigned"}
                   </div>
                 </div>

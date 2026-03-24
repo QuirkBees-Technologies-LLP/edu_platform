@@ -8,6 +8,9 @@ export const clientProfileApiSlice = createApi({
         getClientProfile: builder.query({
             query: () => `/users/auth/profile`,
         }),
+        getNotificationPreferences: builder.query({
+            query: () => `/users/auth/get-notification-preferences`,
+        }),
         updateClientProfile: builder.mutation({
             query: (updatedData) => ({
                 url: `/users/auth/update`,
@@ -16,7 +19,14 @@ export const clientProfileApiSlice = createApi({
                 formData: true
             }),
         }),
+        updateNotificationPreferences: builder.mutation({
+            query: (preferences) => ({
+                url: `/users/auth/notification-preferences`,
+                method: 'PUT',
+                body: preferences,
+            }),
+        }),
     }),
 });
 
-export const { useGetClientProfileQuery, useUpdateClientProfileMutation } = clientProfileApiSlice;
+export const { useGetClientProfileQuery, useUpdateClientProfileMutation, useUpdateNotificationPreferencesMutation, useGetNotificationPreferencesQuery } = clientProfileApiSlice;

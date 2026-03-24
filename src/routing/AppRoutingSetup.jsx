@@ -128,7 +128,6 @@ import CommunityFeed from "../pages/student/iq-social/CommunityFeed";
 import IqAcademy from "../pages/student/iq-academy/IqAcademy";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
 import IqAcademyEducators from "../pages/student/iq-academy-educators/IqAcademyEducators";
-import ForexAcademy from "../pages/student/client-dashboard/forex-academy/ForexAcademy";
 import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
 import PersonalIqInsight from "../pages/student/personal-iq-insight/PersonalIqInsight";
 import IqVault from "../pages/student/iq-vault/IqVault";
@@ -196,7 +195,6 @@ const routes = {
     { path: "/iq-academy", element: <IqAcademy /> },
     { path: "/iq-educators/:id", element: <IqEducators /> },
     { path: "/iq-academy-educators", element: <IqAcademyEducators /> },
-    { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
     { path: "/iq-crypto", element: <IqCrypto /> },
     { path: "/iq-social", element: <CommunityFeed /> },
@@ -329,17 +327,22 @@ const routes = {
 
 const getStudentRoutesByPlan = (plan) => {
   const allowedPaths = plan?.allowedSideBar || [];
+  const alwaysAllowedRoutes = [
+    "/",
+    "/dashboard",
+    "/profile"
+  ];
 
-  return routes.student.reduce((acc, route) => {
-    if (route.children) {
-      const allowedChildren = route.children.filter((child) =>
-        allowedPaths.includes(child.path),
+  return routes?.student?.reduce((acc, route) => {
+    if (route?.children) {
+      const allowedChildren = route?.children?.filter((child) =>
+        allowedPaths?.includes(child?.path) || alwaysAllowedRoutes?.includes(child?.path),
       );
-      if (allowedChildren.length > 0) {
+      if (allowedChildren?.length > 0) {
         acc.push({ ...route, children: allowedChildren });
       }
     } else {
-      if (allowedPaths.includes(route.path)) {
+      if (allowedPaths?.includes(route?.path) || alwaysAllowedRoutes?.includes(route?.path)) {
         acc.push(route);
       }
     }
@@ -361,29 +364,29 @@ const AppRoutingSetup = () => {
 
   return (
     <Routes>
-      <Route element={<RequireAuth />}></Route>
+      <Route element={<RequireAuth />}>
+        {userRole === "student" && (
+          <Route index element={<Navigate to="/dashboard" replace />} />
+        )}
 
-      {userRole === "student" && (
-        <Route index element={<Navigate to="/dashboard" replace />} />
-      )}
-
-      {roleRoutes.map((route, index) => (
-        <Route key={index} element={<Demo1Layout />}>
-          {route.children ? (
-            <Route element={route.element}>
-              {route.children.map((child, childIndex) => (
-                <Route
-                  key={childIndex}
-                  path={child.path}
-                  element={child.element}
-                />
-              ))}
-            </Route>
-          ) : (
-            <Route path={route.path} element={route.element} />
-          )}
-        </Route>
-      ))}
+        {roleRoutes?.map((route, index) => (
+          <Route key={index} element={<Demo1Layout />}>
+            {route?.children ? (
+              <Route element={route?.element}>
+                {route?.children?.map((child, childIndex) => (
+                  <Route
+                    key={childIndex}
+                    path={child?.path}
+                    element={child?.element}
+                  />
+                ))}
+              </Route>
+            ) : (
+              <Route path={route?.path} element={route?.element} />
+            )}
+          </Route>
+        ))}
+      </Route>
 
       {/* {roleRoutes.map((route, index) => (
         <Route key={index} element={<RequireAuth />}>

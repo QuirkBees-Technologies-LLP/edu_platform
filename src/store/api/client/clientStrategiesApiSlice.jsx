@@ -50,6 +50,25 @@ export const clientStrategiesApiSlice = createApi({
             },
             providesTags: ["Strategy"],
         }),
+        getStrategyLanguages: builder.query({
+            query: (id) => `/users/strategies/language/${id}`,
+            providesTags: ["Strategy"],
+        }),
+
+        // Get strategy by id + language
+        getStrategyByName: builder.mutation({
+            query: ({ id, language }) => ({
+                url: `/users/strategies/get/${id}`,
+                method: 'POST',
+                body: { language },
+            }),
+        }),
+
+        // Get admin strategy list for available strategies cards
+        getAdminStrategyList: builder.query({
+            query: () => `/admin/strategy`,
+            providesTags: ["Strategy"],
+        }),
     }),
 });
 
@@ -59,4 +78,7 @@ export const {
     useLazyGetStrategyByIdQuery,
     useGetCategoryWiseStrategyQuery,
     useGetStrategiesNameQuery,
+    useGetStrategyLanguagesQuery,
+    useGetStrategyByNameMutation,
+    useGetAdminStrategyListQuery,
 } = clientStrategiesApiSlice;
