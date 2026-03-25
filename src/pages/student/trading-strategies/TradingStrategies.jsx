@@ -246,6 +246,12 @@ const TradingStrategies = () => {
                 setSelectedStrategyId(strategyResult?._id);
                 setActiveLectureId(null);
                 setActiveLecture(null);
+                
+                // Scroll to top to show the loaded strategy
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
             }
             setIsModalOpen(false);
         } catch (error) {
