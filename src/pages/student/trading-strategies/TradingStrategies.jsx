@@ -246,7 +246,7 @@ const TradingStrategies = () => {
                 setSelectedStrategyId(strategyResult?._id);
                 setActiveLectureId(null);
                 setActiveLecture(null);
-                
+
                 // Allow enough time for Dialog to close and DOM to update before scrolling
                 setTimeout(() => {
                     window.scrollTo({
