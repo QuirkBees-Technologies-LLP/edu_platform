@@ -7,7 +7,7 @@ import {
     useGetEducatorAcademyCategoryQuery,
     useGetLanguageListQuery,
 } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
-import { useGetStrategiesNameQuery } from "../../../../../../../store/api/client/clientStrategiesApiSlice";
+import { useGetAdminStrategyListQuery, useGetStrategiesNameQuery } from "../../../../../../../store/api/client/clientStrategiesApiSlice";
 import {
     Select,
     SelectContent,
@@ -67,7 +67,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
 
     const { data: languagesList } = useGetLanguageListQuery();
     const { data: categories } = useGetEducatorAcademyCategoryQuery();
-    const { data: strategiesData, isLoading: isStrategiesLoading, isFetching: isStrategiesFetching } = useGetStrategiesNameQuery();
+    const { data: strategiesData, isLoading: isStrategiesLoading, isFetching: isStrategiesFetching } = useGetAdminStrategyListQuery();
 
     const { auth } = useAuthContext();
 
