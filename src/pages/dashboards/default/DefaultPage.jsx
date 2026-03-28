@@ -4,6 +4,7 @@ const DefaultPage = () => {
   const {
     currentLayout
   } = useLayout();
+  //Dashboard Layouts
   if (currentLayout?.name === 'demo1-layout') {
     return <Demo1LightSidebarPage />;
   } else if (currentLayout?.name === 'demo2-layout') {
