@@ -29,7 +29,7 @@ import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSli
 import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
 import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
 import { persistReducer, persistStore } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // localStorage
+import storage from "redux-persist/lib/storage";
 import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
 import { clientEducatorApiSlice } from "./api/client/clientEductorApiSlice";
