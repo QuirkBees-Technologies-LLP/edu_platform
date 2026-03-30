@@ -1468,11 +1468,11 @@ export const sideMenus = {
       icon: <LayoutDashboard />,
       path: "/",
     },
-    {
-      title: "Admin Dashboard",
-      icon: <LayoutDashboard />,
-      path: "/admin/dashboard",
-    },
+    // {
+    //   title: "Admin Dashboard",
+    //   icon: <LayoutDashboard />,
+    //   path: "/admin/dashboard",
+    // },
     {
       title: "Academy",
       icon: <BookOpen />,
