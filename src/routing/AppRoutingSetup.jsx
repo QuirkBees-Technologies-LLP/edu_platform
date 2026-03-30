@@ -243,7 +243,7 @@ const routes = {
   admin: [
     { path: "/", element: <DefaultPage /> },
     { path: "/admin/dashboard", element: <AdminDashboard /> },
-    { path: "/admin/metrix-dashboard", element: <MetrixDashboard /> },
+    { path: "/admin/metrix-dashboard", element: <AdminMetrixDashboard /> },
     { path: "/admin/ideas", element: <AdminTradeIdeas /> },
     { path: "/admin/live-ideas", element: <AdminLiveTradeIdeas /> },
     { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
