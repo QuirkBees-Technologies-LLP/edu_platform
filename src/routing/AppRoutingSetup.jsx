@@ -162,6 +162,7 @@ import StudentMasterClass from "../pages/student/MasterClass/MasterClass.jsx";
 import MasterClassStudent from "../pages/student/MasterClass/MasterClassForStudent.jsx";
 import { IdeasLayout } from "../layouts/ideas/IdeasLayout";
 import AdminDashboard from "../pages/admin/admin-Dashboard/AdminDashboard.jsx";
+import AdminMetrixDashboard from "../pages/admin/admin-MetrixDashboard/AdminMetrixDashboard.jsx";
 const routes = {
   student: [
     { path: "/", element: <DefaultPage /> },
@@ -242,6 +243,7 @@ const routes = {
   admin: [
     { path: "/", element: <DefaultPage /> },
     { path: "/admin/dashboard", element: <AdminDashboard /> },
+    { path: "/admin/metrix-dashboard", element: <MetrixDashboard /> },
     { path: "/admin/ideas", element: <AdminTradeIdeas /> },
     { path: "/admin/live-ideas", element: <AdminLiveTradeIdeas /> },
     { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
