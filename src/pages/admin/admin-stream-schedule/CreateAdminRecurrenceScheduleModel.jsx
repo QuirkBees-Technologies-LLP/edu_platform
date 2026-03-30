@@ -450,7 +450,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                   <div className="col-span-6">
                     <div className="flex flex-col gap-1">
                       <label className="form-label text-gray-900 gap-1">
-                        Time Zone<span className="text-danger">*</span>
+                      Trading Session<span className="text-danger">*</span>
                       </label>
                       <Select
                         value={formik.values.timeZone}
