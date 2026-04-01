@@ -48,6 +48,7 @@ import { educatorMasterClassApiSlice } from "./api/educator/educatorMasterClassA
 import { clientMasterClassApiSlice } from "./api/client/clientMasterClassApiSlice";
 import { adminMasterClassApiSlice } from "./api/admin/adminMasterClassApiSlice";
 import { adminStrategyModelApiSlice } from "./api/admin/adminStrategyModelApiSlice";
+import { adminMetricsApiSlice } from "./api/admin/adminMetricsApiSlice";
 
 const languagePersistConfig = {
   key: "language",
@@ -124,6 +125,7 @@ export const store = configureStore({
     [clientMasterClassApiSlice.reducerPath]: clientMasterClassApiSlice.reducer,
     [adminMasterClassApiSlice.reducerPath]: adminMasterClassApiSlice.reducer,
     [adminStrategyModelApiSlice.reducerPath]: adminStrategyModelApiSlice.reducer,
+    [adminMetricsApiSlice.reducerPath]: adminMetricsApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -168,6 +170,7 @@ export const store = configureStore({
       clientMasterClassApiSlice.middleware,
       adminMasterClassApiSlice.middleware,
       adminStrategyModelApiSlice.middleware,
+      adminMetricsApiSlice.middleware,
     ),
 });
 
