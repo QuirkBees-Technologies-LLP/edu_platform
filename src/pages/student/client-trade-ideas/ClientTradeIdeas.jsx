@@ -206,11 +206,10 @@ const ClientTradeIdeas = () => {
                   }}
                   className={`
          p-2 flex items-center text-xs sm:text-sm rounded-md font-medium transition-all
-        ${
-          activeIdea === idea
-            ? "bg-primary text-white shadow-lg shadow-primary/50"
-            : "text-gray-600 hover:bg-gray-300"
-        }
+        ${activeIdea === idea
+                      ? "bg-primary text-white shadow-lg shadow-primary/50"
+                      : "text-gray-600 hover:bg-gray-300"
+                    }
       `}
                 >
                   {(idea === "all" && "All Ideas") ||
@@ -269,7 +268,7 @@ const ClientTradeIdeas = () => {
                   <SelectValue placeholder="Select educator">
                     {educator
                       ? educatorsData?.data?.find((e) => e._id === educator)
-                          ?.first_name?.last_name
+                        ?.first_name?.last_name
                       : "Select educator"}
                   </SelectValue>
                 </SelectTrigger>
@@ -339,11 +338,10 @@ const ClientTradeIdeas = () => {
                               className="flex items-center gap-2 cursor-pointer"
                             >
                               <div
-                                className={`h-4 w-4 border rounded flex items-center justify-center ${
-                                  selected
-                                    ? "bg-primary text-white border-primary"
-                                    : "bg-white dark:bg-[#1c1f26]"
-                                }`}
+                                className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                                  ? "bg-primary text-white border-primary"
+                                  : "bg-white dark:bg-[#1c1f26]"
+                                  }`}
                               >
                                 {selected && <Check size={14} />}
                               </div>
@@ -515,12 +513,12 @@ const ClientTradeIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) === 0
-                                          ? t.image.length - 1
-                                          : (t.currentIndex ?? 0) - 1,
-                                    }
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) === 0
+                                        ? t.image.length - 1
+                                        : (t.currentIndex ?? 0) - 1,
+                                  }
                                   : t,
                               ),
                             );
@@ -536,13 +534,13 @@ const ClientTradeIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) ===
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) ===
                                         t.image.length - 1
-                                          ? 0
-                                          : (t.currentIndex ?? 0) + 1,
-                                    }
+                                        ? 0
+                                        : (t.currentIndex ?? 0) + 1,
+                                  }
                                   : t,
                               ),
                             );
@@ -565,11 +563,10 @@ const ClientTradeIdeas = () => {
                                   ),
                                 );
                               }}
-                              className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                                (trade.currentIndex ?? 0) === idx
-                                  ? "bg-primary"
-                                  : "bg-gray-300 hover:bg-gray-400"
-                              }`}
+                              className={`w-2.5 h-2.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx
+                                ? "bg-primary"
+                                : "bg-gray-300 hover:bg-gray-400"
+                                }`}
                             />
                           ))}
                         </div>
@@ -583,11 +580,10 @@ const ClientTradeIdeas = () => {
                 <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <button
-                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${
-                        trade.type === "buy"
-                          ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                          : "bg-red-500 hover:bg-red-600 text-white"
-                      }`}
+                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${trade.type === "buy"
+                        ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                        : "bg-red-500 hover:bg-red-600 text-white"
+                        }`}
                     >
                       {trade.type === "buy" ? (
                         <TrendingUp size={16} />
@@ -647,9 +643,8 @@ const ClientTradeIdeas = () => {
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
-                        trade.avatarColor
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${trade.avatarColor
+                        }`}
                     >
                       <img
                         className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -664,21 +659,21 @@ const ClientTradeIdeas = () => {
                       </div>
                       <div className="text-gray-600 text-sm">
                         {Array.isArray(trade?.educatorDetails?.categories) &&
-                        trade?.educatorDetails?.categories?.length > 0
+                          trade?.educatorDetails?.categories?.length > 0
                           ? trade?.educatorDetails?.categories
-                              .map((cat) => cat)
-                              .join(", ")
+                            .map((cat) => cat)
+                            .join(", ")
                           : "-"}
                       </div>
                     </div>
                   </div>
 
                   <div className="text-gray-600 text-sm">
-                    {trade.updatedAt
+                    {trade.createdAt
                       ? format(
-                          new Date(trade.updatedAt),
-                          "MMM dd, yyyy, hh:mm a",
-                        )
+                        new Date(trade.createdAt),
+                        "MMM dd, yyyy, hh:mm a",
+                      )
                       : ""}
                   </div>
                 </div>
@@ -693,7 +688,7 @@ const ClientTradeIdeas = () => {
 
                     <span className="font-mono flex items-center gap-2 text-dark dark:text-white">
                       {copiedField.id === trade._id &&
-                      copiedField.field === "Entry" ? (
+                        copiedField.field === "Entry" ? (
                         <span className="text-black dark:text-white text-xs bg-transparent">
                           Copied!
                         </span>
@@ -720,7 +715,7 @@ const ClientTradeIdeas = () => {
 
                     <span className="text-red-600 font-mono flex items-center gap-2">
                       {copiedField.id === trade._id &&
-                      copiedField.field === "Stop Loss" ? (
+                        copiedField.field === "Stop Loss" ? (
                         <span className="text-dark bg-white text-xs">
                           Copied!
                         </span>
@@ -758,7 +753,7 @@ const ClientTradeIdeas = () => {
 
                         <span className="text-emerald-600 font-mono flex items-center gap-2">
                           {copiedField.id === trade._id &&
-                          copiedField.field === fieldName ? (
+                            copiedField.field === fieldName ? (
                             <span className="text-dark bg-white text-xs">
                               Copied!
                             </span>
