@@ -211,8 +211,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        termina: ['Termina', 'sans-serif'],
-        roboto: ['Roboto Flex', 'sans-serif'],
+        termina: ['Inter', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
