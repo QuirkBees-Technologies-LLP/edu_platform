@@ -79,7 +79,6 @@ const HeaderTopbar = () => {
   useEffect(() => {
     if (data) {
       dispatch(setLanguages(data.data));
-      // Set English as default language if no language is selected
       if (!selectedLanguage) {
         const englishLanguage = data.data.find(
           (lang) => lang.name === "English"
@@ -91,7 +90,6 @@ const HeaderTopbar = () => {
     }
   }, [data, selectedLanguage, dispatch]);
 
-  // Fallback: Set English as default if no language is selected and no API data
   useEffect(() => {
     if (!selectedLanguage && !data) {
       dispatch(setSelectedLanguage("English"));
@@ -102,11 +100,6 @@ const HeaderTopbar = () => {
     <>
       {" "}
       <div className="flex items-center gap-2 lg:gap-3.5">
-        {/* <button onClick={handleOpen} className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary text-gray-500">
-        <KeenIcon icon="magnifier" />
-      </button> */}
-        {/* <ModalSearch open={searchModalOpen} onOpenChange={handleClose} /> */}
-
         <Menu>
           <MenuItem
             ref={itemChatRef}
@@ -125,9 +118,6 @@ const HeaderTopbar = () => {
               ],
             }}
           >
-            {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
-          <KeenIcon icon="messages" />
-        </MenuToggle> */}
 
             {DropdownChat({
               menuTtemRef: itemChatRef,
@@ -152,9 +142,6 @@ const HeaderTopbar = () => {
               ],
             }}
           >
-            {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
-          <KeenIcon icon="element-11" />
-        </MenuToggle> */}
 
             {DropdownApps()}
           </MenuItem>
@@ -171,15 +158,12 @@ const HeaderTopbar = () => {
                 {
                   name: "offset",
                   options: {
-                    offset: isRTL() ? [-70, 10] : [70, 10], // [skid, distance]
+                    offset: isRTL() ? [-70, 10] : [70, 10],
                   },
                 },
               ],
             }}
           >
-            {/* <MenuToggle className="btn btn-icon btn-icon-lg relative cursor-pointer size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
-          <KeenIcon icon="notification-status" />
-        </MenuToggle> */}
             {DropdownNotifications({
               menuTtemRef: itemNotificationsRef,
             })}
@@ -187,38 +171,6 @@ const HeaderTopbar = () => {
         </Menu>
         {showLanguageSelector && (
           <div className="relative sm:w-56 language_select">
-            {/* <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white dark:bg-gray-100 text-gray-600 shadow-sm hover:border-gray-400 transition"
-      >
-        {selected}
-        <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""
-            }`}
-        />
-      </button>
-
-      {open && (
-        <ul className="absolute mt-1 w-full bg-white dark:bg-gray-100 border border-gray-200 rounded-lg shadow-md z-10">
-          {languages.map((lang, index) => (
-            <li
-              key={index}
-              onClick={() => {
-                setSelected(lang);
-                setOpen(false);
-              }}
-              className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-200  text-xs text-gray-700"
-            >
-              <span className='hidden sm:block'>
-                {lang.name}
-              </span>
-              <span className='sm:hidden block'>
-                {lang.flag}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )} */}
             <Select
               value={selectedLanguage}
               onValueChange={(value) => dispatch(setSelectedLanguage(value))}

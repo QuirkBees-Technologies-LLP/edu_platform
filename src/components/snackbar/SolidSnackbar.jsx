@@ -1,8 +1,7 @@
 import { SnackbarContent } from 'notistack';
 import { forwardRef } from 'react';
-import { KeenIcon } from '@/components'; // Import your KeenIcon component
+import { KeenIcon } from '@/components';
 
-// Define styles for each state
 const rootStyles = {
   dark: 'bg-dark text-dark-inverse',
   default: 'bg-gray-100 text-gray-700',
@@ -19,7 +18,6 @@ const SolidSnackbar = forwardRef((props, ref) => {
     message
   } = props;
 
-  // Get the icon and styles based on the state
   const iconName = icon || 'information-2';
   const rootClass = rootStyles[state] || rootStyles['primary'];
   return <SnackbarContent ref={ref} role="alert">

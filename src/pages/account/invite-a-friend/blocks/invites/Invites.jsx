@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
@@ -114,7 +114,7 @@ const Invites = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
+            offset: isRTL() ? [0, -10] : [0, 10]
           }
         }]
       }}>
@@ -129,22 +129,17 @@ const Invites = () => {
     }
   }], [isRTL]);
 
-  // Memoize the team data
   const data = useMemo(() => InvitesData, []);
-
-  // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || '';
   });
 
-  // Update localStorage whenever the search term changes
   useEffect(() => {
     localStorage.setItem(storageFilterId, searchTerm);
   }, [searchTerm]);
 
-  // Filtered data based on search term
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data; // If no search term, return full data
+    if (!searchTerm) return data;
 
     return data.filter(team => team.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || team.location.name.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, data]);
@@ -170,7 +165,7 @@ const Invites = () => {
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative">
             <KeenIcon icon="magnifier" className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3" />
-            <input type="text" className="input input-sm ps-8" placeholder="Search Members" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} // Update search term
+            <input type="text" className="input input-sm ps-8" placeholder="Search Members" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
           />
           </div>
           <DataGridColumnVisibility table={table} />

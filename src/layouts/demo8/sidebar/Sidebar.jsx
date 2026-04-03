@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { Link } from 'react-router-dom';
 import { KeenIcon, Menu, MenuItem, MenuToggle } from '@/components';
 import { useEffect, useRef, useState } from 'react';
@@ -74,7 +74,7 @@ const Sidebar = () => {
               modifiers: [{
                 name: 'offset',
                 options: {
-                  offset: [110, 30] // [skid, distance]
+                  offset: [110, 30]
                 }
               }]
             }}>
@@ -94,7 +94,7 @@ const Sidebar = () => {
               modifiers: [{
                 name: 'offset',
                 options: {
-                  offset: isRTL() ? [-20, 30] : [20, 30] // [skid, distance]
+                  offset: isRTL() ? [-20, 30] : [20, 30]
                 }
               }]
             }}>
@@ -113,7 +113,7 @@ const Sidebar = () => {
             modifiers: [{
               name: 'offset',
               options: {
-                offset: isRTL() ? [-20, 28] : [20, 28] // [skid, distance]
+                offset: isRTL() ? [-20, 28] : [20, 28]
               }
             }]
           }}>
@@ -129,7 +129,6 @@ const Sidebar = () => {
       </div>;
   };
   useEffect(() => {
-    // Hide drawer on route chnage after menu link click
     if (mobileMode && prevPathname !== pathname) {
       handleMobileSidebarClose();
     }

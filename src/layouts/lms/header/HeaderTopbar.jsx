@@ -96,7 +96,7 @@ const HeaderTopbar = () => {
               {
                 name: "offset",
                 options: {
-                  offset: isRTL() ? [-70, 10] : [70, 10], // [skid, distance]
+                  offset: isRTL() ? [-70, 10] : [70, 10],
                 },
               },
             ],
@@ -122,7 +122,7 @@ const HeaderTopbar = () => {
               {
                 name: "offset",
                 options: {
-                  offset: isRTL() ? [-20, 10] : [20, 10], // [skid, distance]
+                  offset: isRTL() ? [-20, 10] : [20, 10],
                 },
               },
             ],

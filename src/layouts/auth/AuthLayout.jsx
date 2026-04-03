@@ -4,7 +4,6 @@ import { toAbsoluteUrl } from '@/utils';
 import useBodyClasses from '@/hooks/useBodyClasses';
 import { Fragment } from 'react';
 const Layout = () => {
-  // Applying body classes to set the background color in dark mode
   useBodyClasses('dark:bg-coal-500');
   return <Fragment>
       <style>

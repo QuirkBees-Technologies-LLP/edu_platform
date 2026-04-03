@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useResponsive } from '@/hooks';
 import { useEffect } from 'react';
 import { usePathname } from '@/providers';
@@ -19,7 +19,6 @@ const MegaMenu = () => {
     setMobileMegaMenuOpen(false);
   };
   useEffect(() => {
-    // Hide drawer on route chnage after menu link click
     if (desktopMode === false && prevPathname !== pathname) {
       handleDrawerClose();
     }

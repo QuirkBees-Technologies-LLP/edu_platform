@@ -11,21 +11,19 @@ const MegaMenuInner = () => {
   const {
     isRTL
   } = useLanguage();
-  const [disabled, setDisabled] = useState(true); // Initially set disabled to true
+  const [disabled, setDisabled] = useState(true);
   const {
     layout,
     sidebarMouseLeave,
     setMegaMenuEnabled
   } = useDemo1Layout();
 
-  // Change disabled state to false after a certain time (e.g., 5 seconds)
   useEffect(() => {
     setDisabled(true);
     const timer = setTimeout(() => {
       setDisabled(false);
-    }, 1000); // 1000 milliseconds
+    }, 1000);
 
-    // Cleanup the timer when the component unmounts
     return () => clearTimeout(timer);
   }, [layout.options.sidebar.collapse, sidebarMouseLeave]);
   useEffect(() => {
@@ -62,7 +60,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [300, 0] : [-300, 0] // [skid, distance]
+            offset: isRTL() ? [300, 0] : [-300, 0]
           }
         }]
       }}>
@@ -78,7 +76,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [300, 0] : [-300, 0] // [skid, distance]
+            offset: isRTL() ? [300, 0] : [-300, 0]
           }
         }]
       }}>
@@ -94,7 +92,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [300, 0] : [-300, 0] // [skid, distance]
+            offset: isRTL() ? [300, 0] : [-300, 0]
           }
         }]
       }}>
@@ -110,7 +108,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [20, 0] : [-20, 0] // [skid, distance]
+            offset: isRTL() ? [20, 0] : [-20, 0]
           }
         }]
       }}>

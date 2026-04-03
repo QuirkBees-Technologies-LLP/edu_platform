@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect } from 'react';
 import { useResponsive } from '@/hooks';
 import { SidebarPrimary, SidebarSecondary } from './';
@@ -26,7 +26,6 @@ const Sidebar = () => {
       </div>;
   };
   useEffect(() => {
-    // Hide drawer on route chnage after menu link click
     if (mobileMode && prevPathname !== pathname) {
       handleMobileSidebarClose();
     }

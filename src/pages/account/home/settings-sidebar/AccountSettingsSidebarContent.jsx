@@ -24,26 +24,22 @@ const AccountSettingsSidebarContent = () => {
   } = useLayout();
   const [sidebarSticky, setSidebarSticky] = useState(false);
 
-  // Initialize ref for parentEl
-  const parentRef = useRef(document); // Default to document
+  const parentRef = useRef(document);
   const scrollPosition = useScrollPosition({
     targetRef: parentRef
   });
 
-  // Effect to update parentRef after the component mounts
   useEffect(() => {
     const scrollableElement = document.getElementById('scrollable_content');
     if (scrollableElement) {
       parentRef.current = scrollableElement;
     }
-  }, []); // Run only once on component mount
+  }, []);
 
-  // Handle scroll position and sidebar stickiness
   useEffect(() => {
     setSidebarSticky(scrollPosition > 100);
   }, [scrollPosition, currentLayout?.options]);
 
-  // Get the sticky class based on the current layout, provide a default if not found
   const stickyClass = currentLayout?.name ? stickySidebarClasses[currentLayout.name] || 'top-[calc(var(--tw-header-height)+1rem)]' : 'top-[calc(var(--tw-header-height)+1rem)]';
   return <div className="flex grow gap-5 lg:gap-7.5">
       {desktopMode && <div className="w-[230px] shrink-0">

@@ -1,4 +1,4 @@
-// see: https://usehooks-ts.com/react-hook/use-is-mounted
+
 import { useCallback, useEffect, useRef } from 'react';
 const useIsMounted = () => {
   const isMounted = useRef(false);

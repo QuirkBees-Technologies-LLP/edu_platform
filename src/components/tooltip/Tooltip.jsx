@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Tooltip from '@mui/material/Tooltip';
 
-// Tooltip component that applies utility classes and custom styles
 const DefaultTooltip = ({
   className = '',
   ...props

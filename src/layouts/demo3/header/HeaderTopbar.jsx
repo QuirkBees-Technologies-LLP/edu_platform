@@ -42,7 +42,7 @@ const HeaderTopbar = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: [10, 10] // [skid, distance]
+              offset: [10, 10]
             }
           }]
         }}>
@@ -61,7 +61,7 @@ const HeaderTopbar = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: [10, 10] // [skid, distance]
+              offset: [10, 10]
             }
           }]
         }}>
@@ -81,7 +81,7 @@ const HeaderTopbar = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: [10, 10] // [skid, distance]
+              offset: [10, 10]
             }
           }]
         }}>
@@ -100,7 +100,7 @@ const HeaderTopbar = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: [0, 9] // [skid, distance]
+            offset: [0, 9]
           }
         }]
       }}>

@@ -4,7 +4,6 @@ const InvoicingData = [{
   color: 'badge-warning',
   date: '6 Aug, 2024',
   dueDate: 'HR Dept',
-  // Changed to date
   amount: '24.00'
 }, {
   invoice: 'Invoice-2024-rq857m',
@@ -47,7 +46,6 @@ const InvoicingData = [{
   color: 'badge-warning',
   date: '07 Nov, 2024',
   dueDate: 'Design Dept',
-  // Changed to date
   amount: '67.00'
 }, {
   invoice: 'Invoice-2024-u859c',
@@ -83,7 +81,6 @@ const InvoicingData = [{
   color: 'badge-warning',
   date: '01 Mar, 2024',
   dueDate: 'Marketing Dept',
-  // Changed to date
   amount: '150.00'
 }, {
   invoice: 'Invoice-2024-k453j',
@@ -112,7 +109,6 @@ const InvoicingData = [{
   color: 'badge-warning',
   date: '10 Jun, 2024',
   dueDate: 'Finance Dept',
-  // Changed to date
   amount: '130.00'
 }, {
   invoice: 'Invoice-2024-l892v',
@@ -141,7 +137,6 @@ const InvoicingData = [{
   color: 'badge-warning',
   date: '12 Oct, 2024',
   dueDate: 'IT Dept',
-  // Changed to date
   amount: '500.00'
 }, {
   invoice: 'Invoice-2024-h789p',
@@ -156,7 +151,6 @@ const InvoicingData = [{
   color: 'badge-warning',
   date: '19 Sep, 2024',
   dueDate: 'R&D Dept',
-  // Changed to date
   amount: '350.00'
 }, {
   invoice: 'Invoice-2024-c654j',

@@ -41,7 +41,7 @@ const BasicSettings = () => {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar initialFocus mode="single" // Single date selection
+                <Calendar initialFocus mode="single"
               defaultMonth={date} selected={date} onSelect={setDate} numberOfMonths={1} />
               </PopoverContent>
             </Popover>

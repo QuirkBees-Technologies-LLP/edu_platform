@@ -49,7 +49,7 @@ const AuthTwoFactor = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
+              offset: isRTL() ? [0, -10] : [0, 10]
             }
           }]
         }}>

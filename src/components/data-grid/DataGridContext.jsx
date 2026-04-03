@@ -75,14 +75,13 @@ export const DataGridProvider = props => {
     if (mergedProps.serverSide) {
       debouncedFetchData();
     } else {
-      setLoading(true); // Show loading bar for local data
+      setLoading(true);
       setData(mergedProps.data || []);
       setTotalRows(mergedProps.data ? mergedProps.data.length : 0);
-      setLoading(false); // Hide loading bar after data is set
+      setLoading(false);
     }
   };
 
-  // Trigger debounced fetch for server-side data; load local data if serverSide is false
   useEffect(() => {
     loadData();
   }, [pagination, sorting, columnFilters, mergedProps.data, mergedProps.serverSide, mergedProps.reloadTrigger]);
@@ -130,7 +129,6 @@ export const DataGridProvider = props => {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     manualPagination: mergedProps.serverSide,
-    // manualSorting: mergedProps.serverSide,
     manualFiltering: mergedProps.serverSide,
     autoResetPageIndex: false
   });

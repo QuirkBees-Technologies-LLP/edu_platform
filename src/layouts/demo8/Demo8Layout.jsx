@@ -1,7 +1,6 @@
 import useBodyClasses from '@/hooks/useBodyClasses';
 import { Demo8LayoutProvider, Main } from '.';
 const Demo8Layout = () => {
-  // Using the custom hook to set classes on the body
   useBodyClasses(`
     [--tw-page-bg:#F6F6F9]
     [--tw-page-bg-dark:var(--tw-coal-200)]
@@ -14,7 +13,6 @@ const Demo8Layout = () => {
     dark:bg-[--tw-page-bg-dark]  
   `);
   return (
-    // Providing layout context and rendering the main content
     <Demo8LayoutProvider>
       <Main />
     </Demo8LayoutProvider>
