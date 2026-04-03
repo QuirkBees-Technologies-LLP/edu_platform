@@ -34,7 +34,7 @@ import {
 } from "../../../components/ui/command";
 import { useGetAllEducatorsQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { useGetAcademyCategoryQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
-import { useGetStrategiesNameQuery } from "../../../store/api/client/clientStrategiesApiSlice";
+import { useGetAdminStrategyListQuery, useGetStrategiesNameQuery } from "../../../store/api/client/clientStrategiesApiSlice";
 
 /**
  * Utility function to convert various video URLs to embeddable format
@@ -169,7 +169,7 @@ const MasterClassForStudent = () => {
   ] = useLazyGetMasterClassByIdQuery();
 
   const { data: strategiesName, isLoading: isStrategNameLoading } =
-    useGetStrategiesNameQuery();
+    useGetAdminStrategyListQuery();
 
   // ==================== DATA EXTRACTION ====================
   const strategies = strategiesData?.data || [];

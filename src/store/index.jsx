@@ -29,7 +29,7 @@ import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSli
 import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
 import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
 import { persistReducer, persistStore } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // localStorage
+import storage from "redux-persist/lib/storage";
 import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
 import { clientEducatorApiSlice } from "./api/client/clientEductorApiSlice";
@@ -48,6 +48,7 @@ import { educatorMasterClassApiSlice } from "./api/educator/educatorMasterClassA
 import { clientMasterClassApiSlice } from "./api/client/clientMasterClassApiSlice";
 import { adminMasterClassApiSlice } from "./api/admin/adminMasterClassApiSlice";
 import { adminStrategyModelApiSlice } from "./api/admin/adminStrategyModelApiSlice";
+import { adminMetricsApiSlice } from "./api/admin/adminMetricsApiSlice";
 
 const languagePersistConfig = {
   key: "language",
@@ -124,6 +125,7 @@ export const store = configureStore({
     [clientMasterClassApiSlice.reducerPath]: clientMasterClassApiSlice.reducer,
     [adminMasterClassApiSlice.reducerPath]: adminMasterClassApiSlice.reducer,
     [adminStrategyModelApiSlice.reducerPath]: adminStrategyModelApiSlice.reducer,
+    [adminMetricsApiSlice.reducerPath]: adminMetricsApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -168,6 +170,7 @@ export const store = configureStore({
       clientMasterClassApiSlice.middleware,
       adminMasterClassApiSlice.middleware,
       adminStrategyModelApiSlice.middleware,
+      adminMetricsApiSlice.middleware,
     ),
 });
 

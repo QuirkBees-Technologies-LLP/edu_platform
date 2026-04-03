@@ -1469,6 +1469,11 @@ export const sideMenus = {
       path: "/",
     },
     {
+      title: "Admin Dashboard",
+      icon: <LayoutDashboard />,
+      path: "/admin/metrix-dashboard",
+    },
+    {
       title: "Academy",
       icon: <BookOpen />,
       path: "/admin/courses",
