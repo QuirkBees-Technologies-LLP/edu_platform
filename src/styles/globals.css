@@ -65,3 +65,69 @@
   font-style: italic;
   color: #6b7280;
 }
+
+/* ===== INTRO.JS CUSTOM UI ===== */
+
+.introjs-tooltip {
+  border-radius: 12px !important;
+  padding: 18px !important;
+  background: #111827 !important; /* dark theme */
+  color: #fff !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+  max-width: 320px !important;
+}
+
+.introjs-tooltip-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+.introjs-tooltiptext {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: #d1d5db !important;
+}
+
+/* Buttons container */
+.introjs-tooltipbuttons {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+/* Buttons */
+.introjs-button {
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  border: none !important;
+}
+
+/* Next button */
+.introjs-nextbutton {
+  background: #7c3aed !important;
+  color: #fff !important;
+}
+
+/* Back button */
+.introjs-prevbutton {
+  background: #374151 !important;
+  color: #fff !important;
+}
+
+/* Skip button */
+.introjs-skipbutton {
+  color: #9ca3af !important;
+}
+
+/* Highlighted element */
+.introjs-helperLayer {
+  border-radius: 12px !important;
+}
+
+/* Overlay dark */
+.introjs-overlay {
+  background: rgba(0,0,0,0.75) !important;
+}

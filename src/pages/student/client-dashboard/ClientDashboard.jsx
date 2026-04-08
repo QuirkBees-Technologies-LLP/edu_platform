@@ -33,6 +33,9 @@ import Loader from "../../../components/ui/loader";
 import { QRCodeCanvas } from "qrcode.react";
 import { usePostQuery } from "../../../store/api/client/clientSocialApiSlilce";
 
+import introJs from "intro.js";
+import "intro.js/introjs.css";
+
 const ClientDashboard = () => {
   const navigate = useNavigate();
   const [socialType, setSocialType] = useState("company");
@@ -114,6 +117,90 @@ const ClientDashboard = () => {
     return clean.substring(0, 120);
   };
 
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem("hasSeenTour");
+
+    if (!hasSeenTour) {
+      const timer = setTimeout(() => {
+        startTour();
+        localStorage.setItem("hasSeenTour", "true");
+      }, 2000); // ⬅️ increase delay
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const startTour = () => {
+    const steps = [];
+
+    const hero = document.querySelector(".hero-section");
+    if (hero) {
+      steps.push({
+        element: hero,
+        title: "Dashboard",
+        intro: "This is your dashboard overview",
+      });
+    }
+
+    const academy = document.querySelector(".academy-card");
+    if (academy) {
+      steps.push({
+        element: academy,
+        title: "Dashboard",
+        intro: "You can access courses from this section",
+      });
+    }
+
+    const fast = document.querySelector(".fast-start-card");
+    if (fast) {
+      steps.push({
+        element: fast,
+        title: "Dashboard",
+        intro: "Start your training from here",
+      });
+    }
+
+    const live = document.querySelector(".live-card");
+    if (live) {
+      steps.push({
+        element: live,
+        title: "Dashboard",
+        intro: "Here are the live sessions available",
+      });
+    }
+
+    const social = document.querySelector(".social-feed");
+    if (social) {
+      steps.push({
+        element: social,
+        title: "Dashboard",
+        intro: "Here are the latest updates from your social feed",
+      });
+    }
+
+    if (steps.length === 0) return; // 👈 prevent crash
+
+    introJs().setOptions({
+      steps,
+
+      nextLabel: "Next →",
+      prevLabel: "← Back",
+      skipLabel: "Skip",
+      doneLabel: "Finish",
+
+      showProgress: true,
+      showBullets: true,
+
+      exitOnOverlayClick: false,
+      exitOnEsc: true,
+
+      scrollToElement: true,
+      scrollTo: "tooltip",
+
+      tooltipClass: "custom-intro-tooltip", // custom styling hook
+    }).start();
+  };
+
   return (
     <>
       <Dialog open={isUpgradeModalOpen} onOpenChange={setUpgradeModalOpen}>
@@ -173,7 +260,7 @@ const ClientDashboard = () => {
 
           <div className="relative">
             {/* Hero Section with Live Session */}
-            <div className="mb-8">
+            <div className="mb-8 hero-section">
               <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
                 <div
                   className="absolute inset-0 bg-cover bg-center bg-no-repeat "
@@ -196,7 +283,7 @@ const ClientDashboard = () => {
                         <Loader />
                       </div>
                     ) : liveStreams.length > 0 ? (
-                      <div className="relative w-56 sm:w-80">
+                      <div className="relative w-56 sm:w-80 live-card">
                         {liveStreams.length > 1 && (
                           <>
                             {/* LEFT ARROW */}
@@ -284,7 +371,7 @@ const ClientDashboard = () => {
             {/* Main Features - Bento Grid */}
             <div className="grid grid-cols-12 gap-4 mb-8">
               {/* IQ Academy - Large Card */}
-              <div className="col-span-12 xl:col-span-8">
+              <div className="col-span-12 xl:col-span-8 academy-card">
                 <div className="group relative xl:h-64">
                   {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div> */}
                   <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition shadow-md">
@@ -331,7 +418,7 @@ const ClientDashboard = () => {
               </div>
 
               {/* Fast Start - Medium Card */}
-              <div className="col-span-12 xl:col-span-4">
+              <div className="col-span-12 xl:col-span-4 fast-start-card">
                 <div
                   className="group relative h-64"
                   onClick={() => navigate(`/fast-start-training`)}
@@ -488,7 +575,7 @@ const ClientDashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* Combined Activity Feed */}
               <div className="lg:col-span-2">
-                <div className="card rounded-2xl border p-6 h-full shadow-md">
+                <div className="card rounded-2xl border p-6 h-full shadow-md social-feed">
                   {/* Header */}
                   <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
                     <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
