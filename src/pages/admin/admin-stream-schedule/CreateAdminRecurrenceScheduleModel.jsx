@@ -14,6 +14,8 @@ import { ImageInput } from "@/components/image-input";
 import TagInput from "@/components/ui/tagInput";
 import RichTextEditor from "@/components/ui/rich-editor";
 import DateTimePicker from "./DateTimePicker";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import {
   Select,
@@ -449,8 +451,18 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                 <div className="col-span-12">
                   <div className="col-span-6">
                     <div className="flex flex-col gap-1">
-                      <label className="form-label text-gray-900 gap-1">
-                      Trading Session<span className="text-danger">*</span>
+                      <label className="form-label text-gray-900 gap-1 flex items-center">
+                        Trading Session<span className="text-danger">*</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger type="button" onClick={(e) => e.preventDefault()}>
+                              <Info className="w-4 h-4 text-gray-500 ml-1 cursor-pointer" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" align="start" className="z-[9999] max-w-[280px] break-words p-2 translate-x-8">
+                              <p className="text-xs font-normal text-white whitespace-normal">This refers to the trading session taking place at the time of your session. Not necessarily the session you trade.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </label>
                       <Select
                         value={formik.values.timeZone}
