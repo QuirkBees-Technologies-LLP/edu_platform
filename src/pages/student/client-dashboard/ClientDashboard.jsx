@@ -137,18 +137,23 @@ const ClientDashboard = () => {
   const tourStartedRef = React.useRef(false);
 
   useEffect(() => {
-    // Show tour if hasSeenTour is false, undefined, or missing (covers old users too)
-    const hasSeenTour = auth?.user?.hasSeenTour;
+    // Show tour if the user is a student and hasSeenTour is false, undefined, or missing
+    const user = auth?.user;
+    const isStudent = user?.role === "student";
+    const hasSeenTour = user?.hasSeenTour;
 
-    if (hasSeenTour !== true && auth?.user && !tourStartedRef.current) {
+    if (isStudent && hasSeenTour !== true && !tourStartedRef.current) {
       tourStartedRef.current = true;
       const timer = setTimeout(() => {
         startTour();
-      }, 1500);
+      }, 1000);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        tourStartedRef.current = false;
+      };
     }
-  }, [auth?.user?.hasSeenTour]);
+  }, [auth?.user?.hasSeenTour, auth?.user?.role]);
 
   const startTour = () => {
     const steps = [];
