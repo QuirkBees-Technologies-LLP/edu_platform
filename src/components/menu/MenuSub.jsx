@@ -18,21 +18,18 @@ const MenuSubComponent = forwardRef(function MenuSub(props, ref) {
   const modifiedChildren = Children.map(children, (child, index) => {
     if (isValidElement(child)) {
       if (child.type === MenuItem) {
-        // Add some props to each child
         const modifiedProps = {
           handleParentHide,
           parentId: finalParentId,
           id: `${finalParentId}-${index}`
         };
 
-        // Return the child with modified props
         return cloneElement(child, modifiedProps);
       } else {
         return cloneElement(child);
       }
     }
 
-    // Return the child as is if it's not a valid React element
     return child;
   });
   const renderContent = () => {

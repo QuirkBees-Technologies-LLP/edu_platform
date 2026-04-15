@@ -1,4 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
+import { useAuthContext } from "@/auth";
+import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
 import {
   useGetAllEducatorsQuery,
   useGetClientLiveIdeasQuery,
@@ -69,6 +74,21 @@ const ClientLiveIdeas = () => {
     rangeName: "",
   });
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const liveTourStartedRef = useRef(false);
+  const { auth, saveAuth } = useAuthContext();
+  const [completeTour] = useCompleteTourMutation();
+
+  const markTourComplete = async () => {
+    try {
+      await completeTour().unwrap();
+      if (auth) saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
+    } catch (err) {
+      console.error('Failed to mark tour complete:', err);
+    }
+  };
+
   const observer = useRef();
 
   const { data, isFetching, isLoading, isError, refetch } =
@@ -137,6 +157,113 @@ const ClientLiveIdeas = () => {
     refetch();
   }, [status, category]);
 
+  // ─── Live Ideas Tour ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    const shouldStart = location?.state?.continueTour === true;
+    if (!shouldStart) return;
+    if (liveTourStartedRef.current) return;
+    // ⏳ Only block on isLoading — NOT isFetching.
+    // The [status,category] effect calls refetch() on mount → isFetching=true,
+    // but isFetching is NOT in deps so the effect never re-fires after it clears.
+    if (isLoading) return;
+
+    liveTourStartedRef.current = true;
+
+    const timer = setTimeout(() => {
+      const steps = [];
+
+      // Step 1: Filter bar
+      const filterBar = document.querySelector('.li-filter-bar');
+      if (filterBar) {
+        steps.push({
+          element: filterBar,
+          title: '🔍 Filter Live Ideas',
+          intro: 'Filter live ideas by type (All/Buy/Sell), date range, status, educator, or asset class to find exactly what you\'re looking for.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 2: Stats summary cards
+      const statsRow = document.querySelector('.li-stats-row');
+      if (statsRow) {
+        steps.push({
+          element: statsRow,
+          title: '📊 Live Ideas Summary',
+          intro: 'These cards give you a quick snapshot of performance — Winning Ideas (green), Losing Ideas (red), and total Net Pips gained or lost.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 3: First live idea card
+      const firstCard = document.querySelector('.li-first-card');
+      if (firstCard) {
+        steps.push({
+          element: firstCard,
+          title: '🟢 Live Idea Card',
+          intro: 'Each card shows a live trade idea with the trade direction (Buy/Sell), status badge (Active/Pending/Win/Loss), educator info, and the idea title.',
+          position: 'right',
+        });
+      }
+
+      // Step 4: View Details button
+      const viewBtn = document.querySelector('.li-view-btn');
+      if (viewBtn) {
+        steps.push({
+          element: viewBtn,
+          title: '👁️ View Full Details',
+          intro: 'Click View Details to read the complete live idea with all notes and context from the educator.',
+          position: 'top',
+        });
+      }
+
+      if (steps.length === 0) {
+        markTourComplete();
+        liveTourStartedRef.current = false;
+        return;
+      }
+
+      const tour = introJs.tour().setOptions({
+        steps,
+        hidePrev: true,
+        nextLabel: 'Next →',
+        prevLabel: '← Back',
+        skipLabel: 'Skip',
+        doneLabel: 'Continue',
+        showProgress: true,
+        showBullets: false,
+        overlayOpacity: 0.8,
+        exitOnOverlayClick: false,
+        exitOnEsc: true,
+        scrollToElement: true,
+        tooltipClass: 'custom-intro-tooltip',
+      });
+
+      let tourDone = false;
+      tour.oncomplete(() => {
+        tourDone = true;
+        liveTourStartedRef.current = false;
+        // ✅ Continue to Trading Strategies (next in chain)
+        navigate('/trading-strategies', { state: { continueTour: true } });
+      });
+      tour.onexit(() => {
+        if (!tourDone) {
+          liveTourStartedRef.current = false;
+          // User clicked Skip — end the entire tour chain
+          markTourComplete();
+        }
+      });
+
+      tour.start();
+    }, 1200);
+
+    return () => {
+      clearTimeout(timer);
+      liveTourStartedRef.current = false; // ← allow StrictMode 2nd mount to re-run
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.state?.continueTour, isLoading]);
+  // ─────────────────────────────────────────────────────────────────────────────────
+
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
@@ -192,7 +319,7 @@ const ClientLiveIdeas = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
-      <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
+      <div className="flex flex-wrap items-center justify-between gap-1 mb-2 li-filter-bar">
         <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
           <div className="flex flex-wrap items-center sm:justify-start gap-3 mb-2">
             <div className="py-1 px-2 flex overflow-auto bg-gray-100 rounded-md gap-3 sm:gap-3.5 shadow-md">
@@ -207,11 +334,10 @@ const ClientLiveIdeas = () => {
                   }}
                   className={`
          p-2 flex items-center text-xs sm:text-sm rounded-md font-medium transition-all
-        ${
-          activeIdea === idea
-            ? "bg-primary text-white shadow-lg shadow-primary/50"
-            : "text-gray-600 hover:bg-gray-300"
-        }
+        ${activeIdea === idea
+                      ? "bg-primary text-white shadow-lg shadow-primary/50"
+                      : "text-gray-600 hover:bg-gray-300"
+                    }
       `}
                 >
                   {(idea === "all" && "All Live Ideas") ||
@@ -270,7 +396,7 @@ const ClientLiveIdeas = () => {
                   <SelectValue placeholder="Select educator">
                     {educator
                       ? educatorsData?.data?.find((e) => e._id === educator)
-                          ?.first_name?.last_name
+                        ?.first_name?.last_name
                       : "Select educator"}
                   </SelectValue>
                 </SelectTrigger>
@@ -341,11 +467,10 @@ const ClientLiveIdeas = () => {
                               className="flex items-center gap-2 cursor-pointer"
                             >
                               <div
-                                className={`h-4 w-4 border rounded flex items-center justify-center ${
-                                  selected
-                                    ? "bg-primary text-white border-primary"
-                                    : "bg-white dark:bg-[#1c1f26]"
-                                }`}
+                                className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                                  ? "bg-primary text-white border-primary"
+                                  : "bg-white dark:bg-[#1c1f26]"
+                                  }`}
                               >
                                 {selected && <Check size={14} />}
                               </div>
@@ -385,7 +510,7 @@ const ClientLiveIdeas = () => {
           </div>
         } */}
       </div>
-      <div className="grid grid-cols-12 gap-6 mb-6">
+      <div className="grid grid-cols-12 gap-6 mb-6 li-stats-row">
         {/* Winning Trades */}
         <div className="col-span-12 sm:col-span-6 md:col-span-4">
           <div
@@ -475,7 +600,7 @@ const ClientLiveIdeas = () => {
           {tradeIdeas?.map((trade, index) => (
             <div
               key={trade._id}
-              className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md"
+              className={`bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md${index === 0 ? ' li-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
               {/* Chart placeholder */}
@@ -517,12 +642,12 @@ const ClientLiveIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) === 0
-                                          ? t.image.length - 1
-                                          : (t.currentIndex ?? 0) - 1,
-                                    }
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) === 0
+                                        ? t.image.length - 1
+                                        : (t.currentIndex ?? 0) - 1,
+                                  }
                                   : t,
                               ),
                             );
@@ -538,13 +663,13 @@ const ClientLiveIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) ===
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) ===
                                         t.image.length - 1
-                                          ? 0
-                                          : (t.currentIndex ?? 0) + 1,
-                                    }
+                                        ? 0
+                                        : (t.currentIndex ?? 0) + 1,
+                                  }
                                   : t,
                               ),
                             );
@@ -567,11 +692,10 @@ const ClientLiveIdeas = () => {
                                   ),
                                 );
                               }}
-                              className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                                (trade.currentIndex ?? 0) === idx
-                                  ? "bg-primary"
-                                  : "bg-gray-300 hover:bg-gray-400"
-                              }`}
+                              className={`w-2.5 h-2.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx
+                                ? "bg-primary"
+                                : "bg-gray-300 hover:bg-gray-400"
+                                }`}
                             />
                           ))}
                         </div>
@@ -585,11 +709,10 @@ const ClientLiveIdeas = () => {
                 <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <button
-                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${
-                        trade.type === "buy"
-                          ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                          : "bg-red-500 hover:bg-red-600 text-white"
-                      }`}
+                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${trade.type === "buy"
+                        ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                        : "bg-red-500 hover:bg-red-600 text-white"
+                        }`}
                     >
                       {trade.type === "buy" ? (
                         <TrendingUp size={16} />
@@ -645,9 +768,8 @@ const ClientLiveIdeas = () => {
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
-                        trade.avatarColor
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${trade.avatarColor
+                        }`}
                     >
                       <img
                         className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -662,10 +784,10 @@ const ClientLiveIdeas = () => {
                       </div>
                       <div className="text-gray-600 text-sm">
                         {Array.isArray(trade?.educatorDetails?.categories) &&
-                        trade?.educatorDetails?.categories?.length > 0
+                          trade?.educatorDetails?.categories?.length > 0
                           ? trade?.educatorDetails?.categories
-                              .map((cat) => cat)
-                              .join(", ")
+                            .map((cat) => cat)
+                            .join(", ")
                           : "-"}
                       </div>
                     </div>
@@ -674,9 +796,9 @@ const ClientLiveIdeas = () => {
                   <div className="text-gray-600 text-sm">
                     {trade.createdAt
                       ? format(
-                          new Date(trade.createdAt),
-                          "MMM dd, yyyy, hh:mm a",
-                        )
+                        new Date(trade.createdAt),
+                        "MMM dd, yyyy, hh:mm a",
+                      )
                       : ""}
                   </div>
                 </div>
@@ -692,7 +814,7 @@ const ClientLiveIdeas = () => {
 
                 {/* View Details Button */}
                 <button
-                  className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  className={`w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors${index === 0 ? ' li-view-btn' : ''}`}
                   onClick={() => {
                     setSelectedIdea(trade);
                     setIsViewOpen(true);

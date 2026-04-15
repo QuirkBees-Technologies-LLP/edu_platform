@@ -2,15 +2,12 @@ import { useState, useCallback } from "react";
 import { getAllCourses } from "../services/lms.api";
 
 export const useLMS = () => {
-  // States for different data types
   const [courses, setCourses] = useState([]);
   const [currentCourse, setCurrentCourse] = useState(null);
 
-  // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch all courses
   const fetchCourses = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -27,25 +24,20 @@ export const useLMS = () => {
     }
   }, []);
 
-  // Clear current states
   const clearCurrentStates = useCallback(() => {
     setCurrentCourse(null);
     setError(null);
   }, []);
 
   return {
-    // Data states
     courses,
     currentCourse,
 
-    // Loading and error states
     isLoading,
     error,
 
-    // Fetch functions
     fetchCourses,
 
-    // Utility functions
     clearCurrentStates,
   };
 };

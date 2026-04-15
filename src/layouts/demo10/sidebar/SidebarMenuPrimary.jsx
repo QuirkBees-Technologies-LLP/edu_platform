@@ -14,16 +14,13 @@ const SidebarMenuPrimary = () => {
   } = useMenus();
   const menuConfig = getMenuConfig('primary');
 
-  // Prepend the new item to the menuConfig
-  //const menuConfigWithNewItem = [newItem, ...menuConfig];
-
   const subIndetion = ['ps-7', 'ps-2.5', 'ps-2.5'];
   const buildMenu = items => {
     return items.map((item, index) => {
       if (!item.heading && !item.disabled && item.title !== 'Dashboards') {
         return buildMenuItemRoot(item, index, 0);
       }
-      return null; // Ensure a return for the map
+      return null;
     });
   };
   const buildMenuItemRoot = (item, index, level) => {
@@ -60,7 +57,7 @@ const SidebarMenuPrimary = () => {
       if (!item.disabled) {
         return buildMenuItemChild(item, index, level);
       }
-      return null; // Ensure a return for the map
+      return null;
     });
   };
   const buildMenuItemChild = (item, index, level = 0) => {

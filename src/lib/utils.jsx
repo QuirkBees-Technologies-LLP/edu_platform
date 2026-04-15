@@ -10,7 +10,7 @@ export const formatSecondsToHMS = (secondsInput) => {
 
   const duration = intervalToDuration({
     start: 0,
-    end: secondsInput * 1000, // 👈 convert seconds to ms
+    end: secondsInput * 1000,
   });
 
   const { hours = 0, minutes = 0, seconds = 0 } = duration;
@@ -23,8 +23,6 @@ export const formatSecondsToHMS = (secondsInput) => {
   return parts.join(' ');
 };
 
-
-// Function to strip HTML tags
 const stripHtml = (html) => {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = html;

@@ -47,27 +47,6 @@ const ClientLogin = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
-    // onSubmit: async (values, { setStatus, setSubmitting }) => {
-    //   setLoading(true);
-    //   try {
-    //     if (!login) {
-    //       throw new Error("JWTProvider is required for this form.");
-    //     }
-    //     await login(values.email, values.password, dispatch);
-    //     if (values.remember) {
-    //       localStorage.setItem("email", values.email);
-    //     } else {
-    //       localStorage.removeItem("email");
-    //     }
-    //     navigate("/", {
-    //       replace: true,
-    //     });
-    //   } catch (error) {
-    //     setStatus(error.message);
-    //     setSubmitting(false);
-    //   }
-    //   setLoading(false);
-    // },
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
@@ -84,11 +63,9 @@ const ClientLogin = () => {
         }
 
         if (res?.redirect) {
-          // Already redirected
           return;
         }
         if (res?.success) {
-          // Optional: save token/user here if needed
           navigate("/dashboard", { replace: true });
         }
         if (res?.error) {
@@ -191,14 +168,7 @@ const ClientLogin = () => {
           )}
         </div>
         <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-          {/* <label className="checkbox-group">
-            <input
-              className="checkbox checkbox-sm"
-              type="checkbox"
-              {...formik.getFieldProps("remember")}
-            />
-            <span className="checkbox-label">Remember me</span>
-          </label> */}
+
         </div>
 
         <button
@@ -210,29 +180,7 @@ const ClientLogin = () => {
         </button>
 
         <div className="font-normal text-center">
-          {/* <Link
-            to={
-              currentLayout?.name === "auth-branded"
-                ? "/auth/reset-password"
-                : "/auth/classic/reset-password"
-            }
-            className="text-xs text-[#8D79FF] link shrink-0"
-          >
-            Forgot Password?
-          </Link> */}
-          {/* <span className="text-2sm text-gray-600 me-1.5">
-            Need an account ?
-          </span>
-          <Link
-            to={
-              currentLayout?.name === "auth-branded"
-                ? "/auth/signup"
-                : "/auth/classic/signup"
-            }
-            className="text-2sm link"
-          >
-            Sign up
-          </Link> */}
+          
         </div>
       </form>
     </div>

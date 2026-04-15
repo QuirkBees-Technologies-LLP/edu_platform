@@ -121,7 +121,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                     {/* 🔥 DESKTOP CALENDAR VIEW (md and above) */}
                     <div className="hidden md:block card forex_calender rounded-2xl shadow overflow-hidden">
                         {/* Timezone/Category Legend Header */}
-                        <div className="flex items-center justify-center gap-8 py-4 bg-[#07041f] flex-wrap">
+                        <div className="flex items-center justify-center gap-8 py-4 bg-[#07041f] flex-wrap iq-session-legend">
                             {(singleCategoryData?.data?.category?.name?.toLowerCase() === "digital marketing" ||
                                 singleCategoryData?.data?.category?.name?.toLowerCase() === "digitalmarketing" ||
                                 singleCategoryData?.data?.category?.slug?.toLowerCase() === "digital-marketing" ||
@@ -364,7 +364,7 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                                                                     <div
                                                                                         key={schedule?._id || idx}
                                                                                         onClick={() => navigate(`/iq-educators/${schedule?.educator?._id}`)}
-                                                                                        className={`relative p-1 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${cardClasses} border border-transparent`}
+                                                                                        className={`relative p-1 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${cardClasses} border border-transparent ${idx === 0 ? 'iq-first-schedule-card' : ''}`}
                                                                                     >
                                                                                         <div className="flex gap-1 items-center p-1  ">
                                                                                             <div className="flex flex-col items-center shrink-0">

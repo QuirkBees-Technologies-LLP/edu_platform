@@ -19,10 +19,14 @@ import {
   useGetEducatorsListQuery,
   useToggleFollowMutation,
 } from "../../../store/api/client/clientEductorApiSlice";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { toast } from "sonner";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import { toAbsoluteUrl } from "@/utils/Assets";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
+import { useAuthContext } from "@/auth";
+import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
 
 const safeArray = (val) => (Array.isArray(val) ? val : []);
 
@@ -69,6 +73,10 @@ const EducatorCardSkeleton = () => {
 
 const IqAcademyEducators = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { auth, saveAuth } = useAuthContext();
+  const [completeTour] = useCompleteTourMutation();
+  const educatorsTourStartedRef = useRef(false);
 
   const [activeTab, setActiveTab] = useState("all");
   const [searchText, setSearchText] = useState("");
@@ -196,9 +204,165 @@ const IqAcademyEducators = () => {
 
   useEffect(() => {
     setPage(1);
-    // setEducatorList([]);
-    refetch();
+    // RTK Query automatically re-fetches when query args (activeTab, category, searchText) change
+    // No need to manually call refetch() here — it causes double requests
   }, [activeTab, category, searchText]);
+
+  // Mark tour complete in backend & update auth context
+  const markTourComplete = useCallback(async () => {
+    try {
+      await completeTour().unwrap();
+      if (auth) {
+        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
+      }
+    } catch (err) {
+      console.error('Failed to mark tour complete:', err);
+    }
+  }, [completeTour, auth, saveAuth]);
+
+  // ─── Educators Tour (FINAL stop of User Guide) ─────────────────────────────
+  useEffect(() => {
+    const shouldContinueTour = location?.state?.continueTour === true;
+    if (!shouldContinueTour) return;
+    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
+    if (educatorsTourStartedRef.current) return;
+
+    // ⏳ Wait until educator list has actually loaded — cards must be in the DOM
+    if (isLoading || isFetching) return;
+    if (educatorList.length === 0) return;
+
+    // Only lock the ref AFTER we know data is ready
+    educatorsTourStartedRef.current = true;
+
+    // Detect Skip button clicks
+    let tourDone = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+
+    const timer = setTimeout(() => {
+      const steps = [];
+
+      // Step 1: Page heading
+      const heading = document.querySelector('.educators-heading');
+      if (heading) {
+        steps.push({
+          element: heading,
+          title: '🎓 Educators',
+          intro: 'This is the Educators page! Browse all the professional traders and educators on the platform. You can follow them to get updates on their sessions, ideas and insights.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 2: All / Following tab filters
+      const tabFilters = document.querySelector('.educators-tab-filters');
+      if (tabFilters) {
+        steps.push({
+          element: tabFilters,
+          title: '🔍 Filter Educators',
+          intro: 'Use the tabs to view All educators or only the ones you are Following. Use the category dropdown to narrow down by subject area (Forex, Crypto, etc.).',
+          position: 'bottom',
+        });
+      }
+
+      // Step 3: Search box
+      const searchBox = document.querySelector('.educators-search');
+      if (searchBox) {
+        steps.push({
+          element: searchBox,
+          title: '🔎 Search Educators',
+          intro: 'Type an educator\'s name in the search box to quickly find them. Results update instantly as you type.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 4: First educator card
+      const firstCard = document.querySelector('.educator-card-first');
+      if (firstCard) {
+        steps.push({
+          element: firstCard,
+          title: '👤 Educator Card',
+          intro: 'Each card shows the educator\'s name, role, bio, and stats like number of courses, trade ideas, and insights they have published.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 5: Follow + View Profile buttons
+      const actionButtons = document.querySelector('.educator-action-buttons');
+      if (actionButtons) {
+        steps.push({
+          element: actionButtons,
+          title: '👍 Follow & View Profile',
+          intro: 'Click Follow to subscribe to an educator and get notified of their sessions. Click View Profile to explore their full profile, schedule, and content.',
+          position: 'top',
+        });
+      }
+
+      // Step 6: Go to MasterClass button
+      const masterclassBtn = document.querySelector('.educator-masterclass-btn');
+      if (masterclassBtn) {
+        steps.push({
+          element: masterclassBtn,
+          title: '🎯 Go to MasterClass',
+          intro: 'Each educator has their own MasterClass. Click this button to jump directly into their in-depth strategy courses and start learning!',
+          position: 'top',
+        });
+      }
+
+      if (steps.length === 0) {
+        markTourComplete();
+        educatorsTourStartedRef.current = false;
+        return;
+      }
+
+      const tour = introJs.tour().setOptions({
+        steps,
+        hidePrev: true,
+        nextLabel: 'Next →',
+        prevLabel: '← Back',
+        skipLabel: 'Skip',
+        doneLabel: 'Continue',
+        showProgress: true,
+        showBullets: false,
+        overlayOpacity: 0.8,
+        exitOnOverlayClick: false,
+        exitOnEsc: true,
+        scrollToElement: true,
+        tooltipClass: 'custom-intro-tooltip',
+      });
+
+      tour.oncomplete(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (!userClickedSkip) {
+          tourDone = true;
+        }
+        educatorsTourStartedRef.current = false;
+      });
+      tour.onexit(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (tourDone) {
+          // User completed all steps — continue to Ideas page (next in chain)
+          navigate('/ideas', { state: { continueTour: true } });
+        } else {
+          markTourComplete(); // user skipped — do NOT reset ref
+        }
+      });
+
+      document.addEventListener('click', handleSkipClick, true); // capture phase
+      tour.start();
+    }, 800);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleSkipClick, true);
+      // ❌ Do NOT reset ref here
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.state?.continueTour, isLoading, isFetching, educatorList]);
+  // ───────────────────────────────────────────────────────────────────────
 
   //   return educatorList;
   // }, [activeTab, educatorList]);
@@ -224,7 +388,7 @@ const IqAcademyEducators = () => {
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-start justify-between mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white educators-heading">
             Educators
           </h2>
 
@@ -235,7 +399,7 @@ const IqAcademyEducators = () => {
 
         <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
           <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
-            <div className="flex flex-wrap items-center gap-3 mb-2">
+            <div className="flex flex-wrap items-center gap-3 mb-2 educators-tab-filters">
               <button
                 onClick={() => {
                   setActiveTab("all");
@@ -302,7 +466,7 @@ const IqAcademyEducators = () => {
             </div>
           </div>
 
-          <div className="flex gap-3 sm:gap-6 pb-4 flex-wrap">
+          <div className="flex gap-3 sm:gap-6 pb-4 flex-wrap educators-search">
             <SearchFilterInput
               searchText={searchText}
               handleSearchChange={handleSearchChange}
@@ -331,7 +495,7 @@ const IqAcademyEducators = () => {
               ref={
                 index === educatorList.length - 1 ? lastEducatorRef : undefined
               }
-              className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all"
+              className={`rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all ${index === 0 ? 'educator-card-first' : ''}`}
             >
               <div className="relative h-[170px] bg-gray-300 dark:bg-gray-700 overflow-hidden">
                 <img
@@ -422,7 +586,7 @@ const IqAcademyEducators = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 mt-6">
+                  <div className="flex items-center gap-3 mt-6 educator-action-buttons">
                     <button
                       onClick={() => handleToggle(n)}
                       disabled={followLoadingId === n._id}
@@ -479,7 +643,7 @@ const IqAcademyEducators = () => {
                     onClick={() => navigate(`/master-class/${n?._id}`)}
                     className={`group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 mt-3 w-full ${getMasterClassButtonStyle(
                       n?.categories
-                    )} text-gray-800 dark:text-white border rounded-full text-sm font-medium overflow-hidden`}
+                    )} text-gray-800 dark:text-white border rounded-full text-sm font-medium overflow-hidden educator-masterclass-btn`}
                   >
                     <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <BookOpen

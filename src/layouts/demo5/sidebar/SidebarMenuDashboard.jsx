@@ -80,7 +80,7 @@ const SidebarMenuDashboard = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: [0, 0] // [skid, distance]
+            offset: [0, 0]
           }
         }]
       }}>

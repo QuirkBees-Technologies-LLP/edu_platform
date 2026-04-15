@@ -67,21 +67,6 @@ export const MENU_SIDEBAR_LMS = [
       },
     ],
   },
-  // {
-  //   title: "LifeStyle",
-  //   children: [
-  //     {
-  //       title: "Video",
-  //       icon: "element-1",
-  //       path: "/classroom",
-  //     },
-  //     {
-  //       title: "Admin",
-  //       icon: "element-1",
-  //       path: "/classroom/admin",
-  //     },
-  //   ],
-  // },
 ];
 export const MENU_MEGA_LMS = [
   {

@@ -18,7 +18,6 @@ const Scrollspy = ({
   const anchorElementsRef = useRef(null);
   const prevIdTracker = useRef(null);
 
-  // Check if the element is visible
   const isVisible = element => {
     if (!element || element.getClientRects().length === 0) {
       return false;
@@ -26,12 +25,10 @@ const Scrollspy = ({
     return getComputedStyle(element).getPropertyValue('visibility') === 'visible';
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const replaceHash = useCallback(throttle(sectionId => {
     window.history.replaceState({}, '', `#${sectionId}`);
   }, throttleTime), [throttleTime]);
 
-  // Update the active anchor based on the scroll position
   const updateAnchor = anchorElement => {
     const sectionId = anchorElement.getAttribute(`data-${dataAttribute}-anchor`);
     const sectionElement = document.getElementById(sectionId);
@@ -62,15 +59,12 @@ const Scrollspy = ({
     }
   };
 
-  // Handle the scroll event
   const handleScroll = useCallback(() => {
     anchorElementsRef.current?.forEach(element => {
-      updateAnchor(element); // Ensuring type as HTMLElement
+      updateAnchor(element);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anchorElementsRef]);
 
-  // Handle smooth scrolling to a section on click or when URL hash is present
   const scrollTo = useCallback(anchorElement => event => {
     if (event) event.preventDefault();
     const sectionId = anchorElement.getAttribute(`data-${dataAttribute}-anchor`)?.replace('#', '');
@@ -92,7 +86,6 @@ const Scrollspy = ({
     }
   }, [dataAttribute, offset, smooth, targetRef]);
 
-  // Scroll to the section if the ID is present in the URL hash
   const scrollToHashSection = useCallback(() => {
     const hash = CSS.escape(window.location.hash.replace('#', ''));
     if (hash) {
@@ -103,7 +96,6 @@ const Scrollspy = ({
     }
   }, [dataAttribute, scrollTo]);
   useEffect(() => {
-    // Query elements and store them in the ref, avoiding unnecessary re-renders
     if (selfRef.current) {
       anchorElementsRef.current = Array.from(selfRef.current.querySelectorAll(`[data-${dataAttribute}-anchor]`));
     }
@@ -112,13 +104,11 @@ const Scrollspy = ({
     });
     const scrollElement = targetRef?.current === document ? window : targetRef?.current;
 
-    // Attach the scroll event to the correct scrollable element
     scrollElement?.addEventListener('scroll', handleScroll);
 
-    // Check if there's a hash in the URL and scroll to the corresponding section
     setTimeout(() => {
       scrollToHashSection();
-    }, 100); // Adding a slight delay to ensure content is fully rendered
+    }, 100);
 
     return () => {
       scrollElement?.removeEventListener('scroll', handleScroll);

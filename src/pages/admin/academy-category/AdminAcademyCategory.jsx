@@ -1,4 +1,6 @@
-/* eslint-disable prettier/prettier */
+
+
+
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { useLanguage } from "@/i18n";
@@ -103,7 +105,6 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
         )
       );
       const payload = toggleStatusData.find((type) => type._id === typeId);
-      // Make API call
       await updateAdminAcademyCategory({
         id: payload?._id,
         data: { status: String(newVisibility), name: payload?.name },
@@ -125,7 +126,6 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
         )
       );
       const payload = toggleHideData.find((type) => type._id === typeId);
-      // Make API call
       await updateAdminAcademyCategory({
         id: payload?._id,
         data: { hide: String(newVisibility), name: payload?.name },
@@ -287,7 +287,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
                   {
                     name: "offset",
                     options: {
-                      offset: isRTL() ? [0, -10] : [0, 10], // [skid, distance]
+                      offset: isRTL() ? [0, -10] : [0, 10],
                     },
                   },
                 ],
@@ -308,16 +308,13 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
     [isRTL, toggleHideData, handleHideVisibilityToggle,toggleStatusData,setToggleStatusData]
   );
 
-  // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || "";
   });
 
-  // Filtered data based on search term
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data?.data; // If no search term, return full data
+    if (!searchTerm) return data?.data;
 
-    // return data.filter(member => member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, data?.data]);
   const handleRowSelection = (state) => {
     const selectedRowIds = Object.keys(state);
@@ -348,7 +345,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
               placeholder="Search Members"
               className="input input-md ps-8"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <DataGridColumnVisibility table={table} />
@@ -366,7 +363,6 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
     const newLimit = pageSize;
 
     try {
-      // Fetch API Data
       const response = await getAdminAcademyCategory({
         page: newPage,
         limit: newLimit,
@@ -383,10 +379,10 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
     }
   };
 
-  const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
+  const [tableKey, setTableKey] = useState(0);
 
   const reloadTable = () => {
-    setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
+    setTableKey((prevKey) => prevKey + 1);
   };
 
   return (

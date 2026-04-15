@@ -32,7 +32,7 @@ const Teams = () => {
     }) => <DataGridColumnHeader title='Team' filter={<ColumnInputFilter column={column} />} column={column} />,
     enableSorting: true,
     filterFn: (row, columnId, filterValue) => {
-      const team = row.original.team; // Access the original row data
+      const team = row.original.team;
       const nameMatch = team.name?.toLowerCase().includes(filterValue.toLowerCase());
       const descriptionMatch = team.description?.toLowerCase().includes(filterValue.toLowerCase());
       return nameMatch || descriptionMatch;
@@ -114,22 +114,17 @@ const Teams = () => {
     }
   }], []);
 
-  // Memoize the team data
   const data = useMemo(() => TeamsData, []);
-
-  // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || '';
   });
 
-  // Update localStorage whenever the search term changes
   useEffect(() => {
     localStorage.setItem(storageFilterId, searchTerm);
   }, [searchTerm]);
 
-  // Filtered data based on search term
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data; // If no search term, return full data
+    if (!searchTerm) return data;
 
     return data.filter(team => team.team.name.toLowerCase().includes(searchTerm.toLowerCase()) || team.team.description.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, data]);

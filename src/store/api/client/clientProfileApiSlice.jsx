@@ -26,7 +26,19 @@ export const clientProfileApiSlice = createApi({
                 body: preferences,
             }),
         }),
+        completeTour: builder.mutation({
+            query: () => ({
+                url: `/users/auth/complete-tour`,
+                method: 'POST',
+            }),
+        }),
     }),
 });
 
-export const { useGetClientProfileQuery, useUpdateClientProfileMutation, useUpdateNotificationPreferencesMutation, useGetNotificationPreferencesQuery } = clientProfileApiSlice;
+export const { 
+    useGetClientProfileQuery, 
+    useUpdateClientProfileMutation, 
+    useUpdateNotificationPreferencesMutation, 
+    useGetNotificationPreferencesQuery,
+    useCompleteTourMutation,
+} = clientProfileApiSlice;

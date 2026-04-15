@@ -65,3 +65,164 @@
   font-style: italic;
   color: #6b7280;
 }
+
+/* ===== INTRO.JS CUSTOM UI ===== */
+
+/* Dark mode and glassmorphic styling for Intro.js */
+.introjs-tooltip {
+  background: rgba(17, 24, 39, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  border-radius: 16px !important;
+  color: #f3f4f6 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  font-family: inherit !important;
+  max-width: 400px !important;
+}
+
+.custom-intro-tooltip .introjs-tooltip-title {
+  color: #c084fc !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+  text-shadow: none !important;
+}
+
+/* Target left and right tooltips to increase their width specifically */
+.introjs-tooltip.introjs-left, .introjs-tooltip.introjs-right {
+  max-width: 500px !important;
+  width: 500px !important;
+}
+
+.custom-intro-tooltip .introjs-tooltiptext {
+  color: #f3f4f6 !important; /* Made text brighter white instead of dim gray */
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  padding: 15px !important;
+  text-shadow: none !important;
+}
+
+/* Arrows */
+.introjs-arrow.top { border-bottom-color: rgba(17, 24, 39, 0.95) !important; }
+.introjs-arrow.bottom { border-top-color: rgba(17, 24, 39, 0.95) !important; }
+.introjs-arrow.left { border-right-color: rgba(17, 24, 39, 0.95) !important; }
+.introjs-arrow.right { border-left-color: rgba(17, 24, 39, 0.95) !important; }
+
+/* Buttons */
+.custom-intro-tooltip .introjs-button {
+  background: rgba(139, 92, 246, 0.2) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  color: #e9d5ff !important;
+  text-shadow: none !important;
+  border-radius: 6px !important;
+  padding: 4px 12px !important; /* Reduced vertical padding from 8px to 4px to decrease height */
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+}
+
+.custom-intro-tooltip .introjs-button:hover {
+  background: rgba(3, 70, 253, 0.4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(3, 70, 253, 0.4) !important;
+}
+
+/* Buttons Container */
+.custom-intro-tooltip .introjs-tooltipbuttons {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  margin-top: 15px !important;
+  gap: 10px !important;
+}
+
+/* Skip button styling (Skip is located at the absolute top-right in IntroJS) */
+.custom-intro-tooltip .introjs-skipbutton { 
+  position: absolute !important;
+  top: 15px !important;
+  right: 15px !important;
+  color: #d1d5db !important;
+  background: rgba(17, 24, 39, 0.8) !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-size: 0.75rem !important;
+  text-decoration: none !important;
+  line-height: normal !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  z-index: 99 !important;
+}
+.custom-intro-tooltip .introjs-skipbutton:hover { 
+  background: rgba(139, 92, 246, 0.4) !important;
+  color: #fff !important;
+}
+
+/* Bullets */
+.introjs-bullets ul li a { background: #4b5563 !important; }
+.introjs-bullets ul li a.active {
+  background: #8b5cf6 !important;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6) !important;
+}
+
+/* Welcome card floating tooltip styling: 30% margin left/right = 40% width */
+.introjs-tooltip.introjs-floating {
+  width: 40vw !important;
+  max-width: 40vw !important;
+  min-height: 50vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  border: 2px solid rgba(139, 92, 246, 0.5) !important;
+}
+
+@media (max-width: 768px) {
+  .introjs-tooltip.introjs-floating {
+    width: 90vw !important;
+    max-width: 90% !important;
+    min-height: 40vh !important;
+  }
+}
+
+.welcome-tour-card {
+  text-align: center;
+  padding: 2rem;
+}
+
+.welcome-tour-card h2 {
+  background: linear-gradient(to right, #c084fc, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.introjs-floating .introjs-tooltiptext {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Hide arrows for floating tooltip just in case */
+.introjs-floating .introjs-arrow {
+  display: none !important;
+}
+
+/* Highlighted area & Overlay */
+.introjs-helperLayer {
+  border-radius: 12px !important;
+  box-shadow: rgba(33, 33, 33, 0.8) 0px 0px 1px 2px, rgba(0, 0, 0, 0.75) 0px 0px 0px 5000px !important;
+}
+
+/* Background Blur Overlay for the whole screen (No dark tint) */
+.introjs-overlay {
+  background: transparent !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  opacity: 0.8 !important;
+}
+
+/* Target left and right tooltips to increase their width safely */
+.introjs-tooltip.introjs-left, .introjs-tooltip.introjs-right {
+  max-width: 380px !important;
+  width: 380px !important;
+}

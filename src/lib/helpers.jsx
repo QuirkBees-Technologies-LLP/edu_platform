@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-vars
+
 export const throttle = (func, limit) => {
   let lastFunc;
   let lastRan;

@@ -12,7 +12,6 @@ const Demo10Layout = () => {
     lg:overflow-hidden
   `);
   return (
-    // Providing layout context and rendering the main content
     <Demo10LayoutProvider>
       <Main />
     </Demo10LayoutProvider>

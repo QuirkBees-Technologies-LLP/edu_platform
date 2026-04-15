@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FormattedMessage } from "react-intl";
 import { useAuthContext } from "@/auth";
 import { useLanguage } from "@/i18n";
@@ -19,9 +19,34 @@ import { useDispatch } from "react-redux";
 
 const DropdownUser = ({ menuItemRef }) => {
   const { settings, storeSettings } = useSettings();
-  const { logout, auth } = useAuthContext();
+  const { logout, auth, saveAuth } = useAuthContext();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { isRTL } = useLanguage();
+
+  const isGuideActive = auth?.user?.role === 'student' && !auth?.user?.hasSeenTour;
+
+  const handleUserGuideToggle = () => {
+    if (auth?.user) {
+      const isActivating = !isGuideActive;
+
+      if (isActivating) {
+        saveAuth({
+          ...auth,
+          user: { ...auth.user, hasSeenTour: false },
+        });
+        navigate("/dashboard");
+      } else {
+        saveAuth({
+          ...auth,
+          user: { ...auth.user, hasSeenTour: true },
+        });
+      }
+      if (menuItemRef && menuItemRef.current) {
+        menuItemRef.current.hide();
+      }
+    }
+  };
 
   const handleThemeMode = () => {
     const newThemeMode = settings.themeMode === "dark" ? "light" : "dark";
@@ -106,6 +131,24 @@ const DropdownUser = ({ menuItemRef }) => {
               </MenuTitle>
             </MenuLink>
           </MenuItem>
+          {(auth?.user?.role === 'student' || auth?.user?.role === 'user') && (
+            <div className="menu-item mb-0.5">
+              <div
+                className="menu-link cursor-pointer select-none"
+                onClick={handleUserGuideToggle}
+              >
+                <span className="menu-icon">
+                  <KeenIcon icon="information" />
+                </span>
+                <span className="menu-title">
+                  User Guide
+                </span>
+                <label className="switch switch-sm pointer-events-none">
+                  <input name="userGuide" type="checkbox" checked={!!isGuideActive} readOnly />
+                </label>
+              </div>
+            </div>
+          )}
           <DropdownUserLanguages menuItemRef={menuItemRef} />
           <MenuSeparator />
         </div>

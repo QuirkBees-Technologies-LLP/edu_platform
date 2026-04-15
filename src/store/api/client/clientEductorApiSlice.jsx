@@ -5,6 +5,7 @@ export const clientEducatorApiSlice = createApi({
   reducerPath: "ClientEducator",
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Educator"],
+  keepUnusedDataFor: 30, // Cache results for 30s — reduces re-fetches on navigation
   endpoints: (builder) => ({
     getEducatorsList: builder.query({
       query: ({
@@ -38,10 +39,12 @@ export const clientEducatorApiSlice = createApi({
 
     getClientEducatorAcademyCategory: builder.query({
       query: () => `/users/category/list`,
+      keepUnusedDataFor: 300, // categories rarely change — cache for 5 min
       providesTags: ["Educator"],
     }),
     getCommonCategory: builder.query({
       query: () => `/common/category/get`,
+      keepUnusedDataFor: 300,
       providesTags: ["Educator"],
     }),
   }),

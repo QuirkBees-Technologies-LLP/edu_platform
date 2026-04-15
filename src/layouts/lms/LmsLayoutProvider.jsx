@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { useMenuChildren } from "@/components/menu";
@@ -9,22 +9,13 @@ import { useLayout } from "@/providers";
 import { deepMerge } from "@/utils";
 import { LmsLayoutConfig } from ".";
 
-// Interface defining the structure for layout provider properties
-
-// Initial layout properties with default values
 const initalLayoutProps = {
   layout: LmsLayoutConfig,
-  // Default layout configuration
   megaMenuEnabled: false,
-  // Mega menu disabled by default
   headerSticky: false,
-  // Header is not sticky by default
   mobileSidebarOpen: false,
-  // Mobile sidebar is closed by default
   mobileMegaMenuOpen: false,
-  // Mobile mega menu is closed by default
   sidebarMouseLeave: false,
-  // Sidebar mouse leave is false initially
   setSidebarMouseLeave: (state) => {
     console.log(`${state}`);
   },
@@ -45,46 +36,31 @@ const initalLayoutProps = {
   },
 };
 
-// Creating context for the layout provider with initial properties
 const LmsLayoutContext = createContext(initalLayoutProps);
-
-// Custom hook to access the layout context
 const useLmsLayout = () => useContext(LmsLayoutContext);
-
-// Layout provider component that wraps the application
 const LmsLayoutProvider = ({ children }) => {
-  const { pathname } = useLocation(); // Gets the current path
-  const { setMenuConfig } = useMenus(); // Accesses menu configuration methods
-  const secondaryMenu = useMenuChildren(pathname, MENU_SIDEBAR_LMS, 0); // Retrieves the secondary menu
+  const { pathname } = useLocation();
+  const { setMenuConfig } = useMenus();
+  const secondaryMenu = useMenuChildren(pathname, MENU_SIDEBAR_LMS, 0);
 
-  // Sets the primary and secondary menu configurations
   setMenuConfig("primary", MENU_SIDEBAR_LMS);
   setMenuConfig("secondary", secondaryMenu);
-  const { getLayout, updateLayout, setCurrentLayout } = useLayout(); // Layout management methods
+  const { getLayout, updateLayout, setCurrentLayout } = useLayout();
 
-  // Merges the default layout with the current one
   const getLayoutConfig = () => {
     return deepMerge(LmsLayoutConfig, getLayout(LmsLayoutConfig.name));
   };
-  const [layout, setLayout] = useState(getLayoutConfig); // State for layout configuration
+  const [layout, setLayout] = useState(getLayoutConfig);
 
-  // Updates the current layout when the layout state changes
   useEffect(() => {
     setCurrentLayout(layout);
   });
-  const [megaMenuEnabled, setMegaMenuEnabled] = useState(false); // State for mega menu toggle
-
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false); // State for mobile sidebar
-
-  const [mobileMegaMenuOpen, setMobileMegaMenuOpen] = useState(false); // State for mobile mega menu
-
-  const [sidebarMouseLeave, setSidebarMouseLeave] = useState(false); // State for sidebar mouse leave
-
-  const scrollPosition = useScrollPosition(); // Tracks the scroll position
-
-  const headerSticky = scrollPosition > 0; // Makes the header sticky based on scroll
-
-  // Function to collapse or expand the sidebar
+  const [megaMenuEnabled, setMegaMenuEnabled] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileMegaMenuOpen, setMobileMegaMenuOpen] = useState(false);
+  const [sidebarMouseLeave, setSidebarMouseLeave] = useState(false);
+  const scrollPosition = useScrollPosition();
+  const headerSticky = scrollPosition > 0;
   const setSidebarCollapse = (collapse) => {
     const updatedLayout = {
       options: {
@@ -93,11 +69,10 @@ const LmsLayoutProvider = ({ children }) => {
         },
       },
     };
-    updateLayout(LmsLayoutConfig.name, updatedLayout); // Updates the layout with the collapsed state
-    setLayout(getLayoutConfig()); // Refreshes the layout configuration
+    updateLayout(LmsLayoutConfig.name, updatedLayout);
+    setLayout(getLayoutConfig());
   };
 
-  // Function to set the sidebar theme (e.g., light or dark)
   const setSidebarTheme = (mode) => {
     const updatedLayout = {
       options: {
@@ -106,10 +81,9 @@ const LmsLayoutProvider = ({ children }) => {
         },
       },
     };
-    setLayout(deepMerge(layout, updatedLayout)); // Merges and sets the updated layout
+    setLayout(deepMerge(layout, updatedLayout));
   };
   return (
-    // Provides the layout configuration and controls via context to the application
     <LmsLayoutContext.Provider
       value={{
         layout,
@@ -131,5 +105,4 @@ const LmsLayoutProvider = ({ children }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export { LmsLayoutProvider, useLmsLayout };

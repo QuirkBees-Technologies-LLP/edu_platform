@@ -1,7 +1,6 @@
 import useBodyClasses from '@/hooks/useBodyClasses';
 import { Demo2LayoutProvider, Main } from './';
 const Demo2Layout = () => {
-  // Using the custom hook to set multiple CSS variables and class properties
   useBodyClasses(`
     [--tw-page-bg:var(--tw-light)]
     [--tw-page-bg-dark:var(--tw-coal-500)]
@@ -12,7 +11,6 @@ const Demo2Layout = () => {
     dark:bg-[--tw-page-bg-dark]
   `);
   return (
-    // Providing layout context and rendering the main content
     <Demo2LayoutProvider>
       <Main />
     </Demo2LayoutProvider>

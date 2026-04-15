@@ -34,7 +34,7 @@ const SidebarHeader = forwardRef((props, ref) => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: [0, 15] // [skid, distance]
+              offset: [0, 15]
             }
           }]
         }}>

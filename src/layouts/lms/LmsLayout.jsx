@@ -1,7 +1,6 @@
 import useBodyClasses from "@/hooks/useBodyClasses";
 import { LmsLayoutProvider, Main } from ".";
 const LmsLayout = () => {
-  // Using the useBodyClasses hook to set background styles for light and dark modes
   useBodyClasses(`
     [--tw-page-bg:#fefefe]
     [--tw-page-bg-dark:var(--tw-coal-500)]

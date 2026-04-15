@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft } from "lucide-react";
 import { FaGooglePlay, FaAppStoreIos } from "react-icons/fa";
 import {
@@ -32,6 +32,10 @@ import Loader from "../../../components/ui/loader";
 
 import { QRCodeCanvas } from "qrcode.react";
 import { usePostQuery } from "../../../store/api/client/clientSocialApiSlilce";
+import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+
+import introJs from "intro.js";
+import "intro.js/introjs.css";
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -41,9 +45,30 @@ const ClientDashboard = () => {
     instructor: "Diego Aguirre",
     thumbnail: "/api/placeholder/400/400",
   };
-  const { auth } = useAuthContext();
+  const { auth, saveAuth } = useAuthContext();
   const swiperRef = React.useRef(null);
+  const [completeTour] = useCompleteTourMutation();
 
+  const tourStartedRef = React.useRef(false);
+
+  // Mark tour as completed in backend + update auth context
+  const markTourComplete = useCallback(async () => {
+    try {
+      if (tourStartedRef.current) {
+        tourStartedRef.current = false;
+      }
+      await completeTour().unwrap();
+      // Update auth context so hasSeenTour becomes true in memory
+      if (auth) {
+        saveAuth({
+          ...auth,
+          user: { ...auth.user, hasSeenTour: true },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to mark tour complete:", err);
+    }
+  }, [completeTour, auth, saveAuth]);
   const allowedRoutes = auth?.user?.plan?.allowedSideBar;
 
   const limit = 5;
@@ -114,6 +139,184 @@ const ClientDashboard = () => {
     return clean.substring(0, 120);
   };
 
+  useEffect(() => {
+    // Show tour if the user is a student and hasSeenTour is false, undefined, or missing
+    const user = auth?.user;
+    const isStudent = user?.role === "student";
+    const hasSeenTour = user?.hasSeenTour;
+
+    if (isStudent && hasSeenTour !== true && !tourStartedRef.current) {
+      tourStartedRef.current = true;
+      const timer = setTimeout(() => {
+        startTour();
+      }, 1000);
+
+      return () => {
+        clearTimeout(timer);
+        tourStartedRef.current = false;
+      };
+    }
+  }, [auth?.user?.hasSeenTour, auth?.user?.role]);
+
+  const startTour = () => {
+    const steps = [];
+
+    // Step 1: Welcome Card in center
+    steps.push({
+      title: "Welcome to IQonic!",
+      intro: `
+        <div class="welcome-tour-card">
+          <h2 class="text-3xl md:text-5xl font-bold mb-4">Welcome to Your Dashboard, ${auth?.user?.firstName || auth?.user?.name || 'Trader'}!</h2>
+          <p class="text-lg md:text-xl text-gray-100" style="color: #f3f4f6; font-weight: 500;">We're thrilled to have you here. This quick tour will guide you through the key features of your dashboard — covering both <strong>Trading Education</strong> and <strong>Digital Marketing</strong> so you can get the most out of your experience.</p>
+        </div>
+      `,
+    });
+
+    // Step 2: Live Educator
+    const live = document.querySelector(".live-card");
+    if (live) {
+      steps.push({
+        element: live,
+        title: "Live Educators",
+        intro: "Join live sessions with top educators happening right now.",
+        position: 'right'
+      });
+    }
+
+    // Step 3: IQ Academy
+    const academy = document.querySelector(".academy-card");
+    if (academy) {
+      steps.push({
+        element: academy,
+        title: "IQ Academy",
+        intro: "Access comprehensive courses covering both <strong>Trading</strong> (Forex, Crypto, strategies) and <strong>Digital Marketing</strong> (SEO, social media, paid ads and more) — from basics to advanced levels.",
+        position: 'bottom'
+      });
+    }
+
+    // Step 4: Fast Start Training
+    const fast = document.querySelector(".fast-start-card");
+    if (fast) {
+      steps.push({
+        element: fast,
+        title: "Fast Start Training",
+        intro: "Begin your journey here. We'll guide you through the whole process step-by-step.",
+        position: 'left'
+      });
+    }
+
+    // Step 4.5: IQ Live
+    const iqLive = document.querySelector(".iq-live-card");
+    if (iqLive) {
+      steps.push({
+        element: iqLive,
+        title: "IQ Live",
+        intro: "Join live sessions with our expert educators! IQ Live hosts both:\n\n📈 <strong>Live Trading Sessions</strong> — Real-time market analysis and trading education\n📣 <strong>Digital Marketing Training</strong> — Live sessions on SEO, ads, social media and marketing strategy\n\nSwitch between categories to find the live session that suits you.",
+        position: 'right'
+      });
+    }
+
+    // Step 5: IQ Strategies
+    const strategies = document.querySelector(".strategies-card");
+    if (strategies) {
+      steps.push({
+        element: strategies,
+        title: "IQ Strategies",
+        intro: "Access basic to advanced strategies.",
+        position: 'left'
+      });
+    }
+
+    // Step 6: IQ Social
+    const socialCard = document.querySelector(".social-card");
+    if (socialCard) {
+      steps.push({
+        element: socialCard,
+        title: "IQ Social",
+        intro: "Connect with educators and receive their market updates and ideas",
+        position: 'left'
+      });
+    }
+
+    // Step 7: Live Activity Feed
+    const socialFeed = document.querySelector(".social-feed");
+    if (socialFeed) {
+      steps.push({
+        element: socialFeed,
+        title: "Live Activity Feed",
+        intro: "Stay updated with the latest posts and announcements from corporate and the social community.",
+        position: 'right'
+      });
+    }
+
+    if (steps.length === 0) return;
+
+    const tour = introJs.tour().setOptions({
+      steps,
+      hidePrev: true,
+      nextLabel: "Next →",
+      prevLabel: "← Back",
+      skipLabel: "Skip",
+      doneLabel: "Continue →",
+      showProgress: true,
+      showBullets: false, // Turned off bullets to avoid cluttering next to the progress bar
+      overlayOpacity: 0.8,
+      exitOnOverlayClick: false,
+      exitOnEsc: true,
+      scrollToElement: false, // we will manually handle custom scrolling
+      tooltipClass: "custom-intro-tooltip",
+    });
+
+    // Custom smooth scrolling to perfectly center the element mapping
+    tour.onchange(function (targetElement) {
+      if (this._currentStep === 0 || !targetElement) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      const rect = targetElement.getBoundingClientRect();
+      const absoluteTop = rect.top + window.pageYOffset;
+      // Calculate middle of screen for the element
+      const middle = absoluteTop - (window.innerHeight / 2) + (rect.height / 2);
+
+      window.scrollTo({ top: middle, behavior: "smooth" });
+    });
+
+    // Dashboard tour complete → navigate to FastStartTraining to continue tour there
+    // hasSeenTour is NOT set here — it will be set after FastStartTraining tour finishes
+    let isCompleted = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+    document.addEventListener('click', handleSkipClick, true); // capture phase
+
+    tour.oncomplete(() => {
+      document.removeEventListener('click', handleSkipClick, true);
+      if (!userClickedSkip) {
+        isCompleted = true;
+      }
+      if (tourStartedRef.current) {
+        tourStartedRef.current = false;
+      }
+      // Navigation happens in onexit — which fires after oncomplete too
+    });
+    tour.onexit(() => {
+      document.removeEventListener('click', handleSkipClick, true);
+      if (isCompleted) {
+        // User completed all steps — continue tour on FastStartTraining page
+        navigate('/fast-start-training', { state: { continueTour: true } });
+      } else {
+        // User clicked Skip — end the entire tour chain
+        markTourComplete();
+      }
+    });
+
+    tour.start();
+  };
+
   return (
     <>
       <Dialog open={isUpgradeModalOpen} onOpenChange={setUpgradeModalOpen}>
@@ -173,7 +376,7 @@ const ClientDashboard = () => {
 
           <div className="relative">
             {/* Hero Section with Live Session */}
-            <div className="mb-8">
+            <div className="mb-8 hero-section">
               <div className="relative h-96 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-xl border border-white/10">
                 <div
                   className="absolute inset-0 bg-cover bg-center bg-no-repeat "
@@ -196,7 +399,7 @@ const ClientDashboard = () => {
                         <Loader />
                       </div>
                     ) : liveStreams.length > 0 ? (
-                      <div className="relative w-56 sm:w-80">
+                      <div className="relative w-56 sm:w-80 live-card">
                         {liveStreams.length > 1 && (
                           <>
                             {/* LEFT ARROW */}
@@ -284,7 +487,7 @@ const ClientDashboard = () => {
             {/* Main Features - Bento Grid */}
             <div className="grid grid-cols-12 gap-4 mb-8">
               {/* IQ Academy - Large Card */}
-              <div className="col-span-12 xl:col-span-8">
+              <div className="col-span-12 xl:col-span-8 academy-card">
                 <div className="group relative xl:h-64">
                   {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div> */}
                   <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition shadow-md">
@@ -331,7 +534,7 @@ const ClientDashboard = () => {
               </div>
 
               {/* Fast Start - Medium Card */}
-              <div className="col-span-12 xl:col-span-4">
+              <div className="col-span-12 xl:col-span-4 fast-start-card">
                 <div
                   className="group relative h-64"
                   onClick={() => navigate(`/fast-start-training`)}
@@ -362,7 +565,7 @@ const ClientDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
               {/* IQ Live with Image */}
 
-              <div className="group relative ">
+              <div className="group relative iq-live-card">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
                 <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-red-500/20 hover:border-red-500/40 transition shadow-md">
                   <div
@@ -403,7 +606,7 @@ const ClientDashboard = () => {
               </div>
 
               {/* IQ Strategies with Image */}
-              <div className="group relative">
+              <div className="group relative strategies-card">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
                 <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-blue-500/20 hover:border-blue-500/40 transition shadow-md">
                   <div
@@ -444,7 +647,7 @@ const ClientDashboard = () => {
               </div>
 
               {/* IQ Social with Image */}
-              <div className="group relative">
+              <div className="group relative social-card">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition"></div>
                 <div className="relative h-full bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition shadow-md">
                   <div
@@ -488,7 +691,7 @@ const ClientDashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* Combined Activity Feed */}
               <div className="lg:col-span-2">
-                <div className="card rounded-2xl border p-6 h-full shadow-md">
+                <div className="card rounded-2xl border p-6 h-full shadow-md social-feed">
                   {/* Header */}
                   <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
                     <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">

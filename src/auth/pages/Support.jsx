@@ -1,7 +1,5 @@
-// src/components/SupportPage.jsx
 
 import React from 'react';
-// Make sure to place your images in the specified folder
 import logo from '../../../public/media/app/default-logo-dark.png'
 import bgImage from '../../../public/media/images/1920x1080/bg-img.png';
 

@@ -13,14 +13,13 @@ export function DataGridColumnHeader({
   }
   if (!filter && !column.getCanHide() && column.getCanSort()) {
     return <Button variant="ghost" size="sm" className={cn('-ms-3 h-8 data-[state=open]:bg-accent !ring-0 !ring-offset-0', className)} onClick={() => {
-      // Determine the current sorting state
       const isSorted = column.getIsSorted();
       if (isSorted === 'asc') {
-        column.toggleSorting(true); // Switch to desc
+        column.toggleSorting(true);
       } else if (isSorted === 'desc') {
-        column.clearSorting(); // Clear to unsorted
+        column.clearSorting();
       } else {
-        column.toggleSorting(false); // Switch to asc
+        column.toggleSorting(false);
       }
     }}>
         <span>{title}</span>

@@ -17,18 +17,14 @@ const DataGridPagination = () => {
   const from = pageIndex * pageSize + 1;
   const to = Math.min((pageIndex + 1) * pageSize, totalRows);
 
-  // Replace placeholders in paginationInfo
   const paginationInfo = props.pagination?.info ? props.pagination.info.replace('{from}', from.toString()).replace('{to}', to.toString()).replace('{count}', totalRows.toString()) : `${from} - ${to} of ${totalRows}`;
 
-  // Pagination limit logic
   const pageCount = table.getPageCount();
   const paginationMoreLimit = props.pagination?.moreLimit || 5;
 
-  // Determine the start and end of the pagination group
   const currentGroupStart = Math.floor(pageIndex / paginationMoreLimit) * paginationMoreLimit;
   const currentGroupEnd = Math.min(currentGroupStart + paginationMoreLimit, pageCount);
 
-  // Render page buttons based on the current group
   const renderPageButtons = () => {
     const buttons = [];
     for (let i = currentGroupStart; i < currentGroupEnd; i++) {
@@ -41,17 +37,15 @@ const DataGridPagination = () => {
     return buttons;
   };
 
-  // Render a "previous" ellipsis button if there are previous pages to show
   const renderEllipsisPrevButton = () => {
     if (currentGroupStart > 0) {
       return <Button className={btnBaseClasses} variant="ghost" onClick={() => table.setPageIndex(currentGroupStart - 1)}>
           ...
         </Button>;
     }
-    return null; // No ellipsis needed if we're in the first group
+    return null;
   };
 
-  // Render a "next" ellipsis button if there are more pages to show after the current group
   const renderEllipsisNextButton = () => {
     if (currentGroupEnd < pageCount) {
       return <Button className={btnBaseClasses} variant="ghost" onClick={() => table.setPageIndex(currentGroupEnd)}>

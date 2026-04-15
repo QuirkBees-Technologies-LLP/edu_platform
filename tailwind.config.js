@@ -214,11 +214,7 @@ module.exports = {
         termina: ['Inter', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
       },
-      // fontFamily: {
-      //   sans: ['Outfit',  'sans-serif']
-      // },
       colors: {
-        //begin: Shadcn UI Colors
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -259,7 +255,6 @@ module.exports = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))'
         },
-        //end
         gray: {
           100: 'var(--tw-gray-100)',
           200: 'var(--tw-gray-200)',
@@ -367,51 +362,51 @@ module.exports = {
       },
       fontSize: {
         '4xs': [
-          '0.5625rem', // 9px
+          '0.5625rem',
           {
-            lineHeight: '0.6875rem' // 11px
+            lineHeight: '0.6875rem'
           }
         ],
         '3xs': [
-          '0.625rem', // 10px
+          '0.625rem',
           {
-            lineHeight: '0.75rem' // 12px
+            lineHeight: '0.75rem'
           }
         ],
         '2xs': [
-          '0.6875rem', // 11px
+          '0.6875rem',
           {
-            lineHeight: '0.75rem' // 12px
+            lineHeight: '0.75rem'
           }
         ],
         '2sm': [
-          '0.8125rem', // 13px
+          '0.8125rem',
           {
-            lineHeight: '1.125rem' // 18px
+            lineHeight: '1.125rem'
           }
         ],
         md: [
-          '0.9375rem', // 15px
+          '0.9375rem',
           {
-            lineHeight: '1.375rem' // 22px
+            lineHeight: '1.375rem'
           }
         ],
         '1.5xl': [
-          '1.375rem', // 22px
+          '1.375rem',
           {
-            lineHeight: '1.8125rem' // 29px
+            lineHeight: '1.8125rem'
           }
         ],
         '2.5xl': [
-          '1.625rem', // 26px
+          '1.625rem',
           {
-            lineHeight: '2.125rem' // 34px
+            lineHeight: '2.125rem'
           }
         ]
       },
       lineHeight: {
-        0: '0', // 0px
-        5.5: '1.375rem' // 22px
+        0: '0',
+        5.5: '1.375rem'
       },
       zIndex: {
         1: '1',
@@ -423,16 +418,16 @@ module.exports = {
         3: '3px'
       },
       spacing: {
-        0.75: '0.1875rem', // 3px
-        1.25: '0.3rem', // 5px
-        1.75: '0.4375rem', // 7px
-        2.25: '0.563rem', // 9px
-        2.75: '0.688rem', // 11px
-        4.5: '1.125rem', // 18px
-        5.5: '1.375rem', // 22px
-        6.5: '1.625rem', // 26px
-        7.5: '1.875rem', // 30px
-        12.5: '3.125rem' // 40px
+        0.75: '0.1875rem',
+        1.25: '0.3rem',
+        1.75: '0.4375rem',
+        2.25: '0.563rem',
+        2.75: '0.688rem',
+        4.5: '1.125rem',
+        5.5: '1.375rem',
+        6.5: '1.625rem',
+        7.5: '1.875rem',
+        12.5: '3.125rem'
       },
       screens: {
         sm: '640px',
@@ -441,7 +436,6 @@ module.exports = {
         xl: '1280px',
         '2xl': '1536px'
       },
-      //begin: Shadcn UI Animations
       keyframes: {
         'accordion-down': {
           from: { height: '0' },
@@ -472,7 +466,6 @@ module.exports = {
         'collapsible-up': 'collapsible-up 0.2s ease-out',
         'gradientMove': 'gradientMove 3s infinite ease-in-out',
       }
-      //end
     },
     custom: ({ theme }) => ({
       components: {
@@ -741,7 +734,6 @@ module.exports = {
         }
       });
     },
-    // require('@tailwindcss/line-clamp'),
     require('tailwindcss-animate'),
     require('./src/plugins/plugin'),
     require('./src/plugins/components/theme'),

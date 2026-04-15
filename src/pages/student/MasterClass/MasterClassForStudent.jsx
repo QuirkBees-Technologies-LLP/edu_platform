@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Container } from "@/components/container";
 import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
+import { useAuthContext } from "@/auth";
+import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
 import {
   Loader2,
   CirclePlay,
@@ -100,11 +105,12 @@ const getEmbedUrl = (url) => {
 };
 
 const Banner = () => (
-  <div className="card rounded-2xl overflow-hidden border border-gray-300">
+  <div className="card rounded-2xl overflow-hidden border border-gray-300 masterclass-banner flex items-center justify-center" style={{ minHeight: '220px', maxHeight: '320px' }}>
     <img
       src="/media/images/2026-0218-MasterclassBanner-Desktop.webp"
       alt="MasterClass Banner"
-      className="w-full h-auto object-cover"
+      className="w-full h-full object-cover"
+      style={{ minHeight: '220px', maxHeight: '320px', objectPosition: 'center' }}
     />
   </div>
 );
@@ -125,6 +131,12 @@ const MasterClassForStudent = () => {
   const [timeZone, setTimeZone] = useState([]);
   const [educator, setEducator] = useState("");
 
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { auth, saveAuth } = useAuthContext();
+  const [completeTour] = useCompleteTourMutation();
+  const masterClassTourStartedRef = useRef(false);
+
   const { data: categoryData, isLoading: isCategoryLoading } =
     useGetAcademyCategoryQuery();
   const activeCategory = categoryData?.data?.find(
@@ -138,6 +150,18 @@ const MasterClassForStudent = () => {
   // Get selected language from Redux
   const selectedLanguage = useSelector(selectSelectedLanguage);
   const { data: educatorsData } = useGetAllEducatorsQuery();
+
+  // Mark tour complete in backend & update auth context
+  const markTourComplete = useCallback(async () => {
+    try {
+      await completeTour().unwrap();
+      if (auth) {
+        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
+      }
+    } catch (err) {
+      console.error("Failed to mark tour complete:", err);
+    }
+  }, [completeTour, auth, saveAuth]);
 
   // ==================== API CALLS ====================
   // Fetch all strategies
@@ -198,6 +222,124 @@ const MasterClassForStudent = () => {
       }
     }
   }, [currentStrategy]);
+
+  // ─── MasterClass Tour (final step of User Guide) ─────────────────────────
+  useEffect(() => {
+    const shouldContinueTour = location?.state?.continueTour === true;
+    if (!shouldContinueTour) return;
+    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
+    if (masterClassTourStartedRef.current) return;
+    if (strategiesLoading) return;
+
+    masterClassTourStartedRef.current = true;
+
+    // Detect Skip button clicks
+    let tourDone = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+
+    const timer = setTimeout(() => {
+      const steps = [];
+
+      // Step 1: Highlight the banner / page header area
+      const bannerEl = document.querySelector('.masterclass-banner');
+      if (bannerEl) {
+        steps.push({
+          element: bannerEl,
+          title: '🎓 Master Class',
+          intro: 'Welcome to the Master Class section! Here you will find in-depth courses taught by professional educators — covering both <strong>Trading Strategies</strong> (Forex, Crypto, price action and more) and <strong>Digital Marketing</strong> (SEO, paid ads, social media marketing and more).',
+          position: 'bottom',
+        });
+      }
+
+      // Step 2 : Highlight the Strategy filter
+      const strategyFilter = document.querySelector('.strategy-filter');
+      if (strategyFilter) {
+        steps.push({
+          element: strategyFilter,
+          title: 'Strategy Filter',
+          intro: 'Filter Master Classes by strategy.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 3 : Highlight the Category filter
+      const categoryFilter = document.querySelector('.category-filter');
+      if (categoryFilter) {
+        steps.push({
+          element: categoryFilter,
+          title: '🗂️ Category Filter — Trading & Digital Marketing',
+          intro: 'Use the category tabs to switch between:\n\n📈 <strong>Trading categories</strong> — Forex, Crypto and more\n📣 <strong>Digital Marketing</strong> — SEO, ads, social media strategy and more\n\nEach category has its own set of Master Class courses.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 4: First MasterClass card
+      const firstCard = document.querySelector('.masterclass-card');
+      if (firstCard) {
+        steps.push({
+          element: firstCard,
+          title: '📚 Course Card',
+          intro: 'Click on any Master Class card to dive deep into a course. Each course includes video lectures and detailed explanations — whether it is a trading strategy or a digital marketing skill.',
+          position: 'bottom',
+        });
+      }
+
+      if (steps.length === 0) {
+        markTourComplete();
+        masterClassTourStartedRef.current = false;
+        return;
+      }
+
+      const tour = introJs.tour().setOptions({
+        steps,
+        hidePrev: true,
+        nextLabel: 'Next →',
+        prevLabel: '← Back',
+        skipLabel: 'Skip',
+        doneLabel: 'Continue',
+        showProgress: true,
+        showBullets: false,
+        overlayOpacity: 0.8,
+        exitOnOverlayClick: false,
+        exitOnEsc: true,
+        scrollToElement: true,
+        tooltipClass: 'custom-intro-tooltip',
+      });
+
+      tour.oncomplete(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (!userClickedSkip) {
+          tourDone = true;
+        }
+        masterClassTourStartedRef.current = false;
+      });
+      tour.onexit(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (tourDone) {
+          // User completed all steps — continue tour to IQ Academy
+          navigate('/iq-academy', { state: { continueTour: true } });
+        } else {
+          markTourComplete(); // user skipped — do NOT reset ref
+        }
+      });
+
+      document.addEventListener('click', handleSkipClick, true); // capture phase
+      tour.start();
+    }, 800);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleSkipClick, true);
+      // ❌ Do NOT reset ref here — StrictMode double-invoke would re-trigger the tour
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.state?.continueTour, strategiesLoading]);
+  // ─────────────────────────────────────────────────────────────────────────────
 
   // ==================== EVENT HANDLERS ====================
   const selectStrategy = (strategyId) => {
@@ -372,8 +514,8 @@ const MasterClassForStudent = () => {
                 <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
                   <span className="truncate text-sm">
                     {timeZone?.length > 0
-                      ? `${timeZone?.length} Zone Selected`
-                      : "Select Time Zone"}
+                      ? `${timeZone?.length} Session Selected`
+                      : "Select Trading Session"}
                   </span>
                   <ChevronDown size={16} />
                 </button>
@@ -487,7 +629,7 @@ const MasterClassForStudent = () => {
 
         <div className="flex gap-4 mb-6 justify-between flex-wrap">
           {viewType == "grid" && !isDigitalMarketing && (
-            <div className="flex gap-4 overflow-x-auto pb-4 items-start">
+            <div className="flex gap-4 overflow-x-auto pb-4 items-start strategy-filter">
               {/* All Strategies Option */}
               <button
                 onClick={() => setActiveStrategyId(null)}
@@ -546,7 +688,7 @@ const MasterClassForStudent = () => {
               ))}
             </div>
           )}
-          <div className="flex gap-4 ml-auto overflow-x-auto pb-2">
+          <div className="flex gap-4 ml-auto overflow-x-auto pb-2 category-filter">
             {categoryData?.data?.map((cat) => (
               <button
                 key={cat?._id}
@@ -792,7 +934,7 @@ const MasterClassForStudent = () => {
           ) : (
             // Display strategy cards in a responsive grid
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {strategies?.map((strategy) => {
+              {strategies?.map((strategy, stratIdx) => {
                 const educator = strategy?.educators?.[0];
                 const educatorName = educator
                   ? `${educator?.first_name?.trim() || ""} ${educator?.last_name?.trim() || ""}`.trim()
@@ -802,7 +944,7 @@ const MasterClassForStudent = () => {
                   <div
                     key={strategy?._id}
                     onClick={() => selectStrategy(strategy?._id)}
-                    className={`group card rounded-2xl overflow-hidden border cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${selectedStrategyId === strategy?._id
+                    className={`group card rounded-2xl overflow-hidden border cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${stratIdx === 0 ? 'masterclass-card' : ''} ${selectedStrategyId === strategy?._id
                       ? "border-purple-500 shadow-2xl shadow-purple-500/30 ring-2 ring-purple-400/60"
                       : "border-gray-200 hover:border-purple-300 hover:shadow-sm hover:shadow-purple-100/60"
                       }`}

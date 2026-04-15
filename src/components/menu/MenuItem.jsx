@@ -43,7 +43,6 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
   const finalId = id !== undefined ? id : '';
   const menuContainerRef = useRef(null);
 
-  // eslint-disable-next-line no-undef
   const hideTimeoutRef = useRef(null);
   const {
     pathname,
@@ -84,7 +83,6 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
   const handleMouseEnter = e => {
     if (isMenuDisabled) return;
 
-    // Cancel any previously set hide timeout
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
@@ -99,13 +97,12 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
   const handleMouseLeave = e => {
     if (isMenuDisabled) return;
     if (propTrigger === 'hover') {
-      // Set a timeout to hide the dropdown after `dropdownTimeout` delay
       hideTimeoutRef.current = setTimeout(() => {
         setShow(false);
         if (containerProps.onMouseLeave) {
           containerProps.onMouseLeave(e);
         }
-        hideTimeoutRef.current = null; // Reset the timeout reference
+        hideTimeoutRef.current = null;
       }, dropdownTimeout);
     }
   };
@@ -137,7 +134,6 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
     }
   };
   const renderLink = child => {
-    // Add some props to each child
     const modifiedProps = {
       hasItemSub: hasSub,
       tabIndex,
@@ -145,22 +141,18 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
       handleClick
     };
 
-    // Return the child with modified props
     return cloneElement(child, modifiedProps);
   };
   const renderToggle = child => {
-    // Add some props to each child
     const modifiedProps = {
       hasItemSub: hasSub,
       tabIndex,
       handleToggle
     };
 
-    // Return the child with modified props
     return cloneElement(child, modifiedProps);
   };
   const renderLabel = child => {
-    // Add some props to each child
     const modifiedProps = {
       hasItemSub: hasSub,
       tabIndex,
@@ -168,14 +160,12 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
       handleClick
     };
 
-    // Return the child with modified props
     return cloneElement(child, modifiedProps);
   };
   const renderHeading = child => {
     return cloneElement(child);
   };
   const renderSubDropdown = child => {
-    // Add some props to each child
     const modifiedProps = {
       parentId: `${parentId}-${finalId}`,
       toggle: propToggle,
@@ -206,7 +196,6 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
       setAccordionEnter(true);
     };
 
-    // Add some props to each child
     const modifiedProps = {
       parentId: `${parentId}-${finalId}`,
       tabIndex,
@@ -287,7 +276,6 @@ const MenuItemComponent = forwardRef(function MenuItem(props, ref) {
     }
   }, [pathname]);
 
-  // Cleanup: ensure that any timeouts are cleared when the component unmounts
   useEffect(() => {
     return () => {
       if (hideTimeoutRef.current) {

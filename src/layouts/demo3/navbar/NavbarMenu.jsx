@@ -61,7 +61,7 @@ const NavbarMenu = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: isRTL() ? [10, 0] : [-10, 0] // [skid, distance]
+              offset: isRTL() ? [10, 0] : [-10, 0]
             }
           }]
         }}>
