@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
+import { useAuthContext } from "@/auth";
+import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
 import {
@@ -98,6 +103,21 @@ const IqInsight = () => {
   const [activeTimeframe, setActiveTimeframe] = useState("WEEKLY");
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const insightTourStartedRef = useRef(false);
+  const { auth, saveAuth } = useAuthContext();
+  const [completeTour] = useCompleteTourMutation();
+
+  const markTourComplete = useCallback(async () => {
+    try {
+      await completeTour().unwrap();
+      if (auth) saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
+    } catch (err) {
+      console.error('Failed to mark tour complete:', err);
+    }
+  }, [completeTour, auth, saveAuth]);
+
   const observer = useRef();
 
   const { data, isFetching, isLoading, isError } =
@@ -152,6 +172,127 @@ const IqInsight = () => {
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
+
+  // ─── IQ Insight Tour ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const shouldStart = location?.state?.continueTour === true;
+    if (!shouldStart) return;
+    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
+    if (insightTourStartedRef.current) return;
+    // ⏳ Only block on isLoading — NOT isFetching.
+    // isFetching=true on mount but is NOT in deps → effect never re-runs when it clears.
+    if (isLoading) return;
+
+    insightTourStartedRef.current = true;
+
+    // Detect Skip button clicks
+    let tourDone = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+
+    const timer = setTimeout(() => {
+      const steps = [];
+
+      // Step 1: Market filter tabs
+      const marketFilter = document.querySelector('.insight-market-filter');
+      if (marketFilter) {
+        steps.push({
+          element: marketFilter,
+          title: '🌐 Market Filter',
+          intro: 'Switch between markets: All, Forex, or Crypto. This filters the insights to show only analysis relevant to your chosen market.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 2: Educator selector
+      const educatorFilter = document.querySelector('.insight-educator-filter');
+      if (educatorFilter) {
+        steps.push({
+          element: educatorFilter,
+          title: '👨‍🏫 Filter by Educator',
+          intro: 'Select a specific educator to show only their market insights and analysis.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 3: Search bar
+      const searchBar = document.querySelector('.insight-search');
+      if (searchBar) {
+        steps.push({
+          element: searchBar,
+          title: '🔎 Search Insights',
+          intro: 'Search for specific currency pairs, keywords, or topics across all market analysis posts.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 4: First insight card
+      const firstCard = document.querySelector('.insight-first-card');
+      if (firstCard) {
+        steps.push({
+          element: firstCard,
+          title: '📊 Market Analysis Card',
+          intro: 'Each card shows a market analysis post with the educator\'s name, date, title, and a preview of their analysis. Click View Details to read the full post.',
+          position: 'right',
+        });
+      }
+
+      if (steps.length === 0) {
+        navigate('/live-ideas', { state: { continueTour: true } });
+        insightTourStartedRef.current = false;
+        return;
+      }
+
+      const tour = introJs.tour().setOptions({
+        steps,
+        hidePrev: true,
+        nextLabel: 'Next →',
+        prevLabel: '← Back',
+        skipLabel: 'Skip',
+        doneLabel: 'Next →',
+        showProgress: true,
+        showBullets: false,
+        overlayOpacity: 0.8,
+        exitOnOverlayClick: false,
+        exitOnEsc: true,
+        scrollToElement: true,
+        tooltipClass: 'custom-intro-tooltip',
+      });
+
+      tour.oncomplete(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (!userClickedSkip) {
+          tourDone = true;
+        }
+        insightTourStartedRef.current = false;
+      });
+      tour.onexit(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (tourDone) {
+          // User completed all steps — continue tour on Live Ideas page
+          navigate('/live-ideas', { state: { continueTour: true } });
+        } else {
+          // User clicked Skip — do NOT reset ref
+          markTourComplete();
+        }
+      });
+
+      document.addEventListener('click', handleSkipClick, true); // capture phase
+      tour.start();
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleSkipClick, true);
+      // ❌ Do NOT reset ref here
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.state?.continueTour, isLoading]);
+  // ─────────────────────────────────────────────────────────────────────────────────
   const handleCloseImageView = () => {
     setSelectedIdea({});
   };
@@ -303,7 +444,7 @@ const IqInsight = () => {
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <div className="flex justify-between items-center flex-wrap mb-8 gap-5">
         <div className="flex gap-3.5 flex-wrap">
-          <div className="sm:px-3 p-2 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md border-purple-200 dark:border-gray-200">
+          <div className="sm:px-3 p-2 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md border-purple-200 dark:border-gray-200 insight-market-filter">
             {markets.map((market) => (
               <button
                 key={market}
@@ -314,11 +455,10 @@ const IqInsight = () => {
                   setPage(1);
                 }}
                 className={`sm:px-4 py-2 text-xs sm:text-md rounded-lg font-semibold transition-all
-                        ${
-                          activeMarket === market
-                            ? "bg-sky-500 text-white shadow-lg shadow-primary/50"
-                            : " text-gray-600 hover:bg-gray-300"
-                        }`}
+                        ${activeMarket === market
+                    ? "bg-sky-500 text-white shadow-lg shadow-primary/50"
+                    : " text-gray-600 hover:bg-gray-300"
+                  }`}
               >
                 {market}
               </button>
@@ -346,7 +486,7 @@ const IqInsight = () => {
           </div> */}
         </div>
 
-        <div className="flex items-center gap-2 relative">
+        <div className="flex items-center gap-2 relative insight-educator-filter">
           <Select
             value={educator || ""}
             onValueChange={(val) => {
@@ -357,7 +497,7 @@ const IqInsight = () => {
               <SelectValue placeholder="Select educator">
                 {educator
                   ? educatorsData?.data?.find((e) => e._id === educator)
-                      ?.first_name?.last_name
+                    ?.first_name?.last_name
                   : "Select educator"}
               </SelectValue>
             </SelectTrigger>
@@ -388,7 +528,7 @@ const IqInsight = () => {
           )}
         </div>
 
-        <div className="flex gap-3 sm:gap-6 flex-wrap mr-3">
+        <div className="flex gap-3 sm:gap-6 flex-wrap mr-3 insight-search">
           <SearchFilterInput
             searchText={searchText}
             handleSearchChange={handleSearchChange}
@@ -475,7 +615,7 @@ const IqInsight = () => {
                 // </div>
                 <div
                   key={idea?._id}
-                  className="card border-2  shadow-md border-purple-200 dark:border-gray-200 overflow-hidden flex flex-col h-full"
+                  className={`card border-2 shadow-md border-purple-200 dark:border-gray-200 overflow-hidden flex flex-col h-full${index === 0 ? ' insight-first-card' : ''}`}
                 >
                   <div
                     className="relative overflow-hidden cursor-pointer"
@@ -542,10 +682,10 @@ const IqInsight = () => {
                                     prev.map((t) =>
                                       t._id === idea?._id
                                         ? {
-                                            ...t,
-                                            currentIndex: newIndex,
-                                            isLoading: false,
-                                          }
+                                          ...t,
+                                          currentIndex: newIndex,
+                                          isLoading: false,
+                                        }
                                         : t,
                                     ),
                                   );
@@ -563,7 +703,7 @@ const IqInsight = () => {
 
                                 const newIndex =
                                   (idea.currentIndex ?? 0) ===
-                                  idea.image.length - 1
+                                    idea.image.length - 1
                                     ? 0
                                     : (idea.currentIndex ?? 0) + 1;
 
@@ -584,10 +724,10 @@ const IqInsight = () => {
                                     prev.map((t) =>
                                       t._id === idea._id
                                         ? {
-                                            ...t,
-                                            currentIndex: newIndex,
-                                            isLoading: false,
-                                          }
+                                          ...t,
+                                          currentIndex: newIndex,
+                                          isLoading: false,
+                                        }
                                         : t,
                                     ),
                                   );
@@ -625,20 +765,19 @@ const IqInsight = () => {
                                       prev.map((t) =>
                                         t._id === idea._id
                                           ? {
-                                              ...t,
-                                              currentIndex: idx,
-                                              isLoading: false,
-                                            }
+                                            ...t,
+                                            currentIndex: idx,
+                                            isLoading: false,
+                                          }
                                           : t,
                                       ),
                                     );
                                   };
                                 }}
-                                className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                                  (idea.currentIndex ?? 0) === idx
-                                    ? "bg-primary"
-                                    : "bg-gray-300 hover:bg-gray-400"
-                                }`}
+                                className={`w-2.5 h-2.5 rounded-full transition-colors ${(idea.currentIndex ?? 0) === idx
+                                  ? "bg-primary"
+                                  : "bg-gray-300 hover:bg-gray-400"
+                                  }`}
                               />
                             ))}
                           </div>

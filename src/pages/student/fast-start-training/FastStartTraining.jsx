@@ -1,5 +1,5 @@
 import { CirclePlay } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   useGetAcademyCategoryByMainSectionQuery,
   useGetFirstStartTrainingSectionQuery,
@@ -9,6 +9,11 @@ import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import { Accordion, AccordionItem } from "@/components/accordion";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/auth";
+import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
 
 export default function FastStartTraining() {
   const [activeLectureId, setActiveLectureId] = useState(null);
@@ -18,9 +23,27 @@ export default function FastStartTraining() {
   const [id, setId] = useState();
   const [category, setCategory] = useState();
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { auth, saveAuth } = useAuthContext();
+  const [completeTour] = useCompleteTourMutation();
+  const fastTourStartedRef = useRef(false);
+
   const handleClick = (id) => {
     setId(id); // or simply: id, based on your API setup
   };
+
+  // Mark tour complete in backend & update auth context
+  const markTourComplete = useCallback(async () => {
+    try {
+      await completeTour().unwrap();
+      if (auth) {
+        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
+      }
+    } catch (err) {
+      console.error("Failed to mark tour complete:", err);
+    }
+  }, [completeTour, auth, saveAuth]);
 
   const selectedLanguage = useSelector(selectSelectedLanguage);
 
@@ -144,6 +167,120 @@ export default function FastStartTraining() {
       }
     }
   }, [data, activeTab]);
+
+  // ─── FastStartTraining Tour (continued from Dashboard) ───────────────────
+  useEffect(() => {
+    const shouldContinueTour = location?.state?.continueTour === true;
+    if (!shouldContinueTour) return;
+    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
+    if (fastTourStartedRef.current) return;
+    if (isCategoryLoading) return; // wait for data
+    if (!currentCourse || currentCourse.length === 0) return; // wait for courses
+    if (!lecture) return; // wait for lecture to be selected
+
+    fastTourStartedRef.current = true;
+
+    // Detect Skip button clicks — handles intro.js quirk where oncomplete
+    // may fire on last-step Skip in some versions
+    let tourDone = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+
+    // Small delay so DOM is fully rendered
+    const timer = setTimeout(() => {
+      const steps = [];
+
+      // Step 1: Video / tab area
+      const tabArea = document.querySelector('.fst-tab-area');
+      if (tabArea) {
+        steps.push({
+          element: tabArea,
+          title: '📺 Video Tab',
+          intro: 'Here you can find all the tabs for your selected course. From the video tab, you can watch your training videos.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 2: Accordion / Section
+      const sectionEl = document.querySelector('.accordion-item');
+      if (sectionEl) {
+        steps.push({
+          element: sectionEl,
+          title: '📂 Course Sections',
+          intro: 'Each section contains a collection of lectures. Click on a section to view the lectures.',
+          position: 'right',
+        });
+      }
+
+      // Step 3: First lecture item
+      const lectureEl = document.querySelector('.fst-lecture-item');
+      if (lectureEl) {
+        steps.push({
+          element: lectureEl,
+          title: '🎬 Lecture',
+          intro: 'Click on a lecture to start watching it.',
+          position: 'right',
+        });
+      }
+
+      if (steps.length === 0) {
+        // Koi element nahi mila, directly mark complete
+        markTourComplete();
+        fastTourStartedRef.current = false;
+        return;
+      }
+
+      const tour = introJs.tour().setOptions({
+        steps,
+        hidePrev: true,
+        nextLabel: 'Next →',
+        prevLabel: '← Back',
+        skipLabel: 'Skip',
+        doneLabel: 'Next →',
+        showProgress: true,
+        showBullets: false,
+        overlayOpacity: 0.8,
+        exitOnOverlayClick: false,
+        exitOnEsc: true,
+        scrollToElement: true,
+        tooltipClass: 'custom-intro-tooltip',
+      });
+
+      tour.oncomplete(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (!userClickedSkip) {
+          // Genuine completion — user clicked Done/Next on last step
+          tourDone = true;
+        }
+        fastTourStartedRef.current = false;
+      });
+      tour.onexit(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (tourDone) {
+          // Completed all steps — continue tour on IQ Vault page
+          navigate('/iq-vault', { state: { continueTour: true } });
+        } else {
+          // User clicked Skip — do NOT reset ref (prevents restart if deps change)
+          markTourComplete();
+        }
+      });
+
+      document.addEventListener('click', handleSkipClick, true); // capture phase
+      tour.start();
+    }, 800);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleSkipClick, true);
+      // ❌ Do NOT reset ref here — StrictMode double-invoke would re-trigger the tour
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.state?.continueTour, isCategoryLoading, currentCourse, lecture]);
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);
@@ -322,11 +459,11 @@ export default function FastStartTraining() {
                               key={c._id}
                               title={`${index + 1}. ${c.title}`}
                             >
-                              {c?.lectures?.map((t) => (
+                              {c?.lectures?.map((t, lIdx) => (
                                 <div
                                   key={t._id}
                                   onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
-                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
+                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition ${lIdx === 0 && index === 0 ? 'fst-lecture-item' : ''}
                                    ${activeLectureId === t._id
                                       ? "bg-gray-300 dark:bg-slate-800"
                                       : "hover:bg-gray-50 dark:hover:bg-slate-900"
@@ -379,7 +516,7 @@ export default function FastStartTraining() {
               <div className="md:col-span-2 order-1 md:order-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <div className="flex gap-3 sm:gap-6 flex-wrap">
+                    <div className="flex gap-3 sm:gap-6 flex-wrap fst-tab-area">
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}

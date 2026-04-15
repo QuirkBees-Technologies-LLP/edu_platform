@@ -1,12 +1,16 @@
 import { CirclePlay } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import { Accordion, AccordionItem } from "@/components/accordion";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import ShowMoreLess from "../../../components/ui/showmoreless";
+import { useAuthContext } from "@/auth";
+import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
 
 export default function IqVault() {
   const [activeTab, setActiveTab] = useState("");
@@ -15,13 +19,30 @@ export default function IqVault() {
   const [category, setCategory] = useState();
   const [activeLectureId, setActiveLectureId] = useState(null);
 
+  const { auth, saveAuth } = useAuthContext();
+  const [completeTour] = useCompleteTourMutation();
+  const iqVaultTourStartedRef = useRef(false);
+  const navigate = useNavigate();
+
+  // Mark tour complete in backend & update auth context
+  const markTourComplete = useCallback(async () => {
+    try {
+      await completeTour().unwrap();
+      if (auth) {
+        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
+      }
+    } catch (err) {
+      console.error("Failed to mark tour complete:", err);
+    }
+  }, [completeTour, auth, saveAuth]);
+
   const selectedLanguage = useSelector(selectSelectedLanguage);
 
   const handleClick = (id) => {
     setId(id); // or simply: id, based on your API setup
   };
-  const { search } = useLocation();
-  const params = new URLSearchParams(search);
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
 
   const mainSection = params.get("mainSection");
   const language = params.get("language");
@@ -181,6 +202,133 @@ export default function IqVault() {
       setActiveLectureId(null); // reset active lecture
     }
   }, [categoryName]);
+
+  // ─── IQ Vault Tour (continued from FastStartTraining) ────────────────────
+  useEffect(() => {
+    const shouldContinueTour = location?.state?.continueTour === true;
+    if (!shouldContinueTour) return;
+    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
+    if (iqVaultTourStartedRef.current) return;
+    if (isCategoryLoading) return;
+
+    // Wait until at least tabs are available in data
+    const hasTabs = Array.isArray(data?.categories) && data.categories.length > 0;
+    if (!hasTabs) return;
+
+    // Also wait for upcoming course section if it will be rendered
+    const hasUpcoming = Array.isArray(data?.upcomingCourse);
+    if (!hasUpcoming) return;
+
+    iqVaultTourStartedRef.current = true;
+
+    // Detect Skip button clicks
+    let tourDone = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+
+    const timer = setTimeout(() => {
+      const steps = [];
+
+      // Step 1: Tab area
+      const tabArea = document.querySelector('.iq-vault-tab-area');
+      if (tabArea) {
+        steps.push({
+          element: tabArea,
+          title: '📑 Course Categories',
+          intro: 'These tabs let you switch between different course categories:\n\n📈 <strong>Trading</strong> — Forex, Crypto, and market strategies\n📣 <strong>Digital Marketing</strong> — SEO, paid ads, social media and more\n\nClick any tab to explore its video courses and lessons.',
+          position: 'bottom',
+        });
+      }
+
+      // Step 2: First accordion section
+      const sectionEl = document.querySelector('.accordion-item');
+      if (sectionEl) {
+        steps.push({
+          element: sectionEl,
+          title: '📂 Course Sections',
+          intro: 'Each section groups related lectures together. Click a section to expand it and see the lectures inside.',
+          position: 'right',
+        });
+      }
+
+      // Step 3: First lecture item
+      const lectureEl = document.querySelector('.iq-vault-lecture-item');
+      if (lectureEl) {
+        steps.push({
+          element: lectureEl,
+          title: '🎬 Lecture',
+          intro: 'Click on any lecture to watch it right here. Your progress is saved automatically.',
+          position: 'right',
+        });
+      }
+
+      // Step 4: IQ Vault suggestions / upcoming courses section
+      const vaultSection = document.querySelector('.iq-vault-suggestions-section');
+      if (vaultSection) {
+        steps.push({
+          element: vaultSection,
+          title: '📚 IQ Vault Courses',
+          intro: 'Below the video player you\'ll find the IQ Vault section — a curated list of recommended courses. Use the Experience and Style filters to narrow down courses that match your trading level and approach.',
+          position: 'top',
+        });
+      }
+
+      if (steps.length === 0) {
+        // No elements found — skip ahead to MasterClass
+        iqVaultTourStartedRef.current = false;
+        navigate('/master-class', { state: { continueTour: true } });
+        return;
+      }
+
+      const tour = introJs.tour().setOptions({
+        steps,
+        hidePrev: true,
+        nextLabel: 'Next →',
+        prevLabel: '← Back',
+        skipLabel: 'Skip',
+        doneLabel: 'Continue',
+        showProgress: true,
+        showBullets: false,
+        overlayOpacity: 0.8,
+        exitOnOverlayClick: false,
+        exitOnEsc: true,
+        scrollToElement: true,
+        tooltipClass: 'custom-intro-tooltip',
+      });
+
+      tour.oncomplete(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (!userClickedSkip) {
+          tourDone = true;
+        }
+        iqVaultTourStartedRef.current = false;
+      });
+      tour.onexit(() => {
+        document.removeEventListener('click', handleSkipClick, true);
+        if (tourDone) {
+          // User completed all steps — continue tour on MasterClass page
+          navigate('/master-class', { state: { continueTour: true } });
+        } else {
+          markTourComplete(); // user skipped — do NOT reset ref
+        }
+      });
+
+      document.addEventListener('click', handleSkipClick, true); // capture phase
+      tour.start();
+    }, 800);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleSkipClick, true);
+      // ❌ Do NOT reset ref here — StrictMode double-invoke would re-trigger the tour
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.state?.continueTour, isCategoryLoading, data?.categories]);
+  // ──────────────────────────────────────────────────────────────────────────
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);
@@ -368,8 +516,8 @@ export default function IqVault() {
               {/* Sidebar - Course + Lectures */}
               <div className="order-2 md:order-1 mb-6">
                 {data?.ActiveCategory &&
-                data.ActiveCategory.length > 0 &&
-                activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
+                  data.ActiveCategory.length > 0 &&
+                  activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
                   <>
                     {currentCourse?.length > 0 ? (
                       <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
@@ -382,16 +530,15 @@ export default function IqVault() {
                               key={c._id}
                               title={`${index + 1}. ${c.title}`}
                             >
-                              {c?.lectures?.map((t) => (
+                              {c?.lectures?.map((t, lIdx) => (
                                 <div
                                   key={t._id}
                                   onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
-                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
-                                   ${
-                                     activeLectureId === t._id
-                                       ? "bg-gray-300 dark:bg-slate-800"
-                                       : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                   }`}
+                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition ${lIdx === 0 && currentCourse.indexOf(c) === 0 ? 'iq-vault-lecture-item' : ''}
+                                   ${activeLectureId === t._id
+                                      ? "bg-gray-300 dark:bg-slate-800"
+                                      : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                    }`}
                                 >
                                   <CirclePlay className="mr-2 text-gray-400" />
                                   <span className="text-gray-800 font-medium text-xs">
@@ -440,15 +587,14 @@ export default function IqVault() {
               <div className="md:col-span-2 order-1 md:order-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <div className="flex gap-3 sm:gap-6 flex-wrap">
+                    <div className="flex gap-3 sm:gap-6 flex-wrap iq-vault-tab-area">
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}
-                          className={`pb-4 border-b-2 ${
-                            activeTab === tab._id
-                              ? "border-black dark:border-white text-gray-900"
-                              : "border-transparent text-gray-500 hover:text-gray-900"
-                          }`}
+                          className={`pb-4 border-b-2 ${activeTab === tab._id
+                            ? "border-black dark:border-white text-gray-900"
+                            : "border-transparent text-gray-500 hover:text-gray-900"
+                            }`}
                           onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
@@ -466,8 +612,8 @@ export default function IqVault() {
                       >
                         {/* Dynamic content for active tab */}
                         {data?.ActiveCategory &&
-                        data.ActiveCategory.length > 0 &&
-                        activeTab ===
+                          data.ActiveCategory.length > 0 &&
+                          activeTab ===
                           `${data.ActiveCategory[0]?.categoryId}` ? (
                           currentCourse?.length > 0 && lecture ? (
                             <div className="card">
@@ -572,7 +718,7 @@ export default function IqVault() {
               {data?.ActiveCategory &&
                 data.ActiveCategory.length > 0 &&
                 data?.upcomingCourse?.length > 0 && (
-                  <div className="col-span-full">
+                  <div className="col-span-full iq-vault-suggestions-section">
                     <div className="text-gray-900">
                       <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -595,10 +741,10 @@ export default function IqVault() {
                         <div className="rounded-t-none rounded-b-2xl pb-2 m-6 overflow-x-auto">
                           <div className="flex gap-4 pb-0">
                             {/* Static Course Cards - Optional, not connected to lecture data */}
-                            {data?.upcomingCourse?.map((i) => (
+                            {data?.upcomingCourse?.map((i, idx) => (
                               <div
-                                key={i}
-                                className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
+                                key={i?._id || i?.title}
+                                className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} ${idx === 0 ? 'iq-vault-first-course' : ''}`}
                               >
                                 <div
                                   className="rounded-t-xl overflow-hidden"

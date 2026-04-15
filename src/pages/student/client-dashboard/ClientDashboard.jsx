@@ -49,9 +49,14 @@ const ClientDashboard = () => {
   const swiperRef = React.useRef(null);
   const [completeTour] = useCompleteTourMutation();
 
+  const tourStartedRef = React.useRef(false);
+
   // Mark tour as completed in backend + update auth context
   const markTourComplete = useCallback(async () => {
     try {
+      if (tourStartedRef.current) {
+        tourStartedRef.current = false;
+      }
       await completeTour().unwrap();
       // Update auth context so hasSeenTour becomes true in memory
       if (auth) {
@@ -134,8 +139,6 @@ const ClientDashboard = () => {
     return clean.substring(0, 120);
   };
 
-  const tourStartedRef = React.useRef(false);
-
   useEffect(() => {
     // Show tour if the user is a student and hasSeenTour is false, undefined, or missing
     const user = auth?.user;
@@ -164,7 +167,7 @@ const ClientDashboard = () => {
       intro: `
         <div class="welcome-tour-card">
           <h2 class="text-3xl md:text-5xl font-bold mb-4">Welcome to Your Dashboard, ${auth?.user?.firstName || auth?.user?.name || 'Trader'}!</h2>
-          <p class="text-lg md:text-xl text-gray-100" style="color: #f3f4f6; font-weight: 500;">We're thrilled to have you here. This quick tour will guide you through the key features of your new dashboard so you can get the most out of your experience.</p>
+          <p class="text-lg md:text-xl text-gray-100" style="color: #f3f4f6; font-weight: 500;">We're thrilled to have you here. This quick tour will guide you through the key features of your dashboard — covering both <strong>Trading Education</strong> and <strong>Digital Marketing</strong> so you can get the most out of your experience.</p>
         </div>
       `,
     });
@@ -186,7 +189,7 @@ const ClientDashboard = () => {
       steps.push({
         element: academy,
         title: "IQ Academy",
-        intro: "Access comprehensive courses and master your trading skills from basics to advanced levels.",
+        intro: "Access comprehensive courses covering both <strong>Trading</strong> (Forex, Crypto, strategies) and <strong>Digital Marketing</strong> (SEO, social media, paid ads and more) — from basics to advanced levels.",
         position: 'bottom'
       });
     }
@@ -208,7 +211,7 @@ const ClientDashboard = () => {
       steps.push({
         element: iqLive,
         title: "IQ Live",
-        intro: "Join live trading sessions and interactive webinars directly from here.",
+        intro: "Join live sessions with our expert educators! IQ Live hosts both:\n\n📈 <strong>Live Trading Sessions</strong> — Real-time market analysis and trading education\n📣 <strong>Digital Marketing Training</strong> — Live sessions on SEO, ads, social media and marketing strategy\n\nSwitch between categories to find the live session that suits you.",
         position: 'right'
       });
     }
@@ -219,7 +222,7 @@ const ClientDashboard = () => {
       steps.push({
         element: strategies,
         title: "IQ Strategies",
-        intro: "Access our exclusive vault of advanced trading strategies. Learn how to analyze markets, apply top-tier techniques, and gain an edge in your trading journey.",
+        intro: "Access basic to advanced strategies.",
         position: 'left'
       });
     }
@@ -230,7 +233,7 @@ const ClientDashboard = () => {
       steps.push({
         element: socialCard,
         title: "IQ Social",
-        intro: "Connect with educators and network with other traders in our community.",
+        intro: "Connect with educators and receive their market updates and ideas",
         position: 'left'
       });
     }
@@ -248,13 +251,13 @@ const ClientDashboard = () => {
 
     if (steps.length === 0) return;
 
-    const tour = introJs().setOptions({
+    const tour = introJs.tour().setOptions({
       steps,
       hidePrev: true,
       nextLabel: "Next →",
       prevLabel: "← Back",
       skipLabel: "Skip",
-      doneLabel: "Finish",
+      doneLabel: "Continue →",
       showProgress: true,
       showBullets: false, // Turned off bullets to avoid cluttering next to the progress bar
       overlayOpacity: 0.8,
@@ -279,12 +282,36 @@ const ClientDashboard = () => {
       window.scrollTo({ top: middle, behavior: "smooth" });
     });
 
-    // Mark tour as completed in backend when user finishes or skips
+    // Dashboard tour complete → navigate to FastStartTraining to continue tour there
+    // hasSeenTour is NOT set here — it will be set after FastStartTraining tour finishes
+    let isCompleted = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+    document.addEventListener('click', handleSkipClick, true); // capture phase
+
     tour.oncomplete(() => {
-      markTourComplete();
+      document.removeEventListener('click', handleSkipClick, true);
+      if (!userClickedSkip) {
+        isCompleted = true;
+      }
+      if (tourStartedRef.current) {
+        tourStartedRef.current = false;
+      }
+      // Navigation happens in onexit — which fires after oncomplete too
     });
     tour.onexit(() => {
-      markTourComplete();
+      document.removeEventListener('click', handleSkipClick, true);
+      if (isCompleted) {
+        // User completed all steps — continue tour on FastStartTraining page
+        navigate('/fast-start-training', { state: { continueTour: true } });
+      } else {
+        // User clicked Skip — end the entire tour chain
+        markTourComplete();
+      }
     });
 
     tour.start();

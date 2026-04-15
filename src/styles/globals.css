@@ -121,9 +121,9 @@
 }
 
 .custom-intro-tooltip .introjs-button:hover {
-  background: rgba(246, 174, 92, 0.4) !important;
+  background: rgba(3, 70, 253, 0.4) !important;
   color: #ffffff !important;
-  box-shadow: 0 0 10px rgba(246, 174, 92, 0.4) !important;
+  box-shadow: 0 0 10px rgba(3, 70, 253, 0.4) !important;
 }
 
 /* Buttons Container */
