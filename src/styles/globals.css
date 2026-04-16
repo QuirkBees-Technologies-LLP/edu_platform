@@ -197,7 +197,8 @@
 
 .introjs-floating .introjs-tooltiptext {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
   height: 100%;
 }

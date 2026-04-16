@@ -1,5 +1,5 @@
 import { CirclePlay } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetAcademyCategoryByMainSectionQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
@@ -8,9 +8,7 @@ import { Accordion, AccordionItem } from "@/components/accordion";
 import { useLocation, useNavigate } from "react-router";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
+import { useTourStep } from "@/hooks/useTourStep";
 
 export default function IqVault() {
   const [activeTab, setActiveTab] = useState("");
@@ -19,22 +17,8 @@ export default function IqVault() {
   const [category, setCategory] = useState();
   const [activeLectureId, setActiveLectureId] = useState(null);
 
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
-  const iqVaultTourStartedRef = useRef(false);
+  const { auth } = useAuthContext();
   const navigate = useNavigate();
-
-  // Mark tour complete in backend & update auth context
-  const markTourComplete = useCallback(async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) {
-        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-      }
-    } catch (err) {
-      console.error("Failed to mark tour complete:", err);
-    }
-  }, [completeTour, auth, saveAuth]);
 
   const selectedLanguage = useSelector(selectSelectedLanguage);
 
@@ -202,133 +186,29 @@ export default function IqVault() {
       setActiveLectureId(null); // reset active lecture
     }
   }, [categoryName]);
+  // ─── IQ Vault Tour (continued from FastStartTraining) ──────────────────────
 
-  // ─── IQ Vault Tour (continued from FastStartTraining) ────────────────────
-  useEffect(() => {
-    const shouldContinueTour = location?.state?.continueTour === true;
-    if (!shouldContinueTour) return;
-    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-    if (iqVaultTourStartedRef.current) return;
-    if (isCategoryLoading) return;
-
-    // Wait until at least tabs are available in data
-    const hasTabs = Array.isArray(data?.categories) && data.categories.length > 0;
-    if (!hasTabs) return;
-
-    // Also wait for upcoming course section if it will be rendered
-    const hasUpcoming = Array.isArray(data?.upcomingCourse);
-    if (!hasUpcoming) return;
-
-    iqVaultTourStartedRef.current = true;
-
-    // Detect Skip button clicks
-    let tourDone = false;
-    let userClickedSkip = false;
-    const handleSkipClick = (e) => {
-      if (e.target.closest?.('.introjs-skipbutton')) {
-        userClickedSkip = true;
-      }
-    };
-
-    const timer = setTimeout(() => {
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isCategoryLoading &&
+      Array.isArray(data?.categories) && data.categories.length > 0 &&
+      Array.isArray(data?.upcomingCourse),
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: Tab area
       const tabArea = document.querySelector('.iq-vault-tab-area');
-      if (tabArea) {
-        steps.push({
-          element: tabArea,
-          title: '📑 Course Categories',
-          intro: 'These tabs let you switch between different course categories:\n\n📈 <strong>Trading</strong> — Forex, Crypto, and market strategies\n📣 <strong>Digital Marketing</strong> — SEO, paid ads, social media and more\n\nClick any tab to explore its video courses and lessons.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2: First accordion section
+      if (tabArea) steps.push({ element: tabArea, title: '📑 Course Categories', intro: 'Switch between subject areas using these tabs. Each tab shows courses for a different topic like Trading or Digital Marketing.', position: 'bottom' });
       const sectionEl = document.querySelector('.accordion-item');
-      if (sectionEl) {
-        steps.push({
-          element: sectionEl,
-          title: '📂 Course Sections',
-          intro: 'Each section groups related lectures together. Click a section to expand it and see the lectures inside.',
-          position: 'right',
-        });
-      }
-
-      // Step 3: First lecture item
+      if (sectionEl) steps.push({ element: sectionEl, title: '📂 Course Sections', intro: 'Lectures are grouped into sections. Click a section to expand it and see the individual lectures inside.', position: 'right' });
       const lectureEl = document.querySelector('.iq-vault-lecture-item');
-      if (lectureEl) {
-        steps.push({
-          element: lectureEl,
-          title: '🎬 Lecture',
-          intro: 'Click on any lecture to watch it right here. Your progress is saved automatically.',
-          position: 'right',
-        });
-      }
-
-      // Step 4: IQ Vault suggestions / upcoming courses section
+      if (lectureEl) steps.push({ element: lectureEl, title: '🎬 Watch a Lecture', intro: 'Click any lecture to play it in the video player. Your progress is saved automatically.', position: 'right' });
       const vaultSection = document.querySelector('.iq-vault-suggestions-section');
-      if (vaultSection) {
-        steps.push({
-          element: vaultSection,
-          title: '📚 IQ Vault Courses',
-          intro: 'Below the video player you\'ll find the IQ Vault section — a curated list of recommended courses. Use the Experience and Style filters to narrow down courses that match your trading level and approach.',
-          position: 'top',
-        });
-      }
-
-      if (steps.length === 0) {
-        // No elements found — skip ahead to MasterClass
-        iqVaultTourStartedRef.current = false;
-        navigate('/master-class', { state: { continueTour: true } });
-        return;
-      }
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Continue',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      tour.oncomplete(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!userClickedSkip) {
-          tourDone = true;
-        }
-        iqVaultTourStartedRef.current = false;
-      });
-      tour.onexit(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (tourDone) {
-          // User completed all steps — continue tour on MasterClass page
-          navigate('/master-class', { state: { continueTour: true } });
-        } else {
-          markTourComplete(); // user skipped — do NOT reset ref
-        }
-      });
-
-      document.addEventListener('click', handleSkipClick, true); // capture phase
-      tour.start();
-    }, 800);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleSkipClick, true);
-      // ❌ Do NOT reset ref here — StrictMode double-invoke would re-trigger the tour
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, isCategoryLoading, data?.categories]);
-  // ──────────────────────────────────────────────────────────────────────────
+      if (vaultSection) steps.push({ element: vaultSection, title: '📚 IQ Vault Extra Courses', intro: 'Browse additional recommended courses below the video player. Use the <strong>Experience</strong> and <strong>Style</strong> filters to find courses that match your level and learning approach.', position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/master-class', { state: { continueTour: true } }),
+    delay: 800,
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);

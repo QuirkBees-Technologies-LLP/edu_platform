@@ -4,9 +4,7 @@ import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
+import { useTourStep } from "@/hooks/useTourStep";
 import {
   Loader2,
   CirclePlay,
@@ -133,8 +131,7 @@ const MasterClassForStudent = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
+  const { auth } = useAuthContext();
   const masterClassTourStartedRef = useRef(false);
 
   const { data: categoryData, isLoading: isCategoryLoading } =
@@ -152,16 +149,7 @@ const MasterClassForStudent = () => {
   const { data: educatorsData } = useGetAllEducatorsQuery();
 
   // Mark tour complete in backend & update auth context
-  const markTourComplete = useCallback(async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) {
-        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-      }
-    } catch (err) {
-      console.error("Failed to mark tour complete:", err);
-    }
-  }, [completeTour, auth, saveAuth]);
+  // Now handled internally by useTourStep hook
 
   // ==================== API CALLS ====================
   // Fetch all strategies
@@ -223,122 +211,27 @@ const MasterClassForStudent = () => {
     }
   }, [currentStrategy]);
 
-  // ─── MasterClass Tour (final step of User Guide) ─────────────────────────
-  useEffect(() => {
-    const shouldContinueTour = location?.state?.continueTour === true;
-    if (!shouldContinueTour) return;
-    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-    if (masterClassTourStartedRef.current) return;
-    if (strategiesLoading) return;
-
-    masterClassTourStartedRef.current = true;
-
-    // Detect Skip button clicks
-    let tourDone = false;
-    let userClickedSkip = false;
-    const handleSkipClick = (e) => {
-      if (e.target.closest?.('.introjs-skipbutton')) {
-        userClickedSkip = true;
-      }
-    };
-
-    const timer = setTimeout(() => {
+  // ─── MasterClass Tour (continued from IqVault) ─────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !strategiesLoading,
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: Highlight the banner / page header area
-      const bannerEl = document.querySelector('.masterclass-banner');
-      if (bannerEl) {
-        steps.push({
-          element: bannerEl,
-          title: '🎓 Master Class',
-          intro: 'Welcome to the Master Class section! Here you will find in-depth courses taught by professional educators — covering both <strong>Trading Strategies</strong> (Forex, Crypto, price action and more) and <strong>Digital Marketing</strong> (SEO, paid ads, social media marketing and more).',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2 : Highlight the Strategy filter
+      steps.push({
+        title: '🎓 Master Class',
+        intro: '<div>Welcome to the <strong>Master Class</strong> section! This is where you get deep, structured learning from professional educators.<br><br>Browse courses on <strong>Forex, Crypto, and Digital Marketing</strong> each one packed with video lessons and expert strategies.</div>',
+      });
       const strategyFilter = document.querySelector('.strategy-filter');
-      if (strategyFilter) {
-        steps.push({
-          element: strategyFilter,
-          title: 'Strategy Filter',
-          intro: 'Filter Master Classes by strategy.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3 : Highlight the Category filter
+      if (strategyFilter) steps.push({ element: strategyFilter, title: '🎯 Strategy Filter', intro: 'Filter courses by strategy type to quickly find the approach that fits your trading or marketing style.', position: 'bottom' });
       const categoryFilter = document.querySelector('.category-filter');
-      if (categoryFilter) {
-        steps.push({
-          element: categoryFilter,
-          title: '🗂️ Category Filter — Trading & Digital Marketing',
-          intro: 'Use the category tabs to switch between:\n\n📈 <strong>Trading categories</strong> — Forex, Crypto and more\n📣 <strong>Digital Marketing</strong> — SEO, ads, social media strategy and more\n\nEach category has its own set of Master Class courses.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 4: First MasterClass card
+      if (categoryFilter) steps.push({ element: categoryFilter, title: '🗂️ Category Filter', intro: 'Switch between course categories using these tabs choose <strong>Trading</strong> (Forex, Crypto) or <strong>Digital Marketing</strong> to see the relevant Master Classes.', position: 'bottom' });
       const firstCard = document.querySelector('.masterclass-card');
-      if (firstCard) {
-        steps.push({
-          element: firstCard,
-          title: '📚 Course Card',
-          intro: 'Click on any Master Class card to dive deep into a course. Each course includes video lectures and detailed explanations — whether it is a trading strategy or a digital marketing skill.',
-          position: 'bottom',
-        });
-      }
-
-      if (steps.length === 0) {
-        markTourComplete();
-        masterClassTourStartedRef.current = false;
-        return;
-      }
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Continue',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      tour.oncomplete(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!userClickedSkip) {
-          tourDone = true;
-        }
-        masterClassTourStartedRef.current = false;
-      });
-      tour.onexit(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (tourDone) {
-          // User completed all steps — continue tour to IQ Academy
-          navigate('/iq-academy', { state: { continueTour: true } });
-        } else {
-          markTourComplete(); // user skipped — do NOT reset ref
-        }
-      });
-
-      document.addEventListener('click', handleSkipClick, true); // capture phase
-      tour.start();
-    }, 800);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleSkipClick, true);
-      // ❌ Do NOT reset ref here — StrictMode double-invoke would re-trigger the tour
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, strategiesLoading]);
+      if (firstCard) steps.push({ element: firstCard, title: '📚 Course Card', intro: 'Click a card to open the course and start watching. Each course contains structured video lectures with step-by-step explanations.', position: 'bottom' });
+      return steps;
+    },
+    onDone: () => navigate('/iq-academy', { state: { continueTour: true } }),
+    delay: 800,
+  });
   // ─────────────────────────────────────────────────────────────────────────────
 
   // ==================== EVENT HANDLERS ====================

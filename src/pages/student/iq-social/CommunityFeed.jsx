@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import { useTourStep } from "@/hooks/useTourStep";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { usePostQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import SocialPostCard from "./SocialPostCard";
@@ -36,18 +34,7 @@ const CommunityFeed = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const socialTourStartedRef = useRef(false);
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
-
-  const markTourComplete = async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-    } catch (err) {
-      console.error('Failed to mark tour complete:', err);
-    }
-  };
+  const { auth } = useAuthContext();
 
   const { data, isLoading, isFetching, isError } = usePostQuery(
     { page, limit, socialType }
@@ -75,111 +62,26 @@ const CommunityFeed = () => {
     }
   }, [data]);
 
-  // ─── IQ Social Tour (ABSOLUTE FINAL STOP) ─────────────────────────────────────────────────────
-  useEffect(() => {
-    const shouldStart = location?.state?.continueTour === true;
-    if (!shouldStart) return;
-    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-    if (socialTourStartedRef.current) return;
-    if (isLoading) return;
-
-    socialTourStartedRef.current = true;
-
-    // Detect Skip button clicks
-    let tourDone = false;
-    let userClickedSkip = false;
-    const handleSkipClick = (e) => {
-      if (e.target.closest?.('.introjs-skipbutton')) {
-        userClickedSkip = true;
-      }
-    };
-
-    const timer = setTimeout(() => {
+  // ─── IQ Social Tour (ABSOLUTE FINAL STOP) ──────────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading,
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: Page title/toolbar
       const toolbar = document.querySelector('.social-toolbar');
-      if (toolbar) {
-        steps.push({
-          element: toolbar,
-          title: '📰 IQ Social',
-          intro: 'Welcome to IQ Social! This is the community hub where educators and students share insights, trading updates, and market commentary in real time.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2: Post type filter
+      if (toolbar) steps.push({ element: toolbar, title: '📰 IQ Social', intro: 'Welcome to IQ Social the community hub where educators and students share real-time market insights, updates, and announcements.', position: 'bottom' });
       const filterSelect = document.querySelector('.social-type-filter');
-      if (filterSelect) {
-        steps.push({
-          element: filterSelect,
-          title: '🏷️ Filter by Type',
-          intro: 'Filter posts by type: Social posts from educators, or Corporate announcements from the platform. Switch between them to find what matters to you.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3: First post card
+      if (filterSelect) steps.push({ element: filterSelect, title: '🏷️ Filter Posts', intro: 'Use this dropdown to filter posts by type: <strong>Social</strong> (from educators) or <strong>Corporate</strong> (platform announcements). Leave it as default to see all posts.', position: 'bottom' });
       const firstPost = document.querySelector('.social-first-post');
-      if (firstPost) {
-        steps.push({
-          element: firstPost,
-          title: '💬 Community Post',
-          intro: 'Each post shows the educator or team member, the content, and engagement options. Like, comment, and engage with the community directly from here.',
-          position: 'bottom',
-        });
-      }
-
-      if (steps.length === 0) {
-        markTourComplete();
-        socialTourStartedRef.current = false;
-        return;
-      }
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Finish Tour ✓',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      tour.oncomplete(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!userClickedSkip) {
-          tourDone = true;
-        }
-        socialTourStartedRef.current = false;
-        markTourComplete(); // ✅ ABSOLUTE FINAL STOP
-      });
-      tour.onexit(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!tourDone) {
-          // User clicked Skip — do NOT reset ref (prevents restart during API call)
-          markTourComplete();
-        }
-      });
-
-      document.addEventListener('click', handleSkipClick, true); // capture phase
-      tour.start();
-    }, 1000);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleSkipClick, true);
-      // ❌ Do NOT reset ref here — StrictMode double-invoke would re-trigger the tour
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, isLoading]);
-  // ──────────────────────────────────────────────────────────────────────────────
+      if (firstPost) steps.push({ element: firstPost, title: '💬 Community Post', intro: 'Each post shows the educator or team member, the content, and engagement options. You can like and comment to interact with the community.', position: 'bottom' });
+      return steps;
+    },
+    onDone: () => { }, // Final stop — no next page
+    isFinalStep: true, // ✔ Triggers markTourComplete in onexit
+    doneLabel: 'Finish Tour ✓',
+    delay: 1000,
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
 
 

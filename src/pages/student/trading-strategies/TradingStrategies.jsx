@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import introJs from 'intro.js';
-import 'intro.js/introjs.css';
 import { useAuthContext } from '@/auth';
-import { useCompleteTourMutation } from '../../../store/api/client/clientProfileApiSlice';
+import { useTourStep } from '@/hooks/useTourStep';
 import { toast } from 'sonner';
 import { Container } from '@/components/container';
 import { useGetAdminStrategyListQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery, useGetStrategyByNameMutation } from '@/store/api/client/clientStrategiesApiSlice';
@@ -138,18 +136,7 @@ const TradingStrategies = () => {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const stratTourStartedRef = useRef(false);
-    const { auth, saveAuth } = useAuthContext();
-    const [completeTour] = useCompleteTourMutation();
-
-    const markTourComplete = useCallback(async () => {
-        try {
-            await completeTour().unwrap();
-            if (auth) saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-        } catch (err) {
-            console.error('Failed to mark tour complete:', err);
-        }
-    }, [completeTour, auth, saveAuth]);
+    const { auth } = useAuthContext();
 
     // Get selected language from Redux
     const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery(modalStrategyId, {
@@ -215,122 +202,22 @@ const TradingStrategies = () => {
     // }, [strategies, selectedStrategyId]);
 
     // ─── Trading Strategies Tour ──────────────────────────────────────────────────────────
-    useEffect(() => {
-        const shouldStart = location?.state?.continueTour === true;
-        if (!shouldStart) return;
-        if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-        if (stratTourStartedRef.current) return;
-        if (strategiesLoading) return;
-
-        stratTourStartedRef.current = true;
-
-        // Detect Skip button clicks
-        let tourDone = false;
-        let userClickedSkip = false;
-        const handleSkipClick = (e) => {
-            if (e.target.closest?.('.introjs-skipbutton')) {
-                userClickedSkip = true;
-            }
-        };
-
-        const timer = setTimeout(() => {
+    useTourStep({
+        shouldStart: location?.state?.continueTour === true,
+        isReady: !strategiesLoading,
+        getSteps: () => {
             const steps = [];
-
-            // Step 1: Banner
             const banner = document.querySelector('.ts-banner');
-            if (banner) {
-                steps.push({
-                    element: banner,
-                    title: '📊 Trading Strategies',
-                    intro: 'Welcome to the Trading Strategies section! Here you can explore in-depth strategies created and taught by our professional educators.',
-                    position: 'bottom',
-                });
-            }
-
-            // Step 2: Available Strategies heading
-            // const stratHeading = document.querySelector('.ts-strat-heading');
-            // if (stratHeading) {
-            //     steps.push({
-            //         element: stratHeading,
-            //         title: '📁 Available Strategies',
-            //         intro: 'Browse all available trading strategies. Each strategy card shows the title, market category (Forex, Crypto, etc.), and a short description.',
-            //         position: 'bottom',
-            //     });
-            // }
-
-            // Step 3: First strategy card
+            if (banner) steps.push({ element: banner, title: '📊 Trading Strategies', intro: 'Explore structured trading strategies from professional educators. Each strategy comes with video lessons and detailed explanations.', position: 'bottom' });
             const firstCard = document.querySelector('.ts-first-card');
-            if (firstCard) {
-                steps.push({
-                    element: firstCard,
-                    title: '🎯 Strategy Card',
-                    intro: 'Each card represents a complete trading strategy with lessons. Click the card to preview it, or use the button below to start learning.',
-                    position: 'right',
-                });
-            }
-
-            // Step 4: Start Learning button
+            if (firstCard) steps.push({ element: firstCard, title: '🎯 Strategy Card', intro: 'Each card shows a trading strategy with a description and category. Click the card to preview it, or hit <strong>Start Learning</strong> below to begin.', position: 'right' });
             const startBtn = document.querySelector('.ts-start-btn');
-            if (startBtn) {
-                steps.push({
-                    element: startBtn,
-                    title: '▶️ Start Learning',
-                    intro: 'Click Start Learning to select a language and immediately begin studying this strategy with structured video lessons.',
-                    position: 'top',
-                });
-            }
-
-            if (steps.length === 0) {
-                navigate('/iq-social', { state: { continueTour: true } });
-                stratTourStartedRef.current = false;
-                return;
-            }
-
-            const tour = introJs.tour().setOptions({
-                steps,
-                hidePrev: true,
-                nextLabel: 'Next →',
-                prevLabel: '← Back',
-                skipLabel: 'Skip',
-                doneLabel: 'Next →',
-                showProgress: true,
-                showBullets: false,
-                overlayOpacity: 0.8,
-                exitOnOverlayClick: false,
-                exitOnEsc: true,
-                scrollToElement: true,
-                tooltipClass: 'custom-intro-tooltip',
-            });
-
-            tour.oncomplete(() => {
-                document.removeEventListener('click', handleSkipClick, true);
-                if (!userClickedSkip) {
-                    tourDone = true;
-                }
-                stratTourStartedRef.current = false;
-            });
-            tour.onexit(() => {
-                document.removeEventListener('click', handleSkipClick, true);
-                if (tourDone) {
-                    // User completed all steps — continue tour to IQ Social
-                    navigate('/iq-social', { state: { continueTour: true } });
-                } else {
-                    // User clicked Skip — do NOT reset ref
-                    markTourComplete();
-                }
-            });
-
-            document.addEventListener('click', handleSkipClick, true); // capture phase
-            tour.start();
-        }, 1000);
-
-        return () => {
-            clearTimeout(timer);
-            document.removeEventListener('click', handleSkipClick, true);
-            // ❌ Do NOT reset ref here
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location?.state?.continueTour, strategiesLoading]);
+            if (startBtn) steps.push({ element: startBtn, title: '▶️ Start Learning', intro: 'Click <strong>Start Learning</strong> to choose your preferred language and begin the strategy course immediately.', position: 'top' });
+            return steps;
+        },
+        onDone: () => navigate('/iq-social', { state: { continueTour: true } }),
+        delay: 1000,
+    });
     // ─────────────────────────────────────────────────────────────────────────────────
 
     // ==================== EVENT HANDLERS ====================

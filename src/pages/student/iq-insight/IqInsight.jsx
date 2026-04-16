@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import { useTourStep } from "@/hooks/useTourStep";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
 import {
@@ -105,18 +103,7 @@ const IqInsight = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const insightTourStartedRef = useRef(false);
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
-
-  const markTourComplete = useCallback(async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-    } catch (err) {
-      console.error('Failed to mark tour complete:', err);
-    }
-  }, [completeTour, auth, saveAuth]);
+  const { auth } = useAuthContext();
 
   const observer = useRef();
 
@@ -173,125 +160,25 @@ const IqInsight = () => {
     setIsViewOpen(false);
   };
 
-  // ─── IQ Insight Tour ───────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const shouldStart = location?.state?.continueTour === true;
-    if (!shouldStart) return;
-    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-    if (insightTourStartedRef.current) return;
-    // ⏳ Only block on isLoading — NOT isFetching.
-    // isFetching=true on mount but is NOT in deps → effect never re-runs when it clears.
-    if (isLoading) return;
-
-    insightTourStartedRef.current = true;
-
-    // Detect Skip button clicks
-    let tourDone = false;
-    let userClickedSkip = false;
-    const handleSkipClick = (e) => {
-      if (e.target.closest?.('.introjs-skipbutton')) {
-        userClickedSkip = true;
-      }
-    };
-
-    const timer = setTimeout(() => {
+  // ─── IQ Insight Tour ───────────────────────────────────────────────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading,
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: Market filter tabs
       const marketFilter = document.querySelector('.insight-market-filter');
-      if (marketFilter) {
-        steps.push({
-          element: marketFilter,
-          title: '🌐 Market Filter',
-          intro: 'Switch between markets: All, Forex, or Crypto. This filters the insights to show only analysis relevant to your chosen market.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2: Educator selector
+      if (marketFilter) steps.push({ element: marketFilter, title: '🌐 Market Filter', intro: 'Filter insights by market choose <strong>All, Forex, or Crypto</strong> to see only analysis relevant to that market.', position: 'bottom' });
       const educatorFilter = document.querySelector('.insight-educator-filter');
-      if (educatorFilter) {
-        steps.push({
-          element: educatorFilter,
-          title: '👨‍🏫 Filter by Educator',
-          intro: 'Select a specific educator to show only their market insights and analysis.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3: Search bar
+      if (educatorFilter) steps.push({ element: educatorFilter, title: '👨‍🏫 Filter by Educator', intro: 'Select a specific educator from the dropdown to view only their market insights and analysis posts.', position: 'bottom' });
       const searchBar = document.querySelector('.insight-search');
-      if (searchBar) {
-        steps.push({
-          element: searchBar,
-          title: '🔎 Search Insights',
-          intro: 'Search for specific currency pairs, keywords, or topics across all market analysis posts.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 4: First insight card
+      if (searchBar) steps.push({ element: searchBar, title: '🔎 Search Insights', intro: 'Search for specific currency pairs, topics, or keywords to find relevant market analysis posts.', position: 'bottom' });
       const firstCard = document.querySelector('.insight-first-card');
-      if (firstCard) {
-        steps.push({
-          element: firstCard,
-          title: '📊 Market Analysis Card',
-          intro: 'Each card shows a market analysis post with the educator\'s name, date, title, and a preview of their analysis. Click View Details to read the full post.',
-          position: 'right',
-        });
-      }
-
-      if (steps.length === 0) {
-        navigate('/live-ideas', { state: { continueTour: true } });
-        insightTourStartedRef.current = false;
-        return;
-      }
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Next →',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      tour.oncomplete(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!userClickedSkip) {
-          tourDone = true;
-        }
-        insightTourStartedRef.current = false;
-      });
-      tour.onexit(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (tourDone) {
-          // User completed all steps — continue tour on Live Ideas page
-          navigate('/live-ideas', { state: { continueTour: true } });
-        } else {
-          // User clicked Skip — do NOT reset ref
-          markTourComplete();
-        }
-      });
-
-      document.addEventListener('click', handleSkipClick, true); // capture phase
-      tour.start();
-    }, 1000);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleSkipClick, true);
-      // ❌ Do NOT reset ref here
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, isLoading]);
+      if (firstCard) steps.push({ element: firstCard, title: '📊 Market Analysis Card', intro: 'Each card shows a market analysis post from an educator including their name, post date, title, and a content preview. Click <strong>View Details</strong> to read the full analysis.', position: 'right' });
+      return steps;
+    },
+    onDone: () => navigate('/live-ideas', { state: { continueTour: true } }),
+    delay: 1000,
+  });
   // ─────────────────────────────────────────────────────────────────────────────────
   const handleCloseImageView = () => {
     setSelectedIdea({});

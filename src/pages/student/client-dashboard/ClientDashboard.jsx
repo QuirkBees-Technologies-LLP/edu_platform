@@ -163,11 +163,11 @@ const ClientDashboard = () => {
 
     // Step 1: Welcome Card in center
     steps.push({
-      title: "Welcome to IQonic!",
+      title: "Welcome to IQonic! 👋",
       intro: `
-        <div class="welcome-tour-card">
+         <div class="welcome-tour-card">
           <h2 class="text-3xl md:text-5xl font-bold mb-4">Welcome to Your Dashboard, ${auth?.user?.firstName || auth?.user?.name || 'Trader'}!</h2>
-          <p class="text-lg md:text-xl text-gray-100" style="color: #f3f4f6; font-weight: 500;">We're thrilled to have you here. This quick tour will guide you through the key features of your dashboard — covering both <strong>Trading Education</strong> and <strong>Digital Marketing</strong> so you can get the most out of your experience.</p>
+          <p class="text-lg md:text-xl text-gray-100" style="color: #f3f4f6; font-weight: 500;">We're thrilled to have you here. This quick tour will guide you through the key features of your dashboard covering both <strong>Trading Education</strong> and <strong>Digital Marketing</strong> so you can get the most out of your experience.</p>
         </div>
       `,
     });
@@ -177,8 +177,8 @@ const ClientDashboard = () => {
     if (live) {
       steps.push({
         element: live,
-        title: "Live Educators",
-        intro: "Join live sessions with top educators happening right now.",
+        title: "📡 Live Now",
+        intro: "If an educator is streaming right now, they'll show up here.<br><br>Tap any card to jump straight into their live session.",
         position: 'right'
       });
     }
@@ -188,8 +188,8 @@ const ClientDashboard = () => {
     if (academy) {
       steps.push({
         element: academy,
-        title: "IQ Academy",
-        intro: "Access comprehensive courses covering both <strong>Trading</strong> (Forex, Crypto, strategies) and <strong>Digital Marketing</strong> (SEO, social media, paid ads and more) — from basics to advanced levels.",
+        title: "🎓 IQ Academy",
+        intro: "This is your course library structured lessons on <strong>Forex</strong>, <strong>Crypto</strong>, and <strong>Digital Marketing</strong>.<br><br>Everything from beginner fundamentals to advanced techniques, all in one place.",
         position: 'bottom'
       });
     }
@@ -199,8 +199,8 @@ const ClientDashboard = () => {
     if (fast) {
       steps.push({
         element: fast,
-        title: "Fast Start Training",
-        intro: "Begin your journey here. We'll guide you through the whole process step-by-step.",
+        title: "⚡ Fast Start Training",
+        intro: "Best place to start if you're new.<br><br>Short, focused video lessons that walk you through the basics so you can get up to speed fast.",
         position: 'left'
       });
     }
@@ -210,8 +210,8 @@ const ClientDashboard = () => {
     if (iqLive) {
       steps.push({
         element: iqLive,
-        title: "IQ Live",
-        intro: "Join live sessions with our expert educators! IQ Live hosts both:\n\n📈 <strong>Live Trading Sessions</strong> — Real-time market analysis and trading education\n📣 <strong>Digital Marketing Training</strong> — Live sessions on SEO, ads, social media and marketing strategy\n\nSwitch between categories to find the live session that suits you.",
+        title: "📅 IQ Live Scheduled Sessions",
+        intro: "See what's coming up across the platform.<br><br>Browse scheduled live sessions for <strong>Trading</strong> (Forex, Crypto, market analysis) or <strong>Digital Marketing</strong> and join when they go live.",
         position: 'right'
       });
     }
@@ -221,8 +221,8 @@ const ClientDashboard = () => {
     if (strategies) {
       steps.push({
         element: strategies,
-        title: "IQ Strategies",
-        intro: "Access basic to advanced strategies.",
+        title: "📊 IQ Strategies",
+        intro: "Each strategy here comes from one of our educators, complete with video breakdowns.<br><br>Pick one that matches your style  whether you're just starting out or looking to level up.",
         position: 'left'
       });
     }
@@ -232,8 +232,8 @@ const ClientDashboard = () => {
     if (socialCard) {
       steps.push({
         element: socialCard,
-        title: "IQ Social",
-        intro: "Connect with educators and receive their market updates and ideas",
+        title: "💬 IQ Social",
+        intro: "Your direct line to the educators you follow.<br><br>Market insights, trade ideas, and platform announcements all in a single feed.",
         position: 'left'
       });
     }
@@ -243,8 +243,8 @@ const ClientDashboard = () => {
     if (socialFeed) {
       steps.push({
         element: socialFeed,
-        title: "Live Activity Feed",
-        intro: "Stay updated with the latest posts and announcements from corporate and the social community.",
+        title: "📰 Activity Feed",
+        intro: "The latest posts from educators and the IQonic team show up here in real time.<br><br>Scroll through to stay in the loop.",
         position: 'right'
       });
     }

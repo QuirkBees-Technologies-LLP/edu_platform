@@ -23,10 +23,8 @@ import { useNavigate, useLocation } from "react-router";
 import { toast } from "sonner";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import { toAbsoluteUrl } from "@/utils/Assets";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import { useTourStep } from "@/hooks/useTourStep";
 
 const safeArray = (val) => (Array.isArray(val) ? val : []);
 
@@ -74,9 +72,7 @@ const EducatorCardSkeleton = () => {
 const IqAcademyEducators = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
-  const educatorsTourStartedRef = useRef(false);
+  const { auth } = useAuthContext();
 
   const [activeTab, setActiveTab] = useState("all");
   const [searchText, setSearchText] = useState("");
@@ -207,165 +203,30 @@ const IqAcademyEducators = () => {
     // RTK Query automatically re-fetches when query args (activeTab, category, searchText) change
     // No need to manually call refetch() here — it causes double requests
   }, [activeTab, category, searchText]);
-
-  // Mark tour complete in backend & update auth context
-  const markTourComplete = useCallback(async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) {
-        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-      }
-    } catch (err) {
-      console.error('Failed to mark tour complete:', err);
-    }
-  }, [completeTour, auth, saveAuth]);
-
-  // ─── Educators Tour (FINAL stop of User Guide) ─────────────────────────────
-  useEffect(() => {
-    const shouldContinueTour = location?.state?.continueTour === true;
-    if (!shouldContinueTour) return;
-    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-    if (educatorsTourStartedRef.current) return;
-
-    // ⏳ Wait until educator list has actually loaded — cards must be in the DOM
-    if (isLoading || isFetching) return;
-    if (educatorList.length === 0) return;
-
-    // Only lock the ref AFTER we know data is ready
-    educatorsTourStartedRef.current = true;
-
-    // Detect Skip button clicks
-    let tourDone = false;
-    let userClickedSkip = false;
-    const handleSkipClick = (e) => {
-      if (e.target.closest?.('.introjs-skipbutton')) {
-        userClickedSkip = true;
-      }
-    };
-
-    const timer = setTimeout(() => {
+  // ─── Educators Tour (continued from IQ Academy) ─────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading && !isFetching && educatorList.length > 0,
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: Page heading
       const heading = document.querySelector('.educators-heading');
-      if (heading) {
-        steps.push({
-          element: heading,
-          title: '🎓 Educators',
-          intro: 'This is the Educators page! Browse all the professional traders and educators on the platform. You can follow them to get updates on their sessions, ideas and insights.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2: All / Following tab filters
+      if (heading) steps.push({ element: heading, title: '🎓 Educators', intro: 'Meet the professional traders and educators on the platform. Browse their profiles, follow the ones you like, and access their courses and sessions.', position: 'bottom' });
       const tabFilters = document.querySelector('.educators-tab-filters');
-      if (tabFilters) {
-        steps.push({
-          element: tabFilters,
-          title: '🔍 Filter Educators',
-          intro: 'Use the tabs to view All educators or only the ones you are Following. Use the category dropdown to narrow down by subject area (Forex, Crypto, etc.).',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3: Search box
+      if (tabFilters) steps.push({ element: tabFilters, title: '🔍 Filter & Browse', intro: 'Use the <strong>All / Following</strong> tabs to switch views, and the category dropdown to filter educators by subject (Forex, Crypto, Digital Marketing, etc.).', position: 'bottom' });
       const searchBox = document.querySelector('.educators-search');
-      if (searchBox) {
-        steps.push({
-          element: searchBox,
-          title: '🔎 Search Educators',
-          intro: 'Type an educator\'s name in the search box to quickly find them. Results update instantly as you type.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 4: First educator card
+      if (searchBox) steps.push({ element: searchBox, title: '🔎 Search Educators', intro: "Type an educator's name to find them instantly. Results update as you type.", position: 'bottom' });
       const firstCard = document.querySelector('.educator-card-first');
-      if (firstCard) {
-        steps.push({
-          element: firstCard,
-          title: '👤 Educator Card',
-          intro: 'Each card shows the educator\'s name, role, bio, and stats like number of courses, trade ideas, and insights they have published.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 5: Follow + View Profile buttons
+      if (firstCard) steps.push({ element: firstCard, title: '👤 Educator Card', intro: "Each card displays the educator's name, specialisation, bio, and key stats like the number of courses and trade ideas they've published.", position: 'bottom' });
       const actionButtons = document.querySelector('.educator-action-buttons');
-      if (actionButtons) {
-        steps.push({
-          element: actionButtons,
-          title: '👍 Follow & View Profile',
-          intro: 'Click Follow to subscribe to an educator and get notified of their sessions. Click View Profile to explore their full profile, schedule, and content.',
-          position: 'top',
-        });
-      }
-
-      // Step 6: Go to MasterClass button
+      if (actionButtons) steps.push({ element: actionButtons, title: '👍 Follow or View Profile', intro: 'Click <strong>Follow</strong> to subscribe and get updates from this educator. Click <strong>View Profile</strong> to explore all their content and sessions.', position: 'top' });
       const masterclassBtn = document.querySelector('.educator-masterclass-btn');
-      if (masterclassBtn) {
-        steps.push({
-          element: masterclassBtn,
-          title: '🎯 Go to MasterClass',
-          intro: 'Each educator has their own MasterClass. Click this button to jump directly into their in-depth strategy courses and start learning!',
-          position: 'top',
-        });
-      }
-
-      if (steps.length === 0) {
-        markTourComplete();
-        educatorsTourStartedRef.current = false;
-        return;
-      }
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Continue',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      tour.oncomplete(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!userClickedSkip) {
-          tourDone = true;
-        }
-        educatorsTourStartedRef.current = false;
-      });
-      tour.onexit(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (tourDone) {
-          // User completed all steps — continue to Ideas page (next in chain)
-          navigate('/ideas', { state: { continueTour: true } });
-        } else {
-          markTourComplete(); // user skipped — do NOT reset ref
-        }
-      });
-
-      document.addEventListener('click', handleSkipClick, true); // capture phase
-      tour.start();
-    }, 800);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleSkipClick, true);
-      // ❌ Do NOT reset ref here
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, isLoading, isFetching, educatorList]);
-  // ───────────────────────────────────────────────────────────────────────
-
-  //   return educatorList;
-  // }, [activeTab, educatorList]);
+      if (masterclassBtn) steps.push({ element: masterclassBtn, title: '🎯 Go to MasterClass', intro: "Click this to jump directly into this educator's MasterClass and start learning their courses.", position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/ideas', { state: { continueTour: true } }),
+    delay: 800,
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Helper to get button style based on category
   const getMasterClassButtonStyle = (categories) => {
