@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
@@ -22,10 +22,8 @@ import {
 } from "../../../components/ui/command";
 import GridView from "./GridView";
 import ListView from "./ListView";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import { useTourStep } from "@/hooks/useTourStep";
 
 function toEST(date) {
   return new Date(
@@ -60,9 +58,7 @@ export default function IqAcademy() {
   const selectedLanguage = useSelector(selectSelectedLanguage);
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
-  const iqAcademyTourStartedRef = useRef(false);
+  const { auth } = useAuthContext();
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
@@ -133,17 +129,7 @@ export default function IqAcademy() {
     }
   }, [activeCategoryId, isDigitalMarketing]);
 
-  // Mark tour complete in backend & update auth context
-  const markTourComplete = useCallback(async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) {
-        saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-      }
-    } catch (err) {
-      console.error('Failed to mark tour complete:', err);
-    }
-  }, [completeTour, auth, saveAuth]);
+  // Tour completion now handled internally by useTourStep hook
 
   useEffect(() => {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
@@ -167,160 +153,30 @@ export default function IqAcademy() {
       { skip: !activeCategoryId || viewType !== "grid" }
     );
 
-  // ─── IQ Academy Tour (continues from MasterClass) ─────────────────────────────────
-  useEffect(() => {
-    const shouldContinueTour = location?.state?.continueTour === true;
-    if (!shouldContinueTour) return;
-    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-    if (iqAcademyTourStartedRef.current) return;
-    if (isCategoryLoading) return;
-    // ⏳ Wait for singleCategoryData too — GridView returns null without it
-    if (isDetailLoading) return;
-    if (!singleCategoryData) return;
-
-    iqAcademyTourStartedRef.current = true;
-
-    // Detect Skip button clicks
-    let tourDone = false;
-    let userClickedSkip = false;
-    const handleSkipClick = (e) => {
-      if (e.target.closest?.('.introjs-skipbutton')) {
-        userClickedSkip = true;
-      }
-    };
-
-    const timer = setTimeout(() => {
+  // ─── IQ Academy Tour (continues from MasterClass) ─────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isCategoryLoading && !isDetailLoading && !!singleCategoryData,
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: IQ Academy page intro — covers both Trading & Digital Marketing
       const pageHeading = document.querySelector('.iq-academy-heading');
-      if (pageHeading) {
-        steps.push({
-          element: pageHeading,
-          title: '📅 IQ Live',
-          intro: 'Welcome to IQ Live! This is your hub for all live educational sessions — including <strong>live trading sessions</strong> and <strong>Digital Marketing training</strong> — scheduled by our expert educators.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2: Strategy filter icons (only visible for non-Digital Marketing tabs)
+      if (pageHeading) steps.push({ element: pageHeading, title: '📅 IQ Live', intro: 'This is IQ Live the schedule for all upcoming live sessions across the platform.<br><br>Trading, Crypto, Digital Marketing everything your educators have lined up is right here.', position: 'bottom' });
       const strategyFilter = document.querySelector('.iq-strategy-filter');
-      if (strategyFilter) {
-        steps.push({
-          element: strategyFilter,
-          title: '🎯 Strategy Filter',
-          intro: 'Filter trading sessions by strategy. Click any strategy icon to see only sessions related to that strategy. This filter is available for trading categories like Forex and Crypto.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3: Category tabs — mention Digital Marketing explicitly
+      if (strategyFilter) steps.push({ element: strategyFilter, title: '🎯 Strategy Filter', intro: 'Use these icons to narrow sessions down by strategy.<br><br>Handy when you only want to see sessions that match a specific trading method.', position: 'bottom' });
       const categoryFilter = document.querySelector('.iq-category-filter');
-      if (categoryFilter) {
-        steps.push({
-          element: categoryFilter,
-          title: '🗂️ Categories — Trading & Digital Marketing',
-          intro: 'Switch between categories to find the right sessions for you:\n\n📈 <strong>Forex / Crypto</strong> — Live trading sessions with market analysis\n📣 <strong>Digital Marketing</strong> — Live training on SEO, social media, ads and more\n\nEach category shows its own live schedule and educators.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3b: Digital Marketing specific info step (always shown to explain DM tab)
-      // const categoryFilterDM = document.querySelector('.iq-category-filter');
-      // if (categoryFilterDM) {
-      //   steps.push({
-      //     element: categoryFilterDM,
-      //     title: '📣 Digital Marketing Sessions',
-      //     intro: 'When you click the <strong>Digital Marketing</strong> tab, you will see live sessions dedicated to digital marketing education — covering topics like SEO, paid ads, content marketing, social media strategy and more.\n\nThese sessions have their own schedule separate from trading sessions.',
-      //     position: 'bottom',
-      //   });
-      // }
-
-      // Step 4: Calendar / view toggle
+      if (categoryFilter) steps.push({ element: categoryFilter, title: '🗂️ Category Tabs', intro: 'Switch between <strong>Forex</strong>, <strong>Crypto</strong>, or <strong>Digital Marketing</strong> to see sessions for that subject only.', position: 'bottom' });
       const calendarToggle = document.querySelector('.iq-view-toggle');
-      if (calendarToggle) {
-        steps.push({
-          element: calendarToggle,
-          title: '📆 Calendar & List View',
-          intro: 'Switch between Calendar view (to see the weekly schedule at a glance) and List view (to browse all sessions by strategy or topic).',
-          position: 'bottom',
-        });
-      }
-
-      // Step 5: Session type legend (London / New York / Asian)
+      if (calendarToggle) steps.push({ element: calendarToggle, title: '📆 Calendar vs. List View', intro: '<strong>Calendar view</strong> shows the weekly schedule at a glance.<br><strong>List view</strong> lets you browse all sessions by topic.<br><br>Pick whichever works best for you.', position: 'bottom' });
       const sessionLegend = document.querySelector('.iq-session-legend');
-      if (sessionLegend) {
-        steps.push({
-          element: sessionLegend,
-          title: '🌍 Session Types',
-          intro: 'The calendar uses colour-coded rows to show three market sessions:\n\n🟢 London Session — European market hours\n🟣 New York Session — US market hours\n🟡 Asian Session — Asian market hours\n\nEach row represents a different timezone so you instantly know when each session is live.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 6: First scheduled session card
+      if (sessionLegend) steps.push({ element: sessionLegend, title: '🌍 Market Session Times', intro: 'Each row represents a different trading timezone:<br><br><strong>🟢 London</strong> — European hours<br><strong>🟣 New York</strong> — US hours<br><strong>🟡 Asian</strong> — Asian hours<br><br>Find sessions that fit your schedule.', position: 'bottom' });
       const firstScheduleCard = document.querySelector('.iq-first-schedule-card');
-      if (firstScheduleCard) {
-        steps.push({
-          element: firstScheduleCard,
-          title: '📌 Session Card',
-          intro: 'Each card shows the educator\'s photo, name, and session title. Click any card to go directly to that educator\'s profile and see all their upcoming sessions — whether trading or digital marketing.',
-          position: 'bottom',
-        });
-      }
-
-      if (steps.length === 0) {
-        markTourComplete();
-        iqAcademyTourStartedRef.current = false;
-        return;
-      }
-
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Continue',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      tour.oncomplete(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!userClickedSkip) {
-          tourDone = true;
-        }
-        iqAcademyTourStartedRef.current = false;
-      });
-      tour.onexit(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (tourDone) {
-          // User completed all steps — continue to Educators page (final stop)
-          navigate('/iq-academy-educators', { state: { continueTour: true } });
-        } else {
-          markTourComplete(); // user skipped — do NOT reset ref
-        }
-      });
-
-      document.addEventListener('click', handleSkipClick, true); // capture phase
-      tour.start();
-    }, 800);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleSkipClick, true);
-      // ❌ Do NOT reset ref here — StrictMode double-invoke would re-trigger the tour
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, isCategoryLoading, isDetailLoading, singleCategoryData]);
-  // ─────────────────────────────────────────────────────────────────────────────────
+      if (firstScheduleCard) steps.push({ element: firstScheduleCard, title: '📌 Session Card', intro: "Tap any session card to visit that educator's profile and see what else they have coming up.", position: 'bottom' });
+      return steps;
+    },
+    onDone: () => navigate('/iq-academy-educators', { state: { continueTour: true } }),
+    delay: 800,
+  });
+  // ───────────────────────────────────────────────────────────────────────────────────
 
 
 

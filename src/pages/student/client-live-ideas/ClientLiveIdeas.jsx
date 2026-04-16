@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import { useTourStep } from "@/hooks/useTourStep";
 import {
   useGetAllEducatorsQuery,
   useGetClientLiveIdeasQuery,
@@ -76,18 +74,7 @@ const ClientLiveIdeas = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const liveTourStartedRef = useRef(false);
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
-
-  const markTourComplete = async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-    } catch (err) {
-      console.error('Failed to mark tour complete:', err);
-    }
-  };
+  const { auth } = useAuthContext();
 
   const observer = useRef();
 
@@ -157,111 +144,25 @@ const ClientLiveIdeas = () => {
     refetch();
   }, [status, category]);
 
-  // ─── Live Ideas Tour ─────────────────────────────────────────────────────────
-  useEffect(() => {
-    const shouldStart = location?.state?.continueTour === true;
-    if (!shouldStart) return;
-    if (liveTourStartedRef.current) return;
-    // ⏳ Only block on isLoading — NOT isFetching.
-    // The [status,category] effect calls refetch() on mount → isFetching=true,
-    // but isFetching is NOT in deps so the effect never re-fires after it clears.
-    if (isLoading) return;
-
-    liveTourStartedRef.current = true;
-
-    const timer = setTimeout(() => {
+  // ─── Live Ideas Tour ──────────────────────────────────────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading,
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: Filter bar
       const filterBar = document.querySelector('.li-filter-bar');
-      if (filterBar) {
-        steps.push({
-          element: filterBar,
-          title: '🔍 Filter Live Ideas',
-          intro: 'Filter live ideas by type (All/Buy/Sell), date range, status, educator, or asset class to find exactly what you\'re looking for.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2: Stats summary cards
+      if (filterBar) steps.push({ element: filterBar, title: '🔍 Filter Live Ideas', intro: 'Narrow down live ideas using these filters by direction (All/Buy/Sell), date range, status, educator, or asset class.', position: 'bottom' });
       const statsRow = document.querySelector('.li-stats-row');
-      if (statsRow) {
-        steps.push({
-          element: statsRow,
-          title: '📊 Live Ideas Summary',
-          intro: 'These cards give you a quick snapshot of performance — Winning Ideas (green), Losing Ideas (red), and total Net Pips gained or lost.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3: First live idea card
+      if (statsRow) steps.push({ element: statsRow, title: '📊 Live Ideas Summary', intro: 'A quick view of results: <strong>Winning Ideas</strong> (green), <strong>Losing Ideas</strong> (red), and total <strong>Net Pips</strong>. This updated based on your active filters.', position: 'bottom' });
       const firstCard = document.querySelector('.li-first-card');
-      if (firstCard) {
-        steps.push({
-          element: firstCard,
-          title: '🟢 Live Idea Card',
-          intro: 'Each card shows a live trade idea with the trade direction (Buy/Sell), status badge (Active/Pending/Win/Loss), educator info, and the idea title.',
-          position: 'right',
-        });
-      }
-
-      // Step 4: View Details button
+      if (firstCard) steps.push({ element: firstCard, title: '🟢 Live Idea Card', intro: 'Each card shows a live trade idea with the direction (Buy/Sell), the educator, title, and current status (Active / Pending / Win / Loss).', position: 'right' });
       const viewBtn = document.querySelector('.li-view-btn');
-      if (viewBtn) {
-        steps.push({
-          element: viewBtn,
-          title: '👁️ View Full Details',
-          intro: 'Click View Details to read the complete live idea with all notes and context from the educator.',
-          position: 'top',
-        });
-      }
-
-      if (steps.length === 0) {
-        markTourComplete();
-        liveTourStartedRef.current = false;
-        return;
-      }
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Continue',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      let tourDone = false;
-      tour.oncomplete(() => {
-        tourDone = true;
-        liveTourStartedRef.current = false;
-        // ✅ Continue to Trading Strategies (next in chain)
-        navigate('/trading-strategies', { state: { continueTour: true } });
-      });
-      tour.onexit(() => {
-        if (!tourDone) {
-          liveTourStartedRef.current = false;
-          // User clicked Skip — end the entire tour chain
-          markTourComplete();
-        }
-      });
-
-      tour.start();
-    }, 1200);
-
-    return () => {
-      clearTimeout(timer);
-      liveTourStartedRef.current = false; // ← allow StrictMode 2nd mount to re-run
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, isLoading]);
+      if (viewBtn) steps.push({ element: viewBtn, title: '👁️ View Details', intro: 'Click to open the full trade idea with all the educator\'s notes and context.', position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/trading-strategies', { state: { continueTour: true } }),
+    delay: 1200,
+  });
   // ─────────────────────────────────────────────────────────────────────────────────
 
   const handleCloseView = () => {

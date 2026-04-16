@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import introJs from "intro.js";
-import "intro.js/introjs.css";
 import { useAuthContext } from "@/auth";
-import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import { useTourStep } from "@/hooks/useTourStep";
 import {
   useGetAllEducatorsQuery,
   useGetClientTradeIdeasQuery,
@@ -75,18 +73,7 @@ const ClientTradeIdeas = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const tradeTourStartedRef = useRef(false);
-  const { auth, saveAuth } = useAuthContext();
-  const [completeTour] = useCompleteTourMutation();
-
-  const markTourComplete = useCallback(async () => {
-    try {
-      await completeTour().unwrap();
-      if (auth) saveAuth({ ...auth, user: { ...auth.user, hasSeenTour: true } });
-    } catch (err) {
-      console.error('Failed to mark tour complete:', err);
-    }
-  }, [completeTour, auth, saveAuth]);
+  const { auth } = useAuthContext();
 
   const observer = useRef();
 
@@ -156,127 +143,26 @@ const ClientTradeIdeas = () => {
     refetch();
   }, [status, category]);
 
-  // ─── Trade Ideas Tour ───────────────────────────────────────────────────────────
-  useEffect(() => {
-    const shouldStart = location?.state?.continueTour === true;
-    if (!shouldStart) return;
-    if (auth?.user?.hasSeenTour) return; // Tour already completed — don't restart
-    if (tradeTourStartedRef.current) return;
-    // ⏳ Only block on isLoading — NOT isFetching.
-    // refetch() on mount sets isFetching=true but it's NOT in deps → deadlock.
-    if (isLoading) return;
-
-    tradeTourStartedRef.current = true;
-
-    // Detect Skip button clicks
-    let tourDone = false;
-    let userClickedSkip = false;
-    const handleSkipClick = (e) => {
-      if (e.target.closest?.('.introjs-skipbutton')) {
-        userClickedSkip = true;
-      }
-    };
-
-    // Give the DOM 1.2s to paint the cards after data arrives
-    const timer = setTimeout(() => {
+  // ─── Trade Ideas Tour ────────────────────────────────────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading,
+    getSteps: () => {
       const steps = [];
-
-      // Step 1: Filter bar
       const filterBar = document.querySelector('.ti-filter-bar');
-      if (filterBar) {
-        steps.push({
-          element: filterBar,
-          title: '🔍 Filter Trade Ideas',
-          intro: 'Use these filters to narrow down trade ideas by type (Buy/All/Sell), date range, status (Win/Loss/Active), educator, and asset class (Forex, Crypto, etc.).',
-          position: 'bottom',
-        });
-      }
-
-      // Step 2: Stats summary cards
+      if (filterBar) steps.push({ element: filterBar, title: '🔍 Filter Trade Ideas', intro: 'Refine trade ideas using the filters above filter by direction (Buy/Sell), date range, result (Win/Loss/Active), specific educator, or asset class (Forex, Crypto, etc.).', position: 'bottom' });
       const statsRow = document.querySelector('.ti-stats-row');
-      if (statsRow) {
-        steps.push({
-          element: statsRow,
-          title: '📊 Trade Summary',
-          intro: 'These cards show your overall performance at a glance — total Winning Ideas, Losing Ideas, and Net Pips earned across all filtered trade ideas.',
-          position: 'bottom',
-        });
-      }
-
-      // Step 3: First trade idea card
+      if (statsRow) steps.push({ element: statsRow, title: '📊 Performance Summary', intro: 'A quick snapshot of results: <strong>Winning Ideas</strong>, <strong>Losing Ideas</strong>, and total <strong>Net Pips</strong> based on the current filters.', position: 'bottom' });
       const firstCard = document.querySelector('.ti-first-card');
-      if (firstCard) {
-        steps.push({
-          element: firstCard,
-          title: '📈 Trade Idea Card',
-          intro: 'Each card shows the trade type (Buy/Sell), currency pair, educator, entry price, stop loss (Invalidation), and take profit targets (Exit 1/2/3). The status badge shows if it\'s Active, Pending, Win, or Loss.',
-          position: 'right',
-        });
-      }
-
-      // Step 4: View Details button on first card
+      if (firstCard) steps.push({ element: firstCard, title: '📈 Trade Idea Card', intro: 'Each card shows the trade direction (Buy/Sell), the educator, entry price, stop loss, and take profit targets. The status badge tells you if the trade is <strong>Active, Pending, Won, or Lost</strong>.', position: 'right' });
       const viewBtn = document.querySelector('.ti-view-btn');
-      if (viewBtn) {
-        steps.push({
-          element: viewBtn,
-          title: '👁️ View Full Details',
-          intro: 'Click View Details to open the complete trade idea with the full chart, notes, and analysis from the educator.',
-          position: 'top',
-        });
-      }
-
-      if (steps.length === 0) {
-        navigate('/iq-insight', { state: { continueTour: true } });
-        tradeTourStartedRef.current = false;
-        return;
-      }
-
-      const tour = introJs.tour().setOptions({
-        steps,
-        hidePrev: true,
-        nextLabel: 'Next →',
-        prevLabel: '← Back',
-        skipLabel: 'Skip',
-        doneLabel: 'Next →',
-        showProgress: true,
-        showBullets: false,
-        overlayOpacity: 0.8,
-        exitOnOverlayClick: false,
-        exitOnEsc: true,
-        scrollToElement: true,
-        tooltipClass: 'custom-intro-tooltip',
-      });
-
-      tour.oncomplete(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (!userClickedSkip) {
-          tourDone = true;
-        }
-        tradeTourStartedRef.current = false;
-      });
-      tour.onexit(() => {
-        document.removeEventListener('click', handleSkipClick, true);
-        if (tourDone) {
-          // User completed all steps — continue tour on IQ Insight page
-          navigate('/iq-insight', { state: { continueTour: true } });
-        } else {
-          // User clicked Skip — do NOT reset ref
-          markTourComplete();
-        }
-      });
-
-      document.addEventListener('click', handleSkipClick, true); // capture phase
-      tour.start();
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleSkipClick, true);
-      // ❌ Do NOT reset ref here
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location?.state?.continueTour, isLoading]);
-  // ─────────────────────────────────────────────────────────────────────────────────
+      if (viewBtn) steps.push({ element: viewBtn, title: '👁️ View Details', intro: 'Click to open the full trade idea including the chart, detailed notes, and the educator\'s complete analysis.', position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/iq-insight', { state: { continueTour: true } }),
+    delay: 500,
+  });
+  // ────────────────────────────────────────────────────────────────────────────────────
 
   const handleCloseView = () => {
     setIsViewOpen(false);
