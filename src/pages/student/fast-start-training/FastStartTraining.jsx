@@ -11,6 +11,7 @@ import ShowMoreLess from "../../../components/ui/showmoreless";
 import { Accordion, AccordionItem } from "@/components/accordion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTourStep } from "@/hooks/useTourStep";
+import ResourcesSection from "../../../components/ui/ResourcesSection";
 
 export default function FastStartTraining() {
   const [activeLectureId, setActiveLectureId] = useState(null);
@@ -80,13 +81,13 @@ export default function FastStartTraining() {
 
     // 🟢 Auto-select first lecture when data loads
     if (data?.course?.length > 0) {
-      const firstCourse = data.course[0];
+      const firstCourse = data.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
-        const firstLectureId = firstCourse.lectures[0]._id;
+        const firstLectureId = firstCourse?.lectures?.[0]?._id;
         // Only set if no lecture is currently selected
         if (!activeLectureId) {
           setActiveLectureId(firstLectureId);
-          setLecture(firstCourse.lectures[0] || {});
+          setLecture(firstCourse?.lectures?.[0] || {});
         }
       } else {
         setLecture({});
@@ -468,6 +469,12 @@ export default function FastStartTraining() {
                                 <p className="text-sm text-gray-600 mt-1">
                                   {lecture.description?.replace(/<\/?p>/g, "")}
                                 </p>
+                                {/* Resources — view only */}
+                                <ResourcesSection
+                                  resources={lecture?.resources || []}
+                                  viewOnly
+                                  className="mt-4"
+                                />
                               </div>
                             </div>
                           ) : (

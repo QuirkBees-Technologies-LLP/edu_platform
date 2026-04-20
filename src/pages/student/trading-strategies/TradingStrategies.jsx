@@ -22,6 +22,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import ResourcesSection from "../../../components/ui/ResourcesSection";
 /**
  * Utility function to convert various video URLs to embeddable format
  */
@@ -449,6 +450,15 @@ const TradingStrategies = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Resources for active lecture — view only */}
+                {activeLecture?.resources?.length > 0 && (
+                    <ResourcesSection
+                        resources={activeLecture.resources}
+                        viewOnly
+                        className="mb-8"
+                    />
+                )}
 
                 {/* About Strategy */}
                 {currentStrategy && (
