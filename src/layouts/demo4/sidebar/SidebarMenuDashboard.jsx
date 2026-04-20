@@ -87,7 +87,7 @@ const SidebarMenuDashboard = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [4, 0] : [-4, 0] // [skid, distance]
+            offset: isRTL() ? [4, 0] : [-4, 0]
           }
         }]
       }}>

@@ -5,9 +5,9 @@ const AccordionComponent = ({
   className,
   children,
   allowMultiple,
-  defaultIndex = null // 🟢 Add defaultIndex prop
+  defaultIndex = null
 }) => {
-  const [openIndex, setOpenIndex] = useState(defaultIndex); // 🟢 Use defaultIndex instead of null
+  const [openIndex, setOpenIndex] = useState(defaultIndex);
   
   const handleItemClick = index => {
     setOpenIndex(prevIndex => prevIndex === index ? null : index);

@@ -5,8 +5,10 @@ import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import { Accordion, AccordionItem } from "@/components/accordion";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import ShowMoreLess from "../../../components/ui/showmoreless";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
 
 export default function IqVault() {
   const [activeTab, setActiveTab] = useState("");
@@ -15,13 +17,16 @@ export default function IqVault() {
   const [category, setCategory] = useState();
   const [activeLectureId, setActiveLectureId] = useState(null);
 
+  const { auth } = useAuthContext();
+  const navigate = useNavigate();
+
   const selectedLanguage = useSelector(selectSelectedLanguage);
 
   const handleClick = (id) => {
     setId(id); // or simply: id, based on your API setup
   };
-  const { search } = useLocation();
-  const params = new URLSearchParams(search);
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
 
   const mainSection = params.get("mainSection");
   const language = params.get("language");
@@ -181,6 +186,29 @@ export default function IqVault() {
       setActiveLectureId(null); // reset active lecture
     }
   }, [categoryName]);
+  // ─── IQ Vault Tour (continued from FastStartTraining) ──────────────────────
+
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isCategoryLoading &&
+      Array.isArray(data?.categories) && data.categories.length > 0 &&
+      Array.isArray(data?.upcomingCourse),
+    getSteps: () => {
+      const steps = [];
+      const tabArea = document.querySelector('.iq-vault-tab-area');
+      if (tabArea) steps.push({ element: tabArea, title: '📑 Course Categories', intro: 'Switch between subject areas using these tabs. Each tab shows courses for a different topic like Trading or Digital Marketing.', position: 'bottom' });
+      const sectionEl = document.querySelector('.accordion-item');
+      if (sectionEl) steps.push({ element: sectionEl, title: '📂 Course Sections', intro: 'Lectures are grouped into sections. Click a section to expand it and see the individual lectures inside.', position: 'right' });
+      const lectureEl = document.querySelector('.iq-vault-lecture-item');
+      if (lectureEl) steps.push({ element: lectureEl, title: '🎬 Watch a Lecture', intro: 'Click any lecture to play it in the video player. Your progress is saved automatically.', position: 'right' });
+      const vaultSection = document.querySelector('.iq-vault-suggestions-section');
+      if (vaultSection) steps.push({ element: vaultSection, title: '📚 IQ Vault Extra Courses', intro: 'Browse additional recommended courses below the video player. Use the <strong>Experience</strong> and <strong>Style</strong> filters to find courses that match your level and learning approach.', position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/master-class', { state: { continueTour: true } }),
+    delay: 800,
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);
@@ -368,8 +396,8 @@ export default function IqVault() {
               {/* Sidebar - Course + Lectures */}
               <div className="order-2 md:order-1 mb-6">
                 {data?.ActiveCategory &&
-                data.ActiveCategory.length > 0 &&
-                activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
+                  data.ActiveCategory.length > 0 &&
+                  activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
                   <>
                     {currentCourse?.length > 0 ? (
                       <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
@@ -382,16 +410,15 @@ export default function IqVault() {
                               key={c._id}
                               title={`${index + 1}. ${c.title}`}
                             >
-                              {c?.lectures?.map((t) => (
+                              {c?.lectures?.map((t, lIdx) => (
                                 <div
                                   key={t._id}
                                   onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
-                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
-                                   ${
-                                     activeLectureId === t._id
-                                       ? "bg-gray-300 dark:bg-slate-800"
-                                       : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                   }`}
+                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition ${lIdx === 0 && currentCourse.indexOf(c) === 0 ? 'iq-vault-lecture-item' : ''}
+                                   ${activeLectureId === t._id
+                                      ? "bg-gray-300 dark:bg-slate-800"
+                                      : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                    }`}
                                 >
                                   <CirclePlay className="mr-2 text-gray-400" />
                                   <span className="text-gray-800 font-medium text-xs">
@@ -440,15 +467,14 @@ export default function IqVault() {
               <div className="md:col-span-2 order-1 md:order-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <div className="flex gap-3 sm:gap-6 flex-wrap">
+                    <div className="flex gap-3 sm:gap-6 flex-wrap iq-vault-tab-area">
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}
-                          className={`pb-4 border-b-2 ${
-                            activeTab === tab._id
-                              ? "border-black dark:border-white text-gray-900"
-                              : "border-transparent text-gray-500 hover:text-gray-900"
-                          }`}
+                          className={`pb-4 border-b-2 ${activeTab === tab._id
+                            ? "border-black dark:border-white text-gray-900"
+                            : "border-transparent text-gray-500 hover:text-gray-900"
+                            }`}
                           onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
@@ -466,8 +492,8 @@ export default function IqVault() {
                       >
                         {/* Dynamic content for active tab */}
                         {data?.ActiveCategory &&
-                        data.ActiveCategory.length > 0 &&
-                        activeTab ===
+                          data.ActiveCategory.length > 0 &&
+                          activeTab ===
                           `${data.ActiveCategory[0]?.categoryId}` ? (
                           currentCourse?.length > 0 && lecture ? (
                             <div className="card">
@@ -572,7 +598,7 @@ export default function IqVault() {
               {data?.ActiveCategory &&
                 data.ActiveCategory.length > 0 &&
                 data?.upcomingCourse?.length > 0 && (
-                  <div className="col-span-full">
+                  <div className="col-span-full iq-vault-suggestions-section">
                     <div className="text-gray-900">
                       <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -595,10 +621,10 @@ export default function IqVault() {
                         <div className="rounded-t-none rounded-b-2xl pb-2 m-6 overflow-x-auto">
                           <div className="flex gap-4 pb-0">
                             {/* Static Course Cards - Optional, not connected to lecture data */}
-                            {data?.upcomingCourse?.map((i) => (
+                            {data?.upcomingCourse?.map((i, idx) => (
                               <div
-                                key={i}
-                                className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
+                                key={i?._id || i?.title}
+                                className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} ${idx === 0 ? 'iq-vault-first-course' : ''}`}
                               >
                                 <div
                                   className="rounded-t-xl overflow-hidden"

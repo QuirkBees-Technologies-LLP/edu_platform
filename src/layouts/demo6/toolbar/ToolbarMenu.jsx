@@ -34,7 +34,7 @@ const ToolbarMenu = () => {
       modifiers: [{
         name: 'offset',
         options: {
-          offset: [0, 1] // [skid, distance]
+          offset: [0, 1]
         }
       }]
     }}>

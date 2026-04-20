@@ -60,10 +60,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const videoInputRef = useRef(null);
   const documentInputRef = useRef(null);
 
-  // Reset all statuses when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Clear any previous statuses to prevent immediate closure
       dispatch(clearCreatePostStatus());
       dispatch(clearEducatorPostsStatus());
       setHasInitialized(false);
@@ -74,47 +72,37 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     if (editingPost) {
       setIsEditing(true);
       setContent(editingPost.content || "");
-      // For editing, images/videos/documents might be URLs, not File objects
-      // We'll keep them as is for display, but new uploads will be File objects
       setImages(editingPost.images || []);
       setVideos(editingPost.videos || []);
       setDocuments(editingPost.documents || []);
       setVisibility(editingPost.visibility || "public");
       setCategory(editingPost.category || "General Updates");
 
-      // Set initialization flag after a short delay to prevent immediate closure
       setTimeout(() => {
         setHasInitialized(true);
       }, 100);
     } else {
       setIsEditing(false);
-      // For new posts, set hasInitialized to true immediately
       setHasInitialized(true);
     }
   }, [editingPost]);
 
   useEffect(() => {
-    // Only handle success after component has properly initialized
     if (!hasInitialized) return;
 
-    // Handle create post success (only when not editing)
     if (createStatus === "succeeded" && !isEditing) {
       handleClose();
       dispatch(clearCreatePostStatus());
     }
 
-    // Handle update post success (only when actively editing)
     if (generalStatus === "succeeded" && isEditing) {
       handleClose();
-      // Clear the general error state when update succeeds
       dispatch(clearEducatorPostsStatus());
     }
   }, [createStatus, generalStatus, dispatch, isEditing, hasInitialized]);
 
-  // Cleanup object URLs when component unmounts or files change
   useEffect(() => {
     return () => {
-      // Clean up any object URLs to prevent memory leaks
       images.forEach((file) => {
         if (file instanceof File) {
           // Note: URL.revokeObjectURL is not needed here as the URL will be garbage collected
@@ -134,7 +122,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setIsSubmitting(false);
     setIsEditing(false);
     setHasInitialized(false);
-    // Clear any Redux errors when closing
     dispatch(clearCreatePostStatus());
     dispatch(clearEducatorPostsStatus());
     onClose();
@@ -187,16 +174,15 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     }
   };
 
-  // Helper function to get the display source for files
   const getFileSource = (file) => {
     if (file instanceof File) {
       return URL.createObjectURL(file);
     } else if (typeof file === "string") {
-      return file; // URL string
+      return file;
     } else if (file && file.url) {
-      return file.url; // Object with url property
+      return file.url;
     }
-    return ""; // Fallback
+    return "";
   };
 
   const clearAllFiles = () => {
@@ -208,16 +194,13 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     if (documentInputRef.current) documentInputRef.current.value = "";
   };
 
-  // Helper function to detect if files have changed during editing
   const hasFilesChanged = () => {
-    if (!editingPost) return true; // Always true for new posts
+    if (!editingPost) return true;
 
-    // Check if any new files were added
     const hasNewImages = images.some((file) => file instanceof File);
     const hasNewVideos = videos.some((file) => file instanceof File);
     const hasNewDocuments = documents.some((file) => file instanceof File);
 
-    // Check if any existing files were removed
     const originalImageCount = editingPost.images?.length || 0;
     const originalVideoCount = editingPost.videos?.length || 0;
     const originalDocumentCount = editingPost.documents?.length || 0;
@@ -258,22 +241,17 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setIsSubmitting(true);
 
     try {
-      // When editing, we need to separate existing files (URLs) from new files (File objects)
       const processFiles = (files) => {
         if (!files || files.length === 0) return undefined;
 
         return files.map((file) => {
           if (file instanceof File) {
-            // New file - keep as is for FormData
             return file;
           } else if (typeof file === "string") {
-            // Existing file URL - convert to object with url property
             return { url: file };
           } else if (file && file.url) {
-            // Already in correct format
             return file;
           } else {
-            // Fallback - keep as is
             return file;
           }
         });
@@ -285,7 +263,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         category,
       };
 
-      // Only include files in the API call if they've actually changed
       if (hasFilesChanged()) {
         postData.images = processFiles(images);
         postData.videos = processFiles(videos);
@@ -297,7 +274,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
           updateEducatorPost({ id: editingPost.id, postData })
         ).unwrap();
         toast.success("Post updated successfully!");
-        // Close modal after a short delay so user can see the success message
         setTimeout(() => {
           handleClose();
         }, 1000);
@@ -305,9 +281,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         const result = await dispatch(createEducatorPost(postData)).unwrap();
 
         toast.success("Post created successfully!");
-        // Close modal immediately and also after a delay as backup
         handleClose();
-        // Additional backup close after delay
         setTimeout(() => {
           onClose();
         }, 1000);
@@ -315,14 +289,10 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     } catch (error) {
       console.error("Failed to submit post:", error);
 
-      // Check for JWT expired error
       if (isJwtExpiredError(error)) {
         handleJwtExpired(handleClose, "/auth/login", 1500);
         return;
       }
-
-      // Don't show toast here - let the Redux error state handle it
-      // The error will be displayed in the Alert component above the form
     } finally {
       setIsSubmitting(false);
     }
@@ -357,14 +327,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const categories = [
     "General Updates",
     "Analysis Updates",
-    // 'general',
-    // 'education',
-    // 'trading',
-    // 'technology',
-    // 'business',
-    // 'lifestyle',
-    // 'news',
-    // 'other'
   ];
 
   return (
@@ -539,32 +501,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   </div>
                 )}
 
-                {/* Documents - Button commented out but functionality remains */}
-                {/* {documents.length > 0 && (
-                                     <div>
-                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Documents ({documents.length})</h4>
-                                         <div className="space-y-2">
-                                             {documents.map((doc, index) => (
-                                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg group">
-                                                     <div className="flex items-center gap-2">
-                                                         <FileText size={20} className="text-blue-500" />
-                                                         <span className="text-sm text-gray-700">{doc.name}</span>
-                                                     </div>
-                                                     {(!editingPost || (editingPost && !editingPost.documents?.length)) && (
-                                                         <button
-                                                             type="button"
-                                                             onClick={() => removeFile(doc, 'document')}
-                                                             className="p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                         >
-                                                             <X size={16} />
-                                                         </button>
-                                                     )}
-                                                 </div>
-                                             ))}
-                                         </div>
-                                     </div>
-                                 )} */}
-
                 {/* Clear All Button - Only show when not editing OR when editing but no existing files */}
                 {(!editingPost ||
                   (editingPost &&
@@ -648,41 +584,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   <span>{editingPost ? "Videos" : "Videos"}</span>
                 </button>
               </div>
-
-              {/* Document upload button - Commented out but functionality remains */}
-              {/* <div className="flex items-center gap-2">
-                                     <input
-                                         type="file"
-                                         ref={documentInputRef}
-                                         onChange={(e) => handleFileChange(e, 'document')}
-                                         className="hidden"
-                                         accept=".pdf,.doc,.docx,.txt"
-                                         multiple
-                                         disabled={editingPost && (editingPost.documents?.length > 0)}
-                                     />
-                                     <button 
-                                         type="button"
-                                         onClick={() => {
-                                             if (!editingPost || (editingPost && !editingPost.documents?.length)) {
-                                                 documentInputRef.current?.click();
-                                             }
-                                         }} 
-                                         disabled={editingPost && (editingPost.documents?.length > 0)}
-                                         className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                                             editingPost && (editingPost.documents?.length > 0)
-                                                 ? 'text-gray-400 cursor-not-allowed' 
-                                                 : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
-                                         }`}
-                                     >
-                                         <FileText size={20} />
-                                         <span>
-                                             {editingPost 
-                                                 ? 'Documents'
-                                                 : 'Documents'
-                                             }
-                                         </span>
-                                     </button>
-                                 </div> */}
             </div>
           </div>
 

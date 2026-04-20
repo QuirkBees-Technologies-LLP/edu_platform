@@ -45,7 +45,6 @@ const Demo1LayoutProvider = ({ children }) => {
   const scrollPosition = useScrollPosition();
   const headerSticky = scrollPosition > 0;
 
-  // ✅ SET MENU BASED ON ROLE & PLAN
   useEffect(() => {
     if (!auth?.user) return;
 
@@ -64,7 +63,6 @@ const Demo1LayoutProvider = ({ children }) => {
     } else {
       let fullMenu = sideMenus[userRole] || [];
 
-      // ✅ Hide finance-specific routes for Digital Marketing educators
       if (userRole === "educator") {
         const isDigitalMarketing = auth.user?.categories?.some(
           (cat) =>
@@ -92,7 +90,6 @@ const Demo1LayoutProvider = ({ children }) => {
     }
   }, [auth, pathname]);
 
-  // Update layout whenever state changes
   useEffect(() => {
     setCurrentLayout(layout);
   }, [layout]);
@@ -138,5 +135,4 @@ const Demo1LayoutProvider = ({ children }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export { Demo1LayoutProvider, useDemo1Layout };

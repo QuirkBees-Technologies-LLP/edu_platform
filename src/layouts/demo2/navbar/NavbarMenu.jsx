@@ -61,7 +61,7 @@ const NavbarMenu = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: [-10, 0] // [skid, distance]
+              offset: [-10, 0]
             }
           }]
         }}>

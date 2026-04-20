@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Scrollspy } from '@/components';
-// Import your custom Modal component
 import { AccountSettingsSidebar } from '@/pages/account/home/settings-sidebar';
 import { AdvancedSettingsAddress, AdvancedSettingsAppearance, AdvancedSettingsNotifications, AdvancedSettingsPreferences, AuthEmail, AuthPassword, AuthSingleSingOn, AuthSocialSignIn, AuthTwoFactor, BasicSettings, DeleteAccount, ExternalServicesIntegrations, ExternalServicesManageApi } from '@/pages/account/home/settings-sidebar/blocks';
 import { useResponsive, useViewport } from '@/hooks';

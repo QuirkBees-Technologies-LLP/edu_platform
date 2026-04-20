@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import {
@@ -22,6 +22,8 @@ import {
 } from "../../../components/ui/command";
 import GridView from "./GridView";
 import ListView from "./ListView";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
 
 function toEST(date) {
   return new Date(
@@ -55,6 +57,8 @@ const timeZoneOptions = [
 export default function IqAcademy() {
   const selectedLanguage = useSelector(selectSelectedLanguage);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { auth } = useAuthContext();
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
@@ -125,6 +129,8 @@ export default function IqAcademy() {
     }
   }, [activeCategoryId, isDigitalMarketing]);
 
+  // Tour completion now handled internally by useTourStep hook
+
   useEffect(() => {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
       setActiveCategoryId(categoryData?.data?.[0]?._id);
@@ -147,6 +153,33 @@ export default function IqAcademy() {
       { skip: !activeCategoryId || viewType !== "grid" }
     );
 
+  // ─── IQ Academy Tour (continues from MasterClass) ─────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isCategoryLoading && !isDetailLoading && !!singleCategoryData,
+    getSteps: () => {
+      const steps = [];
+      const pageHeading = document.querySelector('.iq-academy-heading');
+      if (pageHeading) steps.push({ element: pageHeading, title: '📅 IQ Live', intro: 'This is IQ Live the schedule for all upcoming live sessions across the platform.<br><br>Trading, Crypto, Digital Marketing everything your educators have lined up is right here.', position: 'bottom' });
+      const strategyFilter = document.querySelector('.iq-strategy-filter');
+      if (strategyFilter) steps.push({ element: strategyFilter, title: '🎯 Strategy Filter', intro: 'Use these icons to narrow sessions down by strategy.<br><br>Handy when you only want to see sessions that match a specific trading method.', position: 'bottom' });
+      const categoryFilter = document.querySelector('.iq-category-filter');
+      if (categoryFilter) steps.push({ element: categoryFilter, title: '🗂️ Category Tabs', intro: 'Switch between <strong>Forex</strong>, <strong>Crypto</strong>, or <strong>Digital Marketing</strong> to see sessions for that subject only.', position: 'bottom' });
+      const calendarToggle = document.querySelector('.iq-view-toggle');
+      if (calendarToggle) steps.push({ element: calendarToggle, title: '📆 Calendar vs. List View', intro: '<strong>Calendar view</strong> shows the weekly schedule at a glance.<br><strong>List view</strong> lets you browse all sessions by topic.<br><br>Pick whichever works best for you.', position: 'bottom' });
+      const sessionLegend = document.querySelector('.iq-session-legend');
+      if (sessionLegend) steps.push({ element: sessionLegend, title: '🌍 Market Session Times', intro: 'Each row represents a different trading timezone:<br><br><strong>🟢 London</strong> — European hours<br><strong>🟣 New York</strong> — US hours<br><strong>🟡 Asian</strong> — Asian hours<br><br>Find sessions that fit your schedule.', position: 'bottom' });
+      const firstScheduleCard = document.querySelector('.iq-first-schedule-card');
+      if (firstScheduleCard) steps.push({ element: firstScheduleCard, title: '📌 Session Card', intro: "Tap any session card to visit that educator's profile and see what else they have coming up.", position: 'bottom' });
+      return steps;
+    },
+    onDone: () => navigate('/iq-academy-educators', { state: { continueTour: true } }),
+    delay: 800,
+  });
+  // ───────────────────────────────────────────────────────────────────────────────────
+
+
+
   // Fetch strategy data for list view
   const { data: strategyData, isLoading: isStrategyLoading } =
     useGetCategoryWiseStrategyQuery(
@@ -165,6 +198,7 @@ export default function IqAcademy() {
     );
 
   const educators = singleCategoryData?.data?.category?.educators || [];
+
   const strategyEducators = strategyData?.data?.category?.educators || [];
 
   useEffect(() => {
@@ -224,7 +258,7 @@ export default function IqAcademy() {
   );
 
   const renderViewToggle = () => (
-    <div className="hidden md:flex bg-gray-100 rounded-lg p-1 w-fit">
+    <div className="hidden md:flex bg-gray-100 rounded-lg p-1 w-fit iq-view-toggle">
       <button
         onClick={() => setViewType("grid")}
         className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm transition ${viewType === "grid"
@@ -368,8 +402,8 @@ export default function IqAcademy() {
             <button className="min-w-40 xl:min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
               <span className="truncate text-sm">
                 {timeZone?.length > 0
-                  ? `${timeZone?.length} Zone Selected`
-                  : "Select Time Zone"}
+                  ? `${timeZone?.length} Session Selected`
+                  : "Select Trading Session"}
               </span>
               <ChevronDown size={16} />
             </button>
@@ -434,6 +468,8 @@ export default function IqAcademy() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
+      {/* Tour anchor — visually hidden but present for intro.js highlight */}
+      <h1 className="iq-academy-heading sr-only iq-academy-heading-tour">IQ Academy</h1>
       {isInitialLoading && (
         <div className="py-10 flex justify-center">
           <Loader />
@@ -450,7 +486,7 @@ export default function IqAcademy() {
       {/* CATEGORY TABS */}
       <div className="flex gap-4 mb-6 justify-between flex-wrap">
         {viewType == "grid" && !isDigitalMarketing && (
-          <div className="flex gap-4 overflow-x-auto pb-4 items-start">
+          <div className="flex gap-4 overflow-x-auto pb-4 items-start iq-strategy-filter">
             {/* All Strategies Option */}
             <button
               onClick={() => setActiveStrategyId("all")}
@@ -509,7 +545,7 @@ export default function IqAcademy() {
             ))}
           </div>
         )}
-        <div className="flex gap-4 ml-auto overflow-x-auto pb-2">
+        <div className="flex gap-4 ml-auto overflow-x-auto pb-2 iq-category-filter">
           {categoryData?.data?.map((cat) => (
             <button
               key={cat?._id}

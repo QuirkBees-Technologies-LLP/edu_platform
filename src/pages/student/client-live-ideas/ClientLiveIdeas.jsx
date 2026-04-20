@@ -1,4 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
 import {
   useGetAllEducatorsQuery,
   useGetClientLiveIdeasQuery,
@@ -69,6 +72,10 @@ const ClientLiveIdeas = () => {
     rangeName: "",
   });
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { auth } = useAuthContext();
+
   const observer = useRef();
 
   const { data, isFetching, isLoading, isError, refetch } =
@@ -137,6 +144,27 @@ const ClientLiveIdeas = () => {
     refetch();
   }, [status, category]);
 
+  // ─── Live Ideas Tour ──────────────────────────────────────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading,
+    getSteps: () => {
+      const steps = [];
+      const filterBar = document.querySelector('.li-filter-bar');
+      if (filterBar) steps.push({ element: filterBar, title: '🔍 Filter Live Ideas', intro: 'Narrow down live ideas using these filters by direction (All/Buy/Sell), date range, status, educator, or asset class.', position: 'bottom' });
+      const statsRow = document.querySelector('.li-stats-row');
+      if (statsRow) steps.push({ element: statsRow, title: '📊 Live Ideas Summary', intro: 'A quick view of results: <strong>Winning Ideas</strong> (green), <strong>Losing Ideas</strong> (red), and total <strong>Net Pips</strong>. This updated based on your active filters.', position: 'bottom' });
+      const firstCard = document.querySelector('.li-first-card');
+      if (firstCard) steps.push({ element: firstCard, title: '🟢 Live Idea Card', intro: 'Each card shows a live trade idea with the direction (Buy/Sell), the educator, title, and current status (Active / Pending / Win / Loss).', position: 'right' });
+      const viewBtn = document.querySelector('.li-view-btn');
+      if (viewBtn) steps.push({ element: viewBtn, title: '👁️ View Details', intro: 'Click to open the full trade idea with all the educator\'s notes and context.', position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/trading-strategies', { state: { continueTour: true } }),
+    delay: 1200,
+  });
+  // ─────────────────────────────────────────────────────────────────────────────────
+
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
@@ -192,7 +220,7 @@ const ClientLiveIdeas = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
-      <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
+      <div className="flex flex-wrap items-center justify-between gap-1 mb-2 li-filter-bar">
         <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
           <div className="flex flex-wrap items-center sm:justify-start gap-3 mb-2">
             <div className="py-1 px-2 flex overflow-auto bg-gray-100 rounded-md gap-3 sm:gap-3.5 shadow-md">
@@ -207,11 +235,10 @@ const ClientLiveIdeas = () => {
                   }}
                   className={`
          p-2 flex items-center text-xs sm:text-sm rounded-md font-medium transition-all
-        ${
-          activeIdea === idea
-            ? "bg-primary text-white shadow-lg shadow-primary/50"
-            : "text-gray-600 hover:bg-gray-300"
-        }
+        ${activeIdea === idea
+                      ? "bg-primary text-white shadow-lg shadow-primary/50"
+                      : "text-gray-600 hover:bg-gray-300"
+                    }
       `}
                 >
                   {(idea === "all" && "All Live Ideas") ||
@@ -270,7 +297,7 @@ const ClientLiveIdeas = () => {
                   <SelectValue placeholder="Select educator">
                     {educator
                       ? educatorsData?.data?.find((e) => e._id === educator)
-                          ?.first_name?.last_name
+                        ?.first_name?.last_name
                       : "Select educator"}
                   </SelectValue>
                 </SelectTrigger>
@@ -341,11 +368,10 @@ const ClientLiveIdeas = () => {
                               className="flex items-center gap-2 cursor-pointer"
                             >
                               <div
-                                className={`h-4 w-4 border rounded flex items-center justify-center ${
-                                  selected
-                                    ? "bg-primary text-white border-primary"
-                                    : "bg-white dark:bg-[#1c1f26]"
-                                }`}
+                                className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                                  ? "bg-primary text-white border-primary"
+                                  : "bg-white dark:bg-[#1c1f26]"
+                                  }`}
                               >
                                 {selected && <Check size={14} />}
                               </div>
@@ -385,7 +411,7 @@ const ClientLiveIdeas = () => {
           </div>
         } */}
       </div>
-      <div className="grid grid-cols-12 gap-6 mb-6">
+      <div className="grid grid-cols-12 gap-6 mb-6 li-stats-row">
         {/* Winning Trades */}
         <div className="col-span-12 sm:col-span-6 md:col-span-4">
           <div
@@ -475,7 +501,7 @@ const ClientLiveIdeas = () => {
           {tradeIdeas?.map((trade, index) => (
             <div
               key={trade._id}
-              className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md"
+              className={`bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md${index === 0 ? ' li-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
               {/* Chart placeholder */}
@@ -517,12 +543,12 @@ const ClientLiveIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) === 0
-                                          ? t.image.length - 1
-                                          : (t.currentIndex ?? 0) - 1,
-                                    }
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) === 0
+                                        ? t.image.length - 1
+                                        : (t.currentIndex ?? 0) - 1,
+                                  }
                                   : t,
                               ),
                             );
@@ -538,13 +564,13 @@ const ClientLiveIdeas = () => {
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
-                                      ...t,
-                                      currentIndex:
-                                        (t.currentIndex ?? 0) ===
+                                    ...t,
+                                    currentIndex:
+                                      (t.currentIndex ?? 0) ===
                                         t.image.length - 1
-                                          ? 0
-                                          : (t.currentIndex ?? 0) + 1,
-                                    }
+                                        ? 0
+                                        : (t.currentIndex ?? 0) + 1,
+                                  }
                                   : t,
                               ),
                             );
@@ -567,11 +593,10 @@ const ClientLiveIdeas = () => {
                                   ),
                                 );
                               }}
-                              className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                                (trade.currentIndex ?? 0) === idx
-                                  ? "bg-primary"
-                                  : "bg-gray-300 hover:bg-gray-400"
-                              }`}
+                              className={`w-2.5 h-2.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx
+                                ? "bg-primary"
+                                : "bg-gray-300 hover:bg-gray-400"
+                                }`}
                             />
                           ))}
                         </div>
@@ -585,11 +610,10 @@ const ClientLiveIdeas = () => {
                 <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <button
-                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${
-                        trade.type === "buy"
-                          ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                          : "bg-red-500 hover:bg-red-600 text-white"
-                      }`}
+                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${trade.type === "buy"
+                        ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                        : "bg-red-500 hover:bg-red-600 text-white"
+                        }`}
                     >
                       {trade.type === "buy" ? (
                         <TrendingUp size={16} />
@@ -645,9 +669,8 @@ const ClientLiveIdeas = () => {
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
-                        trade.avatarColor
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${trade.avatarColor
+                        }`}
                     >
                       <img
                         className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -662,10 +685,10 @@ const ClientLiveIdeas = () => {
                       </div>
                       <div className="text-gray-600 text-sm">
                         {Array.isArray(trade?.educatorDetails?.categories) &&
-                        trade?.educatorDetails?.categories?.length > 0
+                          trade?.educatorDetails?.categories?.length > 0
                           ? trade?.educatorDetails?.categories
-                              .map((cat) => cat)
-                              .join(", ")
+                            .map((cat) => cat)
+                            .join(", ")
                           : "-"}
                       </div>
                     </div>
@@ -674,9 +697,9 @@ const ClientLiveIdeas = () => {
                   <div className="text-gray-600 text-sm">
                     {trade.createdAt
                       ? format(
-                          new Date(trade.createdAt),
-                          "MMM dd, yyyy, hh:mm a",
-                        )
+                        new Date(trade.createdAt),
+                        "MMM dd, yyyy, hh:mm a",
+                      )
                       : ""}
                   </div>
                 </div>
@@ -692,7 +715,7 @@ const ClientLiveIdeas = () => {
 
                 {/* View Details Button */}
                 <button
-                  className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  className={`w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors${index === 0 ? ' li-view-btn' : ''}`}
                   onClick={() => {
                     setSelectedIdea(trade);
                     setIsViewOpen(true);

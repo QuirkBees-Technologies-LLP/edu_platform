@@ -9,6 +9,8 @@ import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import { Accordion, AccordionItem } from "@/components/accordion";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useTourStep } from "@/hooks/useTourStep";
 
 export default function FastStartTraining() {
   const [activeLectureId, setActiveLectureId] = useState(null);
@@ -17,6 +19,9 @@ export default function FastStartTraining() {
   const [lecture, setLecture] = useState();
   const [id, setId] = useState();
   const [category, setCategory] = useState();
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleClick = (id) => {
     setId(id); // or simply: id, based on your API setup
@@ -144,6 +149,25 @@ export default function FastStartTraining() {
       }
     }
   }, [data, activeTab]);
+
+  // ─── FastStartTraining Tour (continued from Dashboard) ───────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isCategoryLoading && !!currentCourse?.length && !!lecture,
+    getSteps: () => {
+      const steps = [];
+      const tabArea = document.querySelector('.fst-tab-area');
+      if (tabArea) steps.push({ element: tabArea, title: '📺 Course Tabs', intro: 'These tabs organize your course content. Click a tab to switch between video lectures for different topics in your training.', position: 'bottom' });
+      const sectionEl = document.querySelector('.accordion-item');
+      if (sectionEl) steps.push({ element: sectionEl, title: '📂 Course Sections', intro: 'Lectures are grouped into sections by topic. Click a section heading to expand it and see the lectures inside.', position: 'right' });
+      const lectureEl = document.querySelector('.fst-lecture-item');
+      if (lectureEl) steps.push({ element: lectureEl, title: '🎬 Watch a Lecture', intro: 'Click any lecture title to load and play the video in the main area. Your progress is tracked automatically.', position: 'right' });
+      return steps;
+    },
+    onDone: () => navigate('/iq-vault', { state: { continueTour: true } }),
+    delay: 800,
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);
@@ -322,11 +346,11 @@ export default function FastStartTraining() {
                               key={c._id}
                               title={`${index + 1}. ${c.title}`}
                             >
-                              {c?.lectures?.map((t) => (
+                              {c?.lectures?.map((t, lIdx) => (
                                 <div
                                   key={t._id}
                                   onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
-                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
+                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition ${lIdx === 0 && index === 0 ? 'fst-lecture-item' : ''}
                                    ${activeLectureId === t._id
                                       ? "bg-gray-300 dark:bg-slate-800"
                                       : "hover:bg-gray-50 dark:hover:bg-slate-900"
@@ -379,7 +403,7 @@ export default function FastStartTraining() {
               <div className="md:col-span-2 order-1 md:order-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <div className="flex gap-3 sm:gap-6 flex-wrap">
+                    <div className="flex gap-3 sm:gap-6 flex-wrap fst-tab-area">
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}

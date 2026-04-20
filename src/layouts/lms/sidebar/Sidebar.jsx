@@ -67,7 +67,6 @@ export const Sidebar = () => {
     );
   };
   useEffect(() => {
-    // Hide drawer on route chnage after menu link click
     if (!desktopMode && prevPathname !== pathname) {
       handleMobileSidebarClose();
     }

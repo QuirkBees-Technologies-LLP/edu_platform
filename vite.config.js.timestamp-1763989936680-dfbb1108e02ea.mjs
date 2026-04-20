@@ -1,4 +1,4 @@
-// vite.config.js
+
 import { fileURLToPath, URL } from "node:url";
 import react from "file:///D:/QB/Edu-Platform/edu_platform/node_modules/@vitejs/plugin-react/dist/index.mjs";
 import { defineConfig } from "file:///D:/QB/Edu-Platform/edu_platform/node_modules/vite/dist/node/index.js";
@@ -25,7 +25,6 @@ var vite_config_default = defineConfig({
   build: {
     chunkSizeWarningLimit: 3e3,
     outDir: "dist"
-    // Azure looks for this folder by default
   }
 });
 export {

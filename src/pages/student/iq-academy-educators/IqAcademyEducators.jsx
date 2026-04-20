@@ -19,10 +19,12 @@ import {
   useGetEducatorsListQuery,
   useToggleFollowMutation,
 } from "../../../store/api/client/clientEductorApiSlice";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { toast } from "sonner";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import { toAbsoluteUrl } from "@/utils/Assets";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
 
 const safeArray = (val) => (Array.isArray(val) ? val : []);
 
@@ -69,6 +71,8 @@ const EducatorCardSkeleton = () => {
 
 const IqAcademyEducators = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { auth } = useAuthContext();
 
   const [activeTab, setActiveTab] = useState("all");
   const [searchText, setSearchText] = useState("");
@@ -196,12 +200,33 @@ const IqAcademyEducators = () => {
 
   useEffect(() => {
     setPage(1);
-    // setEducatorList([]);
-    refetch();
+    // RTK Query automatically re-fetches when query args (activeTab, category, searchText) change
+    // No need to manually call refetch() here — it causes double requests
   }, [activeTab, category, searchText]);
-
-  //   return educatorList;
-  // }, [activeTab, educatorList]);
+  // ─── Educators Tour (continued from IQ Academy) ─────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading && !isFetching && educatorList.length > 0,
+    getSteps: () => {
+      const steps = [];
+      const heading = document.querySelector('.educators-heading');
+      if (heading) steps.push({ element: heading, title: '🎓 Educators', intro: 'Meet the professional traders and educators on the platform. Browse their profiles, follow the ones you like, and access their courses and sessions.', position: 'bottom' });
+      const tabFilters = document.querySelector('.educators-tab-filters');
+      if (tabFilters) steps.push({ element: tabFilters, title: '🔍 Filter & Browse', intro: 'Use the <strong>All / Following</strong> tabs to switch views, and the category dropdown to filter educators by subject (Forex, Crypto, Digital Marketing, etc.).', position: 'bottom' });
+      const searchBox = document.querySelector('.educators-search');
+      if (searchBox) steps.push({ element: searchBox, title: '🔎 Search Educators', intro: "Type an educator's name to find them instantly. Results update as you type.", position: 'bottom' });
+      const firstCard = document.querySelector('.educator-card-first');
+      if (firstCard) steps.push({ element: firstCard, title: '👤 Educator Card', intro: "Each card displays the educator's name, specialisation, bio, and key stats like the number of courses and trade ideas they've published.", position: 'bottom' });
+      const actionButtons = document.querySelector('.educator-action-buttons');
+      if (actionButtons) steps.push({ element: actionButtons, title: '👍 Follow or View Profile', intro: 'Click <strong>Follow</strong> to subscribe and get updates from this educator. Click <strong>View Profile</strong> to explore all their content and sessions.', position: 'top' });
+      const masterclassBtn = document.querySelector('.educator-masterclass-btn');
+      if (masterclassBtn) steps.push({ element: masterclassBtn, title: '🎯 Go to MasterClass', intro: "Click this to jump directly into this educator's MasterClass and start learning their courses.", position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/ideas', { state: { continueTour: true } }),
+    delay: 800,
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Helper to get button style based on category
   const getMasterClassButtonStyle = (categories) => {
@@ -224,7 +249,7 @@ const IqAcademyEducators = () => {
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-start justify-between mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white educators-heading">
             Educators
           </h2>
 
@@ -235,7 +260,7 @@ const IqAcademyEducators = () => {
 
         <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
           <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
-            <div className="flex flex-wrap items-center gap-3 mb-2">
+            <div className="flex flex-wrap items-center gap-3 mb-2 educators-tab-filters">
               <button
                 onClick={() => {
                   setActiveTab("all");
@@ -302,7 +327,7 @@ const IqAcademyEducators = () => {
             </div>
           </div>
 
-          <div className="flex gap-3 sm:gap-6 pb-4 flex-wrap">
+          <div className="flex gap-3 sm:gap-6 pb-4 flex-wrap educators-search">
             <SearchFilterInput
               searchText={searchText}
               handleSearchChange={handleSearchChange}
@@ -331,7 +356,7 @@ const IqAcademyEducators = () => {
               ref={
                 index === educatorList.length - 1 ? lastEducatorRef : undefined
               }
-              className="rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all"
+              className={`rounded-2xl bg-white dark:bg-[#0F0F1A] shadow-lg border overflow-hidden hover:shadow-xl transition-all ${index === 0 ? 'educator-card-first' : ''}`}
             >
               <div className="relative h-[170px] bg-gray-300 dark:bg-gray-700 overflow-hidden">
                 <img
@@ -422,7 +447,7 @@ const IqAcademyEducators = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 mt-6">
+                  <div className="flex items-center gap-3 mt-6 educator-action-buttons">
                     <button
                       onClick={() => handleToggle(n)}
                       disabled={followLoadingId === n._id}
@@ -479,7 +504,7 @@ const IqAcademyEducators = () => {
                     onClick={() => navigate(`/master-class/${n?._id}`)}
                     className={`group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 mt-3 w-full ${getMasterClassButtonStyle(
                       n?.categories
-                    )} text-gray-800 dark:text-white border rounded-full text-sm font-medium overflow-hidden`}
+                    )} text-gray-800 dark:text-white border rounded-full text-sm font-medium overflow-hidden educator-masterclass-btn`}
                   >
                     <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <BookOpen

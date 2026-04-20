@@ -4,7 +4,6 @@ import { toAbsoluteUrl } from '@/utils';
 import useBodyClasses from '@/hooks/useBodyClasses';
 import { AuthBrandedLayoutProvider } from './AuthBrandedLayoutProvider';
 const Layout = () => {
-  // Applying body classes to manage the background color in dark mode
   useBodyClasses('dark:bg-coal-500');
   return <Fragment>
     <style>
@@ -41,7 +40,6 @@ const Layout = () => {
   </Fragment>;
 };
 
-// AuthBrandedLayout component that wraps the Layout component with AuthBrandedLayoutProvider
 const AuthBrandedLayout = () => <AuthBrandedLayoutProvider>
   <Layout />
 </AuthBrandedLayoutProvider>;

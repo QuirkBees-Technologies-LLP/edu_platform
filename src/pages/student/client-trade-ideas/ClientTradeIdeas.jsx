@@ -1,4 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
 import {
   useGetAllEducatorsQuery,
   useGetClientTradeIdeasQuery,
@@ -68,6 +71,10 @@ const ClientTradeIdeas = () => {
     rangeName: "",
   });
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { auth } = useAuthContext();
+
   const observer = useRef();
 
   const { data, isFetching, isLoading, isError, refetch } =
@@ -136,6 +143,27 @@ const ClientTradeIdeas = () => {
     refetch();
   }, [status, category]);
 
+  // ─── Trade Ideas Tour ────────────────────────────────────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading,
+    getSteps: () => {
+      const steps = [];
+      const filterBar = document.querySelector('.ti-filter-bar');
+      if (filterBar) steps.push({ element: filterBar, title: '🔍 Filter Trade Ideas', intro: 'Refine trade ideas using the filters above filter by direction (Buy/Sell), date range, result (Win/Loss/Active), specific educator, or asset class (Forex, Crypto, etc.).', position: 'bottom' });
+      const statsRow = document.querySelector('.ti-stats-row');
+      if (statsRow) steps.push({ element: statsRow, title: '📊 Performance Summary', intro: 'A quick snapshot of results: <strong>Winning Ideas</strong>, <strong>Losing Ideas</strong>, and total <strong>Net Pips</strong> based on the current filters.', position: 'bottom' });
+      const firstCard = document.querySelector('.ti-first-card');
+      if (firstCard) steps.push({ element: firstCard, title: '📈 Trade Idea Card', intro: 'Each card shows the trade direction (Buy/Sell), the educator, entry price, stop loss, and take profit targets. The status badge tells you if the trade is <strong>Active, Pending, Won, or Lost</strong>.', position: 'right' });
+      const viewBtn = document.querySelector('.ti-view-btn');
+      if (viewBtn) steps.push({ element: viewBtn, title: '👁️ View Details', intro: 'Click to open the full trade idea including the chart, detailed notes, and the educator\'s complete analysis.', position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/iq-insight', { state: { continueTour: true } }),
+    delay: 500,
+  });
+  // ────────────────────────────────────────────────────────────────────────────────────
+
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
@@ -191,7 +219,7 @@ const ClientTradeIdeas = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
-      <div className="flex flex-wrap items-center justify-between gap-1 mb-2">
+      <div className="flex flex-wrap items-center justify-between gap-1 mb-2 ti-filter-bar">
         <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
           <div className="flex flex-wrap items-center sm:justify-start gap-3 mb-2">
             <div className="py-1 px-2 flex overflow-auto bg-gray-100 rounded-md gap-3 sm:gap-3.5 shadow-md">
@@ -381,7 +409,7 @@ const ClientTradeIdeas = () => {
           </div>
         } */}
       </div>
-      <div className="grid grid-cols-12 gap-6 mb-6">
+      <div className="grid grid-cols-12 gap-6 mb-6 ti-stats-row">
         {/* Winning Trades */}
         <div className="col-span-12 sm:col-span-6 md:col-span-4">
           <div
@@ -471,7 +499,7 @@ const ClientTradeIdeas = () => {
           {tradeIdeas?.map((trade, index) => (
             <div
               key={trade._id}
-              className="bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md"
+              className={`bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md${index === 0 ? ' ti-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
               {/* Chart placeholder */}
@@ -779,7 +807,7 @@ const ClientTradeIdeas = () => {
 
                 {/* View Details Button */}
                 <button
-                  className="w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  className={`w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors${index === 0 ? ' ti-view-btn' : ''}`}
                   onClick={() => {
                     setSelectedIdea(trade);
                     setIsViewOpen(true);

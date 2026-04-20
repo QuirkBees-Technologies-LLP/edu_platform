@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { Link } from "react-router-dom";
 import {
@@ -98,6 +101,10 @@ const IqInsight = () => {
   const [activeTimeframe, setActiveTimeframe] = useState("WEEKLY");
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { auth } = useAuthContext();
+
   const observer = useRef();
 
   const { data, isFetching, isLoading, isError } =
@@ -152,6 +159,27 @@ const IqInsight = () => {
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
+
+  // ─── IQ Insight Tour ───────────────────────────────────────────────────────────────────────────────
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isLoading,
+    getSteps: () => {
+      const steps = [];
+      const marketFilter = document.querySelector('.insight-market-filter');
+      if (marketFilter) steps.push({ element: marketFilter, title: '🌐 Market Filter', intro: 'Filter insights by market choose <strong>All, Forex, or Crypto</strong> to see only analysis relevant to that market.', position: 'bottom' });
+      const educatorFilter = document.querySelector('.insight-educator-filter');
+      if (educatorFilter) steps.push({ element: educatorFilter, title: '👨‍🏫 Filter by Educator', intro: 'Select a specific educator from the dropdown to view only their market insights and analysis posts.', position: 'bottom' });
+      const searchBar = document.querySelector('.insight-search');
+      if (searchBar) steps.push({ element: searchBar, title: '🔎 Search Insights', intro: 'Search for specific currency pairs, topics, or keywords to find relevant market analysis posts.', position: 'bottom' });
+      const firstCard = document.querySelector('.insight-first-card');
+      if (firstCard) steps.push({ element: firstCard, title: '📊 Market Analysis Card', intro: 'Each card shows a market analysis post from an educator including their name, post date, title, and a content preview. Click <strong>View Details</strong> to read the full analysis.', position: 'right' });
+      return steps;
+    },
+    onDone: () => navigate('/live-ideas', { state: { continueTour: true } }),
+    delay: 1000,
+  });
+  // ─────────────────────────────────────────────────────────────────────────────────
   const handleCloseImageView = () => {
     setSelectedIdea({});
   };
@@ -303,7 +331,7 @@ const IqInsight = () => {
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <div className="flex justify-between items-center flex-wrap mb-8 gap-5">
         <div className="flex gap-3.5 flex-wrap">
-          <div className="sm:px-3 p-2 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md border-purple-200 dark:border-gray-200">
+          <div className="sm:px-3 p-2 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md border-purple-200 dark:border-gray-200 insight-market-filter">
             {markets.map((market) => (
               <button
                 key={market}
@@ -314,11 +342,10 @@ const IqInsight = () => {
                   setPage(1);
                 }}
                 className={`sm:px-4 py-2 text-xs sm:text-md rounded-lg font-semibold transition-all
-                        ${
-                          activeMarket === market
-                            ? "bg-sky-500 text-white shadow-lg shadow-primary/50"
-                            : " text-gray-600 hover:bg-gray-300"
-                        }`}
+                        ${activeMarket === market
+                    ? "bg-sky-500 text-white shadow-lg shadow-primary/50"
+                    : " text-gray-600 hover:bg-gray-300"
+                  }`}
               >
                 {market}
               </button>
@@ -346,7 +373,7 @@ const IqInsight = () => {
           </div> */}
         </div>
 
-        <div className="flex items-center gap-2 relative">
+        <div className="flex items-center gap-2 relative insight-educator-filter">
           <Select
             value={educator || ""}
             onValueChange={(val) => {
@@ -357,7 +384,7 @@ const IqInsight = () => {
               <SelectValue placeholder="Select educator">
                 {educator
                   ? educatorsData?.data?.find((e) => e._id === educator)
-                      ?.first_name?.last_name
+                    ?.first_name?.last_name
                   : "Select educator"}
               </SelectValue>
             </SelectTrigger>
@@ -388,7 +415,7 @@ const IqInsight = () => {
           )}
         </div>
 
-        <div className="flex gap-3 sm:gap-6 flex-wrap mr-3">
+        <div className="flex gap-3 sm:gap-6 flex-wrap mr-3 insight-search">
           <SearchFilterInput
             searchText={searchText}
             handleSearchChange={handleSearchChange}
@@ -475,7 +502,7 @@ const IqInsight = () => {
                 // </div>
                 <div
                   key={idea?._id}
-                  className="card border-2  shadow-md border-purple-200 dark:border-gray-200 overflow-hidden flex flex-col h-full"
+                  className={`card border-2 shadow-md border-purple-200 dark:border-gray-200 overflow-hidden flex flex-col h-full${index === 0 ? ' insight-first-card' : ''}`}
                 >
                   <div
                     className="relative overflow-hidden cursor-pointer"
@@ -542,10 +569,10 @@ const IqInsight = () => {
                                     prev.map((t) =>
                                       t._id === idea?._id
                                         ? {
-                                            ...t,
-                                            currentIndex: newIndex,
-                                            isLoading: false,
-                                          }
+                                          ...t,
+                                          currentIndex: newIndex,
+                                          isLoading: false,
+                                        }
                                         : t,
                                     ),
                                   );
@@ -563,7 +590,7 @@ const IqInsight = () => {
 
                                 const newIndex =
                                   (idea.currentIndex ?? 0) ===
-                                  idea.image.length - 1
+                                    idea.image.length - 1
                                     ? 0
                                     : (idea.currentIndex ?? 0) + 1;
 
@@ -584,10 +611,10 @@ const IqInsight = () => {
                                     prev.map((t) =>
                                       t._id === idea._id
                                         ? {
-                                            ...t,
-                                            currentIndex: newIndex,
-                                            isLoading: false,
-                                          }
+                                          ...t,
+                                          currentIndex: newIndex,
+                                          isLoading: false,
+                                        }
                                         : t,
                                     ),
                                   );
@@ -625,20 +652,19 @@ const IqInsight = () => {
                                       prev.map((t) =>
                                         t._id === idea._id
                                           ? {
-                                              ...t,
-                                              currentIndex: idx,
-                                              isLoading: false,
-                                            }
+                                            ...t,
+                                            currentIndex: idx,
+                                            isLoading: false,
+                                          }
                                           : t,
                                       ),
                                     );
                                   };
                                 }}
-                                className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                                  (idea.currentIndex ?? 0) === idx
-                                    ? "bg-primary"
-                                    : "bg-gray-300 hover:bg-gray-400"
-                                }`}
+                                className={`w-2.5 h-2.5 rounded-full transition-colors ${(idea.currentIndex ?? 0) === idx
+                                  ? "bg-primary"
+                                  : "bg-gray-300 hover:bg-gray-400"
+                                  }`}
                               />
                             ))}
                           </div>

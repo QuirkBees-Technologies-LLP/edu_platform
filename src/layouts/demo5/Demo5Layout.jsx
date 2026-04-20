@@ -1,7 +1,6 @@
 import useBodyClasses from '@/hooks/useBodyClasses';
 import { Demo5LayoutProvider, Main } from '.';
 const Demo5Layout = () => {
-  // Using the custom hook to set multiple CSS variables and class properties
   useBodyClasses(`
     [--tw-header-height:54px]
     [--tw-sidebar-width:200px]
@@ -11,7 +10,6 @@ const Demo5Layout = () => {
     dark:bg-coal-500
   `);
   return (
-    // Providing layout context and rendering the main content
     <Demo5LayoutProvider>
       <Main />
     </Demo5LayoutProvider>

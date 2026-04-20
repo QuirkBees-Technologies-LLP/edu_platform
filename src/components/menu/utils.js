@@ -5,7 +5,7 @@ export const getMenuLinkPath = children => {
   let path = '';
   Children.forEach(children, child => {
     if (isValidElement(child) && child.type === MenuLink && child.props.path) {
-      path = child.props.path; // Assign the path when found
+      path = child.props.path;
     }
   });
   return path;

@@ -413,8 +413,8 @@ export default function ListView({
                 <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
                   <span className="truncate text-sm">
                     {timeZone?.length > 0
-                      ? `${timeZone?.length} Time Zone Selected`
-                      : "Select Time Zone"}
+                      ? `${timeZone?.length} Trading Session Selected`
+                      : "Select Trading Session"}
                   </span>
                   <ChevronDown size={16} />
                 </button>

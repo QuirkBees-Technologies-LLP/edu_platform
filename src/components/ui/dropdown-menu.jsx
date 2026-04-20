@@ -38,19 +38,13 @@ const DropdownMenuItem = React.forwardRef(({
   inset,
   selected,
   ...props
-}, ref) => <DropdownMenuPrimitive.Item ref={ref} data-selected={selected ? '' : undefined} // Conditionally add data-selected when selected is true
+}, ref) => <DropdownMenuPrimitive.Item ref={ref} data-selected={selected ? '' : undefined}
 className={cn(
-// Base styles for the item
 'relative flex cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
-// Styles applied when the item is focused
 'focus:bg-accent focus:text-accent-foreground',
-// Styles applied when the item is disabled
 'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-// Additional styles for any SVG elements inside the item
 '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
-// Conditional class for inset
 inset && 'pl-8',
-// Additional custom class name passed to the component
 className)} {...props} />);
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 const DropdownMenuCheckboxItem = React.forwardRef(({

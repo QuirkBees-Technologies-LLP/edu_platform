@@ -39,7 +39,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       const text = doc.body.textContent || "";
       return text.trim();
     } catch (err) {
-      return html.replace(/<[^>]+>/g, "").trim(); // fallback
+      return html.replace(/<[^>]+>/g, "").trim();
     }
   };
 
@@ -53,7 +53,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
     });
 
-  // Prevent background scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -61,7 +60,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       document.body.style.overflow = "auto";
     }
 
-    // Cleanup (jab component unmount ya modal close thaye)
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -312,33 +310,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
         </div>
       </div>
 
-      {/* Post Content */}
-        {/* {post.content && (
-                <div className="mb-3">
-                    <p className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words">
-                        {post.content.length > 200 && !isContentExpanded
-                            ? (
-                                <>
-                                    {post.content.substring(0, 200)}
-                                    <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium" onClick={toggleContent}>
-                                        ...more
-                                    </span>
-                                </>
-                            )
-                            : (
-                                <>
-                                    {post.content}
-                                    {post.content.length > 200 && (
-                                        <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1" onClick={toggleContent}>
-                                            Show less
-                                        </span>
-                                    )}
-                                </>
-                            )
-                        }
-                    </p>
-                </div>
-            )} */}
      {plainTextContent && (
         <div className="mb-3">
           <p
@@ -353,33 +324,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
 
       {/* Post Media */}
       {renderMedia()}
-
-      {/* Post Actions - Commented out */}
-      {/* <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-6">
-                    <button 
-                        onClick={handleLike}
-                        className={`flex items-center gap-2 text-sm transition-colors ${
-                            isLiked 
-                                ? 'text-red-500' 
-                                : 'text-gray-600 hover:text-red-500'
-                        }`}
-                    >
-                        <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-                        <span className="font-termina">{post.likeCount || 0}</span>
-                    </button>
-                    
-                    <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-500 transition-colors">
-                        <MessageCircle size={18} />
-                        <span className="font-termina">{post.commentCount || 0}</span>
-                    </button>
-                    
-                    <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-500 transition-colors">
-                        <Share2 size={18} />
-                        <span className="font-termina">{post.shareCount || 0}</span>
-                    </button>
-                </div>
-            </div> */}
 
       {/* Delete Post Dialog */}
       <DeletePostDialog

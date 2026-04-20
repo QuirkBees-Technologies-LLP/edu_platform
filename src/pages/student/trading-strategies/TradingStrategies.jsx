@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuthContext } from '@/auth';
+import { useTourStep } from '@/hooks/useTourStep';
 import { toast } from 'sonner';
 import { Container } from '@/components/container';
 import { useGetAdminStrategyListQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery, useGetStrategyByNameMutation } from '@/store/api/client/clientStrategiesApiSlice';
@@ -131,6 +134,10 @@ const TradingStrategies = () => {
     const [manualStrategyData, setManualStrategyData] = useState(null);
     const [parentStrategyId, setParentStrategyId] = useState(null);
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { auth } = useAuthContext();
+
     // Get selected language from Redux
     const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery(modalStrategyId, {
         skip: !modalStrategyId
@@ -193,6 +200,25 @@ const TradingStrategies = () => {
     //         setSelectedStrategyId(strategies[0]._id);
     //     }
     // }, [strategies, selectedStrategyId]);
+
+    // ─── Trading Strategies Tour ──────────────────────────────────────────────────────────
+    useTourStep({
+        shouldStart: location?.state?.continueTour === true,
+        isReady: !strategiesLoading,
+        getSteps: () => {
+            const steps = [];
+            const banner = document.querySelector('.ts-banner');
+            if (banner) steps.push({ element: banner, title: '📊 Trading Strategies', intro: 'Explore structured trading strategies from professional educators. Each strategy comes with video lessons and detailed explanations.', position: 'bottom' });
+            const firstCard = document.querySelector('.ts-first-card');
+            if (firstCard) steps.push({ element: firstCard, title: '🎯 Strategy Card', intro: 'Each card shows a trading strategy with a description and category. Click the card to preview it, or hit <strong>Start Learning</strong> below to begin.', position: 'right' });
+            const startBtn = document.querySelector('.ts-start-btn');
+            if (startBtn) steps.push({ element: startBtn, title: '▶️ Start Learning', intro: 'Click <strong>Start Learning</strong> to choose your preferred language and begin the strategy course immediately.', position: 'top' });
+            return steps;
+        },
+        onDone: () => navigate('/iq-social', { state: { continueTour: true } }),
+        delay: 1000,
+    });
+    // ─────────────────────────────────────────────────────────────────────────────────
 
     // ==================== EVENT HANDLERS ====================
     const selectStrategy = (strategyId) => {
@@ -315,7 +341,7 @@ const TradingStrategies = () => {
         <div className="max-w-7xl mx-auto px-4 pb-10">
             <Container width="fluid" className="mx-auto px-5">
                 {/* Banner - Static, never changes */}
-                <Banner />
+                <div className="ts-banner"><Banner /></div>
 
                 {/* ========== DYNAMIC CONTENT AREA ========== */}
                 {/* This section updates when a strategy is selected */}
@@ -507,7 +533,7 @@ const TradingStrategies = () => {
                 {/* ========== AVAILABLE STRATEGIES GRID ========== */}
                 {/* This section is always visible */}
                 <div className="mt-10 pb-12 ">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-6 ts-strat-heading">
                         <h2 className="text-2xl font-semibold mb-6">Available Strategies</h2>
                     </div>
 
@@ -519,14 +545,14 @@ const TradingStrategies = () => {
                     ) : (
                         // Display strategy cards in a responsive grid
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                            {strategies?.map((strategy) => (
+                            {strategies?.map((strategy, index) => (
                                 <div
                                     key={strategy?._id}
                                     onClick={() => selectStrategy(strategy?._id)}
                                     className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy?._id
                                         ? 'border-purple-500 shadow-lg shadow-purple-500/30'
                                         : 'border-gray-300 hover:border-gray-400'
-                                        }`}
+                                        }${index === 0 ? ' ts-first-card' : ''}`}
                                 >
                                     {/* Strategy Card Content */}
                                     <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -567,7 +593,7 @@ const TradingStrategies = () => {
                                     {/* Call-to-Action Button */}
                                     <button
                                         onClick={(e) => handleStartLearning(e, strategy)}
-                                        className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto"
+                                        className={`w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto${index === 0 ? ' ts-start-btn' : ''}`}
                                     >
                                         Start Learning
                                     </button>

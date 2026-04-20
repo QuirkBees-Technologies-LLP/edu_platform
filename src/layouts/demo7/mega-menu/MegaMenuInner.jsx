@@ -41,7 +41,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [300, 0] : [-300, 0] // [skid, distance]
+            offset: isRTL() ? [300, 0] : [-300, 0]
           }
         }]
       }}>
@@ -57,7 +57,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: [-300, 0] // [skid, distance]
+            offset: [-300, 0]
           }
         }]
       }}>
@@ -73,7 +73,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: [-300, 0] // [skid, distance]
+            offset: [-300, 0]
           }
         }]
       }}>
@@ -89,7 +89,7 @@ const MegaMenuInner = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: [-20, 0] // [skid, distance]
+            offset: [-20, 0]
           }
         }]
       }}>
