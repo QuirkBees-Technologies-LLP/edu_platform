@@ -146,3 +146,19 @@ export const reorderLectures = async (lectures, token = null) => {
     throw error;
   }
 };
+
+export const deleteResource = async (lectureId, resourceId, token = null) => {
+  try {
+    const response = await api.delete(
+      `/admin/lecture/${lectureId}/resources/${resourceId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

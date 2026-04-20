@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { lmsLectures } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 import {
   Upload,
   Eye,
+  EyeOff,
   FileText,
   Video,
   Save,
@@ -27,6 +29,13 @@ import {
   Clock,
   AlertCircle,
   Loader2,
+  Paperclip,
+  Download,
+  Trash2,
+  FileSpreadsheet,
+  FileImage,
+  File as FileIcon,
+  FileArchive,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
@@ -51,6 +60,9 @@ const LectureContent = ({
   const [videoInputType, setVideoInputType] = useState("url");
   const [lectureContent, setLectureContent] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
+  const [resourceFiles, setResourceFiles] = useState([]);
+  const [deletingResourceId, setDeletingResourceId] = useState(null);
+  const [previewResource, setPreviewResource] = useState(null);
 
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
@@ -119,6 +131,7 @@ const LectureContent = ({
         setShowPreview(false);
         setIsEditing(false);
         setActiveTab("content");
+        setResourceFiles([]);
       }
     }
   }, [lecture, onLectureUpdate]);
@@ -254,8 +267,8 @@ const LectureContent = ({
   };
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith("video/")) {
+    const file = e.target.files?.[0];
+    if (file && file?.type?.startsWith("video/")) {
       setVideoFile(file);
     } else {
       setVideoFile(null);
@@ -288,21 +301,37 @@ const LectureContent = ({
     //   return;
     // }
 
+    // Content is required only when there are no resources (existing or staged)
+    const hasExistingResources = (lectureContent?.resources?.length ?? 0) > 0;
+    const hasStagedResources = resourceFiles.length > 0;
+    const hasAnyResources = hasExistingResources || hasStagedResources;
+
     if (
       formData.type === "VIDEO" &&
       videoInputType === "url" &&
-      !formData.content
+      !formData.content &&
+      !hasAnyResources
     ) {
-      toast.error("Video URL is required");
+      toast.error("Video URL is required (or attach at least one resource)");
       return;
     }
 
     if (
       formData.type === "VIDEO" &&
       videoInputType === "upload" &&
-      !videoFile
+      !videoFile &&
+      !hasAnyResources
     ) {
-      toast.error("Video file is required");
+      toast.error("Video file is required (or attach at least one resource)");
+      return;
+    }
+
+    if (
+      formData.type === "TEXT" &&
+      !formData.content?.trim() &&
+      !hasAnyResources
+    ) {
+      toast.error("Text content is required (or attach at least one resource)");
       return;
     }
 
@@ -322,6 +351,13 @@ const LectureContent = ({
         formData.thumbnail?.file ? formData.thumbnail?.file : null
       );
       dataToSend.append("video", videoFile);
+    }
+
+    // Append resource files
+    if (resourceFiles.length > 0) {
+      resourceFiles.forEach((file) => {
+        dataToSend.append("resources", file);
+      });
     }
 
     setIsLoading(true);
@@ -353,6 +389,7 @@ const LectureContent = ({
       // Reset UI states
       setIsEditing(false);
       setShowPreview(false);
+      setResourceFiles([]);
 
       // Update parent component if callback exists
       if (onLectureUpdate && typeof onLectureUpdate === "function") {
@@ -465,14 +502,14 @@ const LectureContent = ({
 
               {/* Thumbnail Preview */}
               {formData.thumbnail ||
-              formData.thumbnail?.preview ||
-              formData.thumbnail?.url ? (
+                formData.thumbnail?.preview ||
+                formData.thumbnail?.url ? (
                 <div className="mt-3">
                   <img
                     src={
                       formData.thumbnail ||
-                      formData.thumbnail.preview ||
-                      formData.thumbnail.url || // fallback to existing thumbnail URL
+                      formData.thumbnail?.preview ||
+                      formData.thumbnail?.url || // fallback to existing thumbnail URL
                       ""
                     }
                     alt="Thumbnail"
@@ -659,6 +696,341 @@ const LectureContent = ({
     }
   };
 
+  // ── Resource helpers ──────────────────────────────────────────────
+  const getFileIcon = (mimeType) => {
+    if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
+    if (mimeType.includes("pdf")) return <FileText className="w-5 h-5 text-red-500" />;
+    if (mimeType.includes("word") || mimeType.includes("document")) return <FileText className="w-5 h-5 text-blue-500" />;
+    if (mimeType.includes("sheet") || mimeType.includes("excel") || mimeType.includes("csv")) return <FileSpreadsheet className="w-5 h-5 text-green-500" />;
+    if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return <FileText className="w-5 h-5 text-orange-500" />;
+    if (mimeType.includes("image")) return <FileImage className="w-5 h-5 text-purple-500" />;
+    if (mimeType.includes("zip") || mimeType.includes("rar")) return <FileArchive className="w-5 h-5 text-yellow-600" />;
+    return <FileIcon className="w-5 h-5 text-gray-400" />;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
+  const handleResourceUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setResourceFiles((prev) => [...prev, ...files]);
+    e.target.value = "";
+  };
+
+  const removeResourceFile = (index) => {
+    setResourceFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDeleteResource = async (resourceId) => {
+    if (!auth?.token || !lecture?._id) return;
+    setDeletingResourceId(resourceId);
+    try {
+      await lmsLectures.deleteResource(lecture._id, resourceId, auth.token);
+      // Refresh lecture content
+      const response = await lmsLectures.getLectureById(lecture._id, auth.token);
+      setLectureContent(response?.data);
+      toast.success("Resource deleted successfully");
+      setForceUpdateLectureList(true);
+    } catch (error) {
+      console.error("Failed to delete resource:", error);
+      toast.error("Failed to delete resource");
+    } finally {
+      setDeletingResourceId(null);
+    }
+  };
+
+  const renderResourcesEditor = () => (
+    <div className="space-y-4 border-t border-gray-100 pt-4">
+      <div className="flex items-center gap-2 text-primary">
+        <Paperclip className="w-4 h-4" />
+        <Label className="font-medium">Resources / Attachments</Label>
+      </div>
+      <p className="text-xs text-gray-500">
+        Upload supporting materials like PDFs, PPTs, Word docs, or Excel sheets. Max 10 files per upload.
+      </p>
+
+      {/* Existing resources */}
+      {lectureContent?.resources && lectureContent.resources.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-gray-700 ">Existing Resources</p>
+          {lectureContent.resources.map((resource) => (
+            <div
+              key={resource._id}
+              className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200"
+            >
+              {getFileIcon(resource.mimeType)}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-700 truncate">
+                  {resource.originalName}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {formatFileSize(resource.size)}
+                </p>
+              </div>
+
+              {/* Delete button */}
+              {/* <button
+                type="button"
+                onClick={() => handleDeleteResource(resource._id)}
+                disabled={deletingResourceId === resource._id}
+                className="p-1.5 text-gray-400 hover:text-red-500 rounded-md transition-colors disabled:opacity-50"
+                title="Delete resource"
+              >
+                {deletingResourceId === resource._id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+              </button> */}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* New file picker */}
+      <div className="flex items-center gap-2">
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar"
+          onChange={handleResourceUpload}
+          className="hidden"
+          id="resourceUpload"
+        />
+        <label
+          htmlFor="resourceUpload"
+          className="text-sm flex items-center gap-2 cursor-pointer border rounded-md px-4 py-2 hover:bg-primary hover:text-white [&>*]:hover:text-white transition-colors"
+        >
+          <Upload className="h-4 w-4 text-primary" />
+          <span>Choose Files</span>
+        </label>
+      </div>
+
+      {/* Staged files list */}
+      {resourceFiles.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-gray-700">Files to upload ({resourceFiles.length})</p>
+          {resourceFiles.map((file, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 p-2.5 rounded-lg border border-primary/30 bg-primary/5"
+            >
+              {getFileIcon(file.type)}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-700 truncate">
+                  {file.name}
+                </p>
+                <p className="text-xs text-gray-700">
+                  {formatFileSize(file.size)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => removeResourceFile(index)}
+                className="p-1.5 text-gray-400 hover:text-red-500 rounded-md transition-colors"
+                title="Remove file"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const getPreviewType = (mimeType) => {
+    if (!mimeType) return "other";
+    if (mimeType.includes("image")) return "image";
+    if (mimeType.includes("pdf")) return "pdf";
+    if (
+      mimeType.includes("word") ||
+      mimeType.includes("document") ||
+      mimeType.includes("presentation") ||
+      mimeType.includes("powerpoint") ||
+      mimeType.includes("sheet") ||
+      mimeType.includes("excel")
+    )
+      return "office";
+    return "other";
+  };
+
+  const renderViewResources = () => {
+    const resources = lectureContent?.resources || [];
+    if (resources.length === 0) {
+      return null;
+    }
+    return (
+      <>
+        <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
+          <h3 className="font-medium text-gray-800 flex items-center gap-2">
+            <Paperclip className="w-4 h-4 text-primary" />
+            Resources
+            <span className="bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full leading-none">
+              {resources.length}
+            </span>
+          </h3>
+          <div className="space-y-2">
+            {resources?.map((resource) => (
+              <div
+                key={resource._id}
+                className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
+              >
+                {getFileIcon(resource.mimeType)}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {resource.originalName}
+                  </p>
+                  <p className="text-xs text-gray-700">
+                    {formatFileSize(resource.size)}
+                  </p>
+                </div>
+
+                {/* View / Preview button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const type = getPreviewType(resource.mimeType);
+                    if (type === "other") {
+                      window.open(resource.url, "_blank", "noopener,noreferrer");
+                    } else {
+                      setPreviewResource(resource);
+                    }
+                  }}
+                  className="p-2 text-primary hover:bg-primary/10 rounded-md transition-colors"
+                  title="View"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+
+                <a
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
+                  title="Download"
+                >
+                  <Download className="w-4 h-4" />
+                </a>
+
+                {/* <button
+                  type="button"
+                  onClick={() => handleDeleteResource(resource._id)}
+                  disabled={deletingResourceId === resource._id}
+                  className="p-2 text-gray-400 hover:text-red-500 rounded-md transition-colors disabled:opacity-50"
+                  title="Delete resource"
+                >
+                  {deletingResourceId === resource._id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button> */}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Resource Preview Modal */}
+        {createPortal(
+          <AnimatePresence>
+            {previewResource && (
+              <motion.div
+                key="resource-modal-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{ position: "fixed", inset: 0, zIndex: 9999 }}
+                className="flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                onClick={() => setPreviewResource(null)}
+              >
+                <motion.div
+                  key="resource-modal"
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  transition={{ duration: 0.2 }}
+                  className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {getFileIcon(previewResource.mimeType)}
+                      <span className="text-sm font-medium text-gray-100 truncate">
+                        {previewResource.originalName}
+                      </span>
+                      <span className="text-xs text-gray-400 shrink-0">
+                        {formatFileSize(previewResource.size)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 ml-4">
+                      <a
+                        href={previewResource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Download
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewResource(null)}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Modal Body */}
+                  <div className="flex-1 overflow-hidden relative">
+                    {getPreviewType(previewResource.mimeType) === "image" ? (
+                      <div className="flex items-center justify-center p-6 h-full">
+                        <img
+                          src={previewResource.url}
+                          alt={previewResource.originalName}
+                          className="max-w-full max-h-[70vh] object-contain rounded-lg shadow"
+                        />
+                      </div>
+                    ) : getPreviewType(previewResource.mimeType) === "pdf" ? (
+                      // Native browser PDF viewer — opens instantly
+                      <iframe
+                        src={previewResource.url}
+                        className="w-full h-[70vh] border-0"
+                        title={previewResource.originalName}
+                      />
+                    ) : getPreviewType(previewResource.mimeType) === "office" ? (
+                      // Office docs need an external renderer
+                      <div className="relative w-full h-[70vh]">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50 text-gray-400 text-sm z-0">
+                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                          <span>Loading preview…</span>
+                        </div>
+                        <iframe
+                          src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewResource.url)}`}
+                          className="relative z-10 w-full h-full border-0"
+                          title={previewResource.originalName}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+      </>
+    );
+  };
+
   const renderViewContent = () => {
     return (
       <div className="space-y-6">
@@ -738,9 +1110,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lectureContent?.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -756,6 +1127,9 @@ const LectureContent = ({
             </span>
           </div>
         </div>
+
+        {/* Resources section inline */}
+        {renderViewResources()}
       </div>
     );
   };
@@ -787,9 +1161,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lectureContent?.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -813,11 +1186,10 @@ const LectureContent = ({
           </h3>
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                lecture?.type === "VIDEO"
-                  ? "bg-primary-light text-primary"
-                  : "bg-primary-light text-primary"
-              }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture?.type === "VIDEO"
+                ? "bg-primary-light text-primary"
+                : "bg-primary-light text-primary"
+                }`}
             >
               {lecture?.type === "VIDEO" ? (
                 <>
@@ -994,6 +1366,9 @@ const LectureContent = ({
                   {renderContentEditor()}
                 </div>
 
+                {/* Resources section */}
+                {renderResourcesEditor()}
+
                 <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
                   <Switch
                     id="preview"
@@ -1063,21 +1438,19 @@ const LectureContent = ({
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "content"
-                      ? "text-primary border-b-2 border-primary bg-light"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                    }`}
                 >
                   Content
                 </button>
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "settings"
-                      ? "text-primary border-b-2 border-primary bg-light"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "settings"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                    }`}
                 >
                   Settings
                 </button>
