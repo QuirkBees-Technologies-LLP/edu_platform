@@ -10,21 +10,22 @@ import {
   Eye,
   X,
   Loader2,
+  Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ── helpers ───────────────────────────────────────────────────────────
 const getFileIcon = (mimeType) => {
   if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
-  if (mimeType.includes("pdf")) return <FileText className="w-5 h-5 text-red-500" />;
-  if (mimeType.includes("word") || mimeType.includes("document"))
+  if (mimeType?.includes("pdf")) return <FileText className="w-5 h-5 text-red-500" />;
+  if (mimeType?.includes("word") || mimeType?.includes("document"))
     return <FileText className="w-5 h-5 text-blue-500" />;
-  if (mimeType.includes("sheet") || mimeType.includes("excel") || mimeType.includes("csv"))
+  if (mimeType?.includes("sheet") || mimeType?.includes("excel") || mimeType?.includes("csv"))
     return <FileSpreadsheet className="w-5 h-5 text-green-500" />;
-  if (mimeType.includes("presentation") || mimeType.includes("powerpoint"))
+  if (mimeType?.includes("presentation") || mimeType?.includes("powerpoint"))
     return <FileText className="w-5 h-5 text-orange-500" />;
-  if (mimeType.includes("image")) return <FileImage className="w-5 h-5 text-purple-500" />;
-  if (mimeType.includes("zip") || mimeType.includes("rar"))
+  if (mimeType?.includes("image")) return <FileImage className="w-5 h-5 text-purple-500" />;
+  if (mimeType?.includes("zip") || mimeType?.includes("rar"))
     return <FileArchive className="w-5 h-5 text-yellow-600" />;
   return <FileIcon className="w-5 h-5 text-gray-400" />;
 };
@@ -38,32 +39,64 @@ const formatFileSize = (bytes) => {
 
 const getPreviewType = (mimeType) => {
   if (!mimeType) return "other";
-  if (mimeType.includes("image")) return "image";
-  if (mimeType.includes("pdf")) return "pdf";
+  if (mimeType?.includes("image")) return "image";
+  if (mimeType?.includes("pdf")) return "pdf";
   if (
-    mimeType.includes("word") ||
-    mimeType.includes("document") ||
-    mimeType.includes("presentation") ||
-    mimeType.includes("powerpoint") ||
-    mimeType.includes("sheet") ||
-    mimeType.includes("excel")
+    mimeType?.includes("word") ||
+    mimeType?.includes("document") ||
+    mimeType?.includes("presentation") ||
+    mimeType?.includes("powerpoint") ||
+    mimeType?.includes("sheet") ||
+    mimeType?.includes("excel")
   )
     return "office";
   return "other";
 };
 
-const ResourcesSection = ({ resources = [], viewOnly = false, className = "" }) => {
-  const [previewResource, setPreviewResource] = useState(null);
+// Forces a file-save dialog regardless of file type (image, pdf, etc.)
+const triggerDownload = async (url, filename) => {
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename || "download";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    // Fallback: open in new tab if fetch fails (e.g. strict CORS)
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+};
 
-  if (!resources.length) return null;
+const ResourcesSection = ({ resources = [], className = "" }) => {
+  const [previewResource, setPreviewResource] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  if (!resources?.length) return null;
 
   const openPreview = (resource) => {
-    const type = getPreviewType(resource.mimeType);
+    const type = getPreviewType(resource?.mimeType);
     if (type === "other") {
-      window.open(resource.url, "_blank", "noopener,noreferrer");
+      window.open(resource?.url, "_blank", "noopener,noreferrer");
     } else {
       setPreviewResource(resource);
     }
+  };
+
+  const handleDownload = async (resource) => {
+    setDownloadingId(resource?._id);
+    await triggerDownload(resource?.url, resource?.originalName);
+    setDownloadingId(null);
+  };
+
+  const handleModalDownload = async (resource) => {
+    setDownloadingId("modal");
+    await triggerDownload(resource?.url, resource?.originalName);
+    setDownloadingId(null);
   };
 
   return (
@@ -73,23 +106,23 @@ const ResourcesSection = ({ resources = [], viewOnly = false, className = "" }) 
           <Paperclip className="w-4 h-4 text-primary" />
           Resources
           <span className="bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full leading-none">
-            {resources.length}
+            {resources?.length}
           </span>
         </h3>
 
         <div className="space-y-2">
-          {resources.map((resource) => (
+          {resources?.map((resource) => (
             <div
-              key={resource._id}
+              key={resource?._id}
               className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
             >
-              {getFileIcon(resource.mimeType)}
+              {getFileIcon(resource?.mimeType)}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 truncate">
-                  {resource.originalName}
+                  {resource?.originalName}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {formatFileSize(resource.size)}
+                  {formatFileSize(resource?.size)}
                 </p>
               </div>
 
@@ -103,32 +136,20 @@ const ResourcesSection = ({ resources = [], viewOnly = false, className = "" }) 
                 <Eye className="w-4 h-4" />
               </button>
 
-              {!viewOnly && (
-                <a
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
-                  title="Download"
-                >
-                  {/* reuse lucide Download icon */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                </a>
-              )}
+              {/* Download button */}
+              <button
+                type="button"
+                onClick={() => handleDownload(resource)}
+                disabled={downloadingId === resource?._id}
+                className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50"
+                title="Download"
+              >
+                {downloadingId === resource?._id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+              </button>
             </div>
           ))}
         </div>
@@ -159,41 +180,29 @@ const ResourcesSection = ({ resources = [], viewOnly = false, className = "" }) 
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                   <div className="flex items-center gap-2 min-w-0">
-                    {getFileIcon(previewResource.mimeType)}
+                    {getFileIcon(previewResource?.mimeType)}
                     <span className="text-sm font-medium text-gray-800 truncate">
-                      {previewResource.originalName}
+                      {previewResource?.originalName}
                     </span>
                     <span className="text-xs text-gray-400 shrink-0">
-                      {formatFileSize(previewResource.size)}
+                      {formatFileSize(previewResource?.size)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
-                    {/* Download link in modal — hidden when viewOnly */}
-                    {!viewOnly && (
-                      <a
-                        href={previewResource.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-primary text-primary hover:bg-primary hover:text-white transition-colors"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="7 10 12 15 17 10" />
-                          <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                        Download
-                      </a>
-                    )}
+                    {/* Download button in modal */}
+                    <button
+                      type="button"
+                      onClick={() => handleModalDownload(previewResource)}
+                      disabled={downloadingId === "modal"}
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-primary text-primary hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
+                    >
+                      {downloadingId === "modal" ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Download className="w-3.5 h-3.5" />
+                      )}
+                      Download
+                    </button>
                     <button
                       type="button"
                       onClick={() => setPreviewResource(null)}
@@ -206,30 +215,30 @@ const ResourcesSection = ({ resources = [], viewOnly = false, className = "" }) 
 
                 {/* Body */}
                 <div className="flex-1 overflow-hidden relative">
-                  {getPreviewType(previewResource.mimeType) === "image" ? (
+                  {getPreviewType(previewResource?.mimeType) === "image" ? (
                     <div className="flex items-center justify-center p-6 h-full">
                       <img
-                        src={previewResource.url}
-                        alt={previewResource.originalName}
+                        src={previewResource?.url}
+                        alt={previewResource?.originalName}
                         className="max-w-full max-h-[70vh] object-contain rounded-lg shadow"
                       />
                     </div>
-                  ) : getPreviewType(previewResource.mimeType) === "pdf" ? (
+                  ) : getPreviewType(previewResource?.mimeType) === "pdf" ? (
                     <iframe
-                      src={previewResource.url}
+                      src={previewResource?.url}
                       className="w-full h-[70vh] border-0"
-                      title={previewResource.originalName}
+                      title={previewResource?.originalName}
                     />
-                  ) : getPreviewType(previewResource.mimeType) === "office" ? (
+                  ) : getPreviewType(previewResource?.mimeType) === "office" ? (
                     <div className="relative w-full h-[70vh]">
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50 text-gray-400 text-sm z-0">
                         <Loader2 className="w-6 h-6 animate-spin text-primary" />
                         <span>Loading preview…</span>
                       </div>
                       <iframe
-                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewResource.url)}`}
+                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewResource?.url)}`}
                         className="relative z-10 w-full h-full border-0"
-                        title={previewResource.originalName}
+                        title={previewResource?.originalName}
                       />
                     </div>
                   ) : null}
