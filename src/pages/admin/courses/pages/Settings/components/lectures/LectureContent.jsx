@@ -704,7 +704,8 @@ const LectureContent = ({
     if (mimeType.includes("sheet") || mimeType.includes("excel") || mimeType.includes("csv")) return <FileSpreadsheet className="w-5 h-5 text-green-500" />;
     if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return <FileText className="w-5 h-5 text-orange-500" />;
     if (mimeType.includes("image")) return <FileImage className="w-5 h-5 text-purple-500" />;
-    if (mimeType.includes("zip") || mimeType.includes("rar")) return <FileArchive className="w-5 h-5 text-yellow-600" />;
+    if (mimeType.startsWith("audio/")) return <FileIcon className="w-5 h-5 text-pink-500" />;
+    if (mimeType.includes("zip") || mimeType.includes("rar") || mimeType.includes("7z")) return <FileArchive className="w-5 h-5 text-yellow-600" />;
     return <FileIcon className="w-5 h-5 text-gray-400" />;
   };
 
@@ -715,9 +716,38 @@ const LectureContent = ({
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
+  const MAX_RESOURCE_SIZE_MB = 50;
+  const ALLOWED_RESOURCE_EXTS = [
+    "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
+    "txt", "csv", "zip", "rar", "7z",
+    "jpg", "jpeg", "png", "webp", "gif", "svg", "bmp", "tiff", "tif", "ico",
+    "mp3", "wav", "ogg", "aac", "flac", "m4a", "weba",
+  ];
+
   const handleResourceUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setResourceFiles((prev) => [...prev, ...files]);
+    const files = Array.from(e.target.files || []);
+    const valid = [];
+    const rejected = [];
+
+    files.forEach((file) => {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      const isAllowed = ALLOWED_RESOURCE_EXTS.includes(ext) || file.type?.startsWith("image/") || file.type?.startsWith("audio/");
+      if (!isAllowed) {
+        rejected.push(`${file.name} (unsupported type)`);
+        return;
+      }
+      if (file.size > MAX_RESOURCE_SIZE_MB * 1024 * 1024) {
+        rejected.push(`${file.name} (exceeds ${MAX_RESOURCE_SIZE_MB}MB)`);
+        return;
+      }
+      valid.push(file);
+    });
+
+    if (rejected.length) toast.error(`Skipped: ${rejected.join(", ")}`);
+    if (valid.length) {
+      setResourceFiles((prev) => [...prev, ...valid]);
+      toast.success(`${valid.length} file(s) added`);
+    }
     e.target.value = "";
   };
 
@@ -772,12 +802,15 @@ const LectureContent = ({
                 </p>
               </div>
 
-              {/* Delete button */}
-              {/* <button
+              <button
                 type="button"
-                onClick={() => handleDeleteResource(resource._id)}
+                onClick={() => {
+                  if (window.confirm(`Delete "${resource.originalName}"? This cannot be undone.`)) {
+                    handleDeleteResource(resource._id);
+                  }
+                }}
                 disabled={deletingResourceId === resource._id}
-                className="p-1.5 text-gray-400 hover:text-red-500 rounded-md transition-colors disabled:opacity-50"
+                className="shrink-0 p-1.5 bg-red-50 text-red-500 border border-red-200 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50"
                 title="Delete resource"
               >
                 {deletingResourceId === resource._id ? (
@@ -785,7 +818,7 @@ const LectureContent = ({
                 ) : (
                   <Trash2 className="w-4 h-4" />
                 )}
-              </button> */}
+              </button>
             </div>
           ))}
         </div>
@@ -796,7 +829,7 @@ const LectureContent = ({
         <input
           type="file"
           multiple
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z,.jpg,.jpeg,.png,.webp,.gif,.svg,.bmp,.tiff,.tif,.ico,.mp3,.wav,.ogg,.aac,.flac,.m4a,.weba"
           onChange={handleResourceUpload}
           className="hidden"
           id="resourceUpload"
@@ -919,9 +952,13 @@ const LectureContent = ({
 
                 {/* <button
                   type="button"
-                  onClick={() => handleDeleteResource(resource._id)}
+                  onClick={() => {
+                    if (window.confirm(`Delete "${resource.originalName}"? This cannot be undone.`)) {
+                      handleDeleteResource(resource._id);
+                    }
+                  }}
                   disabled={deletingResourceId === resource._id}
-                  className="p-2 text-gray-400 hover:text-red-500 rounded-md transition-colors disabled:opacity-50"
+                  className="shrink-0 p-1.5 bg-red-50 text-red-500 border border-red-200 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50"
                   title="Delete resource"
                 >
                   {deletingResourceId === resource._id ? (
