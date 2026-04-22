@@ -12,6 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../../components/ui/breadcrumb";
+import ResourcesSection from "../../../components/ui/ResourcesSection";
 
 const ClientSpecificCourses = () => {
   const { id } = useParams();
@@ -40,11 +41,9 @@ const ClientSpecificCourses = () => {
 
   const getVideoPlatform = (url) => {
     if (!url) return null;
-    if (url.includes("youtube.com") || url.includes("youtu.be"))
-      return "youtube";
+    if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube";
     if (url.includes("vimeo.com")) return "vimeo";
-    if (url.includes("dailymotion.com") || url.includes("dai.ly"))
-      return "dailymotion";
+    if (url.includes("dailymotion.com") || url.includes("dai.ly")) return "dailymotion";
     if (url.includes("loom.com")) return "loom";
     return null;
   };
@@ -67,7 +66,6 @@ const ClientSpecificCourses = () => {
   const getVideoEmbedUrl = (url) => {
     const platform = getVideoPlatform(url);
     let videoId;
-
     switch (platform) {
       case "youtube":
         videoId = getYouTubeVideoId(url);
@@ -139,6 +137,7 @@ const ClientSpecificCourses = () => {
       ) : (
         <Container>
           <div className="grid grid-cols-12 gap-4">
+            {/* ── Main content area ── */}
             <div className="xl:col-span-8 col-span-12">
               {(currentLecture?.type === "VIDEO" && currentLecture.videoUrl) ||
               currentLecture.content ? (
@@ -186,8 +185,16 @@ const ClientSpecificCourses = () => {
                 </h5>
                 <ShowMoreLess html={currentLecture?.description} limit={180} />
               </div>
+
+              {/* Resources — view only for students */}
+              <ResourcesSection
+                resources={currentLecture?.resources || []}
+                viewOnly
+                className="mb-6"
+              />
             </div>
 
+            {/* ── Sidebar lecture list ── */}
             <div className="xl:col-span-4 col-span-12 space-y-4">
               {sections?.map((section) => (
                 <div className="card p-3 rounded-lg" key={section._id}>
@@ -220,9 +227,7 @@ const ClientSpecificCourses = () => {
                                 <div className="relative">
                                   <img
                                     className="rounded-lg h-14 w-24 object-cover"
-                                    src={
-                                      thumbnails[lecture._id] || defaultImage
-                                    }
+                                    src={thumbnails[lecture._id] || defaultImage}
                                     alt={lecture.title}
                                   />
                                   <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-lg">

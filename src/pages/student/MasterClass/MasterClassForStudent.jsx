@@ -38,6 +38,7 @@ import {
 import { useGetAllEducatorsQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { useGetAcademyCategoryQuery } from "../../../store/api/client/clientAcademyCategoryApiSlice";
 import { useGetAdminStrategyListQuery, useGetStrategiesNameQuery } from "../../../store/api/client/clientStrategiesApiSlice";
+import ResourcesSection from "../../../components/ui/ResourcesSection";
 
 /**
  * Utility function to convert various video URLs to embeddable format
@@ -749,6 +750,15 @@ const MasterClassForStudent = () => {
             </div>
           )}
         </div>
+
+        {/* Resources for active lecture — view only */}
+        {activeLecture?.resources?.length > 0 && (
+          <ResourcesSection
+            resources={activeLecture.resources}
+            viewOnly
+            className="mb-8"
+          />
+        )}
 
         {/* About Strategy */}
         {currentStrategy && (

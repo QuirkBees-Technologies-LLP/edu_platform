@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from "react-router";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import { useAuthContext } from "@/auth";
 import { useTourStep } from "@/hooks/useTourStep";
+import ResourcesSection from "../../../components/ui/ResourcesSection";
 
 export default function IqVault() {
   const [activeTab, setActiveTab] = useState("");
@@ -62,10 +63,10 @@ export default function IqVault() {
       setCurrentCourse(data.course);
 
       // 🟢 Also auto select first lecture whenever data changes
-      const firstCourse = data.course[0];
+      const firstCourse = data.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
-        const firstLecture = firstCourse.lectures[0];
-        setActiveLectureId(firstLecture._id);
+        const firstLecture = firstCourse?.lectures?.[0];
+        setActiveLectureId(firstLecture?._id);
         setLecture(firstLecture);
       }
     } else {
@@ -106,13 +107,13 @@ export default function IqVault() {
 
     // 🟢 Auto-select first lecture when data loads
     if (data?.course?.length > 0) {
-      const firstCourse = data.course[0];
+      const firstCourse = data.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
-        const firstLectureId = firstCourse.lectures[0]._id;
+        const firstLectureId = firstCourse?.lectures?.[0]?._id;
         // Only set if no lecture is currently selected
         if (!activeLectureId) {
           setActiveLectureId(firstLectureId);
-          setLecture(firstCourse.lectures[0] || {});
+          setLecture(firstCourse?.lectures?.[0] || {});
         }
       } else {
         setLecture({});
@@ -545,6 +546,12 @@ export default function IqVault() {
                                     }}
                                   />
                                 )}
+                                {/* Resources — view only */}
+                                <ResourcesSection
+                                  resources={lecture?.resources || []}
+                                  viewOnly
+                                  className="mt-4"
+                                />
                               </div>
                             </div>
                           ) : (
@@ -632,7 +639,7 @@ export default function IqVault() {
                                 >
                                   <img
                                     src={
-                                      i.imageUrl
+                                      i?.imageUrl
                                         ? i.imageUrl
                                         : "public/media/images/video-thumbail.jpg"
                                     }
