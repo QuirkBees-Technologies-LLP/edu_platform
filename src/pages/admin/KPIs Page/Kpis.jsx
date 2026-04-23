@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Archive } from "lucide-react";
 import {
   LineChart,
@@ -21,7 +21,7 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
-import { Users, Eye, Clock, UserCheck, UserPlus, Star } from "lucide-react";
+import { Users, Eye, Clock, UserCheck, UserPlus, Star, Layers } from "lucide-react";
 import { useEducatorKpisQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
 import { useNavigate, useParams } from "react-router";
 import { icon } from "leaflet";
@@ -29,6 +29,7 @@ import Spinner from "@/components/common/LoadingSpinner";
 
 const KpisDashboard = () => {
   const navigate = useNavigate();
+  const [selectedSessionIdx, setSelectedSessionIdx] = useState("all");
 
   const { callId } = useParams();
 
@@ -39,8 +40,18 @@ const KpisDashboard = () => {
     }
   );
 
-  const timelineData = Array.isArray(data?.timeline)
-    ? data.timeline.map((item) => ({
+  // Determine the active view data (aggregated or a specific session)
+  const activeData = useMemo(() => {
+    if (!data) return null;
+    if (selectedSessionIdx === "all") {
+      return data.aggregated || data;
+    }
+    const session = data.sessions?.[selectedSessionIdx];
+    return session || data.aggregated || data;
+  }, [data, selectedSessionIdx]);
+
+  const timelineData = Array.isArray(activeData?.timeline)
+    ? activeData.timeline.map((item) => ({
       time: new Date(item.time).toLocaleTimeString("en-US", {
         hour12: false,
         hour: "2-digit",
@@ -254,20 +265,20 @@ const KpisDashboard = () => {
     ZW: "Zimbabwe",
   };
 
-  const countryData = Array.isArray(data?.countryBreakdown)
-    ? [...data?.countryBreakdown]
+  const countryData = Array.isArray(activeData?.countryBreakdown)
+    ? [...activeData?.countryBreakdown]
       .sort((a, b) => b.unique - a.unique)
       .map((country) => ({
         name: countryNames[country.name] || country.name,
         code: country.name,
         users: country.unique,
-        percentage: ((country.unique / (data?.uniqueUsers || 1)) * 100).toFixed(1),
+        percentage: ((country.unique / (activeData?.uniqueUsers || 1)) * 100).toFixed(1),
       }))
     : [];
 
   // Browser breakdown
-  const browserData = Array.isArray(data?.browserBreakdown)
-    ? [...data?.browserBreakdown]
+  const browserData = Array.isArray(activeData?.browserBreakdown)
+    ? [...activeData?.browserBreakdown]
       .sort((a, b) => b.unique - a.unique)
       .map((browser) => ({
         name: browser.name,
@@ -276,8 +287,8 @@ const KpisDashboard = () => {
     : [];
 
   // OS breakdown
-  const osDataRaw = Array.isArray(data?.osBreakdown)
-    ? data?.osBreakdown.reduce((acc, os) => {
+  const osDataRaw = Array.isArray(activeData?.osBreakdown)
+    ? activeData?.osBreakdown.reduce((acc, os) => {
       const osName = os.name.toLowerCase() === "linux" ? "Linux" : os.name;
       const existing = acc.find((item) => item.name === osName);
       if (existing) existing.users += os.unique;
@@ -376,10 +387,83 @@ const KpisDashboard = () => {
         </div>
       ) : (
         <>
-         
+          {/* Session Selector Tabs */}
+          {data?.sessions?.length > 1 && (
+            <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-4 mb-6 mt-2">
+              <div className="flex items-center gap-2 mb-3">
+                <Layers className="w-5 h-5 text-indigo-500" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {data.sessions.length} Sessions Found
+                </h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedSessionIdx("all")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedSessionIdx === "all"
+                      ? "bg-indigo-600 text-white shadow-md"
+                      : "bg-gray-100 dark:bg-coal-100 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-coal-200"
+                    }`}
+                >
+                  📊 All Sessions (Combined)
+                </button>
+                {data.sessions.map((session, idx) => (
+                  <button
+                    key={session.sessionId}
+                    onClick={() => setSelectedSessionIdx(idx)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedSessionIdx === idx
+                        ? "bg-indigo-600 text-white shadow-md"
+                        : "bg-gray-100 dark:bg-coal-100 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-coal-200"
+                      }`}
+                  >
+                    🔹 Session {idx + 1}
+                    <span className="ml-1 text-xs opacity-75">
+                      ({session.startAt !== "-" ? session.startAt.split(",")[0] : "N/A"})
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Session Timeline Card */}
+          {activeData?.startAt && activeData?.startAt !== "-" && (
+            <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6 mb-6 mt-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                🕐 Session Timeline
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Start Time */}
+                <div className="bg-green-50 dark:bg-green-500/10 rounded-xl p-4">
+                  <p className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider mb-1">Started At</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{activeData?.startAt || "-"}</p>
+                </div>
+                {/* End Time */}
+                <div className="bg-red-50 dark:bg-red-500/10 rounded-xl p-4">
+                  <p className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">Ended At</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{activeData?.endedAt || "-"}</p>
+                </div>
+                {/* Duration */}
+                <div className="bg-blue-50 dark:bg-blue-500/10 rounded-xl p-4">
+                  <p className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Duration</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{activeData?.duration || "-"}</p>
+                </div>
+                {/* Sessions Count */}
+                <div className="bg-purple-50 dark:bg-purple-500/10 rounded-xl p-4">
+                  <p className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">
+                    {selectedSessionIdx === "all" ? "Total Sessions" : "Total Participants"}
+                  </p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    {selectedSessionIdx === "all"
+                      ? `${data?.totalSessionsFound || 1} sessions`
+                      : `${activeData?.totalSessions || 0} views`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Timeline Chart */}
-          <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6 mb-8 mt-8">
+          <div className="bg-white dark:bg-coal-300 rounded-lg shadow-sm border dark:border-coal-100 p-6 mb-8 mt-4">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               👥 Concurrent Users Timeline
             </h2>
@@ -558,36 +642,49 @@ const KpisDashboard = () => {
             </div>
           </div>
 
-           <div className="mb-8">
+          <div className="mb-8">
             <div className="bg-white dark:bg-coal-300 shadow-sm border dark:border-coal-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
               {/* Left section - IDs */}
               <div className="space-y-2 sm:space-y-0 sm:space-x-6 flex flex-col sm:flex-row text-sm text-gray-700 dark:text-gray-300">
-                <div className="flex items-center">
-                  <span className="font-semibold text-gray-900 dark:text-white mr-2">
-                    Session ID:
-                  </span>
-                  <span className="truncate text-gray-500">{data?.sessionId || "—"}</span>
-                </div>
+                {selectedSessionIdx !== "all" && data?.sessions?.[selectedSessionIdx] && (
+                  <div className="flex items-center">
+                    <span className="font-semibold text-gray-900 dark:text-white mr-2">
+                      Session ID:
+                    </span>
+                    <span className="truncate text-gray-500">{data.sessions[selectedSessionIdx].sessionId || "—"}</span>
+                  </div>
+                )}
                 <div className="flex items-center">
                   <span className="font-semibold text-gray-900 dark:text-white mr-2">Call ID:</span>
                   <span className="truncate text-gray-500">{data?.callId || "—"}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-semibold text-gray-900 dark:text-white mr-2">Total Sessions:</span>
+                  <span className="truncate text-gray-500">{data?.totalSessionsFound || 1}</span>
                 </div>
               </div>
 
               {/* Right section - Status */}
               <div className="mt-3 sm:mt-0">
-                <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${data?.ended
-                    ? "bg-red-100 text-red-700 border border-red-200"
-                    : "bg-green-100 text-green-700 border border-green-200"
-                    }`}
-                >
+                {selectedSessionIdx !== "all" && data?.sessions?.[selectedSessionIdx] ? (
                   <span
-                    className={`w-2 h-2 rounded-full mr-2 ${data?.ended ? "bg-red-500" : "bg-green-500 animate-pulse"
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${data.sessions[selectedSessionIdx].status === "ended"
+                        ? "bg-red-100 text-red-700 border border-red-200"
+                        : "bg-green-100 text-green-700 border border-green-200"
                       }`}
-                  />
-                  {data?.ended ? "Ended" : "Live"}
-                </span>
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full mr-2 ${data.sessions[selectedSessionIdx].status === "ended" ? "bg-red-500" : "bg-green-500 animate-pulse"
+                        }`}
+                    />
+                    {data.sessions[selectedSessionIdx].status === "ended" ? "Ended" : "Live"}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide bg-indigo-100 text-indigo-700 border border-indigo-200">
+                    <span className="w-2 h-2 rounded-full mr-2 bg-indigo-500" />
+                    Combined View
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -597,40 +694,39 @@ const KpisDashboard = () => {
             <MetricCard
               icon={Users}
               title="Unique Users"
-              value={data?.uniqueUsers}
-              // subtitle="Last 7 days"
+              value={activeData?.uniqueUsers}
+              subtitle={selectedSessionIdx === "all" && data?.sessions?.length > 1 ? `Across ${data.sessions.length} sessions` : undefined}
               color="green"
             />
             <MetricCard
               icon={Eye}
               title="Peak Concurrent Viewers"
-              value={data?.peakConcurrent}
-              // subtitle="Compared to last week"
+              value={activeData?.peakConcurrent}
               color="purple"
             />
             <MetricCard
               icon={UserCheck}
               title="Total Views"
-              value={data?.totalSessions}
+              value={activeData?.totalSessions}
               color="purple"
             />
-            {/* <MetricCard
-              icon={UserPlus}
-              title="Subscribers"
-              value={data?.subscribers}
-              color="indigo"
-            /> */}
             <MetricCard
               icon={Clock}
               title="Total Watch Time"
-              value={data?.totalWatchTime}
-              // subtitle="This month"
+              value={activeData?.totalWatchTime}
               color="blue"
+            />
+            <MetricCard
+              icon={UserPlus}
+              title="Avg Watch Time / User"
+              value={activeData?.avgWatchTimePerUser}
+              subtitle="Per unique viewer"
+              color="indigo"
             />
             <MetricCard
               icon={Star}
               title="User Ratings"
-              value={data?.userRatings}
+              value={activeData?.userRatings}
               color="yellow"
             />
           </div>
