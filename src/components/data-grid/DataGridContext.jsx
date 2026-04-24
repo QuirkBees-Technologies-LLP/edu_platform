@@ -1,10 +1,13 @@
 'use client';
 
 import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, getFacetedRowModel, getFacetedUniqueValues } from '@tanstack/react-table';
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DataGridInner } from './DataGridInner';
 import { deepMerge, debounce } from '@/lib/helpers';
+
 const DataGridContext = createContext(undefined);
+
 export const useDataGrid = () => {
   const context = useContext(DataGridContext);
   if (!context) {
@@ -12,7 +15,14 @@ export const useDataGrid = () => {
   }
   return context;
 };
+
 export const DataGridProvider = props => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const id = props.id || '';
+  const pageParam = id ? `${id}_page` : 'page';
+  const sizeParam = id ? `${id}_size` : 'size';
+
   const defaultValues = {
     messages: {
       empty: 'No data available',
@@ -36,18 +46,81 @@ export const DataGridProvider = props => {
     rowSelection: false,
     serverSide: false
   };
+
   const mergedProps = deepMerge(defaultValues, props);
+  
+  const initialPageIndex = useMemo(() => {
+    const urlPage = searchParams.get(pageParam);
+    if (urlPage) return parseInt(urlPage) - 1;
+    return props.pagination?.page ?? 0;
+  }, [searchParams, pageParam, props.pagination?.page]);
+
+  const initialPageSize = useMemo(() => {
+    const urlSize = searchParams.get(sizeParam);
+    if (urlSize) return parseInt(urlSize);
+    return props.pagination?.size ?? 5;
+  }, [searchParams, sizeParam, props.pagination?.size]);
+
   const [data, setData] = useState(mergedProps.data || []);
   const [loading, setLoading] = useState(false);
   const [totalRows, setTotalRows] = useState(mergedProps.data ? mergedProps.data.length : 0);
   const [pagination, setPagination] = useState({
-    pageIndex: props.pagination?.page ?? 0,
-    pageSize: props.pagination?.size ?? 5
+    pageIndex: initialPageIndex,
+    pageSize: initialPageSize
   });
   const [rowSelection, setRowSelection] = useState(mergedProps.rowSelection);
   const [sorting, setSorting] = useState(mergedProps.sorting ?? []);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
+
+  // Sync state to URL
+  useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+    let changed = false;
+
+    // We use 1-based indexing for the URL
+    const urlPage = pagination.pageIndex + 1;
+    if (urlPage > 1) {
+      if (newParams.get(pageParam) !== urlPage.toString()) {
+        newParams.set(pageParam, urlPage.toString());
+        changed = true;
+      }
+    } else if (newParams.has(pageParam)) {
+      newParams.delete(pageParam);
+      changed = true;
+    }
+
+    if (pagination.pageSize !== (props.pagination?.size ?? 5)) {
+      if (newParams.get(sizeParam) !== pagination.pageSize.toString()) {
+        newParams.set(sizeParam, pagination.pageSize.toString());
+        changed = true;
+      }
+    } else if (newParams.has(sizeParam)) {
+      newParams.delete(sizeParam);
+      changed = true;
+    }
+
+    if (changed) {
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [pagination, pageParam, sizeParam, setSearchParams, searchParams, props.pagination?.size]);
+
+  // Sync URL to state (handles back/forward)
+  useEffect(() => {
+    const urlPage = searchParams.get(pageParam);
+    const urlSize = searchParams.get(sizeParam);
+    
+    const nextPageIndex = urlPage ? parseInt(urlPage) - 1 : (props.pagination?.page ?? 0);
+    const nextPageSize = urlSize ? parseInt(urlSize) : (props.pagination?.size ?? 5);
+    
+    setPagination(prev => {
+      if (prev.pageIndex !== nextPageIndex || prev.pageSize !== nextPageSize) {
+        return { pageIndex: nextPageIndex, pageSize: nextPageSize };
+      }
+      return prev;
+    });
+  }, [searchParams, pageParam, sizeParam, props.pagination?.page, props.pagination?.size]);
+
   const fetchServerSideData = useCallback(async () => {
     if (loading || !mergedProps.onFetchData) return;
     setLoading(true);
@@ -70,7 +143,9 @@ export const DataGridProvider = props => {
       setLoading(false);
     }
   }, [loading, pagination, sorting, columnFilters, mergedProps.onFetchData]);
+
   const debouncedFetchData = debounce(fetchServerSideData, 100);
+
   const loadData = () => {
     if (mergedProps.serverSide) {
       debouncedFetchData();
@@ -85,6 +160,7 @@ export const DataGridProvider = props => {
   useEffect(() => {
     loadData();
   }, [pagination, sorting, columnFilters, mergedProps.data, mergedProps.serverSide, mergedProps.reloadTrigger]);
+
   const handleRowSelectionChange = updaterOrValue => {
     setRowSelection(prev => typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue);
     if (mergedProps.onRowSelectionChange) {
@@ -92,6 +168,7 @@ export const DataGridProvider = props => {
       mergedProps.onRowSelectionChange(newSelection, table);
     }
   };
+
   const table = useReactTable({
     data,
     columns: mergedProps.columns,
@@ -132,6 +209,7 @@ export const DataGridProvider = props => {
     manualFiltering: mergedProps.serverSide,
     autoResetPageIndex: false
   });
+
   return <DataGridContext.Provider value={{
     props: mergedProps,
     table,
@@ -142,4 +220,4 @@ export const DataGridProvider = props => {
   }}>
     <DataGridInner />
   </DataGridContext.Provider>;
-};
+};
