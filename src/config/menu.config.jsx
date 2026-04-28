@@ -1738,6 +1738,11 @@ export const sideMenus = {
       path: "/trading-strategies",
       children: [
         {
+          title: "Strategy Alerts",
+          icon: <Dot />,
+          path: "/strategy-alerts",
+        },
+        {
           title: "Strategy Access",
           icon: <ChartNoAxesCombined />,
           path: "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
