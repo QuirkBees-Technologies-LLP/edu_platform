@@ -15,7 +15,7 @@ import ResourcesSection from "../../../components/ui/ResourcesSection";
 
 export default function FastStartTraining() {
   const [activeLectureId, setActiveLectureId] = useState(null);
-  const [openAccordionIndex, setOpenAccordionIndex] = useState([0]); // Back to array format
+  const [openAccordionIndex, setOpenAccordionIndex] = useState([0]);
   const [activeTab, setActiveTab] = useState("");
   const [lecture, setLecture] = useState();
   const [id, setId] = useState();
@@ -25,7 +25,7 @@ export default function FastStartTraining() {
   const navigate = useNavigate();
 
   const handleClick = (id) => {
-    setId(id); // or simply: id, based on your API setup
+    setId(id);
   };
 
   const selectedLanguage = useSelector(selectSelectedLanguage);
@@ -40,7 +40,7 @@ export default function FastStartTraining() {
       mainSection: "Fast Start Training",
       id,
       category: activeTab,
-      language: selectedLanguage, // Only use selectedLanguage, no fallback to category
+      language: selectedLanguage,
     },
     {
       refetchOnMountOrArgChange: true,
@@ -55,7 +55,6 @@ export default function FastStartTraining() {
   const [currentCourse, setCurrentCourse] = useState([]);
 
   useEffect(() => {
-    // Only set course data if we have course data AND the active tab matches
     if (
       data?.course &&
       data.course.length > 0 &&
@@ -63,28 +62,23 @@ export default function FastStartTraining() {
     ) {
       setCurrentCourse(data.course);
     } else {
-      // Reset course data if no course data or tab doesn't match
       setCurrentCourse([]);
     }
   }, [data, activeTab]);
 
   useEffect(() => {
-    // Auto-select first category tab when data loads
     if (data?.ActiveCategory?.length > 0 && !activeTab) {
       setActiveTab(data.ActiveCategory[0]?.categoryId);
     }
 
-    // Auto-select first tab from categories if no active tab
     if (data?.categories?.length > 0 && !activeTab) {
       setActiveTab(data.categories[0]?._id);
     }
 
-    // 🟢 Auto-select first lecture when data loads
     if (data?.course?.length > 0) {
       const firstCourse = data.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
         const firstLectureId = firstCourse?.lectures?.[0]?._id;
-        // Only set if no lecture is currently selected
         if (!activeLectureId) {
           setActiveLectureId(firstLectureId);
           setLecture(firstCourse?.lectures?.[0] || {});
@@ -95,34 +89,27 @@ export default function FastStartTraining() {
     }
   }, [data, activeTab, activeLectureId, selectedLanguage]);
 
-  // Force select first tab when data changes and no tab is selected
   useEffect(() => {
     if (data && !activeTab) {
-      // Priority 1: Try to select from ActiveCategory
       if (data.ActiveCategory?.length > 0) {
         setActiveTab(data.ActiveCategory[0]?.categoryId);
       }
-      // Priority 2: Try to select from categories
       else if (data.categories?.length > 0) {
         setActiveTab(data.categories[0]?._id);
       }
     }
   }, [data, activeTab, selectedLanguage]);
 
-  // Reset state when language changes
   useEffect(() => {
     setActiveTab("");
     setActiveLectureId(null);
     setLecture({});
-    setCurrentCourse([]); // Also reset course data when language changes
+    setCurrentCourse([]);
   }, [selectedLanguage]);
 
-  // Refetch data when component mounts or when returning to page
   useEffect(() => {
-    // Refetch data when component mounts
     refetch();
 
-    // Listen for visibility change to refetch when user returns to page
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         refetch();
@@ -131,27 +118,22 @@ export default function FastStartTraining() {
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Cleanup listener on unmount
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [refetch]);
 
-  // Ensure active tab is set when returning to page
   useEffect(() => {
     if (data && !activeTab) {
-      // Priority 1: Try to select from ActiveCategory
       if (data.ActiveCategory?.length > 0) {
         setActiveTab(data.ActiveCategory[0]?.categoryId);
       }
-      // Priority 2: Try to select from categories
       else if (data.categories?.length > 0) {
         setActiveTab(data.categories[0]?._id);
       }
     }
   }, [data, activeTab]);
 
-  // ─── FastStartTraining Tour (continued from Dashboard) ───────────────────
   useTourStep({
     shouldStart: location?.state?.continueTour === true,
     isReady: !isCategoryLoading && !!currentCourse?.length && !!lecture,
@@ -168,7 +150,6 @@ export default function FastStartTraining() {
     onDone: () => navigate('/iq-vault', { state: { continueTour: true } }),
     delay: 800,
   });
-  // ─────────────────────────────────────────────────────────────────────────
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);
@@ -193,11 +174,6 @@ export default function FastStartTraining() {
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    // if (url.includes("vimeo.com/")) {
-    //   const videoId = url.split("vimeo.com/")[1].split("?")[0];
-    //   return `https://player.vimeo.com/video/${videoId}`;
-    // }
-
     if (url.includes("vimeo.com/")) {
       const parts = url.split("vimeo.com/")[1].split("/");
       const videoId = parts[0].split("?")[0];
@@ -212,62 +188,30 @@ export default function FastStartTraining() {
       return `https://www.dailymotion.com/embed/video/${videoId}`;
     }
 
-    // Loom
     if (url.includes("loom.com/share/")) {
       const videoId = url.split("loom.com/share/")[1].split("?")[0];
       return `https://www.loom.com/embed/${videoId}`;
     }
-    // Dyntube
-    // if (url.includes("dyntube.com/video/")) {
-    //     let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
-    //     videoId = videoId.replace(/\/$/, "");
-    //     return `https://player.dyntube.com/video/${videoId}`;
-    //   }
 
     if (url.includes("app.dyntube.com/#/video/")) {
       const match = url.match(/video\/([^/]+)/);
       if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
     }
 
-    // CASE 2: https://videos.dyntube.com/iframes/<id>
     if (url.includes("videos.dyntube.com/iframes/")) {
       const match = url.match(/iframes\/([^/?#]+)/);
       if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
     }
 
-    // CASE 3: https://player.dyntube.com/video/<id>
     if (url.includes("player.dyntube.com/video/")) {
       const match = url.match(/video\/([^/?#]+)/);
       if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
     }
 
-    // CASE 4: fallback generic
     if (url.includes("dyntube.com/")) return url;
 
     return url;
   };
-
-  // const tabs = [
-  //   {
-  //     id: "Backoffice",
-  //     name: "Backoffice",
-  //     content: "Select the lactures", // Dynamic content rendered based on `lecture`
-  //   },
-  //   {
-  //     id: "Crypto",
-  //     name: "Crypto",
-  //     content:
-  //       "Explore the world of cryptocurrencies, blockchain technology, and digital asset trading.",
-  //   },
-  //   {
-  //     id: "Stock-options",
-  //     name: "Stock Options",
-  //     content:
-  //       "Understand stock options, strategies, and how to trade them effectively.",
-  //   },
-  // ];
-
-  // Added the image
 
   return (
     <>
@@ -340,7 +284,7 @@ export default function FastStartTraining() {
                       <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
                         <Accordion
                           allowMultiple={false}
-                          defaultIndex={0} // 🟢 First accordion open by default
+                          defaultIndex={0}
                         >
                           {currentCourse.map((c, index) => (
                             <AccordionItem
@@ -350,7 +294,7 @@ export default function FastStartTraining() {
                               {c?.lectures?.map((t, lIdx) => (
                                 <div
                                   key={t._id}
-                                  onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
+                                  onClick={() => handleBannerClick(t._id)}
                                   className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition ${lIdx === 0 && index === 0 ? 'fst-lecture-item' : ''}
                                    ${activeLectureId === t._id
                                       ? "bg-gray-300 dark:bg-slate-800"
@@ -450,9 +394,6 @@ export default function FastStartTraining() {
                               )}
 
                               <div className="px-6 py-8 rounded-bl-md rounded-br-md">
-                                {/* <h3 className="text-sm tracking-widest font-normal text-gray-600 mb-2">
-                                  {lecture.title}
-                                </h3> */}
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center flex-wrap justify-between mb-3 gap-2">
                                   <h4 className="sm:text-2xl font-medium text-gray-900">
                                     {lecture.title}

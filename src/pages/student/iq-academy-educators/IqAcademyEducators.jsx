@@ -200,10 +200,8 @@ const IqAcademyEducators = () => {
 
   useEffect(() => {
     setPage(1);
-    // RTK Query automatically re-fetches when query args (activeTab, category, searchText) change
-    // No need to manually call refetch() here — it causes double requests
   }, [activeTab, category, searchText]);
-  // ─── Educators Tour (continued from IQ Academy) ─────────────────────────────────────
+
   useTourStep({
     shouldStart: location?.state?.continueTour === true,
     isReady: !isLoading && !isFetching && educatorList.length > 0,
@@ -226,9 +224,7 @@ const IqAcademyEducators = () => {
     onDone: () => navigate('/ideas', { state: { continueTour: true } }),
     delay: 800,
   });
-  // ─────────────────────────────────────────────────────────────────────────
 
-  // Helper to get button style based on category
   const getMasterClassButtonStyle = (categories) => {
     const firstCategory = categories?.[0];
     const categoryName = firstCategory?.name?.toLowerCase() || "";
@@ -421,10 +417,6 @@ const IqAcademyEducators = () => {
                   </p>
 
                   <div className="flex justify-between text-gray-700 dark:text-gray-300 mt-">
-                    {/* <div className="text-center">
-                      <p className="font-semibold dark:text-gray-800">⭐ 4.9</p>
-                      <p className="text-xs dark:text-gray-700">Rating</p>
-                    </div> */}
                     <div className="text-center">
                       <p className="font-semibold dark:text-gray-800 text-gray-700">
                         {n?.courseCount || 0}
@@ -499,7 +491,6 @@ const IqAcademyEducators = () => {
                     </button>
                   </div>
 
-                  {/* MasterClass Button */}
                   <button
                     onClick={() => navigate(`/master-class/${n?._id}`)}
                     className={`group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 mt-3 w-full ${getMasterClassButtonStyle(
@@ -528,9 +519,6 @@ const IqAcademyEducators = () => {
         )}
       </div>
 
-      {/* {page >= totalPages && educatorList.length > 0 && (
-        <p className="text-center text-gray-500 my-8">No more educators.</p>
-      )} */}
     </div>
   );
 };
