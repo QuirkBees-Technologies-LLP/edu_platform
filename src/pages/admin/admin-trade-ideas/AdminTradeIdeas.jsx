@@ -301,7 +301,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
     ],
-    [isRTL]
+    [isRTL],
   );
 
   // Initialize search term from localStorage if available
@@ -386,25 +386,31 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   };
   const [activeTab, setActiveTab] = useState("TableView");
 
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedEducator, setSelectedEducator] = useState("");
+  const [educatorsList, setEducatorsList] = useState([]);
+
   return (
     <div className="container-fluid pb-5">
       <div className="pb-10">
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("TableView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "TableView"
-              ? "bg-gray-100 text-gray-900 shadow"
-              : "text-gray-600"
-              }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "TableView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             Table View
           </button>
           <button
             onClick={() => setActiveTab("UserView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "UserView"
-              ? "bg-gray-100 text-gray-900 shadow"
-              : "text-gray-600"
-              }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === "UserView"
+                ? "bg-gray-100 text-gray-900 shadow"
+                : "text-gray-600"
+            }`}
           >
             User View
           </button>
@@ -522,7 +528,46 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           )}
         </>
       )}
-      {activeTab === "UserView" && <AdminTradeCards />}
+      {activeTab === "UserView" && (
+        <>
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3 mb-5">
+            {/* Status Filter */}
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-3 py-2 bg-gray-800 text-white rounded"
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="win">Win</option>
+              <option value="loss">Loss</option>
+            </select>
+
+            {/* Educator Filter */}
+            <select
+              value={selectedEducator}
+              onChange={(e) => setSelectedEducator(e.target.value)}
+              className="px-3 py-2 bg-gray-800 text-white rounded"
+            >
+              <option value="">All Educators</option>
+              {educatorsList?.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Cards */}
+          <AdminTradeCards
+            selectedStatus={selectedStatus}
+            selectedEducator={selectedEducator}
+            setEducatorsList={setEducatorsList}
+          />
+        </>
+      )}
     </div>
   );
 };
