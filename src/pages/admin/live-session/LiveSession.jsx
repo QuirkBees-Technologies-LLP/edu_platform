@@ -173,7 +173,7 @@ const LiveSession = ({ title = "Live Session" }) => {
   };
 
   const handleRedirect = (callId, row) => {
-    navigate(`/admin/live-session/${callId}`, { state: row });
+    navigate(`/admin/educator-live-session/${callId}`, { state: row });
   };
 
   const handleStartCall = async (rowData) => {
