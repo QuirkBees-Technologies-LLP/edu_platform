@@ -30,7 +30,7 @@ const statusColorMap = {
   win: "blue",
   partialWin: "violet",
   loss: "red",
-  breakEven: "gray"  
+  breakEven: "gray",
 };
 const TradeUserView = [
   {
@@ -106,7 +106,11 @@ const TradeUserView = [
     createAt: "2025-07-21T11:40:30.746Z",
   },
 ];
-const AdminTradeCards = () => {
+const AdminTradeCards = ({
+  selectedStatus,
+  selectedEducator,
+  setEducatorsList,
+}) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [tradeIdeas, setTradeIdeas] = useState([]);
@@ -120,10 +124,24 @@ const AdminTradeCards = () => {
   //   page: page,
   //   limit: limit,
   // });
-  
+
   const { data: fetchData, isFetching } = useGetAdminWithoutTradeIdeasQuery({
     isview: false,
   });
+
+  useEffect(() => {
+    if (fetchData?.data) {
+      const unique = [
+        ...new Set(
+          fetchData.data.map(
+            (trade) =>
+              `${trade?.educatorDetails?.first_name} ${trade?.educatorDetails?.last_name}`,
+          ),
+        ),
+      ];
+      setEducatorsList(unique);
+    }
+  }, [fetchData]);
 
   // const totalPages = fetchData?.pagination?.totalPages || 1;
 
@@ -162,6 +180,17 @@ const AdminTradeCards = () => {
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
+
+  const filteredTrades = fetchData?.data?.filter((trade) => {
+    const statusMatch = selectedStatus ? trade.status === selectedStatus : true;
+
+    const educatorMatch = selectedEducator
+      ? `${trade?.educatorDetails?.first_name} ${trade?.educatorDetails?.last_name}`.toLowerCase() ===
+        selectedEducator.toLowerCase()
+      : true;
+
+    return statusMatch && educatorMatch;
+  });
 
   return (
     <div className="container-fluid p-0">
@@ -245,7 +274,7 @@ const AdminTradeCards = () => {
           </div> */}
 
           <div className="grid grid-cols-12 gap-5 md:gap-6">
-            {fetchData?.data?.map((trade, index) => (
+            {filteredTrades?.map((trade, index) => (
               <div
                 key={trade._id}
                 className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
@@ -448,10 +477,10 @@ const AdminTradeCards = () => {
           selectedIdea={selectedIdea}
         />
         <ImageLightBox
-            isLightBoxOpen={isLightBoxOpen}
-            setIsLightBoxOpen={setIsLightBoxOpen}
-            selectedIdea={selectedIdea}
-          />
+          isLightBoxOpen={isLightBoxOpen}
+          setIsLightBoxOpen={setIsLightBoxOpen}
+          selectedIdea={selectedIdea}
+        />
       </div>
     </div>
   );

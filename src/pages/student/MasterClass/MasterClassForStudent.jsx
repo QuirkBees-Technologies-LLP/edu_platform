@@ -40,13 +40,9 @@ import { useGetAcademyCategoryQuery } from "../../../store/api/client/clientAcad
 import { useGetAdminStrategyListQuery, useGetStrategiesNameQuery } from "../../../store/api/client/clientStrategiesApiSlice";
 import ResourcesSection from "../../../components/ui/ResourcesSection";
 
-/**
- * Utility function to convert various video URLs to embeddable format
- */
 const getEmbedUrl = (url) => {
   if (!url) return "";
 
-  // YouTube
   if (url?.includes("youtube.com/watch?v=")) {
     const videoId = url?.split("v=")?.[1]?.split("&")?.[0];
     return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
@@ -56,7 +52,6 @@ const getEmbedUrl = (url) => {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
   }
 
-  // Vimeo
   if (url?.includes("vimeo.com/")) {
     const parts = url?.split("vimeo.com/")?.[1]?.split("/") || [];
     const videoId = parts?.[0]?.split("?")?.[0];
@@ -67,37 +62,31 @@ const getEmbedUrl = (url) => {
       : `https://player.vimeo.com/video/${videoId}`;
   }
 
-  // Dailymotion
   if (url?.includes("dailymotion.com/video/")) {
     const videoId = url?.split("dailymotion.com/video/")?.[1]?.split("?")?.[0];
     return videoId ? `https://www.dailymotion.com/embed/video/${videoId}` : "";
   }
 
-  // Loom
   if (url?.includes("loom.com/share/")) {
     const videoId = url?.split("loom.com/share/")?.[1]?.split("?")?.[0];
     return videoId ? `https://www.loom.com/embed/${videoId}` : "";
   }
 
-  // Dyntube - Case 1: app.dyntube.com/#/video
   if (url?.includes("app.dyntube.com/#/video/")) {
     const match = url?.match(/video\/([^/]+)/);
     if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
   }
 
-  // Dyntube - Case 2: videos.dyntube.com/iframes
   if (url?.includes("videos.dyntube.com/iframes/")) {
     const match = url?.match(/iframes\/([^/?#]+)/);
     if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
   }
 
-  // Dyntube - Case 3: player.dyntube.com/video
   if (url?.includes("player.dyntube.com/video/")) {
     const match = url?.match(/video\/([^/?#]+)/);
     if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
   }
 
-  // Dyntube - Case 4: fallback generic
   if (url?.includes("dyntube.com/")) return url;
 
   return url;
@@ -115,9 +104,6 @@ const Banner = () => (
 );
 
 const MasterClassForStudent = () => {
-  // ==================== STATE MANAGEMENT ===================
-
-  // Initialize selectedStrategyId: URL param > location state > null
   const [selectedStrategyId, setSelectedStrategyId] = useState(null);
   const [activeLectureId, setActiveLectureId] = useState(null);
   const [activeLecture, setActiveLecture] = useState(null);
@@ -145,15 +131,8 @@ const MasterClassForStudent = () => {
     activeCategory?.name?.toLowerCase()?.includes("digital") ||
     activeCategory?.slug?.toLowerCase()?.includes("digital");
 
-  // Get selected language from Redux
   const selectedLanguage = useSelector(selectSelectedLanguage);
   const { data: educatorsData } = useGetAllEducatorsQuery();
-
-  // Mark tour complete in backend & update auth context
-  // Now handled internally by useTourStep hook
-
-  // ==================== API CALLS ====================
-  // Fetch all strategies
 
   const {
     data: strategiesData,
@@ -172,10 +151,8 @@ const MasterClassForStudent = () => {
         strategies: activeStrategyId,
       },
     },
-    // { refetchOnMountOrArgChange: true }
   );
 
-  // Lazy query for fetching individual strategy details
   const [
     fetchStrategy,
     { data: strategyData, isLoading: strategyLoading, error: strategyError },
@@ -184,23 +161,15 @@ const MasterClassForStudent = () => {
   const { data: strategiesName, isLoading: isStrategNameLoading } =
     useGetAdminStrategyListQuery();
 
-  // ==================== DATA EXTRACTION ====================
   const strategies = strategiesData?.data || [];
   const currentStrategy = strategyData?.data || null;
 
-  // ==================== SIDE EFFECTS ====================
-  /**
-   * When a strategy is selected, fetch its detailed data
-   */
   useEffect(() => {
     if (selectedStrategyId) {
       fetchStrategy(selectedStrategyId);
     }
   }, [selectedStrategyId, fetchStrategy]);
 
-  /**
-   * Auto-select the first lecture from the first section when strategy is loaded
-   */
   useEffect(() => {
     if (currentStrategy?.sections?.length > 0) {
       const firstSection = currentStrategy.sections[0];
@@ -212,7 +181,6 @@ const MasterClassForStudent = () => {
     }
   }, [currentStrategy]);
 
-  // ─── MasterClass Tour (continued from IqVault) ─────────────────────────────
   useTourStep({
     shouldStart: location?.state?.continueTour === true,
     isReady: !strategiesLoading,
@@ -233,19 +201,13 @@ const MasterClassForStudent = () => {
     onDone: () => navigate('/iq-academy', { state: { continueTour: true } }),
     delay: 800,
   });
-  // ─────────────────────────────────────────────────────────────────────────────
 
-  // ==================== EVENT HANDLERS ====================
   const selectStrategy = (strategyId) => {
     setSelectedStrategyId(strategyId);
     setActiveLectureId(null);
     setActiveLecture(null);
-    // window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  /**
-   * Handle lecture selection
-   */
   const handleLectureClick = (lecture) => {
     setActiveLectureId(lecture?._id);
     setActiveLecture(lecture);
@@ -261,8 +223,6 @@ const MasterClassForStudent = () => {
   const tradingMethodOptions = [
     { value: "price_action", label: "Price Action" },
     { value: "institutional", label: "Institutional" },
-    // { value: "wyckoff", label: "Wyckoff" },
-    // { value: "elliot", label: "Elliot" },
     { value: "harmonics", label: "Harmonics" },
   ];
 
@@ -287,7 +247,6 @@ const MasterClassForStudent = () => {
     <>
       {!isDigitalMarketing && (
         <>
-          {/* Trading Type Multi-Select */}
           <div className="flex items-center gap-2 relative">
             <Popover>
               <PopoverTrigger asChild>
@@ -344,7 +303,6 @@ const MasterClassForStudent = () => {
             )}
           </div>
 
-          {/* Trading Method Multi-Select */}
           <div className="flex items-center gap-2 relative">
             <Popover>
               <PopoverTrigger asChild>
@@ -401,7 +359,6 @@ const MasterClassForStudent = () => {
             )}
           </div>
 
-          {/* Time Zone Multi-Select */}
           <div className="flex items-center gap-2 relative">
             <Popover>
               <PopoverTrigger asChild>
@@ -454,7 +411,6 @@ const MasterClassForStudent = () => {
             )}
           </div>
 
-          {/* Reset Button */}
           <button
             type="button"
             onClick={() => {
@@ -476,14 +432,12 @@ const MasterClassForStudent = () => {
     </>
   );
 
-  // ==================== LOADING STATE ====================
   if (strategiesLoading) {
     return (
       <div className="min-h-screen">
         <Container width="fluid" className="mx-auto px-5">
           <Banner />
 
-          {/* Loading State */}
           <div className="flex items-center justify-center h-96">
             <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
             <span className="ml-3 text-gray-600">Loading MasterClass...</span>
@@ -493,14 +447,12 @@ const MasterClassForStudent = () => {
     );
   }
 
-  // ==================== ERROR STATE ====================
   if (strategiesError) {
     return (
       <div className="min-h-screen">
         <Container width="fluid" className="mx-auto px-5">
           <Banner />
 
-          {/* Error State */}
           <div className="flex flex-col items-center justify-center h-96">
             <div className="text-red-500 text-lg mb-4">
               Failed to load MasterClass
@@ -515,7 +467,6 @@ const MasterClassForStudent = () => {
     );
   }
 
-  // ==================== MAIN RENDER ====================
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
       <Container width="fluid" className="mx-auto px-5">
@@ -524,7 +475,6 @@ const MasterClassForStudent = () => {
         <div className="flex gap-4 mb-6 justify-between flex-wrap">
           {viewType == "grid" && !isDigitalMarketing && (
             <div className="flex gap-4 overflow-x-auto pb-4 items-start strategy-filter">
-              {/* All Strategies Option */}
               <button
                 onClick={() => setActiveStrategyId(null)}
                 className="flex flex-col items-center gap-2 group min-w-[72px]"
@@ -555,7 +505,7 @@ const MasterClassForStudent = () => {
                   key={strategy?._id}
                   onClick={() => {
                     setActiveStrategyId(strategy?._id);
-                  }} // Added min-w to prevent shrinking
+                  }}
                   className="flex flex-col items-center gap-2 group min-w-[72px]"
                 >
                   <div
@@ -620,12 +570,6 @@ const MasterClassForStudent = () => {
               </SelectTrigger>
 
               <SelectContent>
-                {/* {isLoading && (
-                            <SelectItem value="loading" disabled>
-                              Loading...
-                            </SelectItem>
-                          )} */}
-
                 {educatorsData?.data?.map((item) => (
                   <SelectItem key={item._id} value={item._id}>
                     {item.first_name} {item.last_name}
@@ -646,13 +590,9 @@ const MasterClassForStudent = () => {
           </div>
         </div>
 
-        {/* Banner - Static, never changes */}
         <Banner />
 
-        {/* ========== DYNAMIC CONTENT AREA ========== */}
-        {/* This section updates when a strategy is selected */}
         <div className="flex flex-col md:flex-row gap-6 mb-8 mt-5">
-          {/* ========== LESSONS PANEL (LEFT SIDEBAR) ========== */}
           {currentStrategy?.sections?.length > 0 ? (
             <div className="md:w-[430px]">
               <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
@@ -702,12 +642,10 @@ const MasterClassForStudent = () => {
             </div>
           ) : null}
 
-          {/* ========== VIDEO PLAYER AREA (MAIN CONTENT) ========== */}
           {currentStrategy && (
             <div className="flex-1">
               <div className="card rounded-2xl border border-gray-300 overflow-hidden">
                 <div className="w-full h-[425px] dark:bg-black flex items-center justify-center bg-gray-200">
-                  {/* Show loading while fetching strategy details */}
                   {strategyLoading ? (
                     <div className="text-center">
                       <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
@@ -733,7 +671,6 @@ const MasterClassForStudent = () => {
                       </h3>
                     </div>
                   ) : currentStrategy ? (
-                    // Strategy selected but no sections/lessons available
                     <div className="text-center text-gray-400">
                       <div className="text-8xl mb-5 opacity-30">▶</div>
                       <h3 className="text-xl text-gray-200">
@@ -751,7 +688,6 @@ const MasterClassForStudent = () => {
           )}
         </div>
 
-        {/* Resources for active lecture — view only */}
         {activeLecture?.resources?.length > 0 && (
           <ResourcesSection
             resources={activeLecture.resources}
@@ -760,18 +696,9 @@ const MasterClassForStudent = () => {
           />
         )}
 
-        {/* About Strategy */}
         {currentStrategy && (
           <div className="card rounded-2xl border border-gray-300 p-8 mb-8">
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-300">
-              {/* {currentStrategy?.imageUrl && (
-                <img
-                  src={currentStrategy?.imageUrl}
-                  alt={currentStrategy?.title || "MasterClass"}
-                  className="w-16 h-16 rounded-xl object-cover"
-                />
-              )} */}
+            <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-300">              
               <div>
                 <h3 className="text-2xl font-semibold">
                   {currentStrategy?.title}
@@ -779,7 +706,6 @@ const MasterClassForStudent = () => {
               </div>
             </div>
 
-            {/* Two Column Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-10">
               <div className="lg:col-span-2">
                 <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">
@@ -795,7 +721,6 @@ const MasterClassForStudent = () => {
                   MasterClass Details
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {/* Display tags with alternating colors */}
                   {currentStrategy.tags?.map((tag, i) => (
                     <span
                       key={i}
@@ -808,7 +733,6 @@ const MasterClassForStudent = () => {
                     </span>
                   ))}
 
-                  {/* Display category badge */}
                   {currentStrategy?.category && (
                     <span className="px-4 py-2 rounded-full text-xs font-medium bg-purple-500/20 border border-purple-500/40 text-purple-400">
                       {currentStrategy?.category?.name}
@@ -822,20 +746,16 @@ const MasterClassForStudent = () => {
           </div>
         )}
 
-        {/* ========== AVAILABLE STRATEGIES GRID ========== */}
-        {/* This section is always visible */}
         <div className="mt-10 pb-12">
           <h2 className="text-2xl font-semibold mb-6">
             Available Master Classes
           </h2>
 
-          {/* Show message if no strategies found */}
           {strategies.length === 0 ? (
             <div className="text-center py-12 text-gray-600">
               No MasterClass available at the moment.
             </div>
           ) : (
-            // Display strategy cards in a responsive grid
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {strategies?.map((strategy, stratIdx) => {
                 const educator = strategy?.educators?.[0];
@@ -852,7 +772,6 @@ const MasterClassForStudent = () => {
                       : "border-gray-200 hover:border-purple-300 hover:shadow-sm hover:shadow-purple-100/60"
                       }`}
                   >
-                    {/* ── Banner with gradient overlay + educator info ── */}
                     <div className="relative w-full h-48 overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-900 via-purple-700 to-orange-500">
                       {strategy?.strategyBanner ? (
                         <img
@@ -868,19 +787,8 @@ const MasterClassForStudent = () => {
                         </div>
                       )}
 
-                      {/* Dark gradient scrim */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
-                      {/* Selected checkmark badge */}
-                      {/* {selectedStrategyId === strategy?._id && (
-                        <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center shadow-lg shadow-purple-500/60 ring-2 ring-white/30">
-                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )} */}
-
-                      {/* Category pill — top left */}
                       {strategy?.category?.name && (
                         <div className="absolute top-3 left-3">
                           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-white border border-white/25">
@@ -889,10 +797,8 @@ const MasterClassForStudent = () => {
                         </div>
                       )}
 
-                      {/* Educator info — bottom of banner */}
                       {educatorName && (
                         <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5">
-                          {/* Avatar stack */}
                           <div className="flex -space-x-2">
                             {strategy?.educators?.slice(0, 3)?.map((edu, i) =>
                               edu?.image ? (
@@ -914,33 +820,22 @@ const MasterClassForStudent = () => {
                               )
                             )}
                           </div>
-                          {/* Name + role */}
                           <div className="flex flex-col leading-tight">
                             <span className="text-white text-xs font-semibold drop-shadow-sm line-clamp-1">
                               {educatorName}{hasMoreEducators && ` +${strategy?.educators?.length - 1}`}
                             </span>
-                            {/* <span className="text-white/65 text-[10px]">Instructor</span> */}
                           </div>
                         </div>
                       )}
                     </div>
-
-                    {/* ── Card Body ── */}
                     <div className="flex flex-col flex-grow p-5">
-                      {/* Title */}
                       <h3 className="text-[15px] font-bold text-gray-900 mb-1.5 line-clamp-1 group-hover:text-purple-600 transition-colors duration-200">
                         {strategy?.title}
                       </h3>
-
-                      {/* Description */}
                       <p className="text-sm text-gray-400 leading-relaxed line-clamp-2 flex-grow mb-4">
                         {strategy?.description || "Explore this master class and enhance your trading skills."}
                       </p>
-
-                      {/* Divider */}
                       <div className="border-t border-gray-100 mb-4" />
-
-                      {/* CTA Button */}
                       <button className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/40 active:scale-[0.97]">
                         Start Learning →
                       </button>

@@ -211,6 +211,9 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
             formData.append("timeZone", values.timeZone);
           }
           formData.append("educator", values?.educator);
+          // Send browser's timezone offset (minutes from UTC) so backend
+          // can generate recurrence dates on the correct local weekdays
+          formData.append("timezoneOffset", new Date().getTimezoneOffset());
 
           values?.tags?.forEach((tag) => {
             formData.append("tags[]", tag);

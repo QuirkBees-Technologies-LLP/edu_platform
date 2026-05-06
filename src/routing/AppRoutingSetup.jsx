@@ -158,9 +158,11 @@ import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTrad
 import ClientLiveIdeas from "../pages/student/client-live-ideas/ClientLiveIdeas";
 import TradingStrategies from "../pages/student/trading-strategies/TradingStrategies";
 import MasterClass from "../pages/educator/master-class/MasterClass";
+import TvWebhookSettings from "../pages/educator/educator-tv-webhook/TvWebhookSettings";
 import StudentMasterClass from "../pages/student/MasterClass/MasterClass.jsx";
 import MasterClassStudent from "../pages/student/MasterClass/MasterClassForStudent.jsx";
 import { IdeasLayout } from "../layouts/ideas/IdeasLayout";
+import StrategyAlerts from "../pages/student/strategy-alerts/StrategyAlerts";
 import AdminMetrixDashboard from "../pages/admin/admin-MetrixDashboard/AdminMetrixDashboard.jsx";
 const routes = {
   student: [
@@ -200,6 +202,7 @@ const routes = {
     { path: "/iq-crypto", element: <IqCrypto /> },
     { path: "/iq-social", element: <CommunityFeed /> },
     { path: "/trading-strategies", element: <TradingStrategies /> },
+    { path: "/strategy-alerts", element: <StrategyAlerts /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
@@ -238,6 +241,7 @@ const routes = {
       element: <EducatorCommunityFeed />,
     },
     { path: "/educator/rating", element: <EducatorRating /> },
+    { path: "/educator/tv-webhook", element: <TvWebhookSettings /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
