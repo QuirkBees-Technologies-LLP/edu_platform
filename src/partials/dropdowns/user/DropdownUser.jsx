@@ -131,7 +131,7 @@ const DropdownUser = ({ menuItemRef }) => {
               </MenuTitle>
             </MenuLink>
           </MenuItem>
-          {auth?.user?.role === 'educator' && (
+          {/* {auth?.user?.role === 'educator' && (
             <MenuItem>
               <MenuLink path="/educator/tv-webhook">
                 <MenuIcon>
@@ -140,7 +140,7 @@ const DropdownUser = ({ menuItemRef }) => {
                 <MenuTitle>TradingView Webhook</MenuTitle>
               </MenuLink>
             </MenuItem>
-          )}
+          )} */}
           {(auth?.user?.role === 'student' || auth?.user?.role === 'user') && (
             <div className="menu-item mb-0.5">
               <div
