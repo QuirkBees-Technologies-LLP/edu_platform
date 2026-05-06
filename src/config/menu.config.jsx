@@ -1737,11 +1737,11 @@ export const sideMenus = {
       icon: <ChartNoAxesCombined />,
       path: "/trading-strategies",
       children: [
-        {
-          title: "Strategy Alerts",
-          icon: <Dot />,
-          path: "/strategy-alerts",
-        },
+        // {
+        //   title: "Strategy Alerts",
+        //   icon: <Dot />,
+        //   path: "/strategy-alerts",
+        // },
         {
           title: "Strategy Access",
           icon: <ChartNoAxesCombined />,
