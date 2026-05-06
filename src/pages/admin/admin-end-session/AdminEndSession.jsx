@@ -67,7 +67,7 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
   };
 
   const handleRedirect = (callId, row) => {
-    navigate(`/admin/live-session/${callId}`, { state: row });
+    navigate(`/admin/educator-live-session/${callId}`, { state: row });
   };
 
   // Columns definition
@@ -88,14 +88,14 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
           return (
             <span>
               <p
-                // className={
-                //   isClickable ? "cursor-pointer hover:text-primary" : ""
-                // }
-                // onClick={
-                //   isClickable
-                //     ? () => handleRedirect(callId, info.row.original)
-                //     : undefined
-                // }
+                className={
+                  isClickable ? "cursor-pointer hover:text-primary" : ""
+                }
+                onClick={
+                  isClickable
+                    ? () => handleRedirect(callId, info.row.original)
+                    : undefined
+                }
               >
                 {title}
               </p>

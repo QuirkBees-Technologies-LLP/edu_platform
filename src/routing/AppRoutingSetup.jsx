@@ -85,6 +85,7 @@ import AdminTradeIdeas from "../pages/admin/admin-trade-ideas/AdminTradeIdeas";
 import LiveSession from "../pages/admin/live-session/LiveSession";
 import ViewLiveSession from "../pages/admin/live-session/AdminLiveSessionView";
 import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionView";
+import AdminEducatorLiveSession from "../pages/admin/live-session/AdminEducatorLiveSession";
 import Courses from "../pages/admin/courses/Courses";
 import { EducatorDetailPage } from "../pages/educatorDetail";
 import ClientLiveSession from "../pages/student/client-live-session/ClientLiveSession";
@@ -264,6 +265,7 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/ticket", element: <Task /> },
@@ -294,6 +296,7 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },
@@ -325,6 +328,7 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },
