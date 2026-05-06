@@ -85,6 +85,7 @@ import AdminTradeIdeas from "../pages/admin/admin-trade-ideas/AdminTradeIdeas";
 import LiveSession from "../pages/admin/live-session/LiveSession";
 import ViewLiveSession from "../pages/admin/live-session/AdminLiveSessionView";
 import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionView";
+import AdminEducatorLiveSession from "../pages/admin/live-session/AdminEducatorLiveSession";
 import Courses from "../pages/admin/courses/Courses";
 import { EducatorDetailPage } from "../pages/educatorDetail";
 import ClientLiveSession from "../pages/student/client-live-session/ClientLiveSession";
@@ -158,9 +159,11 @@ import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTrad
 import ClientLiveIdeas from "../pages/student/client-live-ideas/ClientLiveIdeas";
 import TradingStrategies from "../pages/student/trading-strategies/TradingStrategies";
 import MasterClass from "../pages/educator/master-class/MasterClass";
+import TvWebhookSettings from "../pages/educator/educator-tv-webhook/TvWebhookSettings";
 import StudentMasterClass from "../pages/student/MasterClass/MasterClass.jsx";
 import MasterClassStudent from "../pages/student/MasterClass/MasterClassForStudent.jsx";
 import { IdeasLayout } from "../layouts/ideas/IdeasLayout";
+import StrategyAlerts from "../pages/student/strategy-alerts/StrategyAlerts";
 import AdminMetrixDashboard from "../pages/admin/admin-MetrixDashboard/AdminMetrixDashboard.jsx";
 const routes = {
   student: [
@@ -200,6 +203,7 @@ const routes = {
     { path: "/iq-crypto", element: <IqCrypto /> },
     { path: "/iq-social", element: <CommunityFeed /> },
     { path: "/trading-strategies", element: <TradingStrategies /> },
+    { path: "/strategy-alerts", element: <StrategyAlerts /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
@@ -238,6 +242,7 @@ const routes = {
       element: <EducatorCommunityFeed />,
     },
     { path: "/educator/rating", element: <EducatorRating /> },
+    { path: "/educator/tv-webhook", element: <TvWebhookSettings /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
@@ -260,6 +265,7 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/ticket", element: <Task /> },
@@ -290,6 +296,7 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },
@@ -321,6 +328,7 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },

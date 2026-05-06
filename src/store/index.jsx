@@ -49,6 +49,9 @@ import { clientMasterClassApiSlice } from "./api/client/clientMasterClassApiSlic
 import { adminMasterClassApiSlice } from "./api/admin/adminMasterClassApiSlice";
 import { adminStrategyModelApiSlice } from "./api/admin/adminStrategyModelApiSlice";
 import { adminMetricsApiSlice } from "./api/admin/adminMetricsApiSlice";
+import { educatorTvWebhookApiSlice } from "./api/educator/educatorTvWebhookApiSlice";
+import { clientTvSignalsApiSlice } from "./api/client/clientTvSignalsApiSlice";
+
 
 const languagePersistConfig = {
   key: "language",
@@ -126,6 +129,8 @@ export const store = configureStore({
     [adminMasterClassApiSlice.reducerPath]: adminMasterClassApiSlice.reducer,
     [adminStrategyModelApiSlice.reducerPath]: adminStrategyModelApiSlice.reducer,
     [adminMetricsApiSlice.reducerPath]: adminMetricsApiSlice.reducer,
+    [educatorTvWebhookApiSlice.reducerPath]: educatorTvWebhookApiSlice.reducer,
+    [clientTvSignalsApiSlice.reducerPath]: clientTvSignalsApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -171,6 +176,8 @@ export const store = configureStore({
       adminMasterClassApiSlice.middleware,
       adminStrategyModelApiSlice.middleware,
       adminMetricsApiSlice.middleware,
+      educatorTvWebhookApiSlice.middleware,
+      clientTvSignalsApiSlice.middleware,
     ),
 });
 

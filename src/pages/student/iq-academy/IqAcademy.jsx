@@ -31,8 +31,6 @@ function toEST(date) {
   );
 }
 
-
-// Filter options
 const tradingTypeOptions = [
   { value: "scalper", label: "Scalper" },
   { value: "day_trader", label: "Day Trader" },
@@ -43,8 +41,6 @@ const tradingTypeOptions = [
 const tradingMethodOptions = [
   { value: "price_action", label: "Price Action" },
   { value: "institutional", label: "Institutional" },
-  // { value: "wyckoff", label: "Wyckoff" },
-  // { value: "elliot", label: "Elliot" },
   { value: "harmonics", label: "Harmonics" },
 ];
 
@@ -66,7 +62,6 @@ export default function IqAcademy() {
   const [activeStrategyId, setActiveStrategyId] = useState("all");
   const [viewType, setViewType] = useState("grid");
 
-  // Reset filters when view type changes
   useEffect(() => {
     setTradingType([]);
     setTradingMethod([]);
@@ -76,15 +71,11 @@ export default function IqAcademy() {
     setActiveEducatorId("all");
   }, [viewType]);
 
-
-
-  // Filter states for list view (arrays for multi-select)
   const [tradingType, setTradingType] = useState([]);
   const [tradingMethod, setTradingMethod] = useState([]);
   const [timeZone, setTimeZone] = useState([]);
-  const [statusType, setStatusType] = useState(""); // ONGOING, UPCOMING, PAST
+  const [statusType, setStatusType] = useState("");
 
-  /* Helper function for multi-select logic */
   const handleMultiSelect = (value, currentSelected, setSelected) => {
     if (currentSelected?.includes(value)) {
       setSelected(currentSelected?.filter((item) => item !== value));
@@ -117,7 +108,6 @@ export default function IqAcademy() {
     activeCategory?.name?.toLowerCase()?.includes("digital") ||
     activeCategory?.slug?.toLowerCase()?.includes("digital");
 
-  // Reset filters when category changes to Digital Marketing
   useEffect(() => {
     if (isDigitalMarketing) {
       setTradingType([]);
@@ -128,8 +118,6 @@ export default function IqAcademy() {
       setActiveEducatorId("all");
     }
   }, [activeCategoryId, isDigitalMarketing]);
-
-  // Tour completion now handled internally by useTourStep hook
 
   useEffect(() => {
     if (!isCategoryLoading && categoryData?.data?.length > 0) {
@@ -153,7 +141,6 @@ export default function IqAcademy() {
       { skip: !activeCategoryId || viewType !== "grid" }
     );
 
-  // ─── IQ Academy Tour (continues from MasterClass) ─────────────────────────────────────
   useTourStep({
     shouldStart: location?.state?.continueTour === true,
     isReady: !isCategoryLoading && !isDetailLoading && !!singleCategoryData,
@@ -176,11 +163,7 @@ export default function IqAcademy() {
     onDone: () => navigate('/iq-academy-educators', { state: { continueTour: true } }),
     delay: 800,
   });
-  // ───────────────────────────────────────────────────────────────────────────────────
 
-
-
-  // Fetch strategy data for list view
   const { data: strategyData, isLoading: isStrategyLoading } =
     useGetCategoryWiseStrategyQuery(
       {
@@ -202,10 +185,8 @@ export default function IqAcademy() {
   const strategyEducators = strategyData?.data?.category?.educators || [];
 
   useEffect(() => {
-    // activeEducatorId defaults to "all", no need to set to first educator
   }, [educators, strategyEducators, viewType]);
 
-  // For "all" selection, combine all educators' courses
   const activeEducator = activeEducatorId === "all"
     ? {
       _id: "all",
@@ -228,8 +209,6 @@ export default function IqAcademy() {
     (viewType === "grid" && isDetailLoading) ||
     (viewType === "list" && isStrategyLoading) ||
     !activeCategoryId;
-
-  /* --- RENDER HELPERS --- */
 
   const renderWeekTabs = () => (
     <div className="flex gap-6">
@@ -285,7 +264,6 @@ export default function IqAcademy() {
 
   const renderFiltersAndReset = () => (
     <>
-      {/* Trading Type Multi-Select */}
       <div className="flex items-center gap-2 relative">
         <Popover>
           <PopoverTrigger asChild>
@@ -338,7 +316,6 @@ export default function IqAcademy() {
         )}
       </div>
 
-      {/* Trading Method Multi-Select */}
       <div className="flex items-center gap-2 relative">
         <Popover>
           <PopoverTrigger asChild>
@@ -395,7 +372,6 @@ export default function IqAcademy() {
         )}
       </div>
 
-      {/* Time Zone Multi-Select */}
       <div className="flex items-center gap-2 relative">
         <Popover>
           <PopoverTrigger asChild>
@@ -448,7 +424,6 @@ export default function IqAcademy() {
         )}
       </div>
 
-      {/* Reset Button */}
       <button
         type="button"
         onClick={() => {
@@ -468,7 +443,6 @@ export default function IqAcademy() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
-      {/* Tour anchor — visually hidden but present for intro.js highlight */}
       <h1 className="iq-academy-heading sr-only iq-academy-heading-tour">IQ Academy</h1>
       {isInitialLoading && (
         <div className="py-10 flex justify-center">
@@ -482,12 +456,10 @@ export default function IqAcademy() {
         </div>
       )}
 
-
-      {/* CATEGORY TABS */}
       <div className="flex gap-4 mb-6 justify-between flex-wrap">
         {viewType == "grid" && !isDigitalMarketing && (
           <div className="flex gap-4 overflow-x-auto pb-4 items-start iq-strategy-filter">
-            {/* All Strategies Option */}
+
             <button
               onClick={() => setActiveStrategyId("all")}
               className="flex flex-col items-center gap-2 group min-w-[72px]"
@@ -518,7 +490,7 @@ export default function IqAcademy() {
                 key={strategy?._id}
                 onClick={() => {
                   setActiveStrategyId(strategy?._id);
-                }} // Added min-w to prevent shrinking
+                }}
                 className="flex flex-col items-center gap-2 group min-w-[72px]"
               >
                 <div
@@ -564,9 +536,6 @@ export default function IqAcademy() {
         </div>
       </div>
 
-
-      {/* Mobile View Toggle Buttons - Center */}
-
       <div className="flex md:hidden justify-center mb-6">
         <div className="bg-gray-200 dark:bg-gray-100 rounded-xl p-1.5 flex">
           <button
@@ -591,14 +560,10 @@ export default function IqAcademy() {
         </div>
       </div>
 
-      {/* VIEW-SPECIFIC HEADER LAYOUT */}
       {viewType === "grid" ? (
-        /* GRID VIEW LAYOUT: Week Tabs (left) - Filters & View (Right) */
         <div className="hidden md:flex flex-row items-center justify-between mb-6 gap-4">
-          {/* Left: Week Tabs */}
           {renderWeekTabs()}
 
-          {/* Right: Filters + View Toggle */}
           {viewType === "grid" && (
             <div className="flex items-center gap-3">
               {!isDigitalMarketing && renderFiltersAndReset()}
@@ -607,20 +572,14 @@ export default function IqAcademy() {
           )}
         </div>
       ) : (
-        /* LIST VIEW LAYOUT (Original): Week Tabs + View (Row 1), Filters (Row 2, Centered) */
         <>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             {renderWeekTabs()}
             {renderViewToggle()}
           </div>
-          {/* <div className="flex flex-wrap justify-center gap-4 mb-6">
-            {renderFiltersAndReset()}
-          </div> */}
         </>
       )}
 
-
-      {/* Desktop View */}
       <div className="hidden md:block">
         {viewType === "grid" ? (
           <GridView
@@ -652,7 +611,6 @@ export default function IqAcademy() {
         )}
       </div>
 
-      {/* Mobile View - Switch between List and Grid */}
       <div className="block md:hidden">
         {viewType === "grid" ? (
           <GridView

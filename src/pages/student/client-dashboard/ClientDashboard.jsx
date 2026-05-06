@@ -51,14 +51,12 @@ const ClientDashboard = () => {
 
   const tourStartedRef = React.useRef(false);
 
-  // Mark tour as completed in backend + update auth context
   const markTourComplete = useCallback(async () => {
     try {
       if (tourStartedRef.current) {
         tourStartedRef.current = false;
       }
       await completeTour().unwrap();
-      // Update auth context so hasSeenTour becomes true in memory
       if (auth) {
         saveAuth({
           ...auth,
@@ -98,7 +96,7 @@ const ClientDashboard = () => {
   const [activeTab, setActiveTab] = useState("feed");
   const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [isQRModalOpen, setQRModalOpen] = useState(false);
-  const [qrType, setQrType] = useState("android"); // "android" or "ios"
+  const [qrType, setQrType] = useState("android");
 
   const IQLive = "/iq-academy";
   const IQInsight = "/iq-insight";
@@ -140,7 +138,6 @@ const ClientDashboard = () => {
   };
 
   useEffect(() => {
-    // Show tour if the user is a student and hasSeenTour is false, undefined, or missing
     const user = auth?.user;
     const isStudent = user?.role === "student";
     const hasSeenTour = user?.hasSeenTour;
@@ -259,15 +256,14 @@ const ClientDashboard = () => {
       skipLabel: "Skip",
       doneLabel: "Continue →",
       showProgress: true,
-      showBullets: false, // Turned off bullets to avoid cluttering next to the progress bar
+      showBullets: false,
       overlayOpacity: 0.8,
       exitOnOverlayClick: false,
       exitOnEsc: true,
-      scrollToElement: false, // we will manually handle custom scrolling
+      scrollToElement: false,
       tooltipClass: "custom-intro-tooltip",
     });
 
-    // Custom smooth scrolling to perfectly center the element mapping
     tour.onchange(function (targetElement) {
       if (this._currentStep === 0 || !targetElement) {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -276,14 +272,11 @@ const ClientDashboard = () => {
 
       const rect = targetElement.getBoundingClientRect();
       const absoluteTop = rect.top + window.pageYOffset;
-      // Calculate middle of screen for the element
       const middle = absoluteTop - (window.innerHeight / 2) + (rect.height / 2);
 
       window.scrollTo({ top: middle, behavior: "smooth" });
     });
 
-    // Dashboard tour complete → navigate to FastStartTraining to continue tour there
-    // hasSeenTour is NOT set here — it will be set after FastStartTraining tour finishes
     let isCompleted = false;
     let userClickedSkip = false;
     const handleSkipClick = (e) => {
@@ -291,7 +284,7 @@ const ClientDashboard = () => {
         userClickedSkip = true;
       }
     };
-    document.addEventListener('click', handleSkipClick, true); // capture phase
+    document.addEventListener('click', handleSkipClick, true);
 
     tour.oncomplete(() => {
       document.removeEventListener('click', handleSkipClick, true);
@@ -301,15 +294,12 @@ const ClientDashboard = () => {
       if (tourStartedRef.current) {
         tourStartedRef.current = false;
       }
-      // Navigation happens in onexit — which fires after oncomplete too
     });
     tour.onexit(() => {
       document.removeEventListener('click', handleSkipClick, true);
       if (isCompleted) {
-        // User completed all steps — continue tour on FastStartTraining page
         navigate('/fast-start-training', { state: { continueTour: true } });
       } else {
-        // User clicked Skip — end the entire tour chain
         markTourComplete();
       }
     });
@@ -327,9 +317,6 @@ const ClientDashboard = () => {
           <div className="flex justify-center text-3xl ki-alert-circle text-yellow-500 mb-3.5 mx-auto">
             <OctagonAlert size={40} />
           </div>
-          {/* <div className="text-center">
-            <i className="ki-filled text-3xl ki-alert-circle text-yellow-500 mb-3.5 mx-auto"></i>
-          </div> */}
 
           <p className="mb-4 text-gray-700 text-center">
             This feature is not available in your current plan. <br />
