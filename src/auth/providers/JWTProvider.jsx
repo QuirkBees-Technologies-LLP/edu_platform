@@ -45,6 +45,20 @@ const testUsers = {
       expire_at: new Date("2027-12-29"),
     },
   },
+  "kwame@coaching.com": {
+    password: "Password123!",
+    data: {
+      name: "Kwame Coaching",
+      email: "kwame@coaching.com",
+      crm_id: 11111,
+      first_name: "Kwame",
+      last_name: "Coaching",
+      status: "Active",
+      role: "student",
+      plan: "iq-max",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
 };
 
 const AuthContext = createContext(null);
