@@ -139,10 +139,10 @@ body {
 
 .str-video__participant-view {
   max-width: 100% !important;
-  aspect-ratio: 16/9 !important;
   width: 100% !important;
   height: auto !important;
   min-height: 200px !important;
+  background: #000 !important;
 }
 
 /* Fullscreen fixes for LivestreamPlayer */
@@ -291,7 +291,7 @@ body {
 .live-player-container {
   width: 100%;
   min-height: 200px;
-  aspect-ratio: 16/9;
+  background: #000;
 }
 
 .str-video_livestream-layout_player-wrapper {
@@ -305,6 +305,9 @@ body {
 .str-video__livestream-layout video {
   max-width: 100%;
   max-height: 100%;
+  width: 100%;
+  object-fit: contain !important;
+  background: #000;
 }
 
 /* Fullscreen state class for JavaScript tracking */
