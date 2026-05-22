@@ -262,7 +262,7 @@ const LiveSessionPlayer = ({
         </div>
       ) : (
         <>
-          {!isCallStarted && (
+          {!isCallStarted && !isLive && (
             <div className="flex flex-col justify-center items-center gap-7">
               <Podcast size={44} className="text-primary" />
               <p className="text-gray-300 dark:text-gray-700 mb-0">
