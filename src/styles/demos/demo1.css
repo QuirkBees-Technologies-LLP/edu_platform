@@ -138,6 +138,7 @@ body {
 }
 
 .str-video__participant-view {
+  max-width: 100% !important;
   aspect-ratio: 16/9 !important;
   width: 100% !important;
   height: auto !important;
