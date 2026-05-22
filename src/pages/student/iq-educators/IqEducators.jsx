@@ -332,7 +332,7 @@ const IqEducators = () => {
 
 
   return (
-    <div className="container-fluid pb-10">
+    <div className="container-fixed pb-10">
       {/* Share Toast Notification */}
       {showShareToast && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transform transition-all duration-300 ease-in-out animate-bounce">
