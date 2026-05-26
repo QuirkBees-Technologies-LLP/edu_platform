@@ -8,6 +8,7 @@ import {
   Users,
   Lock,
   FolderOpen,
+  Trash2,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -269,6 +270,16 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         postData.documents = processFiles(documents);
       }
 
+      // When editing, signal the backend to remove existing media if the educator cleared them
+      if (editingPost) {
+        if ((editingPost.images?.length > 0) && images.length === 0) {
+          postData.removeImages = true;
+        }
+        if ((editingPost.videos?.length > 0) && videos.length === 0) {
+          postData.removeVideos = true;
+        }
+      }
+
       if (editingPost) {
         await dispatch(
           updateEducatorPost({ id: editingPost.id, postData })
@@ -453,17 +464,13 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                             alt={`Image ${index + 1}`}
                             className="w-full h-24 object-cover rounded-lg"
                           />
-                          {/* Only show remove button when not editing OR when editing but no existing images */}
-                          {(!editingPost ||
-                            (editingPost && !editingPost.images?.length)) && (
-                            <button
-                              type="button"
-                              onClick={() => removeFile(image, "image")}
-                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X size={12} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeFile(image, "image")}
+                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -484,36 +491,17 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                             controls
                             className="w-full max-h-48 object-cover rounded-lg"
                           />
-                          {/* Only show remove button when not editing OR when editing but no existing videos */}
-                          {(!editingPost ||
-                            (editingPost && !editingPost.videos?.length)) && (
-                            <button
-                              type="button"
-                              onClick={() => removeFile(video, "video")}
-                              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X size={12} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeFile(video, "video")}
+                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
-
-                {/* Clear All Button - Only show when not editing OR when editing but no existing files */}
-                {(!editingPost ||
-                  (editingPost &&
-                    !editingPost.images?.length &&
-                    !editingPost.videos?.length &&
-                    !editingPost.documents?.length)) && (
-                  <button
-                    type="button"
-                    onClick={clearAllFiles}
-                    className="text-sm text-red-600 hover:text-red-800 hover:underline"
-                  >
-                    Clear all files
-                  </button>
                 )}
               </div>
             )}
@@ -529,27 +517,14 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   className="hidden"
                   accept="image/*"
                   multiple
-                  disabled={editingPost && editingPost.images?.length > 0}
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    if (
-                      !editingPost ||
-                      (editingPost && !editingPost.images?.length)
-                    ) {
-                      imageInputRef.current?.click();
-                    }
-                  }}
-                  disabled={editingPost && editingPost.images?.length > 0}
-                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                    editingPost && editingPost.images?.length > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-                  }`}
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex items-center gap-2 p-2 rounded-md transition-colors text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                 >
                   <Image size={20} />
-                  <span>{editingPost ? "Images" : "Images"}</span>
+                  <span>Images</span>
                 </button>
               </div>
 
@@ -561,29 +536,28 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   className="hidden"
                   accept="video/*"
                   multiple
-                  disabled={editingPost && editingPost.videos?.length > 0}
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    if (
-                      !editingPost ||
-                      (editingPost && !editingPost.videos?.length)
-                    ) {
-                      videoInputRef.current?.click();
-                    }
-                  }}
-                  disabled={editingPost && editingPost.videos?.length > 0}
-                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                    editingPost && editingPost.videos?.length > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:text-red-600 hover:bg-red-50"
-                  }`}
+                  onClick={() => videoInputRef.current?.click()}
+                  className="flex items-center gap-2 p-2 rounded-md transition-colors text-gray-600 hover:text-red-600 hover:bg-red-50"
                 >
                   <Video size={20} />
-                  <span>{editingPost ? "Videos" : "Videos"}</span>
+                  <span>Videos</span>
                 </button>
               </div>
+
+              {/* Clear All Button - only show when files exist */}
+              {(images.length > 0 || videos.length > 0) && (
+                <button
+                  type="button"
+                  onClick={clearAllFiles}
+                  className="flex items-center gap-2 p-2 ml-auto rounded-md transition-colors text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200 hover:border-red-400"
+                >
+                  <Trash2 size={18} />
+                  <span>Clear All</span>
+                </button>
+              )}
             </div>
           </div>
 
