@@ -26,6 +26,13 @@ export const adminMetricsApiSlice = createApi({
                 params: { action: 'planslist', startdate, enddate },
             }),
         }),
+        // GET /common/external-api/?action=report&reptype=getorderrep&fromdate=...&todate=...
+        getOrderReport: builder.query({
+            query: ({ fromdate, todate }) => ({
+                url: `/common/external-api/`,
+                params: { action: 'report', reptype: 'getorderrep', fromdate, todate },
+            }),
+        }),
     }),
 });
 
@@ -33,4 +40,6 @@ export const {
     useGetActiveCountsQuery,
     useGetRefundsQuery,
     useGetPlansListQuery,
+    useGetOrderReportQuery,
+    useLazyGetOrderReportQuery,
 } = adminMetricsApiSlice;
