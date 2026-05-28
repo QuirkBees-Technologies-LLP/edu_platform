@@ -1573,8 +1573,16 @@ chat */
   animation: gradientMove 8s ease infinite;
 }
 
-.str-video__participant-view {
+/* .str-video__participant-view {
   aspect-ratio: 16/9 !important;
+} */
+
+.str-video__video {
+  object-fit: contain !important;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto !important;
+  height: auto !important;
 }
 
 @keyframes gradientMove {
