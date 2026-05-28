@@ -13,7 +13,6 @@ import { useSettings } from "@/providers";
 import { toAbsoluteUrl } from "@/utils";
 import { useLazyGetAdminRecordingByUserIDQuery } from "../../../store/api/admin/adminRecordingApiSlice";
 import Spinner from "@/components/common/LoadingSpinner"; // Optional loader component
-import { it } from "@faker-js/faker";
 import VideoPlayerModal from "./VideoPlayerModal";
 import { useLazyGetClientRecordingByUserIDQuery } from "../../../store/api/client/clientRecordingApiSlice";
 
