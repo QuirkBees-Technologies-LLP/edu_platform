@@ -47,7 +47,6 @@ import {
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { ro, tr } from "@faker-js/faker";
 import CreateLiveStream from "./CreateLiveNow";
 import { SearchFilterInput } from "@/components";
 

@@ -13,7 +13,6 @@ import { Link, useParams } from "react-router-dom";
 import { useSettings } from "@/providers";
 import { toAbsoluteUrl } from "@/utils";
 import Spinner from "@/components/common/LoadingSpinner"; // Optional loader component
-import { it } from "@faker-js/faker";
 import VideoPlayerModal from "./VideoPlayerModal";
 import { useLazyGetEducatorRecordingQuery } from "../../../store/api/educator/educatorRecordingApiSlice";
 import VideoThumbnail from "../live-session/VideoThumbnail";
