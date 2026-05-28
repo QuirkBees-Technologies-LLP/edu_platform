@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { useGetActiveCountsQuery, useGetRefundsQuery, useGetPlansListQuery } from "../../../store/api/admin/adminMetricsApiSlice";
+import { useGetActiveCountsQuery, useGetRefundsQuery, useGetPlansListQuery, useLazyGetOrderReportQuery } from "../../../store/api/admin/adminMetricsApiSlice";
 import { useSettings } from "../../../providers/SettingsProvider";
 import CustomDatePicker from "../../../components/common/CustomDatePicker";
 
@@ -127,6 +127,88 @@ export default function AdminMetrixDashboard() {
     const [refundMonth, setRefundMonth] = useState("all");
     const [startDate, setStartDate] = useState(DEFAULT_START);
     const [endDate, setEndDate] = useState(DEFAULT_END);
+
+    // Order Report tab states and hook
+    const [triggerGetOrderReport, { data: reportData, isFetching: reportFetching, error: reportError }] = useLazyGetOrderReportQuery();
+    const [reportStartDate, setReportStartDate] = useState(DEFAULT_START);
+    const [reportEndDate, setReportEndDate] = useState(DEFAULT_END);
+    const [reportSearch, setReportSearch] = useState("");
+
+    const parsedDownloadUrl = useMemo(() => {
+        if (!reportData?.success || !reportData?.data) return null;
+        const keys = Object.keys(reportData.data);
+        const targetKey = keys.find(k => k.includes("privatefile.dhtml"));
+        if (!targetKey) return null;
+        
+        const match = targetKey.match(/file=([^"'\s>\\&]+)/);
+        if (match && match[1]) {
+            return `https://shield.iqonic.life/privatefile.dhtml?file=${match[1]}`;
+        }
+        return null;
+    }, [reportData]);
+
+    const reportRows = useMemo(() => {
+        if (!reportData?.success || !reportData?.data) return [];
+        const keys = Object.keys(reportData.data);
+        const hasHtml = keys.some(k => k.includes("privatefile.dhtml"));
+        if (hasHtml) return [];
+        
+        return Object.entries(reportData.data).map(([distId, valueStr]) => {
+            if (!valueStr || typeof valueStr !== "string") return null;
+            const parts = valueStr.split("\t");
+            return {
+                distId,
+                orderId: parts[0] || "",
+                product: parts[1] || "",
+                paymentDate: parts[2] || "",
+                signupDate: parts[3] || "",
+                amount: parts[4] || "",
+                details: parts.slice(5).join(" | ") || ""
+            };
+        }).filter(Boolean);
+    }, [reportData]);
+
+    const filteredReportRows = useMemo(() => {
+        if (!reportSearch.trim()) return reportRows;
+        const q = reportSearch.toLowerCase();
+        return reportRows.filter(r => 
+            r.distId.toLowerCase().includes(q) ||
+            r.orderId.toLowerCase().includes(q) ||
+            r.product.toLowerCase().includes(q) ||
+            r.paymentDate.toLowerCase().includes(q) ||
+            r.signupDate.toLowerCase().includes(q) ||
+            r.amount.toLowerCase().includes(q) ||
+            r.details.toLowerCase().includes(q)
+        );
+    }, [reportRows, reportSearch]);
+
+    const handleExportCSV = useCallback(() => {
+        if (!reportRows || reportRows.length === 0) return;
+        
+        const headers = ["Distributor ID", "Order ID", "Product", "Payment Date", "Signup Date", "Amount", "Payment Details"];
+        const csvRows = [
+            headers.join(","),
+            ...reportRows.map(row => [
+                `"${row.distId}"`,
+                `"${row.orderId}"`,
+                `"${row.product}"`,
+                `"${row.paymentDate}"`,
+                `"${row.signupDate}"`,
+                `"${row.amount}"`,
+                `"${row.details.replace(/"/g, '""')}"`
+            ].join(","))
+        ];
+        
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Order_Report_${reportStartDate}_to_${reportEndDate}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }, [reportRows, reportStartDate, reportEndDate]);
 
     const dateParams = { startdate: startDate, enddate: endDate };
     const { data: activeData, isLoading: activeLoading, error: activeError, refetch: refetchActive } = useGetActiveCountsQuery(dateParams);
@@ -294,8 +376,8 @@ export default function AdminMetrixDashboard() {
 
             {/* NAV TABS */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 24 }}>
-                {["overview", "packages", "revenue", "tiers", "refunds", "affiliate", "vendor"].map(v => (
-                    <TabBtn S={S} key={v} label={v === "vendor" ? "Vendor Payment" : v.charAt(0).toUpperCase() + v.slice(1)} active={view === v} onClick={() => setView(v)} />
+                {["overview", "packages", "revenue", "tiers", "refunds", "affiliate", "vendor", "report"].map(v => (
+                    <TabBtn S={S} key={v} label={v === "vendor" ? "Vendor Payment" : v === "report" ? "Order Report" : v.charAt(0).toUpperCase() + v.slice(1)} active={view === v} onClick={() => setView(v)} />
                 ))}
             </div>
 
@@ -714,6 +796,190 @@ export default function AdminMetrixDashboard() {
                             {fmtN(analytics.vendorPremiumUsers)} users × $3 + {fmtN(analytics.vendorStandardUsers)} users × $1 | As of {DATA_DATE}
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/*  REPORT  */}
+            {view === "report" && (
+                <div style={{ background: S.card, backdropFilter: S.backdrop, borderRadius: 12, padding: 24, border: `1px solid ${S.cardBorder}`, boxShadow: S.cardShadow }}>
+                    <div style={{ fontSize: 10, letterSpacing: 2, color: S.amber, marginBottom: 16 }}>ORDER REPORT GENERATOR</div>
+                    
+                    <p style={{ fontSize: 14, color: S.soft, marginBottom: 24, lineHeight: "1.6" }}>
+                        Generate and view the order report for the selected date range. You can search the records locally and export them directly to a CSV file.
+                    </p>
+
+                    <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap", marginBottom: 24 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <label style={{ fontSize: 14, color: S.amber, letterSpacing: 1 }}>FROM</label>
+                            <div style={{ width: 180 }}>
+                                <CustomDatePicker value={reportStartDate} onChange={setReportStartDate} />
+                            </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <label style={{ fontSize: 14, color: S.amber, letterSpacing: 1 }}>TO</label>
+                            <div style={{ width: 180 }}>
+                                <CustomDatePicker value={reportEndDate} onChange={setReportEndDate} align="right" />
+                            </div>
+                        </div>
+                        
+                        <button
+                            onClick={() => triggerGetOrderReport({ fromdate: reportStartDate, todate: reportEndDate })}
+                            disabled={reportFetching}
+                            style={{
+                                fontSize: 13,
+                                color: "#0a0a0a",
+                                background: S.amber,
+                                border: "none",
+                                borderRadius: 8,
+                                padding: "10px 24px",
+                                cursor: reportFetching ? "not-allowed" : "pointer",
+                                fontWeight: 600,
+                                transition: "all 0.2s",
+                                opacity: reportFetching ? 0.7 : 1,
+                                height: 38,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8
+                            }}
+                        >
+                            {reportFetching ? "Generating Report..." : "Generate Order Report"}
+                        </button>
+                    </div>
+
+                    {reportError && (
+                        <div style={{ marginTop: 16 }}>
+                            <ErrorBox S={S} message={reportError?.message || "Failed to generate report"} />
+                        </div>
+                    )}
+
+                    {reportData && !reportFetching && (
+                        <div style={{ marginTop: 24 }}>
+                            {/* Fallback to HTML link */}
+                            {parsedDownloadUrl && (
+                                <div style={{ padding: 20, background: S.card2, borderRadius: 8, border: `1px solid ${S.cardBorder}`, marginBottom: 20 }}>
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 12 }}>
+                                        <div style={{ fontSize: 14, color: S.green, fontWeight: 500 }}>✓ Link generated successfully!</div>
+                                        <button
+                                            onClick={() => window.open(parsedDownloadUrl, "_blank")}
+                                            style={{
+                                                fontSize: 14,
+                                                color: "#ffffff",
+                                                background: S.green,
+                                                border: "none",
+                                                borderRadius: 8,
+                                                padding: "12px 28px",
+                                                cursor: "pointer",
+                                                fontWeight: 600,
+                                                transition: "background 0.2s",
+                                                boxShadow: `0 4px 12px ${S.green}33`
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = "#16a34a"}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = S.green}
+                                        >
+                                            Click Here For Downloadable Spreadsheet Version
+                                        </button>
+                                        <span style={{ fontSize: 11, color: S.gray, marginTop: 8 }}>
+                                            Target URL: {parsedDownloadUrl}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Direct JSON rows rendering */}
+                            {reportRows.length > 0 ? (
+                                <div>
+                                    {/* Action Bar */}
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 16 }}>
+                                        <div style={{ fontSize: 13, color: S.soft }}>
+                                            Found <strong style={{ color: S.white }}>{fmtN(reportRows.length)}</strong> orders.
+                                            {filteredReportRows.length !== reportRows.length && (
+                                                <span> (Filtered to <strong style={{ color: S.white }}>{fmtN(filteredReportRows.length)}</strong>)</span>
+                                            )}
+                                        </div>
+                                        
+                                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                                            <input
+                                                type="text"
+                                                placeholder="Search orders..."
+                                                value={reportSearch}
+                                                onChange={(e) => setReportSearch(e.target.value)}
+                                                style={{
+                                                    background: S.card2,
+                                                    border: `1px solid ${S.cardBorder}`,
+                                                    borderRadius: 8,
+                                                    padding: "8px 14px",
+                                                    fontSize: 13,
+                                                    color: S.white,
+                                                    outline: "none",
+                                                    width: 220
+                                                }}
+                                            />
+                                            <button
+                                                onClick={handleExportCSV}
+                                                style={{
+                                                    fontSize: 13,
+                                                    color: "#ffffff",
+                                                    background: S.green,
+                                                    border: "none",
+                                                    borderRadius: 8,
+                                                    padding: "8px 18px",
+                                                    cursor: "pointer",
+                                                    fontWeight: 600,
+                                                    transition: "background 0.2s"
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = "#16a34a"}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = S.green}
+                                            >
+                                                Export to CSV
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Table View */}
+                                    <div style={{ overflowX: "auto", border: `1px solid ${S.cardBorder}`, borderRadius: 8, maxHeight: 500 }}>
+                                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                                            <thead style={{ background: S.card2, position: "sticky", top: 0, zIndex: 1 }}>
+                                                <tr style={{ borderBottom: `1px solid ${S.cardBorder}` }}>
+                                                    {["Distributor ID", "Order ID", "Product", "Payment Date", "Signup Date", "Amount", "Payment Details"].map(h => (
+                                                        <th key={h} style={{ textAlign: "left", padding: "10px 12px", fontSize: 10, letterSpacing: 1, color: S.amber, textTransform: "uppercase" }}>{h}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredReportRows.length > 0 ? (
+                                                    filteredReportRows.map((row, i) => (
+                                                        <tr key={i} style={{ borderBottom: `1px solid ${S.gray}15`, background: i % 2 === 0 ? "transparent" : `${S.gray}05` }}>
+                                                            <td style={{ padding: "8px 12px", fontSize: 12, color: S.white }}>{row.distId}</td>
+                                                            <td style={{ padding: "8px 12px", color: S.soft }}>{row.orderId}</td>
+                                                            <td style={{ padding: "8px 12px" }}>
+                                                                <Badge text={row.product} color={TIER_COLORS[getTier(row.product)] || S.amber} />
+                                                            </td>
+                                                            <td style={{ padding: "8px 12px", color: S.soft }}>{row.paymentDate}</td>
+                                                            <td style={{ padding: "8px 12px", color: S.soft }}>{row.signupDate}</td>
+                                                            <td style={{ padding: "8px 12px", color: S.green, fontWeight: 600 }}>{row.amount}</td>
+                                                            <td style={{ padding: "8px 12px", color: S.soft, fontSize: 12 }}>{row.details}</td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan={7} style={{ textAlign: "center", padding: 24, color: S.soft }}>
+                                                            No orders match the search criteria.
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ) : (
+                                !parsedDownloadUrl && (
+                                    <div style={{ textAlign: "center", padding: 24, color: S.soft }}>
+                                        No order data returned for this date range.
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 
