@@ -25,7 +25,29 @@ import {
   Target,
   ShieldAlert,
   Crosshair,
+  Copy,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+  DialogBody,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Toolbar,
+  ToolbarActions,
+  ToolbarDescription,
+  ToolbarHeading,
+  ToolbarPageTitle,
+} from "@/partials/toolbar";
 
 // ── Signal Type Config ──────────────────────────────────────────────
 const signalConfig = {
@@ -98,55 +120,56 @@ const StudentTradingSignals = () => {
     filters.symbol || filters.signalType || filters.strategy || filters.timeframe;
 
   return (
-    <div className="p-5 max-w-[1400px] mx-auto text-slate-800 dark:text-slate-100">
+    <div className="container-fluid pb-5">
       {/* Header */}
-      <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
+      <Toolbar className="mb-5">
+        <ToolbarHeading>
+          <div className="flex items-center gap-2.5">
             <ChartLine size={24} className="text-blue-500" />
-            Trading Signals
+            <ToolbarPageTitle text="Trading Signals" />
             {unreadCount > 0 && (
-              <span className="bg-red-500 text-white rounded-full px-2.5 py-0.5 text-xs font-bold animate-pulse">
+              <span className="badge badge-sm badge-outline badge-danger animate-pulse">
                 {unreadCount} new
               </span>
             )}
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs sm:text-sm">
-            Real-time alerts from TradingView strategies
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          {/* Search */}
-          <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#131324] border border-slate-200 dark:border-[#202038] rounded-xl px-3 py-2 min-w-[200px] shadow-sm">
-            <Search size={16} className="text-slate-400 dark:text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search signals..."
-              value={filters.search}
-              onChange={(e) => updateFilter("search", e.target.value)}
-              className="border-none outline-none bg-transparent text-xs w-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
-            />
           </div>
-          {/* Filter Toggle */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-              hasActiveFilters
-                ? "border-blue-500 bg-blue-500/10 text-blue-500"
-                : "border-slate-200 dark:border-[#202038] bg-slate-50 dark:bg-[#131324] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1C1C30]"
-            }`}
-          >
-            <Filter size={14} />
-            Filters
-            {hasActiveFilters && (
-              <span className="bg-blue-500 text-white rounded-full w-4.5 h-4.5 flex items-center justify-center text-[10px]">
-                {[filters.symbol, filters.signalType, filters.strategy, filters.timeframe].filter(Boolean).length}
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
+          <ToolbarDescription>
+            Real-time alerts from TradingView strategies
+          </ToolbarDescription>
+        </ToolbarHeading>
+
+        <ToolbarActions>
+          <div className="flex gap-2">
+            {/* Search */}
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#131324] border border-slate-200 dark:border-[#202038] rounded-xl px-3 py-2 min-w-[200px] shadow-sm">
+              <Search size={16} className="text-slate-400 dark:text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search signals..."
+                value={filters.search}
+                onChange={(e) => updateFilter("search", e.target.value)}
+                className="border-none outline-none bg-transparent text-xs w-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+              />
+            </div>
+            {/* Filter Toggle */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${hasActiveFilters
+                  ? "border-blue-500 bg-blue-500/10 text-blue-500"
+                  : "border-slate-200 dark:border-[#202038] bg-slate-50 dark:bg-[#131324] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1C1C30]"
+                }`}
+            >
+              <Filter size={14} />
+              Filters
+              {hasActiveFilters && (
+                <span className="bg-blue-500 text-white rounded-full w-4.5 h-4.5 flex items-center justify-center text-[10px]">
+                  {[filters.symbol, filters.signalType, filters.strategy, filters.timeframe].filter(Boolean).length}
+                </span>
+              )}
+            </button>
+          </div>
+        </ToolbarActions>
+      </Toolbar>
 
       {/* Filter Bar */}
       {showFilters && (
@@ -155,6 +178,7 @@ const StudentTradingSignals = () => {
             label="Signal Type"
             value={filters.signalType}
             onChange={(v) => updateFilter("signalType", v)}
+            placeholder="All Types"
             options={[
               { value: "", label: "All Types" },
               ...Object.keys(signalConfig).map((t) => ({ value: t, label: t })),
@@ -164,6 +188,7 @@ const StudentTradingSignals = () => {
             label="Symbol"
             value={filters.symbol}
             onChange={(v) => updateFilter("symbol", v)}
+            placeholder="All Symbols"
             options={[
               { value: "", label: "All Symbols" },
               ...(options.symbols || []).map((s) => ({ value: s, label: s })),
@@ -173,6 +198,7 @@ const StudentTradingSignals = () => {
             label="Timeframe"
             value={filters.timeframe}
             onChange={(v) => updateFilter("timeframe", v)}
+            placeholder="All Timeframes"
             options={[
               { value: "", label: "All Timeframes" },
               ...(options.timeframes || []).map((t) => ({ value: t, label: t })),
@@ -182,6 +208,7 @@ const StudentTradingSignals = () => {
             label="Strategy"
             value={filters.strategy}
             onChange={(v) => updateFilter("strategy", v)}
+            placeholder="All Strategies"
             options={[
               { value: "", label: "All Strategies" },
               ...(options.strategies || []).map((s) => ({
@@ -193,7 +220,7 @@ const StudentTradingSignals = () => {
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 cursor-pointer font-bold text-xs transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 cursor-pointer font-bold text-xs transition-colors h-10"
             >
               <X size={14} /> Clear
             </button>
@@ -241,9 +268,8 @@ const StudentTradingSignals = () => {
           <button
             onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
             disabled={filters.page <= 1}
-            className={`flex items-center p-2 rounded-xl border border-slate-200 dark:border-[#1F1F35] bg-white dark:bg-[#0F0F1A] text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#131324] cursor-pointer transition-colors ${
-              filters.page <= 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"
-            }`}
+            className={`flex items-center p-2 rounded-xl border border-slate-200 dark:border-[#1F1F35] bg-white dark:bg-[#0F0F1A] text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#131324] cursor-pointer transition-colors ${filters.page <= 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"
+              }`}
           >
             <ChevronLeft size={16} />
           </button>
@@ -253,9 +279,8 @@ const StudentTradingSignals = () => {
           <button
             onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
             disabled={filters.page >= pagination.totalPages}
-            className={`flex items-center p-2 rounded-xl border border-slate-200 dark:border-[#1F1F35] bg-white dark:bg-[#0F0F1A] text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#131324] cursor-pointer transition-colors ${
-              filters.page >= pagination.totalPages ? "opacity-30 cursor-not-allowed" : "opacity-100"
-            }`}
+            className={`flex items-center p-2 rounded-xl border border-slate-200 dark:border-[#1F1F35] bg-white dark:bg-[#0F0F1A] text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#131324] cursor-pointer transition-colors ${filters.page >= pagination.totalPages ? "opacity-30 cursor-not-allowed" : "opacity-100"
+              }`}
           >
             <ChevronRight size={16} />
           </button>
@@ -306,10 +331,10 @@ const SignalCard = ({ signal, onClick }) => {
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <PriceBox label="Entry" value={signal.entryPrice} icon={<Crosshair size={10} />} color="#3b82f6" />
-        <PriceBox label="Stop Loss" value={signal.stopLoss} icon={<ShieldAlert size={10} />} color="#ef4444" />
-        <PriceBox label="Take Profit" value={signal.takeProfit} icon={<Target size={10} />} color="#10b981" />
+      <div className="flex flex-col px-1 mb-2 mt-2">
+        <PriceRow label="Entry" value={signal.entryPrice} colorClass="text-slate-800 dark:text-white" />
+        <PriceRow label="Invalidation" value={signal.stopLoss} colorClass="text-red-500 dark:text-[#ff3b30]" />
+        <PriceRow label="Exit 1" value={signal.takeProfit} colorClass="text-emerald-500 dark:text-[#00c853]" />
       </div>
       <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 dark:border-[#1F1F35]/50">
         <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[130px]">
@@ -324,95 +349,108 @@ const SignalCard = ({ signal, onClick }) => {
   );
 };
 
-const PriceBox = ({ label, value, icon, color }) => (
-  <div className="bg-slate-50 dark:bg-[#131324]/80 rounded-xl p-2 text-center border border-slate-100 dark:border-[#1F1F35]/40">
-    <div className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold mb-1 flex items-center justify-center gap-1">
-      {icon} {label}
-    </div>
-    {value != null ? (
-      <div className="text-[12px] font-bold" style={{ color }}>{formatPrice(value)}</div>
-    ) : (
-      <div className="text-[12px] font-bold text-slate-300 dark:text-slate-600">—</div>
-    )}
-  </div>
-);
-
-const SignalDetailModal = ({ signal, onClose }) => {
-  const config = signalConfig[signal.signalType] || signalConfig.OTHER;
-  const IconComponent = config.icon;
+const PriceRow = ({ label, value, colorClass }) => {
+  const handleCopy = (e) => {
+    e.stopPropagation();
+    if (value != null) {
+      navigator.clipboard.writeText(formatPrice(value).toString());
+      toast.success(`${label} copied!`);
+    }
+  };
 
   return (
-    <div onClick={onClose} className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[1000] p-5">
-      <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-[#0F0F1A] rounded-[24px] p-6 max-w-[480px] w-full border border-slate-100 dark:border-[#1F1F35] shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-5">
-          <div className="flex items-center gap-3">
-            <div style={{ background: config.bgLight }} className="w-11 h-11 rounded-xl flex items-center justify-center">
-              <IconComponent size={22} color={config.bg} />
-            </div>
-            <div>
-              <h2 className="margin-0 text-lg font-extrabold text-slate-900 dark:text-white">
-                {signal.symbol || "Signal Detail"}
-              </h2>
-              <span style={{ background: config.bgLight, color: config.text }} className="px-2 py-0.5 rounded-md text-[10px] font-extrabold">
-                {config.label}
-              </span>
-            </div>
-          </div>
-          <button onClick={onClose} className="bg-slate-50 dark:bg-[#131324] hover:bg-slate-100 dark:hover:bg-[#1C1C30] border-none rounded-lg p-2 cursor-pointer flex transition-colors text-slate-500 dark:text-slate-400">
-            <X size={16} />
-          </button>
-        </div>
-        <div className="grid grid-cols-3 gap-3 mb-5">
-          <DetailPriceBox label="Entry Price" value={signal.entryPrice} color="#3b82f6" />
-          <DetailPriceBox label="Stop Loss" value={signal.stopLoss} color="#ef4444" />
-          <DetailPriceBox label="Take Profit" value={signal.takeProfit} color="#10b981" />
-        </div>
-        <div className="flex flex-col gap-1">
-          {signal.exchange && <InfoRow label="Exchange" value={signal.exchange} />}
-          {signal.market && <InfoRow label="Market" value={signal.market} />}
-          {signal.timeframe && <InfoRow label="Timeframe" value={signal.timeframe} />}
-          {signal.strategyName && <InfoRow label="Strategy" value={signal.strategyName} />}
-          {signal.webhookConfig?.name && <InfoRow label="Source" value={signal.webhookConfig.name} />}
-          {signal.alertName && <InfoRow label="Alert Name" value={signal.alertName} />}
-          <InfoRow label="Received" value={new Date(signal.createdAt).toLocaleString()} />
-        </div>
-        {signal.alertMessage && (
-          <div className="mt-4 p-4 bg-slate-50 dark:bg-[#131324]/80 rounded-xl border border-slate-100 dark:border-[#1F1F35]/50">
-            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold mb-1.5 uppercase tracking-wider">Alert Message</div>
-            <p className="m-0 text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{signal.alertMessage}</p>
-          </div>
-        )}
+    <div className="flex justify-between items-center py-2.5">
+      <span className="text-[14px] text-[#8e9bae] font-medium">{label}</span>
+      <div 
+        className={`flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity ${colorClass}`}
+        onClick={handleCopy}
+        title={`Click to copy ${label}`}
+      >
+        {value != null && <Copy size={14} className="stroke-[2.5]" />}
+        <span className="text-[14px] font-bold">
+          {value != null ? formatPrice(value) : "N/A"}
+        </span>
       </div>
     </div>
   );
 };
 
-const FilterSelect = ({ label, value, onChange, options }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{label}</label>
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#202038] text-xs bg-white dark:bg-[#0F0F1A] text-slate-700 dark:text-slate-200 cursor-pointer outline-none min-w-[140px] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#0F0F1A]">{opt.label}</option>
-      ))}
-    </select>
+const SignalDetailModal = ({ signal, onClose }) => {
+  if (!signal) return null;
+  const config = signalConfig[signal.signalType] || signalConfig.OTHER;
+  const IconComponent = config.icon;
+
+  return (
+    <Dialog open={!!signal} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[480px]">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <div style={{ background: config.bgLight }} className="w-11 h-11 rounded-xl flex items-center justify-center">
+              <IconComponent size={22} color={config.bg} />
+            </div>
+            <div>
+              <DialogTitle className="margin-0 text-lg font-extrabold text-slate-900 dark:text-white">
+                {signal.symbol || "Signal Detail"}
+              </DialogTitle>
+              <span style={{ background: config.bgLight, color: config.text }} className="px-2 py-0.5 rounded-md text-[10px] font-extrabold">
+                {config.label}
+              </span>
+            </div>
+          </div>
+        </DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col px-1 mb-8 gap-1">
+            <PriceRow label="Entry" value={signal.entryPrice} colorClass="text-slate-800 dark:text-white" />
+            <PriceRow label="Invalidation" value={signal.stopLoss} colorClass="text-red-500 dark:text-[#ff3b30]" />
+            <PriceRow label="Exit 1" value={signal.takeProfit} colorClass="text-emerald-500 dark:text-[#00c853]" />
+          </div>
+          <div className="flex flex-col px-1 gap-1.5">
+            {signal.exchange && <InfoRow label="Exchange" value={signal.exchange} />}
+            {signal.market && <InfoRow label="Market" value={signal.market} />}
+            {signal.timeframe && <InfoRow label="Timeframe" value={signal.timeframe} />}
+            {signal.strategyName && <InfoRow label="Strategy" value={signal.strategyName} />}
+            {signal.webhookConfig?.name && <InfoRow label="Source" value={signal.webhookConfig.name} />}
+            {signal.alertName && <InfoRow label="Alert Name" value={signal.alertName} />}
+            <InfoRow label="Received" value={new Date(signal.createdAt).toLocaleString()} />
+          </div>
+          {signal.alertMessage && (
+            <div className="mt-4 p-4 bg-slate-50 dark:bg-[#131324]/80 rounded-xl border border-slate-100 dark:border-[#1F1F35]/50">
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold mb-1.5 uppercase tracking-wider">Alert Message</div>
+              <p className="m-0 text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{signal.alertMessage}</p>
+            </div>
+          )}
+        </DialogBody>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const FilterSelect = ({ label, value, onChange, options, placeholder }) => (
+  <div className="flex flex-col gap-1.5 relative">
+    <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</label>
+    <Select value={value || "ALL"} onValueChange={(val) => onChange(val === "ALL" ? "" : val)}>
+      <SelectTrigger className="w-[160px] h-10 bg-white dark:bg-[#0F0F1A] border border-slate-200 dark:border-[#202038]">
+        <SelectValue placeholder={placeholder}>
+          {value ? options.find(o => o.value === value)?.label : placeholder}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt) => (
+          <SelectItem key={opt.value || "ALL"} value={opt.value || "ALL"}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   </div>
 );
 
-const DetailPriceBox = ({ label, value, color }) => (
-  <div className="bg-slate-50 dark:bg-[#131324]/80 rounded-xl p-3 text-center border border-slate-100 dark:border-[#1F1F35]">
-    <div className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold mb-1.5 uppercase tracking-wider">{label}</div>
-    {value != null ? (
-      <div className="text-base font-extrabold" style={{ color }}>{formatPrice(value)}</div>
-    ) : (
-      <div className="text-base font-extrabold text-slate-300 dark:text-slate-600">—</div>
-    )}
-  </div>
-);
+
 
 const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-[#1F1F35]/40">
-    <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{label}</span>
-    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{value}</span>
+  <div className="flex justify-between items-center py-2">
+    <span className="text-[14px] text-[#8e9bae] font-medium">{label}</span>
+    <span className="text-[14px] font-bold text-slate-800 dark:text-slate-100">{value}</span>
   </div>
 );
 
@@ -422,9 +460,7 @@ function formatPrice(value) {
   if (value == null) return "—";
   const num = parseFloat(value);
   if (isNaN(num)) return value;
-  if (num >= 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
-  if (num >= 1) return num.toFixed(2);
-  return num.toPrecision(4);
+  return num.toFixed(4);
 }
 
 function formatTimeAgo(dateStr) {
@@ -438,18 +474,5 @@ function formatTimeAgo(dateStr) {
   if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
   return date.toLocaleDateString();
 }
-
-// ── Shared Styles ───────────────────────────────────────────────────
-
-const paginationBtnStyle = {
-  display: "flex",
-  alignItems: "center",
-  padding: "8px",
-  borderRadius: "8px",
-  border: "1px solid #e2e8f0",
-  background: "white",
-  cursor: "pointer",
-  color: "#64748b",
-};
 
 export default StudentTradingSignals;

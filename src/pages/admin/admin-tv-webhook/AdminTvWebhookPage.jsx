@@ -1,157 +1,106 @@
-import React, { useState, useCallback, Fragment } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import {
-  useGetAdminTvWebhooksQuery,
+  useLazyGetAdminTvWebhooksQuery,
   useCreateAdminTvWebhookMutation,
   useUpdateAdminTvWebhookMutation,
   useDeleteAdminTvWebhookMutation,
   useRegenerateWebhookSecretMutation,
-  useGetWebhookSignalsQuery,
-  useGetDeliveryHistoryQuery,
+  useLazyGetWebhookSignalsQuery,
+  useLazyGetDeliveryHistoryQuery,
   useRetrySignalNotificationMutation,
 } from "../../../store/api/admin/adminTvWebhookApiSlice";
 import { toast } from "sonner";
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Copy,
-  RefreshCw,
-  Eye,
-  ChevronLeft,
-  Search,
-  Check,
-  X,
-  RotateCcw,
-  ExternalLink,
-  Activity,
-  Bell,
-  ChartLine,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-} from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+  DialogFooter,
+  DialogBody,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import {
+  DataGrid,
+  DataGridColumnHeader,
+  DataGridColumnVisibility,
+  KeenIcon,
+  useDataGrid,
+  Menu,
+  MenuItem,
+  MenuToggle,
+  MenuSub,
+  MenuLink,
+  MenuIcon,
+  MenuTitle,
+} from "@/components";
+import {
+  Toolbar,
+  ToolbarActions,
+  ToolbarDescription,
+  ToolbarHeading,
+  ToolbarPageTitle,
+} from "@/partials/toolbar";
+import { useLanguage } from "@/i18n";
 
-// ── Signal Type Colors ──────────────────────────────────────────────
-const signalTypeColors = {
-  BUY: { bg: "#10b98120", text: "#10b981", label: "BUY" },
-  SELL: { bg: "#ef444420", text: "#ef4444", label: "SELL" },
-  LONG: { bg: "#3b82f620", text: "#3b82f6", label: "LONG" },
-  SHORT: { bg: "#f9731620", text: "#f97316", label: "SHORT" },
-  CLOSE: { bg: "#6b728020", text: "#6b7280", label: "CLOSE" },
-  INFO: { bg: "#8b5cf620", text: "#8b5cf6", label: "INFO" },
-  OTHER: { bg: "#64748b20", text: "#64748b", label: "OTHER" },
+// ── Status / Signal Badge Maps ──────────────────────────────────────
+
+const statusColorMap = {
+  sent: "badge-success",
+  delivered: "badge-success",
+  partial: "badge-warning",
+  failed: "badge-danger",
+  pending: "badge-info",
+  processing: "badge-primary",
+  skipped: "badge-secondary",
 };
 
-const statusColors = {
-  sent: { bg: "#10b98120", text: "#10b981" },
-  partial: { bg: "#f9731620", text: "#f97316" },
-  failed: { bg: "#ef444420", text: "#ef4444" },
-  pending: { bg: "#3b82f620", text: "#3b82f6" },
-  processing: { bg: "#8b5cf620", text: "#8b5cf6" },
-  delivered: { bg: "#10b98120", text: "#10b981" },
-  skipped: { bg: "#64748b20", text: "#64748b" },
-};
-
-const StatusBadge = ({ status }) => {
-  const color = statusColors[status] || statusColors.pending;
-  return (
-    <span
-      style={{
-        background: color.bg,
-        color: color.text,
-        padding: "2px 10px",
-        borderRadius: "9999px",
-        fontSize: "12px",
-        fontWeight: 600,
-        textTransform: "uppercase",
-      }}
-    >
-      {status}
-    </span>
-  );
-};
-
-const SignalTypeBadge = ({ type }) => {
-  const color = signalTypeColors[type] || signalTypeColors.OTHER;
-  return (
-    <span
-      style={{
-        background: color.bg,
-        color: color.text,
-        padding: "2px 10px",
-        borderRadius: "9999px",
-        fontSize: "12px",
-        fontWeight: 600,
-      }}
-    >
-      {color.label}
-    </span>
-  );
+const signalTypeBadgeMap = {
+  BUY: "badge-success",
+  SELL: "badge-danger",
+  LONG: "badge-primary",
+  SHORT: "badge-warning",
+  CLOSE: "badge-secondary",
+  INFO: "badge-info",
+  OTHER: "badge-secondary",
 };
 
 // ── Main Admin Page ─────────────────────────────────────────────────
 
+const formatPrice = (value) => {
+  if (value == null) return "—";
+  const num = parseFloat(value);
+  if (isNaN(num)) return value;
+  return num.toFixed(4);
+};
+
 const AdminTvWebhookPage = () => {
-  const [view, setView] = useState("configs"); // "configs" | "signals" | "delivery"
+  const [view, setView] = useState("configs");
   const [selectedConfig, setSelectedConfig] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingConfig, setEditingConfig] = useState(null);
-  const [deletingConfig, setDeletingConfig] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [page, setPage] = useState(1);
+
+  // Modal states
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isRegenerateOpen, setIsRegenerateOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  // DataGrid reload trigger
+  const [tableKey, setTableKey] = useState(0);
+  const reloadTable = () => setTableKey((k) => k + 1);
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto text-slate-800 dark:text-slate-100">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          {view !== "configs" && (
-            <button
-              onClick={() => {
-                setView("configs");
-                setSelectedConfig(null);
-              }}
-              className="bg-white dark:bg-[#131324] hover:bg-slate-50 dark:hover:bg-[#1C1C30] border border-slate-200 dark:border-[#1F1F35] rounded-xl p-2 cursor-pointer flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors"
-            >
-              <ChevronLeft size={20} />
-            </button>
-          )}
-          <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <ChartLine
-                size={24}
-                className="text-blue-500 mr-1.5 align-middle inline-block"
-              />
-              {view === "configs" && "TradingView Webhooks"}
-              {view === "signals" && `Signals — ${selectedConfig?.name}`}
-              {view === "delivery" && `Delivery — ${selectedConfig?.name}`}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {view === "configs" &&
-                "Manage webhook configurations for TradingView alerts"}
-              {view === "signals" && "View received trading signals"}
-              {view === "delivery" && "FCM notification delivery history"}
-            </p>
-          </div>
-        </div>
-        {view === "configs" && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl px-4 py-2.5 shadow-md shadow-blue-500/20 transition-colors border-none cursor-pointer"
-          >
-            <Plus size={18} /> New Webhook
-          </button>
-        )}
-      </div>
-
-      {/* Views */}
+    <div className="container-fluid pb-5">
       {view === "configs" && (
         <ConfigsView
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          page={page}
-          setPage={setPage}
+          tableKey={tableKey}
+          reloadTable={reloadTable}
           onViewSignals={(config) => {
             setSelectedConfig(config);
             setView("signals");
@@ -161,40 +110,163 @@ const AdminTvWebhookPage = () => {
             setView("delivery");
           }}
           onEdit={(config) => {
-            setEditingConfig(config);
-            setShowEditModal(true);
+            setSelectedRow(config);
+            setIsEditOpen(true);
           }}
           onDelete={(config) => {
-            setDeletingConfig(config);
+            setSelectedRow(config);
+            setIsDeleteOpen(true);
+          }}
+          onRegenerate={(config) => {
+            setSelectedRow(config);
+            setIsRegenerateOpen(true);
+          }}
+          onCreateOpen={() => setIsCreateOpen(true)}
+        />
+      )}
+
+      {view === "signals" && selectedConfig && (
+        <SignalsView
+          config={selectedConfig}
+          onBack={() => {
+            setView("configs");
+            setSelectedConfig(null);
           }}
         />
       )}
-      {view === "signals" && selectedConfig && (
-        <SignalsView configId={selectedConfig._id} />
-      )}
+
       {view === "delivery" && selectedConfig && (
-        <DeliveryView configId={selectedConfig._id} />
+        <DeliveryView
+          config={selectedConfig}
+          onBack={() => {
+            setView("configs");
+            setSelectedConfig(null);
+          }}
+        />
       )}
 
       {/* Modals */}
-      {showCreateModal && (
-        <CreateWebhookModal onClose={() => setShowCreateModal(false)} />
-      )}
-      {showEditModal && editingConfig && (
-        <EditWebhookModal
-          config={editingConfig}
+      <CreateWebhookDialog
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        refetch={reloadTable}
+      />
+
+      {isEditOpen && selectedRow && (
+        <EditWebhookDialog
+          isOpen={isEditOpen}
           onClose={() => {
-            setShowEditModal(false);
-            setEditingConfig(null);
+            setIsEditOpen(false);
+            setSelectedRow(null);
           }}
+          config={selectedRow}
+          refetch={reloadTable}
         />
       )}
-      {deletingConfig && (
-        <DeleteWebhookModal
-          config={deletingConfig}
-          onClose={() => setDeletingConfig(null)}
+
+      {isDeleteOpen && selectedRow && (
+        <DeleteWebhookDialog
+          isOpen={isDeleteOpen}
+          onClose={() => {
+            setIsDeleteOpen(false);
+            setSelectedRow(null);
+          }}
+          config={selectedRow}
+          refetch={reloadTable}
         />
       )}
+
+      {isRegenerateOpen && selectedRow && (
+        <RegenerateSecretDialog
+          isOpen={isRegenerateOpen}
+          onClose={() => {
+            setIsRegenerateOpen(false);
+            setSelectedRow(null);
+          }}
+          config={selectedRow}
+          refetch={reloadTable}
+        />
+      )}
+    </div>
+  );
+};
+
+// ── Webhook URL Cell Component  icator ──────────────
+
+
+
+const WebhookUrlCell = ({ url }) => {
+  const [copied, setCopied] = useState(false);
+
+  const fallbackCopy = (text) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      toast.success("Copied to clipboard");
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+    }
+    document.body.removeChild(textArea);
+  };
+
+  const handleCopy = (e) => {
+    e.stopPropagation();
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url)
+          .then(() => toast.success("Copied to clipboard"))
+          .catch(() => fallbackCopy(url));
+      } else {
+        fallbackCopy(url);
+      }
+    } catch (err) {
+      fallbackCopy(url);
+    }
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  return (
+    <div
+      data-testid="webhook-url-container"
+      className="relative group inline-flex items-center gap-2.5 px-3 py-1.5 rounded-md hover:bg-secondary-active dark:hover:bg-coal-300 border border-transparent hover:border-gray-200 dark:hover:border-coal-100 transition-all duration-200 cursor-pointer"
+    >
+      <span
+        data-testid="webhook-url-text"
+        className="font-mono text-sm text-gray-800 group-hover:text-black dark:group-hover:text-white whitespace-nowrap select-all"
+        onDoubleClick={handleCopy}
+      >
+        {url}
+      </span>
+      <div className="flex items-center">
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                data-testid="webhook-url-copy-btn"
+                onClick={handleCopy}
+                className={`btn btn-xs btn-icon shadow-sm border rounded-md transition-all ${copied
+                  ? "btn-success bg-green-500 hover:bg-green-600 border-green-500 text-white"
+                  : "btn-light border-gray-200 dark:border-coal-100 bg-white dark:bg-coal-300 hover:btn-primary text-gray-600 dark:text-gray-400"
+                  }`}
+              >
+                {copied ? <KeenIcon icon="check" className="text-white" /> : <KeenIcon icon="copy" />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="center" className="z-[9999] bg-gray-50 dark:bg-gray-200 text-gray-800 dark:text-white border-gray-800 px-2.5 py-1 text-xs rounded shadow-lg">
+              {copied ? "Copied!" : "Copy URL"}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   );
 };
@@ -202,411 +274,731 @@ const AdminTvWebhookPage = () => {
 // ── Configs List View ───────────────────────────────────────────────
 
 const ConfigsView = ({
-  searchTerm,
-  setSearchTerm,
-  page,
-  setPage,
+  tableKey,
+  reloadTable,
   onViewSignals,
   onViewDelivery,
   onEdit,
   onDelete,
+  onRegenerate,
+  onCreateOpen,
 }) => {
-  const { data, isLoading, isFetching } = useGetAdminTvWebhooksQuery({
-    page,
-    limit: 20,
-    search: searchTerm,
-  });
-  const [regenerateSecret] = useRegenerateWebhookSecretMutation();
-
-  const handleRegenerate = async (id) => {
-    if (!window.confirm("Regenerate secret? The old webhook URL will stop working."))
-      return;
-    try {
-      await regenerateSecret(id).unwrap();
-      toast.success("Secret regenerated");
-    } catch {
-      toast.error("Failed to regenerate");
-    }
-  };
+  const { isRTL } = useLanguage();
+  const [fetchConfigs, { isLoading }] = useLazyGetAdminTvWebhooksQuery();
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard");
   };
 
-  const configs = data?.data || [];
-  const pagination = data?.pagination;
+  const columns = useMemo(
+    () => [
+      {
+        accessorFn: (row) => row.name,
+        id: "name",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Name" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-0.5">
+              <a
+                className="leading-none font-medium text-sm text-primary hover:text-primary-active cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewSignals(row.original);
+                }}
+              >
+                {row.original.name}
+              </a>
+              {row.original.description && (
+                <span className="text-2xs text-gray-500 leading-tight">
+                  {row.original.description.length > 50
+                    ? row.original.description.slice(0, 50) + "..."
+                    : row.original.description}
+                </span>
+              )}
+            </div>
+          </div>
+        ),
+        meta: { headerClassName: "min-w-[180px]", cellClassName: "min-w-[180px]" },
+      },
+      {
+        accessorFn: (row) => row.isEnabled,
+        id: "status",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Status" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span
+            className={`badge badge-sm badge-outline ${row.original.isEnabled ? "badge-success" : "badge-danger"
+              }`}
+          >
+            {row.original.isEnabled ? "Active" : "Disabled"}
+          </span>
+        ),
+        meta: { headerClassName: "w-[100px]", cellClassName: "w-[100px]" },
+      },
+      {
+        accessorFn: (row) => row.webhookUrl,
+        id: "webhookUrl",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Webhook URL" column={column} />
+        ),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const url =
+            row.original.webhookUrl ||
+            `/api/v1/common/tv-webhook/${row.original.webhookSecret}`;
+          return <WebhookUrlCell url={url} />;
+        },
+        meta: { headerClassName: "min-w-[550px]", cellClassName: "min-w-[550px]" },
+      },
+      {
+        accessorFn: (row) => row.signalCount,
+        id: "signals",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Signals" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="text-gray-700 font-medium">
+            {row.original.signalCount || 0}
+          </span>
+        ),
+        meta: { headerClassName: "w-[90px]", cellClassName: "w-[90px]" },
+      },
+      {
+        accessorFn: (row) => row.createdAt,
+        id: "createdAt",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Created" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="text-gray-600 text-2sm">
+            {new Date(row.original.createdAt).toLocaleDateString()}
+          </span>
+        ),
+        meta: { headerClassName: "min-w-[110px]", cellClassName: "min-w-[110px]" },
+      },
+      {
+        id: "actions",
+        header: () => "",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <ActionMenu
+            config={row.original}
+            isRTL={isRTL}
+            onViewSignals={onViewSignals}
+            onViewDelivery={onViewDelivery}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onRegenerate={onRegenerate}
+          />
+        ),
+        meta: { headerClassName: "w-[60px]", cellClassName: "w-[60px]" },
+      },
+    ],
+    [isRTL, onViewSignals, onViewDelivery, onEdit, onDelete, onRegenerate]
+  );
+
+  const handleFetchData = useCallback(
+    async ({ pageIndex, pageSize }) => {
+      try {
+        const response = await fetchConfigs({
+          page: pageIndex + 1,
+          limit: pageSize,
+        }).unwrap();
+        return {
+          data: response.data || [],
+          totalCount: response.pagination?.total || 0,
+        };
+      } catch {
+        return { data: [], totalCount: 0 };
+      }
+    },
+    [fetchConfigs]
+  );
+
+  const ToolbarTable = () => {
+    const { table } = useDataGrid();
+    return (
+      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+        <h3 className="card-title">Webhooks</h3>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <DataGridColumnVisibility table={table} />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
-      {/* Search */}
-      <div className="mb-4 flex items-center gap-2 bg-slate-50 dark:bg-[#131324] border border-slate-200 dark:border-[#202038] rounded-xl px-4 py-2 max-w-[400px] shadow-sm">
-        <Search size={18} className="text-slate-400 dark:text-slate-500" />
-        <input
-          type="text"
-          placeholder="Search webhooks..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border-none outline-none bg-transparent text-sm w-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
-        />
-      </div>
+      <Toolbar>
+        <ToolbarHeading>
+          <ToolbarPageTitle text="TradingView Webhooks" />
+          <ToolbarDescription>
+            Manage webhook configurations for TradingView alerts
+          </ToolbarDescription>
+        </ToolbarHeading>
+        <ToolbarActions>
+          <button className="btn btn-primary" onClick={onCreateOpen}>
+            <KeenIcon icon="plus" className="me-1" />
+            New Webhook
+          </button>
+        </ToolbarActions>
+      </Toolbar>
 
-      {isLoading ? (
-        <div className="text-center py-16 text-slate-400 dark:text-slate-500">
-          Loading...
-        </div>
-      ) : configs.length === 0 ? (
-        <div className="text-center py-20 px-5 bg-slate-50 dark:bg-[#131324]/20 rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#202038]">
-          <ChartLine size={48} className="text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-          <h3 className="text-slate-600 dark:text-slate-400 font-bold mb-2 text-base">No Webhooks Yet</h3>
-          <p className="text-slate-400 dark:text-slate-500 text-sm">
-            Create your first webhook to start receiving TradingView signals
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {configs.map((config) => (
-            <div
-              key={config._id}
-              className="bg-white dark:bg-[#0F0F1A] border border-slate-200 dark:border-[#1F1F35] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              <div className="flex justify-between items-start flex-wrap gap-3">
-                {/* Left */}
-                <div className="flex-1 min-w-[200px]">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                      {config.name}
-                    </h3>
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        config.isEnabled
-                          ? "bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20"
-                          : "bg-red-500/10 text-red-500 dark:bg-red-500/20"
-                      }`}
-                    >
-                      {config.isEnabled ? "ACTIVE" : "DISABLED"}
-                    </span>
-                  </div>
-                  {config.description && (
-                    <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 mb-2.5">
-                      {config.description}
-                    </p>
-                  )}
-                  {/* Webhook URL */}
-                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#131324] border border-slate-100 dark:border-[#1F1F35]/50 rounded-xl px-3 py-2.5 mb-3">
-                    <code className="font-mono text-xs text-slate-600 dark:text-slate-300 truncate flex-1">
-                      {config.webhookUrl || `POST /api/v1/common/tv-webhook/${config.webhookSecret}`}
-                    </code>
-                    <button
-                      onClick={() =>
-                        copyToClipboard(
-                          config.webhookUrl ||
-                            `/api/v1/common/tv-webhook/${config.webhookSecret}`
-                        )
-                      }
-                      className="bg-transparent border-none cursor-pointer p-1 flex hover:opacity-80"
-                      title="Copy URL"
-                    >
-                      <Copy size={14} className="text-slate-400 dark:text-slate-500" />
-                    </button>
-                  </div>
-                  {/* Stats */}
-                  <div className="flex gap-4 text-xs text-slate-400 dark:text-slate-500 mt-2">
-                    <span className="flex items-center gap-1.5">
-                      <Activity size={14} /> {config.signalCount || 0} signals
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Clock size={14} />{" "}
-                      {new Date(config.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 flex-wrap items-center">
-                  <button
-                    onClick={() => onViewSignals(config)}
-                    className="bg-slate-50 dark:bg-[#131324] hover:bg-slate-100 dark:hover:bg-[#1C1C30] border border-slate-200 dark:border-[#1F1F35] rounded-xl p-2 cursor-pointer flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
-                    title="View Signals"
-                  >
-                    <Eye size={16} />
-                  </button>
-                  <button
-                    onClick={() => onViewDelivery(config)}
-                    className="bg-slate-50 dark:bg-[#131324] hover:bg-slate-100 dark:hover:bg-[#1C1C30] border border-slate-200 dark:border-[#1F1F35] rounded-xl p-2 cursor-pointer flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
-                    title="Delivery History"
-                  >
-                    <Bell size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleRegenerate(config._id)}
-                    className="bg-slate-50 dark:bg-[#131324] hover:bg-slate-100 dark:hover:bg-[#1C1C30] border border-slate-200 dark:border-[#1F1F35] rounded-xl p-2 cursor-pointer flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
-                    title="Regenerate Secret"
-                  >
-                    <RefreshCw size={16} />
-                  </button>
-                  <button
-                    onClick={() => onEdit(config)}
-                    className="bg-slate-50 dark:bg-[#131324] hover:bg-slate-100 dark:hover:bg-[#1C1C30] border border-slate-200 dark:border-[#1F1F35] rounded-xl p-2 cursor-pointer flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
-                    title="Edit"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(config)}
-                    className="bg-slate-50 dark:bg-[#131324] hover:bg-red-50 dark:hover:bg-red-500/10 border border-slate-200 dark:border-[#1F1F35] rounded-xl p-2 cursor-pointer flex items-center justify-center text-slate-500 dark:text-red-400 hover:text-red-600 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: pagination.totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                page === i + 1
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#1F1F35] text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#131324]"
-              } cursor-pointer`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-      )}
+      <DataGrid
+        reloadTrigger={tableKey}
+        serverSide={true}
+        loading={isLoading}
+        columns={columns}
+        pagination={{ size: 10 }}
+        toolbar={<ToolbarTable />}
+        layout={{ card: true }}
+        onFetchData={handleFetchData}
+      />
     </>
+  );
+};
+
+// ── Action Menu ─────────────────────────────────────────────────────
+
+const ActionMenu = ({
+  config,
+  isRTL,
+  onViewSignals,
+  onViewDelivery,
+  onEdit,
+  onDelete,
+  onRegenerate,
+}) => {
+  const ActionMenuSub = () => (
+    <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
+      <MenuItem onClick={() => onViewSignals(config)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="eye" />
+          </MenuIcon>
+          <MenuTitle>View Signals</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+      <MenuItem onClick={() => onViewDelivery(config)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="notification-on" />
+          </MenuIcon>
+          <MenuTitle>Delivery History</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+      <MenuItem onClick={() => onRegenerate(config)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="arrows-circle" />
+          </MenuIcon>
+          <MenuTitle>Regenerate Secret</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+      <MenuItem onClick={() => onEdit(config)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="notepad-edit" />
+          </MenuIcon>
+          <MenuTitle>Edit</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+      <MenuItem onClick={() => onDelete(config)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="trash" />
+          </MenuIcon>
+          <MenuTitle>Delete</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+    </MenuSub>
+  );
+
+  return (
+    <Menu className="items-stretch">
+      <MenuItem
+        toggle="dropdown"
+        trigger="click"
+        dropdownProps={{
+          placement: isRTL() ? "bottom-start" : "bottom-end",
+          modifiers: [
+            {
+              name: "offset",
+              options: { offset: isRTL() ? [0, -10] : [0, 10] },
+            },
+          ],
+        }}
+      >
+        <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+          <KeenIcon icon="dots-vertical" />
+        </MenuToggle>
+        {ActionMenuSub()}
+      </MenuItem>
+    </Menu>
   );
 };
 
 // ── Signals View ────────────────────────────────────────────────────
 
-const SignalsView = ({ configId }) => {
-  const [page, setPage] = useState(1);
-  const { data, isLoading } = useGetWebhookSignalsQuery({
-    id: configId,
-    page,
-    limit: 20,
-  });
+const SignalsView = ({ config, onBack }) => {
+  const [fetchSignals, { isLoading }] = useLazyGetWebhookSignalsQuery();
 
-  const signals = data?.data || [];
-  const pagination = data?.pagination;
+  const columns = useMemo(
+    () => [
+      {
+        accessorFn: (row) => row.symbol,
+        id: "symbol",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Symbol" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-0.5">
+            <span className="font-medium text-sm text-gray-900">
+              {row.original.symbol || "—"}
+            </span>
+            {row.original.exchange && (
+              <span className="text-2xs text-gray-500">
+                {row.original.exchange}
+              </span>
+            )}
+          </div>
+        ),
+        meta: { headerClassName: "min-w-[120px]", cellClassName: "min-w-[120px]" },
+      },
+      {
+        accessorFn: (row) => row.signalType,
+        id: "type",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Type" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => {
+          const type = row.original.signalType || "OTHER";
+          return (
+            <span
+              className={`badge badge-sm badge-outline ${signalTypeBadgeMap[type] || "badge-secondary"
+                }`}
+            >
+              {type}
+            </span>
+          );
+        },
+        meta: { headerClassName: "w-[90px]", cellClassName: "w-[90px]" },
+      },
+      {
+        accessorFn: (row) => row.entryPrice,
+        id: "entryPrice",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Entry Price" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span className="text-gray-700">{formatPrice(info.getValue())}</span>
+        ),
+        meta: { headerClassName: "min-w-[100px]", cellClassName: "min-w-[100px]" },
+      },
+      {
+        accessorFn: (row) => row.stopLoss,
+        id: "sl",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="SL" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span className="text-gray-700">{formatPrice(info.getValue())}</span>
+        ),
+        meta: { headerClassName: "w-[80px]", cellClassName: "w-[80px]" },
+      },
+      {
+        accessorFn: (row) => row.takeProfit,
+        id: "tp",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="TP" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span className="text-gray-700">{formatPrice(info.getValue())}</span>
+        ),
+        meta: { headerClassName: "w-[80px]", cellClassName: "w-[80px]" },
+      },
+      {
+        accessorFn: (row) => row.timeframe,
+        id: "timeframe",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Timeframe" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span className="text-gray-700">{info.getValue() || "—"}</span>
+        ),
+        meta: { headerClassName: "w-[100px]", cellClassName: "w-[100px]" },
+      },
+      {
+        accessorFn: (row) => row.deliveryStatus,
+        id: "delivery",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Delivery" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => {
+          const status = row.original.deliveryStatus || "pending";
+          return (
+            <span
+              className={`badge badge-sm badge-outline ${statusColorMap[status] || "badge-secondary"
+                }`}
+            >
+              {status}
+            </span>
+          );
+        },
+        meta: { headerClassName: "w-[100px]", cellClassName: "w-[100px]" },
+      },
+      {
+        accessorFn: (row) => row.notificationStatus,
+        id: "notification",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Notification" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => {
+          const status = row.original.notificationStatus || "pending";
+          return (
+            <span
+              className={`badge badge-sm badge-outline ${statusColorMap[status] || "badge-secondary"
+                }`}
+            >
+              {status}
+            </span>
+          );
+        },
+        meta: { headerClassName: "w-[110px]", cellClassName: "w-[110px]" },
+      },
+      {
+        accessorFn: (row) => row.createdAt,
+        id: "received",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Received" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="text-gray-600 text-2sm">
+            {new Date(row.original.createdAt).toLocaleString()}
+          </span>
+        ),
+        meta: { headerClassName: "min-w-[150px]", cellClassName: "min-w-[150px]" },
+      },
+    ],
+    []
+  );
+
+  const handleFetchData = useCallback(
+    async ({ pageIndex, pageSize }) => {
+      try {
+        const response = await fetchSignals({
+          id: config._id,
+          page: pageIndex + 1,
+          limit: pageSize,
+        }).unwrap();
+        return {
+          data: response.data || [],
+          totalCount: response.pagination?.total || 0,
+        };
+      } catch {
+        return { data: [], totalCount: 0 };
+      }
+    },
+    [fetchSignals, config._id]
+  );
+
+  const ToolbarTable = () => {
+    const { table } = useDataGrid();
+    return (
+      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+        <h3 className="card-title">Signals — {config.name}</h3>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <DataGridColumnVisibility table={table} />
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="bg-white dark:bg-[#0F0F1A] border border-slate-200 dark:border-[#1F1F35] rounded-2xl overflow-hidden shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-slate-50 dark:bg-[#131324] border-b border-slate-200 dark:border-[#1F1F35]">
-              {["Symbol", "Type", "Entry Price", "SL", "TP", "Timeframe", "Delivery", "Notification", "Received"].map((h) => (
-                <th
-                  key={h}
-                  className="px-4 py-3.5 text-left text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-xs text-slate-400 dark:text-slate-500">
-                  Loading...
-                </td>
-              </tr>
-            ) : signals.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-xs text-slate-400 dark:text-slate-500">
-                  No signals received yet
-                </td>
-              </tr>
-            ) : (
-              signals.map((signal) => (
-                <tr
-                  key={signal._id}
-                  className="border-b border-slate-100 dark:border-[#1F1F35]/30 hover:bg-slate-50/50 dark:hover:bg-[#131324]/20 transition-colors"
-                >
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">
-                    <strong className="text-slate-900 dark:text-white block">{signal.symbol || "—"}</strong>
-                    {signal.exchange && (
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 block">
-                        {signal.exchange}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    <SignalTypeBadge type={signal.signalType} />
-                  </td>
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">{signal.entryPrice || "—"}</td>
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">{signal.stopLoss || "—"}</td>
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">{signal.takeProfit || "—"}</td>
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">{signal.timeframe || "—"}</td>
-                  <td className="px-4 py-3 text-xs">
-                    <StatusBadge status={signal.deliveryStatus} />
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    <StatusBadge status={signal.notificationStatus} />
-                  </td>
-                  <td className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500">
-                    {new Date(signal.createdAt).toLocaleString()}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center gap-2 p-4 border-t border-slate-200 dark:border-[#1F1F35]">
-          {Array.from({ length: pagination.totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-bold border transition-all ${
-                page === i + 1
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#1F1F35] text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#131324]"
-              } cursor-pointer`}
-            >
-              {i + 1}
+    <>
+      <Toolbar>
+        <ToolbarHeading>
+          <div className="flex items-center gap-2">
+            <button className="btn btn-sm btn-icon btn-light" onClick={onBack}>
+              <KeenIcon icon="arrow-left" />
             </button>
-          ))}
-        </div>
-      )}
-    </div>
+            <div>
+              <ToolbarPageTitle text={`Signals — ${config.name}`} />
+              <ToolbarDescription>
+                View received trading signals for this webhook
+              </ToolbarDescription>
+            </div>
+          </div>
+        </ToolbarHeading>
+      </Toolbar>
+
+      <DataGrid
+        serverSide={true}
+        loading={isLoading}
+        columns={columns}
+        pagination={{ size: 10 }}
+        toolbar={<ToolbarTable />}
+        layout={{ card: true }}
+        onFetchData={handleFetchData}
+      />
+    </>
   );
 };
 
 // ── Delivery History View ───────────────────────────────────────────
 
-const DeliveryView = ({ configId }) => {
-  const [page, setPage] = useState(1);
-  const { data, isLoading } = useGetDeliveryHistoryQuery({
-    id: configId,
-    page,
-    limit: 20,
-  });
+const DeliveryView = ({ config, onBack }) => {
+  const [fetchDelivery, { isLoading }] = useLazyGetDeliveryHistoryQuery();
   const [retryNotification, { isLoading: retrying }] =
     useRetrySignalNotificationMutation();
-
-  const logs = data?.data || [];
-  const pagination = data?.pagination;
 
   const handleRetry = async (signalId) => {
     try {
       const result = await retryNotification(signalId).unwrap();
-      toast.success(`Retry complete: ${result.data?.totalSuccess || 0} succeeded`);
+      toast.success(
+        `Retry complete: ${result.data?.totalSuccess || 0} succeeded`
+      );
     } catch {
       toast.error("Retry failed");
     }
   };
 
-  return (
-    <div className="bg-white dark:bg-[#0F0F1A] border border-slate-200 dark:border-[#1F1F35] rounded-2xl overflow-hidden shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-slate-50 dark:bg-[#131324] border-b border-slate-200 dark:border-[#1F1F35]">
-              {["Signal", "Batch", "Tokens", "Success", "Failed", "Status", "Retries", "Date", "Actions"].map((h) => (
-                <th
-                  key={h}
-                  className="px-4 py-3.5 text-left text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-xs text-slate-400 dark:text-slate-500">
-                  Loading...
-                </td>
-              </tr>
-            ) : logs.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-xs text-slate-400 dark:text-slate-500">
-                  No delivery logs yet
-                </td>
-              </tr>
-            ) : (
-              logs.map((log) => (
-                <tr key={log._id} className="border-b border-slate-100 dark:border-[#1F1F35]/30 hover:bg-slate-50/50 dark:hover:bg-[#131324]/20 transition-colors">
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">
-                    <div>
-                      <strong className="text-slate-900 dark:text-white">{log.signal?.symbol || "—"}</strong>
-                      {log.signal?.signalType && (
-                        <span className="ml-1.5">
-                          <SignalTypeBadge type={log.signal.signalType} />
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">#{log.batchIndex + 1}</td>
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">{log.tokenCount}</td>
-                  <td className="px-4 py-3 text-xs text-emerald-500 font-semibold">{log.successCount}</td>
-                  <td className={`px-4 py-3 text-xs font-semibold ${log.failureCount > 0 ? "text-red-500" : "text-slate-400 dark:text-slate-500"}`}>{log.failureCount}</td>
-                  <td className="px-4 py-3 text-xs">
-                    <StatusBadge status={log.status} />
-                  </td>
-                  <td className="px-4 py-3 text-xs text-slate-800 dark:text-slate-200">{log.retryCount}</td>
-                  <td className="px-4 py-3 text-xs text-slate-400 dark:text-slate-500">
-                    {new Date(log.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    {(log.status === "failed" || log.status === "partial") && (
-                      <button
-                        onClick={() => handleRetry(log.signal?._id)}
-                        disabled={retrying}
-                        className="flex items-center gap-1.5 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-none rounded-lg px-3 py-1.5 cursor-pointer text-xs font-bold hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
-                      >
-                        <RotateCcw size={12} /> Retry
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
+  const columns = useMemo(
+    () => [
+      {
+        accessorFn: (row) => row.signal?.symbol,
+        id: "signal",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Signal" column={column} />
+        ),
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-sm text-gray-900">
+              {row.original.signal?.symbol || "—"}
+            </span>
+            {row.original.signal?.signalType && (
+              <span
+                className={`badge badge-sm badge-outline ${signalTypeBadgeMap[row.original.signal.signalType] ||
+                  "badge-secondary"
+                  }`}
+              >
+                {row.original.signal.signalType}
+              </span>
             )}
-          </tbody>
-        </table>
-      </div>
-
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center gap-2 p-4 border-t border-slate-200 dark:border-[#1F1F35]">
-          {Array.from({ length: pagination.totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-bold border transition-all ${
-                page === i + 1
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#1F1F35] text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#131324]"
-              } cursor-pointer`}
+          </div>
+        ),
+        meta: { headerClassName: "min-w-[140px]", cellClassName: "min-w-[140px]" },
+      },
+      {
+        accessorFn: (row) => row.batchIndex,
+        id: "batch",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Batch" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="text-gray-700">
+            #{row.original.batchIndex + 1}
+          </span>
+        ),
+        meta: { headerClassName: "w-[70px]", cellClassName: "w-[70px]" },
+      },
+      {
+        accessorFn: (row) => row.tokenCount,
+        id: "tokens",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Tokens" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span className="text-gray-700">{info.getValue()}</span>
+        ),
+        meta: { headerClassName: "w-[80px]", cellClassName: "w-[80px]" },
+      },
+      {
+        accessorFn: (row) => row.successCount,
+        id: "success",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Success" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span className="text-success font-semibold">{info.getValue()}</span>
+        ),
+        meta: { headerClassName: "w-[80px]", cellClassName: "w-[80px]" },
+      },
+      {
+        accessorFn: (row) => row.failureCount,
+        id: "failed",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Failed" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span
+            className={`font-semibold ${info.getValue() > 0 ? "text-danger" : "text-gray-400"
+              }`}
+          >
+            {info.getValue()}
+          </span>
+        ),
+        meta: { headerClassName: "w-[80px]", cellClassName: "w-[80px]" },
+      },
+      {
+        accessorFn: (row) => row.status,
+        id: "status",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Status" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => {
+          const status = row.original.status || "pending";
+          return (
+            <span
+              className={`badge badge-sm badge-outline ${statusColorMap[status] || "badge-secondary"
+                }`}
             >
-              {i + 1}
-            </button>
-          ))}
+              {status}
+            </span>
+          );
+        },
+        meta: { headerClassName: "w-[90px]", cellClassName: "w-[90px]" },
+      },
+      {
+        accessorFn: (row) => row.retryCount,
+        id: "retries",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Retries" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <span className="text-gray-700">{info.getValue()}</span>
+        ),
+        meta: { headerClassName: "w-[80px]", cellClassName: "w-[80px]" },
+      },
+      {
+        accessorFn: (row) => row.createdAt,
+        id: "date",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Date" column={column} />
+        ),
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="text-gray-600 text-2sm">
+            {new Date(row.original.createdAt).toLocaleString()}
+          </span>
+        ),
+        meta: { headerClassName: "min-w-[150px]", cellClassName: "min-w-[150px]" },
+      },
+      {
+        id: "actions",
+        header: () => "",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const status = row.original.status;
+          if (status === "failed" || status === "partial") {
+            return (
+              <button
+                onClick={() => handleRetry(row.original.signal?._id)}
+                disabled={retrying}
+                className="btn btn-xs btn-warning"
+              >
+                <KeenIcon icon="arrows-circle" className="me-1" />
+                Retry
+              </button>
+            );
+          }
+          return null;
+        },
+        meta: { headerClassName: "w-[90px]", cellClassName: "w-[90px]" },
+      },
+    ],
+    [retrying]
+  );
+
+  const handleFetchData = useCallback(
+    async ({ pageIndex, pageSize }) => {
+      try {
+        const response = await fetchDelivery({
+          id: config._id,
+          page: pageIndex + 1,
+          limit: pageSize,
+        }).unwrap();
+        return {
+          data: response.data || [],
+          totalCount: response.pagination?.total || 0,
+        };
+      } catch {
+        return { data: [], totalCount: 0 };
+      }
+    },
+    [fetchDelivery, config._id]
+  );
+
+  const ToolbarTable = () => {
+    const { table } = useDataGrid();
+    return (
+      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+        <h3 className="card-title">Delivery History — {config.name}</h3>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <DataGridColumnVisibility table={table} />
         </div>
-      )}
-    </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <Toolbar>
+        <ToolbarHeading>
+          <div className="flex items-center gap-2">
+            <button className="btn btn-sm btn-icon btn-light" onClick={onBack}>
+              <KeenIcon icon="arrow-left" />
+            </button>
+            <div>
+              <ToolbarPageTitle text={`Delivery — ${config.name}`} />
+              <ToolbarDescription>
+                FCM notification delivery history
+              </ToolbarDescription>
+            </div>
+          </div>
+        </ToolbarHeading>
+      </Toolbar>
+
+      <DataGrid
+        serverSide={true}
+        loading={isLoading}
+        columns={columns}
+        pagination={{ size: 10 }}
+        toolbar={<ToolbarTable />}
+        layout={{ card: true }}
+        onFetchData={handleFetchData}
+      />
+    </>
   );
 };
 
-// ── Create Webhook Modal ────────────────────────────────────────────
+// ── Create Webhook Dialog ───────────────────────────────────────────
 
-const CreateWebhookModal = ({ onClose }) => {
+const CreateWebhookDialog = ({ isOpen, onClose, refetch }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [createWebhook, { isLoading }] = useCreateAdminTvWebhookMutation();
@@ -618,8 +1010,14 @@ const CreateWebhookModal = ({ onClose }) => {
       return;
     }
     try {
-      await createWebhook({ name: name.trim(), description: description.trim() }).unwrap();
+      await createWebhook({
+        name: name.trim(),
+        description: description.trim(),
+      }).unwrap();
       toast.success("Webhook created!");
+      setName("");
+      setDescription("");
+      refetch();
       onClose();
     } catch {
       toast.error("Failed to create webhook");
@@ -627,55 +1025,62 @@ const CreateWebhookModal = ({ onClose }) => {
   };
 
   return (
-    <ModalOverlay onClose={onClose}>
-      <form onSubmit={handleSubmit}>
-        <h2 className="text-lg font-extrabold text-slate-900 dark:text-white mb-4">
-          Create Webhook
-        </h2>
-        <div className="mb-4">
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. BTC Scalping Strategy"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#202038] text-sm bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-            required
-          />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="p-5 max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create Webhook</DialogTitle>
+          <DialogDescription>
+            Create a new TradingView webhook configuration
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-5 px-0 py-5">
+          <form onSubmit={handleSubmit} id="create-webhook-form">
+            <div className="flex flex-col gap-1 mb-4">
+              <label className="form-label text-gray-900">
+                Name <span className="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. BTC Scalping Strategy"
+                className="form-control input input-md w-full"
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="form-label text-gray-900">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional description..."
+                className="form-control input input-md w-full min-h-[80px]"
+                rows={3}
+              />
+            </div>
+          </form>
         </div>
-        <div className="mb-5">
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Optional description..."
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#202038] text-sm bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all min-h-[80px] resize-y"
-          />
-        </div>
-        <div className="flex gap-2.5 justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#1F1F35] bg-white dark:bg-[#0F0F1A] text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-[#131324] cursor-pointer transition-colors"
-          >
+        <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3">
+          <button type="button" className="btn btn-light" onClick={onClose}>
             Cancel
           </button>
           <button
             type="submit"
+            form="create-webhook-form"
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl border-none bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm cursor-pointer shadow-md shadow-blue-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary"
           >
             {isLoading ? "Creating..." : "Create Webhook"}
           </button>
         </div>
-      </form>
-    </ModalOverlay>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-// ── Edit Webhook Modal ──────────────────────────────────────────────
+// ── Edit Webhook Dialog ─────────────────────────────────────────────
 
-const EditWebhookModal = ({ config, onClose }) => {
+const EditWebhookDialog = ({ isOpen, onClose, config, refetch }) => {
   const [name, setName] = useState(config.name || "");
   const [description, setDescription] = useState(config.description || "");
   const [isEnabled, setIsEnabled] = useState(config.isEnabled);
@@ -695,6 +1100,7 @@ const EditWebhookModal = ({ config, onClose }) => {
         isEnabled,
       }).unwrap();
       toast.success("Webhook updated!");
+      refetch();
       onClose();
     } catch {
       toast.error("Failed to update webhook");
@@ -702,70 +1108,78 @@ const EditWebhookModal = ({ config, onClose }) => {
   };
 
   return (
-    <ModalOverlay onClose={onClose}>
-      <form onSubmit={handleSubmit}>
-        <h2 className="text-lg font-extrabold text-slate-900 dark:text-white mb-4">
-          Edit Webhook
-        </h2>
-        <div className="mb-4">
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#202038] text-sm bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-            required
-          />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="p-5 max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit Webhook</DialogTitle>
+          <DialogDescription>
+            Update webhook configuration settings
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-5 px-0 py-5">
+          <form onSubmit={handleSubmit} id="edit-webhook-form">
+            <div className="flex flex-col gap-1 mb-4">
+              <label className="form-label text-gray-900">
+                Name <span className="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="form-control input input-md w-full"
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1 mb-4">
+              <label className="form-label text-gray-900">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="form-control input input-md w-full min-h-[80px]"
+                rows={3}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="checkbox-group">
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  checked={isEnabled}
+                  onChange={(e) => setIsEnabled(e.target.checked)}
+                />
+                <span className="checkbox-label">Enabled</span>
+              </label>
+            </div>
+          </form>
         </div>
-        <div className="mb-4">
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#202038] text-sm bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all min-h-[80px] resize-y"
-          />
-        </div>
-        <div className="mb-5">
-          <label className="flex items-center gap-2.5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isEnabled}
-              onChange={(e) => setIsEnabled(e.target.checked)}
-              className="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            Enabled
-          </label>
-        </div>
-        <div className="flex gap-2.5 justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#1F1F35] bg-white dark:bg-[#0F0F1A] text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-[#131324] cursor-pointer transition-colors"
-          >
+        <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3">
+          <button type="button" className="btn btn-light" onClick={onClose}>
             Cancel
           </button>
           <button
             type="submit"
+            form="edit-webhook-form"
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl border-none bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm cursor-pointer shadow-md shadow-blue-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary"
           >
             {isLoading ? "Saving..." : "Save Changes"}
           </button>
         </div>
-      </form>
-    </ModalOverlay>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-// ── Delete Webhook Modal ────────────────────────────────────────────
+// ── Delete Webhook Dialog ───────────────────────────────────────────
 
-const DeleteWebhookModal = ({ config, onClose }) => {
+const DeleteWebhookDialog = ({ isOpen, onClose, config, refetch }) => {
   const [deleteWebhook, { isLoading }] = useDeleteAdminTvWebhookMutation();
 
   const handleDelete = async () => {
     try {
       await deleteWebhook(config._id).unwrap();
       toast.success("Webhook deleted");
+      refetch();
       onClose();
     } catch {
       toast.error("Failed to delete webhook");
@@ -773,114 +1187,84 @@ const DeleteWebhookModal = ({ config, onClose }) => {
   };
 
   return (
-    <ModalOverlay onClose={onClose}>
-      <div className="text-center py-4">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-500/10 mb-4">
-          <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="p-5 max-w-[500px]">
+        <VisuallyHidden>
+          <DialogTitle>Delete Webhook</DialogTitle>
+        </VisuallyHidden>
+        <div className="text-center">
+          <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+          <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
+            Are you sure you want to delete{" "}
+            <strong>"{config.name}"</strong>? This action cannot be undone, and
+            any TradingView alerts pointing to this webhook URL will stop
+            working.
+          </p>
         </div>
-        <h2 className="text-lg font-extrabold text-slate-900 dark:text-white mb-2">
-          Delete Webhook
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-          Are you sure you want to delete <strong className="text-slate-800 dark:text-slate-200">"{config.name}"</strong>?
-          This action cannot be undone, and any TradingView alerts pointing to this webhook URL will stop working.
-        </p>
-        <div className="flex gap-2.5 justify-center">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#1F1F35] bg-white dark:bg-[#0F0F1A] text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-[#131324] cursor-pointer transition-colors"
-          >
+        <div className="flex justify-center items-center space-x-4">
+          <button className="btn btn-light" onClick={onClose}>
             Cancel
           </button>
           <button
+            className="btn btn-danger"
             onClick={handleDelete}
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl border-none bg-red-600 hover:bg-red-700 text-white font-bold text-sm cursor-pointer shadow-md shadow-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Deleting..." : "Delete Webhook"}
+            {isLoading ? "Deleting..." : "Yes, I'm sure"}
           </button>
         </div>
-      </div>
-    </ModalOverlay>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-// ── Modal Overlay ───────────────────────────────────────────────────
+// ── Regenerate Secret Dialog ────────────────────────────────────────
 
-const ModalOverlay = ({ onClose, children }) => (
-  <div
-    onClick={onClose}
-    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[1000] p-5"
-  >
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className="bg-white dark:bg-[#0F0F1A] rounded-[24px] p-6 max-w-[500px] w-full border border-slate-100 dark:border-[#1F1F35] shadow-2xl"
-    >
-      {children}
-    </div>
-  </div>
-);
+const RegenerateSecretDialog = ({ isOpen, onClose, config, refetch }) => {
+  const [regenerateSecret, { isLoading }] =
+    useRegenerateWebhookSecretMutation();
 
-// ── Shared Styles ───────────────────────────────────────────────────
+  const handleRegenerate = async () => {
+    try {
+      await regenerateSecret(config._id).unwrap();
+      toast.success("Secret regenerated successfully");
+      refetch();
+      onClose();
+    } catch {
+      toast.error("Failed to regenerate secret");
+    }
+  };
 
-const actionBtnStyle = {
-  background: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  borderRadius: "8px",
-  padding: "8px",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  color: "#64748b",
-  transition: "all 0.15s",
-};
-
-const cellStyle = {
-  padding: "12px 16px",
-  fontSize: "13px",
-  color: "#334155",
-};
-
-const labelStyle = {
-  display: "block",
-  fontSize: "13px",
-  fontWeight: 600,
-  color: "#374151",
-  marginBottom: "6px",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px 14px",
-  borderRadius: "8px",
-  border: "1px solid #d1d5db",
-  fontSize: "14px",
-  outline: "none",
-  boxSizing: "border-box",
-};
-
-const cancelBtnStyle = {
-  padding: "10px 20px",
-  borderRadius: "8px",
-  border: "1px solid #e2e8f0",
-  background: "white",
-  color: "#64748b",
-  fontWeight: 600,
-  cursor: "pointer",
-  fontSize: "14px",
-};
-
-const submitBtnStyle = {
-  padding: "10px 20px",
-  borderRadius: "8px",
-  border: "none",
-  background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-  color: "white",
-  fontWeight: 600,
-  cursor: "pointer",
-  fontSize: "14px",
-  boxShadow: "0 2px 8px rgba(37, 99, 235, 0.3)",
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="p-5 max-w-[500px]">
+        <VisuallyHidden>
+          <DialogTitle>Regenerate Secret</DialogTitle>
+        </VisuallyHidden>
+        <div className="text-center">
+          <i className="ki-filled text-3xl ki-arrows-circle text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+          <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
+            Are you sure you want to regenerate the secret for{" "}
+            <strong>"{config.name}"</strong>? The old webhook URL will stop
+            working immediately, and you will need to update the URL in your
+            TradingView alerts.
+          </p>
+        </div>
+        <div className="flex justify-center items-center space-x-4">
+          <button className="btn btn-light" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-warning"
+            onClick={handleRegenerate}
+            disabled={isLoading}
+          >
+            {isLoading ? "Regenerating..." : "Yes, Regenerate"}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export default AdminTvWebhookPage;

@@ -112,13 +112,16 @@ export const adminTvWebhookApiSlice = createApi({
 
 export const {
   useGetAdminTvWebhooksQuery,
+  useLazyGetAdminTvWebhooksQuery,
   useGetAdminTvWebhookByIdQuery,
   useCreateAdminTvWebhookMutation,
   useUpdateAdminTvWebhookMutation,
   useDeleteAdminTvWebhookMutation,
   useRegenerateWebhookSecretMutation,
   useGetWebhookSignalsQuery,
+  useLazyGetWebhookSignalsQuery,
   useGetAllSignalsQuery,
   useGetDeliveryHistoryQuery,
+  useLazyGetDeliveryHistoryQuery,
   useRetrySignalNotificationMutation,
 } = adminTvWebhookApiSlice;
