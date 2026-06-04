@@ -1044,7 +1044,7 @@ const CreateWebhookDialog = ({ isOpen, onClose, refetch }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. BTC Scalping Strategy"
-                className="form-control input input-md w-full"
+                className="input input-md w-full"
                 required
               />
             </div>
@@ -1053,8 +1053,8 @@ const CreateWebhookDialog = ({ isOpen, onClose, refetch }) => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional description..."
-                className="form-control input input-md w-full min-h-[80px]"
+                placeholder="Enter a description for webhook"
+                className="textarea w-full min-h-[80px] mt-2"
                 rows={3}
               />
             </div>
@@ -1126,7 +1126,7 @@ const EditWebhookDialog = ({ isOpen, onClose, config, refetch }) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="form-control input input-md w-full"
+                className="input input-md w-full"
                 required
               />
             </div>
@@ -1135,7 +1135,7 @@ const EditWebhookDialog = ({ isOpen, onClose, config, refetch }) => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="form-control input input-md w-full min-h-[80px]"
+                className="textarea w-full min-h-[80px]"
                 rows={3}
               />
             </div>
