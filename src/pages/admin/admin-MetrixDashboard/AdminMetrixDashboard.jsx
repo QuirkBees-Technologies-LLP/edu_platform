@@ -135,7 +135,7 @@ export default function AdminMetrixDashboard() {
     const [reportSearch, setReportSearch] = useState("");
 
     const parsedDownloadUrl = useMemo(() => {
-        if (!reportData?.success || !reportData?.data) return null;
+        if (!reportData?.success || !reportData?.data || typeof reportData.data !== "object") return null;
         const keys = Object.keys(reportData.data);
         const targetKey = keys.find(k => k.includes("privatefile.dhtml"));
         if (!targetKey) return null;
@@ -149,23 +149,62 @@ export default function AdminMetrixDashboard() {
 
     const reportRows = useMemo(() => {
         if (!reportData?.success || !reportData?.data) return [];
-        const keys = Object.keys(reportData.data);
-        const hasHtml = keys.some(k => k.includes("privatefile.dhtml"));
-        if (hasHtml) return [];
         
-        return Object.entries(reportData.data).map(([distId, valueStr]) => {
-            if (!valueStr || typeof valueStr !== "string") return null;
-            const parts = valueStr.split("\t");
-            return {
-                distId,
-                orderId: parts[0] || "",
-                product: parts[1] || "",
-                paymentDate: parts[2] || "",
-                signupDate: parts[3] || "",
-                amount: parts[4] || "",
-                details: parts.slice(5).join(" | ") || ""
-            };
-        }).filter(Boolean);
+        const rawData = reportData.data;
+
+        // Case 1: If data is a string (raw TSV/CSV format)
+        if (typeof rawData === "string") {
+            const lines = rawData.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            if (lines.length === 0) return [];
+
+            const rows = [];
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const parts = line.split("\t");
+                
+                // Skip header line
+                if (i === 0 && (parts[0].toLowerCase().includes("userid") || parts[0].toLowerCase().includes("user id"))) {
+                    continue;
+                }
+                
+                rows.push({
+                    distId: parts[0] || "",
+                    orderId: parts[1] || "",
+                    product: parts[2] || "",
+                    paymentDate: parts[3] || "",
+                    signupDate: parts[4] || "",
+                    amount: parts[5] || "",
+                    details: parts.slice(6).join(" | ") || ""
+                });
+            }
+            return rows;
+        }
+
+        // Case 2: If data is an object
+        if (typeof rawData === "object") {
+            const keys = Object.keys(rawData);
+            const hasHtml = keys.some(k => k.includes("privatefile.dhtml"));
+            if (hasHtml) return [];
+
+            return Object.entries(rawData)
+                .map(([distId, valueStr]) => {
+                    if (distId.toLowerCase() === "userid") return null;
+                    if (!valueStr || typeof valueStr !== "string") return null;
+                    const parts = valueStr.split("\t");
+                    return {
+                        distId,
+                        orderId: parts[0] || "",
+                        product: parts[1] || "",
+                        paymentDate: parts[2] || "",
+                        signupDate: parts[3] || "",
+                        amount: parts[4] || "",
+                        details: parts.slice(5).join(" | ") || ""
+                    };
+                })
+                .filter(Boolean);
+        }
+
+        return [];
     }, [reportData]);
 
     const filteredReportRows = useMemo(() => {
