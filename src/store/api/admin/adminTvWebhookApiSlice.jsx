@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithReauth from "../apiSlice";
+import { clientTvSignalsApiSlice } from "../client/clientTvSignalsApiSlice";
 
 export const adminTvWebhookApiSlice = createApi({
   reducerPath: "adminTvWebhook",
@@ -107,6 +108,29 @@ export const adminTvWebhookApiSlice = createApi({
         { type: "TvDeliveryHistory", id: "LIST" },
       ],
     }),
+
+    updateSignal: builder.mutation({
+      query: ({ signalId, ...body }) => ({
+        url: `/admin/tv-webhook/signals/${signalId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: [{ type: "TvWebhookSignals", id: "LIST" }],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            clientTvSignalsApiSlice.util.invalidateTags([
+              { type: "TvSignals", id: "LIST" },
+              { type: "TvSignalDetail", id: arg.signalId },
+              { type: "TvUnreadCount" },
+            ])
+          );
+        } catch (err) {
+          console.error("Failed to invalidate client signals:", err);
+        }
+      },
+    }),
   }),
 });
 
@@ -124,4 +148,5 @@ export const {
   useGetDeliveryHistoryQuery,
   useLazyGetDeliveryHistoryQuery,
   useRetrySignalNotificationMutation,
+  useUpdateSignalMutation,
 } = adminTvWebhookApiSlice;
