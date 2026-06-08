@@ -161,8 +161,8 @@ const StudentTradingSignals = () => {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${hasActiveFilters
-                  ? "border-blue-500 bg-blue-500/10 text-blue-500"
-                  : "border-slate-200 dark:border-[#202038] bg-slate-50 dark:bg-[#131324] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1C1C30]"
+                ? "border-blue-500 bg-blue-500/10 text-blue-500"
+                : "border-slate-200 dark:border-[#202038] bg-slate-50 dark:bg-[#131324] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1C1C30]"
                 }`}
             >
               <Filter size={14} />
@@ -340,6 +340,16 @@ const SignalCard = ({ signal, onClick }) => {
         </div>
       </div>
 
+      {/* ── Strategy Name (highlighted) ── */}
+      {(signal.strategyName || signal.webhookConfig?.name) && (
+        <div className="mb-3 flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 px-2.5 rounded-lg text-[11px] font-bold bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200/40 dark:border-blue-500/20">
+            <ChartLine size={11} className="flex-shrink-0" />
+            {signal.strategyName || signal.webhookConfig?.name}
+          </span>
+        </div>
+      )}
+
       {/* ── Alert Message (full) ── */}
       {signal.alertMessage && (
         <div className="mb-3 p-3 rounded-xl bg-slate-50 dark:bg-[#131324]/80 border border-slate-100 dark:border-[#1F1F35]/50">
@@ -353,7 +363,7 @@ const SignalCard = ({ signal, onClick }) => {
       {/* ── Footer: Source + Time ── */}
       <div className="flex justify-between items-center pt-2.5 mt-auto border-t border-slate-100 dark:border-[#1F1F35]/50">
         <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[160px]">
-          {signal.strategyName || signal.webhookConfig?.name || ""}
+          {signal.webhookConfig?.name ? `Strategy : ${signal.webhookConfig.name}` : ""}
         </span>
         <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">
           <Clock size={10} />
@@ -376,7 +386,7 @@ const PriceRow = ({ label, value, colorClass }) => {
   return (
     <div className="flex justify-between items-center py-2.5">
       <span className="text-[14px] text-[#8e9bae] font-medium">{label}</span>
-      <div 
+      <div
         className={`flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity ${colorClass}`}
         onClick={handleCopy}
         title={`Click to copy ${label}`}
@@ -400,7 +410,7 @@ const PriceBlock = ({ label, value, colorClass, bgClass, icon: Icon }) => {
   };
 
   return (
-    <div 
+    <div
       onClick={handleCopy}
       className={`group flex-1 flex flex-col p-4 rounded-xl border border-slate-100 dark:border-[#1F1F35]/50 hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer select-none ${bgClass}`}
       title={`Click to copy ${label}`}
@@ -524,16 +534,16 @@ const SignalDetailModal = ({ signal, onClose }) => {
         <DialogBody className="px-6 py-5">
           {/* Core Price Levels Grid */}
           <div className="grid grid-cols-2 gap-3 mb-5">
-            <PriceBlock 
-              label="Entry Target" 
-              value={signal.entryPrice} 
+            <PriceBlock
+              label="Entry Target"
+              value={signal.entryPrice}
               colorClass="text-slate-800 dark:text-white"
               bgClass="bg-slate-50/70 dark:bg-[#121222]/40"
               icon={Crosshair}
             />
-            <PriceBlock 
-              label="Stop Loss (Invalidation)" 
-              value={signal.stopLoss} 
+            <PriceBlock
+              label="Stop Loss (Invalidation)"
+              value={signal.stopLoss}
               colorClass="text-red-500 dark:text-[#ff3b30]"
               bgClass="bg-red-50/30 dark:bg-[#ef4444]/5"
               icon={ShieldAlert}
@@ -546,7 +556,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2.5 uppercase tracking-wider px-1">Take Profit Targets</div>
               <div className="grid grid-cols-2 gap-2">
                 {tpLevels.map((tp, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     onClick={() => {
                       if (tp.value != null) {
@@ -581,8 +591,8 @@ const SignalDetailModal = ({ signal, onClose }) => {
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2.5 uppercase tracking-wider px-1">Market Indicators</div>
               <div className="flex flex-wrap gap-1.5 px-0.5">
                 {marketBadges.map((badge, idx) => (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-slate-50 dark:bg-[#131324]/60 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-[#1F1F35]/50"
                   >
                     <span className="text-slate-400 dark:text-slate-500 font-semibold">{badge.label}:</span>
@@ -597,13 +607,8 @@ const SignalDetailModal = ({ signal, onClose }) => {
           {signal.alertMessage && (
             <div className="mb-5 overflow-hidden rounded-xl border border-slate-200 dark:border-[#202038]">
               <div className="flex justify-between items-center px-4 py-2 bg-slate-100/80 dark:bg-[#161626]/80 border-b border-slate-200 dark:border-[#202038] select-none">
-                <div className="flex gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-400 dark:bg-[#ff5f56]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 dark:bg-[#ffbd2e]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-400 dark:bg-[#27c93f]" />
-                </div>
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">TradingView Alert Message</span>
-                <button 
+                <button
                   onClick={() => {
                     navigator.clipboard.writeText(signal.alertMessage);
                     toast.success("Alert message copied!");
@@ -663,7 +668,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
                 <div className="relative mt-2 overflow-hidden rounded-xl border border-slate-200 dark:border-[#202038]">
                   <div className="flex justify-between items-center px-4 py-1.5 bg-slate-100/50 dark:bg-[#161626]/50 border-b border-slate-200 dark:border-[#202038]">
                     <span className="text-[9px] font-mono text-slate-400">payload.json</span>
-                    <button 
+                    <button
                       onClick={() => {
                         navigator.clipboard.writeText(JSON.stringify(signal.rawPayload, null, 2));
                         toast.success("Raw JSON copied!");
