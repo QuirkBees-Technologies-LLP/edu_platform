@@ -67,6 +67,18 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
           </p>
         </div>
       )}
+      {/* ── Chart Thumbnail ── */}
+      {signal.chartImageStatus === "generated" && signal.chartImageUrl && (
+        <div className="mb-3 rounded-xl overflow-hidden border border-slate-100 dark:border-[#1F1F35]/50 relative">
+          <img
+            src={signal.chartImageUrl}
+            alt={`${signal.symbol || "Chart"}`}
+            className="w-full h-[100px] object-cover object-right"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+        </div>
+      )}
 
       {/* ── Footer: Source + Time ── */}
       <div className="flex justify-between items-center pt-2.5 mt-auto border-t border-slate-100 dark:border-[#1F1F35]/50">
