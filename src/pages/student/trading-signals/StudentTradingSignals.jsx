@@ -194,7 +194,7 @@ const StudentTradingSignals = () => {
             placeholder="All Types"
             options={[
               { value: "", label: "All Types" },
-              ...Object.keys(signalConfig).map((t) => ({ value: t, label: t })),
+              ...Object.keys(signalConfig).filter((t) => t !== "OTHER").map((t) => ({ value: t, label: t })),
             ]}
           />
           <FilterSelect
