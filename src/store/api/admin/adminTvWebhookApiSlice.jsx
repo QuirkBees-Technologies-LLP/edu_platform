@@ -131,6 +131,27 @@ export const adminTvWebhookApiSlice = createApi({
         }
       },
     }),
+    deleteSignal: builder.mutation({
+      query: (signalId) => ({
+        url: `/admin/tv-webhook/signals/${signalId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "TvWebhookSignals", id: "LIST" }],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            clientTvSignalsApiSlice.util.invalidateTags([
+              { type: "TvSignals", id: "LIST" },
+              { type: "TvSignalDetail", id: arg },
+              { type: "TvUnreadCount" },
+            ])
+          );
+        } catch (err) {
+          console.error("Failed to invalidate client signals:", err);
+        }
+      },
+    }),
   }),
 });
 
@@ -149,4 +170,5 @@ export const {
   useLazyGetDeliveryHistoryQuery,
   useRetrySignalNotificationMutation,
   useUpdateSignalMutation,
+  useDeleteSignalMutation,
 } = adminTvWebhookApiSlice;
