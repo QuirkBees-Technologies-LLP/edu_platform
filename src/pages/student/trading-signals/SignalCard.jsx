@@ -68,7 +68,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
         </div>
       )}
       {/* ── Chart Thumbnail ── */}
-      {signal.chartImageStatus === "generated" && signal.chartImageUrl && (
+      {signal.chartImageUrl && (
         <div className="mb-3 rounded-xl overflow-hidden border border-slate-100 dark:border-[#1F1F35]/50 relative">
           <img
             src={signal.chartImageUrl}
