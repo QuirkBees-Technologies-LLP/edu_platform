@@ -9,6 +9,7 @@ import {
   useLazyGetDeliveryHistoryQuery,
   useRetrySignalNotificationMutation,
   useUpdateSignalMutation,
+  useDeleteSignalMutation,
 } from "../../../store/api/admin/adminTvWebhookApiSlice";
 import { toast } from "sonner";
 import {
@@ -555,13 +556,78 @@ const ActionMenu = ({
   );
 };
 
+// ── Signal Action Menu ──────────────────────────────────────────────
+
+const SignalActionMenu = ({
+  signal,
+  isRTL,
+  onView,
+  onEdit,
+  onDelete,
+}) => {
+  const ActionMenuSub = () => (
+    <MenuSub className="menu-default" rootClassName="w-full max-w-[150px]">
+      <MenuItem onClick={() => onView(signal)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="eye" />
+          </MenuIcon>
+          <MenuTitle>View</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+      <MenuItem onClick={() => onEdit(signal)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="notepad-edit" />
+          </MenuIcon>
+          <MenuTitle>Edit</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+      <MenuItem onClick={() => onDelete(signal)}>
+        <MenuLink>
+          <MenuIcon>
+            <KeenIcon icon="trash" />
+          </MenuIcon>
+          <MenuTitle>Delete</MenuTitle>
+        </MenuLink>
+      </MenuItem>
+    </MenuSub>
+  );
+
+  return (
+    <Menu className="items-stretch">
+      <MenuItem
+        toggle="dropdown"
+        trigger="click"
+        dropdownProps={{
+          placement: isRTL() ? "bottom-start" : "bottom-end",
+          modifiers: [
+            {
+              name: "offset",
+              options: { offset: isRTL() ? [0, -10] : [0, 10] },
+            },
+          ],
+        }}
+      >
+        <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
+          <KeenIcon icon="dots-vertical" />
+        </MenuToggle>
+        {ActionMenuSub()}
+      </MenuItem>
+    </Menu>
+  );
+};
+
 // ── Signals View ────────────────────────────────────────────────────
 
 const SignalsView = ({ config, onBack }) => {
   const [fetchSignals, { isLoading }] = useLazyGetWebhookSignalsQuery();
   const [selectedSignal, setSelectedSignal] = useState(null);
+  const [isSignalEditMode, setIsSignalEditMode] = useState(false);
+  const [deleteSignalRow, setDeleteSignalRow] = useState(null);
   const [tableKey, setTableKey] = useState(0);
   const reloadTable = () => setTableKey((k) => k + 1);
+  const { isRTL } = useLanguage();
 
   const columns = useMemo(
     () => [
@@ -574,9 +640,16 @@ const SignalsView = ({ config, onBack }) => {
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-sm text-gray-900">
+            <a
+              className="leading-none font-medium text-sm text-primary hover:text-primary-active cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedSignal(row.original);
+                setIsSignalEditMode(false);
+              }}
+            >
               {row.original.symbol || "—"}
-            </span>
+            </a>
             {row.original.exchange && (
               <span className="text-2xs text-gray-500">
                 {row.original.exchange}
@@ -727,22 +800,30 @@ const SignalsView = ({ config, onBack }) => {
         meta: { headerClassName: "w-[100px]", cellClassName: "w-[100px]" },
       },
       {
-        id: "view",
+        id: "actions",
         header: () => "",
         enableSorting: false,
         cell: ({ row }) => (
-          <button
-            onClick={() => setSelectedSignal(row.original)}
-            className="btn btn-sm btn-icon btn-light btn-clear"
-            title="View Details"
-          >
-            <KeenIcon icon="eye" />
-          </button>
+          <SignalActionMenu
+            signal={row.original}
+            isRTL={isRTL}
+            onView={(signal) => {
+              setSelectedSignal(signal);
+              setIsSignalEditMode(false);
+            }}
+            onEdit={(signal) => {
+              setSelectedSignal(signal);
+              setIsSignalEditMode(true);
+            }}
+            onDelete={(signal) => {
+              setDeleteSignalRow(signal);
+            }}
+          />
         ),
-        meta: { headerClassName: "w-[45px]", cellClassName: "w-[45px]" },
+        meta: { headerClassName: "w-[60px]", cellClassName: "w-[60px]" },
       },
     ],
-    []
+    [isRTL]
   );
 
   const handleFetchData = useCallback(
@@ -808,11 +889,24 @@ const SignalsView = ({ config, onBack }) => {
       {selectedSignal && (
         <AdminSignalDetailModal
           signal={selectedSignal}
-          onClose={() => setSelectedSignal(null)}
+          initialEditMode={isSignalEditMode}
+          onClose={() => {
+            setSelectedSignal(null);
+            setIsSignalEditMode(false);
+          }}
           onUpdate={(updatedSignal) => {
             setSelectedSignal(updatedSignal);
             reloadTable();
           }}
+        />
+      )}
+
+      {deleteSignalRow && (
+        <DeleteSignalDialog
+          isOpen={!!deleteSignalRow}
+          onClose={() => setDeleteSignalRow(null)}
+          signal={deleteSignalRow}
+          refetch={reloadTable}
         />
       )}
     </>
@@ -1103,9 +1197,9 @@ const MetaItem = ({ label, value, colSpan = 1 }) => (
   </div>
 );
 
-const AdminSignalDetailModal = ({ signal, onClose, onUpdate }) => {
+const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = false }) => {
   const [showRaw, setShowRaw] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(initialEditMode);
   const [updateSignal, { isLoading: isUpdating }] = useUpdateSignalMutation();
   const [formData, setFormData] = useState({
     symbol: "",
@@ -1121,6 +1215,10 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate }) => {
     timeframe: "",
     customVariablesStr: ""
   });
+
+  React.useEffect(() => {
+    setIsEditing(initialEditMode);
+  }, [initialEditMode, signal]);
 
   React.useEffect(() => {
     if (signal) {
@@ -1396,17 +1494,6 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate }) => {
                   >
                     <option value="BUY">BUY</option>
                     <option value="SELL">SELL</option>
-                    <option value="LONG">LONG</option>
-                    <option value="SHORT">SHORT</option>
-                    <option value="CLOSE">CLOSE</option>
-                    <option value="INFO">INFO</option>
-                    <option value="SL_HIT">SL_HIT</option>
-                    <option value="TP1_HIT">TP1_HIT</option>
-                    <option value="TP2_HIT">TP2_HIT</option>
-                    <option value="TP3_HIT">TP3_HIT</option>
-                    <option value="TP4_HIT">TP4_HIT</option>
-                    <option value="BREAKEVEN_EXIT">BREAKEVEN_EXIT</option>
-                    <option value="OTHER">OTHER</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -1966,6 +2053,52 @@ const RegenerateSecretDialog = ({ isOpen, onClose, config, refetch }) => {
             disabled={isLoading}
           >
             {isLoading ? "Regenerating..." : "Yes, Regenerate"}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// ── Delete Signal Dialog ─────────────────────────────────────────────
+
+const DeleteSignalDialog = ({ isOpen, onClose, signal, refetch }) => {
+  const [deleteSignal, { isLoading }] = useDeleteSignalMutation();
+
+  const handleDelete = async () => {
+    try {
+      await deleteSignal(signal._id).unwrap();
+      toast.success("Signal deleted successfully");
+      refetch();
+      onClose();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to delete signal");
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="p-5 max-w-[500px]">
+        <VisuallyHidden>
+          <DialogTitle>Delete Alert/Signal</DialogTitle>
+        </VisuallyHidden>
+        <div className="text-center">
+          <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+          <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
+            Are you sure you want to delete the alert/signal for{" "}
+            <strong>"{signal.symbol || "unknown"}"</strong>?
+          </p>
+        </div>
+        <div className="flex justify-center items-center space-x-4">
+          <button className="btn btn-light" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={handleDelete}
+            disabled={isLoading}
+          >
+            {isLoading ? "Deleting..." : "Yes, I'm sure"}
           </button>
         </div>
       </DialogContent>
