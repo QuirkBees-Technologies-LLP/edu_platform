@@ -72,11 +72,11 @@ const StudentTradingSignals = () => {
         });
       }
     }
-  }, [data, page]);
+  }, [data, page, filters.signalType, filters.symbol, filters.strategy, filters.timeframe, filters.search]);
 
-  // ── Reset list when any filter changes ───────────────────────────
+  // ── Reset page when any filter changes ─────────────────────────────
+  // (accumulation effect handles replacing signals when page === 1)
   useEffect(() => {
-    setSignals([]);
     setPage(1);
   }, [
     filters.symbol,
@@ -242,7 +242,7 @@ const StudentTradingSignals = () => {
       )}
 
       {/* ── Signal Cards ── */}
-      {isLoading && page === 1 ? (
+      {isFetching && page === 1 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
