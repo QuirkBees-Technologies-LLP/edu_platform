@@ -55,6 +55,7 @@ const IqEducators = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
+  const [liveFeedImage, setLiveFeedImage] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
@@ -1191,9 +1192,6 @@ const IqEducators = () => {
                             </p>
                           </div>
                         </div>
-                        {/* <p className="text-sm font-normal text-gray-700">
-                          {update.content}
-                        </p> */}
 
                         {update?.content && (
                           <div className="mb-3">
@@ -1203,6 +1201,29 @@ const IqEducators = () => {
                                 __html: makeClickableLinks(update?.content),
                               }}
                             />
+                          </div>
+                        )}
+
+                        {/* Post Images */}
+                        {update?.images?.length > 0 && (
+                          <div
+                            className={`grid ${
+                              update.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                            } gap-2 mt-2`}
+                          >
+                            {update.images.map((img) => (
+                              <div
+                                key={img._id || img.url}
+                                className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
+                                onClick={() => setLiveFeedImage(img.url)}
+                              >
+                                <img
+                                  src={img.url}
+                                  alt="post"
+                                  className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                                />
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
@@ -1323,9 +1344,6 @@ const IqEducators = () => {
                             </p>
                           </div>
                         </div>
-                        {/* <p className="text-sm font-normal text-gray-700">
-                          {update.content}
-                        </p> */}
 
                         {update?.content && (
                           <div className="mb-3">
@@ -1335,6 +1353,29 @@ const IqEducators = () => {
                                 __html: makeClickableLinks(update?.content),
                               }}
                             />
+                          </div>
+                        )}
+
+                        {/* Post Images */}
+                        {update?.images?.length > 0 && (
+                          <div
+                            className={`grid ${
+                              update.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                            } gap-2 mt-2`}
+                          >
+                            {update.images.map((img) => (
+                              <div
+                                key={img._id || img.url}
+                                className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
+                                onClick={() => setLiveFeedImage(img.url)}
+                              >
+                                <img
+                                  src={img.url}
+                                  alt="post"
+                                  className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                                />
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
@@ -1521,6 +1562,28 @@ const IqEducators = () => {
         close={() => setIsVolumeOpen(false)}
         slides={[{ src: InfoImage }]}
       />
+
+      {/* Live Feed / Analysis Image Lightbox */}
+      {liveFeedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+          onClick={() => setLiveFeedImage(null)}
+        >
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={liveFeedImage}
+              alt="post"
+              className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
+            />
+            <button
+              onClick={() => setLiveFeedImage(null)}
+              className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       {showRatingModal && (
         <RatingModal
           showRatingModal={showRatingModal}
