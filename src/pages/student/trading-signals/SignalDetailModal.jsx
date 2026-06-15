@@ -202,22 +202,40 @@ const SignalDetailModal = ({ signal, onClose }) => {
           )}
 
           {/* Core Price Levels */}
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            <PriceBlock
-              label="Entry Target"
-              value={signal.entryPrice}
-              colorClass="text-slate-800 dark:text-white"
-              bgClass="bg-slate-50/70 dark:bg-[#121222]/40"
-              icon={Crosshair}
-            />
-            <PriceBlock
-              label="Stop Loss (Invalidation)"
-              value={signal.stopLoss}
-              colorClass="text-red-500 dark:text-[#ff3b30]"
-              bgClass="bg-red-50/30 dark:bg-[#ef4444]/5"
-              icon={ShieldAlert}
-            />
-          </div>
+          {(() => {
+            // Resolve entry price: prefer entryPrice, fallback to price from payload or alert message
+            let resolvedEntry = signal.entryPrice;
+            if (resolvedEntry == null) {
+              resolvedEntry = parseFloat(
+                signal.processedPayload?.entryPrice ||
+                signal.processedPayload?.price ||
+                signal.rawPayload?.price ||
+                signal.rawPayload?.close
+              ) || null;
+            }
+            if (resolvedEntry == null && signal.alertMessage) {
+              const pinMatch = signal.alertMessage.match(/📍\s*([0-9.]+)/);
+              if (pinMatch) resolvedEntry = parseFloat(pinMatch[1]) || null;
+            }
+            return (
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <PriceBlock
+                  label="Entry"
+                  value={resolvedEntry}
+                  colorClass="text-slate-800 dark:text-white"
+                  bgClass="bg-slate-50/70 dark:bg-[#121222]/40"
+                  icon={Crosshair}
+                />
+                <PriceBlock
+                  label="Stop Loss (Invalidation)"
+                  value={signal.stopLoss}
+                  colorClass="text-red-500 dark:text-[#ff3b30]"
+                  bgClass="bg-red-50/30 dark:bg-[#ef4444]/5"
+                  icon={ShieldAlert}
+                />
+              </div>
+            );
+          })()}
 
           {/* TP Targets */}
           {tpLevels.length > 0 && (
