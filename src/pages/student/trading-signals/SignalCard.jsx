@@ -30,6 +30,13 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
               <ChartLine size={13} className="flex-shrink-0" />
               {signal.strategyName || signal.webhookConfig?.name || "—"}
             </span>
+          </div>
+
+          {/* Symbol + Signal Type + Timeframe */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
+              {signal.symbol || "—"}
+            </span>
             {signal.signalType !== "OTHER" && (
               <span
                 style={{ background: config.bgLight, color: config.text }}
@@ -38,13 +45,6 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
                 {config.label}
               </span>
             )}
-          </div>
-
-          {/* Symbol — secondary element below strategy */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
-              {signal.symbol || "—"}
-            </span>
             {(signal.exchange || signal.market || signal.timeframe) && (
               <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
                 {signal.exchange || ""}

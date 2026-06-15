@@ -1186,9 +1186,9 @@ const IqEducators = () => {
                               {update?.author?.last_name}
                             </h4>
                             <p className="text-xs font-normal text-gray-600">
-                              {formatDistanceToNow(new Date(update.createdAt), {
-                                addSuffix: true,
-                              })}
+                              {update?.createdAt
+                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
+                                : ""}
                             </p>
                           </div>
                         </div>
@@ -1207,23 +1207,25 @@ const IqEducators = () => {
                         {/* Post Images */}
                         {update?.images?.length > 0 && (
                           <div
-                            className={`grid ${
-                              update.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
-                            } gap-2 mt-2`}
+                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
                           >
-                            {update.images.map((img) => (
-                              <div
-                                key={img._id || img.url}
-                                className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                                onClick={() => setLiveFeedImage(img.url)}
-                              >
-                                <img
-                                  src={img.url}
-                                  alt="post"
-                                  className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                                />
-                              </div>
-                            ))}
+                            {update.images.map((img, imgIdx) => {
+                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
+                              const imgKey = img?._id || imgUrl || imgIdx;
+                              return imgUrl ? (
+                                <div
+                                  key={imgKey}
+                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
+                                  onClick={() => setLiveFeedImage(imgUrl)}
+                                >
+                                  <img
+                                    src={imgUrl}
+                                    alt="post"
+                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                                  />
+                                </div>
+                              ) : null;
+                            })}
                           </div>
                         )}
                       </div>
@@ -1338,9 +1340,9 @@ const IqEducators = () => {
                               {update?.author?.last_name}
                             </h4>
                             <p className="text-xs font-normal text-gray-600">
-                              {formatDistanceToNow(new Date(update.createdAt), {
-                                addSuffix: true,
-                              })}
+                              {update?.createdAt
+                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
+                                : ""}
                             </p>
                           </div>
                         </div>
@@ -1359,23 +1361,25 @@ const IqEducators = () => {
                         {/* Post Images */}
                         {update?.images?.length > 0 && (
                           <div
-                            className={`grid ${
-                              update.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
-                            } gap-2 mt-2`}
+                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
                           >
-                            {update.images.map((img) => (
-                              <div
-                                key={img._id || img.url}
-                                className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                                onClick={() => setLiveFeedImage(img.url)}
-                              >
-                                <img
-                                  src={img.url}
-                                  alt="post"
-                                  className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                                />
-                              </div>
-                            ))}
+                            {update.images.map((img, imgIdx) => {
+                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
+                              const imgKey = img?._id || imgUrl || imgIdx;
+                              return imgUrl ? (
+                                <div
+                                  key={imgKey}
+                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
+                                  onClick={() => setLiveFeedImage(imgUrl)}
+                                >
+                                  <img
+                                    src={imgUrl}
+                                    alt="post"
+                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                                  />
+                                </div>
+                              ) : null;
+                            })}
                           </div>
                         )}
                       </div>
