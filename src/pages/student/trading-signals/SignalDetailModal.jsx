@@ -194,9 +194,9 @@ const SignalDetailModal = ({ signal, onClose }) => {
               <img
                 src={signal.chartImageUrl}
                 alt={`${signal.symbol || "Chart"} at alert time`}
-                className="w-full h-auto object-cover block"
+                className="w-full h-auto block bg-[#0a0a14]"
                 loading="lazy"
-                style={{ maxHeight: "360px", objectFit: "cover", objectPosition: "top" }}
+                style={{ maxHeight: "360px", objectFit: "contain" }}
               />
             </div>
           )}
