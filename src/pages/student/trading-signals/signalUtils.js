@@ -49,7 +49,8 @@ export function formatPrice(value) {
   if (value == null) return "—";
   const num = parseFloat(value);
   if (isNaN(num)) return value;
-  return num.toFixed(4);
+  // Remove trailing zeros: 4342.8100 → 4342.81, but keep up to 4 decimals max
+  return parseFloat(num.toFixed(4)).toString();
 }
 
 export function formatTimeAgo(dateStr) {
