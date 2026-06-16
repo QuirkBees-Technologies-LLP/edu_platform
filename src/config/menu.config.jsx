@@ -1567,7 +1567,7 @@ export const sideMenus = {
       path: "/admin/educator-rating",
     },
     {
-      title: "Trading Signals",
+      title: " IQ Strategies Alerts",
       icon: <ChartLine />,
       path: "/admin/tv-webhooks",
     },
@@ -1767,7 +1767,7 @@ export const sideMenus = {
       path: "/iq-social",
     },
     {
-      title: "Trading Signals",
+      title: " IQ Strategies Alerts",
       icon: <ChartLine />,
       path: "/trading-signals",
     },
