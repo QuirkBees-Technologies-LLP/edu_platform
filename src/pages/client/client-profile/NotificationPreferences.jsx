@@ -52,7 +52,7 @@ const NotificationPreferences = () => {
     { key: "iqSocial", label: "IQ Social", desc: "Stay updated with community posts and interactions" },
     { key: "iqLive", label: "IQ Live", desc: "Get alerts for live streaming sessions" },
     { key: "liveIdea", label: "Live Ideas", desc: "Receive immediate notifications for live trading ideas" },
-    { key: "tradingSignals", label: "Trading Signals", desc: "Receive push notifications when TradingView signals are triggered" },
+    // { key: "tradingSignals", label: "IQ Strategies Alerts", desc: "Receive push notifications when TradingView signals are triggered" },
   ];
 
   return (

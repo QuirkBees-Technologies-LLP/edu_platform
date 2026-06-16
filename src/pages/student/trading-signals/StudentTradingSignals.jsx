@@ -137,7 +137,7 @@ const StudentTradingSignals = () => {
         <ToolbarHeading>
           <div className="flex items-center gap-2.5">
             <ChartLine size={24} className="text-blue-500" />
-            <ToolbarPageTitle text="Trading Signals" />
+            <ToolbarPageTitle text="IQ Strategies Alerts" />
             {unreadCount > 0 && (
               <span className="badge badge-sm badge-outline badge-danger animate-pulse">
                 {unreadCount} new
@@ -166,11 +166,10 @@ const StudentTradingSignals = () => {
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                hasActiveFilters
-                  ? "border-blue-500 bg-blue-500/10 text-blue-500"
-                  : "border-slate-200 dark:border-[#202038] bg-slate-50 dark:bg-[#131324] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1C1C30]"
-              }`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${hasActiveFilters
+                ? "border-blue-500 bg-blue-500/10 text-blue-500"
+                : "border-slate-200 dark:border-[#202038] bg-slate-50 dark:bg-[#131324] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1C1C30]"
+                }`}
             >
               <Filter size={14} />
               Filters
@@ -260,7 +259,7 @@ const StudentTradingSignals = () => {
           <p className="text-slate-400 dark:text-slate-500 text-sm max-w-md mx-auto">
             {hasActiveFilters
               ? "Try adjusting your filter settings above"
-              : "Trading signals will appear here automatically when alerts are triggered"}
+              : "IQ Strategies Alerts will appear here automatically when alerts are triggered"}
           </p>
         </div>
       ) : (
