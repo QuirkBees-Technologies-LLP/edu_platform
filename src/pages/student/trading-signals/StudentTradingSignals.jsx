@@ -145,7 +145,7 @@ const StudentTradingSignals = () => {
             )}
           </div>
           <ToolbarDescription>
-            Real-time alerts from TradingView strategies
+            Real-time alerts from iqnoic strategies
           </ToolbarDescription>
         </ToolbarHeading>
 
