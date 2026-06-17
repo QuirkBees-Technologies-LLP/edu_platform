@@ -452,7 +452,7 @@ const ConfigsView = ({
         <ToolbarHeading>
           <ToolbarPageTitle text="TradingView Webhooks" />
           <ToolbarDescription>
-            Manage webhook configurations for TradingView alerts
+            Manage webhook configurations for IQ Strategies alerts
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
@@ -869,7 +869,7 @@ const SignalsView = ({ config, onBack }) => {
             <div>
               <ToolbarPageTitle text={`Signals — ${config.name}`} />
               <ToolbarDescription>
-                View received trading signals for this webhook
+                View received IQ Strategies Signals for this webhook
               </ToolbarDescription>
             </div>
           </div>
