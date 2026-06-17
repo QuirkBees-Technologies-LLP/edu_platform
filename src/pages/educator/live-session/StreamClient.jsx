@@ -71,7 +71,7 @@ const StreamClient = ({
   };
 
   return (
-    <div className="container-fixed">
+    <div className="container-fluid">
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 educator_chatbox_chat mb-8">
         <div
           className={`${isFullScreen ? (isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10") : isMdUp ? "col-span-12 md:col-span-7 xl:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}

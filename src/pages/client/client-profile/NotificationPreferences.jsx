@@ -19,6 +19,7 @@ const NotificationPreferences = () => {
       iqSocial: false,
       iqLive: false,
       liveIdea: false,
+      tradingSignals: true,
     },
     onSubmit: async (values) => {
       try {
@@ -40,6 +41,7 @@ const NotificationPreferences = () => {
         iqSocial: !!prefs?.iqSocial,
         iqLive: !!prefs?.iqLive,
         liveIdea: !!prefs?.liveIdea,
+        tradingSignals: prefs?.tradingSignals !== false,
       });
     }
   }, [data]);
@@ -50,6 +52,7 @@ const NotificationPreferences = () => {
     { key: "iqSocial", label: "IQ Social", desc: "Stay updated with community posts and interactions" },
     { key: "iqLive", label: "IQ Live", desc: "Get alerts for live streaming sessions" },
     { key: "liveIdea", label: "Live Ideas", desc: "Receive immediate notifications for live trading ideas" },
+    // { key: "tradingSignals", label: "IQ Strategies Alerts", desc: "Receive push notifications when TradingView signals are triggered" },
   ];
 
   return (

@@ -1,28 +1,27 @@
 import {
+  LayoutDashboard,
   BookOpen,
   CalendarClock,
-  ChartCandlestick,
-  CircleDot,
-  Clapperboard,
-  Layers,
-  LayoutDashboard,
-  Lightbulb,
   PlayCircle,
+  CircleDot,
+  ChartCandlestick,
   User,
-  Dot,
-  School,
-  Tv,
-  ChartLine,
-  ChartNoAxesCombined,
-  MessageCircleMore,
   ChartSpline,
   Package,
-  UserRoundCog,
+  Layers,
+  MessageCircleMore,
   ListTodo,
   Star,
   BadgeCent,
-  MonitorPlay,
+  Lightbulb,
+  ChartNoAxesCombined,
+  Dot,
+  UserRoundCog,
   GraduationCap,
+  School,
+  MonitorPlay,
+  Clapperboard,
+  ChartLine,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1448,6 +1447,11 @@ export const sideMenus = {
       icon: <Star />,
       path: "/admin/educator-rating",
     },
+    {
+      title: "Trading Signals",
+      icon: <ChartLine />,
+      path: "/admin/tv-webhooks",
+    },
   ],
   admin: [
     {
@@ -1561,6 +1565,11 @@ export const sideMenus = {
       title: "Educator Ratings",
       icon: <Star />,
       path: "/admin/educator-rating",
+    },
+    {
+      title: " IQ Strategies Alerts",
+      icon: <ChartLine />,
+      path: "/admin/tv-webhooks",
     },
   ],
   marketer: [
@@ -1756,6 +1765,11 @@ export const sideMenus = {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/iq-social",
+    },
+    {
+      title: " IQ Strategies Alerts",
+      icon: <ChartLine />,
+      path: "/trading-signals",
     },
   ],
 };

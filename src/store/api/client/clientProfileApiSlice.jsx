@@ -32,6 +32,16 @@ export const clientProfileApiSlice = createApi({
                 method: 'POST',
             }),
         }),
+        getAlertPairPreferences: builder.query({
+            query: () => `/users/auth/alert-pair-preferences`,
+        }),
+        updateAlertPairPreferences: builder.mutation({
+            query: (preferences) => ({
+                url: `/users/auth/alert-pair-preferences`,
+                method: 'PUT',
+                body: preferences,
+            }),
+        }),
     }),
 });
 
@@ -41,4 +51,6 @@ export const {
     useUpdateNotificationPreferencesMutation, 
     useGetNotificationPreferencesQuery,
     useCompleteTourMutation,
+    useGetAlertPairPreferencesQuery,
+    useUpdateAlertPairPreferencesMutation,
 } = clientProfileApiSlice;
