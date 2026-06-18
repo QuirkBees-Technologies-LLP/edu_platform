@@ -92,9 +92,9 @@ const SignalDetailModal = ({ signal, onClose }) => {
     tpLevels.push({ label: "TP 1", value: signal.takeProfit });
   }
   const tpKeys = [
-    "tp2", "tp3", "tp4",
-    "takeprofit2", "takeprofit3", "takeprofit4",
-    "take_profit2", "take_profit3", "take_profit4",
+    "tp1", "tp2", "tp3", "tp4",
+    "takeprofit1", "takeprofit2", "takeprofit3", "takeprofit4",
+    "take_profit1", "take_profit2", "take_profit3", "take_profit4",
   ];
   Object.entries(customVars).forEach(([key, val]) => {
     const normKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -103,26 +103,33 @@ const SignalDetailModal = ({ signal, onClose }) => {
       (normKey.startsWith("tp") && /^\d+$/.test(normKey.slice(2)))
     ) {
       const num = parseInt(normKey.replace(/\D/g, ""), 10);
-      if (num > 1) tpLevels.push({ label: `TP ${num}`, value: val, key });
+      // Skip if TP1 already added from signal.takeProfit
+      const alreadyExists = tpLevels.some(
+        (tp) => tp.label === `TP ${num}`
+      );
+      if (!alreadyExists) {
+        tpLevels.push({ label: `TP ${num}`, value: val, key });
+      }
     }
   });
   tpLevels.sort((a, b) => {
     return parseInt(a.label.replace(/\D/g, ""), 10) - parseInt(b.label.replace(/\D/g, ""), 10);
   });
 
-  // ── Market badges vs other vars ───────────────────────────────────
-  const badgeKeys = [
-    "session", "trend", "adx", "strength", "volume_delta", "volume",
-    "poc", "rrr", "lot_size", "pnl", "supertrend", "signal_strength",
-  ];
-  const marketBadges = [];
+  // ── Separate confirmations (boolean ✅/❌) from numeric vars ───────
+  const confirmations = [];
   const otherVars = {};
   Object.entries(customVars).forEach(([key, val]) => {
-    const normKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
     const isTp = tpLevels.some((tp) => tp.key === key);
     if (isTp) return;
-    if (badgeKeys.some((bk) => normKey.includes(bk.replace(/_/g, "")))) {
-      marketBadges.push({ key, label: formatKey(key), value: String(val) });
+
+    const strVal = String(val).trim().toLowerCase();
+    // Detect boolean-like values (✅/❌, true/false, yes/no, 1/0, emojis)
+    const isTruthy = ["true", "yes", "1", "✅", "☑", "✔"].includes(strVal) || strVal.includes("✅") || strVal.includes("☑");
+    const isFalsy = ["false", "no", "0", "❌", "✖", "✗"].includes(strVal) || strVal.includes("❌") || strVal.includes("✗");
+
+    if (isTruthy || isFalsy) {
+      confirmations.push({ key, label: formatKey(key), passed: isTruthy });
     } else {
       otherVars[key] = val;
     }
@@ -241,9 +248,9 @@ const SignalDetailModal = ({ signal, onClose }) => {
           {tpLevels.length > 0 && (
             <div className="mb-5">
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2.5 uppercase tracking-wider px-1">
-                Take Profit Targets
+                🎯 Target Levels
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {tpLevels.map((tp, idx) => (
                   <div
                     key={idx}
@@ -276,31 +283,37 @@ const SignalDetailModal = ({ signal, onClose }) => {
             </div>
           )}
 
-          {/* Market Intelligence Badges */}
-          {marketBadges.length > 0 && (
+          {/* Confirmations */}
+          {confirmations.length > 0 && (
             <div className="mb-5">
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2.5 uppercase tracking-wider px-1">
-                Market Indicators
+                Confirmations
               </div>
-              <div className="flex flex-wrap gap-1.5 px-0.5">
-                {marketBadges.map((badge, idx) => (
+              <div className="bg-slate-50/30 dark:bg-[#0E0E18]/50 rounded-xl border border-slate-100 dark:border-[#1F1F35]/50 px-4 py-1">
+                {confirmations.map((item, idx) => (
                   <div
-                    key={idx}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-slate-50 dark:bg-[#131324]/60 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-[#1F1F35]/50"
+                    key={item.key}
+                    className={`flex justify-between items-center py-2.5 ${
+                      idx < confirmations.length - 1
+                        ? "border-b border-slate-100 dark:border-[#1F1F35]/30"
+                        : ""
+                    }`}
                   >
-                    <span className="text-slate-400 dark:text-slate-500 font-semibold">
-                      {badge.label}:
+                    <span className="text-[13px] text-slate-600 dark:text-slate-300 font-medium">
+                      {item.label}
                     </span>
-                    <span className="text-slate-800 dark:text-slate-200 font-black">
-                      {badge.value}
-                    </span>
+                    {item.passed ? (
+                      <span className="text-[16px]">✅</span>
+                    ) : (
+                      <span className="text-[16px]">❌</span>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Alert Message */}
+          {/* Alert Message — commented out
           {signal.alertMessage && (
             <div className="mb-5 overflow-hidden rounded-xl border border-slate-200 dark:border-[#202038]">
               <div className="flex justify-between items-center px-4 py-2 bg-slate-100/80 dark:bg-[#161626]/80 border-b border-slate-200 dark:border-[#202038] select-none">
@@ -325,8 +338,9 @@ const SignalDetailModal = ({ signal, onClose }) => {
               </div>
             </div>
           )}
+          */}
 
-          {/* Other Variables */}
+          {/* Other Variables — commented out
           {Object.keys(otherVars).length > 0 && (
             <div className="mb-5">
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2 uppercase tracking-wider px-1">
@@ -343,6 +357,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
               </div>
             </div>
           )}
+          */}
 
           {/* Extra Processed Fields */}
           {Object.keys(extraProcessed).length > 0 && (
@@ -400,7 +415,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
             </div>
           )}
 
-          {/* Standard Metadata Grid */}
+          {/* Standard Metadata Grid — commented out
           <div className="mt-6 pt-4 border-t border-slate-100 dark:border-[#1F1F35]/50">
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 bg-slate-50/30 dark:bg-[#0E0E18]/50 p-4 rounded-xl border border-slate-100/40 dark:border-[#1F1F35]/30">
               {signal.exchange && <MetaItem label="Exchange" value={signal.exchange} />}
@@ -420,6 +435,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
               />
             </div>
           </div>
+          */}
         </DialogBody>
       </DialogContent>
     </Dialog>

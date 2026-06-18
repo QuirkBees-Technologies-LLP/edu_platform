@@ -4,6 +4,8 @@ import {
   useMarkSignalReadMutation,
   useGetUnreadCountQuery,
   useGetFilterOptionsQuery,
+  useGetFilterPreferencesQuery,
+  useSaveFilterPreferencesMutation,
 } from "../../../store/api/client/clientTvSignalsApiSlice";
 import {
   Search,
@@ -24,27 +26,128 @@ import signalConfig from "./signalConfig";
 import SignalCard from "./SignalCard";
 import SignalDetailModal from "./SignalDetailModal";
 import FilterSelect from "./FilterSelect";
+import InstrumentFilterDropdown from "./InstrumentFilterDropdown";
+import instrumentCategories from "./instrumentData";
+
+// ── localStorage persistence ─────────────────────────────────────────
+const STORAGE_KEY = "tradingSignalFilters";
+
+const loadSavedFilters = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return {
+        excludedSymbols: Array.isArray(parsed.excludedSymbols) ? parsed.excludedSymbols : [],
+        excludedSignalTypes: Array.isArray(parsed.excludedSignalTypes) ? parsed.excludedSignalTypes : [],
+        excludedStrategies: Array.isArray(parsed.excludedStrategies) ? parsed.excludedStrategies : [],
+        excludedTimeframes: Array.isArray(parsed.excludedTimeframes) ? parsed.excludedTimeframes : [],
+      };
+    }
+  } catch {
+    // Corrupted storage — ignore
+  }
+  return {
+    excludedSymbols: [],
+    excludedSignalTypes: [],
+    excludedStrategies: [],
+    excludedTimeframes: [],
+  };
+};
+
+const saveFilters = (filters) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+  } catch {
+    // Storage full or unavailable — ignore
+  }
+};
+
+// ── Hardcoded timeframe options ──────────────────────────────────────
+const TIMEFRAME_OPTIONS = [
+  { value: "1S", label: "1S" },
+  { value: "5S", label: "5S" },
+  { value: "10S", label: "10S" },
+  { value: "15S", label: "15S" },
+  { value: "30S", label: "30S" },
+  { value: "45S", label: "45S" },
+  { value: "1m", label: "1m" },
+  { value: "3m", label: "3m" },
+  { value: "5m", label: "5m" },
+  { value: "15m", label: "15m" },
+  { value: "30m", label: "30m" },
+  { value: "45m", label: "45m" },
+  { value: "1H", label: "1H" },
+  { value: "2H", label: "2H" },
+  { value: "3H", label: "3H" },
+  { value: "4H", label: "4H" },
+  { value: "1D", label: "1D" },
+  { value: "1W", label: "1W" },
+  { value: "1M", label: "1M" },
+];
 
 // ── Student Trading Signals Page ────────────────────────────────────
 
 const StudentTradingSignals = () => {
   // ── Separate page state so filters reset never conflict ──────────
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState({
-    limit: 12,
-    symbol: "",
-    signalType: "",
-    strategy: "",
-    timeframe: "",
-    search: "",
-  });
+  const [search, setSearch] = useState("");
+  const [exclusionFilters, setExclusionFilters] = useState(loadSavedFilters);
+  const [filtersInitialized, setFiltersInitialized] = useState(false);
   const [signals, setSignals] = useState([]); // accumulated list
   const [showFilters, setShowFilters] = useState(false);
   const [selectedSignal, setSelectedSignal] = useState(null);
   const observer = useRef();
+  const saveTimerRef = useRef(null);
+
+  // ── Load saved preferences from API (overrides localStorage) ────
+  const { data: savedPrefs } = useGetFilterPreferencesQuery();
+  const [savePrefs] = useSaveFilterPreferencesMutation();
+
+  useEffect(() => {
+    if (savedPrefs?.data && !filtersInitialized) {
+      const apiPrefs = savedPrefs.data;
+      const hasApiData =
+        (apiPrefs.excludedSymbols?.length > 0) ||
+        (apiPrefs.excludedSignalTypes?.length > 0) ||
+        (apiPrefs.excludedStrategies?.length > 0) ||
+        (apiPrefs.excludedTimeframes?.length > 0);
+
+      if (hasApiData) {
+        setExclusionFilters({
+          excludedSymbols: Array.isArray(apiPrefs.excludedSymbols) ? apiPrefs.excludedSymbols : [],
+          excludedSignalTypes: Array.isArray(apiPrefs.excludedSignalTypes) ? apiPrefs.excludedSignalTypes : [],
+          excludedStrategies: Array.isArray(apiPrefs.excludedStrategies) ? apiPrefs.excludedStrategies : [],
+          excludedTimeframes: Array.isArray(apiPrefs.excludedTimeframes) ? apiPrefs.excludedTimeframes : [],
+        });
+      }
+      setFiltersInitialized(true);
+    }
+  }, [savedPrefs, filtersInitialized]);
+
+  // ── Persist filters to localStorage + database (debounced) ──────
+  useEffect(() => {
+    saveFilters(exclusionFilters); // localStorage (instant)
+
+    // Debounce the API save to avoid excessive calls
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      savePrefs(exclusionFilters);
+    }, 1000);
+
+    return () => clearTimeout(saveTimerRef.current);
+  }, [exclusionFilters, savePrefs]);
 
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery(
-    { ...filters, page },
+    {
+      page,
+      limit: 12,
+      search,
+      excludedSymbols: exclusionFilters.excludedSymbols,
+      excludedSignalTypes: exclusionFilters.excludedSignalTypes,
+      excludedStrategies: exclusionFilters.excludedStrategies,
+      excludedTimeframes: exclusionFilters.excludedTimeframes,
+    },
     { pollingInterval: 30000 }
   );
   const { data: unreadData } = useGetUnreadCountQuery(undefined, {
@@ -72,19 +175,12 @@ const StudentTradingSignals = () => {
         });
       }
     }
-  }, [data, page, filters.signalType, filters.symbol, filters.strategy, filters.timeframe, filters.search]);
+  }, [data, page, exclusionFilters, search]);
 
   // ── Reset page when any filter changes ─────────────────────────────
-  // (accumulation effect handles replacing signals when page === 1)
   useEffect(() => {
     setPage(1);
-  }, [
-    filters.symbol,
-    filters.signalType,
-    filters.strategy,
-    filters.timeframe,
-    filters.search,
-  ]);
+  }, [exclusionFilters, search]);
 
   // ── IntersectionObserver — trigger next page ─────────────────────
   const lastSignalRef = useCallback(
@@ -112,23 +208,56 @@ const StudentTradingSignals = () => {
     }
   };
 
-  const updateFilter = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const updateExclusion = (key, values) => {
+    setExclusionFilters((prev) => ({ ...prev, [key]: values }));
   };
 
   const clearFilters = () => {
-    setFilters({
-      limit: 12,
-      symbol: "",
-      signalType: "",
-      strategy: "",
-      timeframe: "",
-      search: "",
+    setExclusionFilters({
+      excludedSymbols: [],
+      excludedSignalTypes: [],
+      excludedStrategies: [],
+      excludedTimeframes: [],
     });
   };
 
   const hasActiveFilters =
-    filters.symbol || filters.signalType || filters.strategy || filters.timeframe;
+    exclusionFilters.excludedSymbols.length > 0 ||
+    exclusionFilters.excludedSignalTypes.length > 0 ||
+    exclusionFilters.excludedStrategies.length > 0 ||
+    exclusionFilters.excludedTimeframes.length > 0;
+
+  // Count total individual excluded filters
+  const activeFilterCount =
+    exclusionFilters.excludedSymbols.length +
+    exclusionFilters.excludedSignalTypes.length +
+    exclusionFilters.excludedStrategies.length +
+    exclusionFilters.excludedTimeframes.length;
+
+  // ── Signal type options (from signalConfig) ─────────────────────
+  const signalTypeOptions = Object.keys(signalConfig)
+    .filter((t) => t !== "OTHER")
+    .map((t) => ({ value: t, label: t }));
+
+  // ── Strategy options (from API) ─────────────────────────────────
+  const strategyOptions = (options.strategies || []).map((s) => ({
+    value: s.name,
+    label: s.name,
+  }));
+
+  // Count total SELECTED filters across all categories
+  const totalSymbols = instrumentCategories.flatMap((c) => c.instruments).length;
+  const totalSignalTypes = signalTypeOptions.length;
+  const totalTimeframes = TIMEFRAME_OPTIONS.length;
+  const totalStrategies = strategyOptions.length;
+
+  const totalSelected =
+    (totalSymbols - exclusionFilters.excludedSymbols.length) +
+    (totalSignalTypes - exclusionFilters.excludedSignalTypes.length) +
+    (totalTimeframes - exclusionFilters.excludedTimeframes.length) +
+    (totalStrategies - exclusionFilters.excludedStrategies.length);
+
+  const totalAll = totalSymbols + totalSignalTypes + totalTimeframes + totalStrategies;
 
   return (
     <div className="container-fluid pb-5">
@@ -138,11 +267,6 @@ const StudentTradingSignals = () => {
           <div className="flex items-center gap-2.5">
             <ChartLine size={24} className="text-blue-500" />
             <ToolbarPageTitle text="IQ Strategies Alerts" />
-            {unreadCount > 0 && (
-              <span className="badge badge-sm badge-outline badge-danger animate-pulse">
-                {unreadCount} new
-              </span>
-            )}
           </div>
           <ToolbarDescription>
             Real-time alerts from iqnoic strategies
@@ -157,8 +281,8 @@ const StudentTradingSignals = () => {
               <input
                 type="text"
                 placeholder="Search signals..."
-                value={filters.search}
-                onChange={(e) => updateFilter("search", e.target.value)}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 className="border-none outline-none bg-transparent text-xs w-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
@@ -173,11 +297,9 @@ const StudentTradingSignals = () => {
             >
               <Filter size={14} />
               Filters
-              {hasActiveFilters && (
-                <span className="bg-blue-500 text-white rounded-full w-4.5 h-4.5 flex items-center justify-center text-[10px]">
-                  {[filters.symbol, filters.signalType, filters.strategy, filters.timeframe].filter(Boolean).length}
-                </span>
-              )}
+              <span className="bg-blue-500 text-white rounded-full min-w-5 h-5 px-1 flex items-center justify-center text-[10px] font-bold">
+                {totalSelected}/{totalAll}
+              </span>
             </button>
           </div>
         </ToolbarActions>
@@ -188,46 +310,28 @@ const StudentTradingSignals = () => {
         <div className="flex gap-4 mb-5 flex-wrap p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038] items-end">
           <FilterSelect
             label="Signal Type"
-            value={filters.signalType}
-            onChange={(v) => updateFilter("signalType", v)}
+            excludedValues={exclusionFilters.excludedSignalTypes}
+            onExcludedChange={(v) => updateExclusion("excludedSignalTypes", v)}
             placeholder="All Types"
-            options={[
-              { value: "", label: "All Types" },
-              ...Object.keys(signalConfig).filter((t) => t !== "OTHER").map((t) => ({ value: t, label: t })),
-            ]}
+            options={signalTypeOptions}
           />
-          <FilterSelect
-            label="Symbol"
-            value={filters.symbol}
-            onChange={(v) => updateFilter("symbol", v)}
-            placeholder="All Symbols"
-            options={[
-              { value: "", label: "All Symbols" },
-              ...(options.symbols || []).map((s) => ({ value: s, label: s })),
-            ]}
+          <InstrumentFilterDropdown
+            excludedValues={exclusionFilters.excludedSymbols}
+            onExcludedChange={(v) => updateExclusion("excludedSymbols", v)}
           />
           <FilterSelect
             label="Timeframe"
-            value={filters.timeframe}
-            onChange={(v) => updateFilter("timeframe", v)}
+            excludedValues={exclusionFilters.excludedTimeframes}
+            onExcludedChange={(v) => updateExclusion("excludedTimeframes", v)}
             placeholder="All Timeframes"
-            options={[
-              { value: "", label: "All Timeframes" },
-              ...(options.timeframes || []).map((t) => ({ value: t, label: t })),
-            ]}
+            options={TIMEFRAME_OPTIONS}
           />
           <FilterSelect
             label="Strategy"
-            value={filters.strategy}
-            onChange={(v) => updateFilter("strategy", v)}
+            excludedValues={exclusionFilters.excludedStrategies}
+            onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
             placeholder="All Strategies"
-            options={[
-              { value: "", label: "All Strategies" },
-              ...(options.strategies || []).map((s) => ({
-                value: s.name,
-                label: s.name,
-              })),
-            ]}
+            options={strategyOptions}
           />
           {hasActiveFilters && (
             <button

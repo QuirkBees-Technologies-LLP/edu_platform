@@ -4,12 +4,18 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientTvSignalsApiSlice = createApi({
   reducerPath: "clientTvSignals",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["TvSignals", "TvSignalDetail", "TvUnreadCount", "TvFilters"],
+  tagTypes: ["TvSignals", "TvSignalDetail", "TvUnreadCount", "TvFilters", "TvFilterPrefs"],
   endpoints: (builder) => ({
     getClientTvSignals: builder.query({
       query: ({
         page = 1,
         limit = 12,
+        // Exclusion-based multi-select filters (arrays of unchecked values)
+        excludedSymbols = [],
+        excludedSignalTypes = [],
+        excludedStrategies = [],
+        excludedTimeframes = [],
+        // Legacy single-value filters (backward compat)
         symbol = "",
         signalType = "",
         strategy = "",
@@ -22,6 +28,13 @@ export const clientTvSignalsApiSlice = createApi({
         params.set("page", page);
         params.set("limit", limit);
 
+        // Multi-select exclusion params (preferred)
+        if (excludedSymbols.length > 0) params.set("excludedSymbols", excludedSymbols.join(","));
+        if (excludedSignalTypes.length > 0) params.set("excludedSignalTypes", excludedSignalTypes.join(","));
+        if (excludedStrategies.length > 0) params.set("excludedStrategies", excludedStrategies.join(","));
+        if (excludedTimeframes.length > 0) params.set("excludedTimeframes", excludedTimeframes.join(","));
+
+        // Legacy single-value fallback
         if (symbol) params.set("symbol", symbol);
         if (signalType) params.set("signalType", signalType);
         if (strategy) params.set("strategy", strategy);
@@ -61,6 +74,20 @@ export const clientTvSignalsApiSlice = createApi({
       query: () => `/users/tv-signals/filters`,
       providesTags: [{ type: "TvFilters" }],
     }),
+
+    getFilterPreferences: builder.query({
+      query: () => `/users/tv-signals/filter-preferences`,
+      providesTags: [{ type: "TvFilterPrefs" }],
+    }),
+
+    saveFilterPreferences: builder.mutation({
+      query: (prefs) => ({
+        url: `/users/tv-signals/filter-preferences`,
+        method: "PUT",
+        body: prefs,
+      }),
+      invalidatesTags: [{ type: "TvFilterPrefs" }],
+    }),
   }),
 });
 
@@ -70,4 +97,6 @@ export const {
   useMarkSignalReadMutation,
   useGetUnreadCountQuery,
   useGetFilterOptionsQuery,
+  useGetFilterPreferencesQuery,
+  useSaveFilterPreferencesMutation,
 } = clientTvSignalsApiSlice;
