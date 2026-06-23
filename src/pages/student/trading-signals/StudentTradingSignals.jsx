@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   useGetClientTvSignalsQuery,
-  useMarkSignalReadMutation,
-  useGetUnreadCountQuery,
   useGetFilterOptionsQuery,
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
@@ -150,15 +148,10 @@ const StudentTradingSignals = () => {
     },
     { pollingInterval: 30000 }
   );
-  const { data: unreadData } = useGetUnreadCountQuery(undefined, {
-    pollingInterval: 30000,
-  });
   const { data: filterOptions } = useGetFilterOptionsQuery();
-  const [markRead] = useMarkSignalReadMutation();
 
   const pagination = data?.pagination;
   const totalPages = pagination?.totalPages || 1;
-  const unreadCount = unreadData?.unreadCount || 0;
   const options = filterOptions?.data || {};
 
   // ── Accumulate signals — replace on page 1, append on subsequent ─
@@ -197,15 +190,8 @@ const StudentTradingSignals = () => {
     [isFetching, page, totalPages]
   );
 
-  const handleSignalClick = async (signal) => {
+  const handleSignalClick = (signal) => {
     setSelectedSignal(signal);
-    if (!signal.isRead) {
-      try {
-        await markRead(signal._id).unwrap();
-      } catch {
-        // Silent fail for read marking
-      }
-    }
   };
 
   const updateExclusion = (key, values) => {

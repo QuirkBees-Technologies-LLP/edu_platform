@@ -4,7 +4,7 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientTvSignalsApiSlice = createApi({
   reducerPath: "clientTvSignals",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["TvSignals", "TvSignalDetail", "TvUnreadCount", "TvFilters", "TvFilterPrefs"],
+  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvFilterPrefs"],
   endpoints: (builder) => ({
     getClientTvSignals: builder.query({
       query: ({
@@ -53,23 +53,6 @@ export const clientTvSignalsApiSlice = createApi({
       providesTags: (result, error, id) => [{ type: "TvSignalDetail", id }],
     }),
 
-    markSignalRead: builder.mutation({
-      query: (id) => ({
-        url: `/users/tv-signals/${id}/read`,
-        method: "POST",
-      }),
-      invalidatesTags: (result, error, id) => [
-        { type: "TvSignals", id: "LIST" },
-        { type: "TvSignalDetail", id },
-        { type: "TvUnreadCount" },
-      ],
-    }),
-
-    getUnreadCount: builder.query({
-      query: () => `/users/tv-signals/unread-count`,
-      providesTags: [{ type: "TvUnreadCount" }],
-    }),
-
     getFilterOptions: builder.query({
       query: () => `/users/tv-signals/filters`,
       providesTags: [{ type: "TvFilters" }],
@@ -94,8 +77,6 @@ export const clientTvSignalsApiSlice = createApi({
 export const {
   useGetClientTvSignalsQuery,
   useGetClientTvSignalDetailQuery,
-  useMarkSignalReadMutation,
-  useGetUnreadCountQuery,
   useGetFilterOptionsQuery,
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
