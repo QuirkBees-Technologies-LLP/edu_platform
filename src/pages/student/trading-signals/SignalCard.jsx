@@ -89,9 +89,13 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
 
         const sl = signal.stopLoss;
 
-        // Build TP levels from signal.takeProfit + customVariables
+        // Build TP levels from signal.takeProfits array + customVariables
         const tps = [];
-        if (signal.takeProfit != null) tps.push({ num: 1, val: signal.takeProfit });
+        if (signal.takeProfits?.length > 0) {
+          signal.takeProfits.forEach((tp) => {
+            tps.push({ num: tp.level, val: tp.price });
+          });
+        }
         Object.entries(customVars).forEach(([key, val]) => {
           const norm = key.toLowerCase().replace(/[^a-z0-9]/g, "");
           if (norm.startsWith("tp") && /^\d+$/.test(norm.slice(2))) {

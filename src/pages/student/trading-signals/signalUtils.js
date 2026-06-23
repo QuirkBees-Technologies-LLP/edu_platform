@@ -12,6 +12,14 @@ export function formatTimeframe(tf) {
   const str = String(tf).trim();
   const upper = str.toUpperCase();
 
+  // Handle "X minutes", "X minute" format (e.g. "5 minutes", "15 minute")
+  const minutesMatch = str.match(/^(\d+)\s*minutes?$/i);
+  if (minutesMatch) return `${minutesMatch[1]}m`;
+
+  // Handle "X hours", "X hour" format (e.g. "1 hour", "4 hours")
+  const hoursMatch = str.match(/^(\d+)\s*hours?$/i);
+  if (hoursMatch) return `${hoursMatch[1]}h`;
+
   // Pure string codes from TradingView
   const stringMap = { D: "1D", W: "1W", M: "1M", "1D": "1D", "1W": "1W", "1M": "1M" };
   if (stringMap[upper]) return stringMap[upper];

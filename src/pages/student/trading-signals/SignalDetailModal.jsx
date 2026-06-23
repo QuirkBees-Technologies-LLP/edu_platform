@@ -86,10 +86,12 @@ const SignalDetailModal = ({ signal, onClose }) => {
   const formatKey = (key) =>
     key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-  // ── Build TP levels ───────────────────────────────────────────────
+  // ── Build TP levels from takeProfits array + customVariables ────────
   const tpLevels = [];
-  if (signal.takeProfit != null) {
-    tpLevels.push({ label: "TP 1", value: signal.takeProfit });
+  if (signal.takeProfits?.length > 0) {
+    signal.takeProfits.forEach((tp) => {
+      tpLevels.push({ label: `TP ${tp.level}`, value: tp.price });
+    });
   }
   const tpKeys = [
     "tp1", "tp2", "tp3", "tp4",
@@ -103,7 +105,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
       (normKey.startsWith("tp") && /^\d+$/.test(normKey.slice(2)))
     ) {
       const num = parseInt(normKey.replace(/\D/g, ""), 10);
-      // Skip if TP1 already added from signal.takeProfit
+      // Skip if TP already added from signal.takeProfits
       const alreadyExists = tpLevels.some(
         (tp) => tp.label === `TP ${num}`
       );
@@ -340,7 +342,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
           )}
           */}
 
-          {/* Other Variables — commented out
+          {/* Other Variables */}
           {Object.keys(otherVars).length > 0 && (
             <div className="mb-5">
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2 uppercase tracking-wider px-1">
@@ -357,7 +359,6 @@ const SignalDetailModal = ({ signal, onClose }) => {
               </div>
             </div>
           )}
-          */}
 
           {/* Extra Processed Fields */}
           {Object.keys(extraProcessed).length > 0 && (
