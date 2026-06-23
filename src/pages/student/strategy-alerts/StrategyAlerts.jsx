@@ -1,18 +1,19 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useGetClientTvSignalsQuery } from "../../../store/api/client/clientTvSignalsApiSlice";
-import { useGetAllEducatorsQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import {
   TrendingUp,
   TrendingDown,
   Signal,
   Clock,
-  User,
   ChevronDown,
   Filter,
   Zap,
   BarChart3,
   Activity,
+  ChartLine,
+  Copy,
+  X,
 } from "lucide-react";
 import { Container } from "@/components/container";
 import {
@@ -23,71 +24,68 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Loader from "../../../components/ui/loader";
+import { toast } from "sonner";
+import signalConfig from "../trading-signals/signalConfig";
+import { formatTimeframe, formatTimeAgo, formatPrice } from "../trading-signals/signalUtils";
 
-const ACTION_COLORS = {
-  BUY: {
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    text: "text-emerald-500",
-    badge: "bg-emerald-500",
-    glow: "shadow-emerald-500/20",
-  },
-  SELL: {
-    bg: "bg-red-500/10",
-    border: "border-red-500/30",
-    text: "text-red-500",
-    badge: "bg-red-500",
-    glow: "shadow-red-500/20",
-  },
+// ── Signal type color mapping ──────────────────────────────────────────
+const getSignalColors = (signalType) => {
+  const colorMap = {
+    BUY:  { bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-500", badge: "bg-emerald-500", glow: "shadow-emerald-500/20" },
+    SELL: { bg: "bg-red-500/10",     border: "border-red-500/30",     text: "text-red-500",     badge: "bg-red-500",     glow: "shadow-red-500/20" },
+    LONG: { bg: "bg-blue-500/10",    border: "border-blue-500/30",    text: "text-blue-500",    badge: "bg-blue-500",    glow: "shadow-blue-500/20" },
+    SHORT:{ bg: "bg-orange-500/10",  border: "border-orange-500/30",  text: "text-orange-500",  badge: "bg-orange-500",  glow: "shadow-orange-500/20" },
+    CLOSE:{ bg: "bg-gray-500/10",    border: "border-gray-500/30",    text: "text-gray-500",    badge: "bg-gray-500",    glow: "shadow-gray-500/20" },
+    INFO: { bg: "bg-purple-500/10",  border: "border-purple-500/30",  text: "text-purple-500",  badge: "bg-purple-500",  glow: "shadow-purple-500/20" },
+  };
+  return colorMap[signalType] || { bg: "bg-slate-500/10", border: "border-slate-500/30", text: "text-slate-500", badge: "bg-slate-500", glow: "shadow-slate-500/20" };
 };
 
-const CATEGORY_ICONS = {
-  Crypto: "₿",
-  Forex: "$",
-  Indices: "📊",
-  Commodities: "🥇",
+const getSignalIcon = (signalType) => {
+  if (["BUY", "LONG"].includes(signalType)) return TrendingUp;
+  if (["SELL", "SHORT"].includes(signalType)) return TrendingDown;
+  return Activity;
 };
 
 const StrategyAlerts = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(12);
-  const [category, setCategory] = useState("");
-  const [educator, setEducator] = useState("");
-  const [action, setAction] = useState("");
+  const [signalTypeFilter, setSignalTypeFilter] = useState("");
   const [signals, setSignals] = useState([]);
   const observer = useRef();
 
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery({
     page,
     limit,
-    category,
-    educator,
-    action,
+    ...(signalTypeFilter ? { excludedSignalTypes: [] } : {}),
   });
-
-  const { data: educatorsData } = useGetAllEducatorsQuery();
 
   const totalPages = data?.pagination?.totalPages || 1;
 
   useEffect(() => {
     if (data?.data) {
+      // Client-side filter for signal type if set
+      const filtered = signalTypeFilter
+        ? data.data.filter((s) => s.signalType === signalTypeFilter)
+        : data.data;
+
       if (page === 1) {
-        setSignals(data.data);
+        setSignals(filtered);
       } else {
         setSignals((prev) => {
-          const newSignals = data.data.filter(
+          const newSignals = filtered.filter(
             (s) => !prev.some((p) => p._id === s._id)
           );
           return [...prev, ...newSignals];
         });
       }
     }
-  }, [data, page]);
+  }, [data, page, signalTypeFilter]);
 
   useEffect(() => {
     setSignals([]);
     setPage(1);
-  }, [category, educator, action]);
+  }, [signalTypeFilter]);
 
   const lastSignalRef = useCallback(
     (node) => {
@@ -103,10 +101,18 @@ const StrategyAlerts = () => {
     [isFetching, page, totalPages]
   );
 
-  const categories = ["Forex", "Crypto", "Indices", "Commodities"];
+  // ── Stats from loaded signals ────────────────────────────────────
+  const buyCount = signals.filter((s) => ["BUY", "LONG"].includes(s.signalType)).length;
+  const sellCount = signals.filter((s) => ["SELL", "SHORT"].includes(s.signalType)).length;
 
-  const buyCount = signals.filter((s) => s.action === "BUY").length;
-  const sellCount = signals.filter((s) => s.action === "SELL").length;
+  // ── Copy helper ──────────────────────────────────────────────────
+  const copyValue = (label, value, e) => {
+    e?.stopPropagation();
+    if (value != null) {
+      navigator.clipboard.writeText(String(value));
+      toast.success(`${label} copied!`);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
@@ -122,12 +128,13 @@ const StrategyAlerts = () => {
                 Strategy Alerts
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Live trading signals from TradingView webhooks
+                Live trading signals from IQ Strategies
               </p>
             </div>
           </div>
         </div>
 
+        {/* ── Stats Cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="card rounded-2xl border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
             <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-purple-500/10">
@@ -149,7 +156,7 @@ const StrategyAlerts = () => {
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">
-                Buy Signals
+                Buy / Long
               </p>
               <p className="text-xl font-bold text-emerald-500">{buyCount}</p>
             </div>
@@ -161,100 +168,42 @@ const StrategyAlerts = () => {
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">
-                Sell Signals
+                Sell / Short
               </p>
               <p className="text-xl font-bold text-red-500">{sellCount}</p>
             </div>
           </div>
         </div>
 
+        {/* ── Filter Bar ── */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div className="py-1 px-2 flex overflow-auto bg-gray-100 dark:bg-gray-800 rounded-md gap-2 shadow-sm">
-            {["", "BUY", "SELL"].map((a) => (
+            {["", "BUY", "SELL", "LONG", "SHORT"].map((type) => (
               <button
-                key={a}
-                onClick={() => setAction(a)}
-                className={`px-3 py-1.5 flex items-center text-xs rounded-md font-medium transition-all ${action === a
+                key={type}
+                onClick={() => setSignalTypeFilter(type)}
+                className={`px-3 py-1.5 flex items-center text-xs rounded-md font-medium transition-all cursor-pointer ${signalTypeFilter === type
                   ? "bg-primary text-white shadow-lg shadow-primary/50"
                   : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                   }`}
               >
-                {a === "" ? (
+                {type === "" ? (
                   "All"
-                ) : a === "BUY" ? (
+                ) : ["BUY", "LONG"].includes(type) ? (
                   <span className="flex items-center gap-1">
-                    <TrendingUp size={14} /> Buy
+                    <TrendingUp size={14} /> {type}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1">
-                    <TrendingDown size={14} /> Sell
+                    <TrendingDown size={14} /> {type}
                   </span>
                 )}
               </button>
             ))}
           </div>
-
-          <div className="relative">
-            <Select
-              value={category || ""}
-              onValueChange={(val) => setCategory(val)}
-            >
-              <SelectTrigger className="w-[180px] h-10">
-                <SelectValue placeholder="Asset Class">
-                  {category || "Asset Class"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {CATEGORY_ICONS[cat]} {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {category && (
-              <button
-                type="button"
-                onClick={() => setCategory("")}
-                className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
-              >
-                ✖
-              </button>
-            )}
-          </div>
-
-          <div className="relative">
-            <Select
-              value={educator || ""}
-              onValueChange={(val) => setEducator(val)}
-            >
-              <SelectTrigger className="w-[190px] h-10">
-                <SelectValue placeholder="Select Educator">
-                  {educator
-                    ? educatorsData?.data?.find((e) => e._id === educator)
-                      ?.first_name || "Educator"
-                    : "Select Educator"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {educatorsData?.data?.map((item) => (
-                  <SelectItem key={item._id} value={item._id}>
-                    {item.first_name} {item.last_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {educator && (
-              <button
-                type="button"
-                onClick={() => setEducator("")}
-                className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
-              >
-                ✖
-              </button>
-            )}
-          </div>
         </div>
+
+        {/* ── Signal Cards ── */}
         {isLoading && page === 1 ? (
           <Loader />
         ) : signals.length === 0 && !isLoading && !isFetching ? (
@@ -266,15 +215,47 @@ const StrategyAlerts = () => {
               No strategy alerts yet
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Alerts will appear here when educators publish TradingView signals
+              Alerts will appear here when IQ Strategies signals are triggered
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {signals.map((signal, index) => {
-              const colors = ACTION_COLORS[signal.action] || ACTION_COLORS.BUY;
-              const educatorInfo = signal.educatorId;
-              const categoryInfo = signal.category;
+              const colors = getSignalColors(signal.signalType);
+              const SignalIcon = getSignalIcon(signal.signalType);
+              const config = signalConfig[signal.signalType] || signalConfig.OTHER;
+
+              // ── Build TP levels from takeProfits array + customVariables ──
+              const tps = [];
+              if (signal.takeProfits?.length > 0) {
+                signal.takeProfits.forEach((tp) => {
+                  tps.push({ num: tp.level, val: tp.price });
+                });
+              }
+              // Also check customVariables for tp1, tp2, etc.
+              const customVars = signal.customVariables || {};
+              Object.entries(customVars).forEach(([key, val]) => {
+                const norm = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+                if (norm.startsWith("tp") && /^\d+$/.test(norm.slice(2))) {
+                  const num = parseInt(norm.slice(2), 10);
+                  if (!tps.some((t) => t.num === num)) tps.push({ num, val });
+                }
+              });
+              tps.sort((a, b) => a.num - b.num);
+
+              // ── Build confirmations from customVariables ──
+              const confirmations = [];
+              Object.entries(customVars).forEach(([key, val]) => {
+                const norm = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+                if (norm.startsWith("tp") && /^\d+$/.test(norm.slice(2))) return;
+                const strVal = String(val).trim().toLowerCase();
+                const isTruthy = ["true", "yes", "1", "✅", "☑", "✔"].includes(strVal) || strVal.includes("✅");
+                const isFalsy = ["false", "no", "0", "❌", "✖", "✗"].includes(strVal) || strVal.includes("❌");
+                if (isTruthy || isFalsy) {
+                  const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                  confirmations.push({ label, passed: isTruthy });
+                }
+              });
 
               return (
                 <div
@@ -282,7 +263,7 @@ const StrategyAlerts = () => {
                   ref={index === signals.length - 1 ? lastSignalRef : null}
                   className={`card rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${colors.glow} border-gray-200 dark:border-gray-700`}
                 >
-
+                  {/* ── Card Header: Signal Type + Symbol ── */}
                   <div
                     className={`flex items-center justify-between px-5 py-3 ${colors.bg} border-b ${colors.border}`}
                   >
@@ -290,33 +271,46 @@ const StrategyAlerts = () => {
                       <span
                         className={`px-2.5 py-1 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 ${colors.badge}`}
                       >
-                        {signal.action === "BUY" ? (
-                          <TrendingUp size={14} />
-                        ) : (
-                          <TrendingDown size={14} />
-                        )}
-                        {signal.action}
+                        <SignalIcon size={14} />
+                        {signal.signalType || "OTHER"}
                       </span>
                       <span className="text-base font-bold text-gray-900 dark:text-white">
-                        {signal.ticker}
+                        {signal.symbol || "—"}
                       </span>
                     </div>
-                    {categoryInfo?.name && (
+                    {signal.exchange && (
                       <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                        {CATEGORY_ICONS[categoryInfo.name]}{" "}
-                        {categoryInfo.name}
+                        {signal.exchange}
                       </span>
                     )}
                   </div>
 
                   <div className="px-5 py-4">
-                    <div className="grid grid-cols-2 gap-3 mb-4">
+                    {/* ── Chart Image Thumbnail ── */}
+                    {signal.chartImageUrl && (
+                      <div className="mb-3 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700/50 relative">
+                        <img
+                          src={signal.chartImageUrl}
+                          alt={`${signal.symbol || "Chart"}`}
+                          className="w-full h-[120px] object-cover object-right"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+                      </div>
+                    )}
+
+                    {/* ── Price + Timeframe Grid ── */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
                       <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
                         <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-1">
-                          Price
+                          Entry Price
                         </p>
-                        <p className="text-lg font-bold text-gray-900 dark:text-white font-mono">
-                          {signal.price > 0 ? signal.price.toLocaleString() : "—"}
+                        <p
+                          className="text-lg font-bold text-gray-900 dark:text-white font-mono cursor-pointer hover:text-blue-500 transition-colors"
+                          onClick={(e) => copyValue("Entry", signal.entryPrice, e)}
+                          title="Click to copy"
+                        >
+                          {signal.entryPrice ? formatPrice(signal.entryPrice) : "—"}
                         </p>
                       </div>
                       <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
@@ -324,53 +318,82 @@ const StrategyAlerts = () => {
                           Timeframe
                         </p>
                         <p className="text-lg font-bold text-gray-900 dark:text-white">
-                          {signal.timeframe || "—"}
+                          {signal.timeframe ? formatTimeframe(signal.timeframe) : "—"}
                         </p>
                       </div>
                     </div>
 
-                    {signal.scanner && (
-                      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20">
-                        <BarChart3 className="w-4 h-4 text-purple-500" />
-                        <span className="text-xs font-semibold text-purple-700 dark:text-purple-400">
-                          {signal.scanner}
+                    {/* ── Stop Loss ── */}
+                    {signal.stopLoss != null && (
+                      <div
+                        className="flex items-center justify-between mb-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 cursor-pointer hover:bg-red-100 dark:hover:bg-red-500/15 transition-colors"
+                        onClick={(e) => copyValue("Invalidation", signal.stopLoss, e)}
+                        title="Click to copy"
+                      >
+                        <span className="text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                          ❌ Invalidation (SL)
+                        </span>
+                        <span className="text-sm font-bold text-red-700 dark:text-red-400 font-mono flex items-center gap-1">
+                          {formatPrice(signal.stopLoss)}
+                          <Copy size={10} className="text-red-400/50" />
                         </span>
                       </div>
                     )}
 
-                    {signal.message && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
-                        {signal.message}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-                      <div className="flex items-center gap-2">
-                        {educatorInfo?.image ? (
-                          <img
-                            src={educatorInfo.image}
-                            alt=""
-                            className="w-7 h-7 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
-                          />
-                        ) : (
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-orange-500 flex items-center justify-center">
-                            <User className="w-3.5 h-3.5 text-white" />
+                    {/* ── Take Profit Levels ── */}
+                    {tps.length > 0 && (
+                      <div className="space-y-1 mb-3">
+                        {tps.map((tp) => (
+                          <div
+                            key={tp.num}
+                            className="flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-500/5 cursor-pointer transition-colors"
+                            onClick={(e) => copyValue(`Exit ${tp.num}`, tp.val, e)}
+                            title="Click to copy"
+                          >
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                              🎯 Exit {tp.num}
+                            </span>
+                            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
+                              {formatPrice(tp.val)}
+                              <Copy size={10} className="text-emerald-400/50" />
+                            </span>
                           </div>
-                        )}
-                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                          {educatorInfo?.first_name || ""}{" "}
-                          {educatorInfo?.last_name || ""}
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── Strategy Badge ── */}
+                    {(signal.strategyName || signal.webhookConfig?.name) && (
+                      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20">
+                        <ChartLine className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                        <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 truncate">
+                          {signal.strategyName || signal.webhookConfig?.name}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-gray-400">
+                    )}
+
+                    {/* ── Confirmations ── */}
+                    {confirmations.length > 0 && (
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 mb-3 px-1">
+                        {confirmations.map((item) => (
+                          <span key={item.label} className="text-[11px] text-gray-600 dark:text-gray-300 font-medium flex items-center gap-1">
+                            {item.label}: {item.passed ? "✅" : "❌"}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── Footer: Time ── */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                      {signal.session && (
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                          Session: {signal.session}
+                        </span>
+                      )}
+                      <div className="flex items-center gap-1 text-gray-400 ml-auto">
                         <Clock className="w-3.5 h-3.5" />
                         <span className="text-[11px]">
-                          {signal.createdAt
-                            ? format(
-                              new Date(signal.createdAt),
-                              "MMM dd, hh:mm a"
-                            )
-                            : ""}
+                          {signal.createdAt ? formatTimeAgo(signal.createdAt) : ""}
                         </span>
                       </div>
                     </div>
@@ -383,6 +406,15 @@ const StrategyAlerts = () => {
         {isFetching && page > 1 && (
           <div className="flex justify-center py-6">
             <Loader />
+          </div>
+        )}
+
+        {/* ── End of list ── */}
+        {!isFetching && page >= totalPages && signals.length > 0 && (
+          <div className="flex justify-center items-center py-6">
+            <span className="text-[11px] text-gray-400 dark:text-gray-600 font-medium tracking-wide">
+              — All signals loaded —
+            </span>
           </div>
         )}
       </Container>
