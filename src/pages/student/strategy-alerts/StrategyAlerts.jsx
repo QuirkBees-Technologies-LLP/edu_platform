@@ -31,12 +31,12 @@ import { formatTimeframe, formatTimeAgo, formatPrice } from "../trading-signals/
 // ── Signal type color mapping ──────────────────────────────────────────
 const getSignalColors = (signalType) => {
   const colorMap = {
-    BUY:  { bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-500", badge: "bg-emerald-500", glow: "shadow-emerald-500/20" },
-    SELL: { bg: "bg-red-500/10",     border: "border-red-500/30",     text: "text-red-500",     badge: "bg-red-500",     glow: "shadow-red-500/20" },
-    LONG: { bg: "bg-blue-500/10",    border: "border-blue-500/30",    text: "text-blue-500",    badge: "bg-blue-500",    glow: "shadow-blue-500/20" },
-    SHORT:{ bg: "bg-orange-500/10",  border: "border-orange-500/30",  text: "text-orange-500",  badge: "bg-orange-500",  glow: "shadow-orange-500/20" },
-    CLOSE:{ bg: "bg-gray-500/10",    border: "border-gray-500/30",    text: "text-gray-500",    badge: "bg-gray-500",    glow: "shadow-gray-500/20" },
-    INFO: { bg: "bg-purple-500/10",  border: "border-purple-500/30",  text: "text-purple-500",  badge: "bg-purple-500",  glow: "shadow-purple-500/20" },
+    BUY: { bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-500", badge: "bg-emerald-500", glow: "shadow-emerald-500/20" },
+    SELL: { bg: "bg-red-500/10", border: "border-red-500/30", text: "text-red-500", badge: "bg-red-500", glow: "shadow-red-500/20" },
+    LONG: { bg: "bg-blue-500/10", border: "border-blue-500/30", text: "text-blue-500", badge: "bg-blue-500", glow: "shadow-blue-500/20" },
+    SHORT: { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-500", badge: "bg-orange-500", glow: "shadow-orange-500/20" },
+    CLOSE: { bg: "bg-gray-500/10", border: "border-gray-500/30", text: "text-gray-500", badge: "bg-gray-500", glow: "shadow-gray-500/20" },
+    INFO: { bg: "bg-purple-500/10", border: "border-purple-500/30", text: "text-purple-500", badge: "bg-purple-500", glow: "shadow-purple-500/20" },
   };
   return colorMap[signalType] || { bg: "bg-slate-500/10", border: "border-slate-500/30", text: "text-slate-500", badge: "bg-slate-500", glow: "shadow-slate-500/20" };
 };
@@ -287,12 +287,12 @@ const StrategyAlerts = () => {
 
                   <div className="px-5 py-4">
                     {/* ── Chart Image Thumbnail ── */}
-                    {signal.chartImageUrl && (
+                    {signal?.chartImageUrl && (
                       <div className="mb-3 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700/50 relative">
                         <img
-                          src={signal.chartImageUrl}
-                          alt={`${signal.symbol || "Chart"}`}
-                          className="w-full h-[120px] object-cover object-right"
+                          src={signal?.chartImageUrl}
+                          alt={`${signal?.symbol || "Chart"}`}
+                          className="w-full h-[220px] object-cover object-right"
                           loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
