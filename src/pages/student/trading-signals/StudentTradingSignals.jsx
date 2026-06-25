@@ -95,6 +95,7 @@ const StudentTradingSignals = () => {
   const [signals, setSignals] = useState([]); // accumulated list
   const [showFilters, setShowFilters] = useState(false);
   const [selectedSignal, setSelectedSignal] = useState(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // track first load vs polling
   const observer = useRef();
   const saveTimerRef = useRef(null);
 
@@ -148,6 +149,13 @@ const StudentTradingSignals = () => {
     },
     { pollingInterval: 30000 }
   );
+
+  // ── Mark initial load complete once data arrives ─────────────────
+  useEffect(() => {
+    if (!isLoading && data?.data && isInitialLoad) {
+      setIsInitialLoad(false);
+    }
+  }, [isLoading, data, isInitialLoad]);
   const { data: filterOptions } = useGetFilterOptionsQuery();
 
   const pagination = data?.pagination;
@@ -173,6 +181,7 @@ const StudentTradingSignals = () => {
   // ── Reset page when any filter changes ─────────────────────────────
   useEffect(() => {
     setPage(1);
+    setIsInitialLoad(true); // show skeletons when filters/search change
   }, [exclusionFilters, search]);
 
   // ── IntersectionObserver — trigger next page ─────────────────────
@@ -332,16 +341,44 @@ const StudentTradingSignals = () => {
       )}
 
       {/* ── Signal Cards ── */}
-      {isFetching && page === 1 ? (
+      {isInitialLoad && isFetching && page === 1 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
               key={i}
-              className="bg-slate-100 dark:bg-[#0F0F1A]/80 border border-slate-200 dark:border-[#1F1F35] rounded-2xl h-[180px] animate-pulse"
-            />
+              className="bg-white dark:bg-[#0F0F1A] border border-slate-200 dark:border-[#1F1F35] rounded-2xl p-4.5 animate-pulse flex flex-col"
+            >
+              {/* Header skeleton */}
+              <div className="flex items-start gap-2.5 mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="h-6 w-24 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 rounded-lg mb-2" />
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-3.5 w-16 bg-slate-200 dark:bg-[#1F1F35] rounded" />
+                    <div className="h-4 w-10 bg-slate-200 dark:bg-[#1F1F35] rounded-md" />
+                    <div className="h-3 w-24 bg-slate-200 dark:bg-[#1F1F35] rounded" />
+                  </div>
+                </div>
+              </div>
+              {/* Chart image skeleton */}
+              <div className="-mx-4.5 mb-3 h-[220px] bg-slate-100 dark:bg-[#1A1A2E] border-y border-slate-100 dark:border-[#1F1F35]/50" />
+              {/* Price rows skeleton */}
+              <div className="mb-3 space-y-2">
+                {[1, 2, 3, 4].map((r) => (
+                  <div key={r} className="flex justify-between items-center px-1">
+                    <div className="h-3.5 w-16 bg-slate-200 dark:bg-[#1F1F35] rounded" />
+                    <div className="h-3.5 w-20 bg-slate-200 dark:bg-[#1F1F35] rounded" />
+                  </div>
+                ))}
+              </div>
+              {/* Footer skeleton */}
+              <div className="flex justify-between items-center pt-2.5 mt-auto border-t border-slate-100 dark:border-[#1F1F35]/50">
+                <div className="h-3 w-28 bg-slate-200 dark:bg-[#1F1F35] rounded" />
+                <div className="h-3 w-16 bg-slate-200 dark:bg-[#1F1F35] rounded" />
+              </div>
+            </div>
           ))}
         </div>
-      ) : signals.length === 0 && !isFetching ? (
+      ) : signals.length === 0 && !isLoading ? (
         <div className="text-center py-20 px-5 bg-slate-50 dark:bg-[#131324]/20 rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#202038]">
           <ChartLine size={48} className="text-slate-300 dark:text-slate-700 mx-auto mb-4" />
           <h3 className="text-slate-600 dark:text-slate-400 font-semibold mb-2 text-base">
@@ -367,7 +404,7 @@ const StudentTradingSignals = () => {
       )}
 
       {/* ── Loading more indicator ── */}
-      {isFetching && page > 1 && (
+      {isFetching && page > 1 && !data?.data && (
         <div className="flex justify-center items-center gap-2 py-6">
           <Loader2 size={18} className="animate-spin text-blue-500" />
           <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
