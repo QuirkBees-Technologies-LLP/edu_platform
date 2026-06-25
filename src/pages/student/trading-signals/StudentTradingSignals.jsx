@@ -190,7 +190,7 @@ const StudentTradingSignals = () => {
       if (isFetching || page >= totalPages) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries?.[0]?.isIntersecting) {
           setPage((prev) => prev + 1);
         }
       });
@@ -392,9 +392,9 @@ const StudentTradingSignals = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {signals.map((signal, index) => (
+          {signals?.map((signal, index) => (
             <SignalCard
-              key={signal._id}
+              key={signal?._id}
               signal={signal}
               ref={index === signals.length - 1 ? lastSignalRef : null}
               onClick={() => handleSignalClick(signal)}

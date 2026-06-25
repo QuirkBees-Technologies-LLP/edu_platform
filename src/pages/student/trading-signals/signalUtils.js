@@ -56,19 +56,26 @@ export function formatTimeframe(tf) {
 export function formatPrice(value) {
   if (value == null) return "—";
   const num = parseFloat(value);
-  if (isNaN(num)) return value;
+  if (isNaN(num)) return String(value ?? "—");
   // Remove trailing zeros: 4342.8100 → 4342.81, but keep up to 4 decimals max
   return parseFloat(num.toFixed(4)).toString();
 }
 
 export function formatTimeAgo(dateStr) {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const seconds = Math.floor((now - date) / 1000);
+  if (!dateStr) return "—";
+  try {
+    const now = new Date();
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "—";
+    const seconds = Math.floor((now - date) / 1000);
 
-  if (seconds < 60) return "Just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  return date.toLocaleDateString();
+    if (seconds < 0) return "Just now";
+    if (seconds < 60) return "Just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    return date.toLocaleDateString();
+  } catch (_) {
+    return "—";
+  }
 }
