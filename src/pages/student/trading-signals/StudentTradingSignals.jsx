@@ -295,6 +295,13 @@ const StudentTradingSignals = () => {
       {showFilters && (
         <div className="flex gap-4 mb-5 flex-wrap p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038] items-end">
           <FilterSelect
+            label="Strategy"
+            excludedValues={exclusionFilters.excludedStrategies}
+            onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
+            placeholder="All Strategies"
+            options={strategyOptions}
+          />
+          <FilterSelect
             label="Signal Type"
             excludedValues={exclusionFilters.excludedSignalTypes}
             onExcludedChange={(v) => updateExclusion("excludedSignalTypes", v)}
@@ -312,13 +319,7 @@ const StudentTradingSignals = () => {
             placeholder="All Timeframes"
             options={TIMEFRAME_OPTIONS}
           />
-          <FilterSelect
-            label="Strategy"
-            excludedValues={exclusionFilters.excludedStrategies}
-            onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
-            placeholder="All Strategies"
-            options={strategyOptions}
-          />
+
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
