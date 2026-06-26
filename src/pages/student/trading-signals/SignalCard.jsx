@@ -3,6 +3,7 @@ import { Clock, ChartLine, Copy } from "lucide-react";
 import { toast } from "sonner";
 import signalConfig from "./signalConfig";
 import { formatTimeframe, formatTimeAgo } from "./signalUtils";
+import SymbolIcon from "./symbolIcons";
 
 const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
   const config = signalConfig?.[signal?.signalType] || signalConfig?.OTHER || {};
@@ -25,9 +26,10 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
           </div>
 
           {/* Symbol + Signal Type + Timeframe */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Symbol — glass effect */}
-            <span className="text-[12px] font-black text-violet-700 dark:text-violet-200 bg-violet-200/40 dark:bg-violet-500/20 backdrop-blur-md border border-violet-300/50 dark:border-violet-400/25 px-2.5 py-0.5 rounded-lg tracking-tight truncate leading-snug shadow-sm">
+          <div className="flex items-center gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
+            {/* Symbol — icon + glass effect */}
+            <span className="inline-flex items-center gap-1.5 h-7 text-[12px] font-black text-violet-700 dark:text-violet-200 bg-violet-200/40 dark:bg-violet-500/20 backdrop-blur-md border border-violet-300/50 dark:border-violet-400/25 px-2 rounded-lg tracking-tight truncate leading-none shadow-sm">
+              <SymbolIcon symbol={signal?.symbol} size={22} />
               {signal?.symbol || "—"}
             </span>
 
@@ -39,7 +41,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
                   color: config?.text || "#64748b",
                   borderColor: (config?.text || "#64748b") + "40",
                 }}
-                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-extrabold flex-shrink-0 border leading-tight"
+                className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[11px] font-extrabold flex-shrink-0 border leading-none"
               >
                 {config?.icon && <config.icon size={11} />}
                 {config?.label || ""}
@@ -48,7 +50,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
 
             {/* Timeframe pill */}
             {signal?.timeframe && (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 px-2 rounded-lg flex-shrink-0 tracking-wide uppercase">
+              <span className="inline-flex items-center gap-1.5 h-7 text-[10px] font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 px-2 rounded-lg flex-shrink-0 tracking-wide uppercase">
                 <Clock size={10} className="text-indigo-400 dark:text-indigo-400" />
                 {formatTimeframe(signal?.timeframe)}
               </span>
@@ -56,8 +58,8 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
 
             {/* Session pill */}
             {signal?.session && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 py-0.5 rounded-lg flex-shrink-0 tracking-wide">
-                🌍 {signal.session}
+              <span className="inline-flex items-center gap-1 h-7 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 rounded-lg flex-shrink-0 tracking-wide">
+                {signal.session}
               </span>
             )}
           </div>
