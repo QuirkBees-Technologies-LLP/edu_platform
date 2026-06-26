@@ -50,7 +50,9 @@ import {
   ToolbarPageTitle,
 } from "@/partials/toolbar";
 import { useLanguage } from "@/i18n";
-import { Copy, Target, ShieldAlert, Crosshair, Activity, Pencil, Check, X } from "lucide-react";
+import { Copy, Target, ShieldAlert, Crosshair, Activity, Pencil, Check, X, Clock, ChartLine } from "lucide-react";
+import signalConfig from "../../student/trading-signals/signalConfig";
+import { formatTimeframe } from "../../student/trading-signals/signalUtils";
 
 // ── Status / Signal Badge Maps ──────────────────────────────────────
 
@@ -1162,26 +1164,30 @@ const signalTypeLabel = (type) => {
 
 const PriceBlock = ({ label, value, colorClass, bgClass, icon: Icon }) => {
   const handleCopy = (e) => {
-    e.stopPropagation();
+    e?.stopPropagation?.();
     if (value != null) {
-      navigator.clipboard.writeText(formatPrice(value).toString());
-      toast.success(`${label} copied!`);
+      try {
+        navigator?.clipboard?.writeText?.(formatPrice(value)?.toString?.());
+        toast?.success?.(`${label || "Value"} copied!`);
+      } catch (_) { /* clipboard may not be available */ }
     }
   };
 
   return (
     <div
       onClick={handleCopy}
-      className={`group flex-1 flex flex-col p-4 rounded-xl border border-gray-100 dark:border-coal-200 hover:border-gray-200 dark:hover:border-coal-100 transition-all cursor-pointer select-none ${bgClass}`}
+      className={`group flex-1 flex flex-col p-4 rounded-xl border border-slate-100 dark:border-[#1F1F35]/50 hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer select-none ${bgClass}`}
       title={`Click to copy ${label}`}
     >
       <div className="flex items-center justify-between gap-2 mb-1.5">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
-        {Icon && <Icon size={12} className="text-slate-400" />}
+        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+          {label}
+        </span>
+        {Icon && <Icon size={12} className="text-slate-400 dark:text-slate-500" />}
       </div>
       <div className="flex items-baseline justify-between">
         <span className={`text-[15px] font-black tracking-tight ${colorClass}`}>
-          {value != null ? formatPrice(value) : "—"}
+          {value != null ? formatPrice(value) : "\u2014"}
         </span>
         {value != null && (
           <Copy size={12} className="text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity ml-1.5" />
@@ -1193,8 +1199,8 @@ const PriceBlock = ({ label, value, colorClass, bgClass, icon: Icon }) => {
 
 const MetaItem = ({ label, value, colSpan = 1 }) => (
   <div className={`flex flex-col gap-0.5 ${colSpan === 2 ? 'col-span-2' : ''}`}>
-    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
-    <span className="text-[12px] font-black text-slate-900 dark:text-white truncate">{value || "—"}</span>
+    <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{label}</span>
+    <span className="text-[12px] font-black text-slate-700 dark:text-slate-200 truncate">{value || "—"}</span>
   </div>
 );
 
@@ -1214,7 +1220,18 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
     stopLoss: "",
     takeProfit: "",
     timeframe: "",
-    customVariablesStr: ""
+    customVariablesStr: "",
+    tp1: "",
+    tp2: "",
+    tp3: "",
+    tp4: "",
+    confirmations: {
+      candle_match: null,
+      trade_time: null,
+      "238_behind": null,
+      with_the_trend: null,
+      poc: null,
+    },
   });
 
   React.useEffect(() => {
@@ -1223,6 +1240,41 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
 
   React.useEffect(() => {
     if (signal) {
+      // Build TP values from takeProfits array + customVariables
+      const tpVals = { tp1: "", tp2: "", tp3: "", tp4: "" };
+      if (Array.isArray(signal.takeProfits)) {
+        signal.takeProfits.forEach((tp) => {
+          if (tp?.level != null && tp?.price != null) {
+            const key = `tp${tp.level}`;
+            if (key in tpVals) tpVals[key] = String(tp.price);
+          }
+        });
+      }
+      // Supplement from customVariables
+      const cv = signal.customVariables || {};
+      Object.entries(cv).forEach(([k, v]) => {
+        const norm = (k ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (norm.startsWith("tp") && /^\d+$/.test(norm.slice(2))) {
+          const num = parseInt(norm.slice(2), 10);
+          const key = `tp${num}`;
+          if (key in tpVals && !tpVals[key]) tpVals[key] = String(v);
+        }
+      });
+      // Fallback: signal.takeProfit (singular) as TP1
+      if (!tpVals.tp1 && signal.takeProfit != null) {
+        tpVals.tp1 = String(signal.takeProfit);
+      }
+
+      // Build confirmations
+      const sigConfs = signal.confirmations || {};
+      const confState = {
+        candle_match: sigConfs.candle_match ?? null,
+        trade_time: sigConfs.trade_time ?? null,
+        "238_behind": sigConfs["238_behind"] ?? null,
+        with_the_trend: sigConfs.with_the_trend ?? null,
+        poc: sigConfs.poc ?? null,
+      };
+
       setFormData({
         symbol: signal.symbol || "",
         exchange: signal.exchange || "",
@@ -1235,7 +1287,9 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
         stopLoss: signal.stopLoss != null ? String(signal.stopLoss) : "",
         takeProfit: signal.takeProfit != null ? String(signal.takeProfit) : "",
         timeframe: signal.timeframe || "",
-        customVariablesStr: signal.customVariables ? JSON.stringify(signal.customVariables, null, 2) : "{}"
+        customVariablesStr: signal.customVariables ? JSON.stringify(signal.customVariables, null, 2) : "{}",
+        ...tpVals,
+        confirmations: confState,
       });
     }
   }, [signal, isEditing]);
@@ -1246,33 +1300,44 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
   const badgeClass = signalTypeBadgeMap[type] || "badge-secondary";
 
   // Collect all custom / extra fields dynamically
-  const customVars = signal.customVariables || {};
-  const processedExtra = signal.processedPayload || {};
+  const customVars = signal?.customVariables || {};
+  const processedExtra = signal?.processedPayload || {};
 
   const formatKey = (key) =>
     key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-  // Extract exit levels from customVariables
+  // ── Build TP levels from takeProfits array + customVariables ────────
   const tpLevels = [];
-  if (signal.takeProfit != null) {
-    tpLevels.push({ label: "TP 1", value: signal.takeProfit });
+  if (Array.isArray(signal?.takeProfits) && signal.takeProfits.length > 0) {
+    signal.takeProfits.forEach((tp) => {
+      if (tp?.level != null) tpLevels.push({ label: `TP ${tp.level}`, value: tp?.price });
+    });
   }
-
-  const tpKeys = ["tp2", "tp3", "tp4", "takeprofit2", "takeprofit3", "takeprofit4", "take_profit2", "take_profit3", "take_profit4"];
+  const tpKeys = [
+    "tp1", "tp2", "tp3", "tp4",
+    "takeprofit1", "takeprofit2", "takeprofit3", "takeprofit4",
+    "take_profit1", "take_profit2", "take_profit3", "take_profit4",
+  ];
   Object.entries(customVars).forEach(([key, val]) => {
-    const normKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (tpKeys.includes(normKey) || (normKey.startsWith("tp") && /^\d+$/.test(normKey.slice(2)))) {
+    const normKey = (key ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (
+      tpKeys.includes(normKey) ||
+      (normKey.startsWith("tp") && /^\d+$/.test(normKey.slice(2)))
+    ) {
       const num = parseInt(normKey.replace(/\D/g, ""), 10);
-      if (num > 1) {
+      // Skip if TP already added from signal.takeProfits
+      const alreadyExists = tpLevels.some(
+        (tp) => tp.label === `TP ${num}`
+      );
+      if (!alreadyExists) {
         tpLevels.push({ label: `TP ${num}`, value: val, key });
       }
     }
   });
-
   tpLevels.sort((a, b) => {
-    const numA = parseInt(a.label.replace(/\D/g, ""), 10);
-    const numB = parseInt(b.label.replace(/\D/g, ""), 10);
-    return numA - numB;
+    const aNum = parseInt((a?.label ?? "").replace(/\D/g, ""), 10) || 0;
+    const bNum = parseInt((b?.label ?? "").replace(/\D/g, ""), 10) || 0;
+    return aNum - bNum;
   });
 
   // Extract context/market indicators to display as premium badges
@@ -1284,7 +1349,7 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
   const otherVars = {};
 
   Object.entries(customVars).forEach(([key, val]) => {
-    const normKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const normKey = (key ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
     const isTp = tpLevels.some(tp => tp.key === key);
     if (isTp) return;
 
@@ -1309,6 +1374,23 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
     }
   }
 
+  // ── Confirmations ────────────────────────────────────────────────
+  const CONFIRMATION_LABELS = {
+    candle_match: "Candle Match",
+    trade_time: "Trade Time",
+    "238_behind": "238 Behind",
+    with_the_trend: "With The Trend",
+    poc: "POC",
+  };
+  const confs = signal?.confirmations || {};
+  const confirmations = Object.entries(CONFIRMATION_LABELS)
+    .filter(([key]) => confs[key] !== undefined && confs[key] !== null)
+    .map(([key, label]) => ({ key, label, passed: !!confs[key] }));
+  const passedCount = confirmations.filter((c) => c.passed).length;
+
+  const config = signalConfig?.[type] || signalConfig?.OTHER || {};
+  const IconComponent = config?.icon || Activity;
+
   const InfoRow = ({ label, value }) => (
     <div className="flex justify-between items-center py-2 border-b border-gray-150 dark:border-coal-200 last:border-0">
       <span className="text-[13px] text-slate-400 font-medium">{label}</span>
@@ -1327,9 +1409,10 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
       signalType,
       entryPrice,
       stopLoss,
-      takeProfit,
       timeframe,
       customVariablesStr,
+      tp1, tp2, tp3, tp4,
+      confirmations: formConfirmations,
     } = formData;
 
     if (entryPrice !== "" && entryPrice !== null && isNaN(Number(entryPrice))) {
@@ -1340,10 +1423,27 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
       toast.error("Stop Loss must be a valid number");
       return;
     }
-    if (takeProfit !== "" && takeProfit !== null && isNaN(Number(takeProfit))) {
-      toast.error("Take Profit must be a valid number");
-      return;
+    // Validate TP values
+    for (const [label, val] of [["TP1", tp1], ["TP2", tp2], ["TP3", tp3], ["TP4", tp4]]) {
+      if (val !== "" && val !== null && isNaN(Number(val))) {
+        toast.error(`${label} must be a valid number`);
+        return;
+      }
     }
+
+    // Build takeProfits array
+    const takeProfits = [];
+    [tp1, tp2, tp3, tp4].forEach((val, idx) => {
+      if (val !== "" && val !== null && !isNaN(Number(val))) {
+        takeProfits.push({ level: idx + 1, price: Number(val) });
+      }
+    });
+
+    // Build confirmations — only include non-null values
+    const confirmationsPayload = {};
+    Object.entries(formConfirmations).forEach(([key, val]) => {
+      if (val !== null) confirmationsPayload[key] = val;
+    });
 
     let parsedCustomVariables = null;
     if (customVariablesStr && customVariablesStr.trim()) {
@@ -1361,7 +1461,7 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
 
     try {
       const response = await updateSignal({
-        signalId: signal._id,
+        signalId: signal?._id,
         symbol: symbol.trim() || null,
         exchange: exchange.trim() || null,
         market: market.trim() || null,
@@ -1371,7 +1471,9 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
         signalType,
         entryPrice: entryPrice === "" ? null : Number(entryPrice),
         stopLoss: stopLoss === "" ? null : Number(stopLoss),
-        takeProfit: takeProfit === "" ? null : Number(takeProfit),
+        takeProfit: tp1 === "" ? null : Number(tp1),
+        takeProfits: takeProfits.length > 0 ? takeProfits : null,
+        confirmations: Object.keys(confirmationsPayload).length > 0 ? confirmationsPayload : null,
         timeframe: timeframe.trim() || null,
         customVariables: parsedCustomVariables,
       }).unwrap();
@@ -1388,273 +1490,326 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
 
   return (
     <Dialog open={!!signal} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="p-0 max-w-[650px] max-h-[85vh] overflow-y-auto flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-coal-100 flex-shrink-0">
-          <div className="flex items-center justify-between w-full pr-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <KeenIcon icon="chart-line-star" className="text-primary text-lg" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white m-0">
-                  {isEditing ? "Edit TradingView Alert" : (signal.symbol || "Signal Detail")}
-                </DialogTitle>
-                <DialogDescription className="sr-only">
-                  Detailed view of the trading signal
-                </DialogDescription>
-                {!isEditing && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`badge badge-sm badge-outline ${badgeClass}`}>
-                      {signalTypeLabel(type)}
-                    </span>
-                    {signal.strategyName && (
-                      <span className="badge badge-sm badge-outline badge-primary">
-                        {signal.strategyName}
-                      </span>
-                    )}
-                    {signal.timeframe && (
-                      <span className="text-2xs text-gray-400 bg-gray-50 dark:bg-coal-300 px-1.5 py-0.5 rounded">
-                        {signal.timeframe}
-                      </span>
-                    )}
-                  </div>
+      <DialogContent className={isEditing ? "p-5 max-w-[1200px]" : "p-0 max-w-[650px] max-h-[85vh] overflow-y-auto flex flex-col"}>
+        {isEditing ? (
+          <DialogHeader>
+            <DialogTitle>Edit TradingView Alert</DialogTitle>
+          </DialogHeader>
+        ) : (
+        <DialogHeader className="px-6 pt-6 pb-5 border-b border-slate-100 dark:border-[#1F1F35]/50">
+          <div className="flex items-start gap-3.5">
+            <div
+              style={{ background: config?.bgLight || "#64748b15" }}
+              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
+            >
+              {IconComponent && <IconComponent size={24} color={config?.bg || "#64748b"} />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="margin-0 text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                {signal?.symbol || "Signal Detail"}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                Detailed view of the trading signal
+              </DialogDescription>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                {signal?.signalType && signal?.signalType !== "OTHER" && (
+                  <span
+                    style={{ background: config?.bgLight || "#64748b15", color: config?.text || "#64748b", borderColor: (config?.text || "#64748b") + "30" }}
+                    className="px-2.5 py-0.5 rounded-md text-[11px] font-extrabold border"
+                  >
+                    {config?.label || ""}
+                  </span>
+                )}
+                {signal?.timeframe && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 px-2 py-0.5 rounded-md">
+                    <Clock size={10} />
+                    {formatTimeframe(signal?.timeframe)}
+                  </span>
+                )}
+                {signal?.session && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 py-0.5 rounded-md">
+                    🌍 {signal.session}
+                  </span>
                 )}
               </div>
             </div>
-
             <div className="flex items-center gap-2 flex-shrink-0">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleSave}
-                    disabled={isUpdating}
-                    className="btn btn-sm btn-success flex items-center gap-1.5"
-                    title="Save Changes"
-                  >
-                    <Check size={14} />
-                    <span>{isUpdating ? "Saving..." : "Save"}</span>
-                  </button>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="btn btn-sm btn-light flex items-center gap-1.5"
-                    title="Cancel Edit"
-                  >
-                    <X size={14} />
-                    <span>Cancel</span>
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="btn btn-sm btn-light flex items-center gap-1.5"
-                  title="Edit Alert"
-                >
-                  <Pencil size={14} />
-                  <span>Edit</span>
-                </button>
-              )}
+              <button
+                onClick={() => setIsEditing(true)}
+                className="btn btn-sm btn-light flex items-center gap-1.5"
+                title="Edit Alert"
+              >
+                <Pencil size={14} />
+                <span>Edit</span>
+              </button>
             </div>
           </div>
         </DialogHeader>
+        )}
 
-        <DialogBody className="px-6 py-5 overflow-y-auto flex-1">
-          {isEditing ? (
-            <div className="flex flex-col gap-4 text-slate-800 dark:text-white">
+        {isEditing ? (
+          <>
+            <div className="grid gap-5 px-0 py-5">
               {/* Row 1: Symbol & Timeframe */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Symbol</label>
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900">Symbol</label>
                   <input
                     type="text"
                     value={formData.symbol}
                     onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
                     placeholder="e.g. BTCUSDT"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
+                    className="input input-md w-full"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Timeframe</label>
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900">Timeframe</label>
                   <input
                     type="text"
                     value={formData.timeframe}
                     onChange={(e) => setFormData({ ...formData, timeframe: e.target.value })}
                     placeholder="e.g. 15m, 1h, 4h, D"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
+                    className="input input-md w-full"
                   />
                 </div>
               </div>
 
               {/* Row 2: Signal Type & Strategy Name */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Signal Type</label>
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900">Signal Type</label>
                   <select
                     value={formData.signalType}
                     onChange={(e) => setFormData({ ...formData, signalType: e.target.value })}
-                    className="select select-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
+                    className="select select-md w-full"
                   >
                     <option value="BUY">BUY</option>
                     <option value="SELL">SELL</option>
                   </select>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Strategy Name</label>
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900">Strategy Name</label>
                   <input
                     type="text"
                     value={formData.strategyName}
                     onChange={(e) => setFormData({ ...formData, strategyName: e.target.value })}
                     placeholder="e.g. Bullseye, Supernova"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
+                    className="input input-md w-full"
                   />
                 </div>
               </div>
 
-              {/* Row 3: Entry Price, Stop Loss & Take Profit (TP1) */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Entry Price</label>
+              {/* Row 3: Entry Price & Stop Loss */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900">Entry Price</label>
                   <input
                     type="text"
                     value={formData.entryPrice}
                     onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
                     placeholder="e.g. 50000"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
+                    className="input input-md w-full"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Stop Loss (SL)</label>
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900">Stop Loss (Invalidation)</label>
                   <input
                     type="text"
                     value={formData.stopLoss}
                     onChange={(e) => setFormData({ ...formData, stopLoss: e.target.value })}
                     placeholder="e.g. 49500"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Take Profit (TP1)</label>
-                  <input
-                    type="text"
-                    value={formData.takeProfit}
-                    onChange={(e) => setFormData({ ...formData, takeProfit: e.target.value })}
-                    placeholder="e.g. 51000"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
+                    className="input input-md w-full"
                   />
                 </div>
               </div>
 
-              {/* Row 4: Exchange, Market & Alert Name */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Exchange</label>
-                  <input
-                    type="text"
-                    value={formData.exchange}
-                    onChange={(e) => setFormData({ ...formData, exchange: e.target.value })}
-                    placeholder="e.g. BINANCE, BYBIT"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Market</label>
-                  <input
-                    type="text"
-                    value={formData.market}
-                    onChange={(e) => setFormData({ ...formData, market: e.target.value })}
-                    placeholder="e.g. Crypto, Forex"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">Alert Name</label>
-                  <input
-                    type="text"
-                    value={formData.alertName}
-                    onChange={(e) => setFormData({ ...formData, alertName: e.target.value })}
-                    placeholder="e.g. Alert Long"
-                    className="input input-md w-full bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200"
-                  />
+              {/* Row 4: Take Profit Levels */}
+              <div>
+                <label className="form-label text-gray-900 mb-2">🎯 Target Levels</label>
+                <div className="grid grid-cols-4 gap-3">
+                  {["tp1", "tp2", "tp3", "tp4"].map((key, idx) => (
+                    <div key={key} className="flex flex-col gap-1">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">TP {idx + 1}</span>
+                      <input
+                        type="text"
+                        value={formData[key]}
+                        onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                        placeholder={`TP${idx + 1} price`}
+                        className="input input-md w-full"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Alert Message */}
-              <div className="flex flex-col gap-1.5">
-                <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">TradingView Alert Message</label>
-                <textarea
-                  value={formData.alertMessage}
-                  onChange={(e) => setFormData({ ...formData, alertMessage: e.target.value })}
-                  placeholder="Paste raw alert message text here"
-                  className="textarea w-full min-h-[100px] bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200 font-mono text-[13px]"
-                  rows={4}
-                />
-              </div>
-
-              {/* Custom Variables (JSON Textarea) */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="form-label text-slate-500 dark:text-slate-400 font-bold text-2xs uppercase tracking-wider">
-                    Custom Variables (JSON Object)
-                  </label>
-                  <span className="text-[10px] text-slate-400">e.g. tp2, tp3, tp4, lotSize</span>
+              {/* Row 5: Confirmations */}
+              <div>
+                <label className="form-label text-gray-900 mb-2">Confirmations</label>
+                <div className="grid grid-cols-5 gap-3">
+                  {[
+                    { key: "candle_match", label: "Candle Match" },
+                    { key: "trade_time", label: "Trade Time" },
+                    { key: "238_behind", label: "238 Behind" },
+                    { key: "with_the_trend", label: "With The Trend" },
+                    { key: "poc", label: "POC" },
+                  ].map((item) => {
+                    const val = formData?.confirmations?.[item.key] ?? null;
+                    return (
+                      <div
+                        key={item.key}
+                        onClick={() => {
+                          const next = val === true ? false : val === false ? null : true;
+                          setFormData({
+                            ...formData,
+                            confirmations: { ...(formData?.confirmations || {}), [item.key]: next },
+                          });
+                        }}
+                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border cursor-pointer transition-all select-none ${
+                          val === true
+                            ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-500/40"
+                            : val === false
+                            ? "border-red-400 bg-red-50 dark:bg-red-500/10 dark:border-red-500/40"
+                            : "border-gray-200 bg-gray-50 dark:bg-coal-300 dark:border-coal-200"
+                        }`}
+                        title={`Click to toggle: ✅ → ❌ → Not set → ✅`}
+                      >
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 text-center leading-tight">
+                          {item.label}
+                        </span>
+                        <span className="text-[18px]">
+                          {val === true ? "✅" : val === false ? "❌" : "➖"}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <textarea
-                  value={formData.customVariablesStr}
-                  onChange={(e) => setFormData({ ...formData, customVariablesStr: e.target.value })}
-                  placeholder='{\n  "tp2": 51500,\n  "tp3": 52000,\n  "lotSize": "0.1"\n}'
-                  className="textarea w-full min-h-[120px] bg-white dark:bg-coal-600 text-slate-900 dark:text-white border-gray-250 dark:border-coal-200 font-mono text-[13px]"
-                  rows={5}
-                />
               </div>
             </div>
-          ) : (
+            <div className="flex border-gray-200 border-t justify-end py-5 rounded-b dark:border-gray-200 gap-3">
+              <button type="button" className="btn btn-light" onClick={() => setIsEditing(false)}>
+                Cancel
+              </button>
+              <button disabled={isUpdating} onClick={handleSave} className="btn btn-primary">
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </>
+        ) : (
+          <DialogBody className="px-6 py-1 overflow-y-auto flex-1">
             <>
-              {/* Core Price Levels Grid */}
+              {/* ── Chart Screenshot Section ── */}
+              {signal?.chartImageUrl && (
+                <div className="mb-5 overflow-hidden rounded-xl border border-slate-200 dark:border-[#1F1F35]/70 shadow-sm">
+                  <div className="flex items-center justify-between px-4 py-2 bg-slate-100/80 dark:bg-[#161626]/80 border-b border-slate-200 dark:border-[#202038]">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                      Chart at Alert Time
+                    </span>
+                    <a
+                      href={signal?.chartImageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors"
+                    >
+                      Open full size ↗
+                    </a>
+                  </div>
+                  <img
+                    src={signal?.chartImageUrl}
+                    alt={`${signal?.symbol || "Chart"} at alert time`}
+                    className="w-full h-auto block bg-[#0a0a14]"
+                    loading="lazy"
+                    style={{ maxHeight: "360px", objectFit: "contain" }}
+                  />
+                </div>
+              )}
+
+              {/* Core Price Levels */}
               <div className="grid grid-cols-2 gap-3 mb-5">
                 <PriceBlock
-                  label="Entry Target"
-                  value={signal.entryPrice}
-                  colorClass="text-slate-900 dark:text-white"
-                  bgClass="bg-gray-50/70 dark:bg-coal-300"
+                  label="Entry"
+                  value={signal?.entryPrice}
+                  colorClass="text-slate-800 dark:text-white"
+                  bgClass="bg-slate-50/70 dark:bg-[#121222]/40"
                   icon={Crosshair}
                 />
                 <PriceBlock
                   label="Stop Loss (Invalidation)"
-                  value={signal.stopLoss}
+                  value={signal?.stopLoss}
                   colorClass="text-red-500 dark:text-[#ff3b30]"
-                  bgClass="bg-red-50/30 dark:bg-red-950/10"
+                  bgClass="bg-red-50/30 dark:bg-[#ef4444]/5"
                   icon={ShieldAlert}
                 />
               </div>
 
-              {/* TP Target exits */}
+              {/* TP Target Levels */}
               {tpLevels.length > 0 && (
                 <div className="mb-5">
-                  <div className="text-[10px] text-slate-400 font-bold mb-2.5 uppercase tracking-wider px-1">Take Profit Targets</div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2.5 uppercase tracking-wider px-1">
+                    🎯 Target Levels
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
                     {tpLevels.map((tp, idx) => (
                       <div
                         key={idx}
                         onClick={() => {
-                          if (tp.value != null) {
-                            navigator.clipboard.writeText(formatPrice(tp.value).toString());
-                            toast.success(`${tp.label} copied!`);
-                          }
+                          try {
+                            if (tp?.value != null) {
+                              navigator?.clipboard?.writeText?.(formatPrice(tp?.value)?.toString?.());
+                              toast?.success?.(`${tp?.label || "Value"} copied!`);
+                            }
+                          } catch (_) { /* clipboard may not be available */ }
                         }}
-                        className="flex justify-between items-center p-3 rounded-xl bg-green-50/20 dark:bg-green-950/10 border border-green-100/30 dark:border-green-900/20 hover:border-green-300 dark:hover:border-green-800 transition-all cursor-pointer group"
+                        className="flex justify-between items-center p-3 rounded-xl bg-emerald-50/30 dark:bg-[#10b981]/5 border border-emerald-100/30 dark:border-emerald-950/20 hover:border-emerald-300 dark:hover:border-emerald-800/50 transition-all cursor-pointer group"
                         title={`Click to copy ${tp.label}`}
                       >
                         <div className="flex items-center gap-2">
-                          <Target size={12} className="text-green-500" />
-                          <span className="text-[12px] font-bold text-slate-600 dark:text-slate-400">{tp.label}</span>
+                          <Target size={12} className="text-emerald-500" />
+                          <span className="text-[12px] font-bold text-slate-600 dark:text-slate-400">
+                            {tp?.label || ""}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className="text-[13px] font-black text-emerald-600 dark:text-emerald-400">
-                            {tp.value != null ? formatPrice(tp.value) : "—"}
+                            {tp?.value != null ? formatPrice(tp.value) : "—"}
                           </span>
-                          {tp.value != null && (
+                          {tp?.value != null && (
                             <Copy size={10} className="text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
                           )}
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Confirmations */}
+              {confirmations.length > 0 && (
+                <div className="mb-5">
+                  <div className="flex items-center justify-between px-1 mb-2.5">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                      Confirmations
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                      {passedCount}/{confirmations.length} passed
+                    </span>
+                  </div>
+                  <div className="bg-slate-50/30 dark:bg-[#0E0E18]/50 rounded-xl border border-slate-100 dark:border-[#1F1F35]/50 overflow-hidden">
+                    {confirmations.map((item, idx) => (
+                      <div
+                        key={item?.key ?? idx}
+                        className={`flex justify-between items-center px-4 py-3 ${idx < confirmations.length - 1
+                          ? "border-b border-slate-100 dark:border-[#1F1F35]/30"
+                          : ""
+                          }`}
+                      >
+                        <span className="text-[13px] text-slate-600 dark:text-slate-300 font-medium">
+                          {item?.label || ""}
+                        </span>
+                        {item?.passed ? (
+                          <span className="text-[16px]">✅</span>
+                        ) : (
+                          <span className="text-[16px]">❌</span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1679,112 +1834,22 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
                 </div>
               )}
 
-              {/* Alert Message terminal block */}
-              {signal.alertMessage && (
-                <div className="mb-5 overflow-hidden rounded-xl border border-slate-200 dark:border-[#202038]">
-                  <div className="flex justify-between items-center px-4 py-2 bg-slate-100/80 dark:bg-[#161626]/80 border-b border-slate-200 dark:border-[#202038] select-none">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">TradingView Alert Message</span>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(signal.alertMessage);
-                        toast.success("Alert message copied!");
-                      }}
-                      className="p-1 hover:bg-slate-255 dark:hover:bg-slate-800 rounded transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                      title="Copy message"
-                    >
-                      <Copy size={12} />
-                    </button>
-                  </div>
-                  <div className="p-4 bg-slate-50/40 dark:bg-[#0E0E18]">
-                    <p className="m-0 text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed font-mono whitespace-pre-wrap select-all">
-                      {signal.alertMessage}
-                    </p>
-                  </div>
-                </div>
-              )}
 
-
-              {/* Other Variables */}
-              {Object.keys(otherVars).length > 0 && (
-                <div className="mb-5">
-                  <div className="text-[10px] text-slate-400 font-bold mb-2 uppercase tracking-wider px-1">Other Variables</div>
-                  <div className="bg-gray-50/50 dark:bg-coal-300/50 rounded-xl border border-gray-100 dark:border-coal-100 px-4 py-1">
-                    {Object.entries(otherVars).map(([key, val]) => (
-                      <InfoRow key={key} label={formatKey(key)} value={typeof val === "object" ? JSON.stringify(val) : String(val)} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Extra Processed Fields */}
-              {Object.keys(extraProcessed).length > 0 && (
-                <div className="mb-5">
-                  <div className="text-[10px] text-slate-400 font-bold mb-2 uppercase tracking-wider px-1">Extra Fields</div>
-                  <div className="bg-gray-50/50 dark:bg-coal-300/50 rounded-xl border border-gray-100 dark:border-coal-100 px-4 py-1">
-                    {Object.entries(extraProcessed).map(([key, val]) => (
-                      <InfoRow key={key} label={formatKey(key)} value={typeof val === "object" ? JSON.stringify(val) : String(val)} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Collapsible Raw JSON payload */}
-              {signal.rawPayload && (
-                <div className="mb-5">
-                  <button
-                    onClick={() => setShowRaw(!showRaw)}
-                    className="flex items-center gap-1.5 w-full text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1 py-1.5 hover:bg-gray-150 dark:hover:bg-coal-200 rounded-lg transition-colors cursor-pointer justify-between"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <Activity size={10} />
-                      <span>Raw JSON Payload</span>
-                    </div>
-                    <span className="text-[10px]">{showRaw ? "Collapse [-]" : "Expand [+]"}</span>
-                  </button>
-                  {showRaw && (
-                    <div className="relative mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-coal-100">
-                      <div className="flex justify-between items-center px-4 py-1.5 bg-gray-50 dark:bg-coal-300 border-b border-gray-200 dark:border-coal-100">
-                        <span className="text-[9px] font-mono text-gray-400">payload.json</span>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(JSON.stringify(signal.rawPayload, null, 2));
-                            toast.success("Raw JSON copied!");
-                          }}
-                          className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                          title="Copy JSON"
-                        >
-                          <Copy size={11} />
-                        </button>
-                      </div>
-                      <div className="p-3.5 bg-gray-900 text-gray-300 overflow-x-auto max-h-[200px]">
-                        <pre className="m-0 text-[11px] leading-normal font-mono text-green-400/95 whitespace-pre-wrap break-all">
-                          {JSON.stringify(signal.rawPayload, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Standard Metadata Grid */}
-              <div className="mt-6 pt-4 border-t border-gray-100 dark:border-coal-100">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3 bg-gray-50/40 dark:bg-coal-300/40 p-4 rounded-xl border border-gray-100 dark:border-coal-200">
-                  {signal.exchange && <MetaItem label="Exchange" value={signal.exchange} />}
-                  {signal.market && <MetaItem label="Market" value={signal.market} />}
-                  {signal.timeframe && <MetaItem label="Timeframe" value={signal.timeframe} />}
-                  {signal.strategyName && <MetaItem label="Strategy" value={signal.strategyName} />}
-                  {signal.webhookConfig?.name && <MetaItem label="Webhook Config" value={signal.webhookConfig.name} />}
-                  {signal.alertName && <MetaItem label="Alert Name" value={signal.alertName} />}
-                  <MetaItem label="Delivery Status" value={signal.deliveryStatus} />
-                  <MetaItem label="Notification Status" value={signal.notificationStatus} />
-                  <MetaItem label="Received At" value={signal.receivedAt ? new Date(signal.receivedAt).toLocaleString() : null} />
-                  <MetaItem label="Processed At" value={signal.processedAt ? new Date(signal.processedAt).toLocaleString() : null} />
-                  <MetaItem label="Created At" value={new Date(signal.createdAt).toLocaleString()} colSpan={2} />
+              {/* ── Footer Metadata ── */}
+              <div className="pt-4 mt-2 border-t border-slate-100 dark:border-[#1F1F35]/50">
+                <div className="flex justify-between items-center text-[11px] text-slate-400 dark:text-slate-100">
+                  <span>
+                    {signal?.webhookConfig?.name ? `Strategy: ${signal.webhookConfig.name}` : (signal?.strategyName ? `Strategy: ${signal.strategyName}` : "")}
+                  </span>
+                  <span>
+                    {signal?.createdAt ? `Received: ${signal?.alertTimestamp || new Date(signal.createdAt).toLocaleString()}` : ""}
+                  </span>
                 </div>
               </div>
             </>
-          )}
-        </DialogBody>
+
+          </DialogBody>
+        )}
       </DialogContent>
     </Dialog>
   );
