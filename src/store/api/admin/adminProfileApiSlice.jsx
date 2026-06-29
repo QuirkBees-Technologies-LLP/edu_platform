@@ -5,9 +5,11 @@ export const adminProfileApiSlice = createApi({
     reducerPath: 'adminProfile',
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
+        // get admin profile
         getAdminProfile: builder.query({
             query: () => `/admin/auth/profile`,
         }),
+        // get admin dashboard
         getAdminDashboard: builder.query({
             query: () => `/admin/dashboard/`,
         }),
@@ -22,4 +24,4 @@ export const adminProfileApiSlice = createApi({
     }),
 });
 
-export const { useGetAdminProfileQuery,useGetAdminDashboardQuery, useUpdateAdminProfileMutation } = adminProfileApiSlice;
+export const { useGetAdminProfileQuery, useGetAdminDashboardQuery, useUpdateAdminProfileMutation } = adminProfileApiSlice;

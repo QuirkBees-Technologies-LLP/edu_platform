@@ -274,7 +274,7 @@ const TradingStrategies = () => {
                 setActiveLectureId(null);
                 setActiveLecture(null);
 
-                // Scroll to top to show the loaded strategy
+                // Allow enough time for Dialog to close and DOM to update before scrolling
                 setTimeout(() => {
                     window.scrollTo({
                         top: 0,
@@ -615,7 +615,7 @@ const TradingStrategies = () => {
 
                 {/* ========== LANGUAGE SELECTION MODAL ========== */}
                 <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-                    <DialogContent className="max-w-md w-full">
+                    <DialogContent className="max-w-md w-full" onCloseAutoFocus={(e) => e.preventDefault()}>
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold">
                                 Select Language
