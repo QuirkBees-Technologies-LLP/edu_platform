@@ -55,30 +55,30 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
                 {formatTimeframe(signal?.timeframe)}
               </span>
             )}
-
-            {/* Session pill */}
-            {signal?.session && (() => {
-              // Abbreviation map for common trading sessions
-              const SESSION_SHORT = {
-                "new york": "NY",
-                "london": "LDN",
-                "tokyo": "TKY",
-                "sydney": "SYD",
-                "asia": "ASIA",
-                "frankfurt": "FRA",
-                "hong kong": "HK",
-              };
-              const parts = signal.session.split(",").map((s) => s.trim()).filter(Boolean);
-              const display = parts.length > 1
-                ? parts.map((s) => SESSION_SHORT[s.toLowerCase()] || s).join(", ")
-                : signal.session;
-              return (
-                <span className="inline-flex items-center gap-1 h-7 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 rounded-lg flex-shrink-0 tracking-wide">
-                  {display}
-                </span>
-              );
-            })()}
           </div>
+
+          {/* Session label - smaller, below headers, not highlighted */}
+          {signal?.session && (() => {
+            const formatted = signal.session
+              .split(",")
+              .map((s) => {
+                const trimmed = s.trim();
+                if (!trimmed) return "";
+                const capitalized = trimmed
+                  .split(" ")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                  .join(" ");
+                return capitalized.toLowerCase().endsWith("session") ? capitalized : `${capitalized} session`;
+              })
+              .filter(Boolean)
+              .join(", ");
+
+            return (
+              <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-2 px-0.5">
+                {formatted}
+              </div>
+            );
+          })()}
         </div>
       </div>
       {signal?.chartImageUrl && (
