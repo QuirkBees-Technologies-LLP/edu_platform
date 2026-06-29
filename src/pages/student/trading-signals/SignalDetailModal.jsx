@@ -128,19 +128,15 @@ const SignalDetailModal = ({ signal, onClose }) => {
     return aNum - bNum;
   });
 
-  // ── Confirmations (from structured signal.confirmations object) ────
-  const CONFIRMATION_LABELS = {
-    candle_match: "Candle Match",
-    trade_time: "Trade Time",
-    "238_behind": "238 Behind",
-    with_the_trend: "With The Trend",
-    poc: "POC",
-  };
-
+  // ── Confirmations (dynamic — renders whatever keys exist in signal.confirmations) ──
   const confs = signal?.confirmations || {};
-  const confirmations = Object.entries(CONFIRMATION_LABELS)
-    .filter(([key]) => confs[key] !== undefined && confs[key] !== null)
-    .map(([key, label]) => ({ key, label, passed: !!confs[key] }));
+  const confirmations = Object.entries(confs)
+    .filter(([, val]) => typeof val === "boolean")
+    .map(([key, val]) => ({
+      key,
+      label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      passed: val,
+    }));
 
   const otherVars = { ...customVars };
 

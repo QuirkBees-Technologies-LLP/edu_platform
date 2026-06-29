@@ -205,17 +205,13 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
         const confs = signal?.confirmations;
         if (!confs || typeof confs !== "object") return null;
 
-        const CONFIRMATION_LABELS = {
-          candle_match: "Candle Match",
-          trade_time: "Trade Time",
-          "238_behind": "238 Behind",
-          with_the_trend: "With The Trend",
-          poc: "POC",
-        };
-
-        const items = Object.entries(CONFIRMATION_LABELS)
-          .filter(([key]) => confs[key] !== undefined && confs[key] !== null)
-          .map(([key, label]) => ({ key, label, passed: !!confs[key] }));
+        const items = Object.entries(confs)
+          .filter(([, val]) => typeof val === "boolean")
+          .map(([key, val]) => ({
+            key,
+            label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+            passed: val,
+          }));
 
         if (items.length === 0) return null;
 

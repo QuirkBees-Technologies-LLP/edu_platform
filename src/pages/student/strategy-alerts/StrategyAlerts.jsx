@@ -243,19 +243,33 @@ const StrategyAlerts = () => {
               });
               tps.sort((a, b) => a.num - b.num);
 
-              // ── Build confirmations from customVariables ──
+              // ── Build confirmations dynamically ──
+              // Prefer structured signal.confirmations (new format),
+              // fall back to customVariables parsing (old format).
               const confirmations = [];
-              Object.entries(customVars).forEach(([key, val]) => {
-                const norm = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-                if (norm.startsWith("tp") && /^\d+$/.test(norm.slice(2))) return;
-                const strVal = String(val).trim().toLowerCase();
-                const isTruthy = ["true", "yes", "1", "✅", "☑", "✔"].includes(strVal) || strVal.includes("✅");
-                const isFalsy = ["false", "no", "0", "❌", "✖", "✗"].includes(strVal) || strVal.includes("❌");
-                if (isTruthy || isFalsy) {
-                  const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-                  confirmations.push({ label, passed: isTruthy });
-                }
-              });
+              const sigConfs = signal?.confirmations;
+              if (sigConfs && typeof sigConfs === "object" && Object.keys(sigConfs).length > 0) {
+                // New format: read from signal.confirmations
+                Object.entries(sigConfs).forEach(([key, val]) => {
+                  if (typeof val === "boolean") {
+                    const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                    confirmations.push({ label, passed: val });
+                  }
+                });
+              } else {
+                // Legacy fallback: parse boolean-like values from customVariables
+                Object.entries(customVars).forEach(([key, val]) => {
+                  const norm = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+                  if (norm.startsWith("tp") && /^\d+$/.test(norm.slice(2))) return;
+                  const strVal = String(val).trim().toLowerCase();
+                  const isTruthy = ["true", "yes", "1", "✅", "☑", "✔"].includes(strVal) || strVal.includes("✅");
+                  const isFalsy = ["false", "no", "0", "❌", "✖", "✗"].includes(strVal) || strVal.includes("❌");
+                  if (isTruthy || isFalsy) {
+                    const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                    confirmations.push({ label, passed: isTruthy });
+                  }
+                });
+              }
 
               return (
                 <div

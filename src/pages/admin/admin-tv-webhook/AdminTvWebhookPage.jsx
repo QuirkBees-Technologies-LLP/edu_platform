@@ -1225,13 +1225,7 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
     tp2: "",
     tp3: "",
     tp4: "",
-    confirmations: {
-      candle_match: null,
-      trade_time: null,
-      "238_behind": null,
-      with_the_trend: null,
-      poc: null,
-    },
+    confirmations: {},
   });
 
   React.useEffect(() => {
@@ -1265,15 +1259,12 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
         tpVals.tp1 = String(signal.takeProfit);
       }
 
-      // Build confirmations
+      // Build confirmations dynamically from whatever keys exist
       const sigConfs = signal.confirmations || {};
-      const confState = {
-        candle_match: sigConfs.candle_match ?? null,
-        trade_time: sigConfs.trade_time ?? null,
-        "238_behind": sigConfs["238_behind"] ?? null,
-        with_the_trend: sigConfs.with_the_trend ?? null,
-        poc: sigConfs.poc ?? null,
-      };
+      const confState = {};
+      for (const [key, val] of Object.entries(sigConfs)) {
+        if (typeof val === "boolean") confState[key] = val;
+      }
 
       setFormData({
         symbol: signal.symbol || "",
@@ -1374,18 +1365,15 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
     }
   }
 
-  // ── Confirmations ────────────────────────────────────────────────
-  const CONFIRMATION_LABELS = {
-    candle_match: "Candle Match",
-    trade_time: "Trade Time",
-    "238_behind": "238 Behind",
-    with_the_trend: "With The Trend",
-    poc: "POC",
-  };
+  // ── Confirmations (dynamic — renders whatever keys exist) ──────
   const confs = signal?.confirmations || {};
-  const confirmations = Object.entries(CONFIRMATION_LABELS)
-    .filter(([key]) => confs[key] !== undefined && confs[key] !== null)
-    .map(([key, label]) => ({ key, label, passed: !!confs[key] }));
+  const confirmations = Object.entries(confs)
+    .filter(([, val]) => typeof val === "boolean")
+    .map(([key, val]) => ({
+      key,
+      label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      passed: val,
+    }));
   const passedCount = confirmations.filter((c) => c.passed).length;
 
   const config = signalConfig?.[type] || signalConfig?.OTHER || {};
@@ -1642,46 +1630,37 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
                 </div>
               </div>
 
-              {/* Row 5: Confirmations */}
+              {/* Row 5: Confirmations (dynamic from signal data) */}
               <div>
                 <label className="form-label text-gray-900 mb-2">Confirmations</label>
                 <div className="grid grid-cols-5 gap-3">
-                  {[
-                    { key: "candle_match", label: "Candle Match" },
-                    { key: "trade_time", label: "Trade Time" },
-                    { key: "238_behind", label: "238 Behind" },
-                    { key: "with_the_trend", label: "With The Trend" },
-                    { key: "poc", label: "POC" },
-                  ].map((item) => {
-                    const val = formData?.confirmations?.[item.key] ?? null;
-                    return (
-                      <div
-                        key={item.key}
-                        onClick={() => {
-                          const next = val === true ? false : val === false ? null : true;
-                          setFormData({
-                            ...formData,
-                            confirmations: { ...(formData?.confirmations || {}), [item.key]: next },
-                          });
-                        }}
-                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border cursor-pointer transition-all select-none ${
-                          val === true
-                            ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-500/40"
-                            : val === false
-                            ? "border-red-400 bg-red-50 dark:bg-red-500/10 dark:border-red-500/40"
-                            : "border-gray-200 bg-gray-50 dark:bg-coal-300 dark:border-coal-200"
-                        }`}
-                        title={`Click to toggle: ✅ → ❌ → Not set → ✅`}
-                      >
-                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 text-center leading-tight">
-                          {item.label}
-                        </span>
-                        <span className="text-[18px]">
-                          {val === true ? "✅" : val === false ? "❌" : "➖"}
-                        </span>
-                      </div>
-                    );
-                  })}
+                  {Object.entries(formData?.confirmations || {}).map(([key, val]) => (
+                    <div
+                      key={key}
+                      onClick={() => {
+                        const next = val === true ? false : val === false ? null : true;
+                        setFormData({
+                          ...formData,
+                          confirmations: { ...(formData?.confirmations || {}), [key]: next },
+                        });
+                      }}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border cursor-pointer transition-all select-none ${
+                        val === true
+                          ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-500/40"
+                          : val === false
+                          ? "border-red-400 bg-red-50 dark:bg-red-500/10 dark:border-red-500/40"
+                          : "border-gray-200 bg-gray-50 dark:bg-coal-300 dark:border-coal-200"
+                      }`}
+                      title={`Click to toggle: ✅ → ❌ → Not set → ✅`}
+                    >
+                      <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 text-center leading-tight">
+                        {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </span>
+                      <span className="text-[18px]">
+                        {val === true ? "✅" : val === false ? "❌" : "➖"}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
