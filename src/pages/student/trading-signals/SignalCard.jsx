@@ -57,11 +57,27 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
             )}
 
             {/* Session pill */}
-            {signal?.session && (
-              <span className="inline-flex items-center gap-1 h-7 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 rounded-lg flex-shrink-0 tracking-wide">
-                {signal.session}
-              </span>
-            )}
+            {signal?.session && (() => {
+              // Abbreviation map for common trading sessions
+              const SESSION_SHORT = {
+                "new york": "NY",
+                "london": "LDN",
+                "tokyo": "TKY",
+                "sydney": "SYD",
+                "asia": "ASIA",
+                "frankfurt": "FRA",
+                "hong kong": "HK",
+              };
+              const parts = signal.session.split(",").map((s) => s.trim()).filter(Boolean);
+              const display = parts.length > 1
+                ? parts.map((s) => SESSION_SHORT[s.toLowerCase()] || s).join(", ")
+                : signal.session;
+              return (
+                <span className="inline-flex items-center gap-1 h-7 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 rounded-lg flex-shrink-0 tracking-wide">
+                  {display}
+                </span>
+              );
+            })()}
           </div>
         </div>
       </div>
