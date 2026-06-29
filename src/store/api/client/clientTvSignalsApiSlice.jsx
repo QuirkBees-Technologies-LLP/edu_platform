@@ -4,7 +4,7 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientTvSignalsApiSlice = createApi({
   reducerPath: "clientTvSignals",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvFilterPrefs"],
+  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvFilterPrefs", "TvStrategyPrefs"],
   endpoints: (builder) => ({
     getClientTvSignals: builder.query({
       query: ({
@@ -15,6 +15,9 @@ export const clientTvSignalsApiSlice = createApi({
         excludedSignalTypes = [],
         excludedStrategies = [],
         excludedTimeframes = [],
+        // Strategy-specific display filters
+        entryType = "",          // Defy: "confirmed" | "pending" | ""
+        excludedEntryTypes = [], // Defy multi-select exclusion
         // Legacy single-value filters (backward compat)
         symbol = "",
         signalType = "",
@@ -33,6 +36,10 @@ export const clientTvSignalsApiSlice = createApi({
         if (excludedSignalTypes.length > 0) params.set("excludedSignalTypes", excludedSignalTypes.join(","));
         if (excludedStrategies.length > 0) params.set("excludedStrategies", excludedStrategies.join(","));
         if (excludedTimeframes.length > 0) params.set("excludedTimeframes", excludedTimeframes.join(","));
+
+        // Defy entry type filter
+        if (entryType) params.set("entryType", entryType);
+        if (excludedEntryTypes.length > 0) params.set("excludedEntryTypes", excludedEntryTypes.join(","));
 
         // Legacy single-value fallback
         if (symbol) params.set("symbol", symbol);
@@ -71,6 +78,21 @@ export const clientTvSignalsApiSlice = createApi({
       }),
       invalidatesTags: [{ type: "TvFilterPrefs" }],
     }),
+
+    // ── Strategy-specific filter preferences (Bullseye / Defy) ───────────
+    getStrategyFilterPreferences: builder.query({
+      query: () => `/users/tv-signals/strategy-filter-preferences`,
+      providesTags: [{ type: "TvStrategyPrefs" }],
+    }),
+
+    saveStrategyFilterPreferences: builder.mutation({
+      query: (prefs) => ({
+        url: `/users/tv-signals/strategy-filter-preferences`,
+        method: "PUT",
+        body: prefs,
+      }),
+      invalidatesTags: [{ type: "TvStrategyPrefs" }],
+    }),
   }),
 });
 
@@ -80,4 +102,6 @@ export const {
   useGetFilterOptionsQuery,
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
+  useGetStrategyFilterPreferencesQuery,
+  useSaveStrategyFilterPreferencesMutation,
 } = clientTvSignalsApiSlice;
