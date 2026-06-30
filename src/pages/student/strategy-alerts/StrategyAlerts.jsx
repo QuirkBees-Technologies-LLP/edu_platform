@@ -128,7 +128,7 @@ const StrategyAlerts = () => {
                 Strategy Alerts
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Live trading signals from IQ Strategies
+                Live trading alerts from IQ Strategies
               </p>
             </div>
           </div>
@@ -142,7 +142,7 @@ const StrategyAlerts = () => {
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">
-                Total Signals
+                Total Alerts
               </p>
               <p className="text-xl font-bold text-gray-900 dark:text-white">
                 {data?.pagination?.total || 0}
@@ -215,7 +215,7 @@ const StrategyAlerts = () => {
               No strategy alerts yet
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Alerts will appear here when IQ Strategies signals are triggered
+              Alerts will appear here when IQ Strategies alerts are triggered
             </p>
           </div>
         ) : (
@@ -329,7 +329,7 @@ const StrategyAlerts = () => {
                       </div>
                       <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
                         <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-1">
-                          Timeframe
+                          Time Frame
                         </p>
                         <p className="text-lg font-bold text-gray-900 dark:text-white">
                           {signal.timeframe ? formatTimeframe(signal.timeframe) : "—"}
@@ -399,11 +399,26 @@ const StrategyAlerts = () => {
 
                     {/* ── Footer: Time ── */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-                      {signal.session && (
-                        <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-                          Session: {signal.session}
-                        </span>
-                      )}
+                      {signal.session && (() => {
+                        const formatted = signal.session
+                          .split(",")
+                          .map((s) => {
+                            const trimmed = s.trim();
+                            if (!trimmed) return "";
+                            const capitalized = trimmed
+                              .split(" ")
+                              .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                              .join(" ");
+                            return capitalized.toLowerCase().endsWith("session") ? capitalized : `${capitalized} session`;
+                          })
+                          .filter(Boolean)
+                          .join(", ");
+                        return (
+                          <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                            {formatted}
+                          </span>
+                        );
+                      })()}
                       <div className="flex items-center gap-1 text-gray-400 ml-auto">
                         <Clock className="w-3.5 h-3.5" />
                         <span className="text-[11px]">
@@ -427,7 +442,7 @@ const StrategyAlerts = () => {
         {!isFetching && page >= totalPages && signals.length > 0 && (
           <div className="flex justify-center items-center py-6">
             <span className="text-[11px] text-gray-400 dark:text-gray-600 font-medium tracking-wide">
-              — All signals loaded —
+              — All alerts loaded —
             </span>
           </div>
         )}

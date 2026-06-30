@@ -66,14 +66,8 @@ const saveFilters = (filters) => {
   }
 };
 
-// ── Hardcoded timeframe options ──────────────────────────────────────
+// ── Hardcoded time frame options ─────────────────────────────────────
 const TIMEFRAME_OPTIONS = [
-  { value: "1S", label: "1S" },
-  { value: "5S", label: "5S" },
-  { value: "10S", label: "10S" },
-  { value: "15S", label: "15S" },
-  { value: "30S", label: "30S" },
-  { value: "45S", label: "45S" },
   { value: "1m", label: "1m" },
   { value: "3m", label: "3m" },
   { value: "5m", label: "5m" },
@@ -595,7 +589,7 @@ const StudentTradingSignals = () => {
               <Search size={16} className="text-slate-400 dark:text-slate-500" />
               <input
                 type="text"
-                placeholder="Search signals..."
+                placeholder="Search alerts..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="border-none outline-none bg-transparent text-xs w-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
@@ -718,7 +712,7 @@ const StudentTradingSignals = () => {
               />
             )}
             <FilterSelect
-              label="Signal Type"
+              label="Alert Type"
               excludedValues={exclusionFilters.excludedSignalTypes}
               onExcludedChange={(v) => updateExclusion("excludedSignalTypes", v)}
               placeholder="All Types"
@@ -729,10 +723,10 @@ const StudentTradingSignals = () => {
               onExcludedChange={(v) => updateExclusion("excludedSymbols", v)}
             />
             <FilterSelect
-              label="Timeframe"
+              label="Time Frame"
               excludedValues={exclusionFilters.excludedTimeframes}
               onExcludedChange={(v) => updateExclusion("excludedTimeframes", v)}
-              placeholder="All Timeframes"
+              placeholder="All Time Frames"
               options={TIMEFRAME_OPTIONS}
             />
 
@@ -790,13 +784,13 @@ const StudentTradingSignals = () => {
         <div className="text-center py-20 px-5 bg-slate-50 dark:bg-[#131324]/20 rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#202038]">
           <ChartLine size={48} className="text-slate-300 dark:text-slate-700 mx-auto mb-4" />
           <h3 className="text-slate-600 dark:text-slate-400 font-semibold mb-2 text-base">
-            No Signals Found
+            No Alerts Found
           </h3>
           <p className="text-slate-400 dark:text-slate-500 text-sm max-w-md mx-auto mb-4">
             {search
-              ? `No signals match "${search}". Try a different search term.`
+              ? `No alerts match "${search}". Try a different search term.`
               : hasActiveFilters
-                ? "Your current filters are excluding all signals. Try adjusting your filter settings or clearing them."
+                ? "Your current filters are excluding all alerts. Try adjusting your filter settings or clearing them."
                 : "IQ Strategies Alerts will appear here automatically when alerts are triggered."}
           </p>
           {(hasActiveFilters || search) && (
@@ -833,7 +827,7 @@ const StudentTradingSignals = () => {
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
           <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-            Loading more signals…
+            Loading more alerts…
           </span>
         </div>
       )}
@@ -842,7 +836,7 @@ const StudentTradingSignals = () => {
       {!isFetching && page >= totalPages && signals.length > 0 && (
         <div className="flex justify-center items-center py-6">
           <span className="text-[11px] text-slate-400 dark:text-slate-600 font-medium tracking-wide">
-            — All signals loaded —
+            — All alerts loaded —
           </span>
         </div>
       )}

@@ -168,7 +168,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitle className="margin-0 text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                {signal?.symbol || "Signal Detail"}
+                {signal?.symbol || "Alert Detail"}
               </DialogTitle>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 {/* Signal Type badge */}
@@ -188,11 +188,26 @@ const SignalDetailModal = ({ signal, onClose }) => {
                   </span>
                 )}
                 {/* Session pill */}
-                {signal?.session && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 py-0.5 rounded-md">
-                    🌍 {signal.session}
-                  </span>
-                )}
+                {signal?.session && (() => {
+                  const formatted = signal.session
+                    .split(",")
+                    .map((s) => {
+                      const trimmed = s.trim();
+                      if (!trimmed) return "";
+                      const capitalized = trimmed
+                        .split(" ")
+                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join(" ");
+                      return capitalized.toLowerCase().endsWith("session") ? capitalized : `${capitalized} session`;
+                    })
+                    .filter(Boolean)
+                    .join(", ");
+                  return (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 py-0.5 rounded-md">
+                      🌍 {formatted}
+                    </span>
+                  );
+                })()}
                 {/* Alert Timestamp pill */}
                 {/* {signal?.alertTimestamp && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-600 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 px-2 py-0.5 rounded-md">
@@ -233,9 +248,8 @@ const SignalDetailModal = ({ signal, onClose }) => {
               <img
                 src={signal?.chartImageUrl}
                 alt={`${signal?.symbol || "Chart"} at alert time`}
-                className="w-full h-auto block bg-[#0a0a14]"
+                className="w-full h-[340px] block bg-[#0a0a14] object-cover object-right"
                 loading="lazy"
-                style={{ maxHeight: "360px", objectFit: "contain" }}
               />
             </div>
           )}
