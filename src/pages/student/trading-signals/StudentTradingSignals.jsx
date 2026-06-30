@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   useGetClientTvSignalsQuery,
   useGetFilterOptionsQuery,
@@ -15,6 +16,7 @@ import {
   X,
   Target,
   Zap,
+  BellRing,
 } from "lucide-react";
 import {
   Toolbar,
@@ -86,23 +88,23 @@ const TIMEFRAME_OPTIONS = [
 // ── Bullseye Pattern options ────────────────────────────────────────
 const BULLSEYE_PATTERNS = [
   { value: "XAUUSD", label: "XAUUSD" },
-  { value: "GR40",   label: "GR40" },
+  { value: "GR40", label: "GR40" },
   { value: "NAS100", label: "NAS100" },
   { value: "S&P 500", label: "S&P 500" },
-  { value: "Majors",  label: "Majors" },
+  { value: "Majors", label: "Majors" },
 ];
 
 // ── Defy Execution Mode options ─────────────────────────────────────
 // entrytype field: "confirmed" = Market Execution, "pending" = Pending Orders
 const DEFY_MODES = [
   { value: "confirmed", label: "Market Execution" },
-  { value: "pending",   label: "Pending Orders" },
+  { value: "pending", label: "Pending Orders" },
 ];
 
 // ── Default strategy display state ──────────────────────────────────
 const DEFAULT_STRATEGY_DISPLAY = {
   bullseye: { excludedPatterns: [] },   // [] = all selected
-  defy:     { excludedModes: [] },      // [] = all selected
+  defy: { excludedModes: [] },      // [] = all selected
 };
 
 // ── StrategyFilterPanel — inline filter UI below the filter bar ─────
@@ -125,16 +127,15 @@ const BullseyeFilterPanel = ({ excludedPatterns, onChange }) => (
                 onChange(excludedPatterns.filter((v) => v !== p.value));
               }
             }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
-              isChecked
-                ? "bg-yellow-500/10 border-yellow-500/40 text-yellow-700 dark:text-yellow-400"
-                : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
-            }`}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${isChecked
+              ? "bg-yellow-500/10 border-yellow-500/40 text-yellow-700 dark:text-yellow-400"
+              : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
+              }`}
           >
             <Checkbox
               checked={isChecked}
               className="h-3 w-3"
-              onCheckedChange={() => {}}
+              onCheckedChange={() => { }}
             />
             {p.label}
           </button>
@@ -169,16 +170,15 @@ const DefyFilterPanel = ({ excludedModes, onChange }) => {
                   onChange(excludedModes.filter((v) => v !== m.value));
                 }
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
-                isChecked
-                  ? "bg-blue-500/10 border-blue-500/40 text-blue-700 dark:text-blue-400"
-                  : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
-              }`}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${isChecked
+                ? "bg-blue-500/10 border-blue-500/40 text-blue-700 dark:text-blue-400"
+                : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
+                }`}
             >
               <Checkbox
                 checked={isChecked}
                 className="h-3 w-3"
-                onCheckedChange={() => {}}
+                onCheckedChange={() => { }}
               />
               {m.label}
             </button>
@@ -217,6 +217,7 @@ const areStratPrefsEqual = (p1, p2) => {
 // ── Student Trading Signals Page ────────────────────────────────────
 
 const StudentTradingSignals = () => {
+  const navigate = useNavigate();
   // ── Separate page state so filters reset never conflict ──────────
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -288,15 +289,15 @@ const StudentTradingSignals = () => {
           bullseye: {
             excludedPatterns: Array.isArray(d.bullseye_patterns)
               ? BULLSEYE_PATTERNS
-                  .map((p) => p.value)
-                  .filter((v) => !d.bullseye_patterns.includes(v))
+                .map((p) => p.value)
+                .filter((v) => !d.bullseye_patterns.includes(v))
               : [],
           },
           defy: {
             excludedModes: Array.isArray(d.defy_mode)
               ? DEFY_MODES
-                  .map((m) => m.value)
-                  .filter((v) => !d.defy_mode.includes(v))
+                .map((m) => m.value)
+                .filter((v) => !d.defy_mode.includes(v))
               : [],
           },
         };
@@ -537,7 +538,7 @@ const StudentTradingSignals = () => {
 
   // ── Strategy sub-filter counts (only when strategy is active) ────
   const bullseyeActive = selectedStrategy === "bullseye";
-  const defyActive     = selectedStrategy === "defy";
+  const defyActive = selectedStrategy === "defy";
 
   const bullseyeSelectedCount = bullseyeActive
     ? BULLSEYE_PATTERNS.length - strategyDisplay.bullseye.excludedPatterns.length
@@ -595,6 +596,15 @@ const StudentTradingSignals = () => {
                 className="border-none outline-none bg-transparent text-xs w-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
+            {/* Manage Notifications */}
+            <button
+              type="button"
+              onClick={() => navigate("/profile?tab=alerts")}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+            >
+              <BellRing size={14} />
+              Manage Alert Notifications
+            </button>
 
             {/* Filter Toggle */}
             <button
@@ -628,11 +638,10 @@ const StudentTradingSignals = () => {
               <button
                 type="button"
                 onClick={() => handleStrategySelect("bullseye")}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
-                  bullseyeActive
-                    ? "bg-yellow-500/15 border-yellow-500 text-yellow-600 dark:text-yellow-400"
-                    : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#202038] text-slate-600 dark:text-slate-300 hover:border-yellow-500/50"
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${bullseyeActive
+                  ? "bg-yellow-500/15 border-yellow-500 text-yellow-600 dark:text-yellow-400"
+                  : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#202038] text-slate-600 dark:text-slate-300 hover:border-yellow-500/50"
+                  }`}
               >
                 <Target size={13} className={bullseyeActive ? "text-yellow-500" : "text-slate-400"} />
                 Bullseye
@@ -645,11 +654,10 @@ const StudentTradingSignals = () => {
               <button
                 type="button"
                 onClick={() => handleStrategySelect("defy")}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
-                  defyActive
-                    ? "bg-blue-500/15 border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#202038] text-slate-600 dark:text-slate-300 hover:border-blue-500/50"
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${defyActive
+                  ? "bg-blue-500/15 border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#202038] text-slate-600 dark:text-slate-300 hover:border-blue-500/50"
+                  }`}
               >
                 <Zap size={13} className={defyActive ? "text-blue-500" : "text-slate-400"} />
                 Defy
