@@ -111,8 +111,9 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
   );
 
   const allChecked = excludedValues.length === 0;
-  const noneChecked = excludedValues.length === ALL_SYMBOLS.length;
-  const checkedCount = ALL_SYMBOLS.length - excludedValues.length;
+  const validExcluded = excludedValues.filter((v) => ALL_SYMBOLS.includes(v));
+  const noneChecked = validExcluded.length >= ALL_SYMBOLS.length;
+  const checkedCount = Math.max(0, ALL_SYMBOLS.length - validExcluded.length);
 
   // Global checkbox state: checked / indeterminate / unchecked
   const globalCheckState = allChecked
@@ -179,8 +180,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
             "
           >
             {/* Select All / Deselect All */}
-            <button
-              type="button"
+            <div
               onClick={toggleAll}
               className={`
                 w-full flex items-center gap-2.5 px-3 py-2.5 text-xs
@@ -191,14 +191,14 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
             >
               <Checkbox
                 checked={globalCheckState}
-                onCheckedChange={toggleAll}
+                onCheckedChange={() => {}}
                 className="h-4 w-4"
               />
               <span>{allChecked ? "Deselect All" : "Select All"}</span>
               <span className="text-[10px] text-muted-foreground ml-auto">
                 {checkedCount}/{ALL_SYMBOLS.length}
               </span>
-            </button>
+            </div>
 
             <div className="mx-3 my-1 border-t border-border" />
 
@@ -295,8 +295,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
 
                 return (
                   <>
-                    <button
-                      type="button"
+                    <div
                       onClick={() => toggleCategory(activeCat)}
                       className={`
                         w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold
@@ -306,14 +305,14 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
                     >
                       <Checkbox
                         checked={catCheckState}
-                        onCheckedChange={() => toggleCategory(activeCat)}
+                        onCheckedChange={() => {}}
                         className="h-4 w-4"
                       />
                       <span>All {activeCat.label}</span>
                       <span className="text-[10px] text-muted-foreground ml-auto">
                         {catCheckedCount}/{catSymbols.length}
                       </span>
-                    </button>
+                    </div>
                     <div className="mx-3 my-1 border-t border-border" />
                   </>
                 );
@@ -323,9 +322,8 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
               {activeCat.instruments.map((inst) => {
                 const isChecked = !excludedValues.includes(inst.symbol);
                 return (
-                  <button
+                  <div
                     key={inst.symbol}
-                    type="button"
                     onClick={() => toggleSymbol(inst.symbol)}
                     className={`
                       w-full flex items-center gap-2.5 px-3 py-2 text-xs
@@ -336,7 +334,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
                   >
                     <Checkbox
                       checked={isChecked}
-                      onCheckedChange={() => toggleSymbol(inst.symbol)}
+                      onCheckedChange={() => {}}
                       className="h-4 w-4"
                     />
                     <span className="text-[11px]">
@@ -347,7 +345,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
                         {inst.label}
                       </span>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>

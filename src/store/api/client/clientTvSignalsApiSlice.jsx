@@ -18,6 +18,7 @@ export const clientTvSignalsApiSlice = createApi({
         // Strategy-specific display filters
         entryType = "",          // Defy: "confirmed" | "pending" | ""
         excludedEntryTypes = [], // Defy multi-select exclusion
+        excludedBullseyePatterns = [], // Bullseye pattern exclusion
         // Legacy single-value filters (backward compat)
         symbol = "",
         signalType = "",
@@ -40,6 +41,9 @@ export const clientTvSignalsApiSlice = createApi({
         // Defy entry type filter
         if (entryType) params.set("entryType", entryType);
         if (excludedEntryTypes.length > 0) params.set("excludedEntryTypes", excludedEntryTypes.join(","));
+
+        // Bullseye pattern filter
+        if (excludedBullseyePatterns.length > 0) params.set("excludedBullseyePatterns", excludedBullseyePatterns.join(","));
 
         // Legacy single-value fallback
         if (symbol) params.set("symbol", symbol);
@@ -76,7 +80,8 @@ export const clientTvSignalsApiSlice = createApi({
         method: "PUT",
         body: prefs,
       }),
-      invalidatesTags: [{ type: "TvFilterPrefs" }],
+      // No invalidatesTags — we already have the values in local state,
+      // refetching after save is redundant and causes extra GET calls.
     }),
 
     // ── Strategy-specific filter preferences (Bullseye / Defy) ───────────
@@ -91,7 +96,7 @@ export const clientTvSignalsApiSlice = createApi({
         method: "PUT",
         body: prefs,
       }),
-      invalidatesTags: [{ type: "TvStrategyPrefs" }],
+      // No invalidatesTags — same reason as above.
     }),
   }),
 });

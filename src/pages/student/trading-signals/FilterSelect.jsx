@@ -27,7 +27,7 @@ const FilterSelect = ({
   }, []);
 
   const allChecked = excludedValues.length === 0;
-  const checkedCount = options.length - excludedValues.length;
+  const checkedCount = Math.max(0, options.length - excludedValues.filter((v) => options.some((o) => o.value === v)).length);
 
   const toggleValue = (val) => {
     if (excludedValues.includes(val)) {
@@ -100,8 +100,7 @@ const FilterSelect = ({
           }}
         >
           {/* Select All / Deselect All */}
-          <button
-            type="button"
+          <div
             onClick={toggleAll}
             className={`
               w-full flex items-center gap-2.5 px-3 py-2 text-xs
@@ -112,11 +111,11 @@ const FilterSelect = ({
           >
             <Checkbox
               checked={allChecked}
-              onCheckedChange={toggleAll}
+              onCheckedChange={() => {}}
               className="h-4 w-4"
             />
             <span>{allChecked ? "Deselect All" : "Select All"}</span>
-          </button>
+          </div>
 
           <div className="mx-3 my-1 border-t border-border" />
 
@@ -124,9 +123,8 @@ const FilterSelect = ({
           {options.map((opt) => {
             const isChecked = !excludedValues.includes(opt.value);
             return (
-              <button
+              <div
                 key={opt.value}
-                type="button"
                 onClick={() => toggleValue(opt.value)}
                 className={`
                   w-full flex items-center gap-2.5 px-3 py-2 text-xs
@@ -137,11 +135,11 @@ const FilterSelect = ({
               >
                 <Checkbox
                   checked={isChecked}
-                  onCheckedChange={() => toggleValue(opt.value)}
+                  onCheckedChange={() => {}}
                   className="h-4 w-4"
                 />
                 <span>{opt.label}</span>
-              </button>
+              </div>
             );
           })}
         </div>

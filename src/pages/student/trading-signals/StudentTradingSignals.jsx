@@ -150,43 +150,75 @@ const BullseyeFilterPanel = ({ excludedPatterns, onChange }) => (
   </div>
 );
 
-const DefyFilterPanel = ({ excludedModes, onChange }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
-      Execution Mode
-    </label>
-    <div className="flex flex-wrap gap-2">
-      {DEFY_MODES.map((m) => {
-        const isChecked = !excludedModes.includes(m.value);
-        return (
-          <button
-            key={m.value}
-            type="button"
-            onClick={() => {
-              if (isChecked) {
-                onChange([...excludedModes, m.value]);
-              } else {
-                onChange(excludedModes.filter((v) => v !== m.value));
-              }
-            }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
-              isChecked
-                ? "bg-blue-500/10 border-blue-500/40 text-blue-700 dark:text-blue-400"
-                : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
-            }`}
-          >
-            <Checkbox
-              checked={isChecked}
-              className="h-3 w-3"
-              onCheckedChange={() => {}}
-            />
-            {m.label}
-          </button>
-        );
-      })}
+const DefyFilterPanel = ({ excludedModes, onChange }) => {
+  // BUG #4 fix: at least one mode must remain checked
+  const checkedCount = DEFY_MODES.length - excludedModes.length;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
+        Execution Mode
+      </label>
+      <div className="flex flex-wrap gap-2">
+        {DEFY_MODES.map((m) => {
+          const isChecked = !excludedModes.includes(m.value);
+          return (
+            <button
+              key={m.value}
+              type="button"
+              onClick={() => {
+                if (isChecked) {
+                  // Prevent unchecking the last checked mode
+                  if (checkedCount <= 1) return;
+                  onChange([...excludedModes, m.value]);
+                } else {
+                  onChange(excludedModes.filter((v) => v !== m.value));
+                }
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
+                isChecked
+                  ? "bg-blue-500/10 border-blue-500/40 text-blue-700 dark:text-blue-400"
+                  : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
+              }`}
+            >
+              <Checkbox
+                checked={isChecked}
+                className="h-3 w-3"
+                onCheckedChange={() => {}}
+              />
+              {m.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
+const areArraysEqual = (a1, a2) => {
+  const arr1 = a1 || [];
+  const arr2 = a2 || [];
+  if (arr1.length !== arr2.length) return false;
+  return arr1.every((v) => arr2.includes(v));
+};
+
+const areFiltersEqual = (f1, f2) => {
+  if (!f1 || !f2) return false;
+  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes"];
+  return keys.every((key) => areArraysEqual(f1[key], f2[key]));
+};
+
+const areStratPrefsEqual = (p1, p2) => {
+  if (!p1 || !p2) return false;
+  if (p1.strategy !== p2.strategy) return false;
+  const bullseye1 = p1.display?.bullseye?.excludedPatterns || [];
+  const bullseye2 = p2.display?.bullseye?.excludedPatterns || [];
+  if (!areArraysEqual(bullseye1, bullseye2)) return false;
+  const defy1 = p1.display?.defy?.excludedModes || [];
+  const defy2 = p2.display?.defy?.excludedModes || [];
+  if (!areArraysEqual(defy1, defy2)) return false;
+  return true;
+};
 
 // ── Student Trading Signals Page ────────────────────────────────────
 
@@ -203,10 +235,12 @@ const StudentTradingSignals = () => {
   const observer = useRef();
   const saveTimerRef = useRef(null);
   const stratSaveTimerRef = useRef(null);
+  const lastSavedPrefsRef = useRef(null);
+  const lastSavedStratPrefsRef = useRef(null);
 
   // ── Strategy display filter state ────────────────────────────────
-  // selectedStrategies: string[] — supports multi-select (both Bullseye + Defy at once)
-  const [selectedStrategies, setSelectedStrategies] = useState([]);
+  // selectedStrategy: string | null — only one strategy active at a time
+  const [selectedStrategy, setSelectedStrategy] = useState(null);
   const [strategyDisplay, setStrategyDisplay] = useState(DEFAULT_STRATEGY_DISPLAY);
   const [stratPrefsInitialized, setStratPrefsInitialized] = useState(false);
 
@@ -227,31 +261,36 @@ const StudentTradingSignals = () => {
         (apiPrefs.excludedStrategies?.length > 0) ||
         (apiPrefs.excludedTimeframes?.length > 0);
 
+      const currentPrefs = {
+        excludedSymbols: Array.isArray(apiPrefs.excludedSymbols) ? apiPrefs.excludedSymbols : [],
+        excludedSignalTypes: Array.isArray(apiPrefs.excludedSignalTypes) ? apiPrefs.excludedSignalTypes : [],
+        excludedStrategies: Array.isArray(apiPrefs.excludedStrategies) ? apiPrefs.excludedStrategies : [],
+        excludedTimeframes: Array.isArray(apiPrefs.excludedTimeframes) ? apiPrefs.excludedTimeframes : [],
+      };
+
       if (hasApiData) {
-        setExclusionFilters({
-          excludedSymbols: Array.isArray(apiPrefs.excludedSymbols) ? apiPrefs.excludedSymbols : [],
-          excludedSignalTypes: Array.isArray(apiPrefs.excludedSignalTypes) ? apiPrefs.excludedSignalTypes : [],
-          excludedStrategies: Array.isArray(apiPrefs.excludedStrategies) ? apiPrefs.excludedStrategies : [],
-          excludedTimeframes: Array.isArray(apiPrefs.excludedTimeframes) ? apiPrefs.excludedTimeframes : [],
-        });
+        setExclusionFilters(currentPrefs);
+        lastSavedPrefsRef.current = currentPrefs;
+      } else {
+        lastSavedPrefsRef.current = exclusionFilters; // default from localStorage
       }
       setFiltersInitialized(true);
     }
-  }, [savedPrefs, filtersInitialized]);
+  }, [savedPrefs, filtersInitialized, exclusionFilters]);
 
   // ── Load strategy display preferences from API ───────────────────
   useEffect(() => {
     if (savedStratPrefs?.data && !stratPrefsInitialized) {
       const d = savedStratPrefs.data?.display;
       if (d) {
-        // Restore selected strategies array (was saved as comma-separated or array)
-        if (Array.isArray(d.strategies)) {
-          setSelectedStrategies(d.strategies);
-        } else if (d.strategy) {
-          // backward-compat: old single-value
-          setSelectedStrategies([d.strategy]);
+        let loadedStrategy = null;
+        if (d.strategy) {
+          loadedStrategy = d.strategy;
+        } else if (Array.isArray(d.strategies) && d.strategies.length > 0) {
+          loadedStrategy = d.strategies[0];
         }
-        setStrategyDisplay({
+
+        const loadedDisplay = {
           bullseye: {
             excludedPatterns: Array.isArray(d.bullseye_patterns)
               ? BULLSEYE_PATTERNS
@@ -266,28 +305,58 @@ const StudentTradingSignals = () => {
                   .filter((v) => !d.defy_mode.includes(v))
               : [],
           },
-        });
+        };
+
+        setSelectedStrategy(loadedStrategy);
+        setStrategyDisplay(loadedDisplay);
+
+        lastSavedStratPrefsRef.current = {
+          strategy: loadedStrategy,
+          display: loadedDisplay,
+        };
+      } else {
+        lastSavedStratPrefsRef.current = {
+          strategy: selectedStrategy,
+          display: strategyDisplay,
+        };
       }
       setStratPrefsInitialized(true);
     }
-  }, [savedStratPrefs, stratPrefsInitialized]);
+  }, [savedStratPrefs, stratPrefsInitialized, selectedStrategy, strategyDisplay]);
 
   // ── Persist exclusion filters to localStorage + DB (debounced) ───
   useEffect(() => {
+    if (!filtersInitialized) return;
+
+    // Skip saving if the filters haven't actually changed since last load/save
+    const hasChanged = !areFiltersEqual(exclusionFilters, lastSavedPrefsRef.current);
+    if (!hasChanged) return;
+
     saveFilters(exclusionFilters); // localStorage (instant)
 
     // Debounce the API save to avoid excessive calls
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       savePrefs(exclusionFilters);
+      lastSavedPrefsRef.current = exclusionFilters;
     }, 1000);
 
     return () => clearTimeout(saveTimerRef.current);
-  }, [exclusionFilters, savePrefs]);
+  }, [exclusionFilters, filtersInitialized, savePrefs]);
 
   // ── Persist strategy display prefs to DB (debounced) ────────────
   useEffect(() => {
     if (!stratPrefsInitialized) return;
+
+    const currentPrefs = {
+      strategy: selectedStrategy,
+      display: strategyDisplay,
+    };
+
+    // Skip saving if the strategy prefs haven't actually changed since last load/save
+    const hasChanged = !areStratPrefsEqual(currentPrefs, lastSavedStratPrefsRef.current);
+    if (!hasChanged) return;
+
     clearTimeout(stratSaveTimerRef.current);
     stratSaveTimerRef.current = setTimeout(() => {
       const bullseyeSelected = BULLSEYE_PATTERNS
@@ -299,21 +368,45 @@ const StudentTradingSignals = () => {
 
       saveStratPrefs({
         display: {
-          strategies: selectedStrategies,          // array
-          strategy: selectedStrategies[0] || null, // backward-compat
+          strategies: selectedStrategy ? [selectedStrategy] : [],
+          strategy: selectedStrategy,
           bullseye_patterns: bullseyeSelected,
           defy_mode: defySelected,
         },
       });
+      lastSavedStratPrefsRef.current = currentPrefs;
     }, 1000);
 
     return () => clearTimeout(stratSaveTimerRef.current);
-  }, [selectedStrategies, strategyDisplay, stratPrefsInitialized, saveStratPrefs]);
+  }, [selectedStrategy, strategyDisplay, stratPrefsInitialized, saveStratPrefs]);
 
-  // ── Build entryType filter params for the API ────────────────────
+  // ── BUG #9 fix: Flush pending saves before page unload ──────────
+  useEffect(() => {
+    const flushPendingSaves = () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        savePrefs(exclusionFilters);
+        saveTimerRef.current = null;
+      }
+      if (stratSaveTimerRef.current) {
+        clearTimeout(stratSaveTimerRef.current);
+        stratSaveTimerRef.current = null;
+      }
+    };
+    window.addEventListener("beforeunload", flushPendingSaves);
+    return () => window.removeEventListener("beforeunload", flushPendingSaves);
+  }, [exclusionFilters, savePrefs]);
+
+  // ── Build filter params for the API ──────────────────────────────
   const excludedEntryTypes =
-    selectedStrategies.includes("defy")
+    selectedStrategy === "defy"
       ? strategyDisplay.defy.excludedModes
+      : [];
+
+  // BUG #1 fix: send Bullseye excluded patterns to backend
+  const excludedBullseyePatterns =
+    selectedStrategy === "bullseye"
+      ? strategyDisplay.bullseye.excludedPatterns
       : [];
 
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery(
@@ -326,6 +419,8 @@ const StudentTradingSignals = () => {
       excludedStrategies: exclusionFilters.excludedStrategies,
       excludedTimeframes: exclusionFilters.excludedTimeframes,
       excludedEntryTypes,
+      excludedBullseyePatterns,
+      strategy: selectedStrategy || "",
     },
     { pollingInterval: 30000 }
   );
@@ -362,7 +457,7 @@ const StudentTradingSignals = () => {
   useEffect(() => {
     setPage(1);
     setIsInitialLoad(true); // show skeletons when filters/search change
-  }, [exclusionFilters, search, selectedStrategies, strategyDisplay]);
+  }, [exclusionFilters, search, selectedStrategy, strategyDisplay]);
 
   // ── IntersectionObserver — trigger next page ─────────────────────
   const lastSignalRef = useCallback(
@@ -388,23 +483,38 @@ const StudentTradingSignals = () => {
   };
 
   const clearFilters = () => {
-    setExclusionFilters({
+    const clearedExclusions = {
       excludedSymbols: [],
       excludedSignalTypes: [],
       excludedStrategies: [],
       excludedTimeframes: [],
-    });
-    setSelectedStrategies([]);
+    };
+    setExclusionFilters(clearedExclusions);
+    setSelectedStrategy(null);
     setStrategyDisplay(DEFAULT_STRATEGY_DISPLAY);
+    setSearch("");
+
+    // Immediately save cleared state (skip debounce to prevent stale reload)
+    clearTimeout(saveTimerRef.current);
+    clearTimeout(stratSaveTimerRef.current);
+    savePrefs(clearedExclusions);
+    lastSavedPrefsRef.current = clearedExclusions;
+
+    const clearedStratPrefs = { strategy: null, display: DEFAULT_STRATEGY_DISPLAY };
+    saveStratPrefs({
+      display: {
+        strategies: [],
+        strategy: null,
+        bullseye_patterns: BULLSEYE_PATTERNS.map((p) => p.value),
+        defy_mode: DEFY_MODES.map((m) => m.value),
+      },
+    });
+    lastSavedStratPrefsRef.current = clearedStratPrefs;
   };
 
-  // ── Strategy selector — multi-select toggle ───────────────────────
+  // ── Strategy selector — single-select toggle ───────────────────────
   const handleStrategySelect = (strategy) => {
-    setSelectedStrategies((prev) =>
-      prev.includes(strategy)
-        ? prev.filter((s) => s !== strategy)  // deselect
-        : [...prev, strategy]                 // add
-    );
+    setSelectedStrategy((prev) => (prev === strategy ? null : strategy));
   };
 
   const hasActiveFilters =
@@ -412,7 +522,7 @@ const StudentTradingSignals = () => {
     exclusionFilters.excludedSignalTypes.length > 0 ||
     exclusionFilters.excludedStrategies.length > 0 ||
     exclusionFilters.excludedTimeframes.length > 0 ||
-    selectedStrategies.length > 0;
+    selectedStrategy !== null;
 
   // ── Signal type options (from signalConfig) ─────────────────────
   const signalTypeOptions = Object.keys(signalConfig)
@@ -432,8 +542,8 @@ const StudentTradingSignals = () => {
   const totalStrategies = strategyOptions.length;
 
   // ── Strategy sub-filter counts (only when strategy is active) ────
-  const bullseyeActive = selectedStrategies.includes("bullseye");
-  const defyActive     = selectedStrategies.includes("defy");
+  const bullseyeActive = selectedStrategy === "bullseye";
+  const defyActive     = selectedStrategy === "defy";
 
   const bullseyeSelectedCount = bullseyeActive
     ? BULLSEYE_PATTERNS.length - strategyDisplay.bullseye.excludedPatterns.length
@@ -445,16 +555,22 @@ const StudentTradingSignals = () => {
     : 0;
   const defyTotalCount = defyActive ? DEFY_MODES.length : 0;
 
+  // BUG #12 fix: don't count hidden Strategy dropdown when top filter is active
+  const strategySelectedCount = selectedStrategy !== null
+    ? 0 // Strategy dropdown hidden, don't count
+    : (totalStrategies - exclusionFilters.excludedStrategies.length);
+  const strategyTotalCount = selectedStrategy !== null ? 0 : totalStrategies;
+
   const totalSelected =
-    (totalSymbols - exclusionFilters.excludedSymbols.length) +
-    (totalSignalTypes - exclusionFilters.excludedSignalTypes.length) +
-    (totalTimeframes - exclusionFilters.excludedTimeframes.length) +
-    (totalStrategies - exclusionFilters.excludedStrategies.length) +
+    Math.max(0, totalSymbols - exclusionFilters.excludedSymbols.length) +
+    Math.max(0, totalSignalTypes - exclusionFilters.excludedSignalTypes.length) +
+    Math.max(0, totalTimeframes - exclusionFilters.excludedTimeframes.length) +
+    strategySelectedCount +
     bullseyeSelectedCount +
     defySelectedCount;
 
   const totalAll =
-    totalSymbols + totalSignalTypes + totalTimeframes + totalStrategies +
+    totalSymbols + totalSignalTypes + totalTimeframes + strategyTotalCount +
     bullseyeTotalCount + defyTotalCount;
 
 
@@ -548,11 +664,11 @@ const StudentTradingSignals = () => {
                 )}
               </button>
 
-              {selectedStrategies.length > 0 && (
+              {selectedStrategy !== null && (
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedStrategies([]);
+                    setSelectedStrategy(null);
                     setStrategyDisplay(DEFAULT_STRATEGY_DISPLAY);
                   }}
                   className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all cursor-pointer"
@@ -591,13 +707,16 @@ const StudentTradingSignals = () => {
 
           {/* ── Row 3: Standard Exclusion Filters ───────────────────── */}
           <div className="flex gap-4 flex-wrap items-end">
-            <FilterSelect
-              label="Strategy"
-              excludedValues={exclusionFilters.excludedStrategies}
-              onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
-              placeholder="All Strategies"
-              options={strategyOptions}
-            />
+            {/* Only show Strategy dropdown when no top Strategy Filter is active */}
+            {selectedStrategy === null && (
+              <FilterSelect
+                label="Strategy"
+                excludedValues={exclusionFilters.excludedStrategies}
+                onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
+                placeholder="All Strategies"
+                options={strategyOptions}
+              />
+            )}
             <FilterSelect
               label="Signal Type"
               excludedValues={exclusionFilters.excludedSignalTypes}
@@ -667,17 +786,30 @@ const StudentTradingSignals = () => {
             </div>
           ))}
         </div>
-      ) : signals.length === 0 && !isLoading ? (
+      ) : signals.length === 0 && !isFetching ? (
         <div className="text-center py-20 px-5 bg-slate-50 dark:bg-[#131324]/20 rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#202038]">
           <ChartLine size={48} className="text-slate-300 dark:text-slate-700 mx-auto mb-4" />
           <h3 className="text-slate-600 dark:text-slate-400 font-semibold mb-2 text-base">
             No Signals Found
           </h3>
-          <p className="text-slate-400 dark:text-slate-500 text-sm max-w-md mx-auto">
-            {hasActiveFilters
-              ? "Try adjusting your filter settings above"
-              : "IQ Strategies Alerts will appear here automatically when alerts are triggered"}
+          <p className="text-slate-400 dark:text-slate-500 text-sm max-w-md mx-auto mb-4">
+            {search
+              ? `No signals match "${search}". Try a different search term.`
+              : hasActiveFilters
+                ? "Your current filters are excluding all signals. Try adjusting your filter settings or clearing them."
+                : "IQ Strategies Alerts will appear here automatically when alerts are triggered."}
           </p>
+          {(hasActiveFilters || search) && (
+            <button
+              onClick={() => {
+                clearFilters();
+                setSearch("");
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 cursor-pointer font-semibold text-xs transition-colors"
+            >
+              <X size={14} /> Clear All Filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -692,10 +824,14 @@ const StudentTradingSignals = () => {
         </div>
       )}
 
-      {/* ── Loading more indicator ── */}
-      {isFetching && page > 1 && !data?.data && (
-        <div className="flex justify-center items-center gap-2 py-6">
-          <Loader2 size={18} className="animate-spin text-blue-500" />
+      {/* ── Loading more indicator (infinite scroll) ── */}
+      {isFetching && page > 1 && (
+        <div className="flex justify-center items-center gap-3 py-8">
+          <div className="flex gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
           <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
             Loading more signals…
           </span>
