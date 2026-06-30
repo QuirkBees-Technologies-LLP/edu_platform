@@ -149,7 +149,7 @@ const StrategySection = ({ strategy, selected, onToggle, onToggleRow, onToggleCo
             <h4 className="text-sm font-bold text-gray-900 dark:text-white">
               {strategy.name}
             </h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-50">
               {strategy.pairs.length} pairs × {strategy.timeframes.length} time frame{strategy.timeframes.length > 1 ? "s" : ""}
             </p>
           </div>
@@ -388,7 +388,7 @@ const AlertPairPreferences = () => {
               <h3 className="card-title text-gray-900 dark:text-white font-semibold text-lg">
                 Alert Pair Preferences
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
+              <p className="text-gray-500 dark:text-gray-50 text-sm mt-0.5">
                 Choose which trading pairs and time frames you want to receive notifications for.
               </p>
             </div>
