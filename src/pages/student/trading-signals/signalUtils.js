@@ -79,3 +79,48 @@ export function formatTimeAgo(dateStr) {
     return "—";
   }
 }
+
+/**
+ * Converts a UTC ISO 8601 alertTimestamp to the user's local browser
+ * timezone, displayed in HH:mm format (24-hour).
+ *
+ * Uses `Intl.DateTimeFormat` so the browser automatically determines
+ * the correct timezone — no hardcoded offsets.
+ *
+ * @param {string|null|undefined} timestamp - UTC ISO 8601 string (e.g. "2026-07-01T11:36:00Z")
+ * @returns {string} Local time in "HH:mm" format, or "—" if invalid/missing
+ *
+ * @example
+ * formatAlertTime("2026-07-01T11:36:00Z") // "17:06" in IST, "12:36" in London
+ * formatAlertTime(null)                   // "—"
+ * formatAlertTime("")                     // "—"
+ * formatAlertTime("not-a-date")           // "—"
+ */
+export function formatAlertTime(timestamp) {
+  if (!timestamp || typeof timestamp !== "string" || !timestamp.trim()) {
+    return "—";
+  }
+
+  const trimmed = timestamp.trim();
+
+  try {
+    // If it's already a plain HH:mm or HH:mm:ss time (old webhook format),
+    // return it as-is — no conversion needed
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(trimmed)) {
+      return trimmed;
+    }
+
+    // Otherwise parse as ISO 8601 UTC string (new webhook format)
+    // e.g. "2026-07-01T11:36:00Z" → local HH:mm
+    const date = new Date(trimmed);
+    if (isNaN(date.getTime())) return "—";
+
+    return new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(date);
+  } catch (_) {
+    return "—";
+  }
+}

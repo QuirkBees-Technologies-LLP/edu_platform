@@ -19,6 +19,7 @@ export const clientTvSignalsApiSlice = createApi({
         entryType = "",          // Defy: "confirmed" | "pending" | ""
         excludedDefyTypes = [], // Defy multi-select exclusion
         excludedBullseyeTypes = [], // Bullseye pattern exclusion
+        excludedSessions = [], // Trading session exclusion
         // Legacy single-value filters (backward compat)
         symbol = "",
         signalType = "",
@@ -44,6 +45,9 @@ export const clientTvSignalsApiSlice = createApi({
 
         // Bullseye pattern filter
         if (excludedBullseyeTypes.length > 0) params.set("excludedBullseyeTypes", excludedBullseyeTypes.join(","));
+
+        // Trading session filter
+        if (excludedSessions.length > 0) params.set("excludedSessions", excludedSessions.join(","));
 
         // Legacy single-value fallback
         if (symbol) params.set("symbol", symbol);

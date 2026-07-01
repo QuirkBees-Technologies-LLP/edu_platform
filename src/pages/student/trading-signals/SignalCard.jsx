@@ -2,7 +2,7 @@ import React from "react";
 import { Clock, ChartLine, Copy } from "lucide-react";
 import { toast } from "sonner";
 import signalConfig from "./signalConfig";
-import { formatTimeframe, formatTimeAgo } from "./signalUtils";
+import { formatTimeframe, formatTimeAgo, formatAlertTime } from "./signalUtils";
 import SymbolIcon from "./symbolIcons";
 
 const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
@@ -256,7 +256,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
         </span>
         <span className="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-white/80 font-semibold whitespace-nowrap">
           <Clock size={12} />
-          {signal?.alertTimestamp ? signal?.alertTimestamp : (signal?.createdAt ? formatTimeAgo(signal.createdAt) : "—")}
+          {signal?.alertTimestamp ? formatAlertTime(signal.alertTimestamp) : (signal?.createdAt ? formatTimeAgo(signal.createdAt) : "—")}
         </span>
       </div>
     </div>

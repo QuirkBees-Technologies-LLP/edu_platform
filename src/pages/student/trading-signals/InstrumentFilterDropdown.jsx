@@ -43,32 +43,32 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
   // ── Toggle single symbol ────────────────────────────────────────
   const toggleSymbol = (symbol) => {
     if (excludedValues.includes(symbol)) {
-      onExcludedChange(excludedValues.filter((v) => v !== symbol));
+      onExcludedChange?.(excludedValues.filter((v) => v !== symbol));
     } else {
-      onExcludedChange([...excludedValues, symbol]);
+      onExcludedChange?.([...excludedValues, symbol]);
     }
   };
 
   // ── Toggle entire category ──────────────────────────────────────
   const toggleCategory = (cat) => {
-    const catSymbols = cat.instruments.map((i) => i.symbol);
+    const catSymbols = (cat?.instruments || []).map((i) => i.symbol);
     const allCatChecked = catSymbols.every((s) => !excludedValues.includes(s));
 
     if (allCatChecked) {
       // Uncheck all in this category
-      onExcludedChange([...excludedValues, ...catSymbols]);
+      onExcludedChange?.([...excludedValues, ...catSymbols]);
     } else {
       // Check all in this category
-      onExcludedChange(excludedValues.filter((v) => !catSymbols.includes(v)));
+      onExcludedChange?.(excludedValues.filter((v) => !catSymbols.includes(v)));
     }
   };
 
   // ── Toggle all symbols ──────────────────────────────────────────
   const toggleAll = () => {
     if (excludedValues.length === 0) {
-      onExcludedChange([...ALL_SYMBOLS]);
+      onExcludedChange?.([...ALL_SYMBOLS]);
     } else {
-      onExcludedChange([]);
+      onExcludedChange?.([]);
     }
   };
 
@@ -130,7 +130,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
       : `${checkedCount}/${ALL_SYMBOLS.length} selected`;
 
   return (
-    <div className="flex flex-col gap-1.5 relative" ref={rootRef}>
+    <div className="flex flex-col gap-1.5 relative flex-1 min-w-0" ref={rootRef}>
       {/* Label */}
       <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
         Symbol
@@ -145,7 +145,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
         }}
         className={`
           group flex items-center justify-between gap-2
-          w-[200px] h-10 px-3
+          w-full h-10 px-3
           rounded-md border text-xs font-medium
           transition-all duration-200 cursor-pointer
           border-slate-200 dark:border-[#202038] bg-white dark:bg-[#0F0F1A]

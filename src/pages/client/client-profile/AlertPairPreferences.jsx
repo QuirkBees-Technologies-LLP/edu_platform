@@ -1,66 +1,25 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, Bell, BellOff, Save, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronRight, Bell, BellOff, Save, ExternalLink, Clock, SlidersHorizontal } from "lucide-react";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
   useGetAlertPairPreferencesQuery,
   useUpdateAlertPairPreferencesMutation,
 } from "../../../store/api/client/clientProfileApiSlice";
-
-
-// ── Strategy Data from PDF ─────────────────────────────────────────
-const SHARED_PAIRS = [
-  "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "USD/CAD", "AUD/USD", "NZD/USD",
-  "EUR/GBP", "EUR/JPY", "EUR/CHF", "EUR/CAD", "EUR/AUD", "EUR/NZD",
-  "GBP/JPY", "GBP/CHF", "GBP/CAD", "GBP/AUD",
-  "AUD/JPY", "CAD/JPY", "NZD/JPY", "CHF/JPY",
-  "AUD/NZD", "AUD/CAD", "CHF/CAD",
-  "BTC/USD", "ETH/USD", "SOL/USD",
-];
-
-const STRATEGIES = [
-  {
-    key: "react",
-    name: "React",
-    pairs: SHARED_PAIRS,
-    timeframes: ["M1", "M5", "M15", "M30", "H1", "H4"],
-  },
-  {
-    key: "defy",
-    name: "Defy",
-    pairs: SHARED_PAIRS,
-    timeframes: ["M1", "M5", "M15", "M30", "H1", "H4"],
-  },
-  {
-    key: "bullseye",
-    name: "Bullseye",
-    pairs: ["XAUUSD", "GER40", "NAS100", "SP500", "Majors"],
-    timeframes: ["M5"],
-  },
-  {
-    key: "smartShot",
-    name: "Smart Shot",
-    pairs: ["US30", "NAS100", "SPX", "GBP/USD", "EUR/USD", "XAU/USD", "BTC/USD"],
-    timeframes: ["M1"],
-  },
-  {
-    key: "supernova",
-    name: "Supernova",
-    pairs: ["USD/JPY", "USD/CAD", "USD/CHF", "EUR/USD", "GBP/USD", "AUD/USD", "NZD/USD"],
-    timeframes: ["M1"],
-  },
-];
+import {
+  useGetFilterOptionsQuery,
+} from "../../../store/api/client/clientTvSignalsApiSlice";
 
 
 // ── Helpers ─────────────────────────────────────────────────────────
 const buildKey = (strategy, pair, tf) => `${strategy}__${pair}__${tf}`;
 
-function buildAllKeys() {
+function buildAllKeys(strategies) {
   const keys = new Set();
-  STRATEGIES.forEach((s) => {
-    s.pairs.forEach((pair) => {
-      s.timeframes.forEach((tf) => {
+  (strategies || []).forEach((s) => {
+    (s?.pairs || []).forEach((pair) => {
+      (s?.timeframes || []).forEach((tf) => {
         keys.add(buildKey(s.key, pair, tf));
       });
     });
@@ -68,16 +27,14 @@ function buildAllKeys() {
   return keys;
 }
 
-const ALL_KEYS = buildAllKeys();
-
-function initSelectedFromSaved(savedPrefs) {
+function initSelectedFromSaved(savedPrefs, allKeys) {
   // Empty object or null = all selected (default)
   if (!savedPrefs || Object.keys(savedPrefs).length === 0) {
-    return new Set(ALL_KEYS);
+    return new Set(allKeys);
   }
   // savedPrefs is { key: true/false }
   const selected = new Set();
-  ALL_KEYS.forEach((key) => {
+  allKeys.forEach((key) => {
     if (savedPrefs[key] !== false) {
       selected.add(key);
     }
@@ -85,12 +42,26 @@ function initSelectedFromSaved(savedPrefs) {
   return selected;
 }
 
-function selectedToPrefs(selected) {
+function initStrategySessionExclusions(savedPrefs) {
+  if (!savedPrefs || !savedPrefs.strategySessionExclusions || typeof savedPrefs.strategySessionExclusions !== 'object') {
+    return {};
+  }
+  return savedPrefs.strategySessionExclusions;
+}
+
+function initDefyExcluded(savedPrefs) {
+  if (!savedPrefs || !Array.isArray(savedPrefs.excludedDefyTypes)) {
+    return [];
+  }
+  return savedPrefs.excludedDefyTypes;
+}
+
+function selectedToPrefs(selected, allKeys) {
   // If all selected → save empty (default)
-  if (selected.size === ALL_KEYS.size) return {};
+  if (selected.size === allKeys.size) return {};
   // Otherwise save only the deselected as false
   const prefs = {};
-  ALL_KEYS.forEach((key) => {
+  allKeys.forEach((key) => {
     prefs[key] = selected.has(key);
   });
   return prefs;
@@ -119,13 +90,17 @@ const IndeterminateCheckbox = ({ checked, indeterminate, onChange, className = "
 };
 
 // ── Strategy Section Component ──────────────────────────────────────
-const StrategySection = ({ strategy, selected, onToggle, onToggleRow, onToggleColumn, onToggleStrategy }) => {
+const StrategySection = ({
+  strategy, selected, onToggle, onToggleRow, onToggleColumn, onToggleStrategy,
+  sessionOptions, excludedSessions, onSessionToggle, onSessionToggleAll,
+  defyModeOptions, excludedDefyTypes, onDefyModeToggle, onDefyModeToggleAll,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const strategyKeys = useMemo(() => {
     const keys = [];
-    strategy.pairs.forEach((pair) => {
-      strategy.timeframes.forEach((tf) => {
+    (strategy?.pairs || []).forEach((pair) => {
+      (strategy?.timeframes || []).forEach((tf) => {
         keys.push(buildKey(strategy.key, pair, tf));
       });
     });
@@ -135,6 +110,15 @@ const StrategySection = ({ strategy, selected, onToggle, onToggleRow, onToggleCo
   const selectedCount = strategyKeys.filter((k) => selected.has(k)).length;
   const allSelected = selectedCount === strategyKeys.length;
   const someSelected = selectedCount > 0 && !allSelected;
+
+  // Session counts for this strategy
+  const sessionSelectedCount = (sessionOptions?.length ?? 0) - (excludedSessions?.length ?? 0);
+  const allSessionsSelected = (excludedSessions?.length ?? 0) === 0;
+
+  // Defy mode counts (only relevant for DEFY)
+  const isDefy = strategy.key === "defy";
+  const defySelectedCount = isDefy ? (defyModeOptions?.length ?? 0) - (excludedDefyTypes?.length ?? 0) : 0;
+  const allDefySelected = isDefy ? (excludedDefyTypes?.length ?? 0) === 0 : true;
 
   return (
     <div className="card rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
@@ -153,7 +137,7 @@ const StrategySection = ({ strategy, selected, onToggle, onToggleRow, onToggleCo
               {strategy.name}
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-50">
-              {strategy.pairs.length} pairs × {strategy.timeframes.length} time frame{strategy.timeframes.length > 1 ? "s" : ""}
+              {(strategy?.pairs?.length ?? 0)} pairs × {(strategy?.timeframes?.length ?? 0)} time frame{(strategy?.timeframes?.length ?? 0) > 1 ? "s" : ""}
             </p>
           </div>
         </div>
@@ -181,85 +165,182 @@ const StrategySection = ({ strategy, selected, onToggle, onToggleRow, onToggleCo
         </div>
       </button>
 
-      {/* Strategy Table */}
+      {/* Strategy Expanded Content */}
       {isOpen && (
-        <div className="border-t border-gray-200 dark:border-gray-700 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-white/5">
-                <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-white text-xs uppercase tracking-wider min-w-[140px]">
-                  Pair
-                </th>
-                {strategy.timeframes.map((tf) => {
-                  const colKeys = strategy.pairs.map((p) => buildKey(strategy.key, p, tf));
-                  const colSelectedCount = colKeys.filter((k) => selected.has(k)).length;
-                  const colAllSelected = colSelectedCount === colKeys.length;
-                  const colSomeSelected = colSelectedCount > 0 && !colAllSelected;
+        <>
+          {/* Pairs × Timeframes Table */}
+          <div className="border-t border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-white/5">
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-white text-xs uppercase tracking-wider min-w-[140px]">
+                    Pair
+                  </th>
+                  {strategy.timeframes.map((tf) => {
+                    const colKeys = strategy.pairs.map((p) => buildKey(strategy.key, p, tf));
+                    const colSelectedCount = colKeys.filter((k) => selected.has(k)).length;
+                    const colAllSelected = colSelectedCount === colKeys.length;
+                    const colSomeSelected = colSelectedCount > 0 && !colAllSelected;
+
+                    return (
+                      <th key={tf} className="px-3 py-3 text-center font-semibold text-gray-700 dark:text-white text-xs uppercase tracking-wider">
+                        <div className="flex flex-col items-center gap-1.5">
+                          <span>{tf}</span>
+                          <IndeterminateCheckbox
+                            id={`col-${strategy.key}-${tf}`}
+                            checked={colAllSelected}
+                            indeterminate={colSomeSelected}
+                            onChange={() => onToggleColumn(strategy.key, tf)}
+                          />
+                        </div>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {strategy.pairs.map((pair, idx) => {
+                  const rowKeys = strategy.timeframes.map((tf) => buildKey(strategy.key, pair, tf));
+                  const rowSelectedCount = rowKeys.filter((k) => selected.has(k)).length;
+                  const rowAllSelected = rowSelectedCount === rowKeys.length;
+                  const rowSomeSelected = rowSelectedCount > 0 && !rowAllSelected;
 
                   return (
-                    <th key={tf} className="px-3 py-3 text-center font-semibold text-gray-700 dark:text-white text-xs uppercase tracking-wider">
-                      <div className="flex flex-col items-center gap-1.5">
-                        <span>{tf}</span>
-                        <IndeterminateCheckbox
-                          id={`col-${strategy.key}-${tf}`}
-                          checked={colAllSelected}
-                          indeterminate={colSomeSelected}
-                          onChange={() => onToggleColumn(strategy.key, tf)}
-                        />
-                      </div>
-                    </th>
+                    <tr
+                      key={pair}
+                      className={`border-t border-gray-100 dark:border-gray-800 transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${idx % 2 === 0 ? "" : "bg-gray-50/30 dark:bg-white/[0.02]"
+                        }`}
+                    >
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <IndeterminateCheckbox
+                            id={`row-${strategy.key}-${pair}`}
+                            checked={rowAllSelected}
+                            indeterminate={rowSomeSelected}
+                            onChange={() => onToggleRow(strategy.key, pair)}
+                          />
+                          <label
+                            htmlFor={`row-${strategy.key}-${pair}`}
+                            className="font-medium text-gray-800 dark:text-white cursor-pointer select-none text-xs"
+                          >
+                            {pair}
+                          </label>
+                        </div>
+                      </td>
+                      {strategy.timeframes.map((tf) => {
+                        const key = buildKey(strategy.key, pair, tf);
+                        return (
+                          <td key={tf} className="px-3 py-2.5 text-center">
+                            <IndeterminateCheckbox
+                              id={`cell-${key}`}
+                              checked={selected.has(key)}
+                              indeterminate={false}
+                              onChange={() => onToggle(key)}
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
                   );
                 })}
-              </tr>
-            </thead>
-            <tbody>
-              {strategy.pairs.map((pair, idx) => {
-                const rowKeys = strategy.timeframes.map((tf) => buildKey(strategy.key, pair, tf));
-                const rowSelectedCount = rowKeys.filter((k) => selected.has(k)).length;
-                const rowAllSelected = rowSelectedCount === rowKeys.length;
-                const rowSomeSelected = rowSelectedCount > 0 && !rowAllSelected;
+              </tbody>
+            </table>
+          </div>
 
-                return (
-                  <tr
-                    key={pair}
-                    className={`border-t border-gray-100 dark:border-gray-800 transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${idx % 2 === 0 ? "" : "bg-gray-50/30 dark:bg-white/[0.02]"
+          {/* DEFY Execution Mode — only for DEFY */}
+          {isDefy && defyModeOptions.length > 0 && (
+            <div className="border-t border-gray-200 dark:border-gray-700 px-5 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Execution Mode</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                    {defySelectedCount}/{defyModeOptions.length}
+                  </span>
+                </div>
+                <IndeterminateCheckbox
+                  id={`defy-mode-master-${strategy.key}`}
+                  checked={allDefySelected}
+                  indeterminate={defySelectedCount > 0 && !allDefySelected}
+                  onChange={onDefyModeToggleAll}
+                />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {defyModeOptions.map((mode) => {
+                  const isExcluded = excludedDefyTypes.includes(mode.value);
+                  const isChecked = !isExcluded;
+                  return (
+                    <label
+                      key={mode.value}
+                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-colors ${
+                        isChecked
+                          ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
+                          : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02] hover:bg-gray-100 dark:hover:bg-white/5 opacity-60"
                       }`}
-                  >
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <IndeterminateCheckbox
-                          id={`row-${strategy.key}-${pair}`}
-                          checked={rowAllSelected}
-                          indeterminate={rowSomeSelected}
-                          onChange={() => onToggleRow(strategy.key, pair)}
-                        />
-                        <label
-                          htmlFor={`row-${strategy.key}-${pair}`}
-                          className="font-medium text-gray-800 dark:text-white cursor-pointer select-none text-xs"
-                        >
-                          {pair}
-                        </label>
-                      </div>
-                    </td>
-                    {strategy.timeframes.map((tf) => {
-                      const key = buildKey(strategy.key, pair, tf);
-                      return (
-                        <td key={tf} className="px-3 py-2.5 text-center">
-                          <IndeterminateCheckbox
-                            id={`cell-${key}`}
-                            checked={selected.has(key)}
-                            indeterminate={false}
-                            onChange={() => onToggle(key)}
-                          />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    >
+                      <IndeterminateCheckbox
+                        id={`defy-mode-${mode.value}`}
+                        checked={isChecked}
+                        indeterminate={false}
+                        onChange={() => onDefyModeToggle(mode.value)}
+                      />
+                      <span className="text-sm font-medium text-gray-800 dark:text-white">
+                        {mode.label}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Trading Sessions — per strategy */}
+          {sessionOptions.length > 0 && (
+            <div className="border-t border-gray-200 dark:border-gray-700 px-5 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Trading Sessions</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                    {sessionSelectedCount}/{sessionOptions.length}
+                  </span>
+                </div>
+                <IndeterminateCheckbox
+                  id={`session-master-${strategy.key}`}
+                  checked={allSessionsSelected}
+                  indeterminate={sessionSelectedCount > 0 && !allSessionsSelected}
+                  onChange={onSessionToggleAll}
+                />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {sessionOptions.map((session) => {
+                  const isExcluded = excludedSessions.includes(session.value);
+                  const isChecked = !isExcluded;
+                  return (
+                    <label
+                      key={session.value}
+                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-colors ${
+                        isChecked
+                          ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
+                          : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02] hover:bg-gray-100 dark:hover:bg-white/5 opacity-60"
+                      }`}
+                    >
+                      <IndeterminateCheckbox
+                        id={`session-${strategy.key}-${session.value}`}
+                        checked={isChecked}
+                        indeterminate={false}
+                        onChange={() => onSessionToggle(session.value)}
+                      />
+                      <span className="text-sm font-medium text-gray-800 dark:text-white">
+                        {session.label}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -269,17 +350,32 @@ const StrategySection = ({ strategy, selected, onToggle, onToggleRow, onToggleCo
 const AlertPairPreferences = () => {
   const navigate = useNavigate();
   const { data, isLoading, refetch } = useGetAlertPairPreferencesQuery();
+  const { data: filterOptions, isLoading: isLoadingFilters } = useGetFilterOptionsQuery();
   const [updatePreferences, { isLoading: isSaving }] = useUpdateAlertPairPreferencesMutation();
-  const [selected, setSelected] = useState(new Set(ALL_KEYS));
+  const [selected, setSelected] = useState(new Set());
+  const [strategySessionExclusions, setStrategySessionExclusions] = useState({});
+  const [excludedDefyTypes, setExcludedDefyTypes] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Load saved preferences
+  // Derive active strategies from the API (only admin-enabled strategies)
+  const activeStrategies = useMemo(() => {
+    const configs = filterOptions?.data?.strategyConfigs;
+    if (!configs || configs.length === 0) return [];
+    return configs;
+  }, [filterOptions]);
+
+  // Build ALL_KEYS from active strategies
+  const allKeys = useMemo(() => buildAllKeys(activeStrategies), [activeStrategies]);
+
+  // Load saved preferences — re-derive when strategies or saved prefs change
   useEffect(() => {
-    if (data?.data !== undefined) {
-      setSelected(initSelectedFromSaved(data.data));
+    if (allKeys.size > 0 && data?.data !== undefined) {
+      setSelected(initSelectedFromSaved(data.data, allKeys));
+      setStrategySessionExclusions(initStrategySessionExclusions(data.data));
+      setExcludedDefyTypes(initDefyExcluded(data.data));
       setHasChanges(false);
     }
-  }, [data]);
+  }, [data, allKeys]);
 
   // ── Toggle handlers ───────────────────────────────────────────
   const handleToggle = useCallback((key) => {
@@ -293,7 +389,7 @@ const AlertPairPreferences = () => {
   }, []);
 
   const handleToggleRow = useCallback((strategyKey, pair) => {
-    const strategy = STRATEGIES.find((s) => s.key === strategyKey);
+    const strategy = activeStrategies.find((s) => s.key === strategyKey);
     if (!strategy) return;
 
     const rowKeys = strategy.timeframes.map((tf) => buildKey(strategyKey, pair, tf));
@@ -308,10 +404,10 @@ const AlertPairPreferences = () => {
       return next;
     });
     setHasChanges(true);
-  }, [selected]);
+  }, [selected, activeStrategies]);
 
   const handleToggleColumn = useCallback((strategyKey, tf) => {
-    const strategy = STRATEGIES.find((s) => s.key === strategyKey);
+    const strategy = activeStrategies.find((s) => s.key === strategyKey);
     if (!strategy) return;
 
     const colKeys = strategy.pairs.map((p) => buildKey(strategyKey, p, tf));
@@ -326,10 +422,10 @@ const AlertPairPreferences = () => {
       return next;
     });
     setHasChanges(true);
-  }, [selected]);
+  }, [selected, activeStrategies]);
 
   const handleToggleStrategy = useCallback((strategyKey) => {
-    const strategy = STRATEGIES.find((s) => s.key === strategyKey);
+    const strategy = activeStrategies.find((s) => s.key === strategyKey);
     if (!strategy) return;
 
     const strategyKeys = [];
@@ -350,21 +446,29 @@ const AlertPairPreferences = () => {
       return next;
     });
     setHasChanges(true);
-  }, [selected]);
+  }, [selected, activeStrategies]);
 
   const handleSelectAll = useCallback(() => {
-    const allSelected = selected.size === ALL_KEYS.size;
+    const allSelected = selected.size === allKeys.size;
     if (allSelected) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(ALL_KEYS));
+      setSelected(new Set(allKeys));
     }
     setHasChanges(true);
-  }, [selected]);
+  }, [selected, allKeys]);
 
   const handleSave = async () => {
     try {
-      const prefs = selectedToPrefs(selected);
+      const prefs = selectedToPrefs(selected, allKeys);
+      // Merge per-strategy session exclusions
+      const hasSessionExclusions = Object.values(strategySessionExclusions || {}).some((arr) => Array.isArray(arr) && arr.length > 0);
+      if (hasSessionExclusions) {
+        prefs.strategySessionExclusions = strategySessionExclusions;
+      }
+      if (excludedDefyTypes.length > 0) {
+        prefs.excludedDefyTypes = excludedDefyTypes;
+      }
       await updatePreferences(prefs).unwrap();
       toast.success("Alert preferences saved successfully!");
       setHasChanges(false);
@@ -375,11 +479,35 @@ const AlertPairPreferences = () => {
   };
 
   // ── Derived state ─────────────────────────────────────────────
-  const masterAllSelected = selected.size === ALL_KEYS.size;
+  const masterAllSelected = allKeys.size > 0 && selected.size === allKeys.size;
   const masterSomeSelected = selected.size > 0 && !masterAllSelected;
 
-  if (isLoading) {
+  // Session options from API
+  const sessionOptions = filterOptions?.data?.sessions || [];
+
+  // Defy execution mode options from API
+  const defyModeOptions = filterOptions?.data?.defyModes || [];
+
+  if (isLoading || isLoadingFilters) {
     return <LoadingSpinner />;
+  }
+
+  if (activeStrategies.length === 0) {
+    return (
+      <div className="w-full">
+        <div className="card w-full">
+          <div className="card-body p-8 text-center">
+            <BellOff className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-gray-600 dark:text-gray-400 font-semibold mb-2 text-base">
+              No Strategies Available
+            </h3>
+            <p className="text-gray-400 dark:text-gray-500 text-sm max-w-md mx-auto">
+              There are currently no active strategies configured. Alert preferences will appear here when strategies are enabled.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -420,7 +548,7 @@ const AlertPairPreferences = () => {
                   Select All
                 </label>
                 <span className="text-xs text-gray-500 dark:text-white text-gray-700 font-mono">
-                  ({selected.size}/{ALL_KEYS.size})
+                  ({selected.size}/{allKeys.size})
                 </span>
               </div>
             </div>
@@ -430,7 +558,7 @@ const AlertPairPreferences = () => {
         {/* Strategy Sections */}
         <div className="card-body p-5">
           <div className="grid gap-5">
-            {STRATEGIES.map((strategy) => (
+            {activeStrategies.map((strategy) => (
               <StrategySection
                 key={strategy.key}
                 strategy={strategy}
@@ -439,13 +567,54 @@ const AlertPairPreferences = () => {
                 onToggleRow={handleToggleRow}
                 onToggleColumn={handleToggleColumn}
                 onToggleStrategy={handleToggleStrategy}
+                sessionOptions={sessionOptions}
+                excludedSessions={strategySessionExclusions[strategy.key] || []}
+                onSessionToggle={(sessionValue) => {
+                  setStrategySessionExclusions((prev) => {
+                    const current = prev[strategy.key] || [];
+                    const updated = current.includes(sessionValue)
+                      ? current.filter((s) => s !== sessionValue)
+                      : [...current, sessionValue];
+                    return { ...prev, [strategy.key]: updated };
+                  });
+                  setHasChanges(true);
+                }}
+                onSessionToggleAll={() => {
+                  setStrategySessionExclusions((prev) => {
+                    const current = prev[strategy.key] || [];
+                    const allExcluded = current.length === sessionOptions.length;
+                    return {
+                      ...prev,
+                      [strategy.key]: allExcluded ? [] : sessionOptions.map((s) => s.value),
+                    };
+                  });
+                  setHasChanges(true);
+                }}
+                defyModeOptions={defyModeOptions}
+                excludedDefyTypes={excludedDefyTypes}
+                onDefyModeToggle={(modeValue) => {
+                  setExcludedDefyTypes((prev) =>
+                    prev.includes(modeValue)
+                      ? prev.filter((m) => m !== modeValue)
+                      : [...prev, modeValue]
+                  );
+                  setHasChanges(true);
+                }}
+                onDefyModeToggleAll={() => {
+                  setExcludedDefyTypes((prev) => {
+                    const allExcluded = prev.length === defyModeOptions.length;
+                    return allExcluded ? [] : defyModeOptions.map((m) => m.value);
+                  });
+                  setHasChanges(true);
+                }}
               />
             ))}
           </div>
 
+
+
           {/* Save Button */}
           <div className="mt-6 flex items-center justify-end gap-3">
-
             <button
               type="button"
               onClick={handleSave}
@@ -453,10 +622,7 @@ const AlertPairPreferences = () => {
               className="btn btn-primary flex items-center gap-2"
             >
               {isSaving ? (
-                <>
-                  {/* <i className="ki-filled ki-loading animate-spin"></i> */}
-                  Saving...
-                </>
+                <>Saving...</>
               ) : (
                 <>
                   <Save className="w-4 h-4" />
@@ -477,3 +643,4 @@ const AlertPairPreferences = () => {
 };
 
 export default AlertPairPreferences;
+

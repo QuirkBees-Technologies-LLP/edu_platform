@@ -52,7 +52,7 @@ import {
 import { useLanguage } from "@/i18n";
 import { Copy, Target, ShieldAlert, Crosshair, Activity, Pencil, Check, X, Clock, ChartLine } from "lucide-react";
 import signalConfig from "../../student/trading-signals/signalConfig";
-import { formatTimeframe } from "../../student/trading-signals/signalUtils";
+import { formatTimeframe, formatAlertTime } from "../../student/trading-signals/signalUtils";
 
 // ── Status / Signal Badge Maps ──────────────────────────────────────
 
@@ -1821,7 +1821,7 @@ const AdminSignalDetailModal = ({ signal, onClose, onUpdate, initialEditMode = f
                     {signal?.webhookConfig?.name ? `Strategy: ${signal.webhookConfig.name}` : (signal?.strategyName ? `Strategy: ${signal.strategyName}` : "")}
                   </span>
                   <span>
-                    {signal?.createdAt ? `Received: ${signal?.alertTimestamp || new Date(signal.createdAt).toLocaleString()}` : ""}
+                    {signal?.createdAt ? `Received: ${formatAlertTime(signal?.alertTimestamp) !== "—" ? formatAlertTime(signal.alertTimestamp) : new Date(signal.createdAt).toLocaleString()}` : ""}
                   </span>
                 </div>
               </div>

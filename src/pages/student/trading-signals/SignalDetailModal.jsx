@@ -19,7 +19,7 @@ import {
   DialogBody,
 } from "@/components/ui/dialog";
 import signalConfig from "./signalConfig";
-import { formatTimeframe, formatPrice } from "./signalUtils";
+import { formatTimeframe, formatPrice, formatAlertTime } from "./signalUtils";
 
 // ── Small presentational sub-components ────────────────────────────
 
@@ -27,8 +27,10 @@ const PriceBlock = ({ label, value, colorClass, bgClass, icon: Icon }) => {
   const handleCopy = (e) => {
     e.stopPropagation();
     if (value != null) {
-      navigator.clipboard.writeText(formatPrice(value).toString());
-      toast.success(`${label} copied!`);
+      try {
+        navigator?.clipboard?.writeText?.(formatPrice(value).toString());
+        toast?.success?.(`${label} copied!`);
+      } catch (_) { /* clipboard may not be available */ }
     }
   };
 
@@ -482,7 +484,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
                 {signal?.webhookConfig?.name ? `Strategy: ${signal.webhookConfig.name}` : ""}
               </span>
               <span>
-                {signal?.createdAt ? `Received: ${signal?.alertTimestamp}` : ""}
+                {signal?.createdAt ? `Received: ${formatAlertTime(signal?.alertTimestamp) !== "—" ? formatAlertTime(signal.alertTimestamp) : new Date(signal.createdAt).toLocaleString()}` : ""}
               </span>
             </div>
           </div>

@@ -26,36 +26,38 @@ const FilterSelect = ({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const allChecked = excludedValues.length === 0;
-  const checkedCount = Math.max(0, options.length - excludedValues.filter((v) => options.some((o) => o.value === v)).length);
+  const safeOptions = options || [];
+  const safeExcluded = excludedValues || [];
+  const allChecked = safeExcluded.length === 0;
+  const checkedCount = Math.max(0, safeOptions.length - safeExcluded.filter((v) => safeOptions.some((o) => o.value === v)).length);
 
   const toggleValue = (val) => {
-    if (excludedValues.includes(val)) {
-      onExcludedChange(excludedValues.filter((v) => v !== val));
+    if (safeExcluded.includes(val)) {
+      onExcludedChange?.(safeExcluded.filter((v) => v !== val));
     } else {
-      onExcludedChange([...excludedValues, val]);
+      onExcludedChange?.([...safeExcluded, val]);
     }
   };
 
   const toggleAll = () => {
     if (allChecked) {
       // Uncheck all
-      onExcludedChange(options.map((o) => o.value));
+      onExcludedChange?.(safeOptions.map((o) => o.value));
     } else {
       // Check all
-      onExcludedChange([]);
+      onExcludedChange?.([]);
     }
   };
 
   // Display text on the trigger button — always show count
   const triggerText = allChecked
-    ? `${placeholder} (${options.length}/${options.length})`
+    ? `${placeholder} (${safeOptions.length}/${safeOptions.length})`
     : checkedCount === 0
       ? "None selected"
-      : `${checkedCount}/${options.length} selected`;
+      : `${checkedCount}/${safeOptions.length} selected`;
 
   return (
-    <div className="flex flex-col gap-1.5 relative" ref={rootRef}>
+    <div className="flex flex-col gap-1.5 relative flex-1 min-w-0" ref={rootRef}>
       <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
         {label}
       </label>
@@ -66,7 +68,7 @@ const FilterSelect = ({
         onClick={() => setIsOpen((prev) => !prev)}
         className={`
           flex items-center justify-between gap-2
-          w-[180px] h-10 px-3
+          w-full h-10 px-3
           rounded-md border text-xs font-medium
           transition-all duration-200 cursor-pointer
           border-slate-200 dark:border-[#202038] bg-white dark:bg-[#0F0F1A]
@@ -119,8 +121,8 @@ const FilterSelect = ({
           <div className="mx-3 my-1 border-t border-border" />
 
           {/* Options */}
-          {options.map((opt) => {
-            const isChecked = !excludedValues.includes(opt.value);
+          {safeOptions.map((opt) => {
+            const isChecked = !safeExcluded.includes(opt?.value);
             return (
               <div
                 key={opt.value}
