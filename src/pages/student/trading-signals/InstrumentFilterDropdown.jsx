@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import instrumentCategories from "./instrumentData";
@@ -8,12 +8,12 @@ import instrumentCategories from "./instrumentData";
 // On hover over a category, a submenu slides open with checkboxes.
 // All instruments are checked by default.
 
-// Flatten all symbols for counting
-const ALL_SYMBOLS = instrumentCategories.flatMap((c) =>
-  c.instruments.map((i) => i.symbol)
-);
-
-const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => {
+const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categories = instrumentCategories, flat = false }) => {
+  // Flatten all symbols for counting — recomputed when categories change
+  const allSymbols = useMemo(
+    () => (categories || []).flatMap((c) => (c?.instruments || []).map((i) => i?.symbol)),
+    [categories]
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const rootRef = useRef(null);
@@ -66,7 +66,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
   // ── Toggle all symbols ──────────────────────────────────────────
   const toggleAll = () => {
     if (excludedValues.length === 0) {
-      onExcludedChange?.([...ALL_SYMBOLS]);
+      onExcludedChange?.([...(allSymbols || [])]);
     } else {
       onExcludedChange?.([]);
     }
@@ -106,14 +106,14 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
     }, 300);
   };
 
-  const activeCat = instrumentCategories.find(
-    (c) => c.key === activeCategory
+  const activeCat = categories?.find(
+    (c) => c?.key === activeCategory
   );
 
   const allChecked = excludedValues.length === 0;
-  const validExcluded = excludedValues.filter((v) => ALL_SYMBOLS.includes(v));
-  const noneChecked = validExcluded.length >= ALL_SYMBOLS.length;
-  const checkedCount = Math.max(0, ALL_SYMBOLS.length - validExcluded.length);
+  const validExcluded = excludedValues.filter((v) => allSymbols?.includes(v));
+  const noneChecked = validExcluded.length >= (allSymbols?.length || 0);
+  const checkedCount = Math.max(0, (allSymbols?.length || 0) - validExcluded.length);
 
   // Global checkbox state: checked / indeterminate / unchecked
   const globalCheckState = allChecked
@@ -124,10 +124,10 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
 
   // Trigger display text — always show count
   const triggerText = allChecked
-    ? `All Symbols (${ALL_SYMBOLS.length}/${ALL_SYMBOLS.length})`
+    ? `All Symbols (${allSymbols?.length || 0}/${allSymbols?.length || 0})`
     : noneChecked
       ? "None selected"
-      : `${checkedCount}/${ALL_SYMBOLS.length} selected`;
+      : `${checkedCount}/${allSymbols?.length || 0} selected`;
 
   return (
     <div className="flex flex-col gap-1.5 relative flex-1 min-w-0" ref={rootRef}>
@@ -157,33 +157,33 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
         <span className="truncate">{triggerText}</span>
         <ChevronDown
           size={14}
-          className={`text-slate-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
         />
       </button>
 
       {/* ── Dropdown ── */}
       {isOpen && (
-        <div
-          className="absolute top-full left-0 mt-1.5 z-50 flex"
-          onMouseEnter={handleRootEnter}
-          onMouseLeave={handleRootLeave}
-        >
-          {/* ── Main Category Menu ── */}
+        flat ? (
+          /* ── Flat mode: simple checkbox list without category hierarchy ── */
           <div
             className="
-              w-[200px] py-1
+              absolute top-full left-0 mt-1.5 z-50
+              w-[220px] py-1
               bg-popover text-popover-foreground
               border rounded-md shadow-md
-              overflow-hidden
+              max-h-[320px] overflow-y-auto
             "
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(100,116,139,0.2) transparent",
+            }}
           >
             {/* Select All / Deselect All */}
             <div
               onClick={toggleAll}
               className={`
-                w-full flex items-center gap-2.5 px-3 py-2.5 text-xs
+                w-full flex items-center gap-2.5 px-3 py-2 text-xs
                 transition-all duration-150 cursor-pointer
                 hover:bg-accent hover:text-accent-foreground
                 ${allChecked ? "font-semibold" : ""}
@@ -191,102 +191,88 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
             >
               <Checkbox
                 checked={globalCheckState}
-                onCheckedChange={() => {}}
+                onCheckedChange={() => { }}
                 className="h-4 w-4"
               />
               <span>{allChecked ? "Deselect All" : "Select All"}</span>
-              <span className="text-[10px] text-muted-foreground ml-auto">
-                {checkedCount}/{ALL_SYMBOLS.length}
-              </span>
             </div>
 
             <div className="mx-3 my-1 border-t border-border" />
 
-            {/* Category items */}
-            {instrumentCategories.map((cat) => {
-              const catSymbols = cat.instruments.map((i) => i.symbol);
-              const catCheckedCount = catSymbols.filter(
-                (s) => !excludedValues.includes(s)
-              ).length;
-              const allCatChecked = catCheckedCount === catSymbols.length;
-              const noneCatChecked = catCheckedCount === 0;
-              const isActive = activeCategory === cat.key;
-
-              // Category checkbox state: checked / indeterminate / unchecked
-              const catCheckState = allCatChecked
-                ? true
-                : noneCatChecked
-                  ? false
-                  : "indeterminate";
-
+            {/* Flat symbol list */}
+            {(allSymbols || []).map((sym) => {
+              const isChecked = !excludedValues.includes(sym);
               return (
                 <div
-                  key={cat.key}
-                  onMouseEnter={() => handleCategoryEnter(cat.key)}
-                  onMouseLeave={handleCategoryLeave}
+                  key={sym}
+                  onClick={() => toggleSymbol(sym)}
                   className={`
-                    relative flex items-center justify-between gap-2 px-3 py-2.5
-                    cursor-pointer transition-all duration-150
-                    ${
-                      isActive
-                        ? "bg-accent text-accent-foreground"
-                        : "hover:bg-accent hover:text-accent-foreground"
-                    }
+                    w-full flex items-center gap-2.5 px-3 py-2 text-xs
+                    transition-all duration-150 cursor-pointer text-left
+                    hover:bg-accent hover:text-accent-foreground
+                    ${!isChecked ? "opacity-60" : ""}
                   `}
                 >
-                  <span className="flex items-center gap-2.5 text-xs font-medium">
-                    <Checkbox
-                      checked={catCheckState}
-                      onCheckedChange={() => toggleCategory(cat)}
-                      className="h-4 w-4"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    {cat.label}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-muted-foreground">
-                      {catCheckedCount}/{catSymbols.length}
-                    </span>
-                    <ChevronRight
-                      size={13}
-                      className={`transition-all duration-200 ${
-                        isActive
-                          ? "text-slate-700 dark:text-white translate-x-0.5"
-                          : "text-slate-300 dark:text-slate-600"
-                      }`}
-                    />
-                  </span>
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={() => { }}
+                    className="h-4 w-4"
+                  />
+                  <span>{sym}</span>
                 </div>
               );
             })}
           </div>
-
-          {/* ── Submenu ── */}
-          {activeCat && (
+        ) : (
+          /* ── Category mode: cascading menu with submenus ── */
+          <div
+            className="absolute top-full left-0 mt-1.5 z-50 flex"
+            onMouseEnter={handleRootEnter}
+            onMouseLeave={handleRootLeave}
+          >
+            {/* ── Main Category Menu ── */}
             <div
               className="
-                ml-1 w-[220px] py-1
+                w-[200px] py-1
                 bg-popover text-popover-foreground
                 border rounded-md shadow-md
-                max-h-[380px] overflow-y-auto
-                animate-in fade-in-0 slide-in-from-left-2 duration-150
+                overflow-hidden
               "
-              style={{
-                scrollbarWidth: "thin",
-                scrollbarColor:
-                  "rgba(100,116,139,0.2) transparent",
-              }}
-              onMouseEnter={handleSubmenuEnter}
-              onMouseLeave={handleSubmenuLeave}
             >
-              {/* "All [Category]" toggle at top of submenu */}
-              {(() => {
-                const catSymbols = activeCat.instruments.map((i) => i.symbol);
+              {/* Select All / Deselect All */}
+              <div
+                onClick={toggleAll}
+                className={`
+                  w-full flex items-center gap-2.5 px-3 py-2.5 text-xs
+                  transition-all duration-150 cursor-pointer
+                  hover:bg-accent hover:text-accent-foreground
+                  ${allChecked ? "font-semibold" : ""}
+                `}
+              >
+                <Checkbox
+                  checked={globalCheckState}
+                  onCheckedChange={() => { }}
+                  className="h-4 w-4"
+                />
+                <span>{allChecked ? "Deselect All" : "Select All"}</span>
+                <span className="text-[10px] text-muted-foreground ml-auto">
+                  {checkedCount}/{allSymbols?.length || 0}
+                </span>
+              </div>
+
+              <div className="mx-3 my-1 border-t border-border" />
+
+              {/* Category items */}
+              {categories.map((cat) => {
+                const catSymbols = cat.instruments.map((i) => i.symbol);
                 const catCheckedCount = catSymbols.filter(
                   (s) => !excludedValues.includes(s)
                 ).length;
                 const allCatChecked = catCheckedCount === catSymbols.length;
                 const noneCatChecked = catCheckedCount === 0;
+                const isActive = activeCategory === cat.key;
+
+                // Category checkbox state: checked / indeterminate / unchecked
                 const catCheckState = allCatChecked
                   ? true
                   : noneCatChecked
@@ -294,63 +280,136 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange }) => 
                     : "indeterminate";
 
                 return (
-                  <>
-                    <div
-                      onClick={() => toggleCategory(activeCat)}
-                      className={`
-                        w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold
-                        transition-all duration-150 cursor-pointer
-                        hover:bg-accent hover:text-accent-foreground
-                      `}
-                    >
-                      <Checkbox
-                        checked={catCheckState}
-                        onCheckedChange={() => {}}
-                        className="h-4 w-4"
-                      />
-                      <span>All {activeCat.label}</span>
-                      <span className="text-[10px] text-muted-foreground ml-auto">
-                        {catCheckedCount}/{catSymbols.length}
-                      </span>
-                    </div>
-                    <div className="mx-3 my-1 border-t border-border" />
-                  </>
-                );
-              })()}
-
-              {/* Instrument items */}
-              {activeCat.instruments.map((inst) => {
-                const isChecked = !excludedValues.includes(inst.symbol);
-                return (
                   <div
-                    key={inst.symbol}
-                    onClick={() => toggleSymbol(inst.symbol)}
+                    key={cat.key}
+                    onMouseEnter={() => handleCategoryEnter(cat.key)}
+                    onMouseLeave={handleCategoryLeave}
                     className={`
-                      w-full flex items-center gap-2.5 px-3 py-2 text-xs
-                      transition-all duration-150 cursor-pointer text-left
-                      hover:bg-accent hover:text-accent-foreground
-                      ${!isChecked ? "opacity-60" : ""}
+                      relative flex items-center justify-between gap-2 px-3 py-2.5
+                      cursor-pointer transition-all duration-150
+                      ${isActive
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent hover:text-accent-foreground"
+                      }
                     `}
                   >
-                    <Checkbox
-                      checked={isChecked}
-                      onCheckedChange={() => {}}
-                      className="h-4 w-4"
-                    />
-                    <span className="text-[11px]">
-                      {inst.symbol}
+                    <span className="flex items-center gap-2.5 text-xs font-medium">
+                      <Checkbox
+                        checked={catCheckState}
+                        onCheckedChange={() => toggleCategory(cat)}
+                        className="h-4 w-4"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      {cat.label}
                     </span>
-                    {inst.label !== inst.symbol && (
+                    <span className="flex items-center gap-1.5">
                       <span className="text-[10px] text-muted-foreground">
-                        {inst.label}
+                        {catCheckedCount}/{catSymbols.length}
                       </span>
-                    )}
+                      <ChevronRight
+                        size={13}
+                        className={`transition-all duration-200 ${isActive
+                            ? "text-slate-700 dark:text-white translate-x-0.5"
+                            : "text-slate-300 dark:text-slate-600"
+                          }`}
+                      />
+                    </span>
                   </div>
                 );
               })}
             </div>
-          )}
-        </div>
+
+            {/* ── Submenu ── */}
+            {activeCat && (
+              <div
+                className="
+                  ml-1 w-[220px] py-1
+                  bg-popover text-popover-foreground
+                  border rounded-md shadow-md
+                  max-h-[380px] overflow-y-auto
+                  animate-in fade-in-0 slide-in-from-left-2 duration-150
+                "
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor:
+                    "rgba(100,116,139,0.2) transparent",
+                }}
+                onMouseEnter={handleSubmenuEnter}
+                onMouseLeave={handleSubmenuLeave}
+              >
+                {/* "All [Category]" toggle at top of submenu */}
+                {(() => {
+                  const catSymbols = activeCat.instruments.map((i) => i.symbol);
+                  const catCheckedCount = catSymbols.filter(
+                    (s) => !excludedValues.includes(s)
+                  ).length;
+                  const allCatChecked = catCheckedCount === catSymbols.length;
+                  const noneCatChecked = catCheckedCount === 0;
+                  const catCheckState = allCatChecked
+                    ? true
+                    : noneCatChecked
+                      ? false
+                      : "indeterminate";
+
+                  return (
+                    <>
+                      <div
+                        onClick={() => toggleCategory(activeCat)}
+                        className={`
+                          w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold
+                          transition-all duration-150 cursor-pointer
+                          hover:bg-accent hover:text-accent-foreground
+                        `}
+                      >
+                        <Checkbox
+                          checked={catCheckState}
+                          onCheckedChange={() => { }}
+                          className="h-4 w-4"
+                        />
+                        <span>All {activeCat.label}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto">
+                          {catCheckedCount}/{catSymbols.length}
+                        </span>
+                      </div>
+                      <div className="mx-3 my-1 border-t border-border" />
+                    </>
+                  );
+                })()}
+
+                {/* Instrument items */}
+                {activeCat.instruments.map((inst) => {
+                  const isChecked = !excludedValues.includes(inst.symbol);
+                  return (
+                    <div
+                      key={inst.symbol}
+                      onClick={() => toggleSymbol(inst.symbol)}
+                      className={`
+                        w-full flex items-center gap-2.5 px-3 py-2 text-xs
+                        transition-all duration-150 cursor-pointer text-left
+                        hover:bg-accent hover:text-accent-foreground
+                        ${!isChecked ? "opacity-60" : ""}
+                      `}
+                    >
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => { }}
+                        className="h-4 w-4"
+                      />
+                      <span className="text-[11px]">
+                        {inst.symbol}
+                      </span>
+                      {inst.label !== inst.symbol && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {inst.label}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )
       )}
     </div>
   );

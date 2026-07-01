@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useGetClientTvSignalsQuery,
@@ -298,6 +298,58 @@ const StudentTradingSignals = () => {
     label: s?.name || "",
   }));
 
+  // ── Strategy-scoped filter restriction ─────────────────────────────
+  // When exactly one strategy is active and it’s Killshot, restrict
+  // the Symbol and Time Frame dropdowns to only Killshot-relevant options.
+  // Uses the API-provided strategyConfigs as the source of truth.
+  const activeStrategyNames = useMemo(() => {
+    return strategyOptions
+      .filter((s) => !exclusionFilters.excludedStrategies.some(
+        (ex) => ex.toLowerCase() === s.value.toLowerCase()
+      ))
+      .map((s) => s.value);
+  }, [strategyOptions, exclusionFilters.excludedStrategies]);
+
+  const isOnlyKillshot = activeStrategyNames.length === 1 &&
+    activeStrategyNames[0]?.toLowerCase() === "killshot";
+
+  // Config timeframe format (M1, M5, H1) → frontend value format (1m, 5m, 1H)
+  const CONFIG_TF_TO_FRONTEND = {
+    M1: "1m", M3: "3m", M5: "5m", M15: "15m", M30: "30m", M45: "45m",
+    H1: "1H", H2: "2H", H3: "3H", H4: "4H",
+    D1: "1D", W1: "1W",
+  };
+
+  const effectiveCategories = useMemo(() => {
+    if (!isOnlyKillshot) return instrumentCategories;
+    const killshotConfig = (options.strategyConfigs || []).find(
+      (c) => c.key === "killshot"
+    );
+    if (!killshotConfig?.pairs?.length) return instrumentCategories;
+    const allowedSymbols = new Set(killshotConfig.pairs.map((p) => p.toUpperCase()));
+    return instrumentCategories
+      .map((cat) => ({
+        ...cat,
+        instruments: cat.instruments.filter((inst) =>
+          allowedSymbols.has(inst.symbol.replace(/\//g, "").toUpperCase()) ||
+          allowedSymbols.has(inst.symbol.toUpperCase())
+        ),
+      }))
+      .filter((cat) => cat.instruments.length > 0);
+  }, [isOnlyKillshot, options.strategyConfigs]);
+
+  const effectiveTimeframes = useMemo(() => {
+    if (!isOnlyKillshot) return TIMEFRAME_OPTIONS;
+    const killshotConfig = (options.strategyConfigs || []).find(
+      (c) => c.key === "killshot"
+    );
+    if (!killshotConfig?.timeframes?.length) return TIMEFRAME_OPTIONS;
+    const allowedValues = new Set(
+      killshotConfig.timeframes.map((tf) => CONFIG_TF_TO_FRONTEND[tf] || tf)
+    );
+    return TIMEFRAME_OPTIONS.filter((opt) => allowedValues.has(opt.value));
+  }, [isOnlyKillshot, options.strategyConfigs]);
+
   // ── Derive which sub-filters are active ─────────────────────────────
   // A sub-filter is active only if its parent strategy exists in the
   // API-returned strategies (admin-enabled) AND isn't user-excluded
@@ -328,10 +380,10 @@ const StudentTradingSignals = () => {
     .filter((t) => t !== "OTHER")
     .map((t) => ({ value: t, label: t }));
 
-  // ── Base filter totals ───────────────────────────────────────────
-  const totalSymbols = instrumentCategories.flatMap((c) => c.instruments).length;
+  // ── Base filter totals (use effective values for strategy-scoped restriction) ──
+  const totalSymbols = (effectiveCategories || []).flatMap((c) => c?.instruments || []).length;
   const totalSignalTypes = signalTypeOptions.length;
-  const totalTimeframes = TIMEFRAME_OPTIONS.length;
+  const totalTimeframes = effectiveTimeframes?.length || 0;
   const totalStrategies = strategyOptions.length;
 
   // Sub-filter counts (only counted when their parent strategy is active)
@@ -439,13 +491,15 @@ const StudentTradingSignals = () => {
             <InstrumentFilterDropdown
               excludedValues={exclusionFilters.excludedSymbols}
               onExcludedChange={(v) => updateExclusion("excludedSymbols", v)}
+              categories={effectiveCategories}
+              flat={isOnlyKillshot}
             />
             <FilterSelect
               label="Time Frame"
               excludedValues={exclusionFilters.excludedTimeframes}
               onExcludedChange={(v) => updateExclusion("excludedTimeframes", v)}
               placeholder="All Time Frames"
-              options={TIMEFRAME_OPTIONS}
+              options={effectiveTimeframes}
             />
             {/* ── Conditional: Pattern Type — visible when Bullseye is selected ── */}
             {isBullseyeActive && patternTypeOptions.length > 0 && (
