@@ -1,5 +1,9 @@
 // ── Instrument Categories & Data ─────────────────────────────────────
 // Used by InstrumentFilterDropdown for the cascading filter menu.
+//
+// ⚠ SYNC WARNING: This list is duplicated in the backend at:
+//   edu_platfrom_be/src/controller/user/tvSignals.controller.js → symbolCategories
+// Any additions or removals here MUST be replicated there, and vice versa.
 
 import {
   DollarSign,

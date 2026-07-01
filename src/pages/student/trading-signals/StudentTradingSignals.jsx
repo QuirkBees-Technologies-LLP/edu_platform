@@ -190,6 +190,11 @@ const StudentTradingSignals = () => {
     return () => window.removeEventListener("beforeunload", flushPendingSaves);
   }, [exclusionFilters, savePrefs]);
 
+  // KNOWN LIMITATION: Polling re-fetches the current page, not page 1.
+  // When the user has scrolled past page 1, new signals added since initial
+  // load won't appear at the top until a filter/search change resets to page 1.
+  // This is an acceptable trade-off — a full fix would require a separate
+  // page-1 subscription or WebSocket-based push updates.
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery(
     {
       page,

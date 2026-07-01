@@ -57,23 +57,20 @@ const StrategyAlerts = () => {
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery({
     page,
     limit,
-    ...(signalTypeFilter ? { excludedSignalTypes: [] } : {}),
+    // Server-side filter — previously filtered client-side which caused
+    // pagination mismatches and potentially empty pages.
+    ...(signalTypeFilter ? { signalType: signalTypeFilter } : {}),
   });
 
   const totalPages = data?.pagination?.totalPages || 1;
 
   useEffect(() => {
     if (data?.data) {
-      // Client-side filter for signal type if set
-      const filtered = signalTypeFilter
-        ? data.data.filter((s) => s.signalType === signalTypeFilter)
-        : data.data;
-
       if (page === 1) {
-        setSignals(filtered);
+        setSignals(data.data);
       } else {
         setSignals((prev) => {
-          const newSignals = filtered.filter(
+          const newSignals = data.data.filter(
             (s) => !prev.some((p) => p._id === s._id)
           );
           return [...prev, ...newSignals];
