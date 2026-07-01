@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 const FilterSelect = ({
   label,
   options,          // [{ value: "BUY", label: "BUY" }, ...]  — NO "All" option
-  excludedValues,   // string[] of unchecked values
+  excludedValues = [],   // string[] of unchecked values
   onExcludedChange, // (newExcluded: string[]) => void
   placeholder,      // e.g. "All Types"
 }) => {
@@ -66,7 +66,7 @@ const FilterSelect = ({
         onClick={() => setIsOpen((prev) => !prev)}
         className={`
           flex items-center justify-between gap-2
-          w-[200px] h-10 px-3
+          w-[180px] h-10 px-3
           rounded-md border text-xs font-medium
           transition-all duration-200 cursor-pointer
           border-slate-200 dark:border-[#202038] bg-white dark:bg-[#0F0F1A]
@@ -78,9 +78,8 @@ const FilterSelect = ({
         <span className="truncate">{triggerText}</span>
         <ChevronDown
           size={14}
-          className={`text-slate-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
         />
       </button>
 
@@ -89,7 +88,7 @@ const FilterSelect = ({
         <div
           className="
             absolute top-full left-0 mt-1.5 z-50
-            w-[200px] py-1
+            w-[155px] py-1
             bg-popover text-popover-foreground
             border rounded-md shadow-md
             max-h-[320px] overflow-y-auto
@@ -111,7 +110,7 @@ const FilterSelect = ({
           >
             <Checkbox
               checked={allChecked}
-              onCheckedChange={() => {}}
+              onCheckedChange={() => { }}
               className="h-4 w-4"
             />
             <span>{allChecked ? "Deselect All" : "Select All"}</span>
@@ -135,7 +134,7 @@ const FilterSelect = ({
               >
                 <Checkbox
                   checked={isChecked}
-                  onCheckedChange={() => {}}
+                  onCheckedChange={() => { }}
                   className="h-4 w-4"
                 />
                 <span>{opt.label}</span>

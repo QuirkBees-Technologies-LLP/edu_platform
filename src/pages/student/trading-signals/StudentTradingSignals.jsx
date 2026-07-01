@@ -5,8 +5,6 @@ import {
   useGetFilterOptionsQuery,
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
-  useGetStrategyFilterPreferencesQuery,
-  useSaveStrategyFilterPreferencesMutation,
 } from "../../../store/api/client/clientTvSignalsApiSlice";
 import {
   Search,
@@ -14,8 +12,6 @@ import {
   Loader2,
   ChartLine,
   X,
-  Target,
-  Zap,
   BellRing,
 } from "lucide-react";
 import {
@@ -25,7 +21,7 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
-import { Checkbox } from "@/components/ui/checkbox";
+
 
 import signalConfig from "./signalConfig";
 import SignalCard from "./SignalCard";
@@ -47,6 +43,8 @@ const loadSavedFilters = () => {
         excludedSignalTypes: Array.isArray(parsed.excludedSignalTypes) ? parsed.excludedSignalTypes : [],
         excludedStrategies: Array.isArray(parsed.excludedStrategies) ? parsed.excludedStrategies : [],
         excludedTimeframes: Array.isArray(parsed.excludedTimeframes) ? parsed.excludedTimeframes : [],
+        excludedBullseyeTypes: Array.isArray(parsed.excludedBullseyeTypes) ? parsed.excludedBullseyeTypes : [],
+        excludedDefyTypes: Array.isArray(parsed.excludedDefyTypes) ? parsed.excludedDefyTypes : [],
       };
     }
   } catch {
@@ -57,6 +55,8 @@ const loadSavedFilters = () => {
     excludedSignalTypes: [],
     excludedStrategies: [],
     excludedTimeframes: [],
+    excludedBullseyeTypes: [],
+    excludedDefyTypes: [],
   };
 };
 
@@ -85,109 +85,20 @@ const TIMEFRAME_OPTIONS = [
   { value: "1M", label: "1M" },
 ];
 
-// ── Bullseye Pattern options ────────────────────────────────────────
-const BULLSEYE_PATTERNS = [
+// ── Hardcoded Pattern Type options (Bullseye sub-filter) ─────────────
+const PATTERN_TYPE_OPTIONS = [
   { value: "XAUUSD", label: "XAUUSD" },
-  { value: "GR40", label: "GR40" },
+  { value: "GER40", label: "GER40" },
   { value: "NAS100", label: "NAS100" },
   { value: "S&P 500", label: "S&P 500" },
   { value: "Majors", label: "Majors" },
 ];
 
-// ── Defy Execution Mode options ─────────────────────────────────────
-// entrytype field: "confirmed" = Market Execution, "pending" = Pending Orders
-const DEFY_MODES = [
+// ── Hardcoded Execution Type options (Defy sub-filter) ───────────────
+const EXECUTION_MODE_OPTIONS = [
   { value: "confirmed", label: "Market Execution" },
   { value: "pending", label: "Pending Orders" },
 ];
-
-// ── Default strategy display state ──────────────────────────────────
-const DEFAULT_STRATEGY_DISPLAY = {
-  bullseye: { excludedPatterns: [] },   // [] = all selected
-  defy: { excludedModes: [] },      // [] = all selected
-};
-
-// ── StrategyFilterPanel — inline filter UI below the filter bar ─────
-const BullseyeFilterPanel = ({ excludedPatterns, onChange }) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
-      Pattern Type
-    </label>
-    <div className="flex flex-wrap gap-2">
-      {BULLSEYE_PATTERNS.map((p) => {
-        const isChecked = !excludedPatterns.includes(p.value);
-        return (
-          <button
-            key={p.value}
-            type="button"
-            onClick={() => {
-              if (isChecked) {
-                onChange([...excludedPatterns, p.value]);
-              } else {
-                onChange(excludedPatterns.filter((v) => v !== p.value));
-              }
-            }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${isChecked
-              ? "bg-yellow-500/10 border-yellow-500/40 text-yellow-700 dark:text-yellow-400"
-              : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
-              }`}
-          >
-            <Checkbox
-              checked={isChecked}
-              className="h-3 w-3"
-              onCheckedChange={() => { }}
-            />
-            {p.label}
-          </button>
-        );
-      })}
-    </div>
-  </div>
-);
-
-const DefyFilterPanel = ({ excludedModes, onChange }) => {
-  // BUG #4 fix: at least one mode must remain checked
-  const checkedCount = DEFY_MODES.length - excludedModes.length;
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
-        Execution Mode
-      </label>
-      <div className="flex flex-wrap gap-2">
-        {DEFY_MODES.map((m) => {
-          const isChecked = !excludedModes.includes(m.value);
-          return (
-            <button
-              key={m.value}
-              type="button"
-              onClick={() => {
-                if (isChecked) {
-                  // Prevent unchecking the last checked mode
-                  if (checkedCount <= 1) return;
-                  onChange([...excludedModes, m.value]);
-                } else {
-                  onChange(excludedModes.filter((v) => v !== m.value));
-                }
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer ${isChecked
-                ? "bg-blue-500/10 border-blue-500/40 text-blue-700 dark:text-blue-400"
-                : "bg-slate-100 dark:bg-[#1C1C30] border-slate-200 dark:border-[#202038] text-slate-400 dark:text-slate-500 opacity-60"
-                }`}
-            >
-              <Checkbox
-                checked={isChecked}
-                className="h-3 w-3"
-                onCheckedChange={() => { }}
-              />
-              {m.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
 
 const areArraysEqual = (a1, a2) => {
   const arr1 = a1 || [];
@@ -198,20 +109,8 @@ const areArraysEqual = (a1, a2) => {
 
 const areFiltersEqual = (f1, f2) => {
   if (!f1 || !f2) return false;
-  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes"];
+  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes", "excludedBullseyeTypes", "excludedDefyTypes"];
   return keys.every((key) => areArraysEqual(f1[key], f2[key]));
-};
-
-const areStratPrefsEqual = (p1, p2) => {
-  if (!p1 || !p2) return false;
-  if (p1.strategy !== p2.strategy) return false;
-  const bullseye1 = p1.display?.bullseye?.excludedPatterns || [];
-  const bullseye2 = p2.display?.bullseye?.excludedPatterns || [];
-  if (!areArraysEqual(bullseye1, bullseye2)) return false;
-  const defy1 = p1.display?.defy?.excludedModes || [];
-  const defy2 = p2.display?.defy?.excludedModes || [];
-  if (!areArraysEqual(defy1, defy2)) return false;
-  return true;
 };
 
 // ── Student Trading Signals Page ────────────────────────────────────
@@ -229,23 +128,11 @@ const StudentTradingSignals = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true); // track first load vs polling
   const observer = useRef();
   const saveTimerRef = useRef(null);
-  const stratSaveTimerRef = useRef(null);
   const lastSavedPrefsRef = useRef(null);
-  const lastSavedStratPrefsRef = useRef(null);
-
-  // ── Strategy display filter state ────────────────────────────────
-  // selectedStrategy: string | null — only one strategy active at a time
-  const [selectedStrategy, setSelectedStrategy] = useState(null);
-  const [strategyDisplay, setStrategyDisplay] = useState(DEFAULT_STRATEGY_DISPLAY);
-  const [stratPrefsInitialized, setStratPrefsInitialized] = useState(false);
 
   // ── Load saved preferences from API (overrides localStorage) ────
   const { data: savedPrefs } = useGetFilterPreferencesQuery();
   const [savePrefs] = useSaveFilterPreferencesMutation();
-
-  // ── Load strategy preferences from API ──────────────────────────
-  const { data: savedStratPrefs } = useGetStrategyFilterPreferencesQuery();
-  const [saveStratPrefs] = useSaveStrategyFilterPreferencesMutation();
 
   useEffect(() => {
     if (savedPrefs?.data && !filtersInitialized) {
@@ -254,13 +141,17 @@ const StudentTradingSignals = () => {
         (apiPrefs.excludedSymbols?.length > 0) ||
         (apiPrefs.excludedSignalTypes?.length > 0) ||
         (apiPrefs.excludedStrategies?.length > 0) ||
-        (apiPrefs.excludedTimeframes?.length > 0);
+        (apiPrefs.excludedTimeframes?.length > 0) ||
+        (apiPrefs.excludedBullseyeTypes?.length > 0) ||
+        (apiPrefs.excludedDefyTypes?.length > 0);
 
       const currentPrefs = {
         excludedSymbols: Array.isArray(apiPrefs.excludedSymbols) ? apiPrefs.excludedSymbols : [],
         excludedSignalTypes: Array.isArray(apiPrefs.excludedSignalTypes) ? apiPrefs.excludedSignalTypes : [],
         excludedStrategies: Array.isArray(apiPrefs.excludedStrategies) ? apiPrefs.excludedStrategies : [],
         excludedTimeframes: Array.isArray(apiPrefs.excludedTimeframes) ? apiPrefs.excludedTimeframes : [],
+        excludedBullseyeTypes: Array.isArray(apiPrefs.excludedBullseyeTypes) ? apiPrefs.excludedBullseyeTypes : [],
+        excludedDefyTypes: Array.isArray(apiPrefs.excludedDefyTypes) ? apiPrefs.excludedDefyTypes : [],
       };
 
       if (hasApiData) {
@@ -272,52 +163,6 @@ const StudentTradingSignals = () => {
       setFiltersInitialized(true);
     }
   }, [savedPrefs, filtersInitialized, exclusionFilters]);
-
-  // ── Load strategy display preferences from API ───────────────────
-  useEffect(() => {
-    if (savedStratPrefs?.data && !stratPrefsInitialized) {
-      const d = savedStratPrefs.data?.display;
-      if (d) {
-        let loadedStrategy = null;
-        if (d.strategy) {
-          loadedStrategy = d.strategy;
-        } else if (Array.isArray(d.strategies) && d.strategies.length > 0) {
-          loadedStrategy = d.strategies[0];
-        }
-
-        const loadedDisplay = {
-          bullseye: {
-            excludedPatterns: Array.isArray(d.bullseye_patterns)
-              ? BULLSEYE_PATTERNS
-                .map((p) => p.value)
-                .filter((v) => !d.bullseye_patterns.includes(v))
-              : [],
-          },
-          defy: {
-            excludedModes: Array.isArray(d.defy_mode)
-              ? DEFY_MODES
-                .map((m) => m.value)
-                .filter((v) => !d.defy_mode.includes(v))
-              : [],
-          },
-        };
-
-        setSelectedStrategy(loadedStrategy);
-        setStrategyDisplay(loadedDisplay);
-
-        lastSavedStratPrefsRef.current = {
-          strategy: loadedStrategy,
-          display: loadedDisplay,
-        };
-      } else {
-        lastSavedStratPrefsRef.current = {
-          strategy: selectedStrategy,
-          display: strategyDisplay,
-        };
-      }
-      setStratPrefsInitialized(true);
-    }
-  }, [savedStratPrefs, stratPrefsInitialized, selectedStrategy, strategyDisplay]);
 
   // ── Persist exclusion filters to localStorage + DB (debounced) ───
   useEffect(() => {
@@ -339,42 +184,6 @@ const StudentTradingSignals = () => {
     return () => clearTimeout(saveTimerRef.current);
   }, [exclusionFilters, filtersInitialized, savePrefs]);
 
-  // ── Persist strategy display prefs to DB (debounced) ────────────
-  useEffect(() => {
-    if (!stratPrefsInitialized) return;
-
-    const currentPrefs = {
-      strategy: selectedStrategy,
-      display: strategyDisplay,
-    };
-
-    // Skip saving if the strategy prefs haven't actually changed since last load/save
-    const hasChanged = !areStratPrefsEqual(currentPrefs, lastSavedStratPrefsRef.current);
-    if (!hasChanged) return;
-
-    clearTimeout(stratSaveTimerRef.current);
-    stratSaveTimerRef.current = setTimeout(() => {
-      const bullseyeSelected = BULLSEYE_PATTERNS
-        .map((p) => p.value)
-        .filter((v) => !strategyDisplay.bullseye.excludedPatterns.includes(v));
-      const defySelected = DEFY_MODES
-        .map((m) => m.value)
-        .filter((v) => !strategyDisplay.defy.excludedModes.includes(v));
-
-      saveStratPrefs({
-        display: {
-          strategies: selectedStrategy ? [selectedStrategy] : [],
-          strategy: selectedStrategy,
-          bullseye_patterns: bullseyeSelected,
-          defy_mode: defySelected,
-        },
-      });
-      lastSavedStratPrefsRef.current = currentPrefs;
-    }, 1000);
-
-    return () => clearTimeout(stratSaveTimerRef.current);
-  }, [selectedStrategy, strategyDisplay, stratPrefsInitialized, saveStratPrefs]);
-
   // ── BUG #9 fix: Flush pending saves before page unload ──────────
   useEffect(() => {
     const flushPendingSaves = () => {
@@ -383,26 +192,10 @@ const StudentTradingSignals = () => {
         savePrefs(exclusionFilters);
         saveTimerRef.current = null;
       }
-      if (stratSaveTimerRef.current) {
-        clearTimeout(stratSaveTimerRef.current);
-        stratSaveTimerRef.current = null;
-      }
     };
     window.addEventListener("beforeunload", flushPendingSaves);
     return () => window.removeEventListener("beforeunload", flushPendingSaves);
   }, [exclusionFilters, savePrefs]);
-
-  // ── Build filter params for the API ──────────────────────────────
-  const excludedEntryTypes =
-    selectedStrategy === "defy"
-      ? strategyDisplay.defy.excludedModes
-      : [];
-
-  // BUG #1 fix: send Bullseye excluded patterns to backend
-  const excludedBullseyePatterns =
-    selectedStrategy === "bullseye"
-      ? strategyDisplay.bullseye.excludedPatterns
-      : [];
 
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery(
     {
@@ -413,9 +206,8 @@ const StudentTradingSignals = () => {
       excludedSignalTypes: exclusionFilters.excludedSignalTypes,
       excludedStrategies: exclusionFilters.excludedStrategies,
       excludedTimeframes: exclusionFilters.excludedTimeframes,
-      excludedEntryTypes,
-      excludedBullseyePatterns,
-      strategy: selectedStrategy || "",
+      excludedBullseyeTypes: exclusionFilters.excludedBullseyeTypes,
+      excludedDefyTypes: exclusionFilters.excludedDefyTypes,
     },
     { pollingInterval: 30000 }
   );
@@ -452,7 +244,7 @@ const StudentTradingSignals = () => {
   useEffect(() => {
     setPage(1);
     setIsInitialLoad(true); // show skeletons when filters/search change
-  }, [exclusionFilters, search, selectedStrategy, strategyDisplay]);
+  }, [exclusionFilters, search]);
 
   // ── IntersectionObserver — trigger next page ─────────────────────
   const lastSignalRef = useCallback(
@@ -483,41 +275,33 @@ const StudentTradingSignals = () => {
       excludedSignalTypes: [],
       excludedStrategies: [],
       excludedTimeframes: [],
+      excludedBullseyeTypes: [],
+      excludedDefyTypes: [],
     };
     setExclusionFilters(clearedExclusions);
-    setSelectedStrategy(null);
-    setStrategyDisplay(DEFAULT_STRATEGY_DISPLAY);
     setSearch("");
 
     // Immediately save cleared state (skip debounce to prevent stale reload)
     clearTimeout(saveTimerRef.current);
-    clearTimeout(stratSaveTimerRef.current);
     savePrefs(clearedExclusions);
     lastSavedPrefsRef.current = clearedExclusions;
-
-    const clearedStratPrefs = { strategy: null, display: DEFAULT_STRATEGY_DISPLAY };
-    saveStratPrefs({
-      display: {
-        strategies: [],
-        strategy: null,
-        bullseye_patterns: BULLSEYE_PATTERNS.map((p) => p.value),
-        defy_mode: DEFY_MODES.map((m) => m.value),
-      },
-    });
-    lastSavedStratPrefsRef.current = clearedStratPrefs;
   };
 
-  // ── Strategy selector — single-select toggle ───────────────────────
-  const handleStrategySelect = (strategy) => {
-    setSelectedStrategy((prev) => (prev === strategy ? null : strategy));
-  };
+  // ── Derive which sub-filters are active based on excluded strategies ──
+  const isBullseyeActive = !exclusionFilters.excludedStrategies.some(
+    (s) => s.toLowerCase() === "bullseye"
+  );
+  const isDefyActive = !exclusionFilters.excludedStrategies.some(
+    (s) => s.toLowerCase() === "defy"
+  );
 
   const hasActiveFilters =
-    exclusionFilters.excludedSymbols.length > 0 ||
-    exclusionFilters.excludedSignalTypes.length > 0 ||
-    exclusionFilters.excludedStrategies.length > 0 ||
-    exclusionFilters.excludedTimeframes.length > 0 ||
-    selectedStrategy !== null;
+    (exclusionFilters.excludedSymbols || []).length > 0 ||
+    (exclusionFilters.excludedSignalTypes || []).length > 0 ||
+    (exclusionFilters.excludedStrategies || []).length > 0 ||
+    (exclusionFilters.excludedTimeframes || []).length > 0 ||
+    (isBullseyeActive && (exclusionFilters.excludedBullseyeTypes || []).length > 0) ||
+    (isDefyActive && (exclusionFilters.excludedDefyTypes || []).length > 0);
 
   // ── Signal type options (from signalConfig) ─────────────────────
   const signalTypeOptions = Object.keys(signalConfig)
@@ -536,37 +320,29 @@ const StudentTradingSignals = () => {
   const totalTimeframes = TIMEFRAME_OPTIONS.length;
   const totalStrategies = strategyOptions.length;
 
-  // ── Strategy sub-filter counts (only when strategy is active) ────
-  const bullseyeActive = selectedStrategy === "bullseye";
-  const defyActive = selectedStrategy === "defy";
-
-  const bullseyeSelectedCount = bullseyeActive
-    ? BULLSEYE_PATTERNS.length - strategyDisplay.bullseye.excludedPatterns.length
+  // Sub-filter counts (only counted when their parent strategy is active)
+  const patternTypeSelectedCount = isBullseyeActive
+    ? Math.max(0, PATTERN_TYPE_OPTIONS.length - (exclusionFilters.excludedBullseyeTypes || []).filter((v) => PATTERN_TYPE_OPTIONS.some((o) => o.value === v)).length)
     : 0;
-  const bullseyeTotalCount = bullseyeActive ? BULLSEYE_PATTERNS.length : 0;
-
-  const defySelectedCount = defyActive
-    ? DEFY_MODES.length - strategyDisplay.defy.excludedModes.length
+  const executionModeSelectedCount = isDefyActive
+    ? Math.max(0, EXECUTION_MODE_OPTIONS.length - (exclusionFilters.excludedDefyTypes || []).filter((v) => EXECUTION_MODE_OPTIONS.some((o) => o.value === v)).length)
     : 0;
-  const defyTotalCount = defyActive ? DEFY_MODES.length : 0;
+  const subFilterTotal = (isBullseyeActive ? PATTERN_TYPE_OPTIONS.length : 0)
+    + (isDefyActive ? EXECUTION_MODE_OPTIONS.length : 0);
 
-  // BUG #12 fix: don't count hidden Strategy dropdown when top filter is active
-  const strategySelectedCount = selectedStrategy !== null
-    ? 0 // Strategy dropdown hidden, don't count
-    : (totalStrategies - exclusionFilters.excludedStrategies.length);
-  const strategyTotalCount = selectedStrategy !== null ? 0 : totalStrategies;
+  const strategySelectedCount = Math.max(0, totalStrategies - exclusionFilters.excludedStrategies.length);
 
   const totalSelected =
     Math.max(0, totalSymbols - exclusionFilters.excludedSymbols.length) +
     Math.max(0, totalSignalTypes - exclusionFilters.excludedSignalTypes.length) +
     Math.max(0, totalTimeframes - exclusionFilters.excludedTimeframes.length) +
     strategySelectedCount +
-    bullseyeSelectedCount +
-    defySelectedCount;
+    patternTypeSelectedCount +
+    executionModeSelectedCount;
 
   const totalAll =
-    totalSymbols + totalSignalTypes + totalTimeframes + strategyTotalCount +
-    bullseyeTotalCount + defyTotalCount;
+    totalSymbols + totalSignalTypes + totalTimeframes + totalStrategies +
+    subFilterTotal;
 
 
   return (
@@ -627,98 +403,15 @@ const StudentTradingSignals = () => {
       {/* ── Filter Bar ── */}
       {showFilters && (
         <div className="flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
-
-          {/* ── Row 1: Strategy Selector ─────────────────────────────── */}
-          <div className="flex flex-col gap-1.5">
-            <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
-              Strategy Filter
-            </label>
-            <div className="flex gap-2">
-              {/* Bullseye */}
-              <button
-                type="button"
-                onClick={() => handleStrategySelect("bullseye")}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${bullseyeActive
-                  ? "bg-yellow-500/15 border-yellow-500 text-yellow-600 dark:text-yellow-400"
-                  : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#202038] text-slate-600 dark:text-slate-300 hover:border-yellow-500/50"
-                  }`}
-              >
-                <Target size={13} className={bullseyeActive ? "text-yellow-500" : "text-slate-400"} />
-                Bullseye
-                {bullseyeActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-                )}
-              </button>
-
-              {/* Defy */}
-              <button
-                type="button"
-                onClick={() => handleStrategySelect("defy")}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${defyActive
-                  ? "bg-blue-500/15 border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "bg-white dark:bg-[#0F0F1A] border-slate-200 dark:border-[#202038] text-slate-600 dark:text-slate-300 hover:border-blue-500/50"
-                  }`}
-              >
-                <Zap size={13} className={defyActive ? "text-blue-500" : "text-slate-400"} />
-                Defy
-                {defyActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                )}
-              </button>
-
-              {selectedStrategy !== null && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedStrategy(null);
-                    setStrategyDisplay(DEFAULT_STRATEGY_DISPLAY);
-                  }}
-                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all cursor-pointer"
-                >
-                  <X size={11} /> Clear
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* ── Row 2: Strategy-specific sub-filters — both can show simultaneously ─ */}
-          {bullseyeActive && (
-            <BullseyeFilterPanel
-              excludedPatterns={strategyDisplay.bullseye.excludedPatterns}
-              onChange={(v) =>
-                setStrategyDisplay((prev) => ({
-                  ...prev,
-                  bullseye: { excludedPatterns: v },
-                }))
-              }
-            />
-          )}
-
-          {defyActive && (
-            <DefyFilterPanel
-              excludedModes={strategyDisplay.defy.excludedModes}
-              onChange={(v) =>
-                setStrategyDisplay((prev) => ({
-                  ...prev,
-                  defy: { excludedModes: v },
-                }))
-              }
-            />
-          )}
-
-
-          {/* ── Row 3: Standard Exclusion Filters ───────────────────── */}
+          {/* ── Exclusion Filters ───────────────────────────────── */}
           <div className="flex gap-4 flex-wrap items-end">
-            {/* Only show Strategy dropdown when no top Strategy Filter is active */}
-            {selectedStrategy === null && (
-              <FilterSelect
-                label="Strategy"
-                excludedValues={exclusionFilters.excludedStrategies}
-                onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
-                placeholder="All Strategies"
-                options={strategyOptions}
-              />
-            )}
+            <FilterSelect
+              label="Strategy"
+              excludedValues={exclusionFilters.excludedStrategies}
+              onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
+              placeholder="All Strategies"
+              options={strategyOptions}
+            />
             <FilterSelect
               label="Alert Type"
               excludedValues={exclusionFilters.excludedSignalTypes}
@@ -737,6 +430,26 @@ const StudentTradingSignals = () => {
               placeholder="All Time Frames"
               options={TIMEFRAME_OPTIONS}
             />
+            {/* ── Conditional: Pattern Type — visible when Bullseye is selected ── */}
+            {isBullseyeActive && (
+              <FilterSelect
+                label="Pattern Type"
+                excludedValues={exclusionFilters.excludedBullseyeTypes}
+                onExcludedChange={(v) => updateExclusion("excludedBullseyeTypes", v)}
+                placeholder="All Patterns"
+                options={PATTERN_TYPE_OPTIONS}
+              />
+            )}
+            {/* ── Conditional: Execution Type — visible when Defy is selected ── */}
+            {isDefyActive && (
+              <FilterSelect
+                label="Execution Type"
+                excludedValues={exclusionFilters.excludedDefyTypes}
+                onExcludedChange={(v) => updateExclusion("excludedDefyTypes", v)}
+                placeholder="All Types"
+                options={EXECUTION_MODE_OPTIONS}
+              />
+            )}
 
             {hasActiveFilters && (
               <button

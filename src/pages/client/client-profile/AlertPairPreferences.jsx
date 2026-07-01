@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, Bell, BellOff, Save } from "lucide-react";
+import { ChevronDown, ChevronRight, Bell, BellOff, Save, ExternalLink } from "lucide-react";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
   useGetAlertPairPreferencesQuery,
   useUpdateAlertPairPreferencesMutation,
 } from "../../../store/api/client/clientProfileApiSlice";
+
 
 // ── Strategy Data from PDF ─────────────────────────────────────────
 const SHARED_PAIRS = [
@@ -33,7 +35,7 @@ const STRATEGIES = [
   {
     key: "bullseye",
     name: "Bullseye",
-    pairs: ["GER40", "NAS100", "SP500"],
+    pairs: ["XAUUSD", "GER40", "NAS100", "SP500", "Majors"],
     timeframes: ["M5"],
   },
   {
@@ -49,6 +51,7 @@ const STRATEGIES = [
     timeframes: ["M1"],
   },
 ];
+
 
 // ── Helpers ─────────────────────────────────────────────────────────
 const buildKey = (strategy, pair, tf) => `${strategy}__${pair}__${tf}`;
@@ -264,6 +267,7 @@ const StrategySection = ({ strategy, selected, onToggle, onToggleRow, onToggleCo
 
 // ── Main Component ──────────────────────────────────────────────────
 const AlertPairPreferences = () => {
+  const navigate = useNavigate();
   const { data, isLoading, refetch } = useGetAlertPairPreferencesQuery();
   const [updatePreferences, { isLoading: isSaving }] = useUpdateAlertPairPreferencesMutation();
   const [selected, setSelected] = useState(new Set(ALL_KEYS));
@@ -393,6 +397,14 @@ const AlertPairPreferences = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigate("/trading-signals")}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                IQ Strategies Alerts
+              </button>
               {/* Select All */}
               <div
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 cursor-pointer select-none hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
@@ -433,6 +445,7 @@ const AlertPairPreferences = () => {
 
           {/* Save Button */}
           <div className="mt-6 flex items-center justify-end gap-3">
+
             <button
               type="button"
               onClick={handleSave}

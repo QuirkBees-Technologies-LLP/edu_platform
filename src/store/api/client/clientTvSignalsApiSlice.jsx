@@ -4,7 +4,7 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientTvSignalsApiSlice = createApi({
   reducerPath: "clientTvSignals",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvFilterPrefs", "TvStrategyPrefs"],
+  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvFilterPrefs"],
   endpoints: (builder) => ({
     getClientTvSignals: builder.query({
       query: ({
@@ -17,8 +17,8 @@ export const clientTvSignalsApiSlice = createApi({
         excludedTimeframes = [],
         // Strategy-specific display filters
         entryType = "",          // Defy: "confirmed" | "pending" | ""
-        excludedEntryTypes = [], // Defy multi-select exclusion
-        excludedBullseyePatterns = [], // Bullseye pattern exclusion
+        excludedDefyTypes = [], // Defy multi-select exclusion
+        excludedBullseyeTypes = [], // Bullseye pattern exclusion
         // Legacy single-value filters (backward compat)
         symbol = "",
         signalType = "",
@@ -40,10 +40,10 @@ export const clientTvSignalsApiSlice = createApi({
 
         // Defy entry type filter
         if (entryType) params.set("entryType", entryType);
-        if (excludedEntryTypes.length > 0) params.set("excludedEntryTypes", excludedEntryTypes.join(","));
+        if (excludedDefyTypes.length > 0) params.set("excludedDefyTypes", excludedDefyTypes.join(","));
 
         // Bullseye pattern filter
-        if (excludedBullseyePatterns.length > 0) params.set("excludedBullseyePatterns", excludedBullseyePatterns.join(","));
+        if (excludedBullseyeTypes.length > 0) params.set("excludedBullseyeTypes", excludedBullseyeTypes.join(","));
 
         // Legacy single-value fallback
         if (symbol) params.set("symbol", symbol);
@@ -83,21 +83,6 @@ export const clientTvSignalsApiSlice = createApi({
       // No invalidatesTags — we already have the values in local state,
       // refetching after save is redundant and causes extra GET calls.
     }),
-
-    // ── Strategy-specific filter preferences (Bullseye / Defy) ───────────
-    getStrategyFilterPreferences: builder.query({
-      query: () => `/users/tv-signals/strategy-filter-preferences`,
-      providesTags: [{ type: "TvStrategyPrefs" }],
-    }),
-
-    saveStrategyFilterPreferences: builder.mutation({
-      query: (prefs) => ({
-        url: `/users/tv-signals/strategy-filter-preferences`,
-        method: "PUT",
-        body: prefs,
-      }),
-      // No invalidatesTags — same reason as above.
-    }),
   }),
 });
 
@@ -107,6 +92,4 @@ export const {
   useGetFilterOptionsQuery,
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
-  useGetStrategyFilterPreferencesQuery,
-  useSaveStrategyFilterPreferencesMutation,
 } = clientTvSignalsApiSlice;
