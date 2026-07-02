@@ -471,7 +471,7 @@ const StudentTradingSignals = () => {
             <ToolbarPageTitle text="IQ Strategies Alerts" />
           </div>
           <ToolbarDescription>
-            Real-time alerts from Iqnoic strategies
+            Real-time alerts from Iqonic strategies
           </ToolbarDescription>
         </ToolbarHeading>
 
