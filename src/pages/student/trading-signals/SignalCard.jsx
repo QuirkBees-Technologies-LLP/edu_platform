@@ -82,7 +82,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
           })()}
         </div>
       </div>
-      {signal?.chartImageUrl && (
+      {(signal?.chartImageThumbUrl || signal?.chartImageUrl) && (
         <div className="-mx-4.5 mb-3 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
           {/* Skeleton loader — visible until image loads */}
           {!imageLoaded && (
@@ -113,9 +113,11 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
             </>
           )}
           <img
-            src={signal?.chartImageUrl}
+            src={signal?.chartImageThumbUrl || signal?.chartImageUrl}
             alt={`${signal?.symbol || "Chart"}`}
             className={`w-full h-[220px] object-cover object-right transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+            width={640}
+            height={400}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
           />

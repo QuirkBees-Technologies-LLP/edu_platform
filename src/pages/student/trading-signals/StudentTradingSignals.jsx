@@ -27,6 +27,7 @@ import signalConfig from "./signalConfig";
 import SignalCard from "./SignalCard";
 import SignalDetailModal from "./SignalDetailModal";
 import FilterSelect from "./FilterSelect";
+import SingleFilterSelect from "./SingleFilterSelect";
 import InstrumentFilterDropdown from "./InstrumentFilterDropdown";
 import instrumentCategories from "./instrumentData";
 
@@ -227,6 +228,17 @@ const StudentTradingSignals = () => {
   // load won't appear at the top until a filter/search change resets to page 1.
   // This is an acceptable trade-off — a full fix would require a separate
   // page-1 subscription or WebSocket-based push updates.
+  // When DeFy execution type is mandatory but not yet selected (excludedDefyTypes
+  // is empty = both types visible = no explicit pick), block all DeFy records from
+  // appearing by excluding every type. Once the user picks one, only the other
+  // type stays excluded and the chosen type's records are shown.
+  const effectiveExcludedDefyTypes = useMemo(() => {
+    const excluded = exclusionFilters.excludedDefyTypes || [];
+    // Empty means nothing was explicitly selected — hide all DeFy records
+    if (excluded.length === 0) return ["confirmed", "pending"];
+    return excluded;
+  }, [exclusionFilters.excludedDefyTypes]);
+
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery(
     {
       page,
@@ -237,7 +249,7 @@ const StudentTradingSignals = () => {
       excludedStrategies: exclusionFilters.excludedStrategies,
       excludedTimeframes: exclusionFilters.excludedTimeframes,
       excludedBullseyeTypes: exclusionFilters.excludedBullseyeTypes,
-      excludedDefyTypes: exclusionFilters.excludedDefyTypes,
+      excludedDefyTypes: effectiveExcludedDefyTypes,
       excludedSessions: exclusionFilters.excludedSessions,
     },
     { pollingInterval: 30000 }
@@ -324,6 +336,25 @@ const StudentTradingSignals = () => {
   const patternTypeOptions = options.bullseyePatterns || [];
   const executionModeOptions = options.defyModes || [];
   const tradingSessionOptions = options.sessions || [];
+
+  // ── DeFy Execution Type: mandatory single-select ────────────────────
+  // Derive the currently selected single value from the exclusion array.
+  // If exactly one type remains (one excluded), that's the selected type.
+  // Otherwise (none excluded = both shown = nothing explicitly picked).
+  const ALL_DEFY_EXECUTION_TYPES = ["confirmed", "pending"];
+  const selectedDefyExecutionType = useMemo(() => {
+    const excluded = exclusionFilters.excludedDefyTypes || [];
+    const included = ALL_DEFY_EXECUTION_TYPES.filter(
+      (t) => !excluded.includes(t)
+    );
+    return included.length === 1 ? included[0] : "";
+  }, [exclusionFilters.excludedDefyTypes]);
+
+  const handleDefyTypeSelect = (value) => {
+    // Exclude the other option so only the selected one is shown
+    const excluded = ALL_DEFY_EXECUTION_TYPES.filter((t) => t !== value);
+    updateExclusion("excludedDefyTypes", excluded);
+  };
 
   // ── Strategy options (from API) ─────────────────────────────────
   const strategyOptions = (options.strategies || []).map((s) => ({
@@ -437,11 +468,10 @@ const StudentTradingSignals = () => {
   const patternTypeSelectedCount = isBullseyeActive
     ? Math.max(0, patternTypeOptions.length - (exclusionFilters.excludedBullseyeTypes || []).filter((v) => patternTypeOptions.some((o) => o.value === v)).length)
     : 0;
-  const executionModeSelectedCount = isDefyActive
-    ? Math.max(0, executionModeOptions.length - (exclusionFilters.excludedDefyTypes || []).filter((v) => executionModeOptions.some((o) => o.value === v)).length)
-    : 0;
+  // DeFy Execution Type is now single-select: count is 0 or 1
+  const executionModeSelectedCount = isDefyActive && selectedDefyExecutionType ? 1 : 0;
   const subFilterTotal = (isBullseyeActive ? patternTypeOptions.length : 0)
-    + (isDefyActive ? executionModeOptions.length : 0);
+    + (isDefyActive ? 1 : 0); // single-select: max 1
 
   const totalSessions = tradingSessionOptions.length;
 
@@ -520,7 +550,7 @@ const StudentTradingSignals = () => {
       {showFilters && (
         <div className="flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
           {/* ── Exclusion Filters ───────────────────────────────── */}
-          <div className="flex gap-2.5 items-end flex-nowrap">
+          <div className="flex gap-4 items-end flex-nowrap pb-4">
             <FilterSelect
               label="Strategy"
               excludedValues={exclusionFilters.excludedStrategies}
@@ -558,14 +588,16 @@ const StudentTradingSignals = () => {
                 options={patternTypeOptions}
               />
             )}
-            {/* ── Conditional: Execution Type — visible when Defy is selected ── */}
+            {/* ── Conditional: Execution Type — visible when Defy is selected (mandatory single-select) ── */}
             {isDefyActive && executionModeOptions.length > 0 && (
-              <FilterSelect
+              <SingleFilterSelect
                 label="Execution Type"
-                excludedValues={exclusionFilters.excludedDefyTypes}
-                onExcludedChange={(v) => updateExclusion("excludedDefyTypes", v)}
-                placeholder="All Types"
+                selectedValue={selectedDefyExecutionType}
+                onSelect={handleDefyTypeSelect}
+                placeholder="Select Execution Type"
                 options={executionModeOptions}
+                required={true}
+                error={!selectedDefyExecutionType}
               />
             )}
             {/* ── Trading Session filter ── */}
