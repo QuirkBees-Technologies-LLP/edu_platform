@@ -120,23 +120,28 @@ const StudentTradingSignals = () => {
   const observer = useRef();
   const saveTimerRef = useRef(null);
   const lastSavedPrefsRef = useRef(null);
+  const exclusionFiltersRef = useRef(exclusionFilters); // track latest for unmount flush
 
-  // ── Load saved preferences from API (overrides localStorage) ────
+  // ── Load saved preferences from API (fallback when localStorage is empty) ──
   const { data: savedPrefs } = useGetFilterPreferencesQuery();
   const [savePrefs] = useSaveFilterPreferencesMutation();
 
   useEffect(() => {
-    if (savedPrefs?.data && !filtersInitialized) {
-      const apiPrefs = savedPrefs.data;
-      const hasApiData =
-        (apiPrefs.excludedSymbols?.length > 0) ||
-        (apiPrefs.excludedSignalTypes?.length > 0) ||
-        (apiPrefs.excludedStrategies?.length > 0) ||
-        (apiPrefs.excludedTimeframes?.length > 0) ||
-        (apiPrefs.excludedBullseyeTypes?.length > 0) ||
-        (apiPrefs.excludedDefyTypes?.length > 0) ||
-        (apiPrefs.excludedSessions?.length > 0);
+    if (!filtersInitialized && savedPrefs?.data) {
+      // localStorage saves instantly on every change, so it's always the most
+      // current source. Only fall back to API when localStorage is empty
+      // (new browser / cleared storage / cross-device sync).
+      const hasLocalStorage = !!localStorage.getItem(STORAGE_KEY);
 
+      if (hasLocalStorage) {
+        // Trust localStorage — it was already loaded into state via loadSavedFilters()
+        lastSavedPrefsRef.current = exclusionFilters;
+        setFiltersInitialized(true);
+        return;
+      }
+
+      // No localStorage — use API data as fallback
+      const apiPrefs = savedPrefs.data;
       const currentPrefs = {
         excludedSymbols: Array.isArray(apiPrefs.excludedSymbols) ? apiPrefs.excludedSymbols : [],
         excludedSignalTypes: Array.isArray(apiPrefs.excludedSignalTypes) ? apiPrefs.excludedSignalTypes : [],
@@ -147,11 +152,21 @@ const StudentTradingSignals = () => {
         excludedSessions: Array.isArray(apiPrefs.excludedSessions) ? apiPrefs.excludedSessions : [],
       };
 
+      const hasApiData =
+        (apiPrefs.excludedSymbols?.length > 0) ||
+        (apiPrefs.excludedSignalTypes?.length > 0) ||
+        (apiPrefs.excludedStrategies?.length > 0) ||
+        (apiPrefs.excludedTimeframes?.length > 0) ||
+        (apiPrefs.excludedBullseyeTypes?.length > 0) ||
+        (apiPrefs.excludedDefyTypes?.length > 0) ||
+        (apiPrefs.excludedSessions?.length > 0);
+
       if (hasApiData) {
         setExclusionFilters(currentPrefs);
+        saveFilters(currentPrefs); // sync to localStorage
         lastSavedPrefsRef.current = currentPrefs;
       } else {
-        lastSavedPrefsRef.current = exclusionFilters; // default from localStorage
+        lastSavedPrefsRef.current = exclusionFilters;
       }
       setFiltersInitialized(true);
     }
@@ -189,6 +204,23 @@ const StudentTradingSignals = () => {
     window.addEventListener("beforeunload", flushPendingSaves);
     return () => window.removeEventListener("beforeunload", flushPendingSaves);
   }, [exclusionFilters, savePrefs]);
+
+  // ── Flush pending API save on SPA navigation (component unmount) ──
+  // Uses a ref to avoid stale closure — always saves the latest filters.
+  useEffect(() => {
+    exclusionFiltersRef.current = exclusionFilters;
+  }, [exclusionFilters]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        savePrefs(exclusionFiltersRef.current);
+        saveTimerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savePrefs]);
 
   // KNOWN LIMITATION: Polling re-fetches the current page, not page 1.
   // When the user has scrolled past page 1, new signals added since initial
@@ -281,7 +313,8 @@ const StudentTradingSignals = () => {
     setExclusionFilters(clearedExclusions);
     setSearch("");
 
-    // Immediately save cleared state (skip debounce to prevent stale reload)
+    // Immediately save cleared state to both localStorage + API (skip debounce)
+    saveFilters(clearedExclusions);
     clearTimeout(saveTimerRef.current);
     savePrefs(clearedExclusions);
     lastSavedPrefsRef.current = clearedExclusions;
@@ -310,12 +343,12 @@ const StudentTradingSignals = () => {
   }, [strategyOptions, exclusionFilters.excludedStrategies]);
 
   const DB_NAME_TO_RESTRICTION_KEY = {
-    "defy":       "defy",
-    "bullseye":   "bullseye",
-    "killshot":   "killshot",
-    "react":      "react",
+    "defy": "defy",
+    "bullseye": "bullseye",
+    "killshot": "killshot",
+    "react": "react",
     "smart shot": "smartShot",
-    "supernova":  "supernova",
+    "supernova": "supernova",
   };
 
   const singleActiveStrategyKey = useMemo(() => {
@@ -438,7 +471,7 @@ const StudentTradingSignals = () => {
             <ToolbarPageTitle text="IQ Strategies Alerts" />
           </div>
           <ToolbarDescription>
-            Real-time alerts from iqnoic strategies
+            Real-time alerts from Iqnoic strategies
           </ToolbarDescription>
         </ToolbarHeading>
 

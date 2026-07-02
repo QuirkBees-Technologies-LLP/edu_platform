@@ -272,11 +272,10 @@ const StrategySection = ({
                   return (
                     <label
                       key={mode.value}
-                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-colors ${
-                        isChecked
-                          ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
-                          : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02] hover:bg-gray-100 dark:hover:bg-white/5 opacity-60"
-                      }`}
+                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-colors ${isChecked
+                        ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
+                        : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02] hover:bg-gray-100 dark:hover:bg-white/5 opacity-60"
+                        }`}
                     >
                       <IndeterminateCheckbox
                         id={`defy-mode-${mode.value}`}
@@ -319,11 +318,10 @@ const StrategySection = ({
                   return (
                     <label
                       key={session.value}
-                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-colors ${
-                        isChecked
-                          ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
-                          : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02] hover:bg-gray-100 dark:hover:bg-white/5 opacity-60"
-                      }`}
+                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-colors ${isChecked
+                        ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
+                        : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02] hover:bg-gray-100 dark:hover:bg-white/5 opacity-60"
+                        }`}
                     >
                       <IndeterminateCheckbox
                         id={`session-${strategy.key}-${session.value}`}
@@ -357,22 +355,19 @@ const AlertPairPreferences = () => {
   const [excludedDefyTypes, setExcludedDefyTypes] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Derive active strategies — uses killshotConfig for pair+timeframe data.
-  // Only Killshot has meaningful pair+timeframe preferences; other strategies are unrestricted.
+  // Derive active strategies from alertPreferenceConfigs (Defy, Bullseye, Killshot, etc.)
   const activeStrategies = useMemo(() => {
-    const killshotCfg = filterOptions?.data?.killshotConfig;
-    const strategies  = filterOptions?.data?.strategies || [];
-    const isKillshotEnabled = strategies.some(
-      (s) => s.name?.toLowerCase() === "killshot"
-    );
-    if (!killshotCfg || !isKillshotEnabled) return [];
-    // Build a synthetic strategyConfig entry compatible with buildAllKeys / the grid
-    return [{
-      key:        "killshot",
-      name:       "Killshot",
-      pairs:      (killshotCfg.symbols || []).map((s) => s.value || s),
-      timeframes: (killshotCfg.timeframes || []).map((t) => t.value || t),
-    }];
+    const configs = filterOptions?.data?.alertPreferenceConfigs;
+    if (!configs || !Array.isArray(configs)) return [];
+    // Only include strategies that have both pairs and timeframes
+    return configs
+      .filter((c) => c.pairs?.length > 0 && c.timeframes?.length > 0)
+      .map((c) => ({
+        key: c.key,
+        name: c.name,
+        pairs: c.pairs,
+        timeframes: c.timeframes,
+      }));
   }, [filterOptions]);
 
   // Build ALL_KEYS from active strategies
@@ -542,7 +537,7 @@ const AlertPairPreferences = () => {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
               >
                 <ExternalLink className="w-4 h-4" />
-                IQ Strategies Alerts
+                Back to Alerts
               </button>
               {/* Select All */}
               <div
