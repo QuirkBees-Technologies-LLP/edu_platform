@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Clock, ChartLine, Copy } from "lucide-react";
 import { toast } from "sonner";
 import signalConfig from "./signalConfig";
@@ -7,6 +7,7 @@ import SymbolIcon from "./symbolIcons";
 
 const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
   const config = signalConfig?.[signal?.signalType] || signalConfig?.OTHER || {};
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div
@@ -82,12 +83,41 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
         </div>
       </div>
       {signal?.chartImageUrl && (
-        <div className="-mx-4.5 mb-3 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative">
+        <div className="-mx-4.5 mb-3 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
+          {/* Skeleton loader — visible until image loads */}
+          {!imageLoaded && (
+            <>
+              <style>{`
+                @keyframes skeletonSweep {
+                  0% { transform: translateX(-100%); }
+                  100% { transform: translateX(100%); }
+                }
+              `}</style>
+              <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] z-10 overflow-hidden">
+                {/* Shimmer sweep */}
+                <div className="absolute inset-0 z-20 overflow-hidden">
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.35) 55%, transparent 100%)",
+                      animation: "skeletonSweep 1.6s ease-in-out infinite",
+                    }}
+                  />
+                </div>
+
+                {/* Skeleton block */}
+                <div className="p-3 h-full">
+                  <div className="h-full w-full rounded-lg bg-slate-200/90 dark:bg-slate-700/40" />
+                </div>
+              </div>
+            </>
+          )}
           <img
             src={signal?.chartImageUrl}
             alt={`${signal?.symbol || "Chart"}`}
-            className="w-full h-[220px] object-cover object-right"
+            className={`w-full h-[220px] object-cover object-right transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
             loading="lazy"
+            onLoad={() => setImageLoaded(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
         </div>
