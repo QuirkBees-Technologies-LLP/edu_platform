@@ -286,7 +286,6 @@ const StudentTradingSignals = () => {
   // ── Reset page when any filter changes ─────────────────────────────
   useEffect(() => {
     setPage(1);
-    setIsInitialLoad(true); // show skeletons when filters/search change
   }, [exclusionFilters, search]);
 
   // ── IntersectionObserver — trigger next page ─────────────────────
@@ -625,7 +624,7 @@ const StudentTradingSignals = () => {
       )}
 
       {/* ── Signal Cards ── */}
-      {isInitialLoad && isFetching && page === 1 ? (
+      {signals.length === 0 && isFetching ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
