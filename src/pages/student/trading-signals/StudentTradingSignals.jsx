@@ -298,10 +298,9 @@ const StudentTradingSignals = () => {
     label: s?.name || "",
   }));
 
-  // ── Strategy-scoped filter restriction ─────────────────────────────
-  // When exactly one strategy is active and it’s Killshot, restrict
-  // the Symbol and Time Frame dropdowns to only Killshot-relevant options.
-  // Uses the API-provided strategyConfigs as the source of truth.
+  // -- Strategy-scoped filter restriction ---------------------------------------------------------
+  // Uses API strategyRestrictions for any single active strategy restriction.
+  // Killshot/Bullseye -> restrict Symbol+Timeframe. DEFY/React -> no restriction.
   const activeStrategyNames = useMemo(() => {
     return strategyOptions
       .filter((s) => !exclusionFilters.excludedStrategies.some(
@@ -310,10 +309,27 @@ const StudentTradingSignals = () => {
       .map((s) => s.value);
   }, [strategyOptions, exclusionFilters.excludedStrategies]);
 
-  const isOnlyKillshot = activeStrategyNames.length === 1 &&
-    activeStrategyNames[0]?.toLowerCase() === "killshot";
+  const DB_NAME_TO_RESTRICTION_KEY = {
+    "defy":       "defy",
+    "bullseye":   "bullseye",
+    "killshot":   "killshot",
+    "react":      "react",
+    "smart shot": "smartShot",
+    "supernova":  "supernova",
+  };
 
-  // Config timeframe format (M1, M5, H1) → frontend value format (1m, 5m, 1H)
+  const singleActiveStrategyKey = useMemo(() => {
+    if (activeStrategyNames.length !== 1) return null;
+    return DB_NAME_TO_RESTRICTION_KEY[activeStrategyNames[0]?.toLowerCase()] || null;
+  }, [activeStrategyNames]);
+
+  const activeStrategyRestriction = useMemo(() => {
+    if (!singleActiveStrategyKey) return null;
+    return options.strategyRestrictions?.[singleActiveStrategyKey] || null;
+  }, [singleActiveStrategyKey, options.strategyRestrictions]);
+
+  const isOnlyKillshot = singleActiveStrategyKey === "killshot";
+
   const CONFIG_TF_TO_FRONTEND = {
     M1: "1m", M3: "3m", M5: "5m", M15: "15m", M30: "30m", M45: "45m",
     H1: "1H", H2: "2H", H3: "3H", H4: "4H",
@@ -321,34 +337,32 @@ const StudentTradingSignals = () => {
   };
 
   const effectiveCategories = useMemo(() => {
-    if (!isOnlyKillshot) return instrumentCategories;
-    const killshotConfig = (options.strategyConfigs || []).find(
-      (c) => c.key === "killshot"
-    );
-    if (!killshotConfig?.pairs?.length) return instrumentCategories;
-    const allowedSymbols = new Set(killshotConfig.pairs.map((p) => p.toUpperCase()));
+    if (!activeStrategyRestriction?.restrictsSymbols) return instrumentCategories;
+    const allowedPairs = activeStrategyRestriction.allowedSymbols || [];
+    if (!allowedPairs.length) return instrumentCategories;
+    const allowedSet = new Set(allowedPairs.map((p) => p.toUpperCase()));
     return instrumentCategories
       .map((cat) => ({
         ...cat,
         instruments: cat.instruments.filter((inst) =>
-          allowedSymbols.has(inst.symbol.replace(/\//g, "").toUpperCase()) ||
-          allowedSymbols.has(inst.symbol.toUpperCase())
+          allowedSet.has(inst.symbol.replace(/\//g, "").toUpperCase()) ||
+          allowedSet.has(inst.symbol.toUpperCase())
         ),
       }))
       .filter((cat) => cat.instruments.length > 0);
-  }, [isOnlyKillshot, options.strategyConfigs]);
+  }, [activeStrategyRestriction]);
 
   const effectiveTimeframes = useMemo(() => {
-    if (!isOnlyKillshot) return TIMEFRAME_OPTIONS;
-    const killshotConfig = (options.strategyConfigs || []).find(
-      (c) => c.key === "killshot"
-    );
-    if (!killshotConfig?.timeframes?.length) return TIMEFRAME_OPTIONS;
-    const allowedValues = new Set(
-      killshotConfig.timeframes.map((tf) => CONFIG_TF_TO_FRONTEND[tf] || tf)
-    );
-    return TIMEFRAME_OPTIONS.filter((opt) => allowedValues.has(opt.value));
-  }, [isOnlyKillshot, options.strategyConfigs]);
+    if (!activeStrategyRestriction?.restrictsTimeframes) return TIMEFRAME_OPTIONS;
+    // allowedTimeframes already in frontend format (1m/5m/1H) from API strategyRestrictions
+    if (activeStrategyRestriction.allowedTimeframes?.length) {
+      const allowedValues = new Set(
+        activeStrategyRestriction.allowedTimeframes.map((t) => t.value)
+      );
+      return TIMEFRAME_OPTIONS.filter((opt) => allowedValues.has(opt.value));
+    }
+    return TIMEFRAME_OPTIONS;
+  }, [activeStrategyRestriction]);
 
   // ── Derive which sub-filters are active ─────────────────────────────
   // A sub-filter is active only if its parent strategy exists in the

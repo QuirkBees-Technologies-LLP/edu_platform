@@ -357,11 +357,22 @@ const AlertPairPreferences = () => {
   const [excludedDefyTypes, setExcludedDefyTypes] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Derive active strategies from the API (only admin-enabled strategies)
+  // Derive active strategies — uses killshotConfig for pair+timeframe data.
+  // Only Killshot has meaningful pair+timeframe preferences; other strategies are unrestricted.
   const activeStrategies = useMemo(() => {
-    const configs = filterOptions?.data?.strategyConfigs;
-    if (!configs || configs.length === 0) return [];
-    return configs;
+    const killshotCfg = filterOptions?.data?.killshotConfig;
+    const strategies  = filterOptions?.data?.strategies || [];
+    const isKillshotEnabled = strategies.some(
+      (s) => s.name?.toLowerCase() === "killshot"
+    );
+    if (!killshotCfg || !isKillshotEnabled) return [];
+    // Build a synthetic strategyConfig entry compatible with buildAllKeys / the grid
+    return [{
+      key:        "killshot",
+      name:       "Killshot",
+      pairs:      (killshotCfg.symbols || []).map((s) => s.value || s),
+      timeframes: (killshotCfg.timeframes || []).map((t) => t.value || t),
+    }];
   }, [filterOptions]);
 
   // Build ALL_KEYS from active strategies
