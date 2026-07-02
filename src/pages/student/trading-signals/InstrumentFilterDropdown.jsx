@@ -126,7 +126,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categ
   const triggerText = allChecked
     ? `All Symbols (${allSymbols?.length || 0}/${allSymbols?.length || 0})`
     : noneChecked
-      ? "None selected"
+      ? "No Symbols selected"
       : `${checkedCount}/${allSymbols?.length || 0} selected`;
 
   return (

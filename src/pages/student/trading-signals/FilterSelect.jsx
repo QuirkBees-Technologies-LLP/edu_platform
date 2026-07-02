@@ -53,7 +53,7 @@ const FilterSelect = ({
   const triggerText = allChecked
     ? `${placeholder} (${safeOptions.length}/${safeOptions.length})`
     : checkedCount === 0
-      ? "None selected"
+      ? `No ${label} selected`
       : `${checkedCount}/${safeOptions.length} selected`;
 
   return (
