@@ -597,6 +597,7 @@ const StudentTradingSignals = () => {
                 options={executionModeOptions}
                 required={true}
                 error={!selectedDefyExecutionType}
+                infoText="This filter applies ONLY to Defy. Defy has 2 different modes: Market Execution and Pending Order."
               />
             )}
             {/* ── Trading Session filter ── */}

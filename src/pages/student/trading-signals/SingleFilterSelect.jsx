@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 
 // ── Single-Select Radio Filter Dropdown ───────────────────────────
 // Only one option can be selected at a time (radio behaviour).
@@ -13,8 +13,10 @@ const SingleFilterSelect = ({
   placeholder,      // e.g. "Select Execution Type"
   required,         // boolean — shows required indicator (asterisk)
   error,            // boolean — shows error styling (red border + message)
+  infoText,         // string — optional tooltip text shown via info icon
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const rootRef = useRef(null);
 
   // Close on outside click
@@ -36,10 +38,28 @@ const SingleFilterSelect = ({
 
   return (
     <div className="flex flex-col gap-1.5 relative flex-1 min-w-0" ref={rootRef}>
-      <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
-        {label}
-        {required && <span className="text-amber-400 ml-0.5">*</span>}
-      </label>
+      <div className="flex items-center gap-1">
+        <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
+          {label}
+          {required && <span className="text-amber-400 ml-0.5">*</span>}
+        </label>
+        {infoText && (
+          <div className="relative">
+            <Info
+              size={13}
+              className="text-slate-400 dark:text-slate-500 hover:text-blue-400 dark:hover:text-blue-400 cursor-help transition-colors"
+              onMouseEnter={() => setShowInfo(true)}
+              onMouseLeave={() => setShowInfo(false)}
+            />
+            {showInfo && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-[280px] px-3.5 py-3 rounded-lg bg-slate-800 dark:bg-slate-900 border border-slate-700 dark:border-slate-700 shadow-xl text-[11.5px] text-slate-200 leading-relaxed pointer-events-none">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-[5px] border-transparent border-t-slate-800 dark:border-t-slate-900" />
+                {infoText}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Trigger Button */}
       <button
