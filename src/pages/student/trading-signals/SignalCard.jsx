@@ -82,48 +82,77 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
           })()}
         </div>
       </div>
-      {(signal?.chartImageThumbUrl || signal?.chartImageUrl) && (
-        <div className="-mx-4.5 mb-3 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-          {/* Skeleton loader — visible until image loads */}
-          {!imageLoaded && (
-            <>
-              <style>{`
-                @keyframes skeletonSweep {
-                  0% { transform: translateX(-100%); }
-                  100% { transform: translateX(100%); }
-                }
-              `}</style>
-              <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] z-10 overflow-hidden">
-                {/* Shimmer sweep */}
-                <div className="absolute inset-0 z-20 overflow-hidden">
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.35) 55%, transparent 100%)",
-                      animation: "skeletonSweep 1.6s ease-in-out infinite",
-                    }}
-                  />
-                </div>
+      <div className="-mx-4.5 mb-3 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
+        {(signal?.chartImageThumbUrl || signal?.chartImageUrl) ? (
+          <>
+            {/* Skeleton loader — visible until image loads */}
+            {!imageLoaded && (
+              <>
+                <style>{`
+                  @keyframes skeletonSweep {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                  }
+                `}</style>
+                <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] z-10 overflow-hidden">
+                  {/* Shimmer sweep */}
+                  <div className="absolute inset-0 z-20 overflow-hidden">
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.35) 55%, transparent 100%)",
+                        animation: "skeletonSweep 1.6s ease-in-out infinite",
+                      }}
+                    />
+                  </div>
 
-                {/* Skeleton block */}
-                <div className="p-3 h-full">
-                  <div className="h-full w-full rounded-lg bg-slate-200/90 dark:bg-slate-700/40" />
+                  {/* Skeleton block */}
+                  <div className="p-3 h-full">
+                    <div className="h-full w-full rounded-lg bg-slate-200/90 dark:bg-slate-700/40" />
+                  </div>
+                </div>
+              </>
+            )}
+            <img
+              src={signal?.chartImageThumbUrl || signal?.chartImageUrl}
+              alt={`${signal?.symbol || "Chart"}`}
+              className={`w-full h-[220px] object-cover object-right transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+              width={640}
+              height={400}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+          </>
+        ) : (
+          /* No chart image — show skeleton placeholder to keep card height consistent */
+          <>
+            <style>{`
+              @keyframes skeletonSweep {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+              }
+            `}</style>
+            <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] overflow-hidden">
+              <div className="absolute inset-0 overflow-hidden">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.08) 55%, transparent 100%)",
+                    animation: "skeletonSweep 2.4s ease-in-out infinite",
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-center h-full">
+                <div className="flex flex-col items-center gap-2 opacity-40">
+                  <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                  <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">Chart loading…</span>
                 </div>
               </div>
-            </>
-          )}
-          <img
-            src={signal?.chartImageThumbUrl || signal?.chartImageUrl}
-            alt={`${signal?.symbol || "Chart"}`}
-            className={`w-full h-[220px] object-cover object-right transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
-            width={640}
-            height={400}
-            loading="lazy"
-            onLoad={() => setImageLoaded(true)}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-        </div>
-      )}
+            </div>
+          </>
+        )}
+      </div>
       {/* ── Structured Price Levels ── */}
       {(() => {
         const customVars = signal?.customVariables || {};

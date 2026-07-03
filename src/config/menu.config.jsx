@@ -1762,14 +1762,15 @@ export const sideMenus = {
       ],
     },
     {
+      title: "IQ Strategies Alerts",
+      icon: <ChartLine />,
+      path: "/trading-signals",
+    },
+    {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/iq-social",
     },
-    {
-      title: " IQ Strategies Alerts",
-      icon: <ChartLine />,
-      path: "/trading-signals",
-    },
+
   ],
 };
