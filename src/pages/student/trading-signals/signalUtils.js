@@ -64,17 +64,17 @@ export function formatPrice(value) {
 export function formatTimeAgo(dateStr) {
   if (!dateStr) return "—";
   try {
-    const now = new Date();
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return "—";
-    const seconds = Math.floor((now - date) / 1000);
 
-    if (seconds < 0) return "Just now";
-    if (seconds < 60) return "Just now";
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-    return date.toLocaleDateString();
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date);
   } catch (_) {
     return "—";
   }
@@ -105,20 +105,32 @@ export function formatAlertTime(timestamp) {
 
   try {
     // If it's already a plain HH:mm or HH:mm:ss time (old webhook format),
-    // return it as-is — no conversion needed
+    // show today's date with that time
     if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(trimmed)) {
-      return trimmed;
+      const today = new Date();
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const dd = String(today.getDate()).padStart(2, "0");
+      const mon = months[today.getMonth()];
+      const yyyy = today.getFullYear();
+      // Convert HH:mm to 12-hour format
+      const [hh, mi] = trimmed.split(":").map(Number);
+      const ampm = hh >= 12 ? "pm" : "am";
+      const h12 = hh % 12 || 12;
+      return `${dd} ${mon} ${yyyy}, ${String(h12).padStart(2, "0")}:${String(mi).padStart(2, "0")} ${ampm}`;
     }
 
     // Otherwise parse as ISO 8601 UTC string (new webhook format)
-    // e.g. "2026-07-01T11:36:00Z" → local HH:mm
+    // e.g. "2026-07-01T11:36:00Z" → local "03 Jul 2026, 01:09 pm"
     const date = new Date(trimmed);
     if (isNaN(date.getTime())) return "—";
 
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
+      hour12: true,
     }).format(date);
   } catch (_) {
     return "—";
