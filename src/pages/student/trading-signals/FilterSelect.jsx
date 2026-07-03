@@ -57,7 +57,7 @@ const FilterSelect = ({
       : `${checkedCount}/${safeOptions.length} selected`;
 
   return (
-    <div className="flex flex-col gap-1.5 relative flex-1 min-w-0" ref={rootRef}>
+    <div className="flex flex-col gap-1.5 relative flex-1 min-w-[130px]" ref={rootRef}>
       <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
         {label}
       </label>

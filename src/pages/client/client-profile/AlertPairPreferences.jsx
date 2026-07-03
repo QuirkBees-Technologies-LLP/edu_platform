@@ -56,6 +56,13 @@ function initDefyExcluded(savedPrefs) {
   return savedPrefs.excludedDefyTypes;
 }
 
+function initReactExcluded(savedPrefs) {
+  if (!savedPrefs || !Array.isArray(savedPrefs.excludedReactTypes)) {
+    return [];
+  }
+  return savedPrefs.excludedReactTypes;
+}
+
 function selectedToPrefs(selected, allKeys) {
   // If all selected → save empty (default)
   if (selected.size === allKeys.size) return {};
@@ -94,6 +101,7 @@ const StrategySection = ({
   strategy, selected, onToggle, onToggleRow, onToggleColumn, onToggleStrategy,
   sessionOptions, excludedSessions, onSessionToggle, onSessionToggleAll,
   defyModeOptions, excludedDefyTypes, onDefyModeToggle, onDefyModeToggleAll,
+  reactModeOptions, excludedReactTypes, onReactModeToggle, onReactModeToggleAll,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -119,6 +127,11 @@ const StrategySection = ({
   const isDefy = strategy.key === "defy";
   const defySelectedCount = isDefy ? (defyModeOptions?.length ?? 0) - (excludedDefyTypes?.length ?? 0) : 0;
   const allDefySelected = isDefy ? (excludedDefyTypes?.length ?? 0) === 0 : true;
+
+  // React mode counts (only relevant for REACT)
+  const isReact = strategy.key === "react";
+  const reactSelectedCount = isReact ? (reactModeOptions?.length ?? 0) - (excludedReactTypes?.length ?? 0) : 0;
+  const allReactSelected = isReact ? (excludedReactTypes?.length ?? 0) === 0 : true;
 
   return (
     <div className="card rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
@@ -293,6 +306,52 @@ const StrategySection = ({
             </div>
           )}
 
+          {/* REACT Execution Mode — only for REACT */}
+          {isReact && reactModeOptions.length > 0 && (
+            <div className="border-t border-gray-200 dark:border-gray-700 px-5 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Execution Mode</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                    {reactSelectedCount}/{reactModeOptions.length}
+                  </span>
+                </div>
+                <IndeterminateCheckbox
+                  id={`react-mode-master-${strategy.key}`}
+                  checked={allReactSelected}
+                  indeterminate={reactSelectedCount > 0 && !allReactSelected}
+                  onChange={onReactModeToggleAll}
+                />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {reactModeOptions.map((mode) => {
+                  const isExcluded = excludedReactTypes.includes(mode.value);
+                  const isChecked = !isExcluded;
+                  return (
+                    <label
+                      key={mode.value}
+                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-colors ${isChecked
+                        ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
+                        : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-white/[0.02] hover:bg-gray-100 dark:hover:bg-white/5 opacity-60"
+                        }`}
+                    >
+                      <IndeterminateCheckbox
+                        id={`react-mode-${mode.value}`}
+                        checked={isChecked}
+                        indeterminate={false}
+                        onChange={() => onReactModeToggle(mode.value)}
+                      />
+                      <span className="text-sm font-medium text-gray-800 dark:text-white">
+                        {mode.label}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Trading Sessions — per strategy */}
           {sessionOptions.length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 px-5 py-4">
@@ -353,6 +412,7 @@ const AlertPairPreferences = () => {
   const [selected, setSelected] = useState(new Set());
   const [strategySessionExclusions, setStrategySessionExclusions] = useState({});
   const [excludedDefyTypes, setExcludedDefyTypes] = useState([]);
+  const [excludedReactTypes, setExcludedReactTypes] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
 
   // Derive active strategies from alertPreferenceConfigs (Defy, Bullseye, Killshot, etc.)
@@ -379,6 +439,7 @@ const AlertPairPreferences = () => {
       setSelected(initSelectedFromSaved(data.data, allKeys));
       setStrategySessionExclusions(initStrategySessionExclusions(data.data));
       setExcludedDefyTypes(initDefyExcluded(data.data));
+      setExcludedReactTypes(initReactExcluded(data.data));
       setHasChanges(false);
     }
   }, [data, allKeys]);
@@ -475,6 +536,9 @@ const AlertPairPreferences = () => {
       if (excludedDefyTypes.length > 0) {
         prefs.excludedDefyTypes = excludedDefyTypes;
       }
+      if (excludedReactTypes.length > 0) {
+        prefs.excludedReactTypes = excludedReactTypes;
+      }
       await updatePreferences(prefs).unwrap();
       toast.success("Alert preferences saved successfully!");
       setHasChanges(false);
@@ -493,6 +557,9 @@ const AlertPairPreferences = () => {
 
   // Defy execution mode options from API
   const defyModeOptions = filterOptions?.data?.defyModes || [];
+
+  // React execution mode options from API
+  const reactModeOptions = filterOptions?.data?.reactModes || [];
 
   if (isLoading || isLoadingFilters) {
     return <LoadingSpinner />;
@@ -610,6 +677,23 @@ const AlertPairPreferences = () => {
                   setExcludedDefyTypes((prev) => {
                     const allExcluded = prev.length === defyModeOptions.length;
                     return allExcluded ? [] : defyModeOptions.map((m) => m.value);
+                  });
+                  setHasChanges(true);
+                }}
+                reactModeOptions={reactModeOptions}
+                excludedReactTypes={excludedReactTypes}
+                onReactModeToggle={(modeValue) => {
+                  setExcludedReactTypes((prev) =>
+                    prev.includes(modeValue)
+                      ? prev.filter((m) => m !== modeValue)
+                      : [...prev, modeValue]
+                  );
+                  setHasChanges(true);
+                }}
+                onReactModeToggleAll={() => {
+                  setExcludedReactTypes((prev) => {
+                    const allExcluded = prev.length === reactModeOptions.length;
+                    return allExcluded ? [] : reactModeOptions.map((m) => m.value);
                   });
                   setHasChanges(true);
                 }}

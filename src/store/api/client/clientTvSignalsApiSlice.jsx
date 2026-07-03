@@ -18,6 +18,7 @@ export const clientTvSignalsApiSlice = createApi({
         // Strategy-specific display filters
         entryType = "",          // Defy: "confirmed" | "pending" | ""
         excludedDefyTypes = [], // Defy multi-select exclusion
+        excludedReactTypes = [], // React multi-select exclusion
         excludedBullseyeTypes = [], // Bullseye pattern exclusion
         excludedSessions = [], // Trading session exclusion
         // Legacy single-value filters (backward compat)
@@ -42,6 +43,9 @@ export const clientTvSignalsApiSlice = createApi({
         // Defy entry type filter
         if (entryType) params.set("entryType", entryType);
         if (excludedDefyTypes.length > 0) params.set("excludedDefyTypes", excludedDefyTypes.join(","));
+
+        // React entry type filter
+        if (excludedReactTypes.length > 0) params.set("excludedReactTypes", excludedReactTypes.join(","));
 
         // Bullseye pattern filter
         if (excludedBullseyeTypes.length > 0) params.set("excludedBullseyeTypes", excludedBullseyeTypes.join(","));

@@ -130,7 +130,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categ
       : `${checkedCount}/${allSymbols?.length || 0} selected`;
 
   return (
-    <div className="flex flex-col gap-1.5 relative flex-1 min-w-0" ref={rootRef}>
+    <div className="flex flex-col gap-1.5 relative flex-1 min-w-[130px]" ref={rootRef}>
       {/* Label */}
       <label className="block text-[10px] font-bold text-gray-500 dark:text-white uppercase tracking-wider">
         Symbol

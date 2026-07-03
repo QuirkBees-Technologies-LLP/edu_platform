@@ -46,6 +46,7 @@ const loadSavedFilters = () => {
         excludedTimeframes: Array.isArray(parsed.excludedTimeframes) ? parsed.excludedTimeframes : [],
         excludedBullseyeTypes: Array.isArray(parsed.excludedBullseyeTypes) ? parsed.excludedBullseyeTypes : [],
         excludedDefyTypes: Array.isArray(parsed.excludedDefyTypes) ? parsed.excludedDefyTypes : [],
+        excludedReactTypes: Array.isArray(parsed.excludedReactTypes) ? parsed.excludedReactTypes : [],
         excludedSessions: Array.isArray(parsed.excludedSessions) ? parsed.excludedSessions : [],
       };
     }
@@ -59,6 +60,7 @@ const loadSavedFilters = () => {
     excludedTimeframes: [],
     excludedBullseyeTypes: [],
     excludedDefyTypes: [],
+    excludedReactTypes: [],
     excludedSessions: [],
   };
 };
@@ -101,7 +103,7 @@ const areArraysEqual = (a1, a2) => {
 
 const areFiltersEqual = (f1, f2) => {
   if (!f1 || !f2) return false;
-  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes", "excludedBullseyeTypes", "excludedDefyTypes", "excludedSessions"];
+  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes", "excludedBullseyeTypes", "excludedDefyTypes", "excludedReactTypes", "excludedSessions"];
   return keys.every((key) => areArraysEqual(f1[key], f2[key]));
 };
 
@@ -150,6 +152,7 @@ const StudentTradingSignals = () => {
         excludedTimeframes: Array.isArray(apiPrefs.excludedTimeframes) ? apiPrefs.excludedTimeframes : [],
         excludedBullseyeTypes: Array.isArray(apiPrefs.excludedBullseyeTypes) ? apiPrefs.excludedBullseyeTypes : [],
         excludedDefyTypes: Array.isArray(apiPrefs.excludedDefyTypes) ? apiPrefs.excludedDefyTypes : [],
+        excludedReactTypes: Array.isArray(apiPrefs.excludedReactTypes) ? apiPrefs.excludedReactTypes : [],
         excludedSessions: Array.isArray(apiPrefs.excludedSessions) ? apiPrefs.excludedSessions : [],
       };
 
@@ -160,6 +163,7 @@ const StudentTradingSignals = () => {
         (apiPrefs.excludedTimeframes?.length > 0) ||
         (apiPrefs.excludedBullseyeTypes?.length > 0) ||
         (apiPrefs.excludedDefyTypes?.length > 0) ||
+        (apiPrefs.excludedReactTypes?.length > 0) ||
         (apiPrefs.excludedSessions?.length > 0);
 
       if (hasApiData) {
@@ -239,6 +243,17 @@ const StudentTradingSignals = () => {
     return excluded;
   }, [exclusionFilters.excludedDefyTypes]);
 
+  // When React execution type is mandatory but not yet selected (excludedReactTypes
+  // is empty = all types visible = no explicit pick), block all React records from
+  // appearing by excluding every type. Once the user picks one, only the other
+  // types stay excluded and the chosen type's records are shown.
+  const effectiveExcludedReactTypes = useMemo(() => {
+    const excluded = exclusionFilters.excludedReactTypes || [];
+    // Empty means nothing was explicitly selected — hide all React records
+    if (excluded.length === 0) return ["market_execution", "pending_order", "fvg_pending_order"];
+    return excluded;
+  }, [exclusionFilters.excludedReactTypes]);
+
   const { data, isLoading, isFetching } = useGetClientTvSignalsQuery(
     {
       page,
@@ -250,6 +265,7 @@ const StudentTradingSignals = () => {
       excludedTimeframes: exclusionFilters.excludedTimeframes,
       excludedBullseyeTypes: exclusionFilters.excludedBullseyeTypes,
       excludedDefyTypes: effectiveExcludedDefyTypes,
+      excludedReactTypes: effectiveExcludedReactTypes,
       excludedSessions: exclusionFilters.excludedSessions,
     },
     { pollingInterval: 30000 }
@@ -319,6 +335,7 @@ const StudentTradingSignals = () => {
       excludedTimeframes: [],
       excludedBullseyeTypes: [],
       excludedDefyTypes: [],
+      excludedReactTypes: [],
       excludedSessions: [],
     };
     setExclusionFilters(clearedExclusions);
@@ -334,6 +351,7 @@ const StudentTradingSignals = () => {
   // ── Derive dynamic sub-filter options from API ──────────────────────
   const patternTypeOptions = options.bullseyePatterns || [];
   const executionModeOptions = options.defyModes || [];
+  const reactModeOptions = options.reactModes || [];
   const tradingSessionOptions = options.sessions || [];
 
   // ── DeFy Execution Type: mandatory single-select ────────────────────
@@ -350,9 +368,25 @@ const StudentTradingSignals = () => {
   }, [exclusionFilters.excludedDefyTypes]);
 
   const handleDefyTypeSelect = (value) => {
-    // Exclude the other option so only the selected one is shown
+    // Exclude the other options so only the selected one is shown
     const excluded = ALL_DEFY_EXECUTION_TYPES.filter((t) => t !== value);
     updateExclusion("excludedDefyTypes", excluded);
+  };
+
+  // ── React Execution Type: mandatory single-select ───────────────────
+  const ALL_REACT_EXECUTION_TYPES = ["market_execution", "pending_order", "fvg_pending_order"];
+  const selectedReactExecutionType = useMemo(() => {
+    const excluded = exclusionFilters.excludedReactTypes || [];
+    const included = ALL_REACT_EXECUTION_TYPES.filter(
+      (t) => !excluded.includes(t)
+    );
+    return included.length === 1 ? included[0] : "";
+  }, [exclusionFilters.excludedReactTypes]);
+
+  const handleReactTypeSelect = (value) => {
+    // Exclude the other options so only the selected one is shown
+    const excluded = ALL_REACT_EXECUTION_TYPES.filter((t) => t !== value);
+    updateExclusion("excludedReactTypes", excluded);
   };
 
   // ── Strategy options (from API) ─────────────────────────────────
@@ -442,6 +476,12 @@ const StudentTradingSignals = () => {
   const isDefyActive = defyExistsInApi && !exclusionFilters.excludedStrategies.some(
     (s) => s.toLowerCase() === "defy"
   );
+  const reactExistsInApi = strategyOptions.some(
+    (s) => s.value.toLowerCase() === "react"
+  );
+  const isReactActive = reactExistsInApi && !exclusionFilters.excludedStrategies.some(
+    (s) => s.toLowerCase() === "react"
+  );
 
   const hasActiveFilters =
     (exclusionFilters.excludedSymbols || []).length > 0 ||
@@ -450,6 +490,7 @@ const StudentTradingSignals = () => {
     (exclusionFilters.excludedTimeframes || []).length > 0 ||
     (isBullseyeActive && (exclusionFilters.excludedBullseyeTypes || []).length > 0) ||
     (isDefyActive && (exclusionFilters.excludedDefyTypes || []).length > 0) ||
+    (isReactActive && (exclusionFilters.excludedReactTypes || []).length > 0) ||
     (exclusionFilters.excludedSessions || []).length > 0;
 
   // ── Signal type options (from signalConfig) ─────────────────────
@@ -469,8 +510,11 @@ const StudentTradingSignals = () => {
     : 0;
   // DeFy Execution Type is now single-select: count is 0 or 1
   const executionModeSelectedCount = isDefyActive && selectedDefyExecutionType ? 1 : 0;
+  // React Execution Type is also single-select: count is 0 or 1
+  const reactModeSelectedCount = isReactActive && selectedReactExecutionType ? 1 : 0;
   const subFilterTotal = (isBullseyeActive ? patternTypeOptions.length : 0)
-    + (isDefyActive ? 1 : 0); // single-select: max 1
+    + (isDefyActive ? 1 : 0) // single-select: max 1
+    + (isReactActive ? 1 : 0); // single-select: max 1
 
   const totalSessions = tradingSessionOptions.length;
 
@@ -483,6 +527,7 @@ const StudentTradingSignals = () => {
     strategySelectedCount +
     patternTypeSelectedCount +
     executionModeSelectedCount +
+    reactModeSelectedCount +
     Math.max(0, totalSessions - (exclusionFilters.excludedSessions || []).filter((v) => tradingSessionOptions.some((o) => o.value === v)).length);
 
   const totalAll =
@@ -491,7 +536,7 @@ const StudentTradingSignals = () => {
 
 
   return (
-    <div className="container-fluid pb-5">
+    <div className="container-fluid pb-5 overflow-x-hidden">
       {/* ── Header ── */}
       <Toolbar className="mb-5">
         <ToolbarHeading>
@@ -505,10 +550,10 @@ const StudentTradingSignals = () => {
         </ToolbarHeading>
 
         <ToolbarActions>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {/* Search */}
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#131324] border border-slate-200 dark:border-[#202038] rounded-xl px-3 py-2 min-w-[200px] shadow-sm">
-              <Search size={16} className="text-slate-400 dark:text-slate-500" />
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#131324] border border-slate-200 dark:border-[#202038] rounded-xl px-3 py-2 min-w-0 flex-1 sm:flex-none sm:min-w-[200px] shadow-sm">
+              <Search size={16} className="text-slate-400 dark:text-slate-500 shrink-0" />
               <input
                 type="text"
                 placeholder="Search alerts..."
@@ -521,16 +566,17 @@ const StudentTradingSignals = () => {
             <button
               type="button"
               onClick={() => navigate("/profile?tab=alerts")}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors whitespace-nowrap"
             >
-              <BellRing size={14} />
-              Manage Alert Notifications
+              <BellRing size={14} className="shrink-0" />
+              <span className="hidden sm:inline">Manage Alert Notifications</span>
+              <span className="sm:hidden">Alerts</span>
             </button>
 
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${hasActiveFilters
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${hasActiveFilters
                 ? "border-blue-500 bg-blue-500/10 text-blue-500"
                 : "border-slate-200 dark:border-[#202038] bg-slate-50 dark:bg-[#131324] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1C1C30]"
                 }`}
@@ -549,7 +595,8 @@ const StudentTradingSignals = () => {
       {showFilters && (
         <div className="flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
           {/* ── Exclusion Filters ───────────────────────────────── */}
-          <div className="flex gap-4 items-end flex-nowrap pb-4">
+          <div className="flex gap-4 items-end pb-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-4 items-end flex-1 min-w-0">
             <FilterSelect
               label="Strategy"
               excludedValues={exclusionFilters.excludedStrategies}
@@ -600,6 +647,19 @@ const StudentTradingSignals = () => {
                 infoText="This filter applies ONLY to Defy. Defy has 2 different modes: Market Execution and Pending Order."
               />
             )}
+            {/* ── Conditional: Execution Type — visible when React is selected (mandatory single-select) ── */}
+            {isReactActive && reactModeOptions.length > 0 && (
+              <SingleFilterSelect
+                label="Execution Type"
+                selectedValue={selectedReactExecutionType}
+                onSelect={handleReactTypeSelect}
+                placeholder="Select Execution Type"
+                options={reactModeOptions}
+                required={true}
+                error={!selectedReactExecutionType}
+                infoText="This filter applies ONLY to React. React has 3 different modes: Market Execution, Pending Order, and FVG Pending Order."
+              />
+            )}
             {/* ── Trading Session filter ── */}
             {tradingSessionOptions.length > 0 && (
               <FilterSelect
@@ -610,6 +670,7 @@ const StudentTradingSignals = () => {
                 options={tradingSessionOptions}
               />
             )}
+            </div>
 
             {hasActiveFilters && (
               <button
