@@ -284,10 +284,10 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
       {/* ── Footer: Source + Time ── */}
       <div className="flex justify-between items-center pt-3.5 pb-1 mt-auto border-t border-slate-200 dark:border-[#1F1F35]">
         <span className="text-[12px] text-slate-500 dark:text-white/80 font-semibold truncate max-w-[180px]">
-          {signal?.webhookConfig?.name ? `Strategy : ${signal.webhookConfig.name}` : ""}
+          {signal?.webhookConfig?.name ? `${signal.webhookConfig.name}` : ""}
         </span>
         <span className="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-white/80 font-semibold whitespace-nowrap">
-          <Clock size={12} />
+          {/* <Clock size={12} /> */}
           {signal?.alertTimestamp ? formatAlertTime(signal.alertTimestamp) : (signal?.createdAt ? formatTimeAgo(signal.createdAt) : "—")}
         </span>
       </div>
