@@ -846,7 +846,7 @@ const IqEducators = () => {
                     >
                       <div className="rounded-t-xl overflow-hidden">
                         <img
-                          src={mc?.imageUrl}
+                          src={mc?.imageUrl || mc?.strategyBanner}
                           alt={mc?.title}
                           className="w-full h-36 object-cover"
                         />

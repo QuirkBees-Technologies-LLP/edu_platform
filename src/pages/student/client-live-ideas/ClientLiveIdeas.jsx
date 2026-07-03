@@ -669,8 +669,9 @@ const ClientLiveIdeas = () => {
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${trade.avatarColor
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white cursor-pointer ${trade.avatarColor
                         }`}
+                      onClick={() => navigate(`/iq-educators/${trade?.educatorDetails?._id}`)}
                     >
                       <img
                         className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -679,7 +680,10 @@ const ClientLiveIdeas = () => {
                       />
                     </div>
                     <div>
-                      <div className="dark:text-white font-semibold">
+                      <div
+                        className="dark:text-white font-semibold cursor-pointer hover:text-primary"
+                        onClick={() => navigate(`/iq-educators/${trade?.educatorDetails?._id}`)}
+                      >
                         {trade?.educatorDetails?.first_name}{" "}
                         {trade?.educatorDetails?.last_name}
                       </div>

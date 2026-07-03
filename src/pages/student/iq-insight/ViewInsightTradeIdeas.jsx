@@ -48,13 +48,15 @@ const ViewInsightTradeIdeas = forwardRef(
                 </div>
 
                 <div className="flex items-center">
-                  <EducatorImage
-                    educator={selectedIdea?.educatorDetails}
-                    // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
-                  />
+                  <Link to={`/iq-educators/${selectedIdea?.educatorDetails?._id}`}>
+                    <EducatorImage
+                      educator={selectedIdea?.educatorDetails}
+                      // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                    />
+                  </Link>
                   <div className="">
                     <Link
-                      to="#"
+                      to={`/iq-educators/${selectedIdea?.educatorDetails?._id}`}
                       className="text-2sm text-gray-800 hover:text-primary mb-px"
                     >
                       {selectedIdea?.educatorDetails?.first_name}{" "}
