@@ -15,12 +15,19 @@ import {
 // ── Helpers ─────────────────────────────────────────────────────────
 const buildKey = (strategy, pair, tf) => `${strategy}__${pair}__${tf}`;
 
-const isInvalidSupernovaCombo = (strategyKey, pair, tf) => {
-  if (strategyKey !== "supernova") return false;
+const isInvalidStrategyCombo = (strategyKey, pair, tf) => {
   const p = String(pair).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-  if (p === "XAUUSD" && tf !== "M15") return true;
-  if (p === "GBPNZD" && tf !== "H4") return true;
-  if (p === "US30" && tf !== "M15") return true;
+  if (strategyKey === "supernova") {
+    if (p === "XAUUSD" && tf !== "M15") return true;
+    if (p === "GBPNZD" && tf !== "H4") return true;
+    if (p === "US30" && tf !== "M15") return true;
+  }
+  if (strategyKey === "killshot") {
+    if (p === "US30" && tf !== "M1") return true;
+    if (p === "XAUUSD" && tf !== "M3") return true;
+    if (p === "EURUSD" && tf !== "M5") return true;
+    if (p === "BTCUSD" && tf !== "M5") return true;
+  }
   return false;
 };
 
@@ -29,7 +36,7 @@ function buildAllKeys(strategies) {
   (strategies || []).forEach((s) => {
     (s?.pairs || []).forEach((pair) => {
       (s?.timeframes || []).forEach((tf) => {
-        if (!isInvalidSupernovaCombo(s.key, pair, tf)) {
+        if (!isInvalidStrategyCombo(s.key, pair, tf)) {
           keys.add(buildKey(s.key, pair, tf));
         }
       });
@@ -487,7 +494,7 @@ const StrategySection = ({
     const keys = [];
     (strategy?.pairs || []).forEach((pair) => {
       (strategy?.timeframes || []).forEach((tf) => {
-        if (!isInvalidSupernovaCombo(strategy.key, pair, tf)) {
+        if (!isInvalidStrategyCombo(strategy.key, pair, tf)) {
           keys.push(buildKey(strategy.key, pair, tf));
         }
       });
@@ -559,7 +566,7 @@ const StrategySection = ({
                 </th>
                 {strategy.timeframes.map((tf) => {
                   const colKeys = strategy.pairs
-                    .filter((p) => !isInvalidSupernovaCombo(strategy.key, p, tf))
+                    .filter((p) => !isInvalidStrategyCombo(strategy.key, p, tf))
                     .map((p) => buildKey(strategy.key, p, tf));
                   const colSelectedCount = colKeys.filter((k) => selected.has(k)).length;
                   const colAllSelected = colKeys.length > 0 && colSelectedCount === colKeys.length;
@@ -584,7 +591,7 @@ const StrategySection = ({
             <tbody>
               {strategy.pairs.map((pair, idx) => {
                 const rowKeys = strategy.timeframes
-                  .filter((tf) => !isInvalidSupernovaCombo(strategy.key, pair, tf))
+                  .filter((tf) => !isInvalidStrategyCombo(strategy.key, pair, tf))
                   .map((tf) => buildKey(strategy.key, pair, tf));
                 const rowSelectedCount = rowKeys.filter((k) => selected.has(k)).length;
                 const rowAllSelected = rowKeys.length > 0 && rowSelectedCount === rowKeys.length;
@@ -614,7 +621,7 @@ const StrategySection = ({
                     </td>
                     {strategy.timeframes.map((tf) => {
                       const key = buildKey(strategy.key, pair, tf);
-                      const isInvalid = isInvalidSupernovaCombo(strategy.key, pair, tf);
+                      const isInvalid = isInvalidStrategyCombo(strategy.key, pair, tf);
                       return (
                         <td key={tf} className="px-3 py-2.5 text-center">
                           {isInvalid ? (
@@ -752,7 +759,7 @@ const AlertPairPreferences = () => {
     if (!strategy) return;
 
     const rowKeys = strategy.timeframes
-      .filter((tf) => !isInvalidSupernovaCombo(strategyKey, pair, tf))
+      .filter((tf) => !isInvalidStrategyCombo(strategyKey, pair, tf))
       .map((tf) => buildKey(strategyKey, pair, tf));
     const allSelected = rowKeys.length > 0 && rowKeys.every((k) => selected.has(k));
 
@@ -772,7 +779,7 @@ const AlertPairPreferences = () => {
     if (!strategy) return;
 
     const colKeys = strategy.pairs
-      .filter((p) => !isInvalidSupernovaCombo(strategyKey, p, tf))
+      .filter((p) => !isInvalidStrategyCombo(strategyKey, p, tf))
       .map((p) => buildKey(strategyKey, p, tf));
     const allSelected = colKeys.length > 0 && colKeys.every((k) => selected.has(k));
 
@@ -794,7 +801,7 @@ const AlertPairPreferences = () => {
     const strategyKeys = [];
     strategy.pairs.forEach((pair) => {
       strategy.timeframes.forEach((tf) => {
-        if (!isInvalidSupernovaCombo(strategyKey, pair, tf)) {
+        if (!isInvalidStrategyCombo(strategyKey, pair, tf)) {
           strategyKeys.push(buildKey(strategyKey, pair, tf));
         }
       });
