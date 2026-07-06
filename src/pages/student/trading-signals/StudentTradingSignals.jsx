@@ -521,46 +521,46 @@ const StudentTradingSignals = () => {
 
       {/* ── Filter Bar ── */}
       {showFilters && (
-        <div className="relative z-[100] flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
+        <div className="relative z-[45] flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
           {/* ── Exclusion Filters ───────────────────────────────── */}
           <div className="flex gap-4 items-end pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end flex-1 min-w-0">
-            <FilterSelect
-              label="Strategy"
-              excludedValues={exclusionFilters.excludedStrategies}
-              onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
-              placeholder="All Strategies"
-              options={strategyOptions}
-            />
-            <FilterSelect
-              label="Alert Type"
-              excludedValues={exclusionFilters.excludedSignalTypes}
-              onExcludedChange={(v) => updateExclusion("excludedSignalTypes", v)}
-              placeholder="All Types"
-              options={signalTypeOptions}
-            />
-            <InstrumentFilterDropdown
-              excludedValues={exclusionFilters.excludedSymbols}
-              onExcludedChange={(v) => updateExclusion("excludedSymbols", v)}
-              categories={effectiveCategories}
-              flat={isOnlyKillshot}
-            />
-            <FilterSelect
-              label="Time Frame"
-              excludedValues={exclusionFilters.excludedTimeframes}
-              onExcludedChange={(v) => updateExclusion("excludedTimeframes", v)}
-              placeholder="All Time Frames"
-              options={effectiveTimeframes}
-            />
-            {tradingSessionOptions.length > 0 && (
               <FilterSelect
-                label="Trading Session"
-                excludedValues={exclusionFilters.excludedSessions}
-                onExcludedChange={(v) => updateExclusion("excludedSessions", v)}
-                placeholder="All Sessions"
-                options={tradingSessionOptions}
+                label="Strategy"
+                excludedValues={exclusionFilters.excludedStrategies}
+                onExcludedChange={(v) => updateExclusion("excludedStrategies", v)}
+                placeholder="All Strategies"
+                options={strategyOptions}
               />
-            )}
+              <FilterSelect
+                label="Alert Type"
+                excludedValues={exclusionFilters.excludedSignalTypes}
+                onExcludedChange={(v) => updateExclusion("excludedSignalTypes", v)}
+                placeholder="All Types"
+                options={signalTypeOptions}
+              />
+              <InstrumentFilterDropdown
+                excludedValues={exclusionFilters.excludedSymbols}
+                onExcludedChange={(v) => updateExclusion("excludedSymbols", v)}
+                categories={effectiveCategories}
+                flat={isOnlyKillshot}
+              />
+              <FilterSelect
+                label="Time Frame"
+                excludedValues={exclusionFilters.excludedTimeframes}
+                onExcludedChange={(v) => updateExclusion("excludedTimeframes", v)}
+                placeholder="All Time Frames"
+                options={effectiveTimeframes}
+              />
+              {tradingSessionOptions.length > 0 && (
+                <FilterSelect
+                  label="Trading Session"
+                  excludedValues={exclusionFilters.excludedSessions}
+                  onExcludedChange={(v) => updateExclusion("excludedSessions", v)}
+                  placeholder="All Sessions"
+                  options={tradingSessionOptions}
+                />
+              )}
             </div>
 
             {hasActiveFilters && (
