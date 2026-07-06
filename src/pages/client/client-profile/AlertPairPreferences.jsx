@@ -490,6 +490,7 @@ const StrategySection = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+
   const strategyKeys = useMemo(() => {
     const keys = [];
     (strategy?.pairs || []).forEach((pair) => {
