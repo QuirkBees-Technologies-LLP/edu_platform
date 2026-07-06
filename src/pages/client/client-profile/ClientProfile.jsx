@@ -11,11 +11,14 @@ import { AvatarUpload } from "../../admin/educators/AvatarUpload";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import NotificationPreferences from "./NotificationPreferences";
 import AlertPairPreferences from "./AlertPairPreferences";
+import { useAuthContext } from "../../../auth/useAuthContext";
 
 const ClientProfile = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
+  const { auth } = useAuthContext();
+  const hasTradingSignals = auth?.user?.plan?.allowedSideBar?.includes("/trading-signals") || false;
 
   const { data } = useGetClientProfileQuery();
   const [updateClientProfile] = useUpdateClientProfileMutation();
@@ -97,18 +100,20 @@ const ClientProfile = () => {
           >
             Notifications
           </button>
-          <button
-            className={`px-4 py-3 border-b-2 transition-colors duration-200 ${activeTab === "alerts"
-              ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            onClick={(e) => {
-              e.preventDefault();
-              handleTabChange("alerts");
-            }}
-          >
-            Alert Preferences
-          </button>
+          {hasTradingSignals && (
+            <button
+              className={`px-4 py-3 border-b-2 transition-colors duration-200 ${activeTab === "alerts"
+                ? "border-primary text-primary"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleTabChange("alerts");
+              }}
+            >
+              Alert Preferences
+            </button>
+          )}
         </div>
 
         {/* Tab Content */}
@@ -247,7 +252,7 @@ const ClientProfile = () => {
           <NotificationPreferences />
         )}
 
-        {activeTab === "alerts" && (
+        {activeTab === "alerts" && hasTradingSignals && (
           <AlertPairPreferences />
         )}
       </Container>
