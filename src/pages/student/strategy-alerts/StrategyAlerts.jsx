@@ -66,11 +66,12 @@ const StrategyAlerts = () => {
 
   useEffect(() => {
     if (data?.data) {
+      const validSignals = data.data.filter((s) => Boolean(s?.chartImageUrl));
       if (page === 1) {
-        setSignals(data.data);
+        setSignals(validSignals);
       } else {
         setSignals((prev) => {
-          const newSignals = data.data.filter(
+          const newSignals = validSignals.filter(
             (s) => !prev.some((p) => p._id === s._id)
           );
           return [...prev, ...newSignals];

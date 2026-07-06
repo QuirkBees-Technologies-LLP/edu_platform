@@ -101,10 +101,10 @@ const SingleFilterSelect = ({
       {isOpen && (
         <div
           className="
-            absolute top-full left-0 mt-1.5 z-50
+            absolute top-full left-0 mt-1.5 z-[9999]
             w-[180px] py-1
-            bg-popover text-popover-foreground
-            border rounded-md shadow-md
+            bg-white dark:bg-[#1A1A2E] text-slate-900 dark:text-white
+            border border-slate-200 dark:border-[#2A2A4A] rounded-lg shadow-2xl
             max-h-[320px] overflow-y-auto
           "
           style={{

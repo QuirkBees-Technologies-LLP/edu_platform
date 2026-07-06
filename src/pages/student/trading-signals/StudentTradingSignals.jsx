@@ -27,7 +27,6 @@ import signalConfig from "./signalConfig";
 import SignalCard from "./SignalCard";
 import SignalDetailModal from "./SignalDetailModal";
 import FilterSelect from "./FilterSelect";
-import SingleFilterSelect from "./SingleFilterSelect";
 import InstrumentFilterDropdown from "./InstrumentFilterDropdown";
 import instrumentCategories from "./instrumentData";
 
@@ -44,9 +43,6 @@ const loadSavedFilters = () => {
         excludedSignalTypes: Array.isArray(parsed.excludedSignalTypes) ? parsed.excludedSignalTypes : [],
         excludedStrategies: Array.isArray(parsed.excludedStrategies) ? parsed.excludedStrategies : [],
         excludedTimeframes: Array.isArray(parsed.excludedTimeframes) ? parsed.excludedTimeframes : [],
-        excludedBullseyeTypes: Array.isArray(parsed.excludedBullseyeTypes) ? parsed.excludedBullseyeTypes : [],
-        excludedDefyTypes: Array.isArray(parsed.excludedDefyTypes) ? parsed.excludedDefyTypes : [],
-        excludedReactTypes: Array.isArray(parsed.excludedReactTypes) ? parsed.excludedReactTypes : [],
         excludedSessions: Array.isArray(parsed.excludedSessions) ? parsed.excludedSessions : [],
       };
     }
@@ -58,9 +54,6 @@ const loadSavedFilters = () => {
     excludedSignalTypes: [],
     excludedStrategies: [],
     excludedTimeframes: [],
-    excludedBullseyeTypes: [],
-    excludedDefyTypes: [],
-    excludedReactTypes: [],
     excludedSessions: [],
   };
 };
@@ -90,10 +83,6 @@ const TIMEFRAME_OPTIONS = [
   { value: "1M", label: "1M" },
 ];
 
-// Pattern Type & Execution Type options are now fetched from the API
-// (options.bullseyePatterns and options.defyModes) so that disabling
-// a strategy on the admin side automatically hides its sub-filters.
-
 const areArraysEqual = (a1, a2) => {
   const arr1 = a1 || [];
   const arr2 = a2 || [];
@@ -103,7 +92,7 @@ const areArraysEqual = (a1, a2) => {
 
 const areFiltersEqual = (f1, f2) => {
   if (!f1 || !f2) return false;
-  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes", "excludedBullseyeTypes", "excludedDefyTypes", "excludedReactTypes", "excludedSessions"];
+  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes", "excludedSessions"];
   return keys.every((key) => areArraysEqual(f1[key], f2[key]));
 };
 
@@ -150,9 +139,6 @@ const StudentTradingSignals = () => {
         excludedSignalTypes: Array.isArray(apiPrefs.excludedSignalTypes) ? apiPrefs.excludedSignalTypes : [],
         excludedStrategies: Array.isArray(apiPrefs.excludedStrategies) ? apiPrefs.excludedStrategies : [],
         excludedTimeframes: Array.isArray(apiPrefs.excludedTimeframes) ? apiPrefs.excludedTimeframes : [],
-        excludedBullseyeTypes: Array.isArray(apiPrefs.excludedBullseyeTypes) ? apiPrefs.excludedBullseyeTypes : [],
-        excludedDefyTypes: Array.isArray(apiPrefs.excludedDefyTypes) ? apiPrefs.excludedDefyTypes : [],
-        excludedReactTypes: Array.isArray(apiPrefs.excludedReactTypes) ? apiPrefs.excludedReactTypes : [],
         excludedSessions: Array.isArray(apiPrefs.excludedSessions) ? apiPrefs.excludedSessions : [],
       };
 
@@ -161,9 +147,6 @@ const StudentTradingSignals = () => {
         (apiPrefs.excludedSignalTypes?.length > 0) ||
         (apiPrefs.excludedStrategies?.length > 0) ||
         (apiPrefs.excludedTimeframes?.length > 0) ||
-        (apiPrefs.excludedBullseyeTypes?.length > 0) ||
-        (apiPrefs.excludedDefyTypes?.length > 0) ||
-        (apiPrefs.excludedReactTypes?.length > 0) ||
         (apiPrefs.excludedSessions?.length > 0);
 
       if (hasApiData) {
@@ -232,29 +215,8 @@ const StudentTradingSignals = () => {
   // load won't appear at the top until a filter/search change resets to page 1.
   // This is an acceptable trade-off — a full fix would require a separate
   // page-1 subscription or WebSocket-based push updates.
-  // When DeFy execution type is mandatory but not yet selected (excludedDefyTypes
-  // is empty = both types visible = no explicit pick), block all DeFy records from
-  // appearing by excluding every type. Once the user picks one, only the other
-  // type stays excluded and the chosen type's records are shown.
-  const effectiveExcludedDefyTypes = useMemo(() => {
-    const excluded = exclusionFilters.excludedDefyTypes || [];
-    // Empty means nothing was explicitly selected — hide all DeFy records
-    if (excluded.length === 0) return ["confirmed", "pending"];
-    return excluded;
-  }, [exclusionFilters.excludedDefyTypes]);
 
-  // When React execution type is mandatory but not yet selected (excludedReactTypes
-  // is empty = all types visible = no explicit pick), block all React records from
-  // appearing by excluding every type. Once the user picks one, only the other
-  // types stay excluded and the chosen type's records are shown.
-  const effectiveExcludedReactTypes = useMemo(() => {
-    const excluded = exclusionFilters.excludedReactTypes || [];
-    // Empty means nothing was explicitly selected — hide all React records
-    if (excluded.length === 0) return ["market_execution", "pending_order", "fvg_pending_order"];
-    return excluded;
-  }, [exclusionFilters.excludedReactTypes]);
-
-  const { data, isLoading, isFetching } = useGetClientTvSignalsQuery(
+  const { data: rawSignalsData, isLoading, isFetching } = useGetClientTvSignalsQuery(
     {
       page,
       limit: 12,
@@ -263,13 +225,18 @@ const StudentTradingSignals = () => {
       excludedSignalTypes: exclusionFilters.excludedSignalTypes,
       excludedStrategies: exclusionFilters.excludedStrategies,
       excludedTimeframes: exclusionFilters.excludedTimeframes,
-      excludedBullseyeTypes: exclusionFilters.excludedBullseyeTypes,
-      excludedDefyTypes: effectiveExcludedDefyTypes,
-      excludedReactTypes: effectiveExcludedReactTypes,
       excludedSessions: exclusionFilters.excludedSessions,
     },
     { pollingInterval: 30000 }
   );
+
+  const lastSignalsDataRef = useRef(rawSignalsData);
+  useEffect(() => {
+    if (rawSignalsData?.data) {
+      lastSignalsDataRef.current = rawSignalsData;
+    }
+  }, [rawSignalsData]);
+  const data = rawSignalsData?.data ? rawSignalsData : (lastSignalsDataRef.current || rawSignalsData);
 
   // ── Mark initial load complete once data arrives ─────────────────
   useEffect(() => {
@@ -277,7 +244,15 @@ const StudentTradingSignals = () => {
       setIsInitialLoad(false);
     }
   }, [isLoading, data, isInitialLoad]);
-  const { data: filterOptions } = useGetFilterOptionsQuery();
+
+  const { data: rawFilterOptions, isLoading: isLoadingFilters, isFetching: isFetchingFilters } = useGetFilterOptionsQuery();
+  const lastFilterOptionsRef = useRef(rawFilterOptions);
+  useEffect(() => {
+    if (rawFilterOptions?.data) {
+      lastFilterOptionsRef.current = rawFilterOptions;
+    }
+  }, [rawFilterOptions]);
+  const filterOptions = rawFilterOptions?.data ? rawFilterOptions : (lastFilterOptionsRef.current || rawFilterOptions);
 
   const pagination = data?.pagination;
   const totalPages = pagination?.totalPages || 1;
@@ -286,11 +261,12 @@ const StudentTradingSignals = () => {
   // ── Accumulate signals — replace on page 1, append on subsequent ─
   useEffect(() => {
     if (data?.data) {
+      const validSignals = data.data.filter((s) => Boolean(s?.chartImageUrl));
       if (page === 1) {
-        setSignals(data.data);
+        setSignals(validSignals);
       } else {
         setSignals((prev) => {
-          const incoming = data.data.filter(
+          const incoming = validSignals.filter(
             (s) => !prev.some((p) => p._id === s._id)
           );
           return [...prev, ...incoming];
@@ -333,9 +309,6 @@ const StudentTradingSignals = () => {
       excludedSignalTypes: [],
       excludedStrategies: [],
       excludedTimeframes: [],
-      excludedBullseyeTypes: [],
-      excludedDefyTypes: [],
-      excludedReactTypes: [],
       excludedSessions: [],
     };
     setExclusionFilters(clearedExclusions);
@@ -348,49 +321,11 @@ const StudentTradingSignals = () => {
     lastSavedPrefsRef.current = clearedExclusions;
   };
 
-  // ── Derive dynamic sub-filter options from API ──────────────────────
-  const patternTypeOptions = options.bullseyePatterns || [];
-  const executionModeOptions = options.defyModes || [];
-  const reactModeOptions = options.reactModes || [];
-  const tradingSessionOptions = options.sessions || [];
-
-  // ── DeFy Execution Type: mandatory single-select ────────────────────
-  // Derive the currently selected single value from the exclusion array.
-  // If exactly one type remains (one excluded), that's the selected type.
-  // Otherwise (none excluded = both shown = nothing explicitly picked).
-  const ALL_DEFY_EXECUTION_TYPES = ["confirmed", "pending"];
-  const selectedDefyExecutionType = useMemo(() => {
-    const excluded = exclusionFilters.excludedDefyTypes || [];
-    const included = ALL_DEFY_EXECUTION_TYPES.filter(
-      (t) => !excluded.includes(t)
-    );
-    return included.length === 1 ? included[0] : "";
-  }, [exclusionFilters.excludedDefyTypes]);
-
-  const handleDefyTypeSelect = (value) => {
-    // Exclude the other options so only the selected one is shown
-    const excluded = ALL_DEFY_EXECUTION_TYPES.filter((t) => t !== value);
-    updateExclusion("excludedDefyTypes", excluded);
-  };
-
-  // ── React Execution Type: mandatory single-select ───────────────────
-  const ALL_REACT_EXECUTION_TYPES = ["market_execution", "pending_order", "fvg_pending_order"];
-  const selectedReactExecutionType = useMemo(() => {
-    const excluded = exclusionFilters.excludedReactTypes || [];
-    const included = ALL_REACT_EXECUTION_TYPES.filter(
-      (t) => !excluded.includes(t)
-    );
-    return included.length === 1 ? included[0] : "";
-  }, [exclusionFilters.excludedReactTypes]);
-
-  const handleReactTypeSelect = (value) => {
-    // Exclude the other options so only the selected one is shown
-    const excluded = ALL_REACT_EXECUTION_TYPES.filter((t) => t !== value);
-    updateExclusion("excludedReactTypes", excluded);
-  };
+  // ── Derive session options from API ─────────────────────────────
+  const rawTradingSessionOptions = options.sessions || [];
 
   // ── Strategy options (from API) ─────────────────────────────────
-  const strategyOptions = (options.strategies || []).map((s) => ({
+  const rawStrategyOptions = (options.strategies || []).map((s) => ({
     value: s?.name || "",
     label: s?.name || "",
   }));
@@ -399,12 +334,12 @@ const StudentTradingSignals = () => {
   // Uses API strategyRestrictions for any single active strategy restriction.
   // Killshot/Bullseye -> restrict Symbol+Timeframe. DEFY/React -> no restriction.
   const activeStrategyNames = useMemo(() => {
-    return strategyOptions
+    return rawStrategyOptions
       .filter((s) => !exclusionFilters.excludedStrategies.some(
         (ex) => ex.toLowerCase() === s.value.toLowerCase()
       ))
       .map((s) => s.value);
-  }, [strategyOptions, exclusionFilters.excludedStrategies]);
+  }, [rawStrategyOptions, exclusionFilters.excludedStrategies]);
 
   const DB_NAME_TO_RESTRICTION_KEY = {
     "defy": "defy",
@@ -425,15 +360,9 @@ const StudentTradingSignals = () => {
     return options.strategyRestrictions?.[singleActiveStrategyKey] || null;
   }, [singleActiveStrategyKey, options.strategyRestrictions]);
 
-  const isOnlyKillshot = singleActiveStrategyKey === "killshot";
+  const rawIsOnlyKillshot = singleActiveStrategyKey === "killshot";
 
-  const CONFIG_TF_TO_FRONTEND = {
-    M1: "1m", M3: "3m", M5: "5m", M15: "15m", M30: "30m", M45: "45m",
-    H1: "1H", H2: "2H", H3: "3H", H4: "4H",
-    D1: "1D", W1: "1W",
-  };
-
-  const effectiveCategories = useMemo(() => {
+  const rawEffectiveCategories = useMemo(() => {
     if (!activeStrategyRestriction?.restrictsSymbols) return instrumentCategories;
     const allowedPairs = activeStrategyRestriction.allowedSymbols || [];
     if (!allowedPairs.length) return instrumentCategories;
@@ -449,7 +378,7 @@ const StudentTradingSignals = () => {
       .filter((cat) => cat.instruments.length > 0);
   }, [activeStrategyRestriction]);
 
-  const effectiveTimeframes = useMemo(() => {
+  const rawEffectiveTimeframes = useMemo(() => {
     if (!activeStrategyRestriction?.restrictsTimeframes) return TIMEFRAME_OPTIONS;
     // allowedTimeframes already in frontend format (1m/5m/1H) from API strategyRestrictions
     if (activeStrategyRestriction.allowedTimeframes?.length) {
@@ -461,36 +390,51 @@ const StudentTradingSignals = () => {
     return TIMEFRAME_OPTIONS;
   }, [activeStrategyRestriction]);
 
-  // ── Derive which sub-filters are active ─────────────────────────────
-  // A sub-filter is active only if its parent strategy exists in the
-  // API-returned strategies (admin-enabled) AND isn't user-excluded
-  const bullseyeExistsInApi = strategyOptions.some(
-    (s) => s.value.toLowerCase() === "bullseye"
-  );
-  const defyExistsInApi = strategyOptions.some(
-    (s) => s.value.toLowerCase() === "defy"
-  );
-  const isBullseyeActive = bullseyeExistsInApi && !exclusionFilters.excludedStrategies.some(
-    (s) => s.toLowerCase() === "bullseye"
-  );
-  const isDefyActive = defyExistsInApi && !exclusionFilters.excludedStrategies.some(
-    (s) => s.toLowerCase() === "defy"
-  );
-  const reactExistsInApi = strategyOptions.some(
-    (s) => s.value.toLowerCase() === "react"
-  );
-  const isReactActive = reactExistsInApi && !exclusionFilters.excludedStrategies.some(
-    (s) => s.toLowerCase() === "react"
-  );
+  // ── Preserve existing filter options while API request is in progress ──
+  // Prevents UI flicker or dropdown state resetting during loading/fetching transitions.
+  const isTransitionLoading = (isLoading || isFetching || isLoadingFilters || isFetchingFilters) && !isInitialLoad;
+
+  const preservedOptionsRef = useRef({
+    categories: instrumentCategories,
+    timeframes: TIMEFRAME_OPTIONS,
+    strategies: [],
+    sessions: [],
+    isOnlyKillshot: false,
+  });
+
+  if (!isTransitionLoading) {
+    if (rawEffectiveCategories.length > 0) preservedOptionsRef.current.categories = rawEffectiveCategories;
+    if (rawEffectiveTimeframes.length > 0) preservedOptionsRef.current.timeframes = rawEffectiveTimeframes;
+    if (rawStrategyOptions.length > 0) preservedOptionsRef.current.strategies = rawStrategyOptions;
+    if (rawTradingSessionOptions.length > 0) preservedOptionsRef.current.sessions = rawTradingSessionOptions;
+    preservedOptionsRef.current.isOnlyKillshot = rawIsOnlyKillshot;
+  }
+
+  const effectiveCategories = isTransitionLoading && preservedOptionsRef.current.categories.length > 0
+    ? preservedOptionsRef.current.categories
+    : rawEffectiveCategories;
+
+  const effectiveTimeframes = isTransitionLoading && preservedOptionsRef.current.timeframes.length > 0
+    ? preservedOptionsRef.current.timeframes
+    : rawEffectiveTimeframes;
+
+  const strategyOptions = isTransitionLoading && preservedOptionsRef.current.strategies.length > 0
+    ? preservedOptionsRef.current.strategies
+    : rawStrategyOptions;
+
+  const tradingSessionOptions = isTransitionLoading && preservedOptionsRef.current.sessions.length > 0
+    ? preservedOptionsRef.current.sessions
+    : rawTradingSessionOptions;
+
+  const isOnlyKillshot = isTransitionLoading
+    ? preservedOptionsRef.current.isOnlyKillshot
+    : rawIsOnlyKillshot;
 
   const hasActiveFilters =
     (exclusionFilters.excludedSymbols || []).length > 0 ||
     (exclusionFilters.excludedSignalTypes || []).length > 0 ||
     (exclusionFilters.excludedStrategies || []).length > 0 ||
     (exclusionFilters.excludedTimeframes || []).length > 0 ||
-    (isBullseyeActive && (exclusionFilters.excludedBullseyeTypes || []).length > 0) ||
-    (isDefyActive && (exclusionFilters.excludedDefyTypes || []).length > 0) ||
-    (isReactActive && (exclusionFilters.excludedReactTypes || []).length > 0) ||
     (exclusionFilters.excludedSessions || []).length > 0;
 
   // ── Signal type options (from signalConfig) ─────────────────────
@@ -503,36 +447,20 @@ const StudentTradingSignals = () => {
   const totalSignalTypes = signalTypeOptions.length;
   const totalTimeframes = effectiveTimeframes?.length || 0;
   const totalStrategies = strategyOptions.length;
-
-  // Sub-filter counts (only counted when their parent strategy is active)
-  const patternTypeSelectedCount = isBullseyeActive
-    ? Math.max(0, patternTypeOptions.length - (exclusionFilters.excludedBullseyeTypes || []).filter((v) => patternTypeOptions.some((o) => o.value === v)).length)
-    : 0;
-  // DeFy Execution Type is now single-select: count is 0 or 1
-  const executionModeSelectedCount = isDefyActive && selectedDefyExecutionType ? 1 : 0;
-  // React Execution Type is also single-select: count is 0 or 1
-  const reactModeSelectedCount = isReactActive && selectedReactExecutionType ? 1 : 0;
-  const subFilterTotal = (isBullseyeActive ? patternTypeOptions.length : 0)
-    + (isDefyActive ? 1 : 0) // single-select: max 1
-    + (isReactActive ? 1 : 0); // single-select: max 1
-
   const totalSessions = tradingSessionOptions.length;
 
   const strategySelectedCount = Math.max(0, totalStrategies - (exclusionFilters.excludedStrategies?.length ?? 0));
+  const sessionSelectedCount = Math.max(0, totalSessions - (exclusionFilters.excludedSessions || []).filter((v) => tradingSessionOptions.some((o) => o.value === v)).length);
 
   const totalSelected =
     Math.max(0, totalSymbols - (exclusionFilters.excludedSymbols?.length ?? 0)) +
     Math.max(0, totalSignalTypes - (exclusionFilters.excludedSignalTypes?.length ?? 0)) +
     Math.max(0, totalTimeframes - (exclusionFilters.excludedTimeframes?.length ?? 0)) +
     strategySelectedCount +
-    patternTypeSelectedCount +
-    executionModeSelectedCount +
-    reactModeSelectedCount +
-    Math.max(0, totalSessions - (exclusionFilters.excludedSessions || []).filter((v) => tradingSessionOptions.some((o) => o.value === v)).length);
+    sessionSelectedCount;
 
   const totalAll =
-    totalSymbols + totalSignalTypes + totalTimeframes + totalStrategies +
-    subFilterTotal + totalSessions;
+    totalSymbols + totalSignalTypes + totalTimeframes + totalStrategies + totalSessions;
 
 
   return (
@@ -593,10 +521,10 @@ const StudentTradingSignals = () => {
 
       {/* ── Filter Bar ── */}
       {showFilters && (
-        <div className="flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
+        <div className="relative z-[100] flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
           {/* ── Exclusion Filters ───────────────────────────────── */}
           <div className="flex gap-4 items-end pb-4">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-4 items-end flex-1 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end flex-1 min-w-0">
             <FilterSelect
               label="Strategy"
               excludedValues={exclusionFilters.excludedStrategies}
@@ -624,43 +552,6 @@ const StudentTradingSignals = () => {
               placeholder="All Time Frames"
               options={effectiveTimeframes}
             />
-            {/* ── Conditional: Pattern Type — visible when Bullseye is selected ── */}
-            {isBullseyeActive && patternTypeOptions.length > 0 && (
-              <FilterSelect
-                label="Pattern Type"
-                excludedValues={exclusionFilters.excludedBullseyeTypes}
-                onExcludedChange={(v) => updateExclusion("excludedBullseyeTypes", v)}
-                placeholder="All Patterns"
-                options={patternTypeOptions}
-              />
-            )}
-            {/* ── Conditional: Execution Type — visible when Defy is selected (mandatory single-select) ── */}
-            {isDefyActive && executionModeOptions.length > 0 && (
-              <SingleFilterSelect
-                label="Execution Type"
-                selectedValue={selectedDefyExecutionType}
-                onSelect={handleDefyTypeSelect}
-                placeholder="Select Execution Type"
-                options={executionModeOptions}
-                required={true}
-                error={!selectedDefyExecutionType}
-                infoText="This filter applies ONLY to Defy. Defy has 2 different modes: Market Execution and Pending Order."
-              />
-            )}
-            {/* ── Conditional: Execution Type — visible when React is selected (mandatory single-select) ── */}
-            {isReactActive && reactModeOptions.length > 0 && (
-              <SingleFilterSelect
-                label="Execution Type"
-                selectedValue={selectedReactExecutionType}
-                onSelect={handleReactTypeSelect}
-                placeholder="Select Execution Type"
-                options={reactModeOptions}
-                required={true}
-                error={!selectedReactExecutionType}
-                infoText="This filter applies ONLY to React. React has 3 different modes: Market Execution, Pending Order, and FVG Pending Order."
-              />
-            )}
-            {/* ── Trading Session filter ── */}
             {tradingSessionOptions.length > 0 && (
               <FilterSelect
                 label="Trading Session"

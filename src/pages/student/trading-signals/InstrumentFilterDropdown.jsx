@@ -168,10 +168,10 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categ
           /* ── Flat mode: simple checkbox list without category hierarchy ── */
           <div
             className="
-              absolute top-full left-0 mt-1.5 z-50
-              w-[220px] py-1
-              bg-popover text-popover-foreground
-              border rounded-md shadow-md
+              absolute top-full left-0 mt-1.5 z-[9999]
+              w-[260px] max-w-[320px] shrink-0 py-1
+              bg-white dark:bg-[#1A1A2E] text-slate-900 dark:text-white
+              border border-slate-200 dark:border-[#2A2A4A] rounded-lg shadow-2xl
               max-h-[320px] overflow-y-auto
             "
             style={{
@@ -226,16 +226,16 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categ
         ) : (
           /* ── Category mode: cascading menu with submenus ── */
           <div
-            className="absolute top-full left-0 mt-1.5 z-50 flex"
+            className="absolute top-full left-0 mt-1.5 z-[9999] flex"
             onMouseEnter={handleRootEnter}
             onMouseLeave={handleRootLeave}
           >
             {/* ── Main Category Menu ── */}
             <div
               className="
-                w-[200px] py-1
-                bg-popover text-popover-foreground
-                border rounded-md shadow-md
+                w-[240px] shrink-0 py-1
+                bg-white dark:bg-[#1A1A2E] text-slate-900 dark:text-white
+                border border-slate-200 dark:border-[#2A2A4A] rounded-lg shadow-2xl
                 overflow-hidden
               "
             >
@@ -323,9 +323,9 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categ
             {activeCat && (
               <div
                 className="
-                  ml-1 w-[220px] py-1
-                  bg-popover text-popover-foreground
-                  border rounded-md shadow-md
+                  ml-1 w-[240px] shrink-0 py-1
+                  bg-white dark:bg-[#1A1A2E] text-slate-900 dark:text-white
+                  border border-slate-200 dark:border-[#2A2A4A] rounded-lg shadow-2xl
                   max-h-[380px] overflow-y-auto
                   animate-in fade-in-0 slide-in-from-left-2 duration-150
                 "
