@@ -8,7 +8,7 @@ import {
   useUpdateAlertPairPreferencesMutation,
 } from "../../../store/api/client/clientProfileApiSlice";
 import {
-  useGetFilterOptionsQuery,
+  useGetAlertPreferenceConfigsQuery,
 } from "../../../store/api/client/clientTvSignalsApiSlice";
 
 
@@ -698,7 +698,7 @@ const StrategySection = ({
 const AlertPairPreferences = () => {
   const navigate = useNavigate();
   const { data: rawData, isLoading, refetch } = useGetAlertPairPreferencesQuery();
-  const { data: rawFilterOptions, isLoading: isLoadingFilters } = useGetFilterOptionsQuery();
+  const { data: rawFilterOptions, isLoading: isLoadingFilters } = useGetAlertPreferenceConfigsQuery();
 
   const lastDataRef = useRef(rawData);
   useEffect(() => {
