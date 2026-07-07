@@ -25,6 +25,7 @@ import {
 import ResourcesSection from "../../../components/ui/ResourcesSection";
 import StrategyVideoCarousel from "../../../components/ui/StrategyVideoCarousel";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { getStrategyVideos } from "@/config/strategyConfig";
 
 /**
  * Original Strategy Banner — shown on the landing page before a strategy is selected.
@@ -66,36 +67,6 @@ const parseTags = (tags) => {
     return result;
 };
 
-/**
- * Placeholder video data for the strategy carousel.
- * Replace with an API call when a backend endpoint is available.
- */
-const STRATEGY_VIDEOS = [
-    {
-        id: "v1",
-        title: "IQ_REACT_V1",
-        videoUrl: "https://videos.dyntube.com/iframes/MLM6WSKCfEOEqwe379CGtw",
-        duration: "",
-    },
-    {
-        id: "v2",
-        title: "IQ_DEFY_V4",
-        videoUrl: "https://videos.dyntube.com/iframes/ieeCtsTzUS3irQuPUSg",
-        duration: "",
-    },
-    {
-        id: "v3",
-        title: "IQ_KILLSHOT_V4",
-        videoUrl: "https://videos.dyntube.com/iframes/zQGhQgxx2Eism1fWLbO8A",
-        duration: "",
-    },
-    {
-        id: "v4",
-        title: "IQ_BULLSEYE_V4",
-        videoUrl: "https://videos.dyntube.com/iframes/mR5aNLY6dECk6lkVFeRmeg",
-        duration: "",
-    },
-];
 
 const TradingStrategies = () => {
     // ==================== STATE MANAGEMENT ====================
@@ -319,7 +290,16 @@ const TradingStrategies = () => {
                 {/* Banner or Video Carousel — conditionally rendered */}
                 <div className="ts-banner">
                     {currentStrategy
-                        ? <StrategyVideoCarousel videos={STRATEGY_VIDEOS} />
+                        ? (() => {
+                            const videoConfig = getStrategyVideos(parentStrategy?.title || currentStrategy?.title);
+                            return (
+                                <StrategyVideoCarousel
+                                    videos={videoConfig?.videos || []}
+                                    title={videoConfig?.title}
+                                    description={videoConfig?.description}
+                                />
+                            );
+                        })()
                         : <Banner />
                     }
                 </div>

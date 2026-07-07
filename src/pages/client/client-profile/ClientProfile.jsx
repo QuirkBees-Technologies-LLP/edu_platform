@@ -12,11 +12,16 @@ import { AvatarUpload } from "../../admin/educators/AvatarUpload";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import NotificationPreferences from "./NotificationPreferences";
 import AlertPairPreferences from "./AlertPairPreferences";
+import { useAuthContext } from "../../../auth/useAuthContext";
 
 const ClientProfile = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
+
+  const { auth } = useAuthContext();
+  const allowedRoutes = auth?.user?.plan?.allowedSideBar || [];
+  const hasAlertsAccess = allowedRoutes.includes("/trading-signals");
 
   const { data } = useGetClientProfileQuery();
   const [updateClientProfile] = useUpdateClientProfileMutation();
@@ -72,8 +77,8 @@ const ClientProfile = () => {
   return (
     <div>
       <Container>
-        {/* Back to Alerts — shown only on the Alert Preferences tab */}
-        {activeTab === "alerts" && (
+        {/* Back to Alerts — shown only on the Alert Preferences tab if plan includes /trading-signals */}
+        {hasAlertsAccess && activeTab === "alerts" && (
           <div className="mb-4">
             <button
               type="button"
@@ -112,18 +117,20 @@ const ClientProfile = () => {
           >
             Notifications
           </button>
-          <button
-            className={`px-4 py-3 border-b-2 transition-colors duration-200 ${activeTab === "alerts"
-              ? "border-primary text-primary"
-              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            onClick={(e) => {
-              e.preventDefault();
-              handleTabChange("alerts");
-            }}
-          >
-            Alert Preferences
-          </button>
+          {hasAlertsAccess && (
+            <button
+              className={`px-4 py-3 border-b-2 transition-colors duration-200 ${activeTab === "alerts"
+                ? "border-primary text-primary"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleTabChange("alerts");
+              }}
+            >
+              Alert Preferences
+            </button>
+          )}
         </div>
 
         {/* Tab Content */}
@@ -262,7 +269,7 @@ const ClientProfile = () => {
           <NotificationPreferences />
         )}
 
-        {activeTab === "alerts" && (
+        {hasAlertsAccess && activeTab === "alerts" && (
           <AlertPairPreferences />
         )}
       </Container>

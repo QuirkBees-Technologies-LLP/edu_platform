@@ -1,106 +1,13 @@
 // ── Instrument Categories & Data ─────────────────────────────────────
-// Used by InstrumentFilterDropdown for the cascading filter menu.
+// Re-exports the centralized asset class definitions from strategyConfig
+// as the instrument categories used by InstrumentFilterDropdown and other
+// consumers throughout the frontend.
 //
-// ⚠ SYNC WARNING: This list is duplicated in the backend at:
-//   edu_platfrom_be/src/controller/user/tvSignals.controller.js → symbolCategories
-// Any additions or removals here MUST be replicated there, and vice versa.
+// All instrument data is maintained in src/config/strategyConfig.js.
+// This file exists only to preserve the existing import interface.
 
-import {
-  DollarSign,
-  Bitcoin,
-  BarChart3,
-  Gem,
-} from "lucide-react";
+import { ASSET_CLASSES } from "@/config/strategyConfig";
 
-const instrumentCategories = [
-  {
-    key: "forex",
-    label: "Forex",
-    icon: DollarSign,
-    color: "#3b82f6",
-    colorLight: "#3b82f615",
-    instruments: [
-      { symbol: "EUR/USD", label: "EUR/USD" },
-      { symbol: "GBP/USD", label: "GBP/USD" },
-      { symbol: "AUD/USD", label: "AUD/USD" },
-      { symbol: "NZD/USD", label: "NZD/USD" },
-      { symbol: "USD/JPY", label: "USD/JPY" },
-      { symbol: "USD/CAD", label: "USD/CAD" },
-      { symbol: "USD/CHF", label: "USD/CHF" },
-      { symbol: "EUR/GBP", label: "EUR/GBP" },
-      { symbol: "EUR/JPY", label: "EUR/JPY" },
-      { symbol: "EUR/CHF", label: "EUR/CHF" },
-      { symbol: "EUR/CAD", label: "EUR/CAD" },
-      { symbol: "EUR/AUD", label: "EUR/AUD" },
-      { symbol: "EUR/NZD", label: "EUR/NZD" },
-      { symbol: "GBP/JPY", label: "GBP/JPY" },
-      { symbol: "GBP/CHF", label: "GBP/CHF" },
-      { symbol: "GBP/CAD", label: "GBP/CAD" },
-      { symbol: "GBP/AUD", label: "GBP/AUD" },
-      { symbol: "GBP/NZD", label: "GBP/NZD" },
-      { symbol: "AUD/JPY", label: "AUD/JPY" },
-      { symbol: "AUD/CAD", label: "AUD/CAD" },
-      { symbol: "AUD/CHF", label: "AUD/CHF" },
-      { symbol: "AUD/NZD", label: "AUD/NZD" },
-      { symbol: "NZD/JPY", label: "NZD/JPY" },
-      { symbol: "NZD/CAD", label: "NZD/CAD" },
-      { symbol: "NZD/CHF", label: "NZD/CHF" },
-      { symbol: "CAD/JPY", label: "CAD/JPY" },
-      { symbol: "CAD/CHF", label: "CAD/CHF" },
-      { symbol: "CHF/JPY", label: "CHF/JPY" },
-    ],
-  },
-  {
-    key: "crypto",
-    label: "Crypto",
-    icon: Bitcoin,
-    color: "#f59e0b",
-    colorLight: "#f59e0b15",
-    instruments: [
-      { symbol: "BTC/USD", label: "Bitcoin" },
-      { symbol: "ETH/USD", label: "Ethereum" },
-      { symbol: "SOL/USD", label: "Solana" },
-    ],
-  },
-  {
-    key: "indices",
-    label: "Indices",
-    icon: BarChart3,
-    color: "#8b5cf6",
-    colorLight: "#8b5cf615",
-    instruments: [
-      { symbol: "US30", label: "Dow Jones" },
-      { symbol: "US500", label: "S&P 500" },
-      { symbol: "NAS100", label: "Nasdaq 100" },
-      { symbol: "US2000", label: "Russell 2000" },
-      { symbol: "GER40", label: "DAX" },
-      { symbol: "FRA40", label: "CAC 40" },
-      { symbol: "UK100", label: "FTSE 100" },
-      { symbol: "EU50", label: "Euro Stoxx 50" },
-      { symbol: "SPA35", label: "IBEX 35" },
-      { symbol: "SWI20", label: "SMI" },
-      { symbol: "JPN225", label: "Nikkei 225" },
-      { symbol: "HK50", label: "Hang Seng" },
-      { symbol: "CHN50", label: "China A50" },
-      { symbol: "AUS200", label: "ASX 200" },
-    ],
-  },
-  {
-    key: "commodities",
-    label: "Commodities",
-    icon: Gem,
-    color: "#10b981",
-    colorLight: "#10b98115",
-    instruments: [
-      { symbol: "XAU/USD", label: "Gold" },
-      { symbol: "XAG/USD", label: "Silver" },
-      { symbol: "XPT/USD", label: "Platinum" },
-      { symbol: "XPD/USD", label: "Palladium" },
-      { symbol: "UKOIL", label: "Brent" },
-      { symbol: "USOIL", label: "WTI" },
-      { symbol: "NGAS", label: "Natural Gas" },
-    ],
-  },
-];
+const instrumentCategories = ASSET_CLASSES;
 
 export default instrumentCategories;
