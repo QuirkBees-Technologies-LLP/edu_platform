@@ -4,6 +4,7 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientProfileApiSlice = createApi({
     reducerPath: 'clientProfile',
     baseQuery: baseQueryWithReauth,
+    tagTypes: ['AlertPairPreferences'],
     endpoints: (builder) => ({
         getClientProfile: builder.query({
             query: () => `/users/auth/profile`,
@@ -34,6 +35,7 @@ export const clientProfileApiSlice = createApi({
         }),
         getAlertPairPreferences: builder.query({
             query: () => `/users/auth/alert-pair-preferences`,
+            providesTags: ['AlertPairPreferences'],
         }),
         updateAlertPairPreferences: builder.mutation({
             query: (preferences) => ({
@@ -41,6 +43,7 @@ export const clientProfileApiSlice = createApi({
                 method: 'PUT',
                 body: preferences,
             }),
+            invalidatesTags: ['AlertPairPreferences'],
         }),
     }),
 });

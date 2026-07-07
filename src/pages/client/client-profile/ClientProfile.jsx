@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { ExternalLink } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Container } from "@/components/container";
@@ -71,6 +72,20 @@ const ClientProfile = () => {
   return (
     <div>
       <Container>
+        {/* Back to Alerts — shown only on the Alert Preferences tab */}
+        {activeTab === "alerts" && (
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={() => navigate("/trading-signals")}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Back to Alerts
+            </button>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex border-b border-gray-200 mb-6 font-medium text-sm">
           <button

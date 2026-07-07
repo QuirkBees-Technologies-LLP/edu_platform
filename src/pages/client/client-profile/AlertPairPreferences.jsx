@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, Bell, BellOff, Save, ExternalLink, Clock, DollarSign, Bitcoin, BarChart3, Gem } from "lucide-react";
+import { ChevronDown, ChevronRight, Bell, BellOff, Save, Clock, DollarSign, Bitcoin, BarChart3, Gem, SlidersHorizontal } from "lucide-react";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
   useGetAlertPairPreferencesQuery,
@@ -9,7 +8,13 @@ import {
 } from "../../../store/api/client/clientProfileApiSlice";
 import {
   useGetAlertPreferenceConfigsQuery,
+  useGetFilterOptionsQuery,
+  useGetFilterPreferencesQuery,
 } from "../../../store/api/client/clientTvSignalsApiSlice";
+import { buildMatchedPreferences } from "../../student/trading-signals/matchFiltersToPreferences";
+import MatchFiltersConfirmModal from "../../student/trading-signals/MatchFiltersConfirmModal";
+import instrumentCategories from "../../student/trading-signals/instrumentData";
+import { useNavigate } from "react-router";
 
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -716,6 +721,48 @@ const AlertPairPreferences = () => {
   const [strategySessionExclusions, setStrategySessionExclusions] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
 
+  // ── Match Filters Settings ────────────────────────────────────
+  const { data: savedFilterPrefs } = useGetFilterPreferencesQuery();
+  const { data: filterOptionsData } = useGetFilterOptionsQuery();
+  const [showMatchConfirm, setShowMatchConfirm] = useState(false);
+
+  const allSymbolOptions = useMemo(
+    () => instrumentCategories.flatMap((c) => c?.instruments || []),
+    []
+  );
+
+  // Derive strategy options from the filter page (strategies visible in the IQ Strategies Alerts dropdown)
+  const filterPageStrategyOptions = useMemo(() => {
+    const strategies = filterOptionsData?.data?.strategies || [];
+    return strategies.map((s) => ({ value: s?.name || "", label: s?.name || "" }));
+  }, [filterOptionsData]);
+
+  // Build the saved exclusion filters from the API
+  const savedExclusionFilters = useMemo(() => {
+    const prefs = savedFilterPrefs?.data;
+    if (!prefs) return null;
+    return {
+      excludedStrategies: Array.isArray(prefs.excludedStrategies) ? prefs.excludedStrategies : [],
+      excludedSignalTypes: Array.isArray(prefs.excludedSignalTypes) ? prefs.excludedSignalTypes : [],
+      excludedSymbols: Array.isArray(prefs.excludedSymbols) ? prefs.excludedSymbols : [],
+      excludedTimeframes: Array.isArray(prefs.excludedTimeframes) ? prefs.excludedTimeframes : [],
+      excludedSessions: Array.isArray(prefs.excludedSessions) ? prefs.excludedSessions : [],
+    };
+  }, [savedFilterPrefs]);
+
+  const matchFiltersSummary = useMemo(() => {
+    if (!savedExclusionFilters || !filterOptions?.data?.alertPreferenceConfigs) return null;
+    const { summary } = buildMatchedPreferences(
+      savedExclusionFilters,
+      filterOptions.data.alertPreferenceConfigs,
+      filterOptions.data.sessions || [],
+      filterPageStrategyOptions,
+      allSymbolOptions
+    );
+    return summary;
+  }, [savedExclusionFilters, filterOptions, filterPageStrategyOptions, allSymbolOptions]);
+
+
   // Derive active strategies from alertPreferenceConfigs (Defy, Bullseye, Killshot, etc.)
   const activeStrategies = useMemo(() => {
     const configs = filterOptions?.data?.alertPreferenceConfigs;
@@ -742,6 +789,43 @@ const AlertPairPreferences = () => {
       setHasChanges(false);
     }
   }, [data, allKeys]);
+
+  // ── Match Filters handlers (must be after allKeys) ─────────────
+  const handleMatchFiltersClick = () => {
+    setShowMatchConfirm(true);
+  };
+
+  const handleMatchFiltersConfirm = () => {
+    if (!savedExclusionFilters || !filterOptions?.data?.alertPreferenceConfigs) return;
+
+    const { prefs } = buildMatchedPreferences(
+      savedExclusionFilters,
+      filterOptions.data.alertPreferenceConfigs,
+      filterOptions.data.sessions || [],
+      filterPageStrategyOptions,
+      allSymbolOptions
+    );
+
+    // Apply to local selected state (user still needs to click Save)
+    const newSelected = new Set();
+    allKeys.forEach((key) => {
+      if (prefs[key] !== false) {
+        newSelected.add(key);
+      }
+    });
+    setSelected(newSelected);
+
+    // Apply session exclusions
+    if (prefs.strategySessionExclusions) {
+      setStrategySessionExclusions(prefs.strategySessionExclusions);
+    } else {
+      setStrategySessionExclusions({});
+    }
+
+    setHasChanges(true);
+    setShowMatchConfirm(false);
+    toast.success("Filter selections applied! Click 'Save Preferences' to persist.");
+  };
 
   // ── Toggle handlers ───────────────────────────────────────────
   const handleToggle = useCallback((key) => {
@@ -934,11 +1018,16 @@ const AlertPairPreferences = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => navigate("/trading-signals")}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+                onClick={handleMatchFiltersClick}
+                disabled={!savedExclusionFilters}
+                title="Apply your IQ Strategies Alerts filter selections to these preferences"
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap ${!savedExclusionFilters
+                  ? "text-slate-400 dark:text-slate-600 bg-slate-100 dark:bg-[#131324] border border-slate-200 dark:border-[#202038] cursor-not-allowed opacity-60"
+                  : "text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 cursor-pointer"
+                  }`}
               >
-                <ExternalLink className="w-4 h-4" />
-                Back to Alerts
+                <SlidersHorizontal className="w-4 h-4" />
+                Match Filters Settings
               </button>
               {/* Select All */}
               <div
@@ -1069,6 +1158,14 @@ const AlertPairPreferences = () => {
           </div>
         </div>
       </div>
+
+      {/* Match Filters Confirm Modal */}
+      <MatchFiltersConfirmModal
+        isOpen={showMatchConfirm}
+        onClose={() => setShowMatchConfirm(false)}
+        onConfirm={handleMatchFiltersConfirm}
+        summary={matchFiltersSummary}
+      />
     </div>
   );
 };
