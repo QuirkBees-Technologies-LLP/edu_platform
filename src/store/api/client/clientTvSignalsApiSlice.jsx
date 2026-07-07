@@ -4,7 +4,7 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientTvSignalsApiSlice = createApi({
   reducerPath: "clientTvSignals",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvFilterPrefs"],
+  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvAlertPrefConfigs", "TvFilterPrefs"],
   endpoints: (builder) => ({
     getClientTvSignals: builder.query({
       query: ({
@@ -77,6 +77,11 @@ export const clientTvSignalsApiSlice = createApi({
       providesTags: [{ type: "TvFilters" }],
     }),
 
+    getAlertPreferenceConfigs: builder.query({
+      query: () => `/users/tv-signals/alert-preference-configs`,
+      providesTags: [{ type: "TvAlertPrefConfigs" }],
+    }),
+
     getFilterPreferences: builder.query({
       query: () => `/users/tv-signals/filter-preferences`,
       providesTags: [{ type: "TvFilterPrefs" }],
@@ -98,6 +103,7 @@ export const {
   useGetClientTvSignalsQuery,
   useGetClientTvSignalDetailQuery,
   useGetFilterOptionsQuery,
+  useGetAlertPreferenceConfigsQuery,
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
 } = clientTvSignalsApiSlice;
