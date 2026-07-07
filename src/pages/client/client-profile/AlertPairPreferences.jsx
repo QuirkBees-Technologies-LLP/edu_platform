@@ -14,7 +14,6 @@ import {
 import { buildMatchedPreferences } from "../../student/trading-signals/matchFiltersToPreferences";
 import MatchFiltersConfirmModal from "../../student/trading-signals/MatchFiltersConfirmModal";
 import instrumentCategories from "../../student/trading-signals/instrumentData";
-import { useNavigate } from "react-router";
 
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -701,7 +700,6 @@ const StrategySection = ({
 
 // ── Main Component ──────────────────────────────────────────────────
 const AlertPairPreferences = () => {
-  const navigate = useNavigate();
   const { data: rawData, isLoading, refetch } = useGetAlertPairPreferencesQuery();
   const { data: rawFilterOptions, isLoading: isLoadingFilters } = useGetAlertPreferenceConfigsQuery();
 
@@ -737,8 +735,31 @@ const AlertPairPreferences = () => {
     return strategies.map((s) => ({ value: s?.name || "", label: s?.name || "" }));
   }, [filterOptionsData]);
 
-  // Build the saved exclusion filters from the API
+  // Build the current exclusion filters — prefer localStorage (always up-to-date)
+  // over the API response (may be stale due to debounced saves on the Alerts page).
+  const FILTER_STORAGE_KEY = "tradingSignalFilters";
+
   const savedExclusionFilters = useMemo(() => {
+    // 1. Try localStorage first — it's written instantly on every filter change
+    try {
+      const stored = localStorage.getItem(FILTER_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === "object") {
+          return {
+            excludedStrategies: Array.isArray(parsed.excludedStrategies) ? parsed.excludedStrategies : [],
+            excludedSignalTypes: Array.isArray(parsed.excludedSignalTypes) ? parsed.excludedSignalTypes : [],
+            excludedSymbols: Array.isArray(parsed.excludedSymbols) ? parsed.excludedSymbols : [],
+            excludedTimeframes: Array.isArray(parsed.excludedTimeframes) ? parsed.excludedTimeframes : [],
+            excludedSessions: Array.isArray(parsed.excludedSessions) ? parsed.excludedSessions : [],
+          };
+        }
+      }
+    } catch {
+      // localStorage parse failed — fall through to API data
+    }
+
+    // 2. Fallback to API data
     const prefs = savedFilterPrefs?.data;
     if (!prefs) return null;
     return {
@@ -795,36 +816,57 @@ const AlertPairPreferences = () => {
     setShowMatchConfirm(true);
   };
 
-  const handleMatchFiltersConfirm = () => {
+  const [isMatchingSaving, setIsMatchingSaving] = useState(false);
+
+  const handleMatchFiltersConfirm = async () => {
     if (!savedExclusionFilters || !filterOptions?.data?.alertPreferenceConfigs) return;
 
-    const { prefs } = buildMatchedPreferences(
-      savedExclusionFilters,
-      filterOptions.data.alertPreferenceConfigs,
-      filterOptions.data.sessions || [],
-      filterPageStrategyOptions,
-      allSymbolOptions
-    );
+    setIsMatchingSaving(true);
+    try {
+      const { prefs } = buildMatchedPreferences(
+        savedExclusionFilters,
+        filterOptions.data.alertPreferenceConfigs,
+        filterOptions.data.sessions || [],
+        filterPageStrategyOptions,
+        allSymbolOptions
+      );
 
-    // Apply to local selected state (user still needs to click Save)
-    const newSelected = new Set();
-    allKeys.forEach((key) => {
-      if (prefs[key] !== false) {
-        newSelected.add(key);
+      // Build the API payload from the matched prefs
+      const newSelected = new Set();
+      allKeys.forEach((key) => {
+        if (prefs[key] !== false) {
+          newSelected.add(key);
+        }
+      });
+
+      const apiPrefs = selectedToPrefs(newSelected, allKeys);
+
+      // Merge session exclusions if any
+      const sessionExclusions = prefs.strategySessionExclusions || {};
+      const hasSessionExclusions = Object.values(sessionExclusions).some(
+        (arr) => Array.isArray(arr) && arr.length > 0
+      );
+      if (hasSessionExclusions) {
+        apiPrefs.strategySessionExclusions = sessionExclusions;
       }
-    });
-    setSelected(newSelected);
 
-    // Apply session exclusions
-    if (prefs.strategySessionExclusions) {
-      setStrategySessionExclusions(prefs.strategySessionExclusions);
-    } else {
-      setStrategySessionExclusions({});
+      // Save directly to the API
+      await updatePreferences(apiPrefs).unwrap();
+
+      // Refresh data from server so UI reflects saved state
+      await refetch();
+
+      // Update local state to match (no unsaved changes)
+      setSelected(newSelected);
+      setStrategySessionExclusions(sessionExclusions);
+      setHasChanges(false);
+      setShowMatchConfirm(false);
+      toast.success("Alert preferences updated successfully.");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update alert preferences. Please try again.");
+    } finally {
+      setIsMatchingSaving(false);
     }
-
-    setHasChanges(true);
-    setShowMatchConfirm(false);
-    toast.success("Filter selections applied! Click 'Save Preferences' to persist.");
   };
 
   // ── Toggle handlers ───────────────────────────────────────────
@@ -1162,8 +1204,9 @@ const AlertPairPreferences = () => {
       {/* Match Filters Confirm Modal */}
       <MatchFiltersConfirmModal
         isOpen={showMatchConfirm}
-        onClose={() => setShowMatchConfirm(false)}
+        onClose={() => { if (!isMatchingSaving) setShowMatchConfirm(false); }}
         onConfirm={handleMatchFiltersConfirm}
+        isLoading={isMatchingSaving}
         summary={matchFiltersSummary}
       />
     </div>

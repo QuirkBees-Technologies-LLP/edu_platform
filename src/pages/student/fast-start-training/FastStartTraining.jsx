@@ -232,7 +232,11 @@ export default function FastStartTraining() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Video Carousel */}
               <div className="col-span-full">
-                <StrategyVideoCarousel videos={FAST_START_VIDEOS} />
+                <StrategyVideoCarousel
+                  videos={FAST_START_VIDEOS}
+                  title="Welcome!"
+                  description="Watch this mini series to start your IQONIC journey!"
+                />
               </div>
 
               {/* Sidebar - Course + Lectures */}

@@ -46,6 +46,7 @@ const CreatePackageModel = forwardRef(
       { label: "/trading-strategies", value: "/trading-strategies" },
       { label: "/master-class", value: "/master-class" },
       { label: "/master-class/:id", value: "/master-class/:id" },
+      { label: "/IQ-Strategies-Alerts", value: "/trading-signals" },
       {
         label: "https://www.iqcharts.com/",
         value: "https://www.iqcharts.com/",
