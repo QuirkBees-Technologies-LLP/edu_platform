@@ -6,10 +6,10 @@ import {
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
 } from "../../../store/api/client/clientTvSignalsApiSlice";
+
 import {
   Search,
   Filter,
-  Loader2,
   ChartLine,
   X,
   BellRing,
@@ -21,6 +21,7 @@ import {
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
+import { toast } from "sonner";
 
 
 import signalConfig from "./signalConfig";
@@ -29,6 +30,7 @@ import SignalDetailModal from "./SignalDetailModal";
 import FilterSelect from "./FilterSelect";
 import InstrumentFilterDropdown from "./InstrumentFilterDropdown";
 import instrumentCategories from "./instrumentData";
+
 
 // ── localStorage persistence ─────────────────────────────────────────
 const STORAGE_KEY = "tradingSignalFilters";
@@ -83,6 +85,31 @@ const TIMEFRAME_OPTIONS = [
   { value: "1M", label: "1M" },
 ];
 
+const DB_NAME_TO_RESTRICTION_KEY = {
+  "defy": "defy",
+  "bullseye": "bullseye",
+  "killshot": "killshot",
+  "react": "react",
+  "smart shot": "smartShot",
+  "supernova": "supernova",
+};
+
+const KILLSHOT_CONFIG = {
+  symbols: ["US30", "XAU/USD", "EUR/USD", "BTC/USD"],
+  timeframes: [
+    { value: "1m", label: "1m" },
+    { value: "3m", label: "3m" },
+    { value: "5m", label: "5m" },
+  ],
+};
+
+const KILLSHOT_RESTRICTION = {
+  restrictsSymbols: true,
+  allowedSymbols: KILLSHOT_CONFIG.symbols,
+  restrictsTimeframes: true,
+  allowedTimeframes: KILLSHOT_CONFIG.timeframes,
+};
+
 const areArraysEqual = (a1, a2) => {
   const arr1 = a1 || [];
   const arr2 = a2 || [];
@@ -117,6 +144,7 @@ const StudentTradingSignals = () => {
   // ── Load saved preferences from API (fallback when localStorage is empty) ──
   const { data: savedPrefs } = useGetFilterPreferencesQuery();
   const [savePrefs] = useSaveFilterPreferencesMutation();
+
 
   useEffect(() => {
     if (!filtersInitialized && savedPrefs?.data) {
@@ -325,10 +353,13 @@ const StudentTradingSignals = () => {
   const rawTradingSessionOptions = options.sessions || [];
 
   // ── Strategy options (from API) ─────────────────────────────────
-  const rawStrategyOptions = (options.strategies || []).map((s) => ({
-    value: s?.name || "",
-    label: s?.name || "",
-  }));
+  const rawStrategyOptions = useMemo(() =>
+    (options.strategies || []).map((s) => ({
+      value: s?.name || "",
+      label: s?.name || "",
+    })),
+    [options.strategies]
+  );
 
   // -- Strategy-scoped filter restriction ---------------------------------------------------------
   // Uses API strategyRestrictions for any single active strategy restriction.
@@ -341,14 +372,7 @@ const StudentTradingSignals = () => {
       .map((s) => s.value);
   }, [rawStrategyOptions, exclusionFilters.excludedStrategies]);
 
-  const DB_NAME_TO_RESTRICTION_KEY = {
-    "defy": "defy",
-    "bullseye": "bullseye",
-    "killshot": "killshot",
-    "react": "react",
-    "smart shot": "smartShot",
-    "supernova": "supernova",
-  };
+
 
   const singleActiveStrategyKey = useMemo(() => {
     if (activeStrategyNames.length !== 1) return null;
@@ -356,9 +380,9 @@ const StudentTradingSignals = () => {
   }, [activeStrategyNames]);
 
   const activeStrategyRestriction = useMemo(() => {
-    if (!singleActiveStrategyKey) return null;
-    return options.strategyRestrictions?.[singleActiveStrategyKey] || null;
-  }, [singleActiveStrategyKey, options.strategyRestrictions]);
+    if (singleActiveStrategyKey === "killshot") return KILLSHOT_RESTRICTION;
+    return null;
+  }, [singleActiveStrategyKey]);
 
   const rawIsOnlyKillshot = singleActiveStrategyKey === "killshot";
 
@@ -500,6 +524,7 @@ const StudentTradingSignals = () => {
               <span className="hidden sm:inline">Manage Alert Notifications</span>
               <span className="sm:hidden">Alerts</span>
             </button>
+
 
             {/* Filter Toggle */}
             <button

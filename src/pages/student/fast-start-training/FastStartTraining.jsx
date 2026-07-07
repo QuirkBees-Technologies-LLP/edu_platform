@@ -12,6 +12,45 @@ import { Accordion, AccordionItem } from "@/components/accordion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTourStep } from "@/hooks/useTourStep";
 import ResourcesSection from "../../../components/ui/ResourcesSection";
+import StrategyVideoCarousel from "../../../components/ui/StrategyVideoCarousel";
+import { getEmbedUrl } from "@/utils/videoUtils";
+
+/**
+ * Placeholder video data for the Fast Start Training carousel.
+ * Replace with an API call when a backend endpoint is available.
+ */
+const FAST_START_VIDEOS = [
+  {
+    id: "fst-v1",
+    title: "01_Getting Started_V2",
+    videoUrl: "https://videos.dyntube.com/iframes/ek3BUWMF0WtQg9iTMtA0Q",
+    duration: "",
+  },
+  {
+    id: "fst-v2",
+    title: "02_Access your Account_V2",
+    videoUrl: "https://videos.dyntube.com/iframes/FrZ6pur22ky1g33c5sa2Iw",
+    duration: "",
+  },
+  {
+    id: "fst-v3",
+    title: "03_Access your Education",
+    videoUrl: "https://videos.dyntube.com/iframes/IfperYQPFEiPElvCcWYPaQ",
+    duration: "",
+  },
+  {
+    id: "fst-v4",
+    title: "04_Access your Trading Tools",
+    videoUrl: "https://videos.dyntube.com/iframes/sMCa6rpVjEe0Ix4Ge8BjA",
+    duration: "",
+  },
+  {
+    id: "fst-v5",
+    title: "05_Start using your Apps_V2",
+    videoUrl: "https://videos.dyntube.com/iframes/nPaKOr16k26Sn83rjY5w",
+    duration: "",
+  },
+];
 
 export default function FastStartTraining() {
   const [activeLectureId, setActiveLectureId] = useState(null);
@@ -162,56 +201,6 @@ export default function FastStartTraining() {
     }
   };
 
-  const getEmbedUrl = (url) => {
-    if (!url) return "";
-    if (url.includes("youtube.com/watch?v=")) {
-      const videoId = url.split("v=")[1].split("&")[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-
-    if (url.includes("youtu.be/")) {
-      const videoId = url.split("youtu.be/")[1].split("?")[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-
-    if (url.includes("vimeo.com/")) {
-      const parts = url.split("vimeo.com/")[1].split("/");
-      const videoId = parts[0].split("?")[0];
-      const hash = parts[1] ? parts[1].split("?")[0] : null;
-      return hash
-        ? `https://player.vimeo.com/video/${videoId}?h=${hash}`
-        : `https://player.vimeo.com/video/${videoId}`;
-    }
-
-    if (url.includes("dailymotion.com/video/")) {
-      const videoId = url.split("dailymotion.com/video/")[1].split("?")[0];
-      return `https://www.dailymotion.com/embed/video/${videoId}`;
-    }
-
-    if (url.includes("loom.com/share/")) {
-      const videoId = url.split("loom.com/share/")[1].split("?")[0];
-      return `https://www.loom.com/embed/${videoId}`;
-    }
-
-    if (url.includes("app.dyntube.com/#/video/")) {
-      const match = url.match(/video\/([^/]+)/);
-      if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
-    }
-
-    if (url.includes("videos.dyntube.com/iframes/")) {
-      const match = url.match(/iframes\/([^/?#]+)/);
-      if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
-    }
-
-    if (url.includes("player.dyntube.com/video/")) {
-      const match = url.match(/video\/([^/?#]+)/);
-      if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
-    }
-
-    if (url.includes("dyntube.com/")) return url;
-
-    return url;
-  };
 
   return (
     <>
@@ -241,37 +230,9 @@ export default function FastStartTraining() {
         ) : (
           <div className="container-fluid pb-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Header Banner */}
+              {/* Video Carousel */}
               <div className="col-span-full">
-                {data?.ActiveCategory && data.ActiveCategory.length > 0 ? (
-                  <div
-                    style={{
-                      backgroundImage: `url(/media/banners/Backoffice.jpg)`,
-                    }}
-                    className="text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full"
-                  >
-                    <div className="text-center">
-                      <h1 className="text-4xl font-bold tracking-wider pb-2">
-                        {data?.ActiveCategory[0]?.categoryName}
-                      </h1>
-
-                      <p className="text-lg sm:text-xl tracking-widest">
-                        TRAINING
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gray-100 dark:bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
-                    <div className="text-center">
-                      <h1 className="text-4xl font-bold tracking-wider pb-2 text-gray-600 dark:text-gray-300">
-                        {selectedLanguage}
-                      </h1>
-                      <p className="text-lg sm:text-xl tracking-widest text-gray-500 dark:text-gray-400">
-                        does not have any categories available
-                      </p>
-                    </div>
-                  </div>
-                )}
+                <StrategyVideoCarousel videos={FAST_START_VIDEOS} />
               </div>
 
               {/* Sidebar - Course + Lectures */}
