@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import {
@@ -29,15 +29,34 @@ import "./StrategyVideoCarousel.css";
  * @param {string}   [videos[].duration]     – e.g. "12:30" (optional)
  * @param {string}   [className]      – Extra class on the wrapper
  */
-const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
+const StrategyVideoCarousel = ({ videos: rawVideos, className = "" }) => {
+    // Ensure videos is always a safe array
+    const videos = Array.isArray(rawVideos) ? rawVideos : [];
+
     const swiperRef = useRef(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedVideo, setSelectedVideo] = useState(null);
 
+    // ---- Build padded slides for Swiper v11 loop mode ----
+    // Loop requires slides >= 2 × max(slidesPerView). Max is 2.2, so need ≥ 5.
+    const MIN_LOOP_SLIDES = 5;
+    const canLoop = videos.length >= 2;
+    const slides = useMemo(() => {
+        if (!canLoop || videos.length === 0) return videos.map((v, i) => ({ ...(v || {}), _origIndex: i }));
+        // Duplicate until we have enough slides for loop
+        let arr = videos.map((v, i) => ({ ...(v || {}), _origIndex: i }));
+        while (arr.length < MIN_LOOP_SLIDES) {
+            arr = arr.concat(videos.map((v, i) => ({ ...(v || {}), _origIndex: i })));
+        }
+        return arr;
+    }, [videos, canLoop]);
+
     // ---- Swiper event handlers ----
     const handleSlideChange = useCallback((swiper) => {
-        setActiveIndex(swiper.realIndex);
+        if (swiper && typeof swiper.realIndex === "number") {
+            setActiveIndex(swiper.realIndex);
+        }
     }, []);
 
     const handlePrev = useCallback(() => {
@@ -48,9 +67,11 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
         swiperRef.current?.slideNext();
     }, []);
 
-    const handleDotClick = useCallback((index) => {
-        swiperRef.current?.slideToLoop(index);
-    }, []);
+    const handleDotClick = useCallback((origIndex) => {
+        // Find first slide in the padded array that matches this original index
+        const slideIdx = slides.findIndex((s) => s._origIndex === origIndex);
+        if (slideIdx >= 0) swiperRef.current?.slideToLoop(slideIdx);
+    }, [slides]);
 
     // ---- Video modal ----
     const openVideo = useCallback((video) => {
@@ -64,7 +85,11 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
         setTimeout(() => setSelectedVideo(null), 300);
     }, []);
 
-    if (!videos || videos.length === 0) return null;
+    if (!videos || videos.length === 0 || slides.length === 0) return null;
+
+    // Map swiper realIndex back to original video index for dots
+    const safeActiveIndex = typeof activeIndex === "number" && activeIndex >= 0 ? activeIndex : 0;
+    const dotIndex = slides[safeActiveIndex]?._origIndex ?? (videos.length > 0 ? safeActiveIndex % videos.length : 0);
 
     return (
         <div className={`strategy-video-carousel ${className}`}>
@@ -73,10 +98,8 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
                 onSwiper={(swiper) => { swiperRef.current = swiper; }}
                 onSlideChange={handleSlideChange}
                 centeredSlides
-                slidesPerView="auto"
                 spaceBetween={10}
-                loop={videos.length > 2}
-                // loopAdditionalSlides={2}
+                loop={canLoop}
                 grabCursor
                 breakpoints={{
                     0: { slidesPerView: 1.1, spaceBetween: 6 },
@@ -85,14 +108,16 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
                     1024: { slidesPerView: 2.2, spaceBetween: 12 },
                 }}
             >
-                {videos.map((video) => (
-                    <SwiperSlide key={video.id}>
+                {slides.map((video, idx) => {
+                    if (!video) return null;
+                    return (
+                    <SwiperSlide key={`${video?.id || idx}-${idx}`}>
                         <div
                             className="svc-card"
                             onClick={() => openVideo(video)}
                             role="button"
                             tabIndex={0}
-                            aria-label={`Play video: ${video.title}`}
+                            aria-label={`Play video: ${video?.title || ""}`}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter" || e.key === " ") {
                                     e.preventDefault();
@@ -101,19 +126,19 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
                             }}
                         >
                             {/* Thumbnail — iframe preview for Dyntube, static image for others */}
-                            {video.videoUrl?.includes("dyntube.com") ? (
+                            {video?.videoUrl?.includes("dyntube.com") ? (
                                 <iframe
-                                    src={getEmbedUrl(video.videoUrl)}
+                                    src={getEmbedUrl(video?.videoUrl || "")}
                                     className="svc-thumb"
                                     loading="lazy"
                                     tabIndex={-1}
                                     style={{ pointerEvents: "none", border: "none" }}
-                                    title={video.title}
+                                    title={video?.title || ""}
                                 />
                             ) : (
                                 <img
-                                    src={video.thumbnailUrl || getVideoThumbnail(video.videoUrl) || ""}
-                                    alt={video.title}
+                                    src={video?.thumbnailUrl || getVideoThumbnail(video?.videoUrl || "") || ""}
+                                    alt={video?.title || ""}
                                     className="svc-thumb"
                                     loading="lazy"
                                     onError={(e) => {
@@ -132,14 +157,15 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
 
                             {/* Title + duration */}
                             <div className="svc-info">
-                                <p className="svc-title">{video.title}</p>
-                                {video.duration && (
-                                    <p className="svc-duration">{video.duration}</p>
+                                <p className="svc-title">{video?.title || ""}</p>
+                                {video?.duration && (
+                                    <p className="svc-duration">{video?.duration}</p>
                                 )}
                             </div>
                         </div>
                     </SwiperSlide>
-                ))}
+                    );
+                })}
             </Swiper>
 
             {/* ---- Controls: arrows + dots ---- */}
@@ -156,7 +182,7 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
                     {videos.map((_, index) => (
                         <button
                             key={index}
-                            className={`svc-dot ${index === activeIndex ? "active" : ""}`}
+                            className={`svc-dot ${index === dotIndex ? "active" : ""}`}
                             onClick={() => handleDotClick(index)}
                             aria-label={`Go to slide ${index + 1}`}
                         />
@@ -193,11 +219,11 @@ const StrategyVideoCarousel = ({ videos = [], className = "" }) => {
                         <div className="w-full flex-1 min-h-0">
                             <div className="aspect-video w-full h-full max-h-full">
                                 <iframe
-                                    src={getEmbedUrl(selectedVideo.videoUrl)}
+                                    src={getEmbedUrl(selectedVideo?.videoUrl || "")}
                                     className="w-full h-full"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
-                                    title={selectedVideo.title || "Video Player"}
+                                    title={selectedVideo?.title || "Video Player"}
                                     style={{ border: "none" }}
                                 />
                             </div>
