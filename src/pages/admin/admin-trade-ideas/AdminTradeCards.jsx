@@ -35,7 +35,7 @@ const statusColorMap = {
 const TradeUserView = [
   {
     _id: "687e23fae13aa9e329fad8ec",
-    name: "BTC/USD",
+    name: "BTCUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],
@@ -53,7 +53,7 @@ const TradeUserView = [
   },
   {
     _id: "d7f3e8c5d928d5a42d98d9a2",
-    name: "ETH/USD",
+    name: "ETHUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],
@@ -71,7 +71,7 @@ const TradeUserView = [
   },
   {
     _id: "23e234ae23b8df9485f7f9a7",
-    name: "XRP/USD",
+    name: "XRPUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],
@@ -89,7 +89,7 @@ const TradeUserView = [
   },
   {
     _id: "a4f3c0db7a2f6b7d98a6a5bb",
-    name: "SOL/USD",
+    name: "SOLUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],

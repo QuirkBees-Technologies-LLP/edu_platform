@@ -42,8 +42,10 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
 
     // ---- Build padded slides for Swiper v11 loop mode ----
     // Loop requires slides >= 2 × max(slidesPerView). Max is 2.2, so need ≥ 5.
+    // Only enable loop for 3+ videos. For 1-2 videos, no loop, no duplication.
     const MIN_LOOP_SLIDES = 5;
-    const canLoop = videos.length >= 2;
+    const canLoop = videos.length >= 3;
+    const showNav = videos.length > 1;
     const slides = useMemo(() => {
         if (!canLoop || videos.length === 0) return videos.map((v, i) => ({ ...(v || {}), _origIndex: i }));
         // Duplicate until we have enough slides for loop
@@ -70,10 +72,14 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
     }, []);
 
     const handleDotClick = useCallback((origIndex) => {
-        // Find first slide in the padded array that matches this original index
-        const slideIdx = slides.findIndex((s) => s._origIndex === origIndex);
-        if (slideIdx >= 0) swiperRef.current?.slideToLoop(slideIdx);
-    }, [slides]);
+        if (canLoop) {
+            // Find first slide in the padded array that matches this original index
+            const slideIdx = slides.findIndex((s) => s._origIndex === origIndex);
+            if (slideIdx >= 0) swiperRef.current?.slideToLoop(slideIdx);
+        } else {
+            swiperRef.current?.slideTo(origIndex);
+        }
+    }, [slides, canLoop]);
 
     // ---- Video modal ----
     const openVideo = useCallback((video) => {
@@ -112,8 +118,13 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
                     centeredSlides
                     spaceBetween={10}
                     loop={canLoop}
-                    grabCursor
-                    breakpoints={{
+                    grabCursor={showNav}
+                    breakpoints={videos.length <= 2 ? {
+                        0: { slidesPerView: 1.1, spaceBetween: 6 },
+                        640: { slidesPerView: 1.3, spaceBetween: 8 },
+                        768: { slidesPerView: 1.6, spaceBetween: 10 },
+                        1024: { slidesPerView: 2, spaceBetween: 12 },
+                    } : {
                         0: { slidesPerView: 1.1, spaceBetween: 6 },
                         640: { slidesPerView: 1.3, spaceBetween: 8 },
                         768: { slidesPerView: 1.8, spaceBetween: 10 },
@@ -176,21 +187,30 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
                                         )}
                                     </div>
 
-                                    {/* Left/Right arrows — shown only on active card via CSS */}
-                                    <button
-                                        className="svc-side-btn svc-side-btn--prev"
-                                        onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                                        aria-label="Previous slide"
-                                    >
-                                        <ChevronLeft size={20} />
-                                    </button>
-                                    <button
-                                        className="svc-side-btn svc-side-btn--next"
-                                        onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                                        aria-label="Next slide"
-                                    >
-                                        <ChevronRight size={20} />
-                                    </button>
+                                    {/* Left/Right arrows — shown only on active card via CSS, hidden for single video */}
+                                    {showNav && (
+                                        <>
+                                            {/* For non-loop (2 videos): hide prev on first, hide next on last */}
+                                            {(canLoop || video._origIndex > 0) && (
+                                                <button
+                                                    className="svc-side-btn svc-side-btn--prev"
+                                                    onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                                                    aria-label="Previous slide"
+                                                >
+                                                    <ChevronLeft size={22} />
+                                                </button>
+                                            )}
+                                            {(canLoop || video._origIndex < videos.length - 1) && (
+                                                <button
+                                                    className="svc-side-btn svc-side-btn--next"
+                                                    onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                                                    aria-label="Next slide"
+                                                >
+                                                    <ChevronRight size={22} />
+                                                </button>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                             </SwiperSlide>
                         );
@@ -198,35 +218,37 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
                 </Swiper>
             </div>
 
-            {/* ---- Bottom controls: arrows + dots ---- */}
-            <div className="svc-controls">
-                <button
-                    className="svc-nav-btn"
-                    onClick={handlePrev}
-                    aria-label="Previous slide"
-                >
-                    <ChevronLeft size={18} />
-                </button>
+            {/* ---- Bottom controls: arrows + dots (hidden for single video) ---- */}
+            {showNav && (
+                <div className="svc-controls">
+                    <button
+                        className="svc-nav-btn"
+                        onClick={handlePrev}
+                        aria-label="Previous slide"
+                    >
+                        <ChevronLeft size={16} />
+                    </button>
 
-                <div className="svc-dots">
-                    {videos.map((_, index) => (
-                        <button
-                            key={index}
-                            className={`svc-dot ${index === dotIndex ? "active" : ""}`}
-                            onClick={() => handleDotClick(index)}
-                            aria-label={`Go to slide ${index + 1}`}
-                        />
-                    ))}
+                    <div className="svc-dots">
+                        {videos.map((_, index) => (
+                            <button
+                                key={index}
+                                className={`svc-dot ${index === dotIndex ? "active" : ""}`}
+                                onClick={() => handleDotClick(index)}
+                                aria-label={`Go to slide ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+
+                    <button
+                        className="svc-nav-btn"
+                        onClick={handleNext}
+                        aria-label="Next slide"
+                    >
+                        <ChevronRight size={16} />
+                    </button>
                 </div>
-
-                <button
-                    className="svc-nav-btn"
-                    onClick={handleNext}
-                    aria-label="Next slide"
-                >
-                    <ChevronRight size={18} />
-                </button>
-            </div>
+            )}
 
             {/* ---- Video playback modal ---- */}
             <Dialog open={modalOpen} onOpenChange={closeVideo}>

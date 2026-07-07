@@ -83,18 +83,18 @@ const STRATEGY_VIDEOS = [
         videoUrl: "https://videos.dyntube.com/iframes/ieeCtsTzUS3irQuPUSg",
         duration: "",
     },
-    {
-        id: "v3",
-        title: "IQ_KILLSHOT_V4",
-        videoUrl: "https://videos.dyntube.com/iframes/zQGhQgxx2Eism1fWLbO8A",
-        duration: "",
-    },
-    {
-        id: "v4",
-        title: "IQ_BULLSEYE_V4",
-        videoUrl: "https://videos.dyntube.com/iframes/mR5aNLY6dECk6lkVFeRmeg",
-        duration: "",
-    },
+    // {
+    //     id: "v3",
+    //     title: "IQ_KILLSHOT_V4",
+    //     videoUrl: "https://videos.dyntube.com/iframes/zQGhQgxx2Eism1fWLbO8A",
+    //     duration: "",
+    // },
+    // {
+    //     id: "v4",
+    //     title: "IQ_BULLSEYE_V4",
+    //     videoUrl: "https://videos.dyntube.com/iframes/mR5aNLY6dECk6lkVFeRmeg",
+    //     duration: "",
+    // },
 ];
 
 const TradingStrategies = () => {

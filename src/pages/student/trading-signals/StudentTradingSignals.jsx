@@ -68,40 +68,27 @@ const saveFilters = (filters) => {
   }
 };
 
-// ── Hardcoded time frame options ─────────────────────────────────────
-const TIMEFRAME_OPTIONS = [
-  { value: "1m", label: "1m" },
-  { value: "3m", label: "3m" },
-  { value: "5m", label: "5m" },
-  { value: "15m", label: "15m" },
-  { value: "30m", label: "30m" },
-  { value: "45m", label: "45m" },
-  { value: "1H", label: "1H" },
-  { value: "2H", label: "2H" },
-  { value: "3H", label: "3H" },
-  { value: "4H", label: "4H" },
-  { value: "1D", label: "1D" },
-  { value: "1W", label: "1W" },
-  { value: "1M", label: "1M" },
-];
+// ── Strategy metadata from centralized config ───────────────────────
+import {
+  ALL_FILTER_TIMEFRAME_OPTIONS,
+  DB_NAME_TO_STRATEGY_KEY,
+  STRATEGIES_MAP,
+} from "@/config/strategyConfig";
 
-const DB_NAME_TO_RESTRICTION_KEY = {
-  "defy": "defy",
-  "bullseye": "bullseye",
-  "killshot": "killshot",
-  "react": "react",
-  "smart shot": "smartShot",
-  "supernova": "supernova",
-};
+// Derived from centralized config — used by strategy restriction logic
+const TIMEFRAME_OPTIONS = ALL_FILTER_TIMEFRAME_OPTIONS;
+const DB_NAME_TO_RESTRICTION_KEY = DB_NAME_TO_STRATEGY_KEY;
 
-const KILLSHOT_CONFIG = {
-  symbols: ["US30", "XAU/USD", "EUR/USD", "BTC/USD"],
-  timeframes: [
-    { value: "1m", label: "1m" },
-    { value: "3m", label: "3m" },
-    { value: "5m", label: "5m" },
-  ],
-};
+const KILLSHOT_CONFIG = STRATEGIES_MAP.killshot
+  ? {
+      symbols: STRATEGIES_MAP.killshot.pairs,
+      timeframes: STRATEGIES_MAP.killshot.timeframes.map((tf) => {
+        const m = tf.match(/^M(\d+)$/); if (m) return { value: `${m[1]}m`, label: `${m[1]}m` };
+        const h = tf.match(/^H(\d+)$/); if (h) return { value: `${h[1]}H`, label: `${h[1]}H` };
+        return { value: tf, label: tf };
+      }),
+    }
+  : { symbols: [], timeframes: [] };
 
 const KILLSHOT_RESTRICTION = {
   restrictsSymbols: true,

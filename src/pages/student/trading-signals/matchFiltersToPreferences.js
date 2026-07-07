@@ -3,29 +3,18 @@
 // from the IQ Strategies Alerts page into the alertPairPreferences
 // payload expected by PUT /users/auth/alert-pair-preferences.
 //
-// This file is intentionally self-contained — it duplicates buildKey and
-// isInvalidStrategyCombo from AlertPairPreferences.jsx to avoid creating
-// a cross-page import dependency. Keep both copies in sync.
+// Output format: Hierarchical nested structure
+//   { strategy: { pair: { timeframe: true/false } } }
+//
+// Strategy validation uses the centralized config (isValidPairTimeframe)
+// from src/config/strategyConfig.js — the single source of truth.
 
-// ── Helpers (duplicated from AlertPairPreferences.jsx — keep in sync) ──
+import { isValidPairTimeframe, ALL_FILTER_TIMEFRAME_OPTIONS } from "@/config/strategyConfig";
 
-const buildKey = (strategy, pair, tf) => `${strategy}__${pair}__${tf}`;
+// ── Helpers ──────────────────────────────────────────────────────────
 
-const isInvalidStrategyCombo = (strategyKey, pair, tf) => {
-  const p = String(pair).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-  if (strategyKey === "supernova") {
-    if (p === "XAUUSD" && tf !== "M15") return true;
-    if (p === "GBPNZD" && tf !== "H4") return true;
-    if (p === "US30" && tf !== "M15") return true;
-  }
-  if (strategyKey === "killshot") {
-    if (p === "US30" && tf !== "M1") return true;
-    if (p === "XAUUSD" && tf !== "M3") return true;
-    if (p === "EURUSD" && tf !== "M5") return true;
-    if (p === "BTCUSD" && tf !== "M5") return true;
-  }
-  return false;
-};
+// isInvalidStrategyCombo uses centralized config — no longer duplicated
+const isInvalidStrategyCombo = (strategyKey, pair, tf) => !isValidPairTimeframe(strategyKey, pair, tf);
 
 // ── Normalization ───────────────────────────────────────────────────
 
@@ -54,7 +43,7 @@ const mapFilterTfToConfigTf = (filterTf) => {
  * Check if a config pair is included in the user's active symbol filters.
  * Compares normalized forms to handle slash-vs-no-slash differences.
  *
- * @param {string} configPair - Pair from alertPreferenceConfigs (e.g. "EUR/USD", "US30", "Majors")
+ * @param {string} configPair - Pair from alertPreferenceConfigs (e.g. "EURUSD", "US30", "Majors")
  * @param {Set<string>} normalizedIncludedSymbols - Set of normalized included symbols
  * @param {Array} allSymbolOptions - Flat list of all available symbol objects [{symbol}]
  * @param {Set<string>} normalizedExcludedSymbols - Set of normalized excluded symbols
@@ -87,6 +76,8 @@ const isPairIncluded = (configPair, normalizedIncludedSymbols, allSymbolOptions,
 
 /**
  * Build the alertPairPreferences payload from the current filter state.
+ * Returns a hierarchical nested structure:
+ *   { strategy: { pair: { timeframe: true/false } } }
  *
  * @param {Object}  exclusionFilters       - { excludedStrategies, excludedSignalTypes, excludedSymbols, excludedTimeframes, excludedSessions }
  * @param {Array}   alertPreferenceConfigs - From GET /users/tv-signals/alert-preference-configs → data.alertPreferenceConfigs
@@ -94,7 +85,7 @@ const isPairIncluded = (configPair, normalizedIncludedSymbols, allSymbolOptions,
  * @param {Array}   strategyOptions        - [{ value: "Killshot", label: "Killshot" }, ...]
  * @param {Array}   allSymbolOptions       - Flat list of all symbol options from instrument categories [{symbol}, ...]
  * @returns {{ prefs: Object, summary: Object }}
- *   - prefs: The complete alertPairPreferences object to save
+ *   - prefs: The complete alertPairPreferences object to save (nested format)
  *   - summary: A human-readable summary for the confirmation dialog
  */
 export function buildMatchedPreferences(
@@ -137,7 +128,7 @@ export function buildMatchedPreferences(
   const excludedSessionSet = new Set(excludedSessions);
   const includedSessions = sessions.filter((s) => !excludedSessionSet.has(s.value));
 
-  // ── Step 2: Build the preferences object ──────────────────────────
+  // ── Step 2: Build the nested preferences object ───────────────────
   const prefs = {};
   const strategySessionExclusions = {};
   let selectedCount = 0;
@@ -160,11 +151,13 @@ export function buildMatchedPreferences(
       for (const tf of timeframes) {
         if (isInvalidStrategyCombo(strategyKey, pair, tf)) continue;
 
-        const key = buildKey(strategyKey, pair, tf);
         totalCount++;
 
         if (!strategyIncluded) {
-          prefs[key] = false;
+          // Strategy excluded → mark all its combos as false
+          if (!prefs[strategyKey]) prefs[strategyKey] = {};
+          if (!prefs[strategyKey][pair]) prefs[strategyKey][pair] = {};
+          prefs[strategyKey][pair][tf] = false;
           continue;
         }
 
@@ -174,7 +167,9 @@ export function buildMatchedPreferences(
         const tfIncluded = !excludedTfSet.has(tf);
 
         const isSelected = pairIncluded && tfIncluded;
-        prefs[key] = isSelected;
+        if (!prefs[strategyKey]) prefs[strategyKey] = {};
+        if (!prefs[strategyKey][pair]) prefs[strategyKey][pair] = {};
+        prefs[strategyKey][pair][tf] = isSelected;
         if (isSelected) selectedCount++;
       }
     }
@@ -194,13 +189,13 @@ export function buildMatchedPreferences(
     }
   }
 
-  // Add session exclusions to prefs if any exist
-  const hasSessionExclusions = Object.values(strategySessionExclusions).some(
-    (arr) => Array.isArray(arr) && arr.length > 0
-  );
-  if (hasSessionExclusions) {
-    prefs.strategySessionExclusions = strategySessionExclusions;
-  }
+  // Add session exclusions into each strategy's nested object
+  Object.entries(strategySessionExclusions).forEach(([stratKey, sessions]) => {
+    if (Array.isArray(sessions) && sessions.length > 0) {
+      if (!prefs[stratKey]) prefs[stratKey] = {};
+      prefs[stratKey].excludedSessions = sessions;
+    }
+  });
 
   // ── Step 3: Build human-readable summary ──────────────────────────
   const summary = {
@@ -215,8 +210,8 @@ export function buildMatchedPreferences(
       ? ["All Time Frames"]
       : excludedTimeframes.length > 0
         ? (() => {
-            // Show included timeframes
-            const allTfs = ["1m", "3m", "5m", "15m", "30m", "45m", "1H", "2H", "3H", "4H", "1D", "1W", "1M"];
+            // Show included timeframes (derived from centralized config)
+            const allTfs = ALL_FILTER_TIMEFRAME_OPTIONS.map((t) => t.value);
             return allTfs.filter((tf) => !excludedTimeframes.includes(tf));
           })()
         : [],

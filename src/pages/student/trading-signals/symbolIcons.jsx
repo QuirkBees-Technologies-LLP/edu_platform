@@ -381,15 +381,17 @@ const GasIcon = ({ size = 20 }) => (
 );
 
 // Map commodity symbols to their icon components
+// Keys include both canonical (XAUUSD) and slash (XAU/USD) format
+// because signals from the DB may arrive in either format.
 const commodityIconMap = {
+  "XAUUSD":  GoldBarsIcon,
   "XAU/USD": GoldBarsIcon,
-  "XAUUSD": GoldBarsIcon,
+  "XAGUSD":  SilverBarsIcon,
   "XAG/USD": SilverBarsIcon,
-  "XAGUSD": SilverBarsIcon,
+  "XPTUSD":  PlatinumBarsIcon,
   "XPT/USD": PlatinumBarsIcon,
-  "XPTUSD": PlatinumBarsIcon,
+  "XPDUSD":  PlatinumBarsIcon,
   "XPD/USD": PlatinumBarsIcon,
-  "XPDUSD": PlatinumBarsIcon,
 };
 
 const commodityOilGas = {

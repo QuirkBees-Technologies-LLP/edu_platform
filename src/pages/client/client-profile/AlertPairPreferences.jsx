@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, Bell, BellOff, Save, Clock, DollarSign, Bitcoin, BarChart3, Gem, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, ChevronRight, Bell, BellOff, Save, Clock, DollarSign, SlidersHorizontal } from "lucide-react";
+import { isValidPairTimeframe, getAssetClassCategories, HIERARCHICAL_STRATEGIES } from "@/config/strategyConfig";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
   useGetAlertPairPreferencesQuery,
@@ -17,117 +18,116 @@ import instrumentCategories from "../../student/trading-signals/instrumentData";
 
 
 // ── Helpers ─────────────────────────────────────────────────────────
-const buildKey = (strategy, pair, tf) => `${strategy}__${pair}__${tf}`;
+// Internal path format for Set-based tracking: "strategy.pair.tf"
+const buildPath = (strategy, pair, tf) => `${strategy}.${pair}.${tf}`;
 
-const isInvalidStrategyCombo = (strategyKey, pair, tf) => {
-  const p = String(pair).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-  if (strategyKey === "supernova") {
-    if (p === "XAUUSD" && tf !== "M15") return true;
-    if (p === "GBPNZD" && tf !== "H4") return true;
-    if (p === "US30" && tf !== "M15") return true;
-  }
-  if (strategyKey === "killshot") {
-    if (p === "US30" && tf !== "M1") return true;
-    if (p === "XAUUSD" && tf !== "M3") return true;
-    if (p === "EURUSD" && tf !== "M5") return true;
-    if (p === "BTCUSD" && tf !== "M5") return true;
-  }
-  return false;
-};
+// isInvalidStrategyCombo replaced by isValidPairTimeframe from strategyConfig (inverted logic)
+const isInvalidStrategyCombo = (strategyKey, pair, tf) => !isValidPairTimeframe(strategyKey, pair, tf);
 
-function buildAllKeys(strategies) {
-  const keys = new Set();
+/** Build a Set of all valid strategy.pair.tf paths from strategy configs. */
+function buildAllPaths(strategies) {
+  const paths = new Set();
   (strategies || []).forEach((s) => {
     (s?.pairs || []).forEach((pair) => {
       (s?.timeframes || []).forEach((tf) => {
         if (!isInvalidStrategyCombo(s.key, pair, tf)) {
-          keys.add(buildKey(s.key, pair, tf));
+          paths.add(buildPath(s.key, pair, tf));
         }
       });
     });
   });
-  return keys;
+  return paths;
 }
 
-function initSelectedFromSaved(savedPrefs, allKeys) {
-  // Empty object or null = all selected (default)
+/** Non-pair keys that live at root level in the prefs object. */
+const NON_PAIR_KEYS = new Set([
+  "strategySessionExclusions",
+  "excludedDefyTypes",
+  "excludedReactTypes",
+]);
+
+/**
+ * Initialize the selected Set from saved nested preferences.
+ * Handles both new nested format and legacy flat format.
+ * Empty/null prefs = all selected (default behavior).
+ */
+function initSelectedFromSaved(savedPrefs, allPaths) {
   if (!savedPrefs || Object.keys(savedPrefs).length === 0) {
-    return new Set(allKeys);
+    return new Set(allPaths);
   }
-  // savedPrefs is { key: true/false }
+
+  // Detect legacy flat format (keys contain "__")
+  const isFlat = Object.keys(savedPrefs).some(
+    (k) => k.includes("__") && typeof savedPrefs[k] === "boolean"
+  );
+
   const selected = new Set();
-  allKeys.forEach((key) => {
-    if (savedPrefs[key] !== false) {
-      selected.add(key);
-    }
-  });
+
+  if (isFlat) {
+    // Legacy migration: "react__EURUSD__M1" → path "react.EURUSD.M1"
+    allPaths.forEach((path) => {
+      const [strat, pair, tf] = path.split(".");
+      const flatKey = `${strat}__${pair}__${tf}`;
+      if (savedPrefs[flatKey] !== false) {
+        selected.add(path);
+      }
+    });
+  } else {
+    // New nested format: savedPrefs[strategy][pair][tf]
+    allPaths.forEach((path) => {
+      const [strat, pair, tf] = path.split(".");
+      if (savedPrefs[strat]?.[pair]?.[tf] !== false) {
+        selected.add(path);
+      }
+    });
+  }
+
   return selected;
 }
 
-function initStrategySessionExclusions(savedPrefs) {
-  if (!savedPrefs || !savedPrefs.strategySessionExclusions || typeof savedPrefs.strategySessionExclusions !== 'object') {
-    return {};
-  }
-  return savedPrefs.strategySessionExclusions;
-}
+/**
+ * Convert the selected Set to the nested preferences object for saving.
+ * If all paths are selected → returns empty object (default = all enabled).
+ * Otherwise returns: { strategy: { pair: { tf: true/false } } }
+ */
+function selectedToPrefs(selected, allPaths) {
+  // All selected → save empty (default)
+  if (selected.size === allPaths.size) return {};
 
-function selectedToPrefs(selected, allKeys) {
-  // If all selected → save empty (default)
-  if (selected.size === allKeys.size) return {};
-  // Otherwise save only the deselected as false
   const prefs = {};
-  allKeys.forEach((key) => {
-    prefs[key] = selected.has(key);
+  allPaths.forEach((path) => {
+    const [strat, pair, tf] = path.split(".");
+    if (!prefs[strat]) prefs[strat] = {};
+    if (!prefs[strat][pair]) prefs[strat][pair] = {};
+    prefs[strat][pair][tf] = selected.has(path);
   });
   return prefs;
 }
 
-// ── Asset class category definitions for hierarchical grouping ──────
-// Used to group React/Defy pairs into Forex, Crypto, Indices, Commodities.
-const ASSET_CLASS_CATEGORIES = [
-  {
-    key: "forex",
-    label: "Forex",
-    icon: DollarSign,
-    color: "#3b82f6",
-    colorLight: "#3b82f615",
-    symbols: new Set([
-      "EUR/USD", "GBP/USD", "AUD/USD", "NZD/USD", "USD/JPY", "USD/CAD", "USD/CHF",
-      "EUR/GBP", "EUR/JPY", "EUR/CHF", "EUR/CAD", "EUR/AUD", "EUR/NZD",
-      "GBP/JPY", "GBP/CHF", "GBP/CAD", "GBP/AUD", "GBP/NZD",
-      "AUD/JPY", "AUD/CAD", "AUD/CHF", "AUD/NZD",
-      "NZD/JPY", "NZD/CAD", "NZD/CHF",
-      "CAD/JPY", "CAD/CHF", "CHF/JPY", "CHF/CAD",
-    ]),
-  },
-  {
-    key: "crypto",
-    label: "Crypto",
-    icon: Bitcoin,
-    color: "#f59e0b",
-    colorLight: "#f59e0b15",
-    symbols: new Set(["BTC/USD", "ETH/USD", "SOL/USD"]),
-  },
-  {
-    key: "indices",
-    label: "Indices",
-    icon: BarChart3,
-    color: "#8b5cf6",
-    colorLight: "#8b5cf615",
-    symbols: new Set([
-      "US30", "US500", "NAS100", "US2000", "GER40", "FRA40", "UK100",
-      "EU50", "SPA35", "SWI20", "JPN225", "HK50", "CHN50", "AUS200",
-    ]),
-  },
-  {
-    key: "commodities",
-    label: "Commodities",
-    icon: Gem,
-    color: "#10b981",
-    colorLight: "#10b98115",
-    symbols: new Set(["XAU/USD", "XAG/USD", "XPT/USD", "XPD/USD", "UKOIL", "USOIL", "NGAS"]),
-  },
-];
+function initStrategySessionExclusions(savedPrefs) {
+  if (!savedPrefs || typeof savedPrefs !== 'object') return {};
+
+  // New format: prefs[strategyKey].excludedSessions = [...]
+  const result = {};
+  Object.entries(savedPrefs).forEach(([key, value]) => {
+    if (NON_PAIR_KEYS.has(key)) return;
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (Array.isArray(value.excludedSessions) && value.excludedSessions.length > 0) {
+        result[key] = value.excludedSessions;
+      }
+    }
+  });
+  if (Object.keys(result).length > 0) return result;
+
+  // Legacy fallback: root-level strategySessionExclusions
+  if (savedPrefs.strategySessionExclusions && typeof savedPrefs.strategySessionExclusions === 'object') {
+    return savedPrefs.strategySessionExclusions;
+  }
+  return {};
+}
+
+// Asset class categories derived from centralized config (strategyConfig.js)
+const ASSET_CLASS_CATEGORIES = getAssetClassCategories();
 
 /**
  * Groups a flat array of pair strings into asset class categories.
@@ -169,7 +169,7 @@ function categorizeStrategyPairs(pairs) {
 }
 
 // Strategies that should use the hierarchical UI
-const HIERARCHICAL_STRATEGIES = new Set(["react", "defy"]);
+// HIERARCHICAL_STRATEGIES imported from @/config/strategyConfig
 
 // ── Checkbox with indeterminate support ─────────────────────────────
 const IndeterminateCheckbox = ({ checked, indeterminate, onChange, className = "", id }) => {
@@ -206,7 +206,7 @@ const HierarchicalStrategySection = ({
     const keys = [];
     (strategy?.pairs || []).forEach((pair) => {
       (strategy?.timeframes || []).forEach((tf) => {
-        keys.push(buildKey(strategy.key, pair, tf));
+        keys.push(buildPath(strategy.key, pair, tf));
       });
     });
     return keys;
@@ -349,7 +349,7 @@ const AssetClassTable = ({ category, strategy, selected, onToggle, onToggleRow, 
     const keys = [];
     category.pairs.forEach((pair) => {
       strategy.timeframes.forEach((tf) => {
-        keys.push(buildKey(strategy.key, pair, tf));
+        keys.push(buildPath(strategy.key, pair, tf));
       });
     });
     return keys;
@@ -412,7 +412,7 @@ const AssetClassTable = ({ category, strategy, selected, onToggle, onToggleRow, 
                 </th>
                 {strategy.timeframes.map((tf) => {
                   // Column keys scoped to THIS category's pairs only
-                  const colKeys = category.pairs.map((p) => buildKey(strategy.key, p, tf));
+                  const colKeys = category.pairs.map((p) => buildPath(strategy.key, p, tf));
                   const colSelectedCount = colKeys.filter((k) => selected.has(k)).length;
                   const colAllSelected = colKeys.length > 0 && colSelectedCount === colKeys.length;
                   const colSomeSelected = colSelectedCount > 0 && !colAllSelected;
@@ -435,7 +435,7 @@ const AssetClassTable = ({ category, strategy, selected, onToggle, onToggleRow, 
             </thead>
             <tbody>
               {category.pairs.map((pair, idx) => {
-                const rowKeys = strategy.timeframes.map((tf) => buildKey(strategy.key, pair, tf));
+                const rowKeys = strategy.timeframes.map((tf) => buildPath(strategy.key, pair, tf));
                 const rowSelectedCount = rowKeys.filter((k) => selected.has(k)).length;
                 const rowAllSelected = rowKeys.length > 0 && rowSelectedCount === rowKeys.length;
                 const rowSomeSelected = rowSelectedCount > 0 && !rowAllSelected;
@@ -463,7 +463,7 @@ const AssetClassTable = ({ category, strategy, selected, onToggle, onToggleRow, 
                       </div>
                     </td>
                     {strategy.timeframes.map((tf) => {
-                      const key = buildKey(strategy.key, pair, tf);
+                      const key = buildPath(strategy.key, pair, tf);
                       return (
                         <td key={tf} className="px-3 py-2.5 text-center">
                           <IndeterminateCheckbox
@@ -499,7 +499,7 @@ const StrategySection = ({
     (strategy?.pairs || []).forEach((pair) => {
       (strategy?.timeframes || []).forEach((tf) => {
         if (!isInvalidStrategyCombo(strategy.key, pair, tf)) {
-          keys.push(buildKey(strategy.key, pair, tf));
+          keys.push(buildPath(strategy.key, pair, tf));
         }
       });
     });
@@ -571,7 +571,7 @@ const StrategySection = ({
                 {strategy.timeframes.map((tf) => {
                   const colKeys = strategy.pairs
                     .filter((p) => !isInvalidStrategyCombo(strategy.key, p, tf))
-                    .map((p) => buildKey(strategy.key, p, tf));
+                    .map((p) => buildPath(strategy.key, p, tf));
                   const colSelectedCount = colKeys.filter((k) => selected.has(k)).length;
                   const colAllSelected = colKeys.length > 0 && colSelectedCount === colKeys.length;
                   const colSomeSelected = colSelectedCount > 0 && !colAllSelected;
@@ -596,7 +596,7 @@ const StrategySection = ({
               {strategy.pairs.map((pair, idx) => {
                 const rowKeys = strategy.timeframes
                   .filter((tf) => !isInvalidStrategyCombo(strategy.key, pair, tf))
-                  .map((tf) => buildKey(strategy.key, pair, tf));
+                  .map((tf) => buildPath(strategy.key, pair, tf));
                 const rowSelectedCount = rowKeys.filter((k) => selected.has(k)).length;
                 const rowAllSelected = rowKeys.length > 0 && rowSelectedCount === rowKeys.length;
                 const rowSomeSelected = rowSelectedCount > 0 && !rowAllSelected;
@@ -624,7 +624,7 @@ const StrategySection = ({
                       </div>
                     </td>
                     {strategy.timeframes.map((tf) => {
-                      const key = buildKey(strategy.key, pair, tf);
+                      const key = buildPath(strategy.key, pair, tf);
                       const isInvalid = isInvalidStrategyCombo(strategy.key, pair, tf);
                       return (
                         <td key={tf} className="px-3 py-2.5 text-center">
@@ -800,18 +800,18 @@ const AlertPairPreferences = () => {
   }, [filterOptions]);
 
   // Build ALL_KEYS from active strategies
-  const allKeys = useMemo(() => buildAllKeys(activeStrategies), [activeStrategies]);
+  const allPaths = useMemo(() => buildAllPaths(activeStrategies), [activeStrategies]);
 
   // Load saved preferences — re-derive when strategies or saved prefs change
   useEffect(() => {
-    if (allKeys.size > 0 && data?.data !== undefined) {
-      setSelected(initSelectedFromSaved(data.data, allKeys));
+    if (allPaths.size > 0 && data?.data !== undefined) {
+      setSelected(initSelectedFromSaved(data.data, allPaths));
       setStrategySessionExclusions(initStrategySessionExclusions(data.data));
       setHasChanges(false);
     }
-  }, [data, allKeys]);
+  }, [data, allPaths]);
 
-  // ── Match Filters handlers (must be after allKeys) ─────────────
+  // ── Match Filters handlers (must be after allPaths) ─────────────
   const handleMatchFiltersClick = () => {
     setShowMatchConfirm(true);
   };
@@ -831,24 +831,26 @@ const AlertPairPreferences = () => {
         allSymbolOptions
       );
 
-      // Build the API payload from the matched prefs
+      // Build the API payload from the matched prefs (nested format)
       const newSelected = new Set();
-      allKeys.forEach((key) => {
-        if (prefs[key] !== false) {
-          newSelected.add(key);
+      allPaths.forEach((path) => {
+        const [strat, pair, tf] = path.split(".");
+        if (prefs[strat]?.[pair]?.[tf] !== false) {
+          newSelected.add(path);
         }
       });
 
-      const apiPrefs = selectedToPrefs(newSelected, allKeys);
+      const apiPrefs = selectedToPrefs(newSelected, allPaths);
 
-      // Merge session exclusions if any
-      const sessionExclusions = prefs.strategySessionExclusions || {};
-      const hasSessionExclusions = Object.values(sessionExclusions).some(
-        (arr) => Array.isArray(arr) && arr.length > 0
-      );
-      if (hasSessionExclusions) {
-        apiPrefs.strategySessionExclusions = sessionExclusions;
-      }
+      // Merge session exclusions from matched prefs (nested format)
+      const sessionExclusions = {};
+      Object.entries(prefs).forEach(([stratKey, stratData]) => {
+        if (typeof stratData === 'object' && stratData !== null && Array.isArray(stratData.excludedSessions)) {
+          sessionExclusions[stratKey] = stratData.excludedSessions;
+          if (!apiPrefs[stratKey]) apiPrefs[stratKey] = {};
+          apiPrefs[stratKey].excludedSessions = stratData.excludedSessions;
+        }
+      });
 
       // Save directly to the API
       await updatePreferences(apiPrefs).unwrap();
@@ -886,7 +888,7 @@ const AlertPairPreferences = () => {
 
     const rowKeys = strategy.timeframes
       .filter((tf) => !isInvalidStrategyCombo(strategyKey, pair, tf))
-      .map((tf) => buildKey(strategyKey, pair, tf));
+      .map((tf) => buildPath(strategyKey, pair, tf));
     const allSelected = rowKeys.length > 0 && rowKeys.every((k) => selected.has(k));
 
     setSelected((prev) => {
@@ -906,7 +908,7 @@ const AlertPairPreferences = () => {
 
     const colKeys = strategy.pairs
       .filter((p) => !isInvalidStrategyCombo(strategyKey, p, tf))
-      .map((p) => buildKey(strategyKey, p, tf));
+      .map((p) => buildPath(strategyKey, p, tf));
     const allSelected = colKeys.length > 0 && colKeys.every((k) => selected.has(k));
 
     setSelected((prev) => {
@@ -928,7 +930,7 @@ const AlertPairPreferences = () => {
     strategy.pairs.forEach((pair) => {
       strategy.timeframes.forEach((tf) => {
         if (!isInvalidStrategyCombo(strategyKey, pair, tf)) {
-          strategyKeys.push(buildKey(strategyKey, pair, tf));
+          strategyKeys.push(buildPath(strategyKey, pair, tf));
         }
       });
     });
@@ -954,7 +956,7 @@ const AlertPairPreferences = () => {
     const catKeys = [];
     pairsInCategory.forEach((pair) => {
       strategy.timeframes.forEach((tf) => {
-        catKeys.push(buildKey(strategyKey, pair, tf));
+        catKeys.push(buildPath(strategyKey, pair, tf));
       });
     });
 
@@ -973,7 +975,7 @@ const AlertPairPreferences = () => {
 
   // ── Category + column toggle (for hierarchical UI table columns) ──
   const handleToggleCategoryColumn = useCallback((strategyKey, pairsInCategory, tf) => {
-    const colKeys = pairsInCategory.map((pair) => buildKey(strategyKey, pair, tf));
+    const colKeys = pairsInCategory.map((pair) => buildPath(strategyKey, pair, tf));
     const allSelected = colKeys.length > 0 && colKeys.every((k) => selected.has(k));
 
     setSelected((prev) => {
@@ -988,23 +990,25 @@ const AlertPairPreferences = () => {
   }, [selected]);
 
   const handleSelectAll = useCallback(() => {
-    const allSelected = selected.size === allKeys.size;
+    const allSelected = selected.size === allPaths.size;
     if (allSelected) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(allKeys));
+      setSelected(new Set(allPaths));
     }
     setHasChanges(true);
-  }, [selected, allKeys]);
+  }, [selected, allPaths]);
 
   const handleSave = async () => {
     try {
-      const prefs = selectedToPrefs(selected, allKeys);
-      // Merge per-strategy session exclusions
-      const hasSessionExclusions = Object.values(strategySessionExclusions || {}).some((arr) => Array.isArray(arr) && arr.length > 0);
-      if (hasSessionExclusions) {
-        prefs.strategySessionExclusions = strategySessionExclusions;
-      }
+      const prefs = selectedToPrefs(selected, allPaths);
+      // Merge per-strategy session exclusions into each strategy's nested object
+      Object.entries(strategySessionExclusions || {}).forEach(([stratKey, sessions]) => {
+        if (Array.isArray(sessions) && sessions.length > 0) {
+          if (!prefs[stratKey]) prefs[stratKey] = {};
+          prefs[stratKey].excludedSessions = sessions;
+        }
+      });
       await updatePreferences(prefs).unwrap();
       toast.success("Alert preferences saved successfully!");
       setHasChanges(false);
@@ -1015,7 +1019,7 @@ const AlertPairPreferences = () => {
   };
 
   // ── Derived state ─────────────────────────────────────────────
-  const masterAllSelected = allKeys.size > 0 && selected.size === allKeys.size;
+  const masterAllSelected = allPaths.size > 0 && selected.size === allPaths.size;
   const masterSomeSelected = selected.size > 0 && !masterAllSelected;
 
   // Session options from API
@@ -1086,7 +1090,7 @@ const AlertPairPreferences = () => {
                   Select All
                 </label>
                 <span className="text-xs text-gray-500 dark:text-white text-gray-700 font-mono">
-                  ({selected.size}/{allKeys.size})
+                  ({selected.size}/{allPaths.size})
                 </span>
               </div>
             </div>
