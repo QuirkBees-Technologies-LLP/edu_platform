@@ -805,7 +805,7 @@ const ClientDashboard = () => {
                 </h3>
 
                 {/* Follow IQonic */}
-                <div className="group relative">
+                <a href="https://www.instagram.com/iqoniclife/?hl=es" target="_blank" rel="noopener noreferrer" className="group relative block">
                   <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition"></div>
                   <div className="relative bg-gray-900/50 backdrop-blur-xl rounded-xl border border-white/10 p-4 hover:border-white/20 transition cursor-pointer">
                     <div className="flex items-center justify-between">
@@ -818,14 +818,14 @@ const ClientDashboard = () => {
                             Follow IQonic
                           </p>
                           <p className="text-xs text-gray-600">
-                            @iqonic_official
+                            @iqoniclife
                           </p>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-white transition" />
                     </div>
                   </div>
-                </div>
+                </a>
 
                 {/* Download our Apps Section */}
                 <div className="space-y-3">
