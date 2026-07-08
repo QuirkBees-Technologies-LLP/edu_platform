@@ -316,12 +316,12 @@ export function canonicalToFilterTf(tf) {
 
 export const STRATEGY_VIDEO_CONFIG = {
   react: {
-    title: "React",
+    title: "REACT",
     // description: "Watch these React strategy tutorials to master the React trading system.",
     videos: [
       {
         id: "react-v1",
-        title: "IQ_REACT_V1",
+        title: "React",
         videoUrl: "https://videos.dyntube.com/iframes/MLM6WSKCfEOEqwe379CGtw",
         duration: "",
       },
@@ -335,12 +335,12 @@ export const STRATEGY_VIDEO_CONFIG = {
   },
 
   defy: {
-    title: "Defy",
+    title: "DEFY",
     // description: "Watch these Defy strategy tutorials to master the Defy trading system.",
     videos: [
       {
         id: "defy-v1",
-        title: "IQ_DEFY_V4",
+        title: "DEFY",
         videoUrl: "https://videos.dyntube.com/iframes/ieeCtsTzUS3irQuPUSg",
         duration: "",
       },
@@ -354,12 +354,12 @@ export const STRATEGY_VIDEO_CONFIG = {
   },
 
   killshot: {
-    title: "Killshot",
+    title: "KILLSHOT",
     // description: "Watch these Killshot strategy tutorials to master the Killshot trading system.",
     videos: [
       {
         id: "killshot-v1",
-        title: "IQ_KILLSHOT_V4",
+        title: "KILLSHOT",
         videoUrl: "https://videos.dyntube.com/iframes/zQGhQgxx2Eism1fWLbO8A",
         duration: "",
       },
@@ -373,12 +373,12 @@ export const STRATEGY_VIDEO_CONFIG = {
   },
 
   bullseye: {
-    title: "Bullseye",
+    title: "BULLSEYE",
     // description: "Watch these Bullseye strategy tutorials to master the Bullseye trading system.",
     videos: [
       {
         id: "bullseye-v1",
-        title: "IQ_BULLSEYE_V4",
+        title: "BULLSEYE",
         videoUrl: "https://videos.dyntube.com/iframes/mR5aNLY6dECk6lkVFeRmeg",
         duration: "",
       },
@@ -392,7 +392,7 @@ export const STRATEGY_VIDEO_CONFIG = {
   },
 
   supernova: {
-    title: "Supernova",
+    title: "SUPERNOVA",
     // description: "Watch these Supernova strategy tutorials to master the Supernova trading system.",
     videos: [
       {
@@ -405,7 +405,7 @@ export const STRATEGY_VIDEO_CONFIG = {
   },
 
   smart_shot: {
-    title: "Smart Shot",
+    title: "SMART SHOT",
     videos: [
       {
         id: "smart_shot-v1",
