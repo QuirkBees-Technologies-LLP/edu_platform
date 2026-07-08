@@ -292,11 +292,13 @@ const TradingStrategies = () => {
                     {currentStrategy
                         ? (() => {
                             const videoConfig = getStrategyVideos(parentStrategy?.title || currentStrategy?.title);
+                            const strategyIconUrl = parentStrategy?.imageUrl || currentStrategy?.imageUrl;
                             return (
                                 <StrategyVideoCarousel
                                     videos={videoConfig?.videos || []}
                                     title={videoConfig?.title}
                                     description={videoConfig?.description}
+                                    strategyIcon={strategyIconUrl}
                                 />
                             );
                         })()
@@ -483,13 +485,17 @@ const TradingStrategies = () => {
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                                     {parentStrategy?.educators?.map((educator, i) => (
-                                        <div key={educator?._id || i} className="flex flex-col items-center text-center">
+                                        <div
+                                            key={educator?._id || i}
+                                            className="flex flex-col items-center text-center cursor-pointer group"
+                                            onClick={() => navigate(`/iq-educators/${educator?._id}`)}
+                                        >
                                             <img
                                                 src={educator?.image || `https://ui-avatars.com/api/?name=${educator?.first_name}+${educator?.last_name}`}
                                                 alt={`${educator?.first_name || ''} ${educator?.last_name || ''}`}
-                                                className="w-20 h-20 rounded-full mb-3 border-2 border-gray-300 object-cover"
+                                                className="w-20 h-20 rounded-full mb-3 border-2 border-gray-300 object-cover transition-all duration-300 group-hover:border-[#400dd9] group-hover:shadow-lg group-hover:shadow-[#400dd9]/25 group-hover:scale-105"
                                             />
-                                            <div className="text-sm font-medium text-gray-900">
+                                            <div className="text-sm font-medium text-gray-900 transition-colors duration-200 group-hover:text-[#400dd9]">
                                                 {educator?.first_name} {educator?.last_name}
                                             </div>
                                         </div>

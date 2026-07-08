@@ -31,7 +31,7 @@ import "./StrategyVideoCarousel.css";
  * @param {string}   [title]          – Optional heading above carousel
  * @param {string}   [description]    – Optional sub-text below heading
  */
-const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, description }) => {
+const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, description, strategyIcon }) => {
     // Ensure videos is always a safe array
     const videos = Array.isArray(rawVideos) ? rawVideos : [];
 
@@ -44,7 +44,7 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
     // Loop requires slides >= 2 × max(slidesPerView). Max is 2.2, so need ≥ 5.
     // Only enable loop for 3+ videos. For 1-2 videos, no loop, no duplication.
     const MIN_LOOP_SLIDES = 5;
-    const canLoop = videos.length >= 3;
+    const canLoop = videos.length >= 2;
     const showNav = videos.length > 1;
     const slides = useMemo(() => {
         if (!canLoop || videos.length === 0) return videos.map((v, i) => ({ ...(v || {}), _origIndex: i }));
@@ -101,10 +101,19 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
 
     return (
         <div className={`strategy-video-carousel ${className}`}>
-            {/* ---- Optional title/description ---- */}
+            {/* ---- Strategy title with icon ---- */}
             {(title || description) && (
                 <div className="svc-header">
-                    {title && <h2 className="svc-heading">{title}</h2>}
+                    <div className="svc-heading-row">
+                        {strategyIcon && (
+                            <img
+                                src={strategyIcon}
+                                alt={title || "Strategy"}
+                                className="svc-strategy-icon"
+                            />
+                        )}
+                        {title && <h2 className="svc-heading">{title}</h2>}
+                    </div>
                     {description && <p className="svc-description">{description}</p>}
                 </div>
             )}

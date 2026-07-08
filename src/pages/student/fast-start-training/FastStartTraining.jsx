@@ -22,31 +22,31 @@ import { getEmbedUrl } from "@/utils/videoUtils";
 const FAST_START_VIDEOS = [
   {
     id: "fst-v1",
-    title: "01_Getting Started_V2",
+    title: "Getting Started",
     videoUrl: "https://videos.dyntube.com/iframes/ek3BUWMF0WtQg9iTMtA0Q",
     duration: "",
   },
   {
     id: "fst-v2",
-    title: "02_Access your Account_V2",
+    title: "Access your Account",
     videoUrl: "https://videos.dyntube.com/iframes/FrZ6pur22ky1g33c5sa2Iw",
     duration: "",
   },
   {
     id: "fst-v3",
-    title: "03_Access your Education",
+    title: "Access your Education",
     videoUrl: "https://videos.dyntube.com/iframes/IfperYQPFEiPElvCcWYPaQ",
     duration: "",
   },
   {
     id: "fst-v4",
-    title: "04_Access your Trading Tools",
+    title: "Access your Trading Tools",
     videoUrl: "https://videos.dyntube.com/iframes/sMCa6rpVjEe0Ix4Ge8BjA",
     duration: "",
   },
   {
     id: "fst-v5",
-    title: "05_Start using your Apps_V2",
+    title: "Start using your Apps",
     videoUrl: "https://videos.dyntube.com/iframes/nPaKOr16k26Sn83rjY5w",
     duration: "",
   },
