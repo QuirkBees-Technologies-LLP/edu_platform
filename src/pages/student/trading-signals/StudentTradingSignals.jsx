@@ -120,7 +120,7 @@ const StudentTradingSignals = () => {
   const [exclusionFilters, setExclusionFilters] = useState(loadSavedFilters);
   const [filtersInitialized, setFiltersInitialized] = useState(false);
   const [signals, setSignals] = useState([]); // accumulated list
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
   const [selectedSignal, setSelectedSignal] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true); // track first load vs polling
   const observer = useRef();
