@@ -23,67 +23,22 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import ResourcesSection from "../../../components/ui/ResourcesSection";
+import StrategyVideoCarousel from "../../../components/ui/StrategyVideoCarousel";
+import { getEmbedUrl } from "@/utils/videoUtils";
+import { getStrategyVideos } from "@/config/strategyConfig";
+
 /**
- * Utility function to convert various video URLs to embeddable format
+ * Original Strategy Banner — shown on the landing page before a strategy is selected.
  */
-const getEmbedUrl = (url) => {
-    if (!url) return "";
-
-    // YouTube
-    if (url.includes("youtube.com/watch?v=")) {
-        const videoId = url.split("v=")[1].split("&")[0];
-        return `https://www.youtube.com/embed/${videoId}`;
-    }
-    if (url.includes("youtu.be/")) {
-        const videoId = url.split("youtu.be/")[1].split("?")[0];
-        return `https://www.youtube.com/embed/${videoId}`;
-    }
-
-    // Vimeo
-    if (url.includes("vimeo.com/")) {
-        const parts = url.split("vimeo.com/")[1].split("/");
-        const videoId = parts[0].split("?")[0];
-        const hash = parts[1] ? parts[1].split("?")[0] : null;
-        return hash
-            ? `https://player.vimeo.com/video/${videoId}?h=${hash}`
-            : `https://player.vimeo.com/video/${videoId}`;
-    }
-
-    // Dailymotion
-    if (url.includes("dailymotion.com/video/")) {
-        const videoId = url.split("dailymotion.com/video/")[1].split("?")[0];
-        return `https://www.dailymotion.com/embed/video/${videoId}`;
-    }
-
-    // Loom
-    if (url.includes("loom.com/share/")) {
-        const videoId = url.split("loom.com/share/")[1].split("?")[0];
-        return `https://www.loom.com/embed/${videoId}`;
-    }
-
-    // Dyntube - Case 1: app.dyntube.com/#/video
-    if (url.includes("app.dyntube.com/#/video/")) {
-        const match = url.match(/video\/([^/]+)/);
-        if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
-    }
-
-    // Dyntube - Case 2: videos.dyntube.com/iframes
-    if (url.includes("videos.dyntube.com/iframes/")) {
-        const match = url.match(/iframes\/([^/?#]+)/);
-        if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
-    }
-
-    // Dyntube - Case 3: player.dyntube.com/video
-    if (url.includes("player.dyntube.com/video/")) {
-        const match = url.match(/video\/([^/?#]+)/);
-        if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
-    }
-
-    // Dyntube - Case 4: fallback generic
-    if (url.includes("dyntube.com/")) return url;
-
-    return url;
-};
+const Banner = () => (
+    <div className="rounded-2xl overflow-hidden">
+        <img
+            src="/media/banners/Welcome Banner_Strategy.jpg.jpeg"
+            alt="IQ Strategies Banner"
+            className="w-full h-auto object-cover"
+        />
+    </div>
+);
 
 /**
  * Utility function to parse tags from various backend formats
@@ -112,15 +67,6 @@ const parseTags = (tags) => {
     return result;
 };
 
-const Banner = () => (
-    <div className="card rounded-2xl overflow-hidden border border-gray-300">
-        <img
-            src="/media/banners/Welcome Banner_Strategy.jpg.jpeg"
-            alt="Trading Strategies Banner"
-            className="w-full h-auto object-cover"
-        />
-    </div>
-);
 
 const TradingStrategies = () => {
     // ==================== STATE MANAGEMENT ====================
@@ -341,8 +287,22 @@ const TradingStrategies = () => {
     return (
         <div className="max-w-7xl mx-auto px-4 pb-10">
             <Container width="fluid" className="mx-auto px-5">
-                {/* Banner - Static, never changes */}
-                <div className="ts-banner"><Banner /></div>
+                {/* Banner or Video Carousel — conditionally rendered */}
+                <div className="ts-banner">
+                    {currentStrategy
+                        ? (() => {
+                            const videoConfig = getStrategyVideos(parentStrategy?.title || currentStrategy?.title);
+                            return (
+                                <StrategyVideoCarousel
+                                    videos={videoConfig?.videos || []}
+                                    title={videoConfig?.title}
+                                    description={videoConfig?.description}
+                                />
+                            );
+                        })()
+                        : <Banner />
+                    }
+                </div>
 
                 {/* ========== DYNAMIC CONTENT AREA ========== */}
                 {/* This section updates when a strategy is selected */}

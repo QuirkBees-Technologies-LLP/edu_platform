@@ -12,6 +12,14 @@ export function formatTimeframe(tf) {
   const str = String(tf).trim();
   const upper = str.toUpperCase();
 
+  // Handle "X minutes", "X minute" format (e.g. "5 minutes", "15 minute")
+  const minutesMatch = str.match(/^(\d+)\s*minutes?$/i);
+  if (minutesMatch) return `${minutesMatch[1]}m`;
+
+  // Handle "X hours", "X hour" format (e.g. "1 hour", "4 hours")
+  const hoursMatch = str.match(/^(\d+)\s*hours?$/i);
+  if (hoursMatch) return `${hoursMatch[1]}h`;
+
   // Pure string codes from TradingView
   const stringMap = { D: "1D", W: "1W", M: "1M", "1D": "1D", "1W": "1W", "1M": "1M" };
   if (stringMap[upper]) return stringMap[upper];
@@ -48,19 +56,83 @@ export function formatTimeframe(tf) {
 export function formatPrice(value) {
   if (value == null) return "—";
   const num = parseFloat(value);
-  if (isNaN(num)) return value;
+  if (isNaN(num)) return String(value ?? "—");
   // Remove trailing zeros: 4342.8100 → 4342.81, but keep up to 4 decimals max
   return parseFloat(num.toFixed(4)).toString();
 }
 
 export function formatTimeAgo(dateStr) {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const seconds = Math.floor((now - date) / 1000);
+  if (!dateStr) return "—";
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "—";
 
-  if (seconds < 60) return "Just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  return date.toLocaleDateString();
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date);
+  } catch (_) {
+    return "—";
+  }
+}
+
+/**
+ * Converts a UTC ISO 8601 alertTimestamp to the user's local browser
+ * timezone, displayed in HH:mm format (24-hour).
+ *
+ * Uses `Intl.DateTimeFormat` so the browser automatically determines
+ * the correct timezone — no hardcoded offsets.
+ *
+ * @param {string|null|undefined} timestamp - UTC ISO 8601 string (e.g. "2026-07-01T11:36:00Z")
+ * @returns {string} Local time in "HH:mm" format, or "—" if invalid/missing
+ *
+ * @example
+ * formatAlertTime("2026-07-01T11:36:00Z") // "17:06" in IST, "12:36" in London
+ * formatAlertTime(null)                   // "—"
+ * formatAlertTime("")                     // "—"
+ * formatAlertTime("not-a-date")           // "—"
+ */
+export function formatAlertTime(timestamp) {
+  if (!timestamp || typeof timestamp !== "string" || !timestamp.trim()) {
+    return "—";
+  }
+
+  const trimmed = timestamp.trim();
+
+  try {
+    // If it's already a plain HH:mm or HH:mm:ss time (old webhook format),
+    // show today's date with that time
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(trimmed)) {
+      const today = new Date();
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const dd = String(today.getDate()).padStart(2, "0");
+      const mon = months[today.getMonth()];
+      const yyyy = today.getFullYear();
+      // Convert HH:mm to 12-hour format
+      const [hh, mi] = trimmed.split(":").map(Number);
+      const ampm = hh >= 12 ? "pm" : "am";
+      const h12 = hh % 12 || 12;
+      return `${dd} ${mon} ${yyyy}, ${String(h12).padStart(2, "0")}:${String(mi).padStart(2, "0")} ${ampm}`;
+    }
+
+    // Otherwise parse as ISO 8601 UTC string (new webhook format)
+    // e.g. "2026-07-01T11:36:00Z" → local "03 Jul 2026, 01:09 pm"
+    const date = new Date(trimmed);
+    if (isNaN(date.getTime())) return "—";
+
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date);
+  } catch (_) {
+    return "—";
+  }
 }

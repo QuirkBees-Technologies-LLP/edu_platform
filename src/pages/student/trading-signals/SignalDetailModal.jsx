@@ -6,7 +6,10 @@ import {
   Target,
   ShieldAlert,
   Crosshair,
-  ImageOff,
+  Clock,
+  ChartLine,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import {
   Dialog,
@@ -16,7 +19,7 @@ import {
   DialogBody,
 } from "@/components/ui/dialog";
 import signalConfig from "./signalConfig";
-import { formatTimeframe, formatPrice } from "./signalUtils";
+import { formatTimeframe, formatPrice, formatAlertTime } from "./signalUtils";
 
 // ── Small presentational sub-components ────────────────────────────
 
@@ -24,8 +27,10 @@ const PriceBlock = ({ label, value, colorClass, bgClass, icon: Icon }) => {
   const handleCopy = (e) => {
     e.stopPropagation();
     if (value != null) {
-      navigator.clipboard.writeText(formatPrice(value).toString());
-      toast.success(`${label} copied!`);
+      try {
+        navigator?.clipboard?.writeText?.(formatPrice(value).toString());
+        toast?.success?.(`${label} copied!`);
+      } catch (_) { /* clipboard may not be available */ }
     }
   };
 
@@ -77,56 +82,65 @@ const SignalDetailModal = ({ signal, onClose }) => {
   const [showRaw, setShowRaw] = useState(false);
   if (!signal) return null;
 
-  const config = signalConfig[signal.signalType] || signalConfig.OTHER;
-  const IconComponent = config.icon;
+  const config = signalConfig?.[signal?.signalType] || signalConfig?.OTHER || {};
+  const IconComponent = config?.icon || Activity;
 
-  const customVars = signal.customVariables || {};
-  const processedExtra = signal.processedPayload || {};
+  const customVars = signal?.customVariables && typeof signal.customVariables === "object" ? signal.customVariables : {};
+  const processedExtra = signal?.processedPayload && typeof signal.processedPayload === "object" ? signal.processedPayload : {};
 
-  const formatKey = (key) =>
-    key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const formatKey = (key) => {
+    try {
+      return (key ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    } catch (_) {
+      return String(key ?? "");
+    }
+  };
 
-  // ── Build TP levels ───────────────────────────────────────────────
+  // ── Build TP levels from takeProfits array + customVariables ────────
   const tpLevels = [];
-  if (signal.takeProfit != null) {
-    tpLevels.push({ label: "TP 1", value: signal.takeProfit });
+  if (Array.isArray(signal?.takeProfits) && signal.takeProfits.length > 0) {
+    signal.takeProfits.forEach((tp) => {
+      if (tp?.level != null) tpLevels.push({ label: `TP ${tp.level}`, value: tp?.price });
+    });
   }
   const tpKeys = [
-    "tp2", "tp3", "tp4",
-    "takeprofit2", "takeprofit3", "takeprofit4",
-    "take_profit2", "take_profit3", "take_profit4",
+    "tp1", "tp2", "tp3", "tp4",
+    "takeprofit1", "takeprofit2", "takeprofit3", "takeprofit4",
+    "take_profit1", "take_profit2", "take_profit3", "take_profit4",
   ];
   Object.entries(customVars).forEach(([key, val]) => {
-    const normKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const normKey = (key ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
     if (
       tpKeys.includes(normKey) ||
       (normKey.startsWith("tp") && /^\d+$/.test(normKey.slice(2)))
     ) {
       const num = parseInt(normKey.replace(/\D/g, ""), 10);
-      if (num > 1) tpLevels.push({ label: `TP ${num}`, value: val, key });
+      // Skip if TP already added from signal.takeProfits
+      const alreadyExists = tpLevels.some(
+        (tp) => tp.label === `TP ${num}`
+      );
+      if (!alreadyExists) {
+        tpLevels.push({ label: `TP ${num}`, value: val, key });
+      }
     }
   });
   tpLevels.sort((a, b) => {
-    return parseInt(a.label.replace(/\D/g, ""), 10) - parseInt(b.label.replace(/\D/g, ""), 10);
+    const aNum = parseInt((a?.label ?? "").replace(/\D/g, ""), 10) || 0;
+    const bNum = parseInt((b?.label ?? "").replace(/\D/g, ""), 10) || 0;
+    return aNum - bNum;
   });
 
-  // ── Market badges vs other vars ───────────────────────────────────
-  const badgeKeys = [
-    "session", "trend", "adx", "strength", "volume_delta", "volume",
-    "poc", "rrr", "lot_size", "pnl", "supertrend", "signal_strength",
-  ];
-  const marketBadges = [];
-  const otherVars = {};
-  Object.entries(customVars).forEach(([key, val]) => {
-    const normKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const isTp = tpLevels.some((tp) => tp.key === key);
-    if (isTp) return;
-    if (badgeKeys.some((bk) => normKey.includes(bk.replace(/_/g, "")))) {
-      marketBadges.push({ key, label: formatKey(key), value: String(val) });
-    } else {
-      otherVars[key] = val;
-    }
-  });
+  // ── Confirmations (dynamic — renders whatever keys exist in signal.confirmations) ──
+  const confs = signal?.confirmations || {};
+  const confirmations = Object.entries(confs)
+    .filter(([, val]) => typeof val === "boolean")
+    .map(([key, val]) => ({
+      key,
+      label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      passed: val,
+    }));
+
+  const otherVars = { ...customVars };
 
   // ── Extra processed fields (not in known set) ─────────────────────
   const knownKeys = new Set([
@@ -139,51 +153,93 @@ const SignalDetailModal = ({ signal, onClose }) => {
     if (!knownKeys.has(k) && v != null && v !== "") extraProcessed[k] = v;
   }
 
+  // Count passed confirmations
+  const passedCount = confirmations.filter((c) => c.passed).length;
+
   return (
     <Dialog open={!!signal} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[650px] max-h-[85vh] overflow-y-auto p-0">
         {/* ── Header ── */}
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-[#1F1F35]/50">
-          <div className="flex items-center gap-3">
+        <DialogHeader className="px-6 pt-6 pb-5 border-b border-slate-100 dark:border-[#1F1F35]/50 ">
+          <div className="flex items-start gap-3.5">
             <div
-              style={{ background: config.bgLight }}
-              className="w-11 h-11 rounded-xl flex items-center justify-center"
+              style={{ background: config?.bgLight || "#64748b15" }}
+              className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
             >
-              <IconComponent size={22} color={config.bg} />
+              {IconComponent && <IconComponent size={24} color={config?.bg || "#64748b"} />}
             </div>
-            <div>
-              <DialogTitle className="margin-0 text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                {signal.symbol || "Signal Detail"}
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="margin-0 text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                {signal?.symbol || "Alert Detail"}
               </DialogTitle>
-              <div className="flex items-center gap-2 mt-1">
-                {signal.signalType !== "OTHER" && (
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                {/* Signal Type badge */}
+                {signal?.signalType && signal?.signalType !== "OTHER" && (
                   <span
-                    style={{ background: config.bgLight, color: config.text }}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-extrabold"
+                    style={{ background: config?.bgLight || "#64748b15", color: config?.text || "#64748b", borderColor: (config?.text || "#64748b") + "30" }}
+                    className="px-2.5 py-0.5 rounded-md text-[11px] font-extrabold border"
                   >
-                    {config.label}
+                    {config?.label || ""}
                   </span>
                 )}
-                {signal.timeframe && (
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/40 px-1.5 py-0.5 rounded">
-                    {formatTimeframe(signal.timeframe)}
+                {/* Timeframe pill */}
+                {signal?.timeframe && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 px-2 py-0.5 rounded-md">
+                    <Clock size={10} />
+                    {formatTimeframe(signal?.timeframe)}
                   </span>
                 )}
+                {/* Session pill */}
+                {signal?.session && (() => {
+                  const formatted = signal.session
+                    .split(",")
+                    .map((s) => {
+                      const trimmed = s.trim();
+                      if (!trimmed) return "";
+                      const capitalized = trimmed
+                        .split(" ")
+                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join(" ");
+                      return capitalized.toLowerCase().endsWith("session") ? capitalized : `${capitalized} session`;
+                    })
+                    .filter(Boolean)
+                    .join(", ");
+                  return (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-600 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 px-2 py-0.5 rounded-md">
+                      🌍 {formatted}
+                    </span>
+                  );
+                })()}
+                {/* Alert Timestamp pill */}
+                {/* {signal?.alertTimestamp && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-600 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 px-2 py-0.5 rounded-md">
+                    🕐 {signal.alertTimestamp}
+                  </span>
+                )} */}
               </div>
+              {/* Strategy name */}
+              {/* {signal?.strategyName && (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <ChartLine size={12} className="text-blue-400" />
+                  <span className="text-[12px] font-bold text-blue-500 dark:text-blue-400">
+                    {signal.strategyName}
+                  </span>
+                </div>
+              )} */}
             </div>
           </div>
         </DialogHeader>
 
-        <DialogBody className="px-6 py-5">
+        <DialogBody className="px-6 py-1">
           {/* ── Chart Screenshot Section — only shown when URL exists ── */}
-          {signal.chartImageUrl && (
+          {signal?.chartImageUrl && (
             <div className="mb-5 overflow-hidden rounded-xl border border-slate-200 dark:border-[#1F1F35]/70 shadow-sm">
               <div className="flex items-center justify-between px-4 py-2 bg-slate-100/80 dark:bg-[#161626]/80 border-b border-slate-200 dark:border-[#202038]">
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   Chart at Alert Time
                 </span>
                 <a
-                  href={signal.chartImageUrl}
+                  href={signal?.chartImageUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors"
@@ -192,11 +248,10 @@ const SignalDetailModal = ({ signal, onClose }) => {
                 </a>
               </div>
               <img
-                src={signal.chartImageUrl}
-                alt={`${signal.symbol || "Chart"} at alert time`}
-                className="w-full h-auto block bg-[#0a0a14]"
+                src={signal?.chartImageUrl}
+                alt={`${signal?.symbol || "Chart"} at alert time`}
+                className="w-full h-[340px] block bg-[#0a0a14] object-cover object-right"
                 loading="lazy"
-                style={{ maxHeight: "360px", objectFit: "contain" }}
               />
             </div>
           )}
@@ -204,18 +259,26 @@ const SignalDetailModal = ({ signal, onClose }) => {
           {/* Core Price Levels */}
           {(() => {
             // Resolve entry price: prefer entryPrice, fallback to price from payload or alert message
-            let resolvedEntry = signal.entryPrice;
+            let resolvedEntry = signal?.entryPrice ?? null;
             if (resolvedEntry == null) {
-              resolvedEntry = parseFloat(
-                signal.processedPayload?.entryPrice ||
-                signal.processedPayload?.price ||
-                signal.rawPayload?.price ||
-                signal.rawPayload?.close
-              ) || null;
+              const raw =
+                signal?.processedPayload?.entryPrice ||
+                signal?.processedPayload?.price ||
+                signal?.rawPayload?.price ||
+                signal?.rawPayload?.close;
+              if (raw != null) {
+                const parsed = parseFloat(raw);
+                resolvedEntry = isNaN(parsed) ? null : parsed;
+              }
             }
-            if (resolvedEntry == null && signal.alertMessage) {
-              const pinMatch = signal.alertMessage.match(/📍\s*([0-9.]+)/);
-              if (pinMatch) resolvedEntry = parseFloat(pinMatch[1]) || null;
+            if (resolvedEntry == null && signal?.alertMessage) {
+              try {
+                const pinMatch = signal.alertMessage.match(/📍\s*([0-9.]+)/);
+                if (pinMatch?.[1]) {
+                  const parsed = parseFloat(pinMatch[1]);
+                  resolvedEntry = isNaN(parsed) ? null : parsed;
+                }
+              } catch (_) { /* ignore regex errors */ }
             }
             return (
               <div className="grid grid-cols-2 gap-3 mb-5">
@@ -228,7 +291,7 @@ const SignalDetailModal = ({ signal, onClose }) => {
                 />
                 <PriceBlock
                   label="Stop Loss (Invalidation)"
-                  value={signal.stopLoss}
+                  value={signal?.stopLoss}
                   colorClass="text-red-500 dark:text-[#ff3b30]"
                   bgClass="bg-red-50/30 dark:bg-[#ef4444]/5"
                   icon={ShieldAlert}
@@ -241,17 +304,19 @@ const SignalDetailModal = ({ signal, onClose }) => {
           {tpLevels.length > 0 && (
             <div className="mb-5">
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2.5 uppercase tracking-wider px-1">
-                Take Profit Targets
+                🎯 Target Levels
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {tpLevels.map((tp, idx) => (
                   <div
                     key={idx}
                     onClick={() => {
-                      if (tp.value != null) {
-                        navigator.clipboard.writeText(formatPrice(tp.value).toString());
-                        toast.success(`${tp.label} copied!`);
-                      }
+                      try {
+                        if (tp?.value != null) {
+                          navigator?.clipboard?.writeText?.(formatPrice(tp.value).toString());
+                          toast?.success?.(`${tp?.label || "Value"} copied!`);
+                        }
+                      } catch (_) { /* clipboard may not be available */ }
                     }}
                     className="flex justify-between items-center p-3 rounded-xl bg-emerald-50/30 dark:bg-[#10b981]/5 border border-emerald-100/30 dark:border-emerald-950/20 hover:border-emerald-300 dark:hover:border-emerald-800/50 transition-all cursor-pointer group"
                     title={`Click to copy ${tp.label}`}
@@ -259,14 +324,14 @@ const SignalDetailModal = ({ signal, onClose }) => {
                     <div className="flex items-center gap-2">
                       <Target size={12} className="text-emerald-500" />
                       <span className="text-[12px] font-bold text-slate-600 dark:text-slate-400">
-                        {tp.label}
+                        {tp?.label || ""}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[13px] font-black text-emerald-600 dark:text-emerald-400">
-                        {tp.value != null ? formatPrice(tp.value) : "—"}
+                        {tp?.value != null ? formatPrice(tp.value) : "—"}
                       </span>
-                      {tp.value != null && (
+                      {tp?.value != null && (
                         <Copy size={10} className="text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
                       )}
                     </div>
@@ -276,31 +341,41 @@ const SignalDetailModal = ({ signal, onClose }) => {
             </div>
           )}
 
-          {/* Market Intelligence Badges */}
-          {marketBadges.length > 0 && (
+          {/* Confirmations */}
+          {confirmations.length > 0 && (
             <div className="mb-5">
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2.5 uppercase tracking-wider px-1">
-                Market Indicators
+              <div className="flex items-center justify-between px-1 mb-2.5">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                  Confirmations
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                  {passedCount}/{confirmations.length} passed
+                </span>
               </div>
-              <div className="flex flex-wrap gap-1.5 px-0.5">
-                {marketBadges.map((badge, idx) => (
+              <div className="bg-slate-50/30 dark:bg-[#0E0E18]/50 rounded-xl border border-slate-100 dark:border-[#1F1F35]/50 overflow-hidden">
+                {confirmations.map((item, idx) => (
                   <div
-                    key={idx}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-slate-50 dark:bg-[#131324]/60 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-[#1F1F35]/50"
+                    key={item?.key ?? idx}
+                    className={`flex justify-between items-center px-4 py-3 ${idx < confirmations.length - 1
+                      ? "border-b border-slate-100 dark:border-[#1F1F35]/30"
+                      : ""
+                      }`}
                   >
-                    <span className="text-slate-400 dark:text-slate-500 font-semibold">
-                      {badge.label}:
+                    <span className="text-[13px] text-slate-600 dark:text-slate-300 font-medium">
+                      {item?.label || ""}
                     </span>
-                    <span className="text-slate-800 dark:text-slate-200 font-black">
-                      {badge.value}
-                    </span>
+                    {item.passed ? (
+                      <span className="text-[16px]">✅</span>
+                    ) : (
+                      <span className="text-[16px]">❌</span>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Alert Message */}
+          {/* Alert Message — commented out
           {signal.alertMessage && (
             <div className="mb-5 overflow-hidden rounded-xl border border-slate-200 dark:border-[#202038]">
               <div className="flex justify-between items-center px-4 py-2 bg-slate-100/80 dark:bg-[#161626]/80 border-b border-slate-200 dark:border-[#202038] select-none">
@@ -325,9 +400,10 @@ const SignalDetailModal = ({ signal, onClose }) => {
               </div>
             </div>
           )}
+          */}
 
           {/* Other Variables */}
-          {Object.keys(otherVars).length > 0 && (
+          {/* {Object.keys(otherVars).length > 0 && (
             <div className="mb-5">
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2 uppercase tracking-wider px-1">
                 Other Variables
@@ -342,10 +418,10 @@ const SignalDetailModal = ({ signal, onClose }) => {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Extra Processed Fields */}
-          {Object.keys(extraProcessed).length > 0 && (
+          {/* {Object.keys(extraProcessed).length > 0 && (
             <div className="mb-5">
               <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2 uppercase tracking-wider px-1">
                 Extra Fields
@@ -360,10 +436,10 @@ const SignalDetailModal = ({ signal, onClose }) => {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Collapsible Raw JSON */}
-          {signal.rawPayload && (
+          {signal?.rawPayload && (
             <div className="mb-5">
               <button
                 onClick={() => setShowRaw(!showRaw)}
@@ -381,8 +457,10 @@ const SignalDetailModal = ({ signal, onClose }) => {
                     <span className="text-[9px] font-mono text-slate-400">payload.json</span>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(JSON.stringify(signal.rawPayload, null, 2));
-                        toast.success("Raw JSON copied!");
+                        try {
+                          navigator?.clipboard?.writeText?.(JSON.stringify(signal?.rawPayload, null, 2));
+                          toast?.success?.("Raw JSON copied!");
+                        } catch (_) { /* clipboard may not be available */ }
                       }}
                       className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                       title="Copy JSON"
@@ -392,32 +470,22 @@ const SignalDetailModal = ({ signal, onClose }) => {
                   </div>
                   <div className="p-3.5 bg-[#08080E] text-slate-300 overflow-x-auto max-h-[200px]">
                     <pre className="m-0 text-[11px] leading-normal font-mono text-emerald-400/90 whitespace-pre-wrap break-all">
-                      {JSON.stringify(signal.rawPayload, null, 2)}
+                      {JSON.stringify(signal?.rawPayload, null, 2)}
                     </pre>
                   </div>
                 </div>
               )}
             </div>
           )}
-
-          {/* Standard Metadata Grid */}
-          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-[#1F1F35]/50">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 bg-slate-50/30 dark:bg-[#0E0E18]/50 p-4 rounded-xl border border-slate-100/40 dark:border-[#1F1F35]/30">
-              {signal.exchange && <MetaItem label="Exchange" value={signal.exchange} />}
-              {signal.market && <MetaItem label="Market" value={signal.market} />}
-              {signal.timeframe && (
-                <MetaItem label="Timeframe" value={formatTimeframe(signal.timeframe)} />
-              )}
-              {signal.strategyName && <MetaItem label="Strategy" value={signal.strategyName} />}
-              {signal.webhookConfig?.name && (
-                <MetaItem label="Webhook Config" value={signal.webhookConfig.name} />
-              )}
-              {signal.alertName && <MetaItem label="Alert Name" value={signal.alertName} />}
-              <MetaItem
-                label="Received"
-                value={new Date(signal.createdAt).toLocaleString()}
-                colSpan={2}
-              />
+          {/* ── Footer Metadata ── */}
+          <div className="pt-4 mt-2 border-t border-slate-100 dark:border-[#1F1F35]/50">
+            <div className="flex justify-between items-center text-[11px] text-slate-400 dark:text-slate-100">
+              <span>
+                {signal?.webhookConfig?.name ? `Strategy: ${signal.webhookConfig.name}` : ""}
+              </span>
+              <span>
+                {signal?.createdAt ? `Received: ${formatAlertTime(signal?.alertTimestamp) !== "—" ? formatAlertTime(signal.alertTimestamp) : new Date(signal.createdAt).toLocaleString()}` : ""}
+              </span>
             </div>
           </div>
         </DialogBody>

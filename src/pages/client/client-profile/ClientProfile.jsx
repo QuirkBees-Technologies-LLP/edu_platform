@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { ExternalLink } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Container } from "@/components/container";
@@ -17,8 +18,10 @@ const ClientProfile = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
+
   const { auth } = useAuthContext();
-  const hasTradingSignals = auth?.user?.plan?.allowedSideBar?.includes("/trading-signals") || false;
+  const allowedRoutes = auth?.user?.plan?.allowedSideBar || [];
+  const hasAlertsAccess = allowedRoutes.includes("/trading-signals");
 
   const { data } = useGetClientProfileQuery();
   const [updateClientProfile] = useUpdateClientProfileMutation();
@@ -74,6 +77,20 @@ const ClientProfile = () => {
   return (
     <div>
       <Container>
+        {/* Back to Alerts — shown only on the Alert Preferences tab if plan includes /trading-signals */}
+        {hasAlertsAccess && activeTab === "alerts" && (
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={() => navigate("/trading-signals")}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Back to Alerts
+            </button>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex border-b border-gray-200 mb-6 font-medium text-sm">
           <button
@@ -100,20 +117,18 @@ const ClientProfile = () => {
           >
             Notifications
           </button>
-          {hasTradingSignals && (
-            <button
-              className={`px-4 py-3 border-b-2 transition-colors duration-200 ${activeTab === "alerts"
-                ? "border-primary text-primary"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleTabChange("alerts");
-              }}
-            >
-              Alert Preferences
-            </button>
-          )}
+          <button
+            className={`px-4 py-3 border-b-2 transition-colors duration-200 ${activeTab === "alerts"
+              ? "border-primary text-primary"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            onClick={(e) => {
+              e.preventDefault();
+              handleTabChange("alerts");
+            }}
+          >
+            Alert Preferences
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -252,7 +267,7 @@ const ClientProfile = () => {
           <NotificationPreferences />
         )}
 
-        {activeTab === "alerts" && hasTradingSignals && (
+        {hasAlertsAccess && activeTab === "alerts" && (
           <AlertPairPreferences />
         )}
       </Container>

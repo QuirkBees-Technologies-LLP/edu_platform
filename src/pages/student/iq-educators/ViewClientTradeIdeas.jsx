@@ -47,17 +47,17 @@ const ViewClientTradeIdeas = forwardRef(
 
                 <div className="flex items-center justify-between py-2">
                   {/* Left side: Image + Name */}
-                  <div className="flex items-center">
+                  <Link to={`/iq-educators/${selectedIdea?.educatorDetails?._id}`} className="flex items-center">
                     <img
                       src={selectedIdea?.educatorDetails?.image}
                       className="rounded-full size-7 me-2"
                       alt=""
                     />
-                    <div className="text-2sm text-gray-800 mb-px">
+                    <div className="text-2sm text-gray-800 hover:text-primary mb-px">
                       {selectedIdea?.educatorDetails?.first_name}{" "}
                       {selectedIdea?.educatorDetails?.last_name}
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Right side: Category Name */}
                   <div className="text-2sm text-gray-800">

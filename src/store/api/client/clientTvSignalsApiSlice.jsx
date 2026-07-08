@@ -4,12 +4,24 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientTvSignalsApiSlice = createApi({
   reducerPath: "clientTvSignals",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["TvSignals", "TvSignalDetail", "TvUnreadCount", "TvFilters"],
+  tagTypes: ["TvSignals", "TvSignalDetail", "TvFilters", "TvAlertPrefConfigs", "TvFilterPrefs"],
   endpoints: (builder) => ({
     getClientTvSignals: builder.query({
       query: ({
         page = 1,
         limit = 12,
+        // Exclusion-based multi-select filters (arrays of unchecked values)
+        excludedSymbols = [],
+        excludedSignalTypes = [],
+        excludedStrategies = [],
+        excludedTimeframes = [],
+        // Strategy-specific display filters
+        entryType = "",          // Defy: "confirmed" | "pending" | ""
+        excludedDefyTypes = [], // Defy multi-select exclusion
+        excludedReactTypes = [], // React multi-select exclusion
+        excludedBullseyeTypes = [], // Bullseye pattern exclusion
+        excludedSessions = [], // Trading session exclusion
+        // Legacy single-value filters (backward compat)
         symbol = "",
         signalType = "",
         strategy = "",
@@ -22,6 +34,26 @@ export const clientTvSignalsApiSlice = createApi({
         params.set("page", page);
         params.set("limit", limit);
 
+        // Multi-select exclusion params (preferred)
+        if (excludedSymbols.length > 0) params.set("excludedSymbols", excludedSymbols.join(","));
+        if (excludedSignalTypes.length > 0) params.set("excludedSignalTypes", excludedSignalTypes.join(","));
+        if (excludedStrategies.length > 0) params.set("excludedStrategies", excludedStrategies.join(","));
+        if (excludedTimeframes.length > 0) params.set("excludedTimeframes", excludedTimeframes.join(","));
+
+        // Defy entry type filter
+        if (entryType) params.set("entryType", entryType);
+        if (excludedDefyTypes.length > 0) params.set("excludedDefyTypes", excludedDefyTypes.join(","));
+
+        // React entry type filter
+        if (excludedReactTypes.length > 0) params.set("excludedReactTypes", excludedReactTypes.join(","));
+
+        // Bullseye pattern filter
+        if (excludedBullseyeTypes.length > 0) params.set("excludedBullseyeTypes", excludedBullseyeTypes.join(","));
+
+        // Trading session filter
+        if (excludedSessions.length > 0) params.set("excludedSessions", excludedSessions.join(","));
+
+        // Legacy single-value fallback
         if (symbol) params.set("symbol", symbol);
         if (signalType) params.set("signalType", signalType);
         if (strategy) params.set("strategy", strategy);
@@ -40,26 +72,29 @@ export const clientTvSignalsApiSlice = createApi({
       providesTags: (result, error, id) => [{ type: "TvSignalDetail", id }],
     }),
 
-    markSignalRead: builder.mutation({
-      query: (id) => ({
-        url: `/users/tv-signals/${id}/read`,
-        method: "POST",
-      }),
-      invalidatesTags: (result, error, id) => [
-        { type: "TvSignals", id: "LIST" },
-        { type: "TvSignalDetail", id },
-        { type: "TvUnreadCount" },
-      ],
-    }),
-
-    getUnreadCount: builder.query({
-      query: () => `/users/tv-signals/unread-count`,
-      providesTags: [{ type: "TvUnreadCount" }],
-    }),
-
     getFilterOptions: builder.query({
       query: () => `/users/tv-signals/filters`,
       providesTags: [{ type: "TvFilters" }],
+    }),
+
+    getAlertPreferenceConfigs: builder.query({
+      query: () => `/users/tv-signals/alert-preference-configs`,
+      providesTags: [{ type: "TvAlertPrefConfigs" }],
+    }),
+
+    getFilterPreferences: builder.query({
+      query: () => `/users/tv-signals/filter-preferences`,
+      providesTags: [{ type: "TvFilterPrefs" }],
+    }),
+
+    saveFilterPreferences: builder.mutation({
+      query: (prefs) => ({
+        url: `/users/tv-signals/filter-preferences`,
+        method: "PUT",
+        body: prefs,
+      }),
+      // No invalidatesTags — we already have the values in local state,
+      // refetching after save is redundant and causes extra GET calls.
     }),
   }),
 });
@@ -67,7 +102,8 @@ export const clientTvSignalsApiSlice = createApi({
 export const {
   useGetClientTvSignalsQuery,
   useGetClientTvSignalDetailQuery,
-  useMarkSignalReadMutation,
-  useGetUnreadCountQuery,
   useGetFilterOptionsQuery,
+  useGetAlertPreferenceConfigsQuery,
+  useGetFilterPreferencesQuery,
+  useSaveFilterPreferencesMutation,
 } = clientTvSignalsApiSlice;
