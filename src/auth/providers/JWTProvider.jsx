@@ -27,7 +27,7 @@ const testUsers = {
       last_name: "User",
       status: "Active",
       role: "student",
-      plan: "iq-max",
+      plan: "iq-plus",
       expire_at: new Date("2027-10-29"),
     },
   },
