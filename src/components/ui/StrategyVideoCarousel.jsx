@@ -9,6 +9,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { getEmbedUrl, getVideoThumbnail } from "@/utils/videoUtils";
+import StrategyResources from "./StrategyResources";
 
 import "swiper/css";
 import "./StrategyVideoCarousel.css";
@@ -31,7 +32,7 @@ import "./StrategyVideoCarousel.css";
  * @param {string}   [title]          – Optional heading above carousel
  * @param {string}   [description]    – Optional sub-text below heading
  */
-const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, description, strategyIcon }) => {
+const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, description, strategyIcon, resources = [] }) => {
     // Ensure videos is always a safe array
     const videos = Array.isArray(rawVideos) ? rawVideos : [];
 
@@ -225,7 +226,21 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
                         );
                     })}
                 </Swiper>
+
+                {/* Resources overlay — positioned over right preview card area */}
+                {resources?.length > 0 && (
+                    <div className="svc-resources-overlay">
+                        <StrategyResources resources={resources} />
+                    </div>
+                )}
             </div>
+
+            {/* ---- Resources below carousel (mobile only) ---- */}
+            {resources?.length > 0 && (
+                <div className="svc-resources-mobile">
+                    <StrategyResources resources={resources} />
+                </div>
+            )}
 
             {/* ---- Bottom controls: arrows + dots (hidden for single video) ---- */}
             {showNav && (

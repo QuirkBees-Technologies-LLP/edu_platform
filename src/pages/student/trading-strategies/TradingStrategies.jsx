@@ -26,6 +26,7 @@ import ResourcesSection from "../../../components/ui/ResourcesSection";
 import StrategyVideoCarousel from "../../../components/ui/StrategyVideoCarousel";
 import { getEmbedUrl } from "@/utils/videoUtils";
 import { getStrategyVideos } from "@/config/strategyConfig";
+import { getStrategyResources } from "@/config/strategyResources";
 
 /**
  * Original Strategy Banner — shown on the landing page before a strategy is selected.
@@ -293,12 +294,16 @@ const TradingStrategies = () => {
                         ? (() => {
                             const videoConfig = getStrategyVideos(parentStrategy?.title || currentStrategy?.title);
                             const strategyIconUrl = parentStrategy?.imageUrl || currentStrategy?.imageUrl;
+                            const strategyResources = getStrategyResources(
+                                parentStrategy?.title || currentStrategy?.title
+                            );
                             return (
                                 <StrategyVideoCarousel
                                     videos={videoConfig?.videos || []}
                                     title={videoConfig?.title}
                                     description={videoConfig?.description}
                                     strategyIcon={strategyIconUrl}
+                                    resources={strategyResources}
                                 />
                             );
                         })()

@@ -5,7 +5,7 @@
 /* ---- Container ---- */
 .strategy-video-carousel {
   position: relative;
-  padding: 0.5rem 0;
+  padding: 0 0;
   overflow-x: clip;
   overflow-y: visible;
 }
@@ -13,7 +13,7 @@
 /* ---- Header (strategy title + icon) ---- */
 .svc-header {
   text-align: center;
-  padding: 0.75rem 1rem 1rem;
+  padding: 0.25rem 1rem 0.75rem;
 }
 
 /* Row container: icon + title side-by-side, centred */
@@ -105,7 +105,7 @@
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
   background-size: 200% 100%;
   animation: svc-shimmer 1.5s ease-in-out infinite;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 2.2 / 1;
 }
 
 /* Dark mode skeleton */
@@ -470,5 +470,65 @@
   .svc-dot.active {
     width: 10px;
     height: 10px;
+  }
+}
+
+/* ============================================================
+   Resources Overlay — floating card on right preview card
+   ============================================================ */
+
+/* Positioned inside svc-carousel-wrapper (position: relative) */
+.svc-resources-overlay {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  z-index: 10;
+  width: 265px;
+  max-width: 28%;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-bottom: 0.625rem;
+  pointer-events: auto;
+}
+
+/* Hide overlay on mobile */
+@media (max-width: 767px) {
+  .svc-resources-overlay {
+    display: none !important;
+  }
+}
+
+/* Tablet adjustment */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .svc-resources-overlay {
+    width: 220px;
+    max-width: 30%;
+    right: 8px;
+    bottom: 8px;
+    padding: 0.5rem;
+  }
+}
+
+/* Mobile-only resources card — below carousel */
+.svc-resources-mobile {
+  display: none;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(15, 15, 25, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+}
+
+/* Light mode mobile card */
+:root:not(.dark) .svc-resources-mobile {
+  background: rgba(248, 248, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 767px) {
+  .svc-resources-mobile {
+    display: block;
   }
 }
