@@ -1074,7 +1074,7 @@ const AlertPairPreferences = () => {
                   }`}
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                Match Filters Settings
+                Match filters preferences
               </button>
               {/* Select All */}
               <div

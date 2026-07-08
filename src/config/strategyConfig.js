@@ -12,8 +12,8 @@
  *   ✅ EURUSD, XAUUSD, BTCUSD, US30, NAS100
  *   ❌ EUR/USD, XAU/USD, BTC/USD, S&P 500
  *
- * Coverage: 5 strategies × 48 shared pairs (React/Defy)
- *   24 FX (7 majors + 17 crosses) · 3 Crypto · 14 Indices · 7 Commodities
+ * Coverage: 5 strategies × 49 shared pairs (React/Defy)
+ *   25 FX (7 majors + 18 crosses) · 3 Crypto · 14 Indices · 7 Commodities
  */
 
 import { DollarSign, Bitcoin, BarChart3, Gem } from "lucide-react";
@@ -25,12 +25,12 @@ const FOREX_MAJORS = [
   "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "USDCAD", "NZDUSD",
 ];
 
-/** 17 cross pairs (per PDF — excludes AUDCHF, NZDCAD, NZDCHF, CADCHF) */
+/** 18 cross pairs (per PDF — excludes AUDCHF, NZDCAD, NZDCHF) */
 const FOREX_CROSSES = [
   "EURGBP", "EURJPY", "EURCHF", "EURAUD", "EURCAD", "EURNZD",
   "GBPJPY", "GBPCHF", "GBPAUD", "GBPCAD", "GBPNZD",
   "AUDJPY", "AUDCAD", "AUDNZD",
-  "CADJPY", "CHFJPY", "NZDJPY",
+  "CADCHF", "CADJPY", "CHFJPY", "NZDJPY",
 ];
 
 // ── Majors — no-slash format (for Bullseye "Majors" pattern matching) ─
@@ -107,7 +107,7 @@ export const ASSET_CLASSES = [
   },
 ];
 
-// ── All 48 Pairs (flattened from asset classes) ─────────────────────
+// ── All 49 Pairs (flattened from asset classes) ─────────────────────
 // Used by React and Defy strategies (both cover the full set).
 export const ALL_PAIRS = ASSET_CLASSES.flatMap((c) => c.instruments.map((i) => i.symbol));
 
@@ -150,7 +150,7 @@ export const STRATEGIES = [
     timeframes: STRATEGY_TIMEFRAMES,
     assetClasses: ["forex", "crypto", "indices", "commodities"],
     pairTimeframeMap: null,
-    totalPairs: 48,
+    totalPairs: 49,
   },
   {
     key: "defy",
