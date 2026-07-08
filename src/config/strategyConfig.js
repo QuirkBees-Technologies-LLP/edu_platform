@@ -316,7 +316,7 @@ export function canonicalToFilterTf(tf) {
 
 export const STRATEGY_VIDEO_CONFIG = {
   react: {
-    title: "React",
+    title: "REACT",
     // description: "Watch these React strategy tutorials to master the React trading system.",
     videos: [
       {
