@@ -592,7 +592,7 @@ export default function IqAcademy() {
         ) : (
           <ListView
             strategyEducators={strategyEducators}
-            strategies={strategyData?.data?.strategy || []}
+            strategies={strategiesName?.data || []}
             activeEducatorId={activeEducatorId}
             setActiveEducatorId={setActiveEducatorId}
             activeStrategyId={activeStrategyId}
@@ -623,7 +623,7 @@ export default function IqAcademy() {
         ) : (
           <ListView
             strategyEducators={strategyEducators}
-            strategies={strategyData?.data?.strategy || []}
+            strategies={strategiesName?.data || []}
             activeEducatorId={activeEducatorId}
             setActiveEducatorId={setActiveEducatorId}
             activeStrategyId={activeStrategyId}
