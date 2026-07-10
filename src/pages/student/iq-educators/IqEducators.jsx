@@ -11,6 +11,8 @@ import {
   VolumeX,
   TrendingDown,
   TrendingUp,
+  UserPlus,
+  UserCheck,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
@@ -20,6 +22,7 @@ import {
   useGetEducatorWithCoursesQuery,
   useLazyGetSecureVideoQuery,
 } from "../../../store/api/client/clientCoursesApiSlice";
+import { useToggleFollowMutation } from "../../../store/api/client/clientEductorApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
@@ -38,8 +41,10 @@ import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 
 const IqEducators = () => {
   const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
+  const [toggleFollow, { isLoading: isFollowLoading }] = useToggleFollowMutation();
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
+  const [isFollowing, setIsFollowing] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [courseAll, setCourseAll] = useState(false);
   const [recording, setRecording] = useState(null);
@@ -161,6 +166,27 @@ const IqEducators = () => {
     }
 
   }, [liveTradeIdeas, liveIdea]);
+
+  // Sync follow state from API response
+  useEffect(() => {
+    if (response?.data?.educator?.isFollowing !== undefined) {
+      setIsFollowing(response.data.educator.isFollowing);
+    }
+  }, [response]);
+
+  const handleToggleFollow = async () => {
+    if (isFollowLoading) return;
+    // Optimistic update
+    setIsFollowing((prev) => !prev);
+    try {
+      await toggleFollow(id).unwrap();
+      refetchEducator();
+    } catch (error) {
+      // Revert on error
+      setIsFollowing((prev) => !prev);
+      console.error("Follow toggle error:", error);
+    }
+  };
 
   const handleRefresh = () => {
     // refetchEducator();
@@ -468,12 +494,35 @@ const IqEducators = () => {
 
 
           </div>
-          <button
-            onClick={() => setShowRatingModal(true)}
-            className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors w-fit`}
-          >
-            ⭐ Rate Me
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleToggleFollow}
+              disabled={isFollowLoading}
+              className={`border text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all duration-300 ${
+                isFollowing
+                  ? "border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50"
+                  : getButtonColor()
+              } ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck size={16} />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus size={16} />
+                  Follow
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => setShowRatingModal(true)}
+              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors w-fit`}
+            >
+              ⭐ Rate Me
+            </button>
+          </div>
         </div>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
