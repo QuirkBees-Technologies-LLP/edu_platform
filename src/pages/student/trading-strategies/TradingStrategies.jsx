@@ -95,9 +95,11 @@ const TradingStrategies = () => {
     const {
         data: learningContentData,
         isLoading: isLearningContentLoading,
+        isError: isLearningContentError,
+        isFetching: isLearningContentFetching,
     } = useGetStrategyContentQuery(
-        { strategy: parentStrategyId, language: activeLanguageForContent },
-        { skip: !parentStrategyId || !activeLanguageForContent }
+        { strategy: parentStrategyId /* language: activeLanguageForContent */ },
+        { skip: !parentStrategyId }
     );
     const learningContent = learningContentData?.data;
 
@@ -305,10 +307,11 @@ const TradingStrategies = () => {
                     {currentStrategy
                         ? (() => {
                             // Use dynamic learning content from admin
-                            const hasLearningContent = learningContent?.videos?.length > 0;
+                            // Show banner if: error, still fetching, or no videos
+                            const hasLearningContent = !isLearningContentError && !isLearningContentFetching && learningContent?.videos?.length > 0;
                             const strategyIconUrl = parentStrategy?.imageUrl || currentStrategy?.imageUrl;
 
-                            // If no learning content videos, show banner image
+                            // If no learning content videos or error, show banner image
                             if (!hasLearningContent) {
                                 return <Banner />;
                             }
