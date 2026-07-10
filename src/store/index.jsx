@@ -52,6 +52,8 @@ import { adminMetricsApiSlice } from "./api/admin/adminMetricsApiSlice";
 import { educatorTvWebhookApiSlice } from "./api/educator/educatorTvWebhookApiSlice";
 import { clientTvSignalsApiSlice } from "./api/client/clientTvSignalsApiSlice";
 import { adminTvWebhookApiSlice } from "./api/admin/adminTvWebhookApiSlice";
+import { adminLearningContentApiSlice } from "./api/admin/adminLearningContentApiSlice";
+import { clientLearningContentApiSlice } from "./api/client/clientLearningContentApiSlice";
 
 
 const languagePersistConfig = {
@@ -133,6 +135,8 @@ export const store = configureStore({
     [educatorTvWebhookApiSlice.reducerPath]: educatorTvWebhookApiSlice.reducer,
     [clientTvSignalsApiSlice.reducerPath]: clientTvSignalsApiSlice.reducer,
     [adminTvWebhookApiSlice.reducerPath]: adminTvWebhookApiSlice.reducer,
+    [adminLearningContentApiSlice.reducerPath]: adminLearningContentApiSlice.reducer,
+    [clientLearningContentApiSlice.reducerPath]: clientLearningContentApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -181,6 +185,8 @@ export const store = configureStore({
       educatorTvWebhookApiSlice.middleware,
       clientTvSignalsApiSlice.middleware,
       adminTvWebhookApiSlice.middleware,
+      adminLearningContentApiSlice.middleware,
+      clientLearningContentApiSlice.middleware,
     ),
 });
 

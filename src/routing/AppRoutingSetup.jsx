@@ -167,6 +167,9 @@ import StrategyAlerts from "../pages/student/strategy-alerts/StrategyAlerts";
 import AdminMetrixDashboard from "../pages/admin/admin-MetrixDashboard/AdminMetrixDashboard.jsx";
 import AdminTvWebhookPage from "../pages/admin/admin-tv-webhook/AdminTvWebhookPage";
 import StudentTradingSignals from "../pages/student/trading-signals/StudentTradingSignals";
+import LearningContentList from "../pages/admin/learning-content/LearningContentList";
+import LearningContentForm from "../pages/admin/learning-content/LearningContentForm";
+import LearningContentDetail from "../pages/admin/learning-content/LearningContentDetail";
 const routes = {
   student: [
     { path: "/", element: <DefaultPage /> },
@@ -280,6 +283,10 @@ const routes = {
     },
     { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
     { path: "/admin/tv-webhooks", element: <AdminTvWebhookPage /> },
+    { path: "/admin/learning-content", element: <LearningContentList /> },
+    { path: "/admin/learning-content/create", element: <LearningContentForm /> },
+    { path: "/admin/learning-content/:id", element: <LearningContentDetail /> },
+    { path: "/admin/learning-content/:id/edit", element: <LearningContentForm /> },
   ],
   super_admin: [
     { path: "/", element: <DefaultPage /> },
@@ -313,6 +320,10 @@ const routes = {
     },
     { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
     { path: "/admin/tv-webhooks", element: <AdminTvWebhookPage /> },
+    { path: "/admin/learning-content", element: <LearningContentList /> },
+    { path: "/admin/learning-content/create", element: <LearningContentForm /> },
+    { path: "/admin/learning-content/:id", element: <LearningContentDetail /> },
+    { path: "/admin/learning-content/:id/edit", element: <LearningContentForm /> },
   ],
   marketer: [
     { path: "/", element: <DefaultPage /> },
