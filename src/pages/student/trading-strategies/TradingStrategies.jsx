@@ -301,7 +301,28 @@ const TradingStrategies = () => {
     // ==================== MAIN RENDER ====================
     return (
         <div className="max-w-7xl mx-auto px-4 pb-10">
-            <Container width="fluid" className="mx-auto px-5">
+            {/* <BackButton /> */}
+            <Container width="fluid" className="mx-auto px-2">
+                {/* Strategy Logo — shown from learning content response (dark/light mode) */}
+                {learningContent?.darkModeImage || learningContent?.lightModeImage ? (
+                    <div className="flex items-center justify-center mb-4">
+                        {learningContent?.darkModeImage && (
+                            <img
+                                src={learningContent?.darkModeImage}
+                                alt={currentStrategy?.title || "Strategy"}
+                                className="hidden dark:block h-14 w-auto object-contain"
+                            />
+                        )}
+                        {learningContent?.lightModeImage && (
+                            <img
+                                src={learningContent?.lightModeImage}
+                                alt={currentStrategy?.title || "Strategy"}
+                                className="block dark:hidden h-14 w-auto object-contain"
+                            />
+                        )}
+                    </div>
+                ) : null}
+
                 {/* Banner or Video Carousel — conditionally rendered */}
                 <div className="ts-banner">
                     {currentStrategy
@@ -316,13 +337,17 @@ const TradingStrategies = () => {
                                 return <Banner />;
                             }
 
+                            const hasDarkLightImages = learningContent?.darkModeImage || learningContent?.lightModeImage;
+
                             return (
                                 <StrategyVideoCarousel
-                                    videos={learningContent.videos}
-                                    title={learningContent.title || parentStrategy?.title || currentStrategy?.title}
-                                    description={learningContent.description}
-                                    strategyIcon={strategyIconUrl}
-                                    resources={learningContent.resources || []}
+                                    videos={learningContent?.videos}
+                                    title={hasDarkLightImages ? undefined : (learningContent?.title || parentStrategy?.title || currentStrategy?.title)}
+                                    description={hasDarkLightImages ? undefined : learningContent?.description}
+                                    strategyIcon={hasDarkLightImages ? undefined : strategyIconUrl}
+                                    darkModeImage={learningContent?.darkModeImage || ""}
+                                    lightModeImage={learningContent?.lightModeImage || ""}
+                                    resources={learningContent?.resources || []}
                                 />
                             );
                         })()

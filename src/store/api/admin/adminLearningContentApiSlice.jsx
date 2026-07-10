@@ -51,10 +51,10 @@ export const adminLearningContentApiSlice = createApi({
     }),
 
     updateLearningContent: builder.mutation({
-      query: ({ id, ...body }) => ({
+      query: ({ id, formData }) => ({
         url: `/admin/learning-content/${id}`,
         method: "PUT",
-        body,
+        body: formData,
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: "LearningContent", id: "LIST" },
