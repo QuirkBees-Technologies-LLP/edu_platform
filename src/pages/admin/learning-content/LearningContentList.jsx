@@ -766,86 +766,105 @@ const LearningContentList = () => {
 
 
 
-              {/* Dark / Light Mode Images — side by side */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Dark Mode Image */}
+              {/* Description — only for FAST_START */}
+              {formData.contentType === "FAST_START" && (
                 <div className="space-y-2">
-                  <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-white">
-                    <Moon size={14} className="text-blue-400" />
-                    Dark Mode Image
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white">
+                    Description
                   </label>
-                  {(formData.darkModeImagePreview || formData.darkModeImageFile) ? (
-                    <div className="relative group rounded-xl border-2 p-3 flex items-center justify-center min-h-[100px]" >
-                      <img
-                        src={formData.darkModeImageFile ? URL.createObjectURL(formData.darkModeImageFile) : formData.darkModeImagePreview}
-                        alt="Dark mode preview"
-                        className="max-h-20 w-auto object-contain"
-                      />
-                      <button
-                        type="button"
-                        className="absolute top-1.5 right-1.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        onClick={() => setFormData((prev) => ({ ...prev, darkModeImageFile: null, darkModeImagePreview: "" }))}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center min-h-[100px] rounded-xl border-2 border-dashed border-gray-600 dark:border-gray-600 bg-gray-800/40 hover:bg-gray-800/60 hover:border-indigo-500/50 cursor-pointer transition-all group">
-                      <Upload size={20} className="text-gray-500 group-hover:text-blue-700 transition-colors mb-1.5" />
-                      <span className="text-xs text-gray-500 group-hover:text-blue-700 transition-colors font-medium">Click to upload</span>
-                      <span className="text-[10px] text-gray-600 mt-0.5">PNG, JPG, WEBP</span>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) setFormData((prev) => ({ ...prev, darkModeImageFile: file }));
-                        }}
-                      />
-                    </label>
-                  )}
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleFormChange}
+                    rows={3}
+                    placeholder="e.g., Watch this mini series to start your IQONIC journey!"
+                    className="w-full dark:bg-[#1a1c23] border dark:border-gray-700 rounded-lg px-4 py-2.5 text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all min-h-[80px] resize-none"
+                  />
                 </div>
+              )}
 
-                {/* Light Mode Image */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-white">
-                    <Sun size={14} className="text-blue-700" />
-                    Light Mode Image
-                  </label>
-                  {(formData.lightModeImagePreview || formData.lightModeImageFile) ? (
-                    <div className="relative group rounded-xl border-2 p-3 flex items-center justify-center min-h-[100px]" >
-                      <img
-                        src={formData.lightModeImageFile ? URL.createObjectURL(formData.lightModeImageFile) : formData.lightModeImagePreview}
-                        alt="Light mode preview"
-                        className="max-h-20 w-auto object-contain"
-                      />
-                      <button
-                        type="button"
-                        className="absolute top-1.5 right-1.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        onClick={() => setFormData((prev) => ({ ...prev, lightModeImageFile: null, lightModeImagePreview: "" }))}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center min-h-[100px] rounded-xl border-2 border-dashed border-gray-600 dark:border-gray-600 bg-gray-800/40 hover:bg-gray-800/60 hover:border-indigo-500/50 cursor-pointer transition-all group">
-                      <Upload size={20} className="text-gray-500 group-hover:text-blue-700 transition-colors mb-1.5" />
-                      <span className="text-xs text-gray-500 group-hover:text-blue-700 transition-colors font-medium">Click to upload</span>
-                      <span className="text-[10px] text-gray-600 mt-0.5">PNG, JPG, WEBP</span>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) setFormData((prev) => ({ ...prev, lightModeImageFile: file }));
-                        }}
-                      />
+              {/* Dark / Light Mode Images — only for STRATEGY */}
+              {formData.contentType === "STRATEGY" && (
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Dark Mode Image */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-white">
+                      <Moon size={14} className="text-blue-400" />
+                      Dark Mode Image
                     </label>
-                  )}
+                    {(formData.darkModeImagePreview || formData.darkModeImageFile) ? (
+                      <div className="relative group rounded-xl border-2 p-3 flex items-center justify-center min-h-[100px]" >
+                        <img
+                          src={formData.darkModeImageFile ? URL.createObjectURL(formData.darkModeImageFile) : formData.darkModeImagePreview}
+                          alt="Dark mode preview"
+                          className="max-h-20 w-auto object-contain"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-1.5 right-1.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                          onClick={() => setFormData((prev) => ({ ...prev, darkModeImageFile: null, darkModeImagePreview: "" }))}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center min-h-[100px] rounded-xl border-2 border-dashed border-gray-600 dark:border-gray-600 bg-gray-800/40 hover:bg-gray-800/60 hover:border-indigo-500/50 cursor-pointer transition-all group">
+                        <Upload size={20} className="text-gray-500 group-hover:text-blue-700 transition-colors mb-1.5" />
+                        <span className="text-xs text-gray-500 group-hover:text-blue-700 transition-colors font-medium">Click to upload</span>
+                        <span className="text-[10px] text-gray-600 mt-0.5">PNG, JPG, WEBP</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setFormData((prev) => ({ ...prev, darkModeImageFile: file }));
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Light Mode Image */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-white">
+                      <Sun size={14} className="text-blue-700" />
+                      Light Mode Image
+                    </label>
+                    {(formData.lightModeImagePreview || formData.lightModeImageFile) ? (
+                      <div className="relative group rounded-xl border-2 p-3 flex items-center justify-center min-h-[100px]" >
+                        <img
+                          src={formData.lightModeImageFile ? URL.createObjectURL(formData.lightModeImageFile) : formData.lightModeImagePreview}
+                          alt="Light mode preview"
+                          className="max-h-20 w-auto object-contain"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-1.5 right-1.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                          onClick={() => setFormData((prev) => ({ ...prev, lightModeImageFile: null, lightModeImagePreview: "" }))}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center min-h-[100px] rounded-xl border-2 border-dashed border-gray-600 dark:border-gray-600 bg-gray-800/40 hover:bg-gray-800/60 hover:border-indigo-500/50 cursor-pointer transition-all group">
+                        <Upload size={20} className="text-gray-500 group-hover:text-blue-700 transition-colors mb-1.5" />
+                        <span className="text-xs text-gray-500 group-hover:text-blue-700 transition-colors font-medium">Click to upload</span>
+                        <span className="text-[10px] text-gray-600 mt-0.5">PNG, JPG, WEBP</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setFormData((prev) => ({ ...prev, lightModeImageFile: file }));
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <DialogFooter>
