@@ -32,7 +32,7 @@ import "./StrategyVideoCarousel.css";
  * @param {string}   [title]          – Optional heading above carousel
  * @param {string}   [description]    – Optional sub-text below heading
  */
-const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, description, strategyIcon, resources = [] }) => {
+const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, description, strategyIcon, darkModeImage = "", lightModeImage = "", resources = [] }) => {
     // Ensure videos is always a safe array
     const videos = Array.isArray(rawVideos) ? rawVideos : [];
 
