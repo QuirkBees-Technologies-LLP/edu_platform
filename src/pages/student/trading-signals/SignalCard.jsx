@@ -94,9 +94,9 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
                     100% { transform: translateX(100%); }
                   }
                 `}</style>
-                <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] z-10 overflow-hidden">
+                <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] z-5 overflow-hidden">
                   {/* Shimmer sweep */}
-                  <div className="absolute inset-0 z-20 overflow-hidden">
+                  <div className="absolute inset-0 z-5 overflow-hidden">
                     <div
                       className="absolute inset-0"
                       style={{
