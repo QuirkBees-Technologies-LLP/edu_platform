@@ -4,6 +4,10 @@ import {
   useGetAcademyCategoryByMainSectionQuery,
   useGetFirstStartTrainingSectionQuery,
 } from "../../../store/api/client/clientAcademyCategoryApiSlice";
+import {
+  useGetFastStartContentQuery,
+  useGetFastStartLanguagesQuery,
+} from "../../../store/api/client/clientLearningContentApiSlice";
 import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
@@ -14,43 +18,6 @@ import { useTourStep } from "@/hooks/useTourStep";
 import ResourcesSection from "../../../components/ui/ResourcesSection";
 import StrategyVideoCarousel from "../../../components/ui/StrategyVideoCarousel";
 import { getEmbedUrl } from "@/utils/videoUtils";
-
-/**
- * Placeholder video data for the Fast Start Training carousel.
- * Replace with an API call when a backend endpoint is available.
- */
-const FAST_START_VIDEOS = [
-  {
-    id: "fst-v1",
-    title: "Getting Started",
-    videoUrl: "https://videos.dyntube.com/iframes/ek3BUWMF0WtQg9iTMtA0Q",
-    duration: "",
-  },
-  {
-    id: "fst-v2",
-    title: "Access your Account",
-    videoUrl: "https://videos.dyntube.com/iframes/FrZ6pur22ky1g33c5sa2Iw",
-    duration: "",
-  },
-  {
-    id: "fst-v3",
-    title: "Access your Education",
-    videoUrl: "https://videos.dyntube.com/iframes/IfperYQPFEiPElvCcWYPaQ",
-    duration: "",
-  },
-  {
-    id: "fst-v4",
-    title: "Access your Trading Tools",
-    videoUrl: "https://videos.dyntube.com/iframes/sMCa6rpVjEe0Ix4Ge8BjA",
-    duration: "",
-  },
-  {
-    id: "fst-v5",
-    title: "Start using your Apps",
-    videoUrl: "https://videos.dyntube.com/iframes/nPaKOr16k26Sn83rjY5w",
-    duration: "",
-  },
-];
 
 export default function FastStartTraining() {
   const [activeLectureId, setActiveLectureId] = useState(null);
@@ -69,6 +36,18 @@ export default function FastStartTraining() {
 
   const selectedLanguage = useSelector(selectSelectedLanguage);
 
+  // ── Dynamic Learning Content (replaces hardcoded FAST_START_VIDEOS) ──
+  const {
+    data: learningContentData,
+    isLoading: isLearningContentLoading,
+  } = useGetFastStartContentQuery(
+    { language: selectedLanguage },
+    { skip: !selectedLanguage }
+  );
+
+  const learningContent = learningContentData?.data;
+
+  // ── Existing Academy course/lecture structure (preserved) ────────────
   const {
     data,
     isLoading: isCategoryLoading,
@@ -205,7 +184,7 @@ export default function FastStartTraining() {
   return (
     <>
       <div>
-        {isCategoryLoading ? (
+        {isCategoryLoading || isLearningContentLoading ? (
           <Loader />
         ) : data?.success === false &&
           data?.message === "No Category found on this Language" ? (
@@ -229,14 +208,52 @@ export default function FastStartTraining() {
           </div>
         ) : (
           <div className="container-fluid pb-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Video Carousel */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Video Carousel or Banner fallback */}
               <div className="col-span-full">
-                <StrategyVideoCarousel
-                  videos={FAST_START_VIDEOS}
-                  title="Welcome!"
-                  description="Watch this mini series to start your IQONIC journey!"
-                />
+                {learningContent?.videos?.length > 0 ? (
+                  <StrategyVideoCarousel
+                    videos={learningContent.videos}
+                    title={learningContent.title || ""}
+                    description={learningContent.description || ""}
+                  />
+                ) : data?.ActiveCategory && data.ActiveCategory.length > 0 ? (
+                  <div
+                    style={{
+                      backgroundImage: `url(/media/banners/Backoffice.jpg)`,
+                    }}
+                    className="text-white py-12 rounded-2xl flex justify-center items-center bg-cover bg-center bg-no-repeat h-72 w-full"
+                  >
+                    <div className="text-center">
+                      <h1 className="text-4xl font-bold tracking-wider pb-2">
+                        {data.ActiveCategory[0]?.categoryName}
+                      </h1>
+                      <p className="text-lg sm:text-xl tracking-widest">
+                        TRAINING
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gray-100 dark:bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
+                    <div className="text-center">
+                      <h1 className="text-4xl font-bold tracking-wider pb-2 text-gray-600 dark:text-gray-300">
+                        Fast Start Training
+                      </h1>
+                      <p className="text-lg sm:text-xl tracking-widest text-gray-500 dark:text-gray-400">
+                        No videos available
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {/* Learning Content Resources */}
+                {learningContent?.resources?.length > 0 && (
+                  <div className="mt-5">
+                    <ResourcesSection
+                      resources={learningContent.resources}
+                      viewOnly
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Sidebar - Course + Lectures */}
@@ -277,7 +294,7 @@ export default function FastStartTraining() {
                         </Accordion>
                       </div>
                     ) : (
-                      <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
+                      <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-[#1a1c23]">
                         <div className="flex flex-col items-center justify-center py-12 px-6">
                           <div className="text-center">
                             <div className="text-4xl mb-4">📚</div>
@@ -293,7 +310,7 @@ export default function FastStartTraining() {
                     )}
                   </>
                 ) : (
-                  <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
+                  <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-[#1a1c23]">
                     <div className="flex flex-col items-center justify-center py-12 px-6">
                       <div className="text-center">
                         <div className="text-4xl mb-4">📚</div>

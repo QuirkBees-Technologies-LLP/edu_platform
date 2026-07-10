@@ -89,7 +89,7 @@ const FilterSelect = ({
       {isOpen && (
         <div
           className="
-            absolute top-full left-0 mt-1.5 z-[9999]
+            absolute top-full left-0 mt-1.5 z-[5]
             min-w-full w-max max-w-[300px] py-1
             bg-white dark:bg-[#1A1A2E] text-slate-900 dark:text-white
             border border-slate-200 dark:border-[#2A2A4A] rounded-lg shadow-2xl

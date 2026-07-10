@@ -52,7 +52,7 @@ const SingleFilterSelect = ({
               onMouseLeave={() => setShowInfo(false)}
             />
             {showInfo && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-[280px] px-3.5 py-3 rounded-lg bg-slate-800 dark:bg-slate-900 border border-slate-700 dark:border-slate-700 shadow-xl text-[11.5px] text-slate-200 leading-relaxed pointer-events-none">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-6 w-[280px] px-3.5 py-3 rounded-lg bg-slate-800 dark:bg-slate-900 border border-slate-700 dark:border-slate-700 shadow-xl text-[11.5px] text-slate-200 leading-relaxed pointer-events-none">
                 <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-[5px] border-transparent border-t-slate-800 dark:border-t-slate-900" />
                 {infoText}
               </div>
@@ -101,7 +101,7 @@ const SingleFilterSelect = ({
       {isOpen && (
         <div
           className="
-            absolute top-full left-0 mt-1.5 z-[9999]
+            absolute top-full left-0 mt-1.5 z-6
             w-[180px] py-1
             bg-white dark:bg-[#1A1A2E] text-slate-900 dark:text-white
             border border-slate-200 dark:border-[#2A2A4A] rounded-lg shadow-2xl

@@ -81,13 +81,13 @@ const DB_NAME_TO_RESTRICTION_KEY = DB_NAME_TO_STRATEGY_KEY;
 
 const KILLSHOT_CONFIG = STRATEGIES_MAP.killshot
   ? {
-      symbols: STRATEGIES_MAP.killshot.pairs,
-      timeframes: STRATEGIES_MAP.killshot.timeframes.map((tf) => {
-        const m = tf.match(/^M(\d+)$/); if (m) return { value: `${m[1]}m`, label: `${m[1]}m` };
-        const h = tf.match(/^H(\d+)$/); if (h) return { value: `${h[1]}H`, label: `${h[1]}H` };
-        return { value: tf, label: tf };
-      }),
-    }
+    symbols: STRATEGIES_MAP.killshot.pairs,
+    timeframes: STRATEGIES_MAP.killshot.timeframes.map((tf) => {
+      const m = tf.match(/^M(\d+)$/); if (m) return { value: `${m[1]}m`, label: `${m[1]}m` };
+      const h = tf.match(/^H(\d+)$/); if (h) return { value: `${h[1]}H`, label: `${h[1]}H` };
+      return { value: tf, label: tf };
+    }),
+  }
   : { symbols: [], timeframes: [] };
 
 const KILLSHOT_RESTRICTION = {
@@ -475,7 +475,7 @@ const StudentTradingSignals = () => {
 
 
   return (
-    <div className="container-fluid pb-5 overflow-x-hidden">
+    <div className="max-w-7xl mx-auto px-4 pb-10">
       {/* ── Header ── */}
       <Toolbar className="mb-5">
         <ToolbarHeading>
@@ -533,7 +533,7 @@ const StudentTradingSignals = () => {
 
       {/* ── Filter Bar ── */}
       {showFilters && (
-        <div className="relative z-[45] flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
+        <div className="relative flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
           {/* ── Exclusion Filters ───────────────────────────────── */}
           <div className="flex gap-4 items-end pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end flex-1 min-w-0">
@@ -590,7 +590,7 @@ const StudentTradingSignals = () => {
 
       {/* ── Signal Cards ── */}
       {isInitialLoad && (isLoading || isFetching) ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
               key={i}
@@ -652,7 +652,7 @@ const StudentTradingSignals = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {signals?.map((signal, index) => (
             <SignalCard
               key={signal?._id}

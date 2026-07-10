@@ -37,21 +37,30 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 };
 
-const getPreviewType = (mimeType) => {
-  if (!mimeType) return "other";
-  if (mimeType?.includes("image")) return "image";
-  if (mimeType?.includes("pdf")) return "pdf";
+const getPreviewType = (nameOrType) => {
+  if (!nameOrType) return "other";
+  const lower = nameOrType.toLowerCase();
+  if (lower.includes("image") || lower.includes(".jpg") || lower.includes(".jpeg") || lower.includes(".png") || lower.includes(".gif") || lower.includes(".webp")) return "image";
+  if (lower.includes("pdf") || lower.includes(".pdf")) return "pdf";
   if (
-    mimeType?.includes("word") ||
-    mimeType?.includes("document") ||
-    mimeType?.includes("presentation") ||
-    mimeType?.includes("powerpoint") ||
-    mimeType?.includes("sheet") ||
-    mimeType?.includes("excel")
+    lower.includes("word") ||
+    lower.includes("document") ||
+    lower.includes("presentation") ||
+    lower.includes("powerpoint") ||
+    lower.includes("sheet") ||
+    lower.includes("excel") ||
+    lower.includes(".doc") ||
+    lower.includes(".xls") ||
+    lower.includes(".ppt")
   )
     return "office";
   return "other";
 };
+
+// Helpers to resolve resource fields across old and new API formats
+const getResourceUrl = (r) => r?.url || r?.fileUrl || "";
+const getResourceName = (r) => r?.originalName || r?.displayName || "download";
+const getResourceType = (r) => r?.mimeType || r?.fileType || r?.displayName || "";
 
 // Forces a file-save dialog regardless of file type (image, pdf, etc.)
 const triggerDownload = async (url, filename) => {
@@ -76,12 +85,14 @@ const ResourcesSection = ({ resources = [], className = "" }) => {
   const [previewResource, setPreviewResource] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
 
+  console.log(resources);
+
   if (!resources?.length) return null;
 
   const openPreview = (resource) => {
-    const type = getPreviewType(resource?.mimeType);
+    const type = getPreviewType(getResourceType(resource));
     if (type === "other") {
-      window.open(resource?.url, "_blank", "noopener,noreferrer");
+      window.open(getResourceUrl(resource), "_blank", "noopener,noreferrer");
     } else {
       setPreviewResource(resource);
     }
@@ -89,13 +100,13 @@ const ResourcesSection = ({ resources = [], className = "" }) => {
 
   const handleDownload = async (resource) => {
     setDownloadingId(resource?._id);
-    await triggerDownload(resource?.url, resource?.originalName);
+    await triggerDownload(getResourceUrl(resource), getResourceName(resource));
     setDownloadingId(null);
   };
 
   const handleModalDownload = async (resource) => {
     setDownloadingId("modal");
-    await triggerDownload(resource?.url, resource?.originalName);
+    await triggerDownload(getResourceUrl(resource), getResourceName(resource));
     setDownloadingId(null);
   };
 
@@ -116,13 +127,13 @@ const ResourcesSection = ({ resources = [], className = "" }) => {
               key={resource?._id}
               className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
             >
-              {getFileIcon(resource?.mimeType)}
+              {getFileIcon(resource?.displayName || getResourceType(resource))}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                  {resource?.originalName}
+                <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                  {resource?.displayName || resource?.originalName || "Untitled"}
                 </p>
-                <p className="text-xs text-gray-500">
-                  {formatFileSize(resource?.size)}
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {resource?.fileType || formatFileSize(resource?.size) || ""}
                 </p>
               </div>
 
@@ -141,7 +152,7 @@ const ResourcesSection = ({ resources = [], className = "" }) => {
                 type="button"
                 onClick={() => handleDownload(resource)}
                 disabled={downloadingId === resource?._id}
-                className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50"
+                className="p-2 text-gray-400 dark:text-gray-300 hover:text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50"
                 title="Download"
               >
                 {downloadingId === resource?._id ? (
@@ -180,9 +191,9 @@ const ResourcesSection = ({ resources = [], className = "" }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                   <div className="flex items-center gap-2 min-w-0">
-                    {getFileIcon(previewResource?.mimeType)}
+                    {getFileIcon(getResourceType(previewResource))}
                     <span className="text-sm font-medium text-gray-800 truncate">
-                      {previewResource?.originalName}
+                      {getResourceName(previewResource)}
                     </span>
                     <span className="text-xs text-gray-400 shrink-0">
                       {formatFileSize(previewResource?.size)}
@@ -215,30 +226,30 @@ const ResourcesSection = ({ resources = [], className = "" }) => {
 
                 {/* Body */}
                 <div className="flex-1 overflow-hidden relative">
-                  {getPreviewType(previewResource?.mimeType) === "image" ? (
+                  {getPreviewType(getResourceType(previewResource)) === "image" ? (
                     <div className="flex items-center justify-center p-6 h-full">
                       <img
-                        src={previewResource?.url}
-                        alt={previewResource?.originalName}
+                        src={getResourceUrl(previewResource)}
+                        alt={getResourceName(previewResource)}
                         className="max-w-full max-h-[70vh] object-contain rounded-lg shadow"
                       />
                     </div>
-                  ) : getPreviewType(previewResource?.mimeType) === "pdf" ? (
+                  ) : getPreviewType(getResourceType(previewResource)) === "pdf" ? (
                     <iframe
-                      src={previewResource?.url}
+                      src={getResourceUrl(previewResource)}
                       className="w-full h-[70vh] border-0"
-                      title={previewResource?.originalName}
+                      title={getResourceName(previewResource)}
                     />
-                  ) : getPreviewType(previewResource?.mimeType) === "office" ? (
+                  ) : getPreviewType(getResourceType(previewResource)) === "office" ? (
                     <div className="relative w-full h-[70vh]">
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50 text-gray-400 text-sm z-0">
                         <Loader2 className="w-6 h-6 animate-spin text-primary" />
                         <span>Loading preview…</span>
                       </div>
                       <iframe
-                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewResource?.url)}`}
+                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(getResourceUrl(previewResource))}`}
                         className="relative z-10 w-full h-full border-0"
-                        title={previewResource?.originalName}
+                        title={getResourceName(previewResource)}
                       />
                     </div>
                   ) : null}

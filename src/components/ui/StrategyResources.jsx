@@ -31,12 +31,12 @@ const StrategyResources = ({ resources = [] }) => {
   if (!resources?.length) return null;
 
   const handleView = (resource) => {
-    window.open(resource?.url, "_blank", "noopener,noreferrer");
+    window.open(resource?.url || resource?.fileUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async (resource) => {
     setDownloadingId(resource?._id);
-    await triggerDownload(resource?.url, resource?.originalName);
+    await triggerDownload(resource?.url || resource?.fileUrl, resource?.originalName || resource?.displayName);
     setDownloadingId(null);
   };
 
@@ -52,10 +52,10 @@ const StrategyResources = ({ resources = [] }) => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-              {resource?.originalName}
+              {resource?.originalName || resource?.displayName || "Untitled"}
             </p>
             <p className="text-xs text-gray-500 dark:text-white/60">
-              {formatFileSize(resource?.size)}
+              {resource?.fileType || formatFileSize(resource?.size) || ""}
             </p>
           </div>
 

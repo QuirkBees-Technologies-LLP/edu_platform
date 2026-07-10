@@ -14,6 +14,7 @@ import {
   Eye,
 } from "lucide-react";
 import PropTypes from "prop-types";
+import { getEmbedUrl } from "@/utils/videoUtils";
 
 /**
  * Represents a draggable course card component.
@@ -32,7 +33,9 @@ const DraggableCourseCard = ({
   onMove,
   onDelete,
   onSelect,
+  onDragEnd,
   activeTab,
+  hideMetadata,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -49,6 +52,7 @@ const DraggableCourseCard = ({
     tier,
     instructor,
     section,
+    videoUrl,
   } = course || {};
 
   // For master-class tab prefer strategyBanner, fallback to imageUrl
@@ -67,6 +71,9 @@ const DraggableCourseCard = ({
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: () => {
+      onDragEnd?.();
+    },
   });
 
   const [, drop] = useDrop({
@@ -143,7 +150,17 @@ const DraggableCourseCard = ({
       <div onClick={handleSelect} className="cursor-pointer">
         {/** Thumbnail Section */}
         <div className="relative aspect-video overflow-hidden">
-          {displayImage ? (
+          {videoUrl?.includes("dyntube.com") ? (
+            <iframe
+              src={getEmbedUrl(videoUrl)}
+              className="w-full h-full"
+              loading="lazy"
+              tabIndex={-1}
+              scrolling="no"
+              style={{ pointerEvents: "none", border: "none", overflow: "hidden" }}
+              title={title || ""}
+            />
+          ) : displayImage ? (
             <img
               src={imageError ? fallbackImage : displayImage}
               alt={title}
@@ -183,25 +200,27 @@ const DraggableCourseCard = ({
         </div>
 
         {/** Status Badges */}
-        <div className="absolute top-2 right-2 flex flex-col gap-2">
-          {tier === "PRO" && (
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
-              <Star className="w-3.5 h-3.5" />
-              <span>Pro</span>
-            </div>
-          )}
-          {published ? (
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
-              <Globe className="w-3.5 h-3.5" />
-              <span>Live</span>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
-              <Lock className="w-3 h-3" />
-              <span>Draft</span>
-            </div>
-          )}
-        </div>
+        {!hideMetadata && (
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
+            {tier === "PRO" && (
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
+                <Star className="w-3.5 h-3.5" />
+                <span>Pro</span>
+              </div>
+            )}
+            {published ? (
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
+                <Globe className="w-3.5 h-3.5" />
+                <span>Live</span>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
+                <Lock className="w-3 h-3" />
+                <span>Draft</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/** Content Section */}
         <div className="p-5">
@@ -213,32 +232,36 @@ const DraggableCourseCard = ({
               {section}
             </span>
           </div>
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-            {description}
-          </p>
+          {!hideMetadata && (
+            <>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                {description}
+              </p>
 
-          {/* Course metadata with improved styling */}
-          <div className="flex items-center gap-3 flex-wrap text-sm">
-            {activeTab !== "strategies" && (
-              <>
-                <div className="flex items-center gap-1.5 text-blue-600">
-                  <Book className="w-4 h-4 text-primary shrink-0" />
-                  <span className="font-medium text-primary">
-                    {category?.name || "Uncategorized"}
+              {/* Course metadata with improved styling */}
+              <div className="flex items-center gap-3 flex-wrap text-sm">
+                {activeTab !== "strategies" && (
+                  <>
+                    <div className="flex items-center gap-1.5 text-blue-600">
+                      <Book className="w-4 h-4 text-primary shrink-0" />
+                      <span className="font-medium text-primary">
+                        {category?.name || "Uncategorized"}
+                      </span>
+                    </div>
+
+                    <div className="h-4 w-px bg-gray-300"></div>
+                  </>
+                )}
+
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <Users className="w-4 h-4" />
+                  <span>
+                    {(instructor?.first_name && instructor?.last_name) ? `${instructor.first_name} ${instructor.last_name}` : "Unknown Instructor"}
                   </span>
                 </div>
-
-                <div className="h-4 w-px bg-gray-300"></div>
-              </>
-            )}
-
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <Users className="w-4 h-4" />
-              <span>
-                {(instructor?.first_name && instructor?.last_name) ? `${instructor.first_name} ${instructor.last_name}` : "Unknown Instructor"}
-              </span>
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/** Action Buttons - Edit & Delete for all tabs */}
@@ -282,6 +305,8 @@ DraggableCourseCard.defaultProps = {
   onMove: () => { },
   onDelete: () => { },
   onSelect: () => { },
+  onDragEnd: () => { },
+  hideMetadata: false,
 };
 
 export default DraggableCourseCard;

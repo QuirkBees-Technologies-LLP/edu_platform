@@ -1459,15 +1459,20 @@ export const sideMenus = {
       icon: <LayoutDashboard />,
       path: "/",
     },
-    {
-      title: "Admin Dashboard",
-      icon: <LayoutDashboard />,
-      path: "/admin/metrix-dashboard",
-    },
+    // {
+    //   title: "Admin Dashboard",
+    //   icon: <LayoutDashboard />,
+    //   path: "/admin/metrix-dashboard",
+    // },
     {
       title: "Academy",
       icon: <BookOpen />,
       path: "/admin/courses",
+    },
+    {
+      title: "Learning Content",
+      icon: <BookOpen />,
+      path: "/admin/learning-content",
     },
 
     {
@@ -1571,6 +1576,7 @@ export const sideMenus = {
       icon: <ChartLine />,
       path: "/admin/tv-webhooks",
     },
+
   ],
   marketer: [
     {
