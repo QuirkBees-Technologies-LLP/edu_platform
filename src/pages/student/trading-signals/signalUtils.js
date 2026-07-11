@@ -6,6 +6,7 @@
  *   1 → "1m", 5 → "5m", 15 → "15m", 30 → "30m",
  *   60 → "1h", 120 → "2h", 240 → "4h",
  *   "D" → "1D", "W" → "1W", "M" → "1M"
+ * 
  */
 export function formatTimeframe(tf) {
   if (!tf) return "—";
@@ -108,7 +109,7 @@ export function formatAlertTime(timestamp) {
     // show today's date with that time
     if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(trimmed)) {
       const today = new Date();
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       const dd = String(today.getDate()).padStart(2, "0");
       const mon = months[today.getMonth()];
       const yyyy = today.getFullYear();
