@@ -35,7 +35,7 @@ const digitalMarketingColors = {
     text: "text-[#2196F3]",
 };
 
-// Helper function to check if schedule belongs to Digital Marketing category
+// Helper function to check if schedule belongs to Digital Marketing or E-commerce category
 const isDigitalMarketingCategory = (schedule) => {
     const categoryName = schedule?.category?.name?.toLowerCase() || "";
     const categorySlug = schedule?.category?.slug?.toLowerCase() || "";
@@ -43,7 +43,12 @@ const isDigitalMarketingCategory = (schedule) => {
         categoryName === "digital marketing" ||
         categoryName === "digitalmarketing" ||
         categorySlug === "digital-marketing" ||
-        categorySlug === "digitalmarketing"
+        categorySlug === "digitalmarketing" ||
+        categoryName === "e-commerce" ||
+        categoryName === "ecommerce" ||
+        categoryName === "e commerce" ||
+        categorySlug === "e-commerce" ||
+        categorySlug === "ecommerce"
     );
 };
 
@@ -125,7 +130,12 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                             {(singleCategoryData?.data?.category?.name?.toLowerCase() === "digital marketing" ||
                                 singleCategoryData?.data?.category?.name?.toLowerCase() === "digitalmarketing" ||
                                 singleCategoryData?.data?.category?.slug?.toLowerCase() === "digital-marketing" ||
-                                singleCategoryData?.data?.category?.slug?.toLowerCase() === "digitalmarketing") ? (
+                                singleCategoryData?.data?.category?.slug?.toLowerCase() === "digitalmarketing" ||
+                                singleCategoryData?.data?.category?.name?.toLowerCase() === "e-commerce" ||
+                                singleCategoryData?.data?.category?.name?.toLowerCase() === "ecommerce" ||
+                                singleCategoryData?.data?.category?.name?.toLowerCase() === "e commerce" ||
+                                singleCategoryData?.data?.category?.slug?.toLowerCase() === "e-commerce" ||
+                                singleCategoryData?.data?.category?.slug?.toLowerCase() === "ecommerce") ? (
                                 <div className="flex items-center gap-2">
                                     <div className="w-4 h-4 rounded bg-[#2196F3] border border-[#E3F2FD]"></div>
                                     <span className="text-sm text-gray-100 dark:text-gray-800">Digital Marketing</span>
@@ -174,7 +184,11 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                             <div className="bg-[#0f0f15]">
                                 {(() => {
                                     const isDigiView = singleCategoryData?.data?.category?.name?.toLowerCase()?.includes("digital") ||
-                                        singleCategoryData?.data?.category?.slug?.toLowerCase()?.includes("digital");
+                                        singleCategoryData?.data?.category?.slug?.toLowerCase()?.includes("digital") ||
+                                        singleCategoryData?.data?.category?.name?.toLowerCase()?.includes("e-commerce") ||
+                                        singleCategoryData?.data?.category?.name?.toLowerCase()?.includes("ecommerce") ||
+                                        singleCategoryData?.data?.category?.slug?.toLowerCase()?.includes("e-commerce") ||
+                                        singleCategoryData?.data?.category?.slug?.toLowerCase()?.includes("ecommerce");
 
                                     // --- OPTION A: DIGITAL MARKETING VIEW (ORIGINAL STYLE) ---
                                     if (isDigiView) {
@@ -482,7 +496,12 @@ export default function GridView({ educators, days, isLoading, activeCategoryId,
                                 {(singleCategoryData?.data?.category?.name?.toLowerCase() === "digital marketing" ||
                                     singleCategoryData?.data?.category?.name?.toLowerCase() === "digitalmarketing" ||
                                     singleCategoryData?.data?.category?.slug?.toLowerCase() === "digital-marketing" ||
-                                    singleCategoryData?.data?.category?.slug?.toLowerCase() === "digitalmarketing") ? (
+                                    singleCategoryData?.data?.category?.slug?.toLowerCase() === "digitalmarketing" ||
+                                    singleCategoryData?.data?.category?.name?.toLowerCase() === "e-commerce" ||
+                                    singleCategoryData?.data?.category?.name?.toLowerCase() === "ecommerce" ||
+                                    singleCategoryData?.data?.category?.name?.toLowerCase() === "e commerce" ||
+                                    singleCategoryData?.data?.category?.slug?.toLowerCase() === "e-commerce" ||
+                                    singleCategoryData?.data?.category?.slug?.toLowerCase() === "ecommerce") ? (
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 rounded bg-[#2196F3] border border-[#E3F2FD]"></div>
                                         <span className="text-xs text-gray-700 dark:text-gray-300">Digital Marketing</span>

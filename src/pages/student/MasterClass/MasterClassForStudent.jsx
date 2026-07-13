@@ -129,7 +129,11 @@ const MasterClassForStudent = () => {
 
   const isDigitalMarketing =
     activeCategory?.name?.toLowerCase()?.includes("digital") ||
-    activeCategory?.slug?.toLowerCase()?.includes("digital");
+    activeCategory?.slug?.toLowerCase()?.includes("digital") ||
+    activeCategory?.name?.toLowerCase()?.includes("e-commerce") ||
+    activeCategory?.name?.toLowerCase()?.includes("ecommerce") ||
+    activeCategory?.slug?.toLowerCase()?.includes("e-commerce") ||
+    activeCategory?.slug?.toLowerCase()?.includes("ecommerce");
 
   const selectedLanguage = useSelector(selectSelectedLanguage);
   const { data: educatorsData } = useGetAllEducatorsQuery();

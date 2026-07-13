@@ -236,6 +236,12 @@ const IqAcademyEducators = () => {
       categoryName.includes("digitalmarketing")
     ) {
       return "bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border-[#38BDF8]/50 hover:shadow-[#38BDF8]/30";
+    } else if (
+      categoryName.includes("e-commerce") ||
+      categoryName.includes("ecommerce") ||
+      categoryName.includes("e commerce")
+    ) {
+      return "bg-[#10B981]/20 hover:bg-[#10B981]/30 border-[#10B981]/50 hover:shadow-[#10B981]/30";
     } else {
       return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
     }

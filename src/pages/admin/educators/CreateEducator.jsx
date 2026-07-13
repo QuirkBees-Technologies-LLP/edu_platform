@@ -282,10 +282,11 @@ const CreateEducator = forwardRef(
       },
     });
 
-    // Check if any selected category is "Digital Marketing"
+    // Check if any selected category is "Digital Marketing" or "E-commerce"
     const isDigitalMarketing = formik?.values?.categories?.some((catId) => {
       const cat = categoryList?.data?.find((c) => c._id === catId);
-      return cat?.name?.toLowerCase() === "digital marketing" || cat?.name?.toLowerCase() === "digitalmarketing";
+      const catName = cat?.name?.toLowerCase();
+      return catName === "digital marketing" || catName === "digitalmarketing" || catName === "e-commerce" || catName === "ecommerce" || catName === "e commerce";
     });
 
     useEffect(() => {

@@ -45,12 +45,17 @@ const CreateRecurrenceScheduleModel = forwardRef(
 
     const educatorId = auth?.user?._id ?? null;
 
-    // Check if educator belongs to Digital Marketing category
+    // Check if educator belongs to Digital Marketing or E-commerce category
     const isDigitalMarketing = auth?.user?.categories?.some(
       (cat) =>
         cat?.slug?.toLowerCase() === "digital-marketing" ||
         cat?.name?.toLowerCase() === "digital marketing" ||
-        cat?.name?.toLowerCase() === "digitalmarketing"
+        cat?.name?.toLowerCase() === "digitalmarketing" ||
+        cat?.slug?.toLowerCase() === "e-commerce" ||
+        cat?.slug?.toLowerCase() === "ecommerce" ||
+        cat?.name?.toLowerCase() === "e-commerce" ||
+        cat?.name?.toLowerCase() === "ecommerce" ||
+        cat?.name?.toLowerCase() === "e commerce"
     );
 
     const [isPickerOpen, setIsPickerOpen] = useState(false);

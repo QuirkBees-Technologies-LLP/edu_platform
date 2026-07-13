@@ -60,7 +60,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
       { value: "asian", label: "Asian" },
     ];
 
-    // Helper function to check if educator belongs to Digital Marketing category
+    // Helper function to check if educator belongs to Digital Marketing or E-commerce category
     const isDigitalMarketingEducator = (educatorData) => {
       if (!educatorData?.categories?.length) return false;
       return educatorData.categories.some((cat) => {
@@ -70,7 +70,12 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           categoryName === "digital marketing" ||
           categoryName === "digitalmarketing" ||
           categorySlug === "digital-marketing" ||
-          categorySlug === "digitalmarketing"
+          categorySlug === "digitalmarketing" ||
+          categoryName === "e-commerce" ||
+          categoryName === "ecommerce" ||
+          categoryName === "e commerce" ||
+          categorySlug === "e-commerce" ||
+          categorySlug === "ecommerce"
         );
       });
     };
