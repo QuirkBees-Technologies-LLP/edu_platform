@@ -11,6 +11,8 @@ import {
   VolumeX,
   TrendingDown,
   TrendingUp,
+  UserPlus,
+  UserCheck,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
@@ -20,6 +22,7 @@ import {
   useGetEducatorWithCoursesQuery,
   useLazyGetSecureVideoQuery,
 } from "../../../store/api/client/clientCoursesApiSlice";
+import { useToggleFollowMutation } from "../../../store/api/client/clientEductorApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
@@ -38,8 +41,10 @@ import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 
 const IqEducators = () => {
   const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
+  const [toggleFollow, { isLoading: isFollowLoading }] = useToggleFollowMutation();
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
+  const [isFollowing, setIsFollowing] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [courseAll, setCourseAll] = useState(false);
   const [recording, setRecording] = useState(null);
@@ -82,6 +87,9 @@ const IqEducators = () => {
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       // Digital Marketing - Light Blue gradient
       return "bg-gradient-to-r from-[#38BDF8] to-[#0c4a6e]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      // E-commerce - Teal gradient (3-stop)
+      return "bg-gradient-to-r from-[#167E8C] via-[#1B2746] to-[#152B37]";
     } else {
       // Forex (default) - Blue gradient
       return "bg-gradient-to-r from-[#2B44D3] to-[#0D0D21]";
@@ -99,6 +107,9 @@ const IqEducators = () => {
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       // Digital Marketing - Light Blue
       return "border-[#38BDF8] bg-[#38BDF8] hover:bg-[#0EA5E9]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      // E-commerce
+      return "border-[#16B8C7] bg-[#16B8C7] hover:bg-[#073439]";
     } else {
       // Forex (default) - Blue
       return "border-[#2B44D3] bg-[#2B44D3] hover:bg-[#1E3A8A]";
@@ -114,6 +125,8 @@ const IqEducators = () => {
       return "accent-[#7C3AED]";
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       return "accent-[#38BDF8]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      return "accent-[#16B8C7]";
     } else {
       return "accent-[#2B44D3]";
     }
@@ -128,6 +141,8 @@ const IqEducators = () => {
       return "bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border-[#7C3AED]/50 hover:shadow-[#7C3AED]/30";
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       return "bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border-[#38BDF8]/50 hover:shadow-[#38BDF8]/30";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      return "bg-[#16B8C7]/20 hover:bg-[#16B8C7]/30 border-[#16B8C7]/50 hover:shadow-[#16B8C7]/30";
     } else {
       return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
     }
@@ -140,9 +155,9 @@ const IqEducators = () => {
     isFetching: isFetchingEducator,
   } = useGetEducatorWithCoursesQuery(id);
 
-  // Check if educator's first category is Digital Marketing
+  // Check if educator's first category is Digital Marketing or E-commerce
   const educatorCategoryName = response?.data?.educator?.categories?.[0]?.name?.toLowerCase() ?? "";
-  const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing");
+  const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing") || educatorCategoryName.includes("e-commerce") || educatorCategoryName.includes("ecommerce") || educatorCategoryName.includes("e commerce");
 
   const {
     data: liveTradeIdeas,
@@ -161,6 +176,27 @@ const IqEducators = () => {
     }
 
   }, [liveTradeIdeas, liveIdea]);
+
+  // Sync follow state from API response
+  useEffect(() => {
+    if (response?.data?.educator?.isFollowing !== undefined) {
+      setIsFollowing(response.data.educator.isFollowing);
+    }
+  }, [response]);
+
+  const handleToggleFollow = async () => {
+    if (isFollowLoading) return;
+    // Optimistic update
+    setIsFollowing((prev) => !prev);
+    try {
+      await toggleFollow(id).unwrap();
+      refetchEducator();
+    } catch (error) {
+      // Revert on error
+      setIsFollowing((prev) => !prev);
+      console.error("Follow toggle error:", error);
+    }
+  };
 
   const handleRefresh = () => {
     // refetchEducator();
@@ -468,12 +504,35 @@ const IqEducators = () => {
 
 
           </div>
-          <button
-            onClick={() => setShowRatingModal(true)}
-            className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors w-fit`}
-          >
-            ⭐ Rate Me
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleToggleFollow}
+              disabled={isFollowLoading}
+              className={`border text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all duration-300 ${
+                isFollowing
+                  ? "border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50"
+                  : getButtonColor()
+              } ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck size={16} />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus size={16} />
+                  Follow
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => setShowRatingModal(true)}
+              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors w-fit`}
+            >
+              ⭐ Rate Me
+            </button>
+          </div>
         </div>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">

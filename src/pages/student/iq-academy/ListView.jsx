@@ -74,7 +74,7 @@ const digitalMarketingColors = {
   text: "text-[#2196F3]",
 };
 
-// Helper function to check if category is Digital Marketing
+// Helper function to check if category is Digital Marketing or E-commerce
 const isDigitalMarketingCategory = (categoryData) => {
   const categoryName = categoryData?.name?.toLowerCase() || "";
   const categorySlug = categoryData?.slug?.toLowerCase() || "";
@@ -82,7 +82,12 @@ const isDigitalMarketingCategory = (categoryData) => {
     categoryName === "digital marketing" ||
     categoryName === "digitalmarketing" ||
     categorySlug === "digital-marketing" ||
-    categorySlug === "digitalmarketing"
+    categorySlug === "digitalmarketing" ||
+    categoryName === "e-commerce" ||
+    categoryName === "ecommerce" ||
+    categoryName === "e commerce" ||
+    categorySlug === "e-commerce" ||
+    categorySlug === "ecommerce"
   );
 };
 

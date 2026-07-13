@@ -168,7 +168,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categ
           /* ── Flat mode: simple checkbox list without category hierarchy ── */
           <div
             className="
-              absolute top-full left-0 mt-1.5 z-[9999]
+              absolute top-full left-0 mt-1.5 z-[5]
               w-[260px] max-w-[320px] shrink-0 py-1
               bg-white dark:bg-[#1A1A2E] text-slate-900 dark:text-white
               border border-slate-200 dark:border-[#2A2A4A] rounded-lg shadow-2xl
@@ -226,7 +226,7 @@ const InstrumentFilterDropdown = ({ excludedValues = [], onExcludedChange, categ
         ) : (
           /* ── Category mode: cascading menu with submenus ── */
           <div
-            className="absolute top-full left-0 mt-1.5 z-[9999] flex"
+            className="absolute top-full left-0 mt-1.5 z-[5] flex"
             onMouseEnter={handleRootEnter}
             onMouseLeave={handleRootLeave}
           >

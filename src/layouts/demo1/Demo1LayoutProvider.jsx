@@ -68,7 +68,12 @@ const Demo1LayoutProvider = ({ children }) => {
           (cat) =>
             cat?.slug?.toLowerCase() === "digital-marketing" ||
             cat?.name?.toLowerCase() === "digital marketing" ||
-            cat?.name?.toLowerCase() === "digitalmarketing"
+            cat?.name?.toLowerCase() === "digitalmarketing" ||
+            cat?.slug?.toLowerCase() === "e-commerce" ||
+            cat?.slug?.toLowerCase() === "ecommerce" ||
+            cat?.name?.toLowerCase() === "e-commerce" ||
+            cat?.name?.toLowerCase() === "ecommerce" ||
+            cat?.name?.toLowerCase() === "e commerce"
         );
 
         if (isDigitalMarketing) {

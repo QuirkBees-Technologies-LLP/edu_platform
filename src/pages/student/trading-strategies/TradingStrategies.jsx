@@ -5,6 +5,7 @@ import { useTourStep } from '@/hooks/useTourStep';
 import { toast } from 'sonner';
 import { Container } from '@/components/container';
 import { useGetAdminStrategyListQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery, useGetStrategyByNameMutation } from '@/store/api/client/clientStrategiesApiSlice';
+import { useGetStrategyContentQuery } from '@/store/api/client/clientLearningContentApiSlice';
 import { useSelector } from 'react-redux';
 import { Loader2, CirclePlay, Globe } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
@@ -25,8 +26,6 @@ import {
 import ResourcesSection from "../../../components/ui/ResourcesSection";
 import StrategyVideoCarousel from "../../../components/ui/StrategyVideoCarousel";
 import { getEmbedUrl } from "@/utils/videoUtils";
-import { getStrategyVideos } from "@/config/strategyConfig";
-import { getStrategyResources } from "@/config/strategyResources";
 
 /**
  * Original Strategy Banner — shown on the landing page before a strategy is selected.
@@ -81,6 +80,7 @@ const TradingStrategies = () => {
     const [modalLanguage, setModalLanguage] = useState("");
     const [manualStrategyData, setManualStrategyData] = useState(null);
     const [parentStrategyId, setParentStrategyId] = useState(null);
+    const [activeLanguageForContent, setActiveLanguageForContent] = useState("");
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -90,6 +90,18 @@ const TradingStrategies = () => {
     const { data: strategyLanguages, isLoading: strategyLanguagesLoading } = useGetStrategyLanguagesQuery(modalStrategyId, {
         skip: !modalStrategyId
     });
+
+    // Fetch dynamic learning content for the selected strategy + language
+    const {
+        data: learningContentData,
+        isLoading: isLearningContentLoading,
+        isError: isLearningContentError,
+        isFetching: isLearningContentFetching,
+    } = useGetStrategyContentQuery(
+        { strategy: parentStrategyId /* language: activeLanguageForContent */ },
+        { skip: !parentStrategyId }
+    );
+    const learningContent = learningContentData?.data;
 
 
     // ==================== API CALLS ====================
@@ -228,6 +240,8 @@ const TradingStrategies = () => {
                         behavior: 'smooth'
                     });
                 }, 300);
+                // Store the language for learning content fetch
+                setActiveLanguageForContent(modalLanguage);
             }
             setIsModalOpen(false);
         } catch (error) {
@@ -287,23 +301,53 @@ const TradingStrategies = () => {
     // ==================== MAIN RENDER ====================
     return (
         <div className="max-w-7xl mx-auto px-4 pb-10">
-            <Container width="fluid" className="mx-auto px-5">
+            {/* <BackButton /> */}
+            <Container width="fluid" className="mx-auto px-2">
+                {/* Strategy Logo — shown from learning content response (dark/light mode) */}
+                {learningContent?.darkModeImage || learningContent?.lightModeImage ? (
+                    <div className="flex items-center justify-center mb-4">
+                        {learningContent?.darkModeImage && (
+                            <img
+                                src={learningContent?.darkModeImage}
+                                alt={currentStrategy?.title || "Strategy"}
+                                className="hidden dark:block h-14 w-auto object-contain"
+                            />
+                        )}
+                        {learningContent?.lightModeImage && (
+                            <img
+                                src={learningContent?.lightModeImage}
+                                alt={currentStrategy?.title || "Strategy"}
+                                className="block dark:hidden h-14 w-auto object-contain"
+                            />
+                        )}
+                    </div>
+                ) : null}
+
                 {/* Banner or Video Carousel — conditionally rendered */}
                 <div className="ts-banner">
                     {currentStrategy
                         ? (() => {
-                            const videoConfig = getStrategyVideos(parentStrategy?.title || currentStrategy?.title);
+                            // Use dynamic learning content from admin
+                            // Show banner if: error, still fetching, or no videos
+                            const hasLearningContent = !isLearningContentError && !isLearningContentFetching && learningContent?.videos?.length > 0;
                             const strategyIconUrl = parentStrategy?.imageUrl || currentStrategy?.imageUrl;
-                            const strategyResources = getStrategyResources(
-                                parentStrategy?.title || currentStrategy?.title
-                            );
+
+                            // If no learning content videos or error, show banner image
+                            if (!hasLearningContent) {
+                                return <Banner />;
+                            }
+
+                            const hasDarkLightImages = learningContent?.darkModeImage || learningContent?.lightModeImage;
+
                             return (
                                 <StrategyVideoCarousel
-                                    videos={videoConfig?.videos || []}
-                                    title={videoConfig?.title}
-                                    description={videoConfig?.description}
-                                    strategyIcon={strategyIconUrl}
-                                    resources={strategyResources}
+                                    videos={learningContent?.videos}
+                                    title={hasDarkLightImages ? undefined : (learningContent?.title || parentStrategy?.title || currentStrategy?.title)}
+                                    description={hasDarkLightImages ? undefined : learningContent?.description}
+                                    strategyIcon={hasDarkLightImages ? undefined : strategyIconUrl}
+                                    darkModeImage={learningContent?.darkModeImage || ""}
+                                    lightModeImage={learningContent?.lightModeImage || ""}
+                                    resources={learningContent?.resources || []}
                                 />
                             );
                         })()
@@ -584,74 +628,70 @@ const TradingStrategies = () => {
                     )}
                 </div>
 
-                {/* ========== LANGUAGE SELECTION MODAL ========== */}
-                <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-                    <DialogContent className="max-w-md w-full" onCloseAutoFocus={(e) => e.preventDefault()}>
-                        <DialogHeader>
-                            <DialogTitle className="text-xl font-bold">
-                                Select Language
-                            </DialogTitle>
-                            <DialogDescription className="text-sm text-gray-500">
-                                Choose a language to start learning this strategy
-                            </DialogDescription>
-                        </DialogHeader>
+                {
+                    <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
+                        <DialogContent className="max-w-md w-full" onCloseAutoFocus={(e) => e.preventDefault()}>
+                            <DialogHeader>
+                                <DialogTitle className="text-xl font-bold">
+                                    Select Language
+                                </DialogTitle>
+                                <DialogDescription className="text-sm text-gray-500">
+                                    Choose a language to start learning this strategy
+                                </DialogDescription>
+                            </DialogHeader>
 
-                        {/* Language Dropdown */}
-                        <div className="mt-4">
-                            <label className="text-sm font-medium text-gray-700 mb-1.5 block">Language</label>
-                            <Select
-                                value={modalLanguage}
-                                onValueChange={(val) => setModalLanguage(val)}
-                            >
-                                <SelectTrigger className="w-full h-11">
-                                    <SelectValue placeholder="Select Language">
-                                        {modalLanguage || "Select Language"}
-                                    </SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {strategyLanguagesLoading && (
-                                        <SelectItem value="loading" disabled>
-                                            Loading...
-                                        </SelectItem>
-                                    )}
-                                    {strategyLanguages?.data?.map((item) => (
-                                        <SelectItem key={item} value={item}>
-                                            {item}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Strategy Title (read-only) */}
-                        <div className="mt-4">
-                            <label className="text-sm font-medium text-gray-700 mb-1.5 block">Strategy</label>
-                            <div className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-200 rounded-lg text-sm font-medium text-gray-800 dark:text-gray-700">
-                                {modalStrategyTitle}
+                            <div className="mt-4">
+                                <label className="text-sm font-medium text-gray-700 mb-1.5 block">Language</label>
+                                <Select
+                                    value={modalLanguage}
+                                    onValueChange={(val) => setModalLanguage(val)}
+                                >
+                                    <SelectTrigger className="w-full h-11">
+                                        <SelectValue placeholder="Select Language">
+                                            {modalLanguage || "Select Language"}
+                                        </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {strategyLanguagesLoading && (
+                                            <SelectItem value="loading" disabled>
+                                                Loading...
+                                            </SelectItem>
+                                        )}
+                                        {strategyLanguages?.data?.map((item) => (
+                                            <SelectItem key={item} value={item}>
+                                                {item}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                        </div>
 
+                            <div className="mt-4">
+                                <label className="text-sm font-medium text-gray-700 mb-1.5 block">Strategy</label>
+                                <div className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-200 rounded-lg text-sm font-medium text-gray-800 dark:text-gray-700">
+                                    {modalStrategyTitle}
+                                </div>
+                            </div>
 
-
-                        {/* Apply Button */}
-                        <div className="mt-6">
-                            <button
-                                onClick={handleApplyLanguage}
-                                disabled={!modalLanguage || strategyByNameLoading}
-                                className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {strategyByNameLoading ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Applying...
-                                    </>
-                                ) : (
-                                    'Apply'
-                                )}
-                            </button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                            <div className="mt-6">
+                                <button
+                                    onClick={handleApplyLanguage}
+                                    disabled={!modalLanguage || strategyByNameLoading}
+                                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {strategyByNameLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Applying...
+                                        </>
+                                    ) : (
+                                        'Apply'
+                                    )}
+                                </button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                }
             </Container>
         </div>
     );

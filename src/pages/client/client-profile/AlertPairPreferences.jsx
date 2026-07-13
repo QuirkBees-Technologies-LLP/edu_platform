@@ -53,7 +53,8 @@ const NON_PAIR_KEYS = new Set([
  */
 function initSelectedFromSaved(savedPrefs, allPaths) {
   if (!savedPrefs || Object.keys(savedPrefs).length === 0) {
-    return new Set(allPaths);
+    // New user: no preferences saved — start with everything OFF
+    return new Set();
   }
 
   // Detect legacy flat format (keys contain "__")
