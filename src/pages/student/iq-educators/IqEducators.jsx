@@ -87,6 +87,9 @@ const IqEducators = () => {
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       // Digital Marketing - Light Blue gradient
       return "bg-gradient-to-r from-[#38BDF8] to-[#0c4a6e]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      // E-commerce - Emerald Green gradient
+      return "bg-gradient-to-r from-[#10B981] to-[#064e3b]";
     } else {
       // Forex (default) - Blue gradient
       return "bg-gradient-to-r from-[#2B44D3] to-[#0D0D21]";
@@ -104,6 +107,9 @@ const IqEducators = () => {
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       // Digital Marketing - Light Blue
       return "border-[#38BDF8] bg-[#38BDF8] hover:bg-[#0EA5E9]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      // E-commerce - Emerald Green
+      return "border-[#10B981] bg-[#10B981] hover:bg-[#059669]";
     } else {
       // Forex (default) - Blue
       return "border-[#2B44D3] bg-[#2B44D3] hover:bg-[#1E3A8A]";
@@ -119,6 +125,8 @@ const IqEducators = () => {
       return "accent-[#7C3AED]";
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       return "accent-[#38BDF8]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      return "accent-[#10B981]";
     } else {
       return "accent-[#2B44D3]";
     }
@@ -133,6 +141,8 @@ const IqEducators = () => {
       return "bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border-[#7C3AED]/50 hover:shadow-[#7C3AED]/30";
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       return "bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border-[#38BDF8]/50 hover:shadow-[#38BDF8]/30";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      return "bg-[#10B981]/20 hover:bg-[#10B981]/30 border-[#10B981]/50 hover:shadow-[#10B981]/30";
     } else {
       return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
     }
@@ -145,9 +155,9 @@ const IqEducators = () => {
     isFetching: isFetchingEducator,
   } = useGetEducatorWithCoursesQuery(id);
 
-  // Check if educator's first category is Digital Marketing
+  // Check if educator's first category is Digital Marketing or E-commerce
   const educatorCategoryName = response?.data?.educator?.categories?.[0]?.name?.toLowerCase() ?? "";
-  const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing");
+  const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing") || educatorCategoryName.includes("e-commerce") || educatorCategoryName.includes("ecommerce") || educatorCategoryName.includes("e commerce");
 
   const {
     data: liveTradeIdeas,
