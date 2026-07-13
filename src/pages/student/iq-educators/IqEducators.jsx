@@ -88,8 +88,8 @@ const IqEducators = () => {
       // Digital Marketing - Light Blue gradient
       return "bg-gradient-to-r from-[#38BDF8] to-[#0c4a6e]";
     } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
-      // E-commerce - Teal gradient
-      return "bg-gradient-to-r from-[#2DD4BF] to-[#134e5e]";
+      // E-commerce - Teal gradient (3-stop)
+      return "bg-gradient-to-r from-[#167E8C] via-[#1B2746] to-[#152B37]";
     } else {
       // Forex (default) - Blue gradient
       return "bg-gradient-to-r from-[#2B44D3] to-[#0D0D21]";
@@ -108,8 +108,8 @@ const IqEducators = () => {
       // Digital Marketing - Light Blue
       return "border-[#38BDF8] bg-[#38BDF8] hover:bg-[#0EA5E9]";
     } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
-      // E-commerce - Teal
-      return "border-[#2DD4BF] bg-[#2DD4BF] hover:bg-[#14B8A6]";
+      // E-commerce
+      return "border-[#16B8C7] bg-[#16B8C7] hover:bg-[#073439]";
     } else {
       // Forex (default) - Blue
       return "border-[#2B44D3] bg-[#2B44D3] hover:bg-[#1E3A8A]";
@@ -126,7 +126,7 @@ const IqEducators = () => {
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       return "accent-[#38BDF8]";
     } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
-      return "accent-[#2DD4BF]";
+      return "accent-[#16B8C7]";
     } else {
       return "accent-[#2B44D3]";
     }
@@ -142,7 +142,7 @@ const IqEducators = () => {
     } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
       return "bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border-[#38BDF8]/50 hover:shadow-[#38BDF8]/30";
     } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
-      return "bg-[#2DD4BF]/20 hover:bg-[#2DD4BF]/30 border-[#2DD4BF]/50 hover:shadow-[#2DD4BF]/30";
+      return "bg-[#16B8C7]/20 hover:bg-[#16B8C7]/30 border-[#16B8C7]/50 hover:shadow-[#16B8C7]/30";
     } else {
       return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
     }
