@@ -241,7 +241,7 @@ const IqAcademyEducators = () => {
       categoryName.includes("ecommerce") ||
       categoryName.includes("e commerce")
     ) {
-      return "bg-[#10B981]/20 hover:bg-[#10B981]/30 border-[#10B981]/50 hover:shadow-[#10B981]/30";
+      return "bg-[#16B8C7]/20 hover:bg-[#16B8C7]/30 border-[#16B8C7]/50 hover:shadow-[#16B8C7]/30";
     } else {
       return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
     }
