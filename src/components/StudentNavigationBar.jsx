@@ -12,7 +12,7 @@ const StudentNavigationBar = () => {
       {!isHome && (
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-sm transition-colors"
           aria-label="Go back"
         >
           <ArrowLeft size={16} />
@@ -22,7 +22,7 @@ const StudentNavigationBar = () => {
       {!isHome && (
         <button
           onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-sm transition-colors"
           aria-label="Go home"
         >
           <Home size={16} />
