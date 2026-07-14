@@ -206,7 +206,7 @@ const Package = () => {
     const { table } = useDataGrid();
     return (
       <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
-        <h3 className="card-title">Packages</h3>
+        <h3 className="card-title">SKUs</h3>
         <div className="flex flex-wrap items-center gap-2.5">
           <DataGridColumnVisibility table={table} />
         </div>
@@ -224,9 +224,9 @@ const Package = () => {
     <div className="container-fluid pb-5">
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Package" />
+          <ToolbarPageTitle text="SKUs" />
           <ToolbarDescription>
-            Manage and configure package access — control allowed categories and
+            Manage and configure SKU access — control allowed categories and
             sidebar visibility for each plan.
           </ToolbarDescription>
         </ToolbarHeading>

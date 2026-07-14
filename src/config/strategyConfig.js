@@ -154,7 +154,7 @@ export const STRATEGIES = [
   },
   {
     key: "defy",
-    name: "DEFY",
+    name: "Defy",
     pairs: ALL_PAIRS,
     timeframes: STRATEGY_TIMEFRAMES,
     assetClasses: ["forex", "crypto", "indices", "commodities"],

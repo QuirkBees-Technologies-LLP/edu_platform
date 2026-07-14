@@ -574,19 +574,19 @@ const TradingStrategies = () => {
                                 <div
                                     key={strategy?._id}
                                     onClick={() => selectStrategy(strategy?._id)}
-                                    className={`card rounded-2xl p-6 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy?._id
+                                    className={`card rounded-2xl p-4 border cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col ${selectedStrategyId === strategy?._id
                                         ? 'border-purple-500 shadow-lg shadow-purple-500/30'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }${index === 0 ? ' ts-first-card' : ''}`}
                                 >
                                     {/* Strategy Card Content */}
-                                    <div className="flex flex-col md:flex-row gap-4 mb-4">
+                                    <div className="flex flex-col md:flex-row gap-3 mb-3">
                                         {/* Strategy Image */}
                                         {strategy?.imageUrl && (
                                             <img
                                                 src={strategy?.imageUrl}
                                                 alt={strategy?.title}
-                                                className="w-20 h-20 rounded-xl object-cover"
+                                                className="w-14 h-14 rounded-xl object-cover"
                                             />
                                         )}
 
@@ -610,7 +610,7 @@ const TradingStrategies = () => {
 
                                     {/* Strategy Description (limited to 2 lines) */}
                                     <div className="flex-grow">
-                                        <p className="text-sm text-gray-900 leading-relaxed mb-4 line-clamp-2">
+                                        <p className="text-xs text-gray-900 leading-relaxed mb-3 line-clamp-2">
                                             {strategy?.description}
                                         </p>
                                     </div>
@@ -618,7 +618,7 @@ const TradingStrategies = () => {
                                     {/* Call-to-Action Button */}
                                     <button
                                         onClick={(e) => handleStartLearning(e, strategy)}
-                                        className={`w-full py-3 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto${index === 0 ? ' ts-start-btn' : ''}`}
+                                        className={`w-full py-2.5 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity mt-auto${index === 0 ? ' ts-start-btn' : ''}`}
                                     >
                                         Start Learning
                                     </button>

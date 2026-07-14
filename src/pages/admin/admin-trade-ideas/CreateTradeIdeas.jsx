@@ -51,6 +51,7 @@ const CreateTradeIdeas = forwardRef(
       category: "",
       pips: 0,
       checkTime: false,
+      tradingViewLinks: [],
     };
 
     const numberField = () =>
@@ -64,7 +65,11 @@ const CreateTradeIdeas = forwardRef(
 
     const createSchema = Yup.object().shape({
       name: Yup.string().required("Symbol is required"),
-      files: Yup.array().min(1, "At least one file is required"),
+      files: Yup.array().when('tradingViewLinks', {
+        is: (tvLinks) => !tvLinks || tvLinks.filter(l => l.trim()).length === 0,
+        then: (schema) => schema.min(1, "At least one screenshot or TradingView link is required"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
       type: Yup.string().oneOf(["buy", "sell"]).required("Type is required"),
       status: Yup.string()
         .oneOf(["active", "pending", "win", "partialWin", "loss", "breakEven"])
@@ -127,6 +132,13 @@ const CreateTradeIdeas = forwardRef(
         formData.append("category", values.category);
         formData.append("checkTime", values.checkTime);
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
+
+        // Append TradingView links
+        const tvLinks = (values.tradingViewLinks || []).filter(l => l.trim());
+        if (tvLinks.length > 0) {
+          formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+        }
+
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -180,6 +192,7 @@ const CreateTradeIdeas = forwardRef(
           exits: selectedRow?.exits,
           educatorId: selectedRow?.educatorDetails?._id,
           checkTime: selectedRow?.isUpdatedIdea || false,
+          tradingViewLinks: selectedRow?.tradingViewLinks || [],
         };
         formik.setValues(initData);
       }
@@ -608,6 +621,48 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
               )}
+
+                {/* TradingView Links */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      TradingView Links
+                    </label>
+                    {(formik.values.tradingViewLinks || []).map((link, idx) => (
+                      <div key={idx} className="flex items-center gap-2 mb-2">
+                        <input
+                          type="url"
+                          placeholder="https://www.tradingview.com/chart/..."
+                          className="form-control input input-md w-full"
+                          value={link}
+                          onChange={(e) => {
+                            const updated = [...formik.values.tradingViewLinks];
+                            updated[idx] = e.target.value;
+                            formik.setFieldValue('tradingViewLinks', updated);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-icon rounded-full btn-danger"
+                          onClick={() => {
+                            const updated = formik.values.tradingViewLinks.filter((_, i) => i !== idx);
+                            formik.setFieldValue('tradingViewLinks', updated);
+                          }}
+                        >
+                          <i className="ki-outline ki-cross"></i>
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-light w-fit"
+                      onClick={() => formik.setFieldValue('tradingViewLinks', [...(formik.values.tradingViewLinks || []), ''])}
+                    >
+                      + Add TradingView Link
+                    </button>
+                  </div>
+                </div>
+
 
               <div className="col-span-12">
                 <div className="flex flex-wrap gap-5">
