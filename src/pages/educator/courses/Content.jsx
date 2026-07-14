@@ -4,17 +4,17 @@ import { useAuthContext } from "../../../auth/useAuthContext";
 
 // components
 import SettingsSection from "./pages/Settings";
-import Classroom from "./pages/Classroom";
+// import Classroom from "./pages/Classroom"; // Classroom tab removed
 const Content = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState(() => {
     const hash = window.location.hash.replace("#", "");
-    return hash || "classroom";
+    return hash || "settings";
   });
   const { auth } = useAuthContext();
 
   const baseNavItems = [
-    { icon: BookOpen, label: "Classroom", href: "#classroom" },
+    // { icon: BookOpen, label: "Classroom", href: "#classroom" }, // Classroom tab removed
   ];
 
   const adminNavItems = [
@@ -35,8 +35,8 @@ const Content = () => {
   };
   const renderContent = () => {
     switch (activePage) {
-      case "classroom":
-        return <Classroom />;
+      // case "classroom":
+      //   return <Classroom />;
       case "settings":
         return <SettingsSection />;
       default:

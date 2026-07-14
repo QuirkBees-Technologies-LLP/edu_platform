@@ -37,7 +37,7 @@ const MasterClass = () => {
             />
 
             <div className="container-fluid">
-                <Content defaultActiveTab="master-class" defaultView="classroom" />
+                <Content defaultActiveTab="master-class" defaultView="settings" />
             </div>
         </div>
     );

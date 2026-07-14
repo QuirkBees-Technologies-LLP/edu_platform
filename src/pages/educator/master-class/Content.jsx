@@ -4,18 +4,18 @@ import { useAuthContext } from "../../../auth/useAuthContext";
 
 // components
 import SettingsSection from "../courses/pages/Settings";
-import Classroom from "../courses/pages/Classroom";
+// import Classroom from "../courses/pages/Classroom"; // Classroom tab removed
 
 const Content = ({ defaultActiveTab, defaultView }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [activePage, setActivePage] = useState(() => {
         const hash = window.location.hash.replace("#", "");
-        return hash || defaultView || "classroom";
+        return hash || defaultView || "settings";
     });
     const { auth } = useAuthContext();
 
     const baseNavItems = [
-        { icon: BookOpen, label: "Master Class", href: "#classroom" },
+        // { icon: BookOpen, label: "Master Class", href: "#classroom" }, // Classroom tab removed
     ];
 
     const adminNavItems = [
@@ -36,10 +36,10 @@ const Content = ({ defaultActiveTab, defaultView }) => {
     };
     const renderContent = () => {
         switch (activePage) {
-            case "classroom":
-            case "iq vault":
-            case "master class":
-                return <Classroom defaultActiveTab={defaultActiveTab} hideToggle={true} />;
+            // case "classroom":
+            // case "iq vault":
+            // case "master class":
+            //     return <Classroom defaultActiveTab={defaultActiveTab} hideToggle={true} />;
             case "settings":
                 return <SettingsSection defaultActiveTab={defaultActiveTab} />;
             default:
