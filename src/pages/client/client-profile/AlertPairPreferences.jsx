@@ -88,12 +88,10 @@ function initSelectedFromSaved(savedPrefs, allPaths) {
 
 /**
  * Convert the selected Set to the nested preferences object for saving.
- * If all paths are selected → returns empty object (default = all enabled).
- * Otherwise returns: { strategy: { pair: { tf: true/false } } }
+ * Always saves explicit true/false for each strategy/pair/timeframe.
+ * Returns: { strategy: { pair: { tf: true/false } } }
  */
 function selectedToPrefs(selected, allPaths) {
-  // All selected → save empty (default)
-  if (selected.size === allPaths.size) return {};
 
   const prefs = {};
   allPaths.forEach((path) => {
