@@ -499,7 +499,7 @@ const ClientTradeIdeas = () => {
           {tradeIdeas?.map((trade, index) => (
             <div
               key={trade._id}
-              className={`bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md${index === 0 ? ' ti-first-card' : ''}`}
+              className={`bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md flex flex-col${index === 0 ? ' ti-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
               {/* Chart placeholder */}
@@ -573,7 +573,7 @@ const ClientTradeIdeas = () => {
                               ),
                             );
                           }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2!right-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md -translate-y-1/2"
+                          className="absolute !right-3 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md"
                         >
                           <ChevronRight size={20} />
                         </button>
@@ -666,7 +666,7 @@ const ClientTradeIdeas = () => {
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="p-6 flex flex-col flex-1">
                 {/* Trader Info */}
                 <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
@@ -773,7 +773,8 @@ const ClientTradeIdeas = () => {
                   </div>
 
                   {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
-                    const tpValue = trade?.exits?.[idx] ?? "N/A";
+                    const tpValue = trade?.exits?.[idx];
+                    if (!tpValue && tpValue !== 0) return null;
                     const fieldName = `Exit ${idx + 1}`;
 
                     return (
@@ -790,16 +791,14 @@ const ClientTradeIdeas = () => {
                               Copied!
                             </span>
                           ) : (
-                            tpValue !== "N/A" && (
-                              <button
-                                onClick={() =>
-                                  handleCopyField(trade._id, fieldName, tpValue)
-                                }
-                                className="text-gray-800 flex items-center"
-                              >
-                                <Copy size={14} />
-                              </button>
-                            )
+                            <button
+                              onClick={() =>
+                                handleCopyField(trade._id, fieldName, tpValue)
+                              }
+                              className="text-gray-800 flex items-center"
+                            >
+                              <Copy size={14} />
+                            </button>
                           )}
 
                           {tpValue}
@@ -811,7 +810,7 @@ const ClientTradeIdeas = () => {
 
                 {/* View Details Button */}
                 <button
-                  className={`w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors${index === 0 ? ' ti-view-btn' : ''}`}
+                  className={`w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors mt-auto${index === 0 ? ' ti-view-btn' : ''}`}
                   onClick={() => {
                     setSelectedIdea(trade);
                     setIsViewOpen(true);

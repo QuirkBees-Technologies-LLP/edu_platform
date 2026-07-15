@@ -52,7 +52,7 @@ const CreateTradeIdeas = forwardRef(
       category: "",
       pips: 0,
       checkTime: false,
-      tradingViewLinks: [],
+      tradingViewLinks: [""],
     };
     const numberField = () =>
       Yup.number()
@@ -65,11 +65,16 @@ const CreateTradeIdeas = forwardRef(
 
     const createSchema = Yup.object().shape({
       name: Yup.string().required("symbol is required"),
-      files: Yup.array().when('tradingViewLinks', {
-        is: (tvLinks) => !tvLinks || tvLinks.filter(l => l.trim()).length === 0,
-        then: (schema) => schema.min(1, "At least one screenshot or TradingView link is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
+      files: Yup.array().test(
+        'files-or-links',
+        'At least one screenshot or TradingView link is required',
+        function (files) {
+          const tvLinks = this.parent.tradingViewLinks;
+          const hasLinks = tvLinks && tvLinks.filter(l => l && l.trim()).length > 0;
+          const hasFiles = files && files.length > 0;
+          return hasLinks || hasFiles;
+        }
+      ),
       type: Yup.string().oneOf(["buy", "sell"]).required("Type is required"),
       status: Yup.string()
         .oneOf(["active", "pending", "win", "partialWin", "loss", "breakEven"])
@@ -130,11 +135,9 @@ const CreateTradeIdeas = forwardRef(
         formData.append("checkTime", values.checkTime);
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
 
-        // Append TradingView links
-        const tvLinks = (values.tradingViewLinks || []).filter(l => l.trim());
-        if (tvLinks.length > 0) {
-          formData.append("tradingViewLinks", JSON.stringify(tvLinks));
-        }
+        // Append TradingView links (always send, even empty, so backend can clear old links)
+        const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
+        formData.append("tradingViewLinks", JSON.stringify(tvLinks));
 
         // Send existing image URLs the user kept (so backend knows which to preserve)
         if (selectedRow?._id) {
@@ -200,7 +203,7 @@ const CreateTradeIdeas = forwardRef(
           exits: selectedRow?.exits,
           pips: selectedRow?.pips,
           checkTime: selectedRow?.isUpdatedIdea || false,
-          tradingViewLinks: selectedRow?.tradingViewLinks || [],
+          tradingViewLinks: selectedRow?.tradingViewLinks?.length > 0 ? selectedRow.tradingViewLinks : [""],
         };
         formik.setValues(initData);
       }
@@ -639,7 +642,7 @@ const CreateTradeIdeas = forwardRef(
                     <label className="form-label text-gray-900 gap-1">
                       TradingView Links
                     </label>
-                    {(formik.values.tradingViewLinks || []).map((link, idx) => (
+                    {(formik.values.tradingViewLinks || [""]).map((link, idx) => (
                       <div key={idx} className="flex items-center gap-2 mb-2">
                         <input
                           type="url"
@@ -652,16 +655,18 @@ const CreateTradeIdeas = forwardRef(
                             formik.setFieldValue('tradingViewLinks', updated);
                           }}
                         />
-                        <button
-                          type="button"
-                          className="btn btn-xs btn-icon rounded-full btn-danger"
-                          onClick={() => {
-                            const updated = formik.values.tradingViewLinks.filter((_, i) => i !== idx);
-                            formik.setFieldValue('tradingViewLinks', updated);
-                          }}
-                        >
-                          <i className="ki-outline ki-cross"></i>
-                        </button>
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-icon rounded-full btn-danger"
+                            onClick={() => {
+                              const updated = formik.values.tradingViewLinks.filter((_, i) => i !== idx);
+                              formik.setFieldValue('tradingViewLinks', updated);
+                            }}
+                          >
+                            <i className="ki-outline ki-cross"></i>
+                          </button>
+                        )}
                       </div>
                     ))}
                     <button
@@ -669,7 +674,7 @@ const CreateTradeIdeas = forwardRef(
                       className="btn btn-sm btn-light w-fit"
                       onClick={() => formik.setFieldValue('tradingViewLinks', [...(formik.values.tradingViewLinks || []), ''])}
                     >
-                      + Add TradingView Link
+                      + Add Another TradingView Link
                     </button>
                   </div>
                 </div>

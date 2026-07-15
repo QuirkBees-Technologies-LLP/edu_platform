@@ -374,7 +374,8 @@ const AdminTradeCards = ({
                       </span>
                     </div>
                     {[0, 1, 2].map((idx) => {
-                      const exitValue = trade?.exits?.[idx] ?? "N/A";
+                      const exitValue = trade?.exits?.[idx];
+                      if (!exitValue && exitValue !== 0) return null;
                       const fieldName = `Exit ${idx + 1}`;
 
                       return (

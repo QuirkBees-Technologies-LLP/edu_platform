@@ -153,7 +153,8 @@ export default function ClientTradeSlider({
 
           {/* Exit 1 / Exit 2 / Exit 3 */}
           {[0, 1, 2].map((idx) => {
-            const value = selectedIdea?.exits?.[idx] ?? "N/A";
+            const value = selectedIdea?.exits?.[idx];
+            if (!value && value !== 0) return null;
             const fieldName = `Exit ${idx + 1}`;
 
             return (
@@ -165,16 +166,14 @@ export default function ClientTradeSlider({
                     copiedField.field === fieldName ? (
                     <span className="text-xs text-green-600">Copied!</span>
                   ) : (
-                    value !== "N/A" && (
-                      <button
-                        onClick={() =>
-                          handleCopyField(selectedIdea._id, fieldName, value)
-                        }
-                        className="text-gray-600 flex items-center"
-                      >
-                        <Copy size={14} />
-                      </button>
-                    )
+                    <button
+                      onClick={() =>
+                        handleCopyField(selectedIdea._id, fieldName, value)
+                      }
+                      className="text-gray-600 flex items-center"
+                    >
+                      <Copy size={14} />
+                    </button>
                   )}
 
                   {value}
