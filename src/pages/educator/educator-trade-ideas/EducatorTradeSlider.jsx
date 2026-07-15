@@ -90,16 +90,20 @@ export default function EducatorTradeSlider({
             </span>
           </div>
 
-          {[0, 1, 2].map((idx) => (
-            <div key={idx} className="flex justify-between text-sm">
-              <span className="text-gray-600 font-normal text-sm">
-                {`Exit ${idx + 1}`}
-              </span>
-              <span className="font-medium text-gray-800">
-                {selectedIdea?.exits?.[idx] ?? "N/A"}
-              </span>
-            </div>
-          ))}
+          {[0, 1, 2].map((idx) => {
+            const exitValue = selectedIdea?.exits?.[idx];
+            if (!exitValue && exitValue !== 0) return null;
+            return (
+              <div key={idx} className="flex justify-between text-sm">
+                <span className="text-gray-600 font-normal text-sm">
+                  {`Exit ${idx + 1}`}
+                </span>
+                <span className="font-medium text-gray-800">
+                  {exitValue}
+                </span>
+              </div>
+            );
+          })}
 
           <ShowMoreLess
             html={selectedIdea?.description || "No description"}
