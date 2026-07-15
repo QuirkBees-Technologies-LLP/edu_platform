@@ -273,38 +273,38 @@ const StrategyAlerts = () => {
                 <div
                   key={signal._id}
                   ref={index === signals.length - 1 ? lastSignalRef : null}
-                  className={`card rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${colors.glow} border-gray-200 dark:border-gray-700`}
+                  className={`card rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${colors.glow} border-gray-200 dark:border-gray-700 !p-0`}
                 >
                   {/* ── Card Header: Signal Type + Symbol ── */}
                   <div
-                    className={`flex items-center justify-between px-5 py-3 ${colors.bg} border-b ${colors.border}`}
+                    className={`flex items-center justify-between px-3 py-1.5 ${colors.bg} border-b ${colors.border}`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <span
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 ${colors.badge}`}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-bold text-white flex items-center gap-1 ${colors.badge}`}
                       >
-                        <SignalIcon size={14} />
+                        <SignalIcon size={12} />
                         {signal.signalType || "OTHER"}
                       </span>
-                      <span className="text-base font-bold text-gray-900 dark:text-white">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">
                         {signal.symbol || "—"}
                       </span>
                     </div>
                     {signal.exchange && (
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                         {signal.exchange}
                       </span>
                     )}
                   </div>
 
-                  <div className="px-5 py-4">
+                  <div className="px-3 pt-2 pb-1">
                     {/* ── Chart Image Thumbnail ── */}
                     {signal?.chartImageUrl && (
-                      <div className="mb-3 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700/50 relative">
+                      <div className="mb-2 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700/50 relative">
                         <img
                           src={signal?.chartImageUrl}
                           alt={`${signal?.symbol || "Chart"}`}
-                          className="w-full h-[220px] object-cover object-right"
+                          className="w-full h-[120px] object-cover object-right"
                           loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
@@ -312,24 +312,24 @@ const StrategyAlerts = () => {
                     )}
 
                     {/* ── Price + Timeframe Grid ── */}
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                      <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-1">
+                    <div className="grid grid-cols-2 gap-1.5 mb-1.5">
+                      <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-1.5">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-0.5">
                           Entry Price
                         </p>
                         <p
-                          className="text-lg font-bold text-gray-900 dark:text-white font-mono cursor-pointer hover:text-blue-500 transition-colors"
+                          className="text-sm font-bold text-gray-900 dark:text-white font-mono cursor-pointer hover:text-blue-500 transition-colors"
                           onClick={(e) => copyValue("Entry", signal.entryPrice, e)}
                           title="Click to copy"
                         >
                           {signal.entryPrice ? formatPrice(signal.entryPrice) : "—"}
                         </p>
                       </div>
-                      <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-1">
+                      <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-1.5">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider mb-0.5">
                           Time Frame
                         </p>
-                        <p className="text-lg font-bold text-gray-900 dark:text-white">
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">
                           {signal.timeframe ? formatTimeframe(signal.timeframe) : "—"}
                         </p>
                       </div>
@@ -338,11 +338,11 @@ const StrategyAlerts = () => {
                     {/* ── Stop Loss ── */}
                     {signal.stopLoss != null && (
                       <div
-                        className="flex items-center justify-between mb-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 cursor-pointer hover:bg-red-100 dark:hover:bg-red-500/15 transition-colors"
+                        className="flex items-center justify-between mb-1 px-2 py-1 rounded-md bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 cursor-pointer hover:bg-red-100 dark:hover:bg-red-500/15 transition-colors"
                         onClick={(e) => copyValue("Invalidation", signal.stopLoss, e)}
                         title="Click to copy"
                       >
-                        <span className="text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                        <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 flex items-center gap-1">
                           ❌ Invalidation (SL)
                         </span>
                         <span className="text-sm font-bold text-red-700 dark:text-red-400 font-mono flex items-center gap-1">
@@ -354,15 +354,15 @@ const StrategyAlerts = () => {
 
                     {/* ── Take Profit Levels ── */}
                     {tps.length > 0 && (
-                      <div className="space-y-1 mb-3">
+                      <div className="space-y-px mb-1.5">
                         {tps.map((tp) => (
                           <div
                             key={tp.num}
-                            className="flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-500/5 cursor-pointer transition-colors"
+                            className="flex items-center justify-between px-2 py-0.5 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-500/5 cursor-pointer transition-colors"
                             onClick={(e) => copyValue(`Exit ${tp.num}`, tp.val, e)}
                             title="Click to copy"
                           >
-                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                            <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                               🎯 Exit {tp.num}
                             </span>
                             <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
@@ -376,9 +376,9 @@ const StrategyAlerts = () => {
 
                     {/* ── Strategy Badge ── */}
                     {(signal.strategyName || signal.webhookConfig?.name) && (
-                      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20">
-                        <ChartLine className="w-4 h-4 text-purple-500 flex-shrink-0" />
-                        <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 truncate">
+                      <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-md bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20">
+                        <ChartLine className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+                        <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-400 truncate">
                           {signal.strategyName || signal.webhookConfig?.name}
                         </span>
                       </div>
@@ -386,9 +386,9 @@ const StrategyAlerts = () => {
 
                     {/* ── Confirmations ── */}
                     {confirmations.length > 0 && (
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 mb-3 px-1">
+                      <div className="flex flex-wrap gap-x-2 gap-y-0.5 mb-1 px-0.5">
                         {confirmations.map((item) => (
-                          <span key={item.label} className="text-[11px] text-gray-600 dark:text-gray-300 font-medium flex items-center gap-1">
+                          <span key={item.label} className="text-[10px] text-gray-600 dark:text-gray-300 font-medium flex items-center gap-1">
                             {item.label}: {item.passed ? "✅" : "❌"}
                           </span>
                         ))}
@@ -396,7 +396,7 @@ const StrategyAlerts = () => {
                     )}
 
                     {/* ── Footer: Time ── */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-800">
                       {signal.session && (() => {
                         const formatted = signal.session
                           .split(",")

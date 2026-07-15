@@ -2,7 +2,7 @@ import { Fragment, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Outlet, useLocation } from 'react-router';
 import { useMenuCurrentItem } from '@/components/menu';
-import { Footer, Header, Sidebar, useDemo1Layout } from '../';
+import { Footer, Header, Sidebar, Content, useDemo1Layout } from '../';
 import { useMenus } from '@/providers';
 const Main = () => {
   const {
@@ -51,9 +51,7 @@ const Main = () => {
       <div className="wrapper flex grow flex-col">
         <Header />
 
-        <main className="grow content pt-5" role="content">
-          <Outlet />
-        </main>
+        <Content />
 
         {/* <Footer /> */}
       </div>

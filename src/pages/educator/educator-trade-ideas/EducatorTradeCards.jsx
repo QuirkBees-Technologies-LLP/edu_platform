@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useGetClientTradeIdeasQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
-import { ArrowDown, ArrowUp, Container, Copy, Eye } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Container, Copy, Eye } from "lucide-react";
 import { Toolbar, ToolbarActions, ToolbarDescription, ToolbarHeading, ToolbarPageTitle } from '@/partials/toolbar';
 import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 import EducatorCardImage from "./EducatorCardImage";
@@ -119,6 +119,7 @@ const EducatorTradeCards = () => {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [selectedIdea, setSelectedIdea] = useState({});
     const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+    const [imageIndices, setImageIndices] = useState({});
 
     const  { data:ListRecord }=
     useGetEducatorWithoutTradeIdeasQuery({isview:false});
@@ -254,16 +255,84 @@ const EducatorTradeCards = () => {
                   key={trade._id}
                   className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
                 >
-                  <div className="relative h-[28vh] w-full">
-                    <img
-                      src={trade?.image[0]}
-                      alt={trade.pair}
-                      className="w-full object-cover h-full cursor-pointer"
-                      onClick={() => {
-                        setSelectedIdea(trade);
-                        setIsLightBoxOpen(true);
-                      }}
-                    />
+                  <div className="relative h-[28vh] w-full overflow-hidden">
+                    {trade?.image && trade.image.length > 0 && (
+                      <>
+                        <img
+                          src={trade.image[imageIndices[trade._id] ?? 0]}
+                          alt={trade.pair}
+                          className="w-full object-cover h-full cursor-pointer transition-all duration-500"
+                          onClick={() => {
+                            setSelectedIdea(trade);
+                            setIsLightBoxOpen(true);
+                          }}
+                        />
+
+                        <button
+                          onClick={() => {
+                            setSelectedIdea(trade);
+                            setIsLightBoxOpen(true);
+                          }}
+                          className="absolute left-2 bottom-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow z-30"
+                        >
+                          <Eye size={20} />
+                        </button>
+
+                        {trade.image.length > 1 && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setImageIndices((prev) => ({
+                                  ...prev,
+                                  [trade._id]:
+                                    (prev[trade._id] ?? 0) === 0
+                                      ? trade.image.length - 1
+                                      : (prev[trade._id] ?? 0) - 1,
+                                }));
+                              }}
+                              className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                            >
+                              <ChevronLeft size={20} />
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setImageIndices((prev) => ({
+                                  ...prev,
+                                  [trade._id]:
+                                    (prev[trade._id] ?? 0) ===
+                                      trade.image.length - 1
+                                      ? 0
+                                      : (prev[trade._id] ?? 0) + 1,
+                                }));
+                              }}
+                              className="absolute !right-3 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md"
+                            >
+                              <ChevronRight size={20} />
+                            </button>
+
+                            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                              {trade.image.map((_, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    setImageIndices((prev) => ({
+                                      ...prev,
+                                      [trade._id]: idx,
+                                    }));
+                                  }}
+                                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                                    (imageIndices[trade._id] ?? 0) === idx
+                                      ? "bg-primary"
+                                      : "bg-gray-300 hover:bg-gray-400"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   <div className="p-4">
@@ -349,7 +418,8 @@ const EducatorTradeCards = () => {
                         </span>
                       </div>
                       {[0, 1, 2].map((idx) => {
-                        const exitValue = trade?.exits?.[idx] ?? "N/A";
+                        const exitValue = trade?.exits?.[idx];
+                        if (!exitValue && exitValue !== 0) return null;
                         const fieldName = `Exit ${idx + 1}`;
 
                         return (

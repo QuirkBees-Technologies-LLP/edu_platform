@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Clock, ChartLine, Copy } from "lucide-react";
+import { Clock, ChartLine, Copy, Globe, Zap } from "lucide-react";
 import { toast } from "sonner";
 import signalConfig from "./signalConfig";
 import { formatTimeframe, formatTimeAgo, formatAlertTime } from "./signalUtils";
@@ -16,7 +16,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
       className="relative rounded-2xl p-4.5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35]"
     >
       {/* ── Header: Strategy Name (primary) + Signal Type ── */}
-      <div className="flex items-start gap-2.5 mb-3">
+      <div className="flex items-start gap-1 mb-2">
         <div className="flex-1 min-w-0">
           {/* Strategy name — primary highlighted element */}
           <div className="flex items-center gap-2 mb-2">
@@ -75,14 +75,14 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
               .join(", ");
 
             return (
-              <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-2 px-0.5">
+              <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-1 px-0.5">
                 {formatted}
               </div>
             );
           })()}
         </div>
       </div>
-      <div className="-mx-4.5 mb-3 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
+      <div className="-mx-4.5 mb-1 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
         {(signal?.chartImageThumbUrl || signal?.chartImageUrl) ? (
           <>
             {/* Skeleton loader — visible until image loads */}
@@ -229,7 +229,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
         if (entry == null && sl == null && tps.length === 0) return null;
 
         return (
-          <div className="mb-3 space-y-1.5">
+          <div className="mb-1 space-y-1.5">
             {/* Entry */}
             {entry != null && (
               <div
@@ -294,7 +294,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
 
         return (
           <div className="mt-auto mb-0">
-            <div className="text-[10px] text-slate-400 dark:text-white font-semibold mb-1.5 uppercase tracking-wider px-1">
+            <div className="text-[10px] text-slate-400 dark:text-white font-semibold uppercase tracking-wider px-1">
               Confirmations
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 px-1">
@@ -311,7 +311,7 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
 
 
       {/* ── Footer: Source + Time ── */}
-      <div className="flex justify-between items-center pt-3.5 pb-1 mt-auto border-t border-slate-200 dark:border-[#1F1F35]">
+      <div className="flex justify-between items-center pt-1  border-t border-slate-200 dark:border-[#1F1F35]">
         <span className="text-[12px] text-slate-500 dark:text-white/80 font-semibold truncate max-w-[180px]">
           {signal?.webhookConfig?.name ? `${signal.webhookConfig.name}` : ""}
         </span>

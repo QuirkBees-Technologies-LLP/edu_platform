@@ -607,7 +607,7 @@ const LearningContentList = () => {
         <ToolbarHeading>
           <ToolbarPageTitle text="Learning Content" />
           <ToolbarDescription>
-            Manage dynamic learning videos and resources for students
+            Manage dynamic page header videos and resources for students
           </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
