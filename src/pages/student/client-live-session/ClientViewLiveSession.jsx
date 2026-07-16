@@ -15,7 +15,7 @@ import { isSafari } from "../../../utils/Devices";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
-const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
+const ClientViewLiveSession = ({ bannerImage, callId, educatorData, headerGradient }) => {
   const [client, setClient] = useState(null);
 
   const [call, setCall] = useState(null);
@@ -172,6 +172,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
           callId={callId}
           bannerImage={bannerImage}
           educatorData={educatorData}
+          headerGradient={headerGradient}
         >
           <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
             {
@@ -181,6 +182,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
                 callId={callId}
                 token={token}
                 educatorData={educatorData}
+                headerGradient={headerGradient}
               />
             }
           </StreamTheme>
