@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   useGetClientTvSignalsQuery,
   useGetFilterOptionsQuery,
   useGetFilterPreferencesQuery,
   useSaveFilterPreferencesMutation,
 } from "../../../store/api/client/clientTvSignalsApiSlice";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
 
 import {
   Search,
@@ -114,6 +116,8 @@ const areFiltersEqual = (f1, f2) => {
 
 const StudentTradingSignals = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { auth } = useAuthContext();
   // ── Separate page state so filters reset never conflict ──────────
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -473,11 +477,30 @@ const StudentTradingSignals = () => {
   const totalAll =
     totalSymbols + totalSignalTypes + totalTimeframes + totalStrategies + totalSessions;
 
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isTransitionLoading && !isInitialLoad && !isLoading && !isFetchingFilters,
+    getSteps: () => {
+      const steps = [];
+      const heading = document.querySelector('.tour-signals-heading');
+      if (heading) steps.push({ element: heading, title: 'IQ Strategies Alerts', intro: 'Here you can see real-time alerts from Iqonic strategies.', position: 'bottom' });
+      
+      const filterBar = document.querySelector('.tour-signals-filters');
+      if (filterBar) steps.push({ element: filterBar, title: 'Filter Alerts', intro: 'Use these filters to find exactly what you are looking for by Strategy, Symbol, Time Frame, and more.', position: 'bottom' });
+      
+      const firstCard = document.querySelector('.tour-signals-card');
+      if (firstCard) steps.push({ element: firstCard, title: 'Signal Card', intro: 'Each card displays detailed signal information including Entry, Exit targets, and Confirmations.', position: 'right' });
+      
+      return steps;
+    },
+    onDone: () => navigate('/iq-social', { state: { continueTour: true } }),
+    delay: 1000,
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
       {/* ── Header ── */}
-      <Toolbar className="mb-5">
+      <Toolbar className="mb-5 tour-signals-heading">
         <ToolbarHeading>
           <div className="flex items-center gap-2.5">
             <ChartLine size={24} className="text-blue-500" />
@@ -533,7 +556,7 @@ const StudentTradingSignals = () => {
 
       {/* ── Filter Bar ── */}
       {showFilters && (
-        <div className="relative flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038]">
+        <div className="relative flex flex-col gap-4 mb-5 p-4 bg-slate-50 dark:bg-[#131324] rounded-xl border border-slate-200 dark:border-[#202038] tour-signals-filters">
           {/* ── Exclusion Filters ───────────────────────────────── */}
           <div className="flex gap-4 items-end pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end flex-1 min-w-0">
@@ -654,12 +677,13 @@ const StudentTradingSignals = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {signals?.map((signal, index) => (
-            <SignalCard
-              key={signal?._id}
-              signal={signal}
-              ref={index === signals.length - 1 ? lastSignalRef : null}
-              onClick={() => handleSignalClick(signal)}
-            />
+            <div key={signal?._id} className={index === 0 ? "tour-signals-card" : ""}>
+              <SignalCard
+                signal={signal}
+                ref={index === signals.length - 1 ? lastSignalRef : null}
+                onClick={() => handleSignalClick(signal)}
+              />
+            </div>
           ))}
         </div>
       )}
