@@ -49,6 +49,7 @@ const ClientLiveSessionContent = ({
   token,
   bannerImage,
   educatorData,
+  headerGradient,
 }) => {
   const [showFull, setShowFull] = useState(false);
   const isMdUp = useResponsive("up", "md");
@@ -187,7 +188,7 @@ const ClientLiveSessionContent = ({
           )}
           {token && callId && status !== "live" && (
             <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-              <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+              <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                 <h3 className="text-white font-semibold text-sm">About </h3>
               </div>
 
@@ -217,6 +218,7 @@ const ClientLiveSessionWrapper = ({
   token,
   bannerImage,
   educatorData,
+  headerGradient,
 }) => {
   return (
     <ClientLiveSessionContent
@@ -225,6 +227,7 @@ const ClientLiveSessionWrapper = ({
       token={token}
       bannerImage={bannerImage}
       educatorData={educatorData}
+      headerGradient={headerGradient}
     />
   );
 };
