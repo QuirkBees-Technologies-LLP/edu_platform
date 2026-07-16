@@ -175,8 +175,20 @@ const TradingStrategies = () => {
             if (startBtn) steps.push({ element: startBtn, title: '▶️ Start Learning', intro: 'Click <strong>Start Learning</strong> to choose your preferred language and begin the strategy course immediately.', position: 'top' });
             return steps;
         },
-        onDone: () => navigate('/iq-social', { state: { continueTour: true } }),
-        delay: 1000,
+        onDone: () => {
+            try {
+                const allowedRoutes = auth?.user?.plan?.allowedSideBar || [];
+                if (allowedRoutes.includes('/trading-signals')) {
+                    navigate('/trading-signals', { state: { continueTour: true } });
+                } else {
+                    navigate('/iq-social', { state: { continueTour: true } });
+                }
+            } catch (err) {
+                console.error("Tour routing error:", err);
+                navigate('/iq-social', { state: { continueTour: true } });
+            }
+        },
+        delay: 1200,
     });
     // ─────────────────────────────────────────────────────────────────────────────────
 

@@ -541,6 +541,7 @@ const IqEducators = () => {
             bannerImage={response?.data?.educator?.bannerImage}
             callId={callId}
             educatorData={response?.data?.educator?.description}
+            headerGradient={getHeaderGradient()}
           />
         </div>
       </div>
@@ -552,7 +553,7 @@ const IqEducators = () => {
 
 
           {!isDigitalMarketing && <div className="text-gray-900">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-medium">Live Ideas</h2>
@@ -700,7 +701,7 @@ const IqEducators = () => {
 
           {/* Course  */}
           <div className="text-gray-900 ">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Courses</h2>
                 <button
@@ -791,7 +792,7 @@ const IqEducators = () => {
 
           {/* Recordings - Show for Digital Marketing only (after Courses) */}
           {isDigitalMarketing && <div className="text-gray-900 mb-8">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Recordings</h2>
                 <button
@@ -883,7 +884,7 @@ const IqEducators = () => {
           {/* Master Classes - Show for Digital Marketing only, below Recordings, only if data exists */}
           {isDigitalMarketing && response?.data?.masterClasses?.length > 0 && (
             <div className="text-gray-900 mb-8">
-              <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+              <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-medium">Master Classes</h2>
                   <button
@@ -932,7 +933,7 @@ const IqEducators = () => {
 
           {/* Idea - Hide for Digital Marketing */}
           {!isDigitalMarketing && <div className="text-gray-900 mb-28">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Idea</h2>
                 <button
@@ -1034,7 +1035,7 @@ const IqEducators = () => {
           {/* Insight - Hide for Digital Marketing */}
 
           {!isDigitalMarketing && <div className="text-gray-900 mb-28">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Insights</h2>
                 <button
@@ -1139,7 +1140,7 @@ const IqEducators = () => {
           <div className="grid grid-cols-12 gap-6">
             {/* <div className="col-span-12 md:col-span-6 xl:col-span-12 space-y-6">
               <div className="card rounded-2xl shadow-md overflow-hidden">
-                <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                   <h3 className="text-white font-semibold text-sm">Chatbox</h3>
                 </div>
 
@@ -1191,7 +1192,7 @@ const IqEducators = () => {
             <div className="col-span-12 md:col-span-6 xl:col-span-12">
               <div className="card rounded-2xl shadow-md overflow-hidden">
                 {/* Header */}
-                <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                   <h3 className="text-white font-semibold text-sm">
                     Live Feed
                   </h3>
@@ -1345,7 +1346,7 @@ const IqEducators = () => {
             <div className="col-span-12 md:col-span-6 xl:col-span-12">
               <div className="card rounded-2xl shadow-md overflow-hidden">
                 {/* Header */}
-                <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                   <h3 className="text-white font-semibold text-sm">
                     Analysis Updates
                   </h3>
@@ -1502,7 +1503,7 @@ const IqEducators = () => {
         {/* Recording - Hide for Digital Marketing (shown above after Courses) */}
         {!isDigitalMarketing && <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
           <div className="text-gray-900 mb-2">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Recordings</h2>
                 <button

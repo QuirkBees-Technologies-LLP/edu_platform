@@ -16,6 +16,8 @@ import {
   ChevronRight,
   Copy,
   Eye,
+  ChartLine,
+  Clock,
 } from "lucide-react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import {
@@ -499,101 +501,129 @@ const ClientTradeIdeas = () => {
           {tradeIdeas?.map((trade, index) => (
             <div
               key={trade._id}
-              className={`bg-white dark:bg-[#0F0F1A] border rounded-2xl shadow-md flex flex-col${index === 0 ? ' ti-first-card' : ''}`}
+              className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
-              {/* Chart placeholder */}
-              <div className="relative h-[300px] rounded-t-[20px] overflow-hidden">
-                {/* <img
-                  src="/media/images/2600x1600/banner_3.jpg"
-                  alt="Academy"
-                  className="w-full h-full object-cover"
-                /> */}
+              {/* ── Header: Strategy Name (primary) + Signal Type ── */}
+              <div className="flex items-start gap-1 mb-2">
+                <div className="flex-1 min-w-0">
+                  {/* Strategy name + Status */}
+                  {/* Row 1: Educator - Pair + Status */}
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%]">
+                      <img
+                        src={`${trade?.educatorDetails?.image || ""}`}
+                        alt={trade?.educatorDetails?.first_name}
+                        className="w-4 h-4 rounded-full object-cover flex-shrink-0"
+                      />
+                      <span className="flex items-center min-w-0">
+                        <span className="truncate">{trade?.educatorDetails?.first_name} {trade?.educatorDetails?.last_name}</span>
+                        <span className="flex-shrink-0 whitespace-nowrap">&nbsp;- {trade.name || "—"}</span>
+                      </span>
+                    </span>
+                    {trade.status && (
+                      <span
+                        className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${LabelMap[trade.status] === 'Active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
+                          LabelMap[trade.status] === 'Pending' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' :
+                            LabelMap[trade.status] === 'Win' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' :
+                              LabelMap[trade.status] === 'Partial Win' ? 'bg-emerald-400/15 text-emerald-500 dark:text-emerald-400' :
+                                LabelMap[trade.status] === 'Loss' ? 'bg-red-500/15 text-red-600 dark:text-red-400' :
+                                  'bg-slate-500/15 text-slate-600 dark:text-slate-400'
+                          }`}
+                      >
+                        {LabelMap[trade.status] === 'Win' ? `WIN +${trade.pips} pips` :
+                          LabelMap[trade.status] === 'Loss' ? `LOSS -${trade.pips} pips` :
+                            LabelMap[trade.status]}
+                      </span>
+                    )}
+                  </div>
 
-                {/* <div className="relative h-[28vh] w-full overflow-hidden"> */}
-                {trade.image && trade.image.length > 0 && (
+                  {/* Row 2: Type - Timeframe */}
+                  <div className="flex items-center justify-between gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
+                    {(trade.type || trade.timeFrame) && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-extrabold flex-shrink-0 border leading-none ${trade.type === 'buy' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20'
+                          }`}
+                      >
+                        {trade.type === 'buy' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                        {trade.type ? trade.type.charAt(0).toUpperCase() + trade.type.slice(1).toLowerCase() : ""}
+                        {trade.timeFrame ? ` - ${Array.isArray(trade.timeFrame) ? trade.timeFrame.join('/') : trade.timeFrame}` : ""}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                      {trade.createdAt ? format(new Date(trade.createdAt), "MMM dd, hh:mm a") : ""}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Chart Image Thumbnail ── */}
+              <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
+                {trade.image && trade.image.length > 0 ? (
                   <>
                     <img
                       src={trade.image[trade.currentIndex ?? 0]}
                       alt={trade.pair}
-                      className="w-full h-full object-cover cursor-pointer transition-all duration-500"
+                      className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                       onClick={() => {
                         setSelectedIdea(trade);
                         setIsLightBoxOpen(true);
                       }}
                     />
-
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setSelectedIdea(trade);
                         setIsLightBoxOpen(true);
                       }}
-                      className="absolute left-2 bottom-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow z-30"
+                      className="absolute right-2 bottom-2 text-white p-1.5 bg-black/50 hover:bg-black/70 rounded-md backdrop-blur-sm transition-colors z-30"
                     >
-                      <Eye size={20} />
+                      <Eye size={14} />
                     </button>
-
                     {trade.image.length > 1 && (
                       <>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setTradeIdeas((prev) =>
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
                                     ...t,
-                                    currentIndex:
-                                      (t.currentIndex ?? 0) === 0
-                                        ? t.image.length - 1
-                                        : (t.currentIndex ?? 0) - 1,
+                                    currentIndex: (t.currentIndex ?? 0) === 0 ? t.image.length - 1 : (t.currentIndex ?? 0) - 1,
                                   }
-                                  : t,
-                              ),
+                                  : t
+                              )
                             );
                           }}
-                          className="!left-3 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                         >
-                          <ChevronLeft size={20} />
+                          <ChevronLeft size={16} />
                         </button>
-
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setTradeIdeas((prev) =>
                               prev.map((t) =>
                                 t._id === trade._id
                                   ? {
                                     ...t,
-                                    currentIndex:
-                                      (t.currentIndex ?? 0) ===
-                                        t.image.length - 1
-                                        ? 0
-                                        : (t.currentIndex ?? 0) + 1,
+                                    currentIndex: (t.currentIndex ?? 0) === t.image.length - 1 ? 0 : (t.currentIndex ?? 0) + 1,
                                   }
-                                  : t,
-                              ),
+                                  : t
+                              )
                             );
                           }}
-                          className="absolute !right-3 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white text-gray-700 rounded-full p-1 shadow-md"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                         >
-                          <ChevronRight size={20} />
+                          <ChevronRight size={16} />
                         </button>
-
-                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
                           {trade.image.map((_, idx) => (
-                            <button
+                            <div
                               key={idx}
-                              onClick={() => {
-                                setTradeIdeas((prev) =>
-                                  prev.map((t) =>
-                                    t._id === trade._id
-                                      ? { ...t, currentIndex: idx }
-                                      : t,
-                                  ),
-                                );
-                              }}
-                              className={`w-2.5 h-2.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx
-                                ? "bg-primary"
-                                : "bg-gray-300 hover:bg-gray-400"
+                              className={`w-1.5 h-1.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx ? "bg-white" : "bg-white/40"
                                 }`}
                             />
                           ))}
@@ -601,225 +631,84 @@ const ClientTradeIdeas = () => {
                       </>
                     )}
                   </>
+                ) : (
+                  <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-2 opacity-40">
+                      <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                      <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">No Chart Loading...</span>
+                    </div>
+                  </div>
                 )}
-                {/* </div> */}
-
-                {/* OVERLAY BLOCK */}
-                <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${trade.type === "buy"
-                        ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                        : "bg-red-500 hover:bg-red-600 text-white"
-                        }`}
-                    >
-                      {trade.type === "buy" ? (
-                        <TrendingUp size={16} />
-                      ) : (
-                        <TrendingDown size={16} />
-                      )}
-                      {trade.type.toUpperCase()}
-                    </button>
-
-                    <div className="bg-gray-800 px-2 py-1 rounded-lg font-semibold text-xs text-white">
-                      {trade.name}
-                    </div>
-                  </div>
-
-                  {LabelMap[trade.status] === "Active" && (
-                    <div className="bg-cyan-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                      {LabelMap[trade.status]}
-                    </div>
-                  )}
-                  {LabelMap[trade.status] === "Pending" && (
-                    <div className="bg-purple-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                      {LabelMap[trade.status]}
-                    </div>
-                  )}
-
-                  {LabelMap[trade.status] === "Win" && (
-                    <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                      <span>★</span>
-                      WIN +{trade.pips} pips
-                    </div>
-                  )}
-
-                  {LabelMap[trade.status] === "Loss" && (
-                    <div className="bg-red-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                      <span>▲</span>
-                      LOSS -{trade.pips} pips
-                    </div>
-                  )}
-                  {LabelMap[trade.status] === "Partial Win" && (
-                    <div className="bg-purple-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                      <span>▲</span>
-                      PARTIAL WIN {trade.pips} pips
-                    </div>
-                  )}
-                  {LabelMap[trade.status] === "Break Even" && (
-                    <div className="bg-blue-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                      Break Even
-                    </div>
-                  )}
-                </div>
               </div>
 
-              <div className="p-6 flex flex-col flex-1">
-                {/* Trader Info */}
-                <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-                  <div className="flex items-center gap-3">
+              {/* ── Structured Price Levels ── */}
+              <div className="mb-2 space-y-1.5 flex-1">
+                {trade.entry && (
+                  <div
+                    className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                    onClick={() => handleCopyField(trade._id, "Entry", trade.entry)}
+                  >
+                    <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
+                    <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+                      {copiedField.id === trade._id && copiedField.field === "Entry" ? (
+                        <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                      ) : null}
+                      <span className="text-[10px]">📍</span> {trade.entry}
+                      <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                    </span>
+                  </div>
+                )}
+                {trade.invalidation && (
+                  <div
+                    className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                    onClick={() => handleCopyField(trade._id, "Stop Loss", trade.invalidation)}
+                  >
+                    <span className="text-[12px] text-slate-600 dark:text-white font-medium">Invalidation</span>
+                    <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+                      {copiedField.id === trade._id && copiedField.field === "Stop Loss" ? (
+                        <span className="text-[9px] text-red-500 mr-1">Copied</span>
+                      ) : null}
+                      <span className="text-[10px]">❌</span> {trade.invalidation}
+                      <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                    </span>
+                  </div>
+                )}
+                {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
+                  const tpValue = trade?.exits?.[idx];
+                  if (!tpValue && tpValue !== 0) return null;
+                  const fieldName = `Exit ${idx + 1}`;
+                  return (
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white cursor-pointer ${trade.avatarColor
-                        }`}
-                      onClick={() => navigate(`/iq-educators/${trade?.educatorDetails?._id}`)}
+                      key={tpField}
+                      className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                      onClick={() => handleCopyField(trade._id, fieldName, tpValue)}
                     >
-                      <img
-                        className="w-12 h-12 rounded-full flex items-center justify-center"
-                        src={`${trade?.educatorDetails?.image}`}
-                        alt=""
-                      />
+                      <span className="text-[12px] text-slate-600 dark:text-white font-medium">{fieldName}</span>
+                      <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        {copiedField.id === trade._id && copiedField.field === fieldName ? (
+                          <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                        ) : null}
+                        <span className="text-[10px]">🎯</span> {tpValue}
+                        <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                      </span>
                     </div>
-                    <div>
-                      <div
-                        className="dark:text-white font-semibold cursor-pointer hover:text-primary"
-                        onClick={() => navigate(`/iq-educators/${trade?.educatorDetails?._id}`)}
-                      >
-                        {trade?.educatorDetails?.first_name}{" "}
-                        {trade?.educatorDetails?.last_name}
-                      </div>
-                      <div className="text-gray-600 text-sm">
-                        {Array.isArray(trade?.educatorDetails?.categories) &&
-                          trade?.educatorDetails?.categories?.length > 0
-                          ? trade?.educatorDetails?.categories
-                            .map((cat) => cat)
-                            .join(", ")
-                          : "-"}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-gray-600 text-sm">
-                    {trade.createdAt
-                      ? format(
-                        new Date(trade.createdAt),
-                        "MMM dd, yyyy, hh:mm a",
-                      )
-                      : ""}
-                  </div>
-                </div>
-
-                {/* Trade Details */}
-                <div className="space-y-3 mb-6">
-                  {/* ENTRY */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-800 dark:text-white-200">
-                      Entry
-                    </span>
-
-                    <span className="font-mono flex items-center gap-2 text-dark dark:text-white">
-                      {copiedField.id === trade._id &&
-                        copiedField.field === "Entry" ? (
-                        <span className="text-black dark:text-white text-xs bg-transparent">
-                          Copied!
-                        </span>
-                      ) : (
-                        trade.entry && (
-                          <button
-                            onClick={() =>
-                              handleCopyField(trade._id, "Entry", trade.entry)
-                            }
-                            className="text-gray-800 dark:text-white-200 flex items-center"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        )
-                      )}
-
-                      {trade.entry}
-                    </span>
-                  </div>
-
-                  {/* STOP LOSS */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-800">Invalidation</span>
-
-                    <span className="text-red-600 font-mono flex items-center gap-2">
-                      {copiedField.id === trade._id &&
-                        copiedField.field === "Stop Loss" ? (
-                        <span className="text-dark bg-white text-xs">
-                          Copied!
-                        </span>
-                      ) : (
-                        trade.invalidation && (
-                          <button
-                            onClick={() =>
-                              handleCopyField(
-                                trade._id,
-                                "Stop Loss",
-                                trade.invalidation,
-                              )
-                            }
-                            className="text-red-600 flex items-center"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        )
-                      )}
-
-                      {trade.invalidation}
-                    </span>
-                  </div>
-
-                  {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
-                    const tpValue = trade?.exits?.[idx];
-                    if (!tpValue && tpValue !== 0) return null;
-                    const fieldName = `Exit ${idx + 1}`;
-
-                    return (
-                      <div
-                        className="flex justify-between items-center"
-                        key={tpField}
-                      >
-                        <span className="text-gray-800">{fieldName}</span>
-
-                        <span className="text-emerald-600 font-mono flex items-center gap-2">
-                          {copiedField.id === trade._id &&
-                            copiedField.field === fieldName ? (
-                            <span className="text-dark bg-white text-xs">
-                              Copied!
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                handleCopyField(trade._id, fieldName, tpValue)
-                              }
-                              className="text-gray-800 flex items-center"
-                            >
-                              <Copy size={14} />
-                            </button>
-                          )}
-
-                          {tpValue}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* View Details Button */}
-                <button
-                  className={`w-full bg-gray-200 hover:bg-gray-700/50 border dark:text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors mt-auto${index === 0 ? ' ti-view-btn' : ''}`}
-                  onClick={() => {
-                    setSelectedIdea(trade);
-                    setIsViewOpen(true);
-                  }}
-                >
-                  <Eye size={18} />
-                  View Details
-                </button>
+                  );
+                })}
               </div>
+
+              {/* ── Footer: Source + Time ── */}
+
+
+              {/* View Details Button */}
+              <button
+                className={`w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors${index === 0 ? ' ti-view-btn' : ''}`}
+                onClick={() => {
+                  setSelectedIdea(trade);
+                  setIsViewOpen(true);
+                }}
+              >
+                <Eye size={14} /> View Details
+              </button>
             </div>
           ))}
 

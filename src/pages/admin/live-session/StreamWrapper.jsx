@@ -44,7 +44,7 @@ const ShowMoreLess = ({
   );
 };
 
-const StreamWrapper = ({ call, children, bannerImage, educatorData }) => {
+const StreamWrapper = ({ call, children, bannerImage, educatorData, headerGradient }) => {
 
   const safeHtml = makeClickableLinks(educatorData || "");
   if (!call)
@@ -69,7 +69,7 @@ const StreamWrapper = ({ call, children, bannerImage, educatorData }) => {
           {/* Chatbox Section */}
           {/* <div className="col-span-12 lg:col-span-4">
             <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-              <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+              <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                 <h3 className="text-white font-semibold text-sm">Chatbox </h3>
               </div>
 
@@ -104,7 +104,7 @@ const StreamWrapper = ({ call, children, bannerImage, educatorData }) => {
 
           <div className="col-span-12 lg:col-span-4">
             <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-              <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+              <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                 <h3 className="text-white font-semibold text-sm">About Me </h3>
               </div>
 
