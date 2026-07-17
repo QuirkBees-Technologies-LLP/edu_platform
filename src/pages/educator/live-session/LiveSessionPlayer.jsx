@@ -6,7 +6,7 @@ import {
 } from "@stream-io/video-react-sdk";
 import { Copy, PhoneOff, Podcast, Radio, Route, RouteOff } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { DefaultTooltip } from "@/components";
+import { DefaultTooltip, LiveClosedCaptions } from "@/components";
 import { toast } from "sonner";
 import {
   useEducatorChangeLiveStreamStatusUpdateMutation,
@@ -227,18 +227,21 @@ const LiveSessionPlayer = ({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "unset" }}>
-      <LivestreamPlayer
-        displayName="Hello guys"
-        layoutProps={{
-          showLiveBadge: true,
-          showSpeakerName: true,
-          showParticipantCount: true,
-          showDuration: true,
-          enableFullScreen: true,
-        }}
-        callType="livestream"
-        callId={callId}
-      />
+      <div className="relative w-full h-full rounded-xl overflow-hidden live-player-container">
+        <LivestreamPlayer
+          displayName="Hello guys"
+          layoutProps={{
+            showLiveBadge: true,
+            showSpeakerName: true,
+            showParticipantCount: true,
+            showDuration: true,
+            enableFullScreen: true,
+          }}
+          callType="livestream"
+          callId={callId}
+        />
+        <LiveClosedCaptions />
+      </div>
 
       {isCallEnd ? (
         <div className="flex flex-col justify-center items-center gap-5 pb-20 pt-20">
