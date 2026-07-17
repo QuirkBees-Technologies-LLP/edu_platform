@@ -13,7 +13,7 @@ import { MessageInputUI } from "./MessageInput";
 import { ChatHeader } from "./ChatHeader";
 import { ChatSidebar } from "./ChatSidebar";
 
-const   ChatContainer = ({ sessionToken, callId }) => {
+const   ChatContainer = ({ sessionToken, callId, headerGradient }) => {
   const {
     actionsModalOpen,
     isFullScreen,
@@ -77,6 +77,7 @@ const   ChatContainer = ({ sessionToken, callId }) => {
               eventUnread={eventUnread}
               globalUnread={globalUnread}
               qaUnread={qaUnread}
+              headerGradient={headerGradient}
             />
             <Channel
               channel={currentChannel}
