@@ -12,6 +12,6 @@ export * from './alert';
 
 export { default as PostCard } from './PostCard';
 export { default as CreatePostModal } from './CreatePostModal';
-export {default as SearchFilterInput} from './SearchFilterInput';
-export {default as CustomSelect} from './CustomSelect';
-export {default as LiveClosedCaptions} from './LiveClosedCaptions';
+export { default as SearchFilterInput } from './SearchFilterInput';
+export { default as CustomSelect } from './CustomSelect';
+// export {default as LiveClosedCaptions} from './LiveClosedCaptions';
