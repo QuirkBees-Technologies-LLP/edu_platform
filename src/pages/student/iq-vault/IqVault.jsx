@@ -387,14 +387,25 @@ export default function IqVault() {
                         </Accordion>
                       </div>
                     ) : (
-                      <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
-                        <div className="flex flex-col items-center justify-center py-12 px-6">
+                      <div
+                        className="max-h-[675px] left_sidebar rounded-xl shadow card overflow-hidden relative"
+                        style={{
+                          backgroundImage: data?.ActiveCategory?.[0]?.categoryName
+                            ? `url(/media/banners/${data.ActiveCategory[0].categoryName.replace(/\s+/g, "-")}.jpg)`
+                            : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+                        <div className="flex flex-col items-center justify-center py-12 px-6 relative z-10">
                           <div className="text-center">
                             <div className="text-4xl mb-4">📚</div>
-                            <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
+                            <h3 className="text-lg font-medium text-white mb-2">
                               Coming Soon
                             </h3>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm">
+                            <p className="text-gray-300 text-sm">
                               Coming Soon
                             </p>
                           </div>
@@ -403,14 +414,25 @@ export default function IqVault() {
                     )}
                   </>
                 ) : (
-                  <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
-                    <div className="flex flex-col items-center justify-center py-12 px-6">
+                  <div
+                    className="max-h-[675px] left_sidebar rounded-xl shadow card overflow-hidden relative"
+                    style={{
+                      backgroundImage: data?.categories?.find(c => c._id === activeTab)?.name
+                        ? `url(/media/banners/${data.categories.find(c => c._id === activeTab).name.replace(/\s+/g, "-")}.jpg)`
+                        : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+                    <div className="flex flex-col items-center justify-center py-12 px-6 relative z-10">
                       <div className="text-center">
                         <div className="text-4xl mb-4">📚</div>
-                        <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
+                        <h3 className="text-lg font-medium text-white mb-2">
                           Coming Soon
                         </h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        <p className="text-gray-300 text-sm">
                           Coming Soon
                         </p>
                       </div>
@@ -507,14 +529,25 @@ export default function IqVault() {
                               </div>
                             </div>
                           ) : (
-                            <div className="card">
-                              <div className="flex flex-col items-center justify-center py-20 px-6">
+                            <div
+                              className="card overflow-hidden relative"
+                              style={{
+                                backgroundImage: data?.ActiveCategory?.[0]?.categoryName
+                                  ? `url(/media/banners/${data.ActiveCategory[0].categoryName.replace(/\s+/g, "-")}.jpg)`
+                                  : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                              }}
+                            >
+                              <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+                              <div className="flex flex-col items-center justify-center py-20 px-6 relative z-10">
                                 <div className="text-center">
                                   <div className="text-6xl mb-4">📚</div>
-                                  <h3 className="text-xl font-medium text-gray-700 mb-2">
+                                  <h3 className="text-xl font-medium text-white mb-2">
                                     Coming Soon
                                   </h3>
-                                  <p className="text-gray-500">Coming Soon</p>
+                                  <p className="text-gray-300">Coming Soon</p>
                                 </div>
                               </div>
                             </div>

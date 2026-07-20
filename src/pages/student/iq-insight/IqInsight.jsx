@@ -36,7 +36,7 @@ import {
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
 import Loader from "../../../components/ui/loader";
-import { Eye, ThumbsUp, MessageCircle, Share2, FileText } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown } from "lucide-react";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import debounce from "lodash.debounce";
 import {
@@ -182,6 +182,18 @@ const IqInsight = () => {
   // ─────────────────────────────────────────────────────────────────────────────────
   const handleCloseImageView = () => {
     setSelectedIdea({});
+  };
+
+  const [copiedField, setCopiedField] = useState({ id: null, field: null });
+
+  const handleCopyField = async (id, fieldName, value) => {
+    try {
+      await navigator.clipboard.writeText(value ?? "N/A");
+      setCopiedField({ id, field: fieldName });
+      setTimeout(() => setCopiedField({ id: null, field: null }), 1200);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
   };
 
   const marketData = [
@@ -448,281 +460,221 @@ const IqInsight = () => {
               </div>
             ) : tradeIdeas.length > 0 ? (
               tradeIdeas.map((idea, index) => (
-                // <div
-                //   key={idea._id}
-                //   className="card border-2 hover:bg-gray-200 overflow-hidden h-fit"
-                // >
-                //   <div
-                //     className="overflow-hidden cursor-pointer"
-                //     onClick={() => {
-                //       setSelectedIdea(idea);
-                //       setIsViewOpen(true);
-                //     }}
-                //     ref={
-                //       index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
-                //     }
-                //   >
-                //     <img
-                //       src={idea?.image?.[0]}
-                //       className="w-full h-[220px] object-cover "
-                //       alt=""
-                //     />
-                //   </div>
-                //   <div className="card-border card-rounded-b flex flex-col gap-2 justify-between min-h-[210px]">
-                //     <div className="px-5 py-4.5 ">
-                //       <div className="flex item-center justify-between  mb-2">
-                //         <div className="font-bold mr-3 text-gray-900">
-                //           {idea?.name}
-                //         </div>
-                //       </div>
-                //       <ShowMoreLess
-                //         className="text-gray-900 text-sm mt-2 leading-relaxed"
-                //         html={idea?.description || "No description"}
-                //         limit={65}
-                //       />
-                //     </div>
-                //     <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3">
-                //       <div className="flex items-center">
-                //         <EducatorImage educator={idea?.educatorDetails} />
-                //         <div>
-                //           <Link
-                //             to={`/iq-educators/${idea?.educatorDetails?._id}`}
-                //             className="text-2sm text-gray-800 hover:text-primary mb-px"
-                //           >
-                //             {idea?.educatorDetails?.first_name}{" "}
-                //             {idea?.educatorDetails?.last_name}{" "}
-                //           </Link>
-                //           <div className="text-2sm text-gray-700 mb-px">
-                //             {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
-                //           </div>
-                //         </div>
-                //       </div>
-                //     </div>
-                //   </div>
-                // </div>
                 <div
-                  key={idea?._id}
-                  className={`card border-2 shadow-md border-purple-200 dark:border-gray-200 overflow-hidden flex flex-col h-full${index === 0 ? ' insight-first-card' : ''}`}
+                  key={idea._id}
+                  className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' insight-first-card' : ''}`}
+                  ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
                 >
-                  <div
-                    className="relative overflow-hidden cursor-pointer"
-                    // onClick={() => {
-                    //   setSelectedIdea(idea);
-                    //   setIsViewOpen(true);
-                    // }}
-                    ref={
-                      index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null
-                    }
-                  >
-                    {idea?.image && idea?.image.length > 0 && (
-                      <>
-                        {idea?.isLoading && (
-                          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
-                            <Loader />
-                          </div>
+                  {/* ── Header: Strategy Name (primary) + Signal Type ── */}
+                  <div className="flex items-start gap-1 mb-2">
+                    <div className="flex-1 min-w-0">
+                      {/* Row 1: Educator */}
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-full">
+                          <img
+                            src={`${idea?.educatorDetails?.image || ""}`}
+                            alt={idea?.educatorDetails?.first_name}
+                            className="w-4 h-4 rounded-full object-cover flex-shrink-0"
+                          />
+                          <span className="truncate">{idea?.educatorDetails?.first_name} {idea?.educatorDetails?.last_name}</span>
+                        </span>
+                      </div>
+
+                      {/* Row 2: Type - Timeframe */}
+                      <div className="flex items-center justify-between gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
+                        {(idea.type || idea.timeFrame || idea.timeframe) && (
+                          <span
+                            className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-extrabold flex-shrink-0 border leading-none ${idea.type === 'buy' || idea.type === 'Buy' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : idea.type === 'sell' || idea.type === 'Sell' ? 'bg-red-500/10 text-red-600 border-red-500/20' : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                              }`}
+                          >
+                            {idea.type === 'buy' || idea.type === 'Buy' ? <TrendingUp size={14} /> : idea.type === 'sell' || idea.type === 'Sell' ? <TrendingDown size={14} /> : null}
+                            {idea.type ? idea.type.charAt(0).toUpperCase() + idea.type.slice(1).toLowerCase() : "Insight"}
+                            {(idea.timeFrame || idea.timeframe) ? ` - ${Array.isArray(idea.timeFrame || idea.timeframe) ? (idea.timeFrame || idea.timeframe).join('/') : (idea.timeFrame || idea.timeframe)}` : ""}
+                          </span>
                         )}
+                        <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                          {(idea.createdAt || idea.createAt) ? format(new Date(idea.createdAt || idea.createAt), "MMM dd, hh:mm a") : ""}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-                        {/* Image */}
+                  {/* ── Chart Image Thumbnail ── */}
+                  <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
+                    {idea.image && idea.image.length > 0 ? (
+                      <>
                         <img
-                          src={idea?.image[idea.currentIndex ?? 0]}
-                          alt={idea?.name}
-                          className={`w-full h-[220px] object-cover transition-opacity duration-200 ${idea?.isLoading ? "opacity-0" : "opacity-100"}`}
-                        />
-
-                        <button
+                          src={idea.image[idea.currentIndex ?? 0]}
+                          alt={idea.pair || idea.name}
+                          className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                           onClick={() => {
                             setSelectedIdea(idea);
                             setIsLightBoxOpen(true);
                           }}
-                          className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 rounded-full shadow"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedIdea(idea);
+                            setIsLightBoxOpen(true);
+                          }}
+                          className="absolute right-2 bottom-2 text-white p-1.5 bg-black/50 hover:bg-black/70 rounded-md backdrop-blur-sm transition-colors z-30"
                         >
-                          <Eye size={20} />
+                          <Eye size={14} />
                         </button>
-
-                        {/* Arrows */}
-                        {idea?.image.length > 1 && (
+                        {idea.image.length > 1 && (
                           <>
-                            {/* Left */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-
-                                const newIndex =
-                                  (idea.currentIndex ?? 0) === 0
-                                    ? idea?.image.length - 1
-                                    : (idea.currentIndex ?? 0) - 1;
-
-                                // Start Loading
-                                setTradeIdeas((prev) =>
-                                  prev.map((t) =>
-                                    t._id === idea?._id
-                                      ? { ...t, isLoading: true }
-                                      : t,
-                                  ),
-                                );
-
-                                // Preload next image
-                                const img = new Image();
-                                img.src = idea?.image[newIndex];
-                                img.onload = () => {
-                                  setTradeIdeas((prev) =>
-                                    prev.map((t) =>
-                                      t._id === idea?._id
-                                        ? {
-                                          ...t,
-                                          currentIndex: newIndex,
-                                          isLoading: false,
-                                        }
-                                        : t,
-                                    ),
-                                  );
-                                };
-                              }}
-                              className="left-3 z-10 bg-white/60 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
-                            >
-                              <ChevronLeft size={20} />
-                            </button>
-
-                            {/* Right */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-
-                                const newIndex =
-                                  (idea.currentIndex ?? 0) ===
-                                    idea.image.length - 1
-                                    ? 0
-                                    : (idea.currentIndex ?? 0) + 1;
-
-                                // Start Loading
                                 setTradeIdeas((prev) =>
                                   prev.map((t) =>
                                     t._id === idea._id
-                                      ? { ...t, isLoading: true }
-                                      : t,
-                                  ),
+                                      ? {
+                                        ...t,
+                                        currentIndex: (t.currentIndex ?? 0) === 0 ? t.image.length - 1 : (t.currentIndex ?? 0) - 1,
+                                      }
+                                      : t
+                                  )
                                 );
-
-                                // Preload next image
-                                const img = new Image();
-                                img.src = idea.image[newIndex];
-                                img.onload = () => {
-                                  setTradeIdeas((prev) =>
-                                    prev.map((t) =>
-                                      t._id === idea._id
-                                        ? {
-                                          ...t,
-                                          currentIndex: newIndex,
-                                          isLoading: false,
-                                        }
-                                        : t,
-                                    ),
-                                  );
-                                };
                               }}
-                              className="right-3 z-10 bg-white/60 hover:bg-white text-gray-700 rounded-full p-1 shadow-md absolute top-1/2 -translate-y-1/2"
+                              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                             >
-                              <ChevronRight size={20} />
+                              <ChevronLeft size={16} />
                             </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTradeIdeas((prev) =>
+                                  prev.map((t) =>
+                                    t._id === idea._id
+                                      ? {
+                                        ...t,
+                                        currentIndex: (t.currentIndex ?? 0) === t.image.length - 1 ? 0 : (t.currentIndex ?? 0) + 1,
+                                      }
+                                      : t
+                                  )
+                                );
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                            >
+                              <ChevronRight size={16} />
+                            </button>
+                            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                              {idea.image.map((_, idx) => (
+                                <div
+                                  key={idx}
+                                  className={`w-1.5 h-1.5 rounded-full transition-colors ${(idea.currentIndex ?? 0) === idx ? "bg-white" : "bg-white/40"
+                                    }`}
+                                />
+                              ))}
+                            </div>
                           </>
                         )}
-
-                        {/* Dots */}
-                        {idea?.image.length > 1 && (
-                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
-                            {idea.image.map((_, idx) => (
-                              <button
-                                key={idx}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-
-                                  // Start Loading
-                                  setTradeIdeas((prev) =>
-                                    prev.map((t) =>
-                                      t._id === idea._id
-                                        ? { ...t, isLoading: true }
-                                        : t,
-                                    ),
-                                  );
-
-                                  const img = new Image();
-                                  img.src = idea.image[idx];
-                                  img.onload = () => {
-                                    setTradeIdeas((prev) =>
-                                      prev.map((t) =>
-                                        t._id === idea._id
-                                          ? {
-                                            ...t,
-                                            currentIndex: idx,
-                                            isLoading: false,
-                                          }
-                                          : t,
-                                      ),
-                                    );
-                                  };
-                                }}
-                                className={`w-2.5 h-2.5 rounded-full transition-colors ${(idea.currentIndex ?? 0) === idx
-                                  ? "bg-primary"
-                                  : "bg-gray-300 hover:bg-gray-400"
-                                  }`}
-                              />
-                            ))}
-                          </div>
-                        )}
                       </>
+                    ) : (
+                      <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-2 opacity-40">
+                          <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">No Chart Loading...</span>
+                        </div>
+                      </div>
                     )}
                   </div>
 
-                  {/* Body + Footer */}
-                  <div className="flex flex-col gap-2 justify-between min-h-[200px]">
-                    <div className=" bg-gray-100 px-3 py-3">
-                      <div className="flex items-center">
-                        <EducatorImage educator={idea?.educatorDetails} />
-                        <div>
-                          <Link
-                            to={`/iq-educators/${idea?.educatorDetails?._id}`}
-                            className="text-2sm text-gray-800 hover:text-primary mb-px"
-                          >
-                            {idea?.educatorDetails?.first_name}{" "}
-                            {idea?.educatorDetails?.last_name}
-                          </Link>
-                          <div className="text-2sm text-gray-700 mb-px">
-                            {format(idea?.createAt, "MMM dd, yyyy, hh:mm a")}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Body */}
-                    <div className="px-5 py-2 flex-1 flex flex-col">
-                      <div className="flex item-center justify-between mb-2 min-h-10">
-                        <div className="font-bold mr-3 text-sky-500">
-                          {idea?.name}
-                        </div>
-                      </div>
-                      <div className="text-gray-900 text-sm leading-relaxed h-20 overflow-hidden">
-                        <ShowMoreLess
-                          html={idea?.description || "No description"}
-                          limit={100}
-                          onOpen={() => {
-                            setSelectedIdea(idea);
-                            setIsViewOpen(true);
-                          }}
-                        />
-                      </div>
-                      <div className="mt-auto">
-                        <button
-                          onClick={() => {
-                            setSelectedIdea(idea);
-                            setIsViewOpen(true);
-                          }}
-                          className="w-full bg-teal-800 hover:bg-teal-900 border dark:text-white font-sm py-1.5 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  {/* ── Structured Price Levels / Content ── */}
+                  <div className="mb-2 space-y-1.5 flex-1">
+                    <div className="px-1 py-1 flex items-center justify-between gap-2 flex-wrap">
+                      {(idea.pair || idea.name) && (
+                        <span className="text-[14px] font-extrabold text-slate-800 dark:text-white">
+                          {idea.pair || idea.name}
+                        </span>
+                      )}
+                      {idea.status && (
+                        <span
+                          className={`inline-block px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${idea.status === 'Active' || idea.status === 'active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
+                            idea.status === 'Pending' || idea.status === 'pending' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' :
+                              idea.status === 'Win' || idea.status === 'win' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' :
+                                idea.status === 'Partial Win' || idea.status === 'partial_win' ? 'bg-emerald-400/15 text-emerald-500 dark:text-emerald-400' :
+                                  idea.status === 'Loss' || idea.status === 'loss' ? 'bg-red-500/15 text-red-600 dark:text-red-400' :
+                                    'bg-slate-500/15 text-slate-600 dark:text-slate-400'
+                            }`}
                         >
-                          <Eye size={18} />
-                          View Details
-                        </button>
-                      </div>
+                          {(idea.status === 'Win' || idea.status === 'win') && idea.pips ? `WIN +${idea.pips} pips` :
+                            (idea.status === 'Loss' || idea.status === 'loss') && idea.pips ? `LOSS -${idea.pips} pips` :
+                              idea.status}
+                        </span>
+                      )}
                     </div>
+                    {idea.entry && (
+                      <div
+                        className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                        onClick={() => handleCopyField(idea._id, "Entry", idea.entry)}
+                      >
+                        <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
+                        <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+                          {copiedField.id === idea._id && copiedField.field === "Entry" ? (
+                            <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                          ) : null}
+                          <span className="text-[10px]">📍</span> {idea.entry}
+                          <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                        </span>
+                      </div>
+                    )}
+                    {idea.invalidation && (
+                      <div
+                        className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                        onClick={() => handleCopyField(idea._id, "Stop Loss", idea.invalidation)}
+                      >
+                        <span className="text-[12px] text-slate-600 dark:text-white font-medium">Invalidation</span>
+                        <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+                          {copiedField.id === idea._id && copiedField.field === "Stop Loss" ? (
+                            <span className="text-[9px] text-red-500 mr-1">Copied</span>
+                          ) : null}
+                          <span className="text-[10px]">❌</span> {idea.invalidation}
+                          <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                        </span>
+                      </div>
+                    )}
+                    {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
+                      const tpValue = idea?.exits?.[idx];
+                      if (!tpValue && tpValue !== 0) return null;
+                      const fieldName = `Exit ${idx + 1}`;
+                      return (
+                        <div
+                          key={tpField}
+                          className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                          onClick={() => handleCopyField(idea._id, fieldName, tpValue)}
+                        >
+                          <span className="text-[12px] text-slate-600 dark:text-white font-medium">{fieldName}</span>
+                          <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            {copiedField.id === idea._id && copiedField.field === fieldName ? (
+                              <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                            ) : null}
+                            <span className="text-[10px]">🎯</span> {tpValue}
+                            <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {(!idea.entry && !idea.invalidation && (!idea.exits || idea.exits.length === 0)) && (idea.description || idea.message || idea.name) && (
+                      <div className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3">
+                        <div dangerouslySetInnerHTML={{ __html: idea.description || idea.message || idea.name }} />
+                      </div>
+                    )}
                   </div>
+
+                  {/* View Details Button */}
+                  <button
+                    className={`w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors${index === 0 ? ' insight-view-btn' : ''}`}
+                    onClick={() => {
+                      setSelectedIdea(idea);
+                      setIsViewOpen(true);
+                    }}
+                  >
+                    <Eye size={14} /> View Details
+                  </button>
                 </div>
               ))
             ) : (

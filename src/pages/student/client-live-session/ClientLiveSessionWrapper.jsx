@@ -184,7 +184,7 @@ const ClientLiveSessionContent = ({
       >
         <div className={`transition-all duration-300 ease-in-out h-full`}>
           {token && callId && status === "live" && (
-            <ChatContainer sessionToken={token} callId={callId} />
+            <ChatContainer sessionToken={token} callId={callId} headerGradient={headerGradient} />
           )}
           {token && callId && status !== "live" && (
             <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
