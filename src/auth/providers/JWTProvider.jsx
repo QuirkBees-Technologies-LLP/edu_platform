@@ -59,6 +59,20 @@ const testUsers = {
       expire_at: new Date("2027-12-31"),
     },
   },
+  "giuseppe@iqonic.vip": {
+    password: "Gp!7kW#mQ2x",
+    data: {
+      name: "Giuseppe",
+      email: "giuseppe@iqonic.vip",
+      crm_id: 22222,
+      first_name: "Giuseppe",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
 };
 
 const AuthContext = createContext(null);

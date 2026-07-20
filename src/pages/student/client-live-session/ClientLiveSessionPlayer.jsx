@@ -5,6 +5,7 @@ import {
 } from "@stream-io/video-react-sdk";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useLayout } from "../../../providers";
+import { LiveClosedCaptions } from "@/components";
 
 /** ✅ Get real media elements (Stream SDK fallback) */
 const getStreamMediaElements = () =>
@@ -293,6 +294,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
             callType="livestream"
             callId={callId}
           />
+          <LiveClosedCaptions />
         </div>
       </StreamCall>
     </StreamVideo>
