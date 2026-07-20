@@ -16,7 +16,7 @@ const getStreamMediaElements = () =>
 /** ✅ Check if device is iOS */
 const isIOS = () => {
   if (typeof window === "undefined") return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 };
 
@@ -79,7 +79,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
     console.log("🟡 Video element:", video);
     console.log("🟡 Video has webkitEnterFullscreen:", video?.webkitEnterFullscreen ? "YES" : "NO");
     console.log("🟡 Video has webkitSetPresentationMode:", video?.webkitSetPresentationMode ? "YES" : "NO");
-    
+
     if (!video) {
       console.log("🔴 No video element found!");
       return false;
@@ -203,22 +203,22 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
 
   const fullscreenStyles = isFullscreen
     ? {
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: "100vw",
-        height: `${viewportHeight}px`,
-        zIndex: 99999,
-        backgroundColor: "#000",
-        borderRadius: 0,
-        overflow: "hidden",
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-        paddingLeft: "env(safe-area-inset-left)",
-        paddingRight: "env(safe-area-inset-right)",
-      }
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: "100vw",
+      height: `${viewportHeight}px`,
+      zIndex: 99999,
+      backgroundColor: "#000",
+      borderRadius: 0,
+      overflow: "hidden",
+      paddingTop: "env(safe-area-inset-top)",
+      paddingBottom: "env(safe-area-inset-bottom)",
+      paddingLeft: "env(safe-area-inset-left)",
+      paddingRight: "env(safe-area-inset-right)",
+    }
     : undefined;
 
   return (
@@ -226,9 +226,8 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
       <StreamCall call={call}>
         <div
           ref={containerRef}
-          className={`relative w-full h-full rounded-xl overflow-hidden live-player-container ${
-            isFullscreen ? "css-fullscreen-active" : ""
-          }`}
+          className={`relative w-full h-full rounded-xl overflow-hidden live-player-container ${isFullscreen ? "css-fullscreen-active" : ""
+            }`}
           style={fullscreenStyles}
         >
           {/* ✅ Fullscreen button */}
@@ -294,7 +293,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
             callType="livestream"
             callId={callId}
           />
-          <LiveClosedCaptions />
+          {/* <LiveClosedCaptions /> */}
         </div>
       </StreamCall>
     </StreamVideo>
