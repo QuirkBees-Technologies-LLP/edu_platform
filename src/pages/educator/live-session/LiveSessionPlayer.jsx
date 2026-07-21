@@ -362,6 +362,13 @@ const LiveSessionPlayer = ({
                         }
                       }
 
+                      // Stop closed captions before stopping live
+                      try {
+                        await call.stopClosedCaptions();
+                      } catch (err) {
+                        console.warn("⚠ stopClosedCaptions failed:", err);
+                      }
+
                       await call.stopLive();
                       await updateLiveStatus({
                         callId,
@@ -376,6 +383,14 @@ const LiveSessionPlayer = ({
                       console.log("👉 Going live for:", callId);
                       await call.goLive();
                       setGoLiveStartedAt(new Date());
+
+                      // Start closed captions for live transcription
+                      try {
+                        await call.startClosedCaptions();
+                        console.log("✅ Closed captions started");
+                      } catch (err) {
+                        console.warn("⚠ startClosedCaptions failed:", err);
+                      }
 
                       await new Promise((resolve) => setTimeout(resolve, 1500));
 
