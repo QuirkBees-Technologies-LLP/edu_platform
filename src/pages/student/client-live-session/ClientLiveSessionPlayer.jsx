@@ -293,7 +293,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
             callType="livestream"
             callId={callId}
           />
-          {/* <LiveClosedCaptions /> */}
+          <LiveClosedCaptions />
         </div>
       </StreamCall>
     </StreamVideo>

@@ -240,7 +240,7 @@ const LiveSessionPlayer = ({
           callType="livestream"
           callId={callId}
         />
-        {/* <LiveClosedCaptions /> */}
+        <LiveClosedCaptions />
       </div>
 
       {isCallEnd ? (
