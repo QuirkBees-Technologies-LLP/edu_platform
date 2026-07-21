@@ -384,9 +384,9 @@ const LiveSessionPlayer = ({
                       await call.goLive();
                       setGoLiveStartedAt(new Date());
 
-                      // Start closed captions for live transcription
+                      // Start closed captions for live transcription (backup for auto-on)
                       try {
-                        await call.startClosedCaptions();
+                        await call.startClosedCaptions({ language: "en" });
                         console.log("✅ Closed captions started");
                       } catch (err) {
                         console.warn("⚠ startClosedCaptions failed:", err);

@@ -13,20 +13,61 @@ const LiveClosedCaptions = () => {
     }
   }, [closedCaptions]);
 
+  // Debug: log captions to console
+  useEffect(() => {
+    if (closedCaptions && closedCaptions.length > 0) {
+      console.log("🎤 Closed Captions received:", closedCaptions);
+    }
+  }, [closedCaptions]);
+
   if (!closedCaptions || closedCaptions.length === 0) return null;
 
   return (
-    <div className="absolute bottom-16 left-0 right-0 flex flex-col items-center justify-end pointer-events-none z-[9999] p-4">
-      <div className="flex flex-col items-center max-w-[80%] max-h-[150px] overflow-hidden">
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '64px',
+        left: 0,
+        right: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        pointerEvents: 'none',
+        zIndex: 9999,
+        padding: '16px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          maxWidth: '80%',
+          maxHeight: '150px',
+          overflow: 'hidden',
+        }}
+      >
         {closedCaptions.slice(-3).map((caption, index) => (
-          <div 
-            key={`${caption.startTime}-${index}`} 
-            className="bg-black/60 text-white px-4 py-2 rounded-lg text-center mt-2 mb-1 shadow-lg backdrop-blur-sm transition-all"
+          <div
+            key={`${caption.startTime}-${index}`}
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              color: '#ffffff',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              textAlign: 'center',
+              marginTop: '8px',
+              marginBottom: '4px',
+              backdropFilter: 'blur(4px)',
+              fontSize: '16px',
+              lineHeight: '1.4',
+            }}
           >
-            <span className="font-semibold text-blue-300 mr-2">
+            <span style={{ fontWeight: 600, color: '#93c5fd', marginRight: '8px' }}>
               {caption.user?.name || caption.speakerId || "Speaker"}:
             </span>
-            <span className="text-lg">{caption.text}</span>
+            <span>{caption.text}</span>
           </div>
         ))}
         <div ref={bottomRef} />
