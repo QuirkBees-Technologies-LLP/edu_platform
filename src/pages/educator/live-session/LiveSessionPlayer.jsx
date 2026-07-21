@@ -12,6 +12,8 @@ import {
   useEducatorChangeLiveStreamStatusUpdateMutation,
   useEndAndCreateMutation,
   useEndCallMutation,
+  useStartCaptionsMutation,
+  useStopCaptionsMutation,
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { useNavigate } from "react-router";
 import RecordingControls from "./RecordingControls";
@@ -44,6 +46,8 @@ const LiveSessionPlayer = ({
     useEducatorLiveStreamStatusUpdateMutation();
   const [updateChangeLiveStatus, { isLoading: isLoading }] =
     useEducatorChangeLiveStreamStatusUpdateMutation();
+  const [startCaptions] = useStartCaptionsMutation();
+  const [stopCaptions] = useStopCaptionsMutation();
 
   const { useIsCallLive, useCallMembers } = useCallStateHooks();
   const [goLiveStartedAt, setGoLiveStartedAt] = useState(null);
@@ -362,11 +366,11 @@ const LiveSessionPlayer = ({
                         }
                       }
 
-                      // Stop closed captions before stopping live
+                      // Stop closed captions via server-side API
                       try {
-                        await call.stopClosedCaptions();
+                        await stopCaptions({ callId }).unwrap();
                       } catch (err) {
-                        console.warn("⚠ stopClosedCaptions failed:", err);
+                        console.warn("⚠ stopCaptions failed:", err);
                       }
 
                       await call.stopLive();
@@ -384,12 +388,12 @@ const LiveSessionPlayer = ({
                       await call.goLive();
                       setGoLiveStartedAt(new Date());
 
-                      // Start closed captions for live transcription (backup for auto-on)
+                      // Start closed captions via server-side API (bypasses user permission)
                       try {
-                        await call.startClosedCaptions({ language: "en" });
-                        console.log("✅ Closed captions started");
+                        await startCaptions({ callId }).unwrap();
+                        console.log("✅ Closed captions started (server-side)");
                       } catch (err) {
-                        console.warn("⚠ startClosedCaptions failed:", err);
+                        console.warn("⚠ startCaptions failed:", err);
                       }
 
                       await new Promise((resolve) => setTimeout(resolve, 1500));

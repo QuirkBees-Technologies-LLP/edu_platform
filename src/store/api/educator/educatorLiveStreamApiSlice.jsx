@@ -54,6 +54,20 @@ export const educatorLiveStreamApiSlice = createApi({
         body: { status },
       }),
     }),
+    startCaptions: builder.mutation({
+      query: ({ callId }) => ({
+        url: `/educator/live-stream/captions/start`,
+        method: "POST",
+        body: { callId },
+      }),
+    }),
+    stopCaptions: builder.mutation({
+      query: ({ callId }) => ({
+        url: `/educator/live-stream/captions/stop`,
+        method: "POST",
+        body: { callId },
+      }),
+    }),
   }),
 });
 
@@ -66,4 +80,6 @@ export const {
   useEducatorChangeLiveStreamStatusUpdateMutation,
   useStartCallMutation,
   useEndAndCreateMutation,
+  useStartCaptionsMutation,
+  useStopCaptionsMutation,
 } = educatorLiveStreamApiSlice;
