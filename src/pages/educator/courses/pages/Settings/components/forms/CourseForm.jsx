@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { languages } from "eslint-plugin-prettier";
+
 
 // Categories for the course
 const COURSE_CATEGORIES = [
@@ -83,7 +83,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     initialData?.imageUrl || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
-  const [sectionSelect, setSectionSelect] = useState();
+  const [sectionSelect, setSectionSelect] = useState(initialData?.section || undefined);
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetCoursesTypesQuery();
   const { data } = useGetEducatorAcademyCategoryQuery(sectionSelect);
@@ -101,32 +101,61 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     watch,
   } = useForm({
     resolver: zodResolver(courseSchema),
-    defaultValues: initialData || {
-      title: "",
-      description: "",
-      imageFile: undefined,
-      category: "",
-      published: false,
-      isFeatured: false,
-      section: "",
-      language: "",
-      tier: "FREE",
-    },
+    defaultValues: initialData
+      ? {
+          title: initialData.title || "",
+          description: initialData.description || "",
+          imageFile: undefined,
+          category: initialData?.category?._id || initialData?.category || "",
+          published: initialData.published ?? false,
+          isFeatured: initialData.isFeatured ?? false,
+          section: initialData.section || "",
+          language: initialData.language || "",
+          tier: initialData.tier || "FREE",
+        }
+      : {
+          title: "",
+          description: "",
+          imageFile: undefined,
+          category: "",
+          published: false,
+          isFeatured: false,
+          section: "",
+          language: "",
+          tier: "FREE",
+        },
   });
 
 
 
   useEffect(() => {
     if (initialData) {
+      // Set image preview
       if (initialData.imageUrl) {
         setThumbnailPreview(initialData.imageUrl);
-        // setValue("imageFile", initialData.imageUrl);
       }
+      // Set all form values explicitly for edit mode
+      setValue("title", initialData.title || "");
+      setValue("description", initialData.description || "");
+      // Only set section after courseTypesList has loaded
+      if (initialData.section && courseTypesList?.data?.length > 0) {
+        setValue("section", initialData.section);
+        setSectionSelect(initialData.section);
+      }
+      // Only set language after languagesList has loaded
+      if (initialData.language && languagesList?.data?.length > 0) {
+        setValue("language", initialData.language);
+      }
+      if (initialData.tier) {
+        setValue("tier", initialData.tier);
+      }
+      setValue("published", initialData.published ?? false);
+      setValue("isFeatured", initialData.isFeatured ?? false);
       if (initialData?.category?._id && data?.data?.length > 0) {
         setValue("category", initialData?.category?._id);
       }
     }
-  }, [initialData, data, setValue]);
+  }, [initialData, data, courseTypesList, languagesList, setValue]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -141,7 +170,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     }
   };
 
-  const selectedTier = watch("tier");
+
   const selectedSection = watch("section");
   console.log("selectedSection", selectedSection);
   useEffect(() => {
@@ -398,9 +427,13 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           >
             Course Tier <span className="text-red-500 font-bold">*</span>
           </label>
+          <Controller
+            name="tier"
+            control={control}
+            render={({ field }) => (
           <Select
-            defaultValue={selectedTier}
-            onValueChange={(value) => setValue("tier", value)}
+            value={field.value}
+            onValueChange={field.onChange}
             className={`form-control input input-md w-full ${errors.tier && "border border-danger"}`}
           >
             <SelectTrigger>
@@ -411,6 +444,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <SelectItem value="PREMIUM">Pro</SelectItem>
             </SelectContent>
           </Select>
+            )}
+          />
           {errors?.tier && (
             <p className="text-sm text-red-600">{errors?.tier?.message}</p>
           )}

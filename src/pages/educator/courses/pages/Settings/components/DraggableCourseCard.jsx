@@ -42,13 +42,16 @@ const DraggableCourseCard = ({
     id,
     title,
     description,
-    strategyBanner: imageUrl,
+    strategyBanner,
+    imageUrl: courseImageUrl,
     category,
     published,
     tier,
     instructor,
     section,
   } = course || {};
+
+  const imageUrl = strategyBanner || courseImageUrl;
 
   // Fallback image URL
   const fallbackImage =

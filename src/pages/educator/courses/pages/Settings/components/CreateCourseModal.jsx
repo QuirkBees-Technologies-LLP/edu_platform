@@ -221,31 +221,8 @@ const CreateCourseModal = forwardRef(
             </DialogTitle>
           </DialogHeader>
 
-          {/* Tab Switcher */}
-          {!initialData && (
-            <div className="flex border-b mb-6 border-gray-100">
-              {/* <button
-                onClick={() => setActiveTab("course")}
-                className={`pb-3 px-8 text-sm font-semibold transition-all relative ${activeTab === "course"
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-gray-400 hover:text-gray-600"
-                  }`}
-              >
-                Course
-              </button> */}
-              {(isAdmin || auth?.user?.role === "educator") && (
-                <button
-                  onClick={() => setActiveTab("master-class")}
-                  className={`pb-3 px-8 text-sm font-semibold transition-all relative ${activeTab === "master-class"
-                    ? "text-primary border-b-2 border-primary"
-                    : "text-gray-400 hover:text-gray-600"
-                    }`}
-                >
-                  Master Class
-                </button>
-              )}
-            </div>
-          )}
+
+
 
           {activeTab === "course" ? (
             <CourseForm
