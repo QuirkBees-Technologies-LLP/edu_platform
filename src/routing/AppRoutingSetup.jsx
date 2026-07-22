@@ -217,7 +217,7 @@ const routes = {
     { path: "/educator/live-ideas", element: <EducatorLiveTradeIdeas /> },
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
     { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
-    { path: "/educator/courses", element: <Courses /> },
+    { path: "/educator/courses", element: <Navigate to="/educator/master-class" replace /> },
     { path: "/educator/master-class", element: <MasterClass /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/recordings", element: <EducatorRecording /> },
