@@ -12,6 +12,8 @@ import {
   useEducatorChangeLiveStreamStatusUpdateMutation,
   useEndAndCreateMutation,
   useEndCallMutation,
+  useStartCaptionsMutation,
+  useStopCaptionsMutation,
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { useNavigate } from "react-router";
 import RecordingControls from "./RecordingControls";
@@ -44,6 +46,8 @@ const LiveSessionPlayer = ({
     useEducatorLiveStreamStatusUpdateMutation();
   const [updateChangeLiveStatus, { isLoading: isLoading }] =
     useEducatorChangeLiveStreamStatusUpdateMutation();
+  const [startCaptions] = useStartCaptionsMutation();
+  const [stopCaptions] = useStopCaptionsMutation();
 
   const { useIsCallLive, useCallMembers } = useCallStateHooks();
   const [goLiveStartedAt, setGoLiveStartedAt] = useState(null);
@@ -227,18 +231,21 @@ const LiveSessionPlayer = ({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "unset" }}>
-      <LivestreamPlayer
-        displayName="Hello guys"
-        layoutProps={{
-          showLiveBadge: true,
-          showSpeakerName: true,
-          showParticipantCount: true,
-          showDuration: true,
-          enableFullScreen: true,
-        }}
-        callType="livestream"
-        callId={callId}
-      />
+      <div className="relative w-full h-full rounded-xl overflow-hidden live-player-container">
+        <LivestreamPlayer
+          displayName="Hello guys"
+          layoutProps={{
+            showLiveBadge: true,
+            showSpeakerName: true,
+            showParticipantCount: true,
+            showDuration: true,
+            enableFullScreen: true,
+          }}
+          callType="livestream"
+          callId={callId}
+        />
+        <LiveClosedCaptions />
+      </div>
 
       {isCallEnd ? (
         <div className="flex flex-col justify-center items-center gap-5 pb-20 pt-20">
@@ -359,6 +366,13 @@ const LiveSessionPlayer = ({
                         }
                       }
 
+                      // Stop closed captions via server-side API
+                      try {
+                        await stopCaptions({ callId }).unwrap();
+                      } catch (err) {
+                        console.warn("⚠ stopCaptions failed:", err);
+                      }
+
                       await call.stopLive();
                       await updateLiveStatus({
                         callId,
@@ -373,6 +387,14 @@ const LiveSessionPlayer = ({
                       console.log("👉 Going live for:", callId);
                       await call.goLive();
                       setGoLiveStartedAt(new Date());
+
+                      // Start closed captions via server-side API (bypasses user permission)
+                      try {
+                        await startCaptions({ callId }).unwrap();
+                        console.log("✅ Closed captions started (server-side)");
+                      } catch (err) {
+                        console.warn("⚠ startCaptions failed:", err);
+                      }
 
                       await new Promise((resolve) => setTimeout(resolve, 1500));
 

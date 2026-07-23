@@ -49,10 +49,10 @@ const EducatorLiveSessionView = () => {
 
       const newCall = newClient.call("livestream", callId);
       
-      // Check if already joined before joining
+      // Join the call to establish WebSocket connection
+      // Required for receiving closed caption events
       if (!newCall.state.joined) {
-        // await newCall.join();
-        await newCall.get();
+        await newCall.join({ create: true });
       }
 
       setClient(newClient);

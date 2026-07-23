@@ -1644,12 +1644,7 @@ export const sideMenus = {
       path: "/",
     },
     {
-      title: "Academy",
-      icon: <BookOpen />,
-      path: "/educator/courses",
-    },
-    {
-      title: "Master Class",
+      title: "Academy & Master Class",
       icon: <GraduationCap />,
       path: "/educator/master-class",
     },
