@@ -2,22 +2,17 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useCallStateHooks } from '@stream-io/video-react-sdk';
 
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'hi', label: 'हिन्दी' },
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Deutsch' },
-  { code: 'ar', label: 'العربية' },
-  { code: 'zh', label: '中文' },
-  { code: 'pt', label: 'Português' },
-  { code: 'ja', label: '日本語' },
-  { code: 'ko', label: '한국어' },
-  { code: 'ru', label: 'Русский' },
-  { code: 'it', label: 'Italiano' },
-  { code: 'nl', label: 'Nederlands' },
-  { code: 'tr', label: 'Türkçe' },
-];
+// Map language names (from DB) to GetStream language codes
+const LANGUAGE_NAME_TO_CODE = {
+  english: 'en', japanese: 'ja', spanish: 'es', polish: 'pl', german: 'de',
+  french: 'fr', italian: 'it', dutch: 'nl', portuguese: 'pt', korean: 'ko',
+  chinese: 'zh', arabic: 'ar', hindi: 'hi', russian: 'ru', turkish: 'tr',
+  swedish: 'sv', danish: 'da', finnish: 'fi', greek: 'el', hungarian: 'hu',
+  romanian: 'ro', czech: 'cs', catalan: 'ca', indonesian: 'id', thai: 'th',
+  tagalog: 'tl', hebrew: 'he', croatian: 'hr', malay: 'ms', norwegian: 'no',
+  ukrainian: 'uk', tamil: 'ta', slovakian: 'sk', slovak: 'sk', serbian: 'sr',
+  armenian: 'hy', bulgarian: 'bg', estonian: 'et', slovenian: 'sl',
+};
 
 const LiveClosedCaptions = () => {
   const { useCallClosedCaptions, useIsCallLive } = useCallStateHooks();
@@ -27,7 +22,38 @@ const LiveClosedCaptions = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [portalTarget, setPortalTarget] = useState(null);
+  const [supportedLanguages, setSupportedLanguages] = useState([{ code: 'en', label: 'English' }]);
   const langMenuRef = useRef(null);
+
+  // Fetch active languages from API on mount
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const baseUrl = import.meta.env?.VITE_BASE_URL || '';
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${baseUrl}/users/language/`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res?.ok) return;
+        const data = await res.json();
+        if (data?.success && Array.isArray(data?.data)) {
+          const langs = [{ code: 'en', label: 'English' }];
+          data.data.forEach((lang) => {
+            const name = lang?.name;
+            if (!name) return;
+            const code = LANGUAGE_NAME_TO_CODE[name.toLowerCase()];
+            if (code && code !== 'en') {
+              langs.push({ code, label: name });
+            }
+          });
+          setSupportedLanguages(langs);
+        }
+      } catch (err) {
+        console.error('Failed to fetch languages:', err);
+      }
+    };
+    fetchLanguages();
+  }, []);
 
   const toggleCaptions = useCallback(() => {
     setShowCaptions((prev) => !prev);
@@ -41,7 +67,7 @@ const LiveClosedCaptions = () => {
   // Close language menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (langMenuRef.current && !langMenuRef.current.contains(e.target)) {
+      if (langMenuRef?.current && !langMenuRef.current.contains(e?.target)) {
         setShowLangMenu(false);
       }
     };
@@ -54,7 +80,7 @@ const LiveClosedCaptions = () => {
   // Track fullscreen changes
   useEffect(() => {
     const onFullscreenChange = () => {
-      const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+      const fsEl = document?.fullscreenElement || document?.webkitFullscreenElement;
       if (fsEl) {
         fsEl.style.position = 'relative';
         setPortalTarget(fsEl);
@@ -114,21 +140,22 @@ const LiveClosedCaptions = () => {
   // Get the caption text in the selected language
   const getCaptionText = useCallback(
     (caption) => {
+      if (!caption) return '';
       if (selectedLanguage === 'en') {
-        return caption.text;
+        return caption?.text || '';
       }
       // GetStream sends translations as caption.translations = { es: "...", hi: "...", ... }
-      if (caption.translations && caption.translations[selectedLanguage]) {
+      if (caption?.translations?.[selectedLanguage]) {
         return caption.translations[selectedLanguage];
       }
       // Fallback to original text if translation not available
-      return caption.text;
+      return caption?.text || '';
     },
     [selectedLanguage]
   );
 
   const selectedLangLabel =
-    SUPPORTED_LANGUAGES.find((l) => l.code === selectedLanguage)?.label || 'English';
+    supportedLanguages?.find((l) => l?.code === selectedLanguage)?.label || 'English';
 
   // Don't render anything if stream is not live
   if (!isLive) return null;
@@ -139,8 +166,8 @@ const LiveClosedCaptions = () => {
       <button
         className="captions-cc-btn"
         onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+          e?.preventDefault();
+          e?.stopPropagation();
           toggleCaptions();
         }}
         style={{
@@ -169,7 +196,7 @@ const LiveClosedCaptions = () => {
       </button>
 
       {/* Language Selector Button */}
-      {/* {showCaptions && (
+      {showCaptions && (
         <div
           ref={langMenuRef}
           style={{ position: 'absolute', bottom: '20px', right: '95px' }}
@@ -177,8 +204,8 @@ const LiveClosedCaptions = () => {
           <button
             className="captions-lang-btn"
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+              e?.preventDefault();
+              e?.stopPropagation();
               setShowLangMenu((prev) => !prev);
             }}
             style={{
@@ -204,6 +231,8 @@ const LiveClosedCaptions = () => {
               {showLangMenu ? '▲' : '▼'}
             </span>
           </button>
+
+          {/* Language Dropdown Menu */}
           {showLangMenu && (
             <div
               className="captions-lang-menu"
@@ -222,13 +251,13 @@ const LiveClosedCaptions = () => {
                 boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
               }}
             >
-              {SUPPORTED_LANGUAGES.map((lang) => (
+              {supportedLanguages?.map((lang) => (
                 <button
-                  key={lang.code}
+                  key={lang?.code}
                   onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleLanguageSelect(lang.code);
+                    e?.preventDefault();
+                    e?.stopPropagation();
+                    handleLanguageSelect(lang?.code);
                   }}
                   style={{
                     display: 'block',
@@ -236,41 +265,41 @@ const LiveClosedCaptions = () => {
                     padding: '6px 14px',
                     border: 'none',
                     background:
-                      selectedLanguage === lang.code
+                      selectedLanguage === lang?.code
                         ? 'rgba(255, 255, 255, 0.15)'
                         : 'transparent',
                     color:
-                      selectedLanguage === lang.code
+                      selectedLanguage === lang?.code
                         ? '#fff'
                         : 'rgba(255, 255, 255, 0.75)',
                     fontSize: '12px',
-                    fontWeight: selectedLanguage === lang.code ? 600 : 400,
+                    fontWeight: selectedLanguage === lang?.code ? 600 : 400,
                     textAlign: 'left',
                     cursor: 'pointer',
                     transition: 'background 0.15s ease',
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedLanguage !== lang.code) {
+                    if (selectedLanguage !== lang?.code) {
                       e.target.style.background = 'rgba(255, 255, 255, 0.08)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedLanguage !== lang.code) {
+                    if (selectedLanguage !== lang?.code) {
                       e.target.style.background = 'transparent';
                     }
                   }}
                 >
-                  {selectedLanguage === lang.code && '✓ '}
-                  {lang.label}
+                  {selectedLanguage === lang?.code && '✓ '}
+                  {lang?.label}
                 </button>
               ))}
             </div>
           )}
         </div>
-      )} */}
+      )}
 
       {/* Captions Text */}
-      {showCaptions && closedCaptions && closedCaptions.length > 0 && (
+      {showCaptions && closedCaptions?.length > 0 && (
         <div
           style={{
             position: 'absolute',
@@ -294,9 +323,9 @@ const LiveClosedCaptions = () => {
               overflow: 'hidden',
             }}
           >
-            {closedCaptions.slice(-2).map((caption, index) => (
+            {closedCaptions?.slice(-2)?.map((caption, index) => (
               <div
-                key={`${caption.startTime}-${index}`}
+                key={`${caption?.startTime || index}-${index}`}
                 style={{
                   backgroundColor: 'rgba(0, 0, 0, 0.8)',
                   color: '#ffffff',
