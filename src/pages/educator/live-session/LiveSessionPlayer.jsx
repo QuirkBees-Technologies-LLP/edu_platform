@@ -20,6 +20,7 @@ import RecordingControls from "./RecordingControls";
 import { useEducatorLiveStreamStatusUpdateMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { LiveClosedCaptions } from "@/components";
 
 const LiveSessionPlayer = ({
   client,
