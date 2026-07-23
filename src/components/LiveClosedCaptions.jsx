@@ -1,17 +1,55 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useCallStateHooks } from '@stream-io/video-react-sdk';
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'zh', label: '中文' },
+  { code: 'pt', label: 'Português' },
+  { code: 'ja', label: '日本語' },
+  { code: 'ko', label: '한국어' },
+  { code: 'ru', label: 'Русский' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'nl', label: 'Nederlands' },
+  { code: 'tr', label: 'Türkçe' },
+];
 
 const LiveClosedCaptions = () => {
   const { useCallClosedCaptions, useIsCallLive } = useCallStateHooks();
   const closedCaptions = useCallClosedCaptions();
   const isLive = useIsCallLive();
-  const [showCaptions, setShowCaptions] = useState(true);
+  const [showCaptions, setShowCaptions] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [portalTarget, setPortalTarget] = useState(null);
+  const langMenuRef = useRef(null);
 
   const toggleCaptions = useCallback(() => {
     setShowCaptions((prev) => !prev);
   }, []);
+
+  const handleLanguageSelect = useCallback((langCode) => {
+    setSelectedLanguage(langCode);
+    setShowLangMenu(false);
+  }, []);
+
+  // Close language menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target)) {
+        setShowLangMenu(false);
+      }
+    };
+    if (showLangMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showLangMenu]);
 
   // Track fullscreen changes
   useEffect(() => {
@@ -48,9 +86,21 @@ const LiveClosedCaptions = () => {
           pointer-events: none !important;
           z-index: 99999 !important;
         }
-        .captions-cc-btn {
+        .captions-cc-btn,
+        .captions-lang-btn,
+        .captions-lang-menu {
           pointer-events: auto !important;
           z-index: 100000 !important;
+        }
+        .captions-lang-menu::-webkit-scrollbar {
+          width: 4px;
+        }
+        .captions-lang-menu::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .captions-lang-menu::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 2px;
         }
       `;
       document.head.appendChild(style);
@@ -60,6 +110,25 @@ const LiveClosedCaptions = () => {
       if (el) el.remove();
     };
   }, []);
+
+  // Get the caption text in the selected language
+  const getCaptionText = useCallback(
+    (caption) => {
+      if (selectedLanguage === 'en') {
+        return caption.text;
+      }
+      // GetStream sends translations as caption.translations = { es: "...", hi: "...", ... }
+      if (caption.translations && caption.translations[selectedLanguage]) {
+        return caption.translations[selectedLanguage];
+      }
+      // Fallback to original text if translation not available
+      return caption.text;
+    },
+    [selectedLanguage]
+  );
+
+  const selectedLangLabel =
+    SUPPORTED_LANGUAGES.find((l) => l.code === selectedLanguage)?.label || 'English';
 
   // Don't render anything if stream is not live
   if (!isLive) return null;
@@ -98,6 +167,107 @@ const LiveClosedCaptions = () => {
       >
         CC
       </button>
+
+      {/* Language Selector Button */}
+      {/* {showCaptions && (
+        <div
+          ref={langMenuRef}
+          style={{ position: 'absolute', bottom: '20px', right: '95px' }}
+        >
+          <button
+            className="captions-lang-btn"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowLangMenu((prev) => !prev);
+            }}
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '4px',
+              padding: '3px 8px',
+              fontSize: '10px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              letterSpacing: '0.3px',
+              lineHeight: '1',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+            title="Change caption language"
+          >
+            🌐 {selectedLangLabel}
+            <span style={{ fontSize: '8px', opacity: 0.7 }}>
+              {showLangMenu ? '▲' : '▼'}
+            </span>
+          </button>
+          {showLangMenu && (
+            <div
+              className="captions-lang-menu"
+              style={{
+                position: 'absolute',
+                bottom: '22px',
+                right: '0',
+                backgroundColor: 'rgba(0, 0, 0, 0.92)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '8px',
+                padding: '4px 0',
+                minWidth: '140px',
+                maxHeight: '220px',
+                overflowY: 'auto',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              }}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleLanguageSelect(lang.code);
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '6px 14px',
+                    border: 'none',
+                    background:
+                      selectedLanguage === lang.code
+                        ? 'rgba(255, 255, 255, 0.15)'
+                        : 'transparent',
+                    color:
+                      selectedLanguage === lang.code
+                        ? '#fff'
+                        : 'rgba(255, 255, 255, 0.75)',
+                    fontSize: '12px',
+                    fontWeight: selectedLanguage === lang.code ? 600 : 400,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'background 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedLanguage !== lang.code) {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedLanguage !== lang.code) {
+                      e.target.style.background = 'transparent';
+                    }
+                  }}
+                >
+                  {selectedLanguage === lang.code && '✓ '}
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )} */}
 
       {/* Captions Text */}
       {showCaptions && closedCaptions && closedCaptions.length > 0 && (
@@ -139,7 +309,7 @@ const LiveClosedCaptions = () => {
                   lineHeight: '1.4',
                 }}
               >
-                {caption.text}
+                {getCaptionText(caption)}
               </div>
             ))}
           </div>
