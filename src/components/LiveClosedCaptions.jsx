@@ -169,7 +169,7 @@ const LiveClosedCaptions = () => {
       </button>
 
       {/* Language Selector Button */}
-      {showCaptions && (
+      {/* {showCaptions && (
         <div
           ref={langMenuRef}
           style={{ position: 'absolute', bottom: '20px', right: '95px' }}
@@ -204,8 +204,6 @@ const LiveClosedCaptions = () => {
               {showLangMenu ? '▲' : '▼'}
             </span>
           </button>
-
-          {/* Language Dropdown Menu */}
           {showLangMenu && (
             <div
               className="captions-lang-menu"
@@ -269,7 +267,7 @@ const LiveClosedCaptions = () => {
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       {/* Captions Text */}
       {showCaptions && closedCaptions && closedCaptions.length > 0 && (
