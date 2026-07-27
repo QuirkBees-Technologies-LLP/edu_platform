@@ -1,6 +1,14 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useCallStateHooks } from '@stream-io/video-react-sdk';
+import { useCallStateHooks, useCall } from '@stream-io/video-react-sdk';
+import { useGetLanguageQuery } from '../store/api/client/clientLanguageApiSlice';
+
+// GetStream supported translation codes (source of truth from API docs)
+const GETSTREAM_SUPPORTED_CODES = new Set([
+  'en', 'fr', 'es', 'de', 'it', 'nl', 'pt', 'pl', 'ca', 'cs',
+  'da', 'el', 'fi', 'id', 'ja', 'ru', 'sv', 'ta', 'th', 'tr',
+  'hu', 'ro', 'zh', 'ar', 'tl', 'he', 'hi', 'hr', 'ko', 'ms', 'no', 'uk'
+]);
 
 // Map language names (from DB) to GetStream language codes
 const LANGUAGE_NAME_TO_CODE = {
@@ -10,8 +18,9 @@ const LANGUAGE_NAME_TO_CODE = {
   swedish: 'sv', danish: 'da', finnish: 'fi', greek: 'el', hungarian: 'hu',
   romanian: 'ro', czech: 'cs', catalan: 'ca', indonesian: 'id', thai: 'th',
   tagalog: 'tl', hebrew: 'he', croatian: 'hr', malay: 'ms', norwegian: 'no',
-  ukrainian: 'uk', tamil: 'ta', slovakian: 'sk', slovak: 'sk', serbian: 'sr',
-  armenian: 'hy', bulgarian: 'bg', estonian: 'et', slovenian: 'sl',
+  ukrainian: 'uk', tamil: 'ta',
+  // slovakian/slovak/serbian/armenian/bulgarian/estonian/slovenian
+  // are NOT supported by GetStream translation API — omitted intentionally
 };
 
 const LiveClosedCaptions = () => {
@@ -25,35 +34,103 @@ const LiveClosedCaptions = () => {
   const [supportedLanguages, setSupportedLanguages] = useState([{ code: 'en', label: 'English' }]);
   const langMenuRef = useRef(null);
 
-  // Fetch active languages from API on mount
+  // Fetch languages using RTK Query (clientLanguageApiSlice)
+  const { data: languageData } = useGetLanguageQuery();
   useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const baseUrl = import.meta.env?.VITE_BASE_URL || '';
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${baseUrl}/users/language/`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        if (!res?.ok) return;
-        const data = await res.json();
-        if (data?.success && Array.isArray(data?.data)) {
-          const langs = [{ code: 'en', label: 'English' }];
-          data.data.forEach((lang) => {
-            const name = lang?.name;
-            if (!name) return;
-            const code = LANGUAGE_NAME_TO_CODE[name.toLowerCase()];
-            if (code && code !== 'en') {
-              langs.push({ code, label: name });
-            }
-          });
-          setSupportedLanguages(langs);
-        }
-      } catch (err) {
-        console.error('Failed to fetch languages:', err);
+    if (!languageData?.data) return;
+    const langs = [{ code: 'en', label: 'English' }];
+    languageData.data.forEach((lang) => {
+      const name = lang?.name;
+      if (!name) return;
+      const code = LANGUAGE_NAME_TO_CODE[name.toLowerCase()];
+      if (code && code !== 'en' && GETSTREAM_SUPPORTED_CODES.has(code)) {
+        langs.push({ code, label: name });
       }
-    };
-    fetchLanguages();
+    });
+    setSupportedLanguages(langs);
+  }, [languageData]);
+
+  // FIX: React 18 batches rapid state updates, so closedCaptions hook misses
+  // intermediate events (e.g. Spanish arrives then gets overwritten by Dutch).
+  // Solution: listen to the RAW 'call.closed_caption' event — fires per-event,
+  // before React batching — and store each language's latest caption in a ref.
+  // Structure: translationStoreRef.current = { en: text, es: text, nl: text, ... }
+  const call = useCall();
+  const translationStoreRef = useRef({ en: '' });
+  const [displayText, setDisplayText] = useState({ en: '' });
+  const [captionVisible, setCaptionVisible] = useState(false);
+  const hideTimerRef = useRef(null);
+
+  // Caption auto-hide: after 4s of no new caption, fade out
+  const resetHideTimer = useCallback(() => {
+    setCaptionVisible(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
+      setCaptionVisible(false);
+    }, 4000);
   }, []);
+
+  // Cleanup timer on unmount
+  useEffect(() => () => { if (hideTimerRef.current) clearTimeout(hideTimerRef.current); }, []);
+
+  useEffect(() => {
+    if (!call) return;
+    const unsubscribe = call.on('call.closed_caption', (event) => {
+      const caption = event?.closed_caption
+        || event?.closedCaption
+        || (event?.text ? event : null);
+      if (!caption?.text) return;
+      const lang = caption.language || 'en';
+      const isTranslated = caption.translated === true;
+      if (!isTranslated && lang === 'en') {
+        translationStoreRef.current['en'] = caption.text;
+        setDisplayText(prev => ({ ...prev, en: caption.text }));
+        resetHideTimer();
+      } else if (isTranslated) {
+        translationStoreRef.current[lang] = caption.text;
+        setDisplayText(prev => ({ ...prev, [lang]: caption.text }));
+        resetHideTimer();
+      }
+    });
+    return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
+  }, [call, resetHideTimer]);
+
+  // Inject smooth caption CSS animation
+  useEffect(() => {
+    const styleId = 'cc-caption-animation';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes cc-slide-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0);   }
+        }
+        @keyframes cc-fade-out {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
+        .cc-caption-box {
+          animation: cc-slide-in 0.25s ease forwards;
+          transition: opacity 0.4s ease;
+        }
+        .cc-caption-box.hiding {
+          animation: cc-fade-out 0.5s ease forwards;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  // Get caption text for selected language from accumulated store
+  const currentCaptionText = React.useMemo(() => {
+    if (selectedLanguage === 'en') {
+      return displayText['en'] || '';
+    }
+    // Return translated if available, else fallback to English
+
+    return displayText[selectedLanguage] || displayText['en'] || '';
+  }, [selectedLanguage, displayText]);
 
   const toggleCaptions = useCallback(() => {
     setShowCaptions((prev) => !prev);
@@ -137,22 +214,7 @@ const LiveClosedCaptions = () => {
     };
   }, []);
 
-  // Get the caption text in the selected language
-  const getCaptionText = useCallback(
-    (caption) => {
-      if (!caption) return '';
-      if (selectedLanguage === 'en') {
-        return caption?.text || '';
-      }
-      // GetStream sends translations as caption.translations = { es: "...", hi: "...", ... }
-      if (caption?.translations?.[selectedLanguage]) {
-        return caption.translations[selectedLanguage];
-      }
-      // Fallback to original text if translation not available
-      return caption?.text || '';
-    },
-    [selectedLanguage]
-  );
+
 
   const selectedLangLabel =
     supportedLanguages?.find((l) => l?.code === selectedLanguage)?.label || 'English';
@@ -183,7 +245,7 @@ const LiveClosedCaptions = () => {
             : '1px solid rgba(255, 255, 255, 0.15)',
           borderRadius: '4px',
           padding: '3px 6px',
-          fontSize: '10px',
+          fontSize: '12px',
           fontWeight: 700,
           cursor: 'pointer',
           letterSpacing: '0.5px',
@@ -298,52 +360,43 @@ const LiveClosedCaptions = () => {
         </div>
       )}
 
-      {/* Captions Text */}
-      {showCaptions && closedCaptions?.length > 0 && (
+      {/* Captions Text — auto-hides 4s after last speech, smooth fade */}
+      {showCaptions && currentCaptionText && (
         <div
           style={{
             position: 'absolute',
-            bottom: '40px',
+            bottom: '60px',
             left: 0,
             right: 0,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '16px',
+            justifyContent: 'center',
+            padding: '0 16px',
+            pointerEvents: 'none',
           }}
         >
           <div
+            className={`cc-caption-box${captionVisible ? '' : ' hiding'}`}
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              maxWidth: '80%',
-              maxHeight: '120px',
-              overflow: 'hidden',
+              backgroundColor: 'rgba(38, 29, 29, 0.14)',
+              color: '#ffffff',
+              padding: '7px 18px',
+              borderRadius: '8px',
+              textAlign: 'center',
+              backdropFilter: 'blur(6px)',
+              fontSize: '12px',
+              fontWeight: 500,
+              lineHeight: '1.5',
+              maxWidth: '75%',
+              letterSpacing: '0.01em',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
             }}
           >
-            {closedCaptions?.slice(-2)?.map((caption, index) => (
-              <div
-                key={`${caption?.startTime || index}-${index}`}
-                style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  color: '#ffffff',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  textAlign: 'center',
-                  marginTop: '4px',
-                  backdropFilter: 'blur(4px)',
-                  fontSize: '14px',
-                  lineHeight: '1.4',
-                }}
-              >
-                {getCaptionText(caption)}
-              </div>
-            ))}
+            {currentCaptionText}
           </div>
         </div>
       )}
+
     </div>
   );
 
