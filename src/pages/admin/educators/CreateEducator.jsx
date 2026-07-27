@@ -55,6 +55,7 @@ const CreateEducator = forwardRef(
   ) => {
     const { auth } = useAuthContext();
     const [passwordVisible, setPasswordVisible] = React.useState(false);
+    const [changePassword, setChangePassword] = React.useState(false);
     const [isTradingTypeOpen, setIsTradingTypeOpen] = React.useState(false);
     const [isTradingMethodOpen, setIsTradingMethodOpen] = React.useState(false);
     const [isTimeZoneOpen, setIsTimeZoneOpen] = React.useState(false);
@@ -223,7 +224,10 @@ const CreateEducator = forwardRef(
 
           if (selectedRow?._id) {
             payload.id = selectedRow._id;
-            delete payload.password;
+            // Only include password if admin explicitly chose to change it
+            if (!changePassword || !payload.password) {
+              delete payload.password;
+            }
           }
           if (typeof payload.icon === "string") {
             delete payload.icon;
@@ -269,6 +273,7 @@ const CreateEducator = forwardRef(
           }
 
           formik.resetForm();
+          setChangePassword(false);
 
           handleCloseCreate();
           setSelectedRow({});
@@ -326,6 +331,7 @@ const CreateEducator = forwardRef(
         open={isCreateOpen}
         onOpenChange={() => {
           formik.resetForm();
+          setChangePassword(false);
           handleCloseCreate();
           setSelectedRow({});
         }}
@@ -507,45 +513,76 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              {!selectedRow?._id && (
-                <div className="col-span-12 md:col-span-6">
-                  <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Password <span className="text-danger">*</span>
+              {/* Password field - required on create, optional on edit */}
+              <div className="col-span-12 md:col-span-6">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between min-h-[1.5rem]">
+                    <label className="form-label text-gray-900 mb-0 leading-none">
+                      Password
+                      {!selectedRow?._id && <span className="text-danger ms-1">*</span>}
                     </label>
-                    <label className="input">
-                      <input
-                        type={passwordVisible ? "text" : "password"}
-                        autoComplete="off"
-                        {...formik.getFieldProps("password")}
-                        className={clsx("form-control", {
-                          "is-invalid":
-                            formik.touched.password && formik.errors.password,
-                        })}
-                      />
-                      <button className="btn btn-icon" onClick={togglePassword}>
-                        <KeenIcon
-                          icon="eye"
-                          className={clsx("text-gray-500", {
-                            hidden: passwordVisible,
-                          })}
+                    {selectedRow?._id && (
+                      <label className="inline-flex items-center gap-1.5 text-xs font-medium text-primary cursor-pointer select-none whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={changePassword}
+                          onChange={(e) => {
+                            setChangePassword(e.target.checked);
+                            if (!e.target.checked) {
+                              formik.setFieldValue("password", "");
+                            }
+                          }}
+                          className="form-checkbox h-3.5 w-3.5 rounded accent-primary"
                         />
-                        <KeenIcon
-                          icon="eye-slash"
-                          className={clsx("text-gray-500", {
-                            hidden: !passwordVisible,
-                          })}
-                        />
-                      </button>
-                    </label>
-                    {formik.touched.password && formik.errors.password && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.password}
-                      </span>
+                        Change Password
+                      </label>
                     )}
                   </div>
+
+                  {/* Show password input: always on create, only when toggled on edit */}
+                  {(!selectedRow?._id || changePassword) && (
+                    <>
+                      <label className="input">
+                        <input
+                          type={passwordVisible ? "text" : "password"}
+                          autoComplete="off"
+                          placeholder="Enter new password"
+                          {...formik.getFieldProps("password")}
+                          className={clsx("form-control", {
+                            "is-invalid":
+                              formik.touched.password && formik.errors.password,
+                          })}
+                        />
+                        <button className="btn btn-icon" onClick={togglePassword}>
+                          <KeenIcon
+                            icon="eye"
+                            className={clsx("text-gray-500", {
+                              hidden: passwordVisible,
+                            })}
+                          />
+                          <KeenIcon
+                            icon="eye-slash"
+                            className={clsx("text-gray-500", {
+                              hidden: !passwordVisible,
+                            })}
+                          />
+                        </button>
+                      </label>
+                      {formik.touched.password && formik.errors.password && (
+                        <span role="alert" className="text-danger text-xs mt-1">
+                          {formik.errors.password}
+                        </span>
+                      )}
+                    </>
+                  )}
+
+                  {selectedRow?._id && !changePassword && (
+                    <p className="text-xs text-gray-400 mt-0.5 leading-snug">
+                      Tick "Change Password" above to reset the educator's password.
+                    </p>
+                  )}
                 </div>
-              )}
+              </div>
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
