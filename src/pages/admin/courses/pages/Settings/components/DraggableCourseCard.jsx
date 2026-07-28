@@ -53,12 +53,12 @@ const DraggableCourseCard = ({
     instructor,
     section,
     videoUrl,
+    isMasterClass,
+    isStrategies,
   } = course || {};
 
-  // For master-class tab prefer strategyBanner, fallback to imageUrl
-  const displayImage = activeTab === "master-class"
-    ? (strategyBanner || imageUrl)
-    : imageUrl;
+  // Always prefer strategyBanner (unified form banner), fallback to imageUrl (icon)
+  const displayImage = strategyBanner || imageUrl;
 
   // Fallback image URL
   const fallbackImage =
@@ -199,7 +199,7 @@ const DraggableCourseCard = ({
           )}
         </div>
 
-        {/** Status Badges */}
+        {/** Status Badges — top right */}
         {!hideMetadata && (
           <div className="absolute top-2 right-2 flex flex-col gap-2">
             {tier === "PRO" && (
@@ -221,6 +221,23 @@ const DraggableCourseCard = ({
             )}
           </div>
         )}
+
+        {/** Content Type Badge — top left */}
+        <div className="absolute top-2 left-2">
+          {(activeTab === "strategies" || isStrategies === true) ? (
+            <div className="bg-green-800 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Strategy
+            </div>
+          ) : (activeTab === "master-class" || isMasterClass === true) ? (
+            <div className="bg-yellow-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Masterclass
+            </div>
+          ) : (
+            <div className="bg-blue-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Course
+            </div>
+          )}
+        </div>
 
         {/** Content Section */}
         <div className="p-5">

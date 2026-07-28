@@ -23,34 +23,63 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
     commentCount = 0,
   } = post;
 
-  // Convert HTML → plain text
-  const htmlToPlainText = (html) => {
+  // Extract plain text length for truncation logic, but keep HTML for display
+  const getPlainTextLength = (html) => {
+    if (!html) return 0;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      return (doc.body.textContent || "").trim().length;
+    } catch {
+      return html.replace(/<[^>]+>/g, "").trim().length;
+    }
+  };
+
+  const richContent = content || "";
+  const contentLength = getPlainTextLength(richContent);
+
+  // Safe HTML truncation that doesn't break tags
+  const truncateHtml = (html, maxLen) => {
     if (!html) return "";
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
-      return (doc.body.textContent || "").trim();
+      const text = doc.body.textContent || "";
+      if (text.length <= maxLen) return html;
+
+      let remaining = maxLen;
+      const truncateNode = (node) => {
+        if (remaining <= 0) {
+          node.remove();
+          return;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (node.textContent.length > remaining) {
+            node.textContent = node.textContent.substring(0, remaining) + "…";
+            remaining = 0;
+          } else {
+            remaining -= node.textContent.length;
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const children = Array.from(node.childNodes);
+          for (const child of children) {
+            truncateNode(child);
+          }
+        }
+      };
+
+      truncateNode(doc.body);
+      return doc.body.innerHTML;
     } catch {
-      return html.replace(/<[^>]+>/g, "").trim();
+      return html.substring(0, maxLen) + "…";
     }
   };
 
-  const plainTextContent = htmlToPlainText(content || "");
-
-  // Convert URLs into clickable links
-  const makeClickableLinks = (text) =>
-    text.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-[#8B5CF6] hover:underline">${url}</a>`;
-    });
-
-  const displayText = isExpanded
-    ? plainTextContent
-    : plainTextContent.substring(0, 200);
+  const displayHtml = isExpanded ? richContent : truncateHtml(richContent, 200);
 
   const finalHtml =
-    makeClickableLinks(displayText) +
-    (plainTextContent.length > 200
+    displayHtml +
+    (contentLength > 200
       ? isExpanded
         ? ` <span id="toggleText" class="text-blue-600 dark:text-[#8B5CF6] cursor-pointer font-medium ml-1">Show less</span>`
         : ` <span id="toggleText" class="text-blue-600 dark:text-[#8B5CF6] cursor-pointer font-medium">...more</span>`
@@ -86,10 +115,10 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       </div>
 
       {/* Post Content */}
-      {plainTextContent && (
+      {richContent && (
         <div className="mb-3">
-          <p
-            className="text-sm text-gray-800 dark:text-[#EDEDED] transition-colors duration-300 leading-relaxed whitespace-pre-wrap break-words"
+          <div
+            className="text-sm text-gray-800 dark:text-[#EDEDED] transition-colors duration-300 leading-relaxed whitespace-pre-wrap break-words prose prose-sm max-w-none dark:prose-invert"
             dangerouslySetInnerHTML={{ __html: finalHtml }}
             onClick={(e) => {
               if (e.target.id === "toggleText") setIsExpanded(!isExpanded);

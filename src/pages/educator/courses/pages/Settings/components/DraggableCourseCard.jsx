@@ -49,6 +49,7 @@ const DraggableCourseCard = ({
     tier,
     instructor,
     section,
+    isMasterClass,
   } = course || {};
 
   const imageUrl = strategyBanner || courseImageUrl;
@@ -179,7 +180,7 @@ const DraggableCourseCard = ({
           )}
         </div>
 
-        {/** Status Badges */}
+        {/** Status Badges — top right */}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           {tier === "PRO" && (
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
@@ -196,6 +197,19 @@ const DraggableCourseCard = ({
             <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
               <Lock className="w-3 h-3" />
               <span>Draft</span>
+            </div>
+          )}
+        </div>
+
+        {/** Content Type Badge — top left */}
+        <div className="absolute top-2 left-2">
+          {isMasterClass === false ? (
+            <div className="bg-blue-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Course
+            </div>
+          ) : (
+            <div className="bg-yellow-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Masterclass
             </div>
           )}
         </div>
