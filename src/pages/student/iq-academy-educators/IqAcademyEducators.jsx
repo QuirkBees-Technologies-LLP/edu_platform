@@ -427,7 +427,7 @@ const IqAcademyEducators = () => {
                       <p className="font-semibold dark:text-gray-800 text-gray-700">
                         {n?.courseCount || 0}
                       </p>
-                      <p className="text-xs dark:text-gray-700 text-gray-700">Courses</p>
+                      <p className="text-xs dark:text-gray-700 text-gray-700">Masterclasses</p>
                     </div>
 
                     <div className="text-center">

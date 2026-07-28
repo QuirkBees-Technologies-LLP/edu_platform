@@ -29,7 +29,7 @@ const CreateCourseModal = forwardRef(
 
     if (!isOpen) return null;
 
-    const dialogTitle = initialData ? "Edit Course" : "Create New Course";
+    const dialogTitle = initialData ? "Edit Masterclass" : "Create New Masterclass";
 
     const handleSubmit = async (formData) => {
       setIsSubmitting(true);
@@ -42,8 +42,8 @@ const CreateCourseModal = forwardRef(
 
         toast.success(
           initialData
-            ? "Course updated successfully!"
-            : "Course created successfully!"
+            ? "Masterclass updated successfully!"
+            : "Masterclass created successfully!"
         );
         onClose();
         // Automatic refetching via RTK Query tag invalidation handles list updates

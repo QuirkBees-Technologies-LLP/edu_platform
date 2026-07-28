@@ -46,7 +46,6 @@ const IqEducators = () => {
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
   const [isFollowing, setIsFollowing] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [courseAll, setCourseAll] = useState(false);
   const [recording, setRecording] = useState(null);
   const [idea, setIdea] = useState(null);
   const [liveIdea, setLiveIdea] = useState(null);
@@ -699,95 +698,6 @@ const IqEducators = () => {
 
 
 
-          {/* Course  */}
-          <div className="text-gray-900 ">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Courses</h2>
-                <button
-                  onClick={() => setCourseAll((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                >
-                  {courseAll ? "Show Less" : "View All"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.courses?.length > 0 ? (
-                courseAll ? (
-                  // GRID VIEW (sabhi courses ek sath)
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.courses?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full border rounded-xl shadow-sm cursor-pointer"
-                        onClick={() =>
-                          navigate(
-                            `/iq-vault?mainSection=${course?.section}&language=${course?.language}&categoryId=${course?.category?._id}&courseId=${course?._id}`
-                          )
-                        }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.strategyBanner || course?.imageUrl}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <p className="text-xs text-gray-600">
-                            {course?.address}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.courses?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                        onClick={() =>
-                          navigate(
-                            `/iq-vault?mainSection=${course?.section}&language=${course?.language}&categoryId=${course?.category?._id}&courseId=${course?._id}`
-                          )
-                        }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.strategyBanner || course?.imageUrl}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <p className="text-xs text-gray-600">
-                            {course?.address}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">
-                    No Courses Found
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
 
 
           {/* Recordings - Show for Digital Marketing only (after Courses) */}
@@ -881,22 +791,22 @@ const IqEducators = () => {
             </div>
           </div>}
 
-          {/* Master Classes - Show for Digital Marketing only, below Recordings, only if data exists */}
-          {isDigitalMarketing && response?.data?.masterClasses?.length > 0 && (
-            <div className="text-gray-900 mb-8">
-              <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-medium">Master Classes</h2>
-                  <button
-                    className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                    onClick={() => navigate(`/master-class/${id}`)}
-                  >
-                    View All
-                  </button>
-                </div>
+          {/* Master Classes — shown for ALL educators */}
+          <div className="text-gray-900 mb-8">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Master Classes</h2>
+                <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => navigate(`/master-class/${id}`)}
+                >
+                  View All
+                </button>
               </div>
+            </div>
 
-              <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.masterClasses?.length > 0 ? (
                 <div className="flex gap-4">
                   {response?.data?.masterClasses?.map((mc) => (
                     <div
@@ -927,9 +837,13 @@ const IqEducators = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Masterclasses Found</span>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Idea - Hide for Digital Marketing */}
           {!isDigitalMarketing && <div className="text-gray-900 mb-28">

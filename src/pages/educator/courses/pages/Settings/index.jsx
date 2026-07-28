@@ -198,13 +198,13 @@ const SettingsSection = ({ defaultActiveTab }) => {
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to Courses
+                  Back to Masterclasses
                 </button>
               )}
               {!selectedCourseId && (
                 <div className="flex bg-gray-100 p-1 rounded-lg">
                   <span className="px-4 py-1.5 rounded-md text-sm font-medium bg-white text-primary shadow-sm">
-                    All Courses
+                    All Masterclasses
                   </span>
                 </div>
               )}
@@ -213,7 +213,7 @@ const SettingsSection = ({ defaultActiveTab }) => {
               <span className="text-sm text-gray-500">
                 {selectedCourseId
                   ? currentData?.find((c) => c?._id === selectedCourseId)?.title
-                  : "All Courses"}
+                  : "All Masterclasses"}
               </span>
             </div>
           </div>
