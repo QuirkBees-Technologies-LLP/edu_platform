@@ -268,13 +268,14 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
         try {
             const formData = new FormData();
 
-            // Derive isMasterClass from contentType dropdown selection
-            const isMasterClass = values.contentType === "masterclass";
-            // Educators: section is always "IQ Academy" (hardcoded per brief)
+            // Educators always create Masterclasses (isMasterClass forced true)
+            // Admins use contentType dropdown to choose
+            const isMasterClass = isAdmin ? (values.contentType === "masterclass") : true;
+            // Educators: section is always "Masterclass" (hardcoded per brief)
             // Admins: masterclass → "Masterclass", course → selected section
             const resolvedSection = isAdmin
                 ? (isMasterClass ? "Masterclass" : (values.section || "IQ Academy"))
-                : "IQ Academy";
+                : "Masterclass";
 
             [
                 "title", "description", "aboutStrategy", "category", "published",
@@ -524,7 +525,8 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
 
             {/* Selects Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 border-t pt-8 mt-4">
-                {/* Content Type — visible to everyone */}
+                {/* Content Type — only visible to admins; educators always create Masterclasses */}
+                {isAdmin && (
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
                         Content Type <span className="text-rose-500">*</span>
@@ -545,6 +547,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                         )}
                     />
                 </div>
+                )}
 
                 {/* Type of Course (section) — shown only for admins when contentType=course */}
                 {isAdmin && watch("contentType") === "course" && (
@@ -667,7 +670,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                 <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
                     <div className="text-left space-y-1">
                         <label htmlFor="published" className="text-sm font-bold text-gray-700 cursor-pointer">
-                            Publish Course
+                            {isAdmin ? "Publish Course" : "Publish Masterclass"}
                         </label>
                         <p className="text-xs text-gray-500">Visible to students immediately.</p>
                     </div>
@@ -688,7 +691,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                 <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
                     <div className="text-left space-y-1">
                         <label htmlFor="isPaidMasterclass" className="text-sm font-bold text-gray-700 cursor-pointer">
-                            Publish as Paid Course
+                            {isAdmin ? "Publish as Paid Course" : "Publish as Paid Masterclass"}
                         </label>
                         {/* <p className="text-xs text-gray-500">Flag for upcoming marketplace — no payment gating yet.</p> */}
                     </div>
@@ -728,7 +731,9 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                             <span>{Math.min(Math.round(uploadProgress), 100)}%</span>
                         </>
                     ) : (
-                        initialData ? "Update Course" : "Save Course"
+                        initialData
+                            ? (isAdmin ? "Update Course" : "Update Masterclass")
+                            : (isAdmin ? "Save Course" : "Save Masterclass")
                     )}
                 </button>
             </div>

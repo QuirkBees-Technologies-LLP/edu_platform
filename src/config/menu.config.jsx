@@ -1644,7 +1644,7 @@ export const sideMenus = {
       path: "/",
     },
     {
-      title: "IQ Academy",
+      title: "Masterclass",
       icon: <GraduationCap />,
       path: "/educator/master-class",
     },

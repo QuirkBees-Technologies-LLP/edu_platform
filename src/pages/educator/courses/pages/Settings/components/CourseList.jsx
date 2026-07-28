@@ -169,10 +169,10 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
           <div className="flex flex-col items-center justify-center h-full">
             <Plus className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-700">
-              Create New Course
+              Create New Masterclass
             </h3>
             <p className="text-sm text-gray-500 mt-2">
-              Start building your course
+              Start building your masterclass
             </p>
           </div>
         </div>
