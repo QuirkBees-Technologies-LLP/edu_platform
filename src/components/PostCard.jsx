@@ -31,27 +31,67 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
    const [isExpanded, setIsExpanded] = useState(false);
 
   
-  const htmlToPlainText = (html) => {
+  // Extract plain text length for truncation logic, but keep HTML for display
+  const getPlainTextLength = (html) => {
+    if (!html) return 0;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      return (doc.body.textContent || "").trim().length;
+    } catch {
+      return html.replace(/<[^>]+>/g, "").trim().length;
+    }
+  };
+
+  const richContent = post?.content || "";
+  const contentLength = getPlainTextLength(richContent);
+
+  // For truncation: use a safe HTML truncation that doesn't break tags
+  const truncateHtml = (html, maxLen) => {
     if (!html) return "";
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
       const text = doc.body.textContent || "";
-      return text.trim();
-    } catch (err) {
-      return html.replace(/<[^>]+>/g, "").trim();
+      if (text.length <= maxLen) return html;
+
+      // Walk the DOM and truncate text nodes
+      let remaining = maxLen;
+      const truncateNode = (node) => {
+        if (remaining <= 0) {
+          node.remove();
+          return;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (node.textContent.length > remaining) {
+            node.textContent = node.textContent.substring(0, remaining) + "…";
+            remaining = 0;
+          } else {
+            remaining -= node.textContent.length;
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const children = Array.from(node.childNodes);
+          for (const child of children) {
+            truncateNode(child);
+          }
+        }
+      };
+
+      truncateNode(doc.body);
+      return doc.body.innerHTML;
+    } catch {
+      return html.substring(0, maxLen) + "…";
     }
   };
 
-
-  const plainTextContent = htmlToPlainText(post?.content || "");
-
-
-  const makeClickableLinks = (text) =>
-    text.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
+  const displayHtml = isExpanded ? richContent : truncateHtml(richContent, 200);
+  const finalHtml =
+    displayHtml +
+    (contentLength > 200
+      ? isExpanded
+        ? ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
+        : ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
+      : "");
 
   useEffect(() => {
     if (isOpen) {
@@ -122,8 +162,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       return `${years} year${years > 1 ? "s" : ""} ago`;
     }
   };
-
- 
 
   const renderMedia = () => {
     const hasImages = post.images && post.images.length > 0;
@@ -238,17 +276,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     );
   };
 
-    const displayText = isExpanded
-    ? plainTextContent
-    : plainTextContent.substring(0, 200);
-  const finalHtml =
-    makeClickableLinks(displayText) +
-    (plainTextContent.length > 200
-      ? isExpanded
-        ? ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
-        : ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
-      : "");
-
   return (
     <div className="card rounded-lg shadow-md p-4 mb-4">
       {/* Post Header */}
@@ -310,10 +337,10 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
         </div>
       </div>
 
-     {plainTextContent && (
+     {richContent && (
         <div className="mb-3">
-          <p
-            className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+          <div
+            className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words prose prose-sm max-w-none"
             dangerouslySetInnerHTML={{ __html: finalHtml }}
             onClick={(e) => {
               if (e.target.id === "toggleText") setIsExpanded(!isExpanded);

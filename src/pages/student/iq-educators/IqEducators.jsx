@@ -720,27 +720,27 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.courses?.map((course) => (
                       <div
-                        key={course._id}
+                        key={course?._id}
                         className="w-full border rounded-xl shadow-sm cursor-pointer"
                         onClick={() =>
                           navigate(
-                            `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                            `/iq-vault?mainSection=${course?.section}&language=${course?.language}&categoryId=${course?.category?._id}&courseId=${course?._id}`
                           )
                         }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course.imageUrl}
-                            alt={course.title}
+                            src={course?.strategyBanner || course?.imageUrl}
+                            alt={course?.title}
                             className="w-full h-36 object-cover"
                           />
                         </div>
                         <div className="p-4">
                           <h3 className="text-md font-normal mb-2">
-                            {course.title}
+                            {course?.title}
                           </h3>
                           <p className="text-xs text-gray-600">
-                            {course.address}
+                            {course?.address}
                           </p>
                         </div>
                       </div>
@@ -751,27 +751,27 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.courses?.map((course) => (
                       <div
-                        key={course._id}
+                        key={course?._id}
                         className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
                         onClick={() =>
                           navigate(
-                            `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                            `/iq-vault?mainSection=${course?.section}&language=${course?.language}&categoryId=${course?.category?._id}&courseId=${course?._id}`
                           )
                         }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course.imageUrl}
-                            alt={course.title}
+                            src={course?.strategyBanner || course?.imageUrl}
+                            alt={course?.title}
                             className="w-full h-36 object-cover"
                           />
                         </div>
                         <div className="p-4">
                           <h3 className="text-md font-normal mb-2">
-                            {course.title}
+                            {course?.title}
                           </h3>
                           <p className="text-xs text-gray-600">
-                            {course.address}
+                            {course?.address}
                           </p>
                         </div>
                       </div>
