@@ -165,17 +165,17 @@ const MasterClassForStudent = () => {
   const { data: strategiesName, isLoading: isStrategNameLoading } =
     useGetAdminStrategyListQuery();
 
-  // Fetch ALL masterclasses (no category filter) to derive which categories actually have content
-  const { data: allStrategiesForCategories } = useGetAllMasterClassQuery(
-    { params: { language: selectedLanguage } },
-  );
+  // // Fetch ALL masterclasses (no category filter) to derive which categories actually have content
+  // const { data: allStrategiesForCategories } = useGetAllMasterClassQuery(
+  //   { params: { language: selectedLanguage } },
+  // );
 
-  // Build a Set of category IDs that have at least one masterclass
-  const categoriesWithContent = new Set(
-    (allStrategiesForCategories?.data || [])
-      .map((s) => s?.category?._id)
-      .filter(Boolean)
-  );
+  // // Build a Set of category IDs that have at least one masterclass
+  // const categoriesWithContent = new Set(
+  //   (allStrategiesForCategories?.data || [])
+  //     .map((s) => s?.category?._id)
+  //     .filter(Boolean)
+  // );
 
   const strategies = strategiesData?.data || [];
   const currentStrategy = strategyData?.data || null;
@@ -363,7 +363,7 @@ const MasterClassForStudent = () => {
           )}
           <div className="flex gap-4 ml-auto overflow-x-auto pb-2 category-filter">
             {categoryData?.data
-              ?.filter((cat) => categoriesWithContent.has(cat?._id))
+              // ?.filter((cat) => categoriesWithContent.has(cat?._id))
               ?.map((cat) => (
               <button
                 key={cat?._id}
