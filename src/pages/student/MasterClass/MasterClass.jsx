@@ -422,9 +422,9 @@ const StudentMasterClass = () => {
                                     >
                                         {/* ── Banner with gradient overlay + educator info ── */}
                                         <div className="relative w-full h-48 overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-900 via-purple-700 to-orange-500">
-                                            {strategy?.strategyBanner ? (
+                                            {(strategy?.strategyBanner || strategy?.imageUrl) ? (
                                                 <img
-                                                    src={strategy?.strategyBanner}
+                                                    src={strategy?.strategyBanner || strategy?.imageUrl}
                                                     alt={strategy?.title || 'Strategy'}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 />
