@@ -317,12 +317,12 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                     {/* Title */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-gray-700">
-                            Course Title <span className="text-rose-500">*</span>
+                            {isAdmin ? "Course Title" : "Masterclass Title"} <span className="text-rose-500">*</span>
                         </label>
                         <input
                             {...register("title")}
                             className="w-full dark:bg-[#1a1c23] border rounded-lg px-4 py-2.5 text-gray-700 placeholder:text-gray-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all"
-                            placeholder="Enter course title"
+                            placeholder={isAdmin ? "Enter course title" : "Enter masterclass title"}
                         />
                         {errors?.title && <p className="text-xs text-rose-500 mt-1">{errors.title.message}</p>}
                     </div>
@@ -360,7 +360,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                     {/* Banner Upload */}
                     <div className="space-y-2 col-span-2">
                         <label className="block text-sm font-medium text-gray-700">
-                            Course Banner{" "}
+                            {isAdmin ? "Course Banner" : "Masterclass Banner"}{" "}
                             <span className="text-gray-400 text-xs font-normal">(optional)</span>
                         </label>
 
@@ -382,7 +382,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                                         src={bannerPreview}
                                         className="w-full object-cover"
                                         style={{ maxHeight: "260px", objectPosition: "center" }}
-                                        alt="Course Banner"
+                                        alt={isAdmin ? "Course Banner" : "Masterclass Banner"}
                                     />
 
                                     {/* Hover overlay — change photo prompt */}
