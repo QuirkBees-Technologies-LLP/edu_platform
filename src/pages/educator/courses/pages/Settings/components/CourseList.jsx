@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus, Book, Video, Users, X, Edit2 } from "lucide-react";
@@ -31,6 +33,7 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // holds course to delete
 
   const handleUpdateCourse = async (courseData) => {
     if (!selectedCourse) return;
@@ -57,31 +60,28 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteCourse = async (course) => {
-    const itemType = activeTab === "master-class" ? "Master Class" : "Course";
+  const handleDeleteCourse = (course) => {
+    setDeleteConfirm(course); // show modal instead of window.confirm
+  };
 
-    if (
-      window.confirm(
-        `Are you sure you want to delete "${course?.title}"? This action cannot be undone.`
-      )
-    ) {
-      try {
-        if (activeTab === "master-class") {
-          // Use RTK Query mutation for Master Class
-          await deleteMasterClass(course._id).unwrap();
-        } else {
-          // Use Redux thunk for courses
-          await dispatch(
-            deleteExistingCourse({
-              id: course?._id,
-              token: localStorage.getItem("token"),
-            })
-          ).unwrap();
-        }
-        toast.success(`${itemType} deleted successfully!`);
-      } catch (error) {
-        toast.error(error?.data?.message || error?.message || `Failed to delete ${itemType.toLowerCase()}`);
+  const confirmDelete = async () => {
+    const course = deleteConfirm;
+    const itemType = activeTab === "master-class" ? "Master Class" : "Course";
+    setDeleteConfirm(null);
+    try {
+      if (activeTab === "master-class") {
+        await deleteMasterClass(course?._id).unwrap();
+      } else {
+        await dispatch(
+          deleteExistingCourse({
+            id: course?._id,
+            token: localStorage.getItem("token"),
+          })
+        ).unwrap();
       }
+      toast.success(`${itemType} deleted successfully!`);
+    } catch (error) {
+      toast.error(error?.data?.message || error?.message || `Failed to delete ${itemType.toLowerCase()}`);
     }
   };
 
@@ -128,7 +128,7 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
   };
 
   const handleSelectCourse = (course) => {
-    onCourseSelect(course);
+    onCourseSelect?.(course);
   };
 
   return (
@@ -152,7 +152,7 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
         ) : (
           <div className="col-span-full">
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No {activeTab === "courses" ? "IQ Vault" : "Master Class"} found</p>
+              <p className="text-gray-500">No courses found yet</p>
             </div>
           </div>
         )}
@@ -169,10 +169,10 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
           <div className="flex flex-col items-center justify-center h-full">
             <Plus className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-700">
-              Create New {activeTab === "courses" ? "IQ Vault" : "Master Class"}
+              Create New Masterclass
             </h3>
             <p className="text-sm text-gray-500 mt-2">
-              Start building your {activeTab === "courses" ? "IQ Vault" : "Master Class"}
+              Start building your masterclass
             </p>
           </div>
         </div>
@@ -187,8 +187,30 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
           }}
           onSubmit={isEditMode ? handleUpdateCourse : undefined}
           initialData={isEditMode ? selectedCourse : undefined}
-          activeTab={activeTab}
         />
+        {/** Delete Confirmation Modal — uses project-standard Dialog */}
+        <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
+          <DialogContent className="p-5 max-w-[500px]">
+            <VisuallyHidden>
+              <DialogTitle>Delete Confirmation</DialogTitle>
+            </VisuallyHidden>
+            <i className="ki-filled text-3xl ki-trash dark:text-white text-gray-500 mb-3.5 mx-auto block text-center" />
+            <p className="mb-4 text-gray-700 dark:text-white text-base text-center">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">"{deleteConfirm?.title}"</span>?{" "}
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-center items-center space-x-4">
+              <button className="btn btn-light" onClick={() => setDeleteConfirm(null)}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={confirmDelete}>
+                Yes, I'm sure
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </DndProvider>
   );

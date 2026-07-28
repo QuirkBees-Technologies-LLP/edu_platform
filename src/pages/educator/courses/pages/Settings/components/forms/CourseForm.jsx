@@ -222,13 +222,13 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           htmlFor="title"
           className="block text-sm font-medium text-gray-700"
         >
-          Course Title <span className="text-red-500 font-bold">*</span>
+          Masterclass Title <span className="text-red-500 font-bold">*</span>
         </label>
         <input
           id="title"
           type="text"
           className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-          placeholder="Enter course title"
+          placeholder="Enter masterclass title"
           {...register("title")}
         />
         {errors?.title && (
@@ -246,7 +246,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         <textarea
           id="description"
           className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm min-h-[100px]"
-          placeholder="Enter course description"
+          placeholder="Enter masterclass description"
           {...register("description")}
         />
         {errors?.description && (
@@ -256,7 +256,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 
       <div className="space-y-4">
         <label className="block text-sm font-medium text-gray-700">
-          Course Thumbnail <span className="text-red-500 font-bold">*</span>
+          Masterclass Thumbnail <span className="text-red-500 font-bold">*</span>
         </label>
 
         <div className="flex flex-col space-y-2">

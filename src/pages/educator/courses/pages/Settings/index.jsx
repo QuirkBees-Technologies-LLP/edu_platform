@@ -33,12 +33,8 @@ const SettingsSection = ({ defaultActiveTab }) => {
   const isAdmin = auth?.user?.role === "admin" || auth?.user?.role === "super_admin";
   const isEducator = auth?.user?.role === "educator";
 
-  const [activeTab, setActiveTab] = useState(() => {
-    if (defaultActiveTab) return defaultActiveTab;
-    const savedTab = localStorage.getItem("settingsTab");
-    // Removed isAdmin restriction for strategies since educators need Master Class
-    return savedTab || "courses";
-  });
+  // Everything is now a masterclass — single unified flow
+  const [activeTab] = useState("master-class");
 
   // Selectors
   const courses = useSelector(selectAllCourses);
@@ -104,9 +100,7 @@ const SettingsSection = ({ defaultActiveTab }) => {
     }
   }, [dispatch, auth?.token, auth?.user?._id, auth?.user?.role, activeTab]);
 
-  useEffect(() => {
-    localStorage.setItem("settingsTab", activeTab);
-  }, [activeTab]);
+
 
   // Handle course select
   const handleCourseSelect = (course) => {
@@ -147,12 +141,10 @@ const SettingsSection = ({ defaultActiveTab }) => {
       return (
         <ErrorMessages
           heading={
-            activeTab === "courses" ? "No IQ Vault Yet" : "No Master Class Yet"
+              "No Courses Yet"
           }
           message={
-            activeTab === "courses"
-              ? "You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."
-              : "You haven’t created any master class yet. Let’s get your first one set up and ready to go."
+            "You haven't created any courses yet. Let's get your first one set up and ready to go."
           }
           onRetry={() => {
             let action;
@@ -206,33 +198,14 @@ const SettingsSection = ({ defaultActiveTab }) => {
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to {activeTab === "courses" ? "IQ Vault" : "Master Class"}
+                  Back to Masterclasses
                 </button>
               )}
               {!selectedCourseId && (
                 <div className="flex bg-gray-100 p-1 rounded-lg">
-                  {(!defaultActiveTab || defaultActiveTab !== "master-class") && (
-                    <button
-                      onClick={() => setActiveTab("courses")}
-                      className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "courses"
-                        ? "bg-white text-primary shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                        }`}
-                    >
-                      Courses
-                    </button>
-                  )}
-                  {(isAdmin || isEducator) && (
-                    <button
-                      onClick={() => setActiveTab("master-class")}
-                      className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "master-class"
-                        ? "bg-white text-primary shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                        }`}
-                    >
-                      Master Class
-                    </button>
-                  )}
+                  <span className="px-4 py-1.5 rounded-md text-sm font-medium bg-white text-primary shadow-sm">
+                    All Masterclasses
+                  </span>
                 </div>
               )}
             </div>
@@ -240,7 +213,7 @@ const SettingsSection = ({ defaultActiveTab }) => {
               <span className="text-sm text-gray-500">
                 {selectedCourseId
                   ? currentData?.find((c) => c?._id === selectedCourseId)?.title
-                  : `All ${activeTab === "courses" ? "IQ Vault" : "Master Class"}`}
+                  : "All Masterclasses"}
               </span>
             </div>
           </div>

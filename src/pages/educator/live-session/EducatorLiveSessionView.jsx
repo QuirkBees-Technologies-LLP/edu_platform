@@ -38,7 +38,8 @@ const EducatorLiveSessionView = () => {
       const token = response.token;
       setSessionToken(token);
 
-      const newClient = new StreamVideoClient({
+      // ✅ Use getOrCreateInstance to prevent duplicate clients for the same userId
+      const newClient = StreamVideoClient.getOrCreateInstance({
         apiKey,
         token,
         user: {
@@ -48,7 +49,7 @@ const EducatorLiveSessionView = () => {
       });
 
       const newCall = newClient.call("livestream", callId);
-      
+
       // Join the call to establish WebSocket connection
       // Required for receiving closed caption events
       if (!newCall.state.joined) {
@@ -60,7 +61,7 @@ const EducatorLiveSessionView = () => {
 
       return () => {
         if (newCall.state.joined) {
-          newCall.leave();
+          newCall.leave().catch(console.error);
         }
         newClient.disconnectUser();
       };
@@ -82,16 +83,9 @@ const EducatorLiveSessionView = () => {
     init();
 
     return () => {
-      effectRan.current = false;
+      // ✅ Do NOT reset effectRan.current here — prevents double-init in React Strict Mode
       if (typeof cleanupFn === "function") {
         cleanupFn();
-      }
-      // Cleanup existing client and call on unmount
-      if (call) {
-        call.leave().catch(console.error);
-      }
-      if (client) {
-        client.disconnectUser();
       }
     };
   }, [fetchTokenAndInitialize]);
