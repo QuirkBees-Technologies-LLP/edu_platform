@@ -1644,7 +1644,7 @@ export const sideMenus = {
       path: "/",
     },
     {
-      title: "Masterclases",
+      title: "Masterclasses",
       icon: <GraduationCap />,
       path: "/educator/master-class",
     },
