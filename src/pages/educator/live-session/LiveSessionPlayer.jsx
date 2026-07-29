@@ -393,6 +393,10 @@ const LiveSessionPlayer = ({
                                   "participant.filter": {
                                     isPinned: true,
                                   },
+                                  "participant.border_radius": "0px",
+                                  "participant.video_border_rounded": false,
+                                  "grid.margin": 0,
+                                  "grid.cell_padding": 4,
                                 },
                               });
                             } catch (err) {
