@@ -99,6 +99,10 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData, headerGradie
                   name: "single_participant",
                   options: {
                     video_border_radius: "0",
+                    "participant.border_radius": "0px",
+                    "participant.video_border_rounded": false,
+                    "grid.margin": 0,
+                    "grid.cell_padding": 4,
                   },
                 },
               },

@@ -73,6 +73,48 @@ const testUsers = {
       expire_at: new Date("2027-12-31"),
     },
   },
+  "Simone@iqonic.vip": {
+    password: "Sm!9nR#vL4wK",
+    data: {
+      name: "Simone Iqonic",
+      email: "Simone@iqonic.vip",
+      crm_id: 33333,
+      first_name: "Simone",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
+  "Loris@iqonic.vip": {
+    password: "Lr@6tX#pJ8mZ",
+    data: {
+      name: "Loris Iqonic",
+      email: "Loris@iqonic.vip",
+      crm_id: 44444,
+      first_name: "Loris",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
+  "User@iqonic.vip": {
+    password: "Us#2bN!qH7cW",
+    data: {
+      name: "User Iqonic",
+      email: "User@iqonic.vip",
+      crm_id: 55555,
+      first_name: "User",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
 };
 
 const AuthContext = createContext(null);
