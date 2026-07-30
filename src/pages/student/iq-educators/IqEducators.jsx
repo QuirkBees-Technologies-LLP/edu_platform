@@ -507,11 +507,10 @@ const IqEducators = () => {
             <button
               onClick={handleToggleFollow}
               disabled={isFollowLoading}
-              className={`border text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all duration-300 ${
-                isFollowing
-                  ? "border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50"
-                  : getButtonColor()
-              } ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+              className={`border text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all duration-300 ${isFollowing
+                ? "border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50"
+                : getButtonColor()
+                } ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
             >
               {isFollowing ? (
                 <>
@@ -849,7 +848,7 @@ const IqEducators = () => {
           {!isDigitalMarketing && <div className="text-gray-900 mb-28">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Idea</h2>
+                <h2 className="text-xl font-medium">Ideas</h2>
                 <button
                   onClick={() => setIdea((prev) => !prev)}
                   className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
