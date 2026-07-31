@@ -42,6 +42,21 @@ export const clientMasterClassApiSlice = createApi({
             query: (id) => `/users/master-class/${id}`,
             providesTags: (result, error, id) => [{ type: "MasterClass", id }],
         }),
+
+        // Get all Academies (isAcademy=true)
+        getAllAcademies: builder.query({
+            query: ({ params } = {}) => {
+                const queryParams = new URLSearchParams();
+                queryParams.append("isAcademy", "true");
+                if (params?.language) queryParams.append("language", params.language);
+                if (params?.search) queryParams.append("search", params.search);
+                if (params?.category) queryParams.append("category", params.category);
+                if (params?.educatorId) queryParams.append("educatorId", params.educatorId);
+
+                return `/users/master-class/all?${queryParams.toString()}`;
+            },
+            providesTags: ["MasterClass"],
+        }),
     }),
 });
 
@@ -50,4 +65,6 @@ export const {
     useGetAllMasterClassQuery,
     useGetMasterClassByIdQuery,
     useLazyGetMasterClassByIdQuery,
+    useGetAllAcademiesQuery,
 } = clientMasterClassApiSlice;
+

@@ -167,32 +167,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/** Course / Strategy / Master Class Cards */}
-        {courses?.length > 0 ? (
-          courses.map((course, index) => (
-            <div key={course?._id} className="relative group">
-              <DraggableCourseCard
-                course={course}
-                index={index}
-                onEdit={activeTab === "master-class" ? handleEditMC : handleEditCourse}
-                onDelete={activeTab === "master-class" ? handleDeleteMC : handleDeleteCourse}
-                onMove={activeTab === "master-class" ? undefined : handleMoveCourse}
-                onSelect={handleSelectCourse}
-                activeTab={activeTab}
-              />
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full">
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">
-                No {activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategies" : "Master Classes"} found
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/** Create New Card */}
+        {/** Create New Card — always first */}
         <div
           onClick={() => {
             if (activeTab === "master-class") {
@@ -207,16 +182,31 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
           }}
           className="rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300 hover:border-primary cursor-pointer transition-colors duration-200"
         >
-          <div className="flex flex-col items-center justify-center h-full">
+          <div className="flex flex-col items-center justify-center h-full min-h-[180px]">
             <Plus className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-700">
-              Create New {activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}
+              Create New {activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}
             </h3>
             <p className="text-sm text-gray-500 mt-2">
-              Start building your {activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}
+              Start building your {activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}
             </p>
           </div>
         </div>
+
+        {/** Course / Strategy / Master Class Cards */}
+        {courses?.map((course, index) => (
+          <div key={course?._id} className="relative group">
+            <DraggableCourseCard
+              course={course}
+              index={index}
+              onEdit={activeTab === "master-class" ? handleEditMC : handleEditCourse}
+              onDelete={activeTab === "master-class" ? handleDeleteMC : handleDeleteCourse}
+              onMove={activeTab === "master-class" ? undefined : handleMoveCourse}
+              onSelect={handleSelectCourse}
+              activeTab={activeTab}
+            />
+          </div>
+        ))}
 
         {/** Modal for Course/Strategy */}
         {activeTab !== "master-class" && (

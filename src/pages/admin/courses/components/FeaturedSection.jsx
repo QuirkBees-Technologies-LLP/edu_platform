@@ -5,7 +5,7 @@ import { Star, ChevronRight, TrendingUp } from "lucide-react";
 
 const FeaturedSection = ({
   courses,
-  title = "Featured IQ Vault",
+  title = "Featured Academy",
   subtitle = "Learn from our top-rated instructors",
   onSelectCourse
 }) => {
@@ -75,7 +75,7 @@ const FeaturedSection = ({
             whileHover={{ x: 3 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span>View all IQ Vault</span>
+            <span>View all Academy</span>
             <ChevronRight className="w-4 h-4" />
           </motion.a>
         </div>
