@@ -117,7 +117,7 @@ const CreateCourseModal = forwardRef(
           tier: formData.get("tier"),
           language: formData.get("language"),
           section: formData.get("section"),
-          instructor: auth?.user?._id,
+          instructor: initialData?.instructor?._id || initialData?.instructor || initialData?.createdBy || auth?.user?._id,
         };
 
         let requestData;
@@ -168,8 +168,12 @@ const CreateCourseModal = forwardRef(
       } catch (error) {
         console.error("Submission error:", error);
         toast.error(
-          error?.data?.message || error?.message || "Operation failed. Please try again."
+          typeof error === "string"
+            ? error
+            : error?.data?.message || error?.message || "Operation failed. Please try again."
         );
+        // Re-fetch courses so list still loads after error
+        await fetchAllCourses();
       } finally {
         setIsSubmitting(false);
       }
