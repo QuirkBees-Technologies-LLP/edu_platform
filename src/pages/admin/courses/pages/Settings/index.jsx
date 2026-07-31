@@ -21,6 +21,7 @@ import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorMessages from "@/components/common/ErrorsMessage";
+import { selectSelectedLanguage } from "@/store/reducer/studentLanagugeSlice";
 
 const SettingsSection = () => {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ const SettingsSection = () => {
     localStorage.getItem("selectedCourseId")
   );
   const isAdmin = auth?.user?.role === "admin" || auth?.user?.role === "super_admin";
+  const selectedLanguage = useSelector(selectSelectedLanguage);
   const [activeTab, setActiveTab] = useState(() => {
     const savedTab = localStorage.getItem("settingsTab");
     if (savedTab === "strategies" && !isAdmin) return "courses";
@@ -47,7 +49,7 @@ const SettingsSection = () => {
   useEffect(() => {
     if (auth?.token) {
       let action;
-      let payload = { params: { isDeleted: false }, token: auth.token };
+      let payload = { params: { isDeleted: false, ...(selectedLanguage ? { language: selectedLanguage } : {}) }, token: auth.token };
 
       if (activeTab === "strategies") {
         action = fetchStrategies;
@@ -74,7 +76,7 @@ const SettingsSection = () => {
     } else {
       console.log("No auth token available");
     }
-  }, [dispatch, auth?.token, auth?.user?._id, auth?.user?.role, activeTab]);
+  }, [dispatch, auth?.token, auth?.user?._id, auth?.user?.role, activeTab, selectedLanguage]);
 
   useEffect(() => {
     localStorage.setItem("settingsTab", activeTab);

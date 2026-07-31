@@ -37,8 +37,16 @@ const HeaderTopbar = () => {
     "/iq-academy-educators",
     "/master-class",
     "/master-class/:id"
-
   ];
+
+  const EDUCATOR_ALLOWED_ROUTES = [
+    "/master-class",
+    "/stream-schedule",
+    "/ended-stream-schedule",
+    "/live-session",
+    "/ended-live-sessions"
+  ];
+
   const location = useLocation();
   const { isRTL } = useLanguage();
   const itemChatRef = useRef(null);
@@ -50,13 +58,17 @@ const HeaderTopbar = () => {
   const role = user?.role;
   const planRoutes = user?.plan?.allowedSideBar || [];
 
-  const allowedRoutes =
-    role === "student"
-      ? planRoutes.filter((r) => STUDENT_ALLOWED_ROUTES.includes(r))
-      : planRoutes;
-
-  const showLanguageSelector =
-    role !== "student" || allowedRoutes.includes(location.pathname);
+  const showLanguageSelector = (() => {
+    if (role === "student") {
+      const allowedRoutes = planRoutes.filter((r) => STUDENT_ALLOWED_ROUTES.includes(r));
+      return allowedRoutes.includes(location.pathname);
+    }
+    if (role === "educator") {
+      return EDUCATOR_ALLOWED_ROUTES.includes(location.pathname);
+    }
+    // Admin, super_admin, marketer — show on all pages
+    return true;
+  })();
 
   const profilePhoto = auth?.user?.image;
   const itemNotificationsRef = useRef(null);
