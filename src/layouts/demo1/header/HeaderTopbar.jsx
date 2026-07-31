@@ -40,11 +40,20 @@ const HeaderTopbar = () => {
   ];
 
   const EDUCATOR_ALLOWED_ROUTES = [
-    "/master-class",
-    "/stream-schedule",
-    "/ended-stream-schedule",
-    "/live-session",
-    "/ended-live-sessions"
+    "/educator/master-class",
+    "/educator/stream-schedule",
+    "/educator/ended-stream-schedule",
+    "/educator/live-session",
+    "/educator/ended-live-sessions"
+  ];
+
+  const ADMIN_ALLOWED_ROUTES = [
+    "/admin/courses",
+    "/admin/stream-schedule",
+    "/admin/educator-ended-schedule",
+    "/admin/live-session",
+    "/admin/ended-live-sessions",
+    "/admin/stream-recording"
   ];
 
   const location = useLocation();
@@ -66,8 +75,11 @@ const HeaderTopbar = () => {
     if (role === "educator") {
       return EDUCATOR_ALLOWED_ROUTES.includes(location.pathname);
     }
-    // Admin, super_admin, marketer — show on all pages
-    return true;
+    // Admin, super_admin, marketer — whitelist
+    if (role === "admin" || role === "super_admin" || role === "marketer") {
+      return ADMIN_ALLOWED_ROUTES.includes(location.pathname);
+    }
+    return false;
   })();
 
   const profilePhoto = auth?.user?.image;

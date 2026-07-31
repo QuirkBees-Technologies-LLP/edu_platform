@@ -29,9 +29,10 @@ const SidebarHeader = forwardRef((props, ref) => {
 
   const { auth } = useAuthContext();
   const location = useLocation();
-  const isStudent = auth?.user?.role === 'student';
-  const isHome = location.pathname === "/dashboard";
-  const showBackButton = isStudent && !isHome;
+  const role = auth?.user?.role;
+  const homePaths = ["/", "/dashboard"];
+  const isHome = homePaths.includes(location.pathname);
+  const showBackButton = !!role && !isHome;
 
   const lightLogo = () => <Fragment>
     <Link to="/" className="dark:hidden">
