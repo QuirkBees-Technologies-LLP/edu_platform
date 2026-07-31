@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Clock, ChartLine, Copy, Globe, Zap } from "lucide-react";
 import { toast } from "sonner";
 import signalConfig from "./signalConfig";
-import { formatTimeframe, formatTimeAgo, formatAlertTime } from "./signalUtils";
+import { formatTimeframe, formatTimeAgo, formatAlertTime, getRelativeTime } from "./signalUtils";
 import SymbolIcon from "./symbolIcons";
 
 const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
@@ -316,8 +316,14 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
           {signal?.webhookConfig?.name ? `${signal.webhookConfig.name}` : ""}
         </span>
         <span className="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-white/80 font-semibold whitespace-nowrap">
-          {/* <Clock size={12} /> */}
-          {signal?.alertTimestamp ? formatAlertTime(signal.alertTimestamp) : (signal?.createdAt ? formatTimeAgo(signal.createdAt) : "—")}
+          {(() => {
+            const ts = signal?.alertTimestamp || signal?.createdAt;
+            const rel = ts ? getRelativeTime(ts) : null;
+            const exact = signal?.alertTimestamp
+              ? formatAlertTime(signal.alertTimestamp)
+              : (signal?.createdAt ? formatTimeAgo(signal.createdAt) : "—");
+            return rel ? `${rel} · ${exact}` : exact;
+          })()}
         </span>
       </div>
     </div>

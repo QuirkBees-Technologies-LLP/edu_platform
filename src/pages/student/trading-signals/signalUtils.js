@@ -81,6 +81,33 @@ export function formatTimeAgo(dateStr) {
 }
 
 /**
+ * Returns a relative human-readable "time ago" string.
+ * e.g. "just now", "5m ago", "3h ago", "2 days ago"
+ */
+export function getRelativeTime(dateStr) {
+  if (!dateStr) return "—";
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "—";
+    const diffMs = Date.now() - date.getTime();
+    if (diffMs < 0) return "just now";
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return "just now";
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDay = Math.floor(diffHr / 24);
+    if (diffDay < 7) return `${diffDay}d ago`;
+    const diffWk = Math.floor(diffDay / 7);
+    if (diffWk < 5) return `${diffWk}w ago`;
+    return new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+  } catch (_) {
+    return "—";
+  }
+}
+
+/**
  * Converts a UTC ISO 8601 alertTimestamp to the user's local browser
  * timezone, displayed in HH:mm format (24-hour).
  *

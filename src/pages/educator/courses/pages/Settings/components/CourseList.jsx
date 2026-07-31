@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Plus, Book, Video, Users, X, Edit2 } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 
@@ -12,45 +12,66 @@ import {
   updateExistingCourse,
   deleteExistingCourse,
   reorderCourses,
-  reorderStrategies,
   selectAllCourses,
 } from "@/store/reducer/courseSlice";
 import {
   useDeleteEducatorMasterClassMutation,
-  useReorderEducatorMasterClassMutation
+  useReorderEducatorMasterClassMutation,
+  useDeleteEducatorAcademyMutation,
+  useReorderEducatorAcademiesMutation,
+  useUpdateEducatorAcademyMutation,
 } from "@/store/api/educator/educatorMasterClassApiSlice";
+
 // Components
 import CreateCourseModal from "./CreateCourseModal";
+import CreateAcademyModal from "./CreateAcademyModal";
 import DraggableCourseCard from "./DraggableCourseCard";
 
-const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
+const CourseList = ({ onCourseSelect, activeTab, courses: propCourses, onSwitchToMasterclass }) => {
   const dispatch = useDispatch();
   const reduxCourses = useSelector(selectAllCourses);
-  const courses = propCourses || reduxCourses;
+  const courses = propCourses ?? reduxCourses;
 
+  // ─── Masterclass mutations ────────────────────────────────────────────────
   const [deleteMasterClass] = useDeleteEducatorMasterClassMutation();
   const [reorderMasterClasses] = useReorderEducatorMasterClassMutation();
+
+  // ─── Academy mutations ────────────────────────────────────────────────────
+  const [deleteAcademy] = useDeleteEducatorAcademyMutation();
+  const [reorderAcademies] = useReorderEducatorAcademiesMutation();
+  const [updateAcademy, { isLoading: isUpdatingAcademy }] = useUpdateEducatorAcademyMutation();
+
+  // ─── Modal state ──────────────────────────────────────────────────────────
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(null); // holds course to delete
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  const isAcademyTab = activeTab === "academy";
+  const itemLabel = isAcademyTab ? "Academy" : "Masterclass";
+
+  // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleUpdateCourse = async (courseData) => {
     if (!selectedCourse) return;
     try {
-      await dispatch(
-        updateExistingCourse({
-          id: selectedCourse?._id,
-          courseData,
-          token: localStorage.getItem("token"),
-        })
-      ).unwrap();
-      toast.success("Course updated successfully!");
+      if (isAcademyTab) {
+        await updateAcademy({ id: selectedCourse._id, formData: courseData }).unwrap();
+        toast.success("Academy updated successfully!");
+      } else {
+        await dispatch(
+          updateExistingCourse({
+            id: selectedCourse._id,
+            courseData,
+            token: localStorage.getItem("token"),
+          })
+        ).unwrap();
+        toast.success("Masterclass updated successfully!");
+      }
       setIsModalOpen(false);
       setSelectedCourse(null);
       setIsEditMode(false);
     } catch (error) {
-      toast.error(error?.message || "Failed to update course");
+      toast.error(error?.data?.message || error?.message || `Failed to update ${itemLabel.toLowerCase()}`);
     }
   };
 
@@ -61,69 +82,44 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
   };
 
   const handleDeleteCourse = (course) => {
-    setDeleteConfirm(course); // show modal instead of window.confirm
+    setDeleteConfirm(course);
   };
 
   const confirmDelete = async () => {
     const course = deleteConfirm;
-    const itemType = activeTab === "master-class" ? "Master Class" : "Course";
     setDeleteConfirm(null);
     try {
-      if (activeTab === "master-class") {
-        await deleteMasterClass(course?._id).unwrap();
+      if (isAcademyTab) {
+        await deleteAcademy(course._id).unwrap();
       } else {
-        await dispatch(
-          deleteExistingCourse({
-            id: course?._id,
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
+        await deleteMasterClass(course._id).unwrap();
       }
-      toast.success(`${itemType} deleted successfully!`);
+      toast.success(`${itemLabel} deleted successfully!`);
     } catch (error) {
-      toast.error(error?.data?.message || error?.message || `Failed to delete ${itemType.toLowerCase()}`);
+      toast.error(
+        error?.data?.message || error?.message || `Failed to delete ${itemLabel.toLowerCase()}`
+      );
     }
   };
 
   const handleMoveCourse = async (dragIndex, hoverIndex) => {
     try {
-      // Create a new array with the reordered courses
       const newCourses = [...courses];
-      const draggedCourse = newCourses[dragIndex];
+      const dragged = newCourses[dragIndex];
       newCourses.splice(dragIndex, 1);
-      newCourses.splice(hoverIndex, 0, draggedCourse);
+      newCourses.splice(hoverIndex, 0, dragged);
 
-      // Prepare the order data for the API
-      const courseOrders = newCourses?.map((course, index) => ({
-        id: course?._id,
-        order: index,
-      }));
+      const orderedList = newCourses.map((item, idx) => ({ id: item._id, order: idx }));
 
-      // Dispatch the reorder action
-      if (activeTab === "master-class") {
-        await reorderMasterClasses({ strategies: courseOrders }).unwrap();
-        // No need to dispatch updateLocalOrder as RTK Query should invalidate tags and refetch or we can optimistic update (but here relying on invalidation for now)
+      if (isAcademyTab) {
+        await reorderAcademies({ strategies: orderedList }).unwrap();
       } else {
-        const strategyAction = reorderCourses;
-        const payloadKey = "courses";
-
-        const result = await dispatch(
-          strategyAction({
-            [payloadKey]: courseOrders,
-            token: localStorage.getItem("token"),
-          })
-        ).unwrap();
-
-        // Force a re-render by updating the courses array
-        dispatch({
-          type: "courses/updateLocalOrder",
-          payload: result,
-        });
+        await reorderMasterClasses({ strategies: orderedList }).unwrap();
       }
 
-      toast.success("Course order updated successfully!");
+      toast.success(`${itemLabel} order updated successfully!`);
     } catch (error) {
-      toast.error(error?.message || "Failed to update course order");
+      toast.error(error?.message || `Failed to update ${itemLabel.toLowerCase()} order`);
     }
   };
 
@@ -131,64 +127,80 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
     onCourseSelect?.(course);
   };
 
+  const openCreateModal = () => {
+    setIsEditMode(false);
+    setSelectedCourse(null);
+    setIsModalOpen(true);
+  };
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/** Course Cards */}
-        {courses?.length > 0 ? (
-          courses.map((course, index) => (
-            <div key={course?._id} className="relative group">
-              <DraggableCourseCard
-                course={course}
-                index={index}
-                onEdit={handleEditCourse}
-                onDelete={handleDeleteCourse}
-                onMove={handleMoveCourse}
-                onSelect={handleSelectCourse}
-                activeTab={activeTab}
-              />
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full">
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No courses found yet</p>
-            </div>
-          </div>
-        )}
-
-        {/** Create New Course Card */}
+        {/* Create New Card — always first */}
         <div
-          onClick={() => {
-            setIsEditMode(false);
-            setSelectedCourse(null);
-            setIsModalOpen(true);
-          }}
+          onClick={openCreateModal}
           className="rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300 hover:border-primary cursor-pointer transition-colors duration-200"
         >
-          <div className="flex flex-col items-center justify-center h-full">
+          <div className="flex flex-col items-center justify-center h-full min-h-[180px]">
             <Plus className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-700">
-              Create New Masterclass
+              Create New {itemLabel}
             </h3>
             <p className="text-sm text-gray-500 mt-2">
-              Start building your masterclass
+              Start building your {itemLabel.toLowerCase()}
             </p>
           </div>
         </div>
 
-        {/** Modal for Course Creation/Editing */}
-        <CreateCourseModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedCourse(null);
-            setIsEditMode(false);
-          }}
-          onSubmit={isEditMode ? handleUpdateCourse : undefined}
-          initialData={isEditMode ? selectedCourse : undefined}
-        />
-        {/** Delete Confirmation Modal — uses project-standard Dialog */}
+        {/* Existing Cards */}
+        {courses?.map((course, index) => (
+          <div key={course?._id} className="relative group">
+            <DraggableCourseCard
+              course={course}
+              index={index}
+              onEdit={handleEditCourse}
+              onDelete={handleDeleteCourse}
+              onMove={handleMoveCourse}
+              onSelect={handleSelectCourse}
+              activeTab={activeTab}
+            />
+          </div>
+        ))}
+
+        {/* ─── Masterclass Modal ──────────────────────────────────────────── */}
+        {!isAcademyTab && (
+          <CreateCourseModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedCourse(null);
+              setIsEditMode(false);
+            }}
+            onSubmit={isEditMode ? handleUpdateCourse : undefined}
+            initialData={isEditMode ? selectedCourse : undefined}
+          />
+        )}
+
+        {/* ─── Academy Modal ──────────────────────────────────────────────── */}
+        {isAcademyTab && (
+          <CreateAcademyModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedCourse(null);
+              setIsEditMode(false);
+            }}
+            onSubmit={isEditMode ? handleUpdateCourse : undefined}
+            initialData={isEditMode ? selectedCourse : undefined}
+            onSwitchToMasterclass={() => {
+              setIsModalOpen(false);
+              onSwitchToMasterclass?.();
+            }}
+          />
+        )}
+
+        {/* ─── Delete Confirmation Dialog ─────────────────────────────────── */}
         <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
           <DialogContent className="p-5 max-w-[500px]">
             <VisuallyHidden>
@@ -210,7 +222,6 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses }) => {
             </div>
           </DialogContent>
         </Dialog>
-
       </div>
     </DndProvider>
   );
