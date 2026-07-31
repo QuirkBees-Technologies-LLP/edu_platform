@@ -1,6 +1,8 @@
 import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import { useLanguage } from "@/i18n";
 import {
   DataGrid,
@@ -74,6 +76,7 @@ const LiveSession = ({ title = "Live Session" }) => {
   const [selectedEducator, setSelectedEducator] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
+  const selectedLanguage = useSelector(selectSelectedLanguage);
   const handleClickOpen = () => {
     setIsCreateOpen(true);
   };
@@ -448,6 +451,7 @@ const LiveSession = ({ title = "Live Session" }) => {
         limit: newLimit,
         educator: selectedEducator?._id || "",
         search: searchTextInput || "",
+        ...(selectedLanguage ? { language: selectedLanguage } : {}),
       }).unwrap();
 
       return {
@@ -561,7 +565,7 @@ const LiveSession = ({ title = "Live Session" }) => {
       <DataGrid
         key={`${searchTextInput}-${selectedEducator?._id || ""}`}
         serverSide={true}
-        reloadTrigger={tableKey}
+        reloadTrigger={`${tableKey}-${selectedLanguage}`}
         loading={isLoading}
         columns={columns}
         rowSelection={true}

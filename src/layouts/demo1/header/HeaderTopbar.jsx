@@ -37,8 +37,25 @@ const HeaderTopbar = () => {
     "/iq-academy-educators",
     "/master-class",
     "/master-class/:id"
-
   ];
+
+  const EDUCATOR_ALLOWED_ROUTES = [
+    "/educator/master-class",
+    "/educator/stream-schedule",
+    "/educator/ended-stream-schedule",
+    "/educator/live-session",
+    "/educator/ended-live-sessions"
+  ];
+
+  const ADMIN_ALLOWED_ROUTES = [
+    "/admin/courses",
+    "/admin/stream-schedule",
+    "/admin/educator-ended-schedule",
+    "/admin/live-session",
+    "/admin/ended-live-sessions",
+    "/admin/stream-recording"
+  ];
+
   const location = useLocation();
   const { isRTL } = useLanguage();
   const itemChatRef = useRef(null);
@@ -50,13 +67,20 @@ const HeaderTopbar = () => {
   const role = user?.role;
   const planRoutes = user?.plan?.allowedSideBar || [];
 
-  const allowedRoutes =
-    role === "student"
-      ? planRoutes.filter((r) => STUDENT_ALLOWED_ROUTES.includes(r))
-      : planRoutes;
-
-  const showLanguageSelector =
-    role !== "student" || allowedRoutes.includes(location.pathname);
+  const showLanguageSelector = (() => {
+    if (role === "student") {
+      const allowedRoutes = planRoutes.filter((r) => STUDENT_ALLOWED_ROUTES.includes(r));
+      return allowedRoutes.includes(location.pathname);
+    }
+    if (role === "educator") {
+      return EDUCATOR_ALLOWED_ROUTES.includes(location.pathname);
+    }
+    // Admin, super_admin, marketer — whitelist
+    if (role === "admin" || role === "super_admin" || role === "marketer") {
+      return ADMIN_ALLOWED_ROUTES.includes(location.pathname);
+    }
+    return false;
+  })();
 
   const profilePhoto = auth?.user?.image;
   const itemNotificationsRef = useRef(null);

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { ChevronLeft, Info } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuthContext } from "../../../../../auth/useAuthContext";
 
 // Store
@@ -16,6 +16,7 @@ import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorMessages from "@/components/common/ErrorsMessage";
+import { selectSelectedLanguage } from "@/store/reducer/studentLanagugeSlice";
 
 const SettingsSection = () => {
   // ── Info tooltip state ──────────────────────────────────────────────────
@@ -48,8 +49,8 @@ const SettingsSection = () => {
     localStorage.getItem("selectedCourseId")
   );
 
-  // ── Language filter (1.8) ───────────────────────────────────────────────
-  // const [selectedLanguage, setSelectedLanguage] = useState("all");
+  // ── Language filter from header dropdown ─────────────────────────────
+  const selectedLanguage = useSelector(selectSelectedLanguage);
 
   // ── RTK Query — Masterclasses ───────────────────────────────────────────
   const {
@@ -58,7 +59,7 @@ const SettingsSection = () => {
     error: masterClassesError,
     refetch: refetchMasterClasses,
   } = useGetEducatorMasterClassesQuery(
-    { isDeleted: false },
+    { isDeleted: false, ...(selectedLanguage ? { language: selectedLanguage } : {}) },
     { skip: activeTab !== "master-class" }
   );
 
@@ -69,7 +70,7 @@ const SettingsSection = () => {
     error: academiesError,
     refetch: refetchAcademies,
   } = useGetEducatorAcademiesQuery(
-    { isDeleted: false },
+    { isDeleted: false, ...(selectedLanguage ? { language: selectedLanguage } : {}) },
     { skip: activeTab !== "academy" }
   );
 
