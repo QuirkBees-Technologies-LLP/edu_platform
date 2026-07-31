@@ -82,7 +82,11 @@ export function formatTimeAgo(dateStr) {
 
 /**
  * Returns a relative human-readable "time ago" string.
- * e.g. "just now", "5m ago", "3h ago", "2 days ago"
+ * Rules:
+ *   < 1 hour  → "X minutes ago" (e.g. 1 minute ago, 5 minutes ago, 15 minutes ago)
+ *   1-23 hours → "X hours ago" (e.g. 1 hour ago, 23 hours ago)
+ *   1-6 days   → "X days ago" (e.g. 1 day ago, 6 days ago)
+ *   7+ days    → "X weeks ago" (e.g. 1 week ago, 2 weeks ago)
  */
 export function getRelativeTime(dateStr) {
   if (!dateStr) return "—";
@@ -92,16 +96,15 @@ export function getRelativeTime(dateStr) {
     const diffMs = Date.now() - date.getTime();
     if (diffMs < 0) return "just now";
     const diffSec = Math.floor(diffMs / 1000);
-    if (diffSec < 60) return "just now";
+    if (diffSec < 60) return "1 minute ago";
     const diffMin = Math.floor(diffSec / 60);
-    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffMin < 60) return `${diffMin} ${diffMin === 1 ? "minute" : "minutes"} ago`;
     const diffHr = Math.floor(diffMin / 60);
-    if (diffHr < 24) return `${diffHr}h ago`;
+    if (diffHr < 24) return `${diffHr} ${diffHr === 1 ? "hour" : "hours"} ago`;
     const diffDay = Math.floor(diffHr / 24);
-    if (diffDay < 7) return `${diffDay}d ago`;
+    if (diffDay < 7) return `${diffDay} ${diffDay === 1 ? "day" : "days"} ago`;
     const diffWk = Math.floor(diffDay / 7);
-    if (diffWk < 5) return `${diffWk}w ago`;
-    return new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+    return `${diffWk} ${diffWk === 1 ? "week" : "weeks"} ago`;
   } catch (_) {
     return "—";
   }
