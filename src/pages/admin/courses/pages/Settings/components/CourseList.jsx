@@ -103,7 +103,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
       }));
 
       const strategyAction = activeTab === "courses" ? reorderCourses : reorderStrategies;
-      const payloadKey = "courses";
+      const payloadKey = activeTab === "courses" ? "courses" : "strategies";
 
       const result = await dispatch(
         strategyAction({ [payloadKey]: courseOrders, token: localStorage.getItem("token") })
