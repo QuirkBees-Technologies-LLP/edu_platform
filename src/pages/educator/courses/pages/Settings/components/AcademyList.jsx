@@ -4,7 +4,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 // Store
 import {
@@ -66,7 +66,7 @@ const AcademyList = ({ academies, onAcademySelect, onSwitchToMasterclass }) => {
         order: index,
       }));
 
-      await reorderAcademies({ strategies: academyOrders }).unwrap();
+      await reorderAcademies({ courses: academyOrders }).unwrap();
       toast.success("Academy order updated!");
     } catch (error) {
       toast.error(error?.message || "Failed to update academy order");

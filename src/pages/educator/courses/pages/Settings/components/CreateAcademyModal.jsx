@@ -1,5 +1,5 @@
 import { forwardRef, useState } from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { GraduationCap, AlertTriangle, ArrowRight, X } from "lucide-react";
 import {
   Dialog,

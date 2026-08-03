@@ -238,8 +238,8 @@ export const deleteLecture = async (lectureId, token) => {
 
 export const reorderLectures = async (lectureOrders, token) => {
   const response = await api.put(
-    "/lectures/reorder",
-    { lectureOrders },
+    "/admin/lecture/reorder",
+    { lectures: lectureOrders },
     {
       headers: { Authorization: `Bearer ${token}` },
     }

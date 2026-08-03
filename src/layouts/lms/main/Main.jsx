@@ -11,6 +11,10 @@ const Main = () => {
   const menuConfig = getMenuConfig("primary");
   const menuItem = useMenuCurrentItem(pathname, menuConfig);
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname]);
+
+  useEffect(() => {
     const bodyClass = document.body.classList;
 
     bodyClass.add("demo1");
