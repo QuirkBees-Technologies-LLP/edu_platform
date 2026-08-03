@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useNavigate } from "react-router";
 import { useLanguage } from "@/i18n";
 import { toast } from "sonner";
@@ -49,7 +49,7 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
   const [selectedEducator, setSelectedEducator] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
-  const selectedLanguage = useSelector(selectSelectedLanguage);
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
   const ColumnInputFilter = ({ column }) => {
     return (
       <Input
@@ -235,7 +235,7 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
         status: "ended",
         educator: selectedEducator?._id || "",
         search: searchTextInput || "",
-        ...(selectedLanguage ? { language: selectedLanguage } : {}),
+        ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
       }).unwrap();
 
       const endedData = response.data.filter((row) => row.status === "ended");

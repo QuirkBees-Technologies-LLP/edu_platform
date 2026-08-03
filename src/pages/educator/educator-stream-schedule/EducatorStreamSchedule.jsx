@@ -2,7 +2,7 @@ import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useLanguage } from "@/i18n";
 import debounce from "lodash.debounce";
 import {
@@ -57,7 +57,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
-  const selectedLanguage = useSelector(selectSelectedLanguage);
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
   const [isReccurenceScheduleOpen, setIsReccurenceScheduleOpen] =
     useState(false);
 
@@ -441,7 +441,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         page: newPage,
         limit: newLimit,
         search: searchTextInput || "",
-        ...(selectedLanguage ? { language: selectedLanguage } : {}),
+        ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
       }).unwrap();
 
       return {

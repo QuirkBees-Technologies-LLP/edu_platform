@@ -21,7 +21,7 @@ import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorMessages from "@/components/common/ErrorsMessage";
-import { selectSelectedLanguage } from "@/store/reducer/studentLanagugeSlice";
+import { selectSelectedLanguagesAdmin } from "@/store/reducer/studentLanagugeSlice";
 
 const SettingsSection = () => {
   const dispatch = useDispatch();
@@ -33,7 +33,7 @@ const SettingsSection = () => {
     localStorage.getItem("selectedCourseId")
   );
   const isAdmin = auth?.user?.role === "admin" || auth?.user?.role === "super_admin";
-  const selectedLanguage = useSelector(selectSelectedLanguage);
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
   const [activeTab, setActiveTab] = useState(() => {
     const savedTab = localStorage.getItem("settingsTab");
     if (savedTab === "strategies" && !isAdmin) return "courses";
@@ -49,7 +49,7 @@ const SettingsSection = () => {
   useEffect(() => {
     if (auth?.token) {
       let action;
-      let payload = { params: { isDeleted: false, ...(selectedLanguage ? { language: selectedLanguage } : {}) }, token: auth.token };
+      let payload = { params: { isDeleted: false, ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}) }, token: auth.token };
 
       if (activeTab === "strategies") {
         action = fetchStrategies;

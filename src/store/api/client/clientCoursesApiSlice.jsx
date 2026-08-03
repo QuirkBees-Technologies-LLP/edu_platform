@@ -11,6 +11,7 @@ export const clientCoursesApiSlice = createApi({
     }),
     getEducatorWithCourses: builder.query({
       query: (educatorId) => `/users/educator-course/${educatorId}`,
+      keepUnusedDataFor: 0,
     }),
     getClientSingleCourses: builder.query({
       query: (courseId) => `/users/course/${courseId}`,

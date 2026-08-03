@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/i18n";
 import { toast } from "sonner";
@@ -200,7 +200,7 @@ const LearningContentList = () => {
   });
   const strategies = strategiesData?.data || [];
   const languages = languagesData?.data || [];
-  const selectedLanguage = useSelector(selectSelectedLanguage);
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   const reloadTable = () => setTableKey((k) => k + 1);
 
@@ -306,7 +306,7 @@ const LearningContentList = () => {
           page: pageIndex + 1,
           limit: pageSize,
           search: searchFilter?.value || "",
-          ...(selectedLanguage ? { language: selectedLanguage } : {}),
+          ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
         }).unwrap();
 
         return {
