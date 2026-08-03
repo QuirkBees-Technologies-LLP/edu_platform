@@ -8,7 +8,8 @@ const initialState = {
     { _id: '4', name: 'German' }
   ],
   selectedLanguage: 'English',
-  selectedLanguagesAdmin: ['English']
+  selectedLanguagesAdmin: ['English', 'Hindi', 'Spanish', 'German'],
+  hasInitializedAdminLanguages: false
 };
 
 const studentLanagugeSlice = createSlice({
@@ -31,6 +32,10 @@ const studentLanagugeSlice = createSlice({
     },
     setLanguages: (state, action) => {
       state.languages = action.payload;
+      if (!state.hasInitializedAdminLanguages && Array.isArray(action.payload) && action.payload.length > 0) {
+        state.selectedLanguagesAdmin = action.payload.map(l => l.name);
+        state.hasInitializedAdminLanguages = true;
+      }
     }
   }
 });
