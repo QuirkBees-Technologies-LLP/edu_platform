@@ -152,7 +152,9 @@ const IqEducators = () => {
     data: response,
     refetch: refetchEducator,
     isFetching: isFetchingEducator,
-  } = useGetEducatorWithCoursesQuery(id);
+  } = useGetEducatorWithCoursesQuery(id, {
+    refetchOnMountOrArgChange: true,
+  });
 
   // Check if educator's first category is Digital Marketing or E-commerce
   const educatorCategoryName = response?.data?.educator?.categories?.[0]?.name?.toLowerCase() ?? "";
@@ -166,6 +168,8 @@ const IqEducators = () => {
     page: 1,
     limit: 10,
     id: id,
+  }, {
+    refetchOnMountOrArgChange: true,
   });
 
   useEffect(() => {
