@@ -3,7 +3,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 // Store
 import {
@@ -103,7 +103,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
       }));
 
       const strategyAction = activeTab === "courses" ? reorderCourses : reorderStrategies;
-      const payloadKey = activeTab === "courses" ? "courses" : "strategies";
+      const payloadKey = "courses";
 
       const result = await dispatch(
         strategyAction({ [payloadKey]: courseOrders, token: localStorage.getItem("token") })

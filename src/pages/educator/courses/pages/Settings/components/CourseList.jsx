@@ -5,7 +5,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 // Store
 import {
@@ -112,9 +112,9 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses, onSwitchT
       const orderedList = newCourses.map((item, idx) => ({ id: item._id, order: idx }));
 
       if (isAcademyTab) {
-        await reorderAcademies({ strategies: orderedList }).unwrap();
+        await reorderAcademies({ courses: orderedList }).unwrap();
       } else {
-        await reorderMasterClasses({ strategies: orderedList }).unwrap();
+        await reorderMasterClasses({ courses: orderedList }).unwrap();
       }
 
       toast.success(`${itemLabel} order updated successfully!`);

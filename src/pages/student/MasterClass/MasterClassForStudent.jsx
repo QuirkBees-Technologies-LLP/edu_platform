@@ -222,6 +222,7 @@ const MasterClassForStudent = () => {
     setSelectedStrategyId(strategyId);
     setActiveLectureId(null);
     setActiveLecture(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLectureClick = (lecture) => {

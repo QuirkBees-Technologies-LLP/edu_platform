@@ -1,6 +1,6 @@
 import { forwardRef, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { X } from "lucide-react";
 import {
   Dialog,

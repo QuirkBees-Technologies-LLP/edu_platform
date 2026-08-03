@@ -4,7 +4,7 @@ import { useSettings } from '@/providers/SettingsProvider';
 import { AppRouting } from '@/routing';
 import { PathnameProvider } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
-import { Toaster as HotToaster } from 'react-hot-toast';
+
 import { Provider } from 'react-redux';
 import { persistor, store } from './store';
 import "yet-another-react-lightbox/plugins/counter.css";
@@ -38,7 +38,7 @@ const App = () => {
           <AppRouting />
         </PathnameProvider>
         <Toaster />
-        <HotToaster position="top-right" />
+
       </PersistGate>
     </Provider>
   </BrowserRouter>;
