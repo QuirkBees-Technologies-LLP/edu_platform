@@ -6,6 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 // Store
 import {
@@ -34,11 +35,11 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses, onSwitchT
 
   // ─── Masterclass mutations ────────────────────────────────────────────────
   const [deleteMasterClass] = useDeleteEducatorMasterClassMutation();
-  const [reorderMasterClasses] = useReorderEducatorMasterClassMutation();
+  const [reorderMasterClasses, { isLoading: isReorderingMC }] = useReorderEducatorMasterClassMutation();
 
   // ─── Academy mutations ────────────────────────────────────────────────────
   const [deleteAcademy] = useDeleteEducatorAcademyMutation();
-  const [reorderAcademies] = useReorderEducatorAcademiesMutation();
+  const [reorderAcademies, { isLoading: isReorderingAc }] = useReorderEducatorAcademiesMutation();
   const [updateAcademy, { isLoading: isUpdatingAcademy }] = useUpdateEducatorAcademyMutation();
 
   // ─── Modal state ──────────────────────────────────────────────────────────
@@ -49,6 +50,7 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses, onSwitchT
 
   const isAcademyTab = activeTab === "academy";
   const itemLabel = isAcademyTab ? "Academy" : "Masterclass";
+  const isReordering = isReorderingMC || isReorderingAc;
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleUpdateCourse = async (courseData) => {
@@ -136,9 +138,15 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses, onSwitchT
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Create New Card — always first */}
-        <div
+      <div className="relative min-h-[200px]">
+        {isReordering && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-lg">
+            <LoadingSpinner />
+          </div>
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Create New Card — always first */}
+          <div
           onClick={openCreateModal}
           className="rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300 hover:border-primary cursor-pointer transition-colors duration-200"
         >
@@ -167,6 +175,7 @@ const CourseList = ({ onCourseSelect, activeTab, courses: propCourses, onSwitchT
             />
           </div>
         ))}
+        </div>
 
         {/* ─── Masterclass Modal ──────────────────────────────────────────── */}
         {!isAcademyTab && (

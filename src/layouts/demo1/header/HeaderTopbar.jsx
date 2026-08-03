@@ -17,9 +17,12 @@ import { useSelector } from "react-redux";
 import {
   selectLanguages,
   selectSelectedLanguage,
+  selectSelectedLanguagesAdmin,
   setLanguages,
   setSelectedLanguage,
+  toggleLanguageAdmin,
 } from "../../../store/reducer/studentLanagugeSlice";
+import { MultiSelectLanguage } from "@/components/ui/MultiSelectLanguage";
 import {
   Select,
   SelectContent,
@@ -98,27 +101,14 @@ const HeaderTopbar = () => {
   const dispatch = useDispatch();
   const languages = useSelector(selectLanguages);
   const selectedLanguage = useSelector(selectSelectedLanguage);
+  const selectedLanguagesAdmin = useSelector(selectSelectedLanguagesAdmin);
   const { data } = useGetLanguageQuery();
 
   useEffect(() => {
     if (data) {
       dispatch(setLanguages(data.data));
-      if (!selectedLanguage) {
-        const englishLanguage = data.data.find(
-          (lang) => lang.name === "English"
-        );
-        if (englishLanguage) {
-          dispatch(setSelectedLanguage(englishLanguage.name));
-        }
-      }
     }
-  }, [data, selectedLanguage, dispatch]);
-
-  useEffect(() => {
-    if (!selectedLanguage && !data) {
-      dispatch(setSelectedLanguage("English"));
-    }
-  }, [selectedLanguage, data, dispatch]);
+  }, [data, dispatch]);
 
   return (
     <>
@@ -195,28 +185,35 @@ const HeaderTopbar = () => {
         </Menu>
         {showLanguageSelector && (
           <div className="relative sm:w-56 language_select">
-            <Select
-              value={selectedLanguage}
-              onValueChange={(value) => dispatch(setSelectedLanguage(value))}
-              className={`form-control input input-md w-full`}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.isArray(languages) && languages.length > 0 ? (
-                  languages?.map((item) => (
-                    <SelectItem key={item._id} value={item.name}>
-                      {item.name}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-sm text-gray-500">
-                    No options available
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
+            {auth?.user?.role === "admin" || auth?.user?.role === "educator" || auth?.user?.role === "super_admin" || auth?.user?.role === "marketer" ? (
+              <MultiSelectLanguage
+                options={Array.isArray(languages) ? languages : []}
+                selectedValues={selectedLanguagesAdmin || []}
+                onToggle={(value) => dispatch(toggleLanguageAdmin(value))}
+              />
+            ) : (
+              <Select
+                value={selectedLanguage || ""}
+                onValueChange={(value) => dispatch(setSelectedLanguage(value))}
+              >
+                <SelectTrigger className="w-full bg-transparent border-0 focus:ring-0 focus:ring-offset-0 px-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent className="max-h-64 z-[99999999]">
+                  {data?.data?.length > 0 ? (
+                    data?.data?.map((item) => (
+                      <SelectItem key={item._id} value={item.name} className="cursor-pointer">
+                        {item.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-gray-500">
+                      No options available
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         )}
         <Menu>

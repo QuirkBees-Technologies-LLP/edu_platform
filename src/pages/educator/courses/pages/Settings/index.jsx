@@ -16,7 +16,7 @@ import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorMessages from "@/components/common/ErrorsMessage";
-import { selectSelectedLanguage } from "@/store/reducer/studentLanagugeSlice";
+import { selectSelectedLanguagesAdmin } from "@/store/reducer/studentLanagugeSlice";
 
 const SettingsSection = () => {
   // ── Info tooltip state ──────────────────────────────────────────────────
@@ -50,16 +50,17 @@ const SettingsSection = () => {
   );
 
   // ── Language filter from header dropdown ─────────────────────────────
-  const selectedLanguage = useSelector(selectSelectedLanguage);
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   // ── RTK Query — Masterclasses ───────────────────────────────────────────
   const {
     data: masterClassesData,
     isLoading: isMasterClassesLoading,
+    isFetching: isMasterClassesFetching,
     error: masterClassesError,
     refetch: refetchMasterClasses,
   } = useGetEducatorMasterClassesQuery(
-    { isDeleted: false, ...(selectedLanguage ? { language: selectedLanguage } : {}) },
+    { isDeleted: false, ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}) },
     { skip: activeTab !== "master-class" }
   );
 
@@ -67,10 +68,11 @@ const SettingsSection = () => {
   const {
     data: academiesData,
     isLoading: isAcademiesLoading,
+    isFetching: isAcademiesFetching,
     error: academiesError,
     refetch: refetchAcademies,
   } = useGetEducatorAcademiesQuery(
-    { isDeleted: false, ...(selectedLanguage ? { language: selectedLanguage } : {}) },
+    { isDeleted: false, ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}) },
     { skip: activeTab !== "academy" }
   );
 
@@ -81,7 +83,7 @@ const SettingsSection = () => {
       : academiesData?.data;
 
   const currentLoading =
-    activeTab === "master-class" ? isMasterClassesLoading : isAcademiesLoading;
+    activeTab === "master-class" ? (isMasterClassesLoading || isMasterClassesFetching) : (isAcademiesLoading || isAcademiesFetching);
 
   const currentError =
     activeTab === "master-class" ? masterClassesError : academiesError;
@@ -240,22 +242,11 @@ const SettingsSection = () => {
                             Academy Guidelines
                           </h4>
                         </div>
-                        <ul className="space-y-2 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                          <li className="flex items-start gap-2">
-                            <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                            <span className="dark:text-white">
-                              Only <strong className="text-gray-800 dark:text-white">one Academy</strong> is allowed per language.
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-                            <span className="dark:text-white" >
-                              If an Academy already exists for a language, any new Academy for that language must be approved by the{" "}
-                              <strong className="text-gray-800 dark:text-white">IQonic Corporate Team</strong>{" "}
-                              before it can be published and made live.
-                            </span>
-                          </li>
-                        </ul>
+                        <p className="text-xs dark:text-white text-gray-600 dark:text-gray-300 leading-relaxed">
+                          Any new Academy must be approved by the{" "}
+                          <strong className="text-gray-800 dark:text-white">IQonic Corporate Team</strong>{" "}
+                          before it can be published and made live.
+                        </p>
                         {/* Tooltip arrow */}
                         <div className="absolute -top-1.5 left-4 w-3 h-3 bg-white dark:bg-[#1a1c23] border-l border-t border-gray-200 dark:border-gray-600 rotate-45" />
                       </div>

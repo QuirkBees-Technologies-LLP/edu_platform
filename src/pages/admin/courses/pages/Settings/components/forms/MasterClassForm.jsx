@@ -451,8 +451,8 @@ const MasterClassForm = ({ onSubmit, initialData, isLoading }) => {
 
                 <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
                     <div className="text-left space-y-1">
-                        <label htmlFor="mc_isFeatured" className="text-sm font-bold text-gray-700 cursor-pointer">Feature Masterclass</label>
-                        <p className="text-xs text-gray-500">Highlight on platform home.</p>
+                        <label htmlFor="mc_isFeatured" className="text-sm font-bold text-gray-700 cursor-pointer">Publish as Paid Masterclass</label>
+                        {/* <p className="text-xs text-gray-500">Highlight on platform home.</p> */}
                     </div>
                     <Controller
                         name="isFeatured"

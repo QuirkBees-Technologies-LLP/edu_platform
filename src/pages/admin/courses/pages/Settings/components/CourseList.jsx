@@ -230,7 +230,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
             onClick={() => setIsMCModalOpen(false)}
           >
             <div
-              className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-6xl min-h-[90vh] max-h-[95vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
