@@ -470,7 +470,16 @@ const IqInsight = () => {
                     <div className="flex-1 min-w-0">
                       {/* Row 1: Educator */}
                       <div className="flex justify-between items-start gap-2 mb-2">
-                        <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-full">
+                        <span
+                          className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-full cursor-pointer hover:bg-blue-500/20 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (idea?.educatorDetails?._id) {
+                              navigate(`/iq-educators/${idea.educatorDetails._id}`);
+                            }
+                          }}
+                          title={`View ${idea?.educatorDetails?.first_name || ""}'s profile`}
+                        >
                           <img
                             src={`${idea?.educatorDetails?.image || ""}`}
                             alt={idea?.educatorDetails?.first_name}
