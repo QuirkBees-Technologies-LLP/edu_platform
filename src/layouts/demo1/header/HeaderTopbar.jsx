@@ -196,7 +196,7 @@ const HeaderTopbar = () => {
                 value={selectedLanguage || ""}
                 onValueChange={(value) => dispatch(setSelectedLanguage(value))}
               >
-                <SelectTrigger className="w-full bg-transparent border-0 focus:ring-0 focus:ring-offset-0 px-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                <SelectTrigger className="w-full bg-light-light h-10 rounded-md border border-input px-3 py-2 text-[0.8125rem] font-medium hover:border-gray-400 focus:border-primary focus:ring-0 focus:ring-offset-0 focus:outline-none">
                   <SelectValue placeholder="Language" />
                 </SelectTrigger>
                 <SelectContent className="max-h-64 z-[99999999]">
