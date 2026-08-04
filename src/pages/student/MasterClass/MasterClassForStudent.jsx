@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Check,
   RotateCcw,
+  Search,
 } from "lucide-react";
 import { Accordion, AccordionItem } from "@/components/accordion";
 import {
@@ -115,6 +116,22 @@ const MasterClassForStudent = () => {
   const [tradingMethod, setTradingMethod] = useState([]);
   const [timeZone, setTimeZone] = useState([]);
   const [educator, setEducator] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const searchTimerRef = useRef(null);
+
+  // Debounce search input (300ms)
+  const handleSearchChange = useCallback((value) => {
+    setSearchInput(value);
+    clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    return () => clearTimeout(searchTimerRef.current);
+  }, []);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -153,6 +170,7 @@ const MasterClassForStudent = () => {
         category: activeCategoryId,
         educatorId: educator,
         strategies: activeStrategyId,
+        search: debouncedSearch || undefined,
       },
     },
   );
@@ -222,6 +240,7 @@ const MasterClassForStudent = () => {
     setSelectedStrategyId(strategyId);
     setActiveLectureId(null);
     setActiveLecture(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLectureClick = (lecture) => {
@@ -382,8 +401,29 @@ const MasterClassForStudent = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pb-5">
-          
+        <div className="flex items-center gap-3 pb-5 flex-wrap">
+
+          {/* Search Input */}
+          <div className="flex items-center gap-2 w-[250px] h-11 px-3 rounded-md border border-input bg-background text-sm shadow-sm">
+            <Search size={14} className="text-muted-foreground shrink-0" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="border-none outline-none bg-transparent text-sm w-full text-foreground placeholder:text-muted-foreground"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => { setSearchInput(""); setDebouncedSearch(""); clearTimeout(searchTimerRef.current); }}
+                className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
           <div className="flex items-center gap-2 relative">
             <Select
               value={educator || ""}
@@ -629,7 +669,14 @@ const MasterClassForStudent = () => {
                       )}
 
                       {educatorName && (
-                        <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5">
+                        <div
+                          className="absolute bottom-3 left-3 right-3 flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/iq-educators/${educator?._id}`);
+                          }}
+                          title={`View ${educatorName}'s profile`}
+                        >
                           <div className="flex -space-x-2">
                             {strategy?.educators?.slice(0, 3)?.map((edu, i) =>
                               edu?.image ? (

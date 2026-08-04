@@ -79,11 +79,21 @@ const editCourseSchema = z.object({
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
+  // Normalize section: educator courses may use "Academy" instead of "IQ Academy"
+  const normalizeSection = (section) => {
+    if (!section) return "IQ Academy";
+    // Map "Academy" to "IQ Academy" so dropdown matches
+    if (section === "Academy") return "IQ Academy";
+    return section;
+  };
+
+  const normalizedSection = normalizeSection(initialData?.section);
+
   const [thumbnailPreview, setThumbnailPreview] = useState(
-    initialData?.imageUrl || null
+    initialData?.imageUrl || initialData?.strategyBanner || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
-  const [sectionSelect, setSectionSelect] = useState();
+  const [sectionSelect, setSectionSelect] = useState(normalizedSection || "");
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetCoursesTypesQuery();
   const { data } = useGetEducatorAcademyCategoryQuery(sectionSelect);
@@ -101,32 +111,48 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     watch,
   } = useForm({
     resolver: zodResolver(courseSchema),
-    defaultValues: initialData || {
-      title: "",
-      description: "",
-      imageFile: undefined,
-      category: "",
-      published: false,
-      isFeatured: false,
-      section: "",
-      language: "",
-      tier: "FREE",
-    },
+    defaultValues: initialData
+      ? {
+          title: initialData.title || "",
+          description: initialData.description || "",
+          imageFile: undefined,
+          category: initialData.category?._id || initialData.category || "",
+          published: initialData.published === true || initialData.published === "true",
+          isFeatured: initialData.isFeatured === true || initialData.isFeatured === "true",
+          section: normalizedSection,
+          language: initialData.language || "",
+          tier: initialData.tier || "FREE",
+        }
+      : {
+          title: "",
+          description: "",
+          imageFile: undefined,
+          category: "",
+          published: false,
+          isFeatured: false,
+          section: "IQ Academy",
+          language: "",
+          tier: "FREE",
+        },
   });
 
 
 
   useEffect(() => {
     if (initialData) {
-      if (initialData.imageUrl) {
-        setThumbnailPreview(initialData.imageUrl);
-        // setValue("imageFile", initialData.imageUrl);
+      const existingImage = initialData.imageUrl || initialData.strategyBanner;
+      if (existingImage) {
+        setThumbnailPreview(existingImage);
       }
-      if (initialData?.category?._id && data?.data?.length > 0) {
-        setValue("category", initialData?.category?._id);
+      // Set category when categories list is loaded
+      const catId = initialData?.category?._id || initialData?.category;
+      if (catId && data?.data?.length > 0) {
+        setValue("category", catId);
       }
+      // Set section to normalized value
+      setValue("section", normalizedSection);
     }
-  }, [initialData, data, setValue]);
+  }, [initialData, data, setValue, normalizedSection]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -168,8 +194,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     // Handle image file - required for new courses, optional for edits with existing image
     if (data.imageFile instanceof File && data.imageFile.size > 0) {
       formData.append("imageUrl", data.imageFile);
-    } else if (!initialData?.imageUrl) {
-      // Only require image for new courses
+    } else if (!initialData) {
+      // Only require image for new courses (not editing)
       console.error("No valid image file provided for new course");
       return;
     }
@@ -184,7 +210,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 
   return (
     <form
-      onSubmit={handleSubmit(submitHandler)}
+      onSubmit={handleSubmit(submitHandler, (formErrors) => {
+        console.error("Form validation errors:", formErrors);
+      })}
       className="space-y-6"
       encType="multipart/form-data"
     >

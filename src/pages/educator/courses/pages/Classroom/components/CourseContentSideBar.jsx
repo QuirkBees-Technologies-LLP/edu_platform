@@ -121,7 +121,7 @@ const CourseContentSideBar = ({
           <div className="p-1.5 bg-gray-100 rounded-full group-hover:bg-primary group-hover:text-white">
             <ChevronLeft className="w-4 h-4" />
           </div>
-          <span className="font-medium">Back to IQ Vault</span>
+          <span className="font-medium">Back to Academy</span>
         </button>
 
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">

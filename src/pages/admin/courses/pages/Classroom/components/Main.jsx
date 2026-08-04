@@ -159,7 +159,7 @@ const Main = ({ onSelectCourse }) => {
       <div>
         <h3 className="font-medium text-gray-800">{instructor?.name}</h3>
         <p className="text-sm text-gray-500">
-          {instructor?.courses?.length || "0"} IQ Vault
+          {instructor?.courses?.length || "0"} Academy
         </p>
       </div>
     </motion.div>
@@ -194,7 +194,7 @@ const Main = ({ onSelectCourse }) => {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 border-4 border-primary rounded-full animate-spin"></div>
-          <p className="text-gray-600">Loading IQ Vault...</p>
+          <p className="text-gray-600">Loading Academy...</p>
         </div>
       </div>
     );
@@ -209,11 +209,11 @@ const Main = ({ onSelectCourse }) => {
         <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="max-w-xl">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Explore Our IQ Vault
+              Explore Our Academy
             </h1>
             <p className="text-gray-900 mb-6">
               Enhance your skills with our industry-leading instructors and
-              expertly crafted IQ Vault.
+              expertly crafted Academy.
             </p>
 
             <div className="relative">
@@ -266,7 +266,7 @@ const Main = ({ onSelectCourse }) => {
       {/* {featuredCourses.length >= 5 && (
         <FeaturedSection
           courses={featuredCourses}
-          title="Featured IQ Vault"
+          title="Featured Academy"
           subtitle="Recommended by our team and top students"
           onSelectCourse={onSelectCourse}
         />
@@ -340,7 +340,7 @@ const Main = ({ onSelectCourse }) => {
             <p className="text-gray-500 mt-2 max-w-md mx-auto">
               {searchTerm
                 ? `No results for "${searchTerm}"`
-                : "No IQ Vault available in this category yet"}
+                : "No Academy available in this category yet"}
             </p>
             <button
               className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-active"

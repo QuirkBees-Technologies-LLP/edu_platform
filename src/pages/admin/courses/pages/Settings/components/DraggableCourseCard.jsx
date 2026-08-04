@@ -234,7 +234,7 @@ const DraggableCourseCard = ({
             </div>
           ) : (
             <div className="bg-blue-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
-              Course
+              Academy
             </div>
           )}
         </div>
@@ -289,8 +289,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleEdit}
             className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title={`Edit ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
-            aria-label={`Edit ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            title={`Edit ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            aria-label={`Edit ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
           >
             <Edit2 className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>
@@ -298,8 +298,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleDelete}
             className="p-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title={`Delete ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
-            aria-label={`Delete ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            title={`Delete ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            aria-label={`Delete ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
           >
             <Trash className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>

@@ -1,6 +1,8 @@
 import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useLanguage } from "@/i18n";
 import {
   DataGrid,
@@ -68,6 +70,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
   const [selectedEducator, setSelectedEducator] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -392,6 +395,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
             limit: newLimit,
             educator: selectedEducator?._id || "",
             search: searchTextInput || "",
+            ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
           }).unwrap();
 
           return {
@@ -403,7 +407,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           return { data: [], totalCount: 0 };
         }
       },
-    [getAdminStreamSchedule, selectedEducator, searchTextInput]
+    [getAdminStreamSchedule, selectedEducator, searchTextInput, selectedLanguage]
   );
 
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
@@ -516,7 +520,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
       <DataGrid
         key={`${searchTextInput}-${selectedEducator?._id || ""}`}
         serverSide={true}
-        reloadTrigger={tableKey}
+        reloadTrigger={`${tableKey}-${selectedLanguage}`}
         loading={isLoading}
         columns={columns}
         rowSelection={true}

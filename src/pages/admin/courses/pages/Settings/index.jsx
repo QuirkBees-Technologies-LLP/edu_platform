@@ -21,6 +21,7 @@ import CourseList from "./components/CourseList";
 import CourseContent from "./components/CourseContent";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ErrorMessages from "@/components/common/ErrorsMessage";
+import { selectSelectedLanguagesAdmin } from "@/store/reducer/studentLanagugeSlice";
 
 const SettingsSection = () => {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ const SettingsSection = () => {
     localStorage.getItem("selectedCourseId")
   );
   const isAdmin = auth?.user?.role === "admin" || auth?.user?.role === "super_admin";
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
   const [activeTab, setActiveTab] = useState(() => {
     const savedTab = localStorage.getItem("settingsTab");
     if (savedTab === "strategies" && !isAdmin) return "courses";
@@ -47,7 +49,7 @@ const SettingsSection = () => {
   useEffect(() => {
     if (auth?.token) {
       let action;
-      let payload = { params: { isDeleted: false }, token: auth.token };
+      let payload = { params: { isDeleted: false, ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}) }, token: auth.token };
 
       if (activeTab === "strategies") {
         action = fetchStrategies;
@@ -74,7 +76,7 @@ const SettingsSection = () => {
     } else {
       console.log("No auth token available");
     }
-  }, [dispatch, auth?.token, auth?.user?._id, auth?.user?.role, activeTab]);
+  }, [dispatch, auth?.token, auth?.user?._id, auth?.user?.role, activeTab, selectedLanguage]);
 
   useEffect(() => {
     localStorage.setItem("settingsTab", activeTab);
@@ -119,11 +121,11 @@ const SettingsSection = () => {
       return (
         <ErrorMessages
           heading={
-            activeTab === "courses" ? "No IQ Vault Yet" : activeTab === "strategies" ? "No Strategies Yet" : "No Master Classes Yet"
+            activeTab === "courses" ? "No Academy Yet" : activeTab === "strategies" ? "No Strategies Yet" : "No Master Classes Yet"
           }
           message={
             activeTab === "courses"
-              ? "You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."
+              ? "You haven't created any Academy yet. Let's get your first one set up and ready to go."
               : "You haven’t created any strategies yet. Let’s get your first one set up and ready to go."
           }
           onRetry={() => {
@@ -180,7 +182,7 @@ const SettingsSection = () => {
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to {activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategies" : "Master Classes"}
+                  Back to {activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategies" : "Master Classes"}
                 </button>
               )}
               {!selectedCourseId && (
@@ -192,7 +194,7 @@ const SettingsSection = () => {
                       : "text-gray-500 hover:text-gray-700"
                       }`}
                   >
-                    Courses
+                    Academy
                   </button>
                   {isAdmin && (
                     <button
@@ -223,7 +225,7 @@ const SettingsSection = () => {
               <span className="text-sm text-gray-500">
                 {selectedCourseId
                   ? courses?.find((c) => c?._id === selectedCourseId)?.title
-                  : `All ${activeTab === "courses" ? "IQ Vault" : activeTab === "strategies" ? "Strategies" : "Master Classes"}`}
+                  : `All ${activeTab === "courses" ? "Academies" : activeTab === "strategies" ? "Strategies" : "Master Classes"}`}
               </span>
             </div>
           </div>

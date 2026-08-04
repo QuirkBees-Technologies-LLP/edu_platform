@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
 import {
-  useGetCoursesTypesQuery,
   useGetEducatorAcademyCategoryQuery,
   useGetLanguageListQuery,
 } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
@@ -17,75 +16,61 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
-
-// Categories for the course
-const COURSE_CATEGORIES = [
-  "Programming",
-  "Finance",
-  "Development",
-  "Design",
-  "Business",
-  "Marketing",
-  "Language",
-  "Science",
-  "Art",
-  "Music",
-];
-
-// Schema for course validation
-const createCourseSchema = z.object({
+// ─── Validation Schemas ────────────────────────────────────────────────────
+const createAcademySchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   imageFile: z
-    .instanceof(File, { message: "Course thumbnail is required" })
+    .instanceof(File, { message: "Academy thumbnail is required" })
     .refine((file) => file && file.size > 0, {
-      message: "Please select a valid course thumbnail image",
+      message: "Please select a valid academy thumbnail image",
     }),
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  tier: z.enum(["FREE", "PREMIUM"]).default("FREE"),
-  section: z.string().min(1, "Please select a course type"),
-  language: z.string().min(1, "Please select a course language"),
+  tier: z.enum(["FREE", "PREMIUM"], {
+    required_error: "Please select a tier",
+  }),
+  language: z.string().min(1, "Please select a language"),
 });
 
-const editCourseSchema = z.object({
+const editAcademySchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   imageFile: z
-    .instanceof(File, { message: "Course thumbnail is required" })
+    .instanceof(File, { message: "Academy thumbnail is required" })
     .optional()
     .refine(
       (file) => {
-        // If no file is provided, it's valid (for edit mode with existing image)
         if (!file) return true;
-        // If file is provided, it must have content
         return file.size > 0;
       },
-      {
-        message: "Please select a valid course thumbnail image",
-      }
+      { message: "Please select a valid academy thumbnail image" }
     ),
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  tier: z.enum(["FREE", "PREMIUM"]).default("FREE"),
-  section: z.string().min(1, "Please select a course type"),
-  language: z.string().min(1, "Please select a course language"),
+  tier: z.enum(["FREE", "PREMIUM"], {
+    required_error: "Please select a tier",
+  }),
+  language: z.string().min(1, "Please select a language"),
 });
 
-const CourseForm = ({ onSubmit, initialData, isLoading }) => {
+// ─── Component ─────────────────────────────────────────────────────────────
+const AcademyForm = ({ onSubmit, initialData, isLoading }) => {
   const [thumbnailPreview, setThumbnailPreview] = useState(
-    initialData?.imageUrl || null
+    initialData?.strategyBanner || initialData?.imageUrl || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
-  const [sectionSelect, setSectionSelect] = useState(initialData?.section || undefined);
-  const { data: languagesList } = useGetLanguageListQuery();
-  const { data: courseTypesList } = useGetCoursesTypesQuery();
-  const { data } = useGetEducatorAcademyCategoryQuery(sectionSelect);
 
-  // Choose schema based on whether we're editing or creating
-  const courseSchema = initialData ? editCourseSchema : createCourseSchema;
+  // Always use 'IQ Academy' section — not shown in UI
+  const ACADEMY_SECTION = "IQ Academy";
+
+  const { data: languagesList } = useGetLanguageListQuery();
+  const { data } = useGetEducatorAcademyCategoryQuery(ACADEMY_SECTION);
+
+  // Choose schema based on create vs edit
+  const academySchema = initialData ? editAcademySchema : createAcademySchema;
 
   const {
     control,
@@ -96,7 +81,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     setValue,
     watch,
   } = useForm({
-    resolver: zodResolver(courseSchema),
+    resolver: zodResolver(academySchema),
     defaultValues: initialData
       ? {
           title: initialData.title || "",
@@ -105,7 +90,6 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           category: initialData?.category?._id || initialData?.category || "",
           published: initialData.published ?? false,
           isFeatured: initialData.isFeatured ?? false,
-          section: initialData.section || "",
           language: initialData.language || "",
           tier: initialData.tier || "FREE",
         }
@@ -116,29 +100,21 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           category: "",
           published: false,
           isFeatured: false,
-          section: "",
           language: "",
           tier: "FREE",
         },
   });
 
-
-
+  // ── Populate form on edit ───────────────────────────────────────────────
   useEffect(() => {
     if (initialData) {
-      // Set image preview
-      if (initialData.imageUrl) {
+      if (initialData.strategyBanner) {
+        setThumbnailPreview(initialData.strategyBanner);
+      } else if (initialData.imageUrl) {
         setThumbnailPreview(initialData.imageUrl);
       }
-      // Set all form values explicitly for edit mode
       setValue("title", initialData.title || "");
       setValue("description", initialData.description || "");
-      // Only set section after courseTypesList has loaded
-      if (initialData.section && courseTypesList?.data?.length > 0) {
-        setValue("section", initialData.section);
-        setSectionSelect(initialData.section);
-      }
-      // Only set language after languagesList has loaded
       if (initialData.language && languagesList?.data?.length > 0) {
         setValue("language", initialData.language);
       }
@@ -151,59 +127,44 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         setValue("category", initialData?.category?._id);
       }
     }
-  }, [initialData, data, courseTypesList, languagesList, setValue]);
+  }, [initialData, data, languagesList, setValue]);
 
+  // ── File picker ────────────────────────────────────────────────────────
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setCurrentImageFile(file);
       setValue("imageFile", file, { shouldValidate: true });
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result);
-      };
+      reader.onloadend = () => setThumbnailPreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
-
-  const selectedSection = watch("section");
-  console.log("selectedSection", selectedSection);
-  useEffect(() => {
-    if (selectedSection) {
-      setSectionSelect(selectedSection);
-    } else {
-      setSectionSelect(""); // optional: ALL case
-    }
-  }, [selectedSection]);
-  const selectedLanguage = watch("language");
-  const submitHandler = async (data) => {
+  // ── Submit ─────────────────────────────────────────────────────────────
+  const submitHandler = async (values) => {
     const formData = new FormData();
+    formData.append("title", values.title);
+    formData.append("description", values.description);
+    formData.append("category", values.category);
+    formData.append("published", values.published);
+    formData.append("isFeatured", values.isFeatured);
+    formData.append("tier", values.tier);
+    formData.append("section", ACADEMY_SECTION); // always "IQ Academy"
+    formData.append("language", values.language);
 
-    // Append all regular fields
-    formData.append("title", data.title);
-    formData.append("description", data.description);
-    formData.append("category", data.category);
-    formData.append("published", data.published);
-    formData.append("isFeatured", data.isFeatured);
-    formData.append("tier", data.tier);
-    formData.append("section", data.section);
-    formData.append("language", data.language);
+    // Academy-specific flags
+    formData.append("isAcademy", true);
+    formData.append("isMasterClass", false);
+    formData.append("isStrategies", false);
 
-    // Handle image file - required for new courses, optional for edits with existing image
-    if (data.imageFile instanceof File && data.imageFile.size > 0) {
-      formData.append("imageUrl", data.imageFile);
-    } else if (!initialData?.imageUrl) {
-      // Only require image for new courses
-      console.error("No valid image file provided for new course");
+    if (values.imageFile instanceof File && values.imageFile.size > 0) {
+      formData.append("image", values.imageFile);
+    } else if (!initialData?.strategyBanner && !initialData?.imageUrl) {
+      console.error("No valid image file provided for new academy");
       return;
     }
-    // If editing and no new image selected, keep existing image
 
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
     await onSubmit(formData);
   };
 
@@ -213,18 +174,16 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       className="space-y-6"
       encType="multipart/form-data"
     >
+      {/* ── Academy Title ─────────────────────────────────────────────── */}
       <div className="space-y-2">
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Masterclass Title <span className="text-red-500 font-bold">*</span>
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          Academy Title <span className="text-red-500 font-bold">*</span>
         </label>
         <input
           id="title"
           type="text"
           className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-          placeholder="Enter masterclass title"
+          placeholder="Enter academy title"
           {...register("title")}
         />
         {errors?.title && (
@@ -232,17 +191,15 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         )}
       </div>
 
+      {/* ── Description ──────────────────────────────────────────────── */}
       <div className="space-y-2">
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
           Description <span className="text-red-500 font-bold">*</span>
         </label>
         <textarea
           id="description"
           className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm min-h-[100px]"
-          placeholder="Enter masterclass description"
+          placeholder="Enter academy description"
           {...register("description")}
         />
         {errors?.description && (
@@ -250,22 +207,23 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         )}
       </div>
 
+      {/* ── Thumbnail ────────────────────────────────────────────────── */}
       <div className="space-y-4">
         <label className="block text-sm font-medium text-gray-700">
-          Masterclass Thumbnail <span className="text-red-500 font-bold">*</span>
+          Academy Thumbnail <span className="text-red-500 font-bold">*</span>
         </label>
 
         <div className="flex flex-col space-y-2">
           <div className="relative w-full">
             <input
               type="file"
-              id="thumbnail-upload"
+              id="academy-thumbnail-upload"
               accept="image/*"
               className="hidden"
               onChange={handleFileChange}
             />
             <label
-              htmlFor="thumbnail-upload"
+              htmlFor="academy-thumbnail-upload"
               className="flex cursor-pointer items-center justify-center w-full h-[40px] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 bg-primary-light text-primary border border-gray-300"
             >
               <Upload className="h-4 w-4 mr-2" />
@@ -289,7 +247,6 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           </div>
         )}
 
-        {/* Error message for thumbnail */}
         {errors?.imageFile && (
           <p className="text-sm text-red-600 mt-2">
             {errors?.imageFile?.message}
@@ -297,54 +254,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* ── Language (full width — Type of Course removed for Academy) ── */}
+      <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
-          <label
-            htmlFor="section"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Type of Course <span className="text-red-500 font-bold">*</span>
-          </label>
-          <Controller
-            name="section"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value}
-                onValueChange={(value) => {
-                  field.onChange(value); // 👈 RHF update
-                }}
-                className={`form-control input input-md w-full ${errors.section ? "border border-danger" : ""}`}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {courseTypesList?.data?.length > 0 ? (
-                    courseTypesList?.data?.map((type) => (
-                      <SelectItem key={type?._id} value={type?.name}>
-                        {type?.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem disabled value="null">
-                      No types found
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors?.section && (
-            <p className="text-sm text-red-600">{errors?.section?.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="language"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="language" className="block text-sm font-medium text-gray-700">
             Course Language <span className="text-red-500 font-bold">*</span>
           </label>
           <Controller
@@ -354,7 +267,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <Select
                 value={field.value}
                 onValueChange={field.onChange}
-                className={`form-control input input-md w-full ${errors.language ? "border border-danger " : ""}`}
+                className={`form-control input input-md w-full ${
+                  errors.language ? "border border-danger" : ""
+                }`}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
@@ -381,12 +296,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         </div>
       </div>
 
+      {/* ── Category + Tier ──────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label
-            htmlFor="category"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
             Category <span className="text-red-500 font-bold">*</span>
           </label>
           <Controller
@@ -396,7 +309,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <Select
                 value={field.value}
                 onValueChange={field.onChange}
-                className={`form-control input input-md w-full ${errors.category ? "border border-danger" : ""}`}
+                className={`form-control input input-md w-full ${
+                  errors.category ? "border border-danger" : ""
+                }`}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
@@ -416,44 +331,41 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           )}
         </div>
 
-        {/* <div className="space-y-2">
-          <label
-            htmlFor="tier"
-            className="block text-sm font-medium text-gray-700"
-          >
+        <div className="space-y-2">
+          <label htmlFor="tier" className="block text-sm font-medium text-gray-700">
             Course Tier <span className="text-red-500 font-bold">*</span>
           </label>
           <Controller
             name="tier"
             control={control}
             render={({ field }) => (
-          <Select
-            value={field.value}
-            onValueChange={field.onChange}
-            className={`form-control input input-md w-full ${errors.tier && "border border-danger"}`}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="FREE">Free</SelectItem>
-              <SelectItem value="PREMIUM">Pro</SelectItem>
-            </SelectContent>
-          </Select>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                className={`form-control input input-md w-full ${
+                  errors.tier && "border border-danger"
+                }`}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FREE">Free</SelectItem>
+                  <SelectItem value="PREMIUM">Pro</SelectItem>
+                </SelectContent>
+              </Select>
             )}
           />
           {errors?.tier && (
             <p className="text-sm text-red-600">{errors?.tier?.message}</p>
           )}
-        </div> */}
+        </div>
       </div>
 
+      {/* ── Publish Course ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between p-4 border rounded-lg">
         <div>
-          <label
-            htmlFor="published"
-            className="text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="published" className="text-sm font-medium text-gray-700">
             Publish Course
           </label>
           <p className="text-sm text-gray-500">
@@ -473,12 +385,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         />
       </div>
 
+      {/* ── Feature Course ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between p-4 border rounded-lg">
         <div>
-          <label
-            htmlFor="isFeatured"
-            className="text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
             Feature Course
           </label>
           <p className="text-sm text-gray-500">
@@ -498,6 +408,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         />
       </div>
 
+      {/* ── Actions ───────────────────────────────────────────────────── */}
       <div className="flex justify-end space-x-4">
         <button
           type="button"
@@ -515,11 +426,11 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           {isLoading && (
             <Loader2 className="inline-block mr-2 h-4 w-4 animate-spin" />
           )}
-          {initialData ? "Update Course" : "Create Course"}
+          {initialData ? "Update Academy" : "Create Academy"}
         </button>
       </div>
     </form>
   );
 };
 
-export default CourseForm;
+export default AcademyForm;

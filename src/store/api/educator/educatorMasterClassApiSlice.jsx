@@ -4,13 +4,15 @@ import baseQueryWithReauth from "../apiSlice";
 export const educatorMasterClassApiSlice = createApi({
     reducerPath: 'educatorMasterClass',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['MasterClass'],
+    tagTypes: ['MasterClass', 'Academy'],
     endpoints: (builder) => ({
+        // ─── Masterclass endpoints ────────────────────────────────────────────
         getEducatorMasterClasses: builder.query({
             query: (params = {}) => ({
                 url: '/common/master-class/',
                 params: {
                     isDeleted: false,
+                    isAcademy: false,
                     ...params
                 }
             }),
@@ -66,6 +68,59 @@ export const educatorMasterClassApiSlice = createApi({
             }),
             invalidatesTags: [{ type: 'MasterClass', id: 'LIST' }],
         }),
+
+        // ─── Academy endpoints ────────────────────────────────────────────────
+        getEducatorAcademies: builder.query({
+            query: (params = {}) => ({
+                url: '/common/master-class/',
+                params: {
+                    isDeleted: false,
+                    isAcademy: true,
+                    ...params,
+                },
+            }),
+            providesTags: (result) =>
+                result?.data
+                    ? [
+                        ...result.data.map(({ _id }) => ({ type: 'Academy', id: _id })),
+                        { type: 'Academy', id: 'LIST' },
+                    ]
+                    : [{ type: 'Academy', id: 'LIST' }],
+        }),
+        createEducatorAcademy: builder.mutation({
+            query: (formData) => ({
+                url: '/common/master-class/',
+                method: 'POST',
+                body: formData,
+            }),
+            invalidatesTags: [{ type: 'Academy', id: 'LIST' }],
+        }),
+        updateEducatorAcademy: builder.mutation({
+            query: ({ id, formData }) => ({
+                url: `/common/master-class/${id}`,
+                method: 'PUT',
+                body: formData,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'Academy', id: 'LIST' },
+                { type: 'Academy', id },
+            ],
+        }),
+        deleteEducatorAcademy: builder.mutation({
+            query: (id) => ({
+                url: `/common/master-class/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: 'Academy', id: 'LIST' }],
+        }),
+        reorderEducatorAcademies: builder.mutation({
+            query: (data) => ({
+                url: '/common/master-class/reorder',
+                method: 'PUT',
+                body: data,
+            }),
+            invalidatesTags: [{ type: 'Academy', id: 'LIST' }],
+        }),
     }),
 });
 
@@ -75,5 +130,11 @@ export const {
     useCreateEducatorMasterClassMutation,
     useUpdateEducatorMasterClassMutation,
     useDeleteEducatorMasterClassMutation,
-    useReorderEducatorMasterClassMutation
+    useReorderEducatorMasterClassMutation,
+    // Academy
+    useGetEducatorAcademiesQuery,
+    useCreateEducatorAcademyMutation,
+    useUpdateEducatorAcademyMutation,
+    useDeleteEducatorAcademyMutation,
+    useReorderEducatorAcademiesMutation,
 } = educatorMasterClassApiSlice;

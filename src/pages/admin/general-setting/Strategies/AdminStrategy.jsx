@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { useState } from "react";
 import { Plus, Edit2, Trash, Eye, Book, Globe2, Loader2 } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import {
     Dialog,
     DialogContent,

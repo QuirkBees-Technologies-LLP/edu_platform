@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useNavigate } from "react-router";
 import { useLanguage } from "@/i18n";
 import { toast } from "sonner";
@@ -52,6 +54,7 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
 
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   const reloadTable = () => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
@@ -330,6 +333,7 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
         limit: newLimit,
         status: "ended",
         search: searchTextInput || "",
+        ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
       }).unwrap();
 
       const endedData = response.data.filter((row) => row.status === "ended");
@@ -379,7 +383,7 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
 
       <DataGrid
         serverSide={true}
-        key={tableKey}
+        key={`${tableKey}-${selectedLanguage}`}
         loading={isLoading}
         columns={columns}
         rowSelection={true}

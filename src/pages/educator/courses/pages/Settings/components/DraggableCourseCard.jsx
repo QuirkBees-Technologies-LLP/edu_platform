@@ -134,7 +134,7 @@ const DraggableCourseCard = ({
           : "opacity-100 hover:shadow-lg"
         }`}
       role="article"
-      aria-label={`${activeTab === "courses" ? "Course" : "Master Class"}: ${title}`}
+      aria-label={`${activeTab === "academy" ? "Academy" : activeTab === "courses" ? "IQ Academy" : "Masterclass"}: ${title}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -203,9 +203,9 @@ const DraggableCourseCard = ({
 
         {/** Content Type Badge — top left */}
         <div className="absolute top-2 left-2">
-          {isMasterClass === false ? (
+          {(activeTab === "academy" || course?.isAcademy) ? (
             <div className="bg-blue-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
-              Course
+              Academy
             </div>
           ) : (
             <div className="bg-yellow-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
@@ -256,8 +256,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleEdit}
             className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title={`Edit ${activeTab === "courses" ? "IQ Vault" : "Master Class"}`}
-            aria-label={`Edit ${activeTab === "courses" ? "IQ Vault" : "Master Class"}`}
+            title={`Edit ${activeTab === "academy" ? "Academy" : activeTab === "courses" ? "IQ Academy" : "Masterclass"}`}
+            aria-label={`Edit ${activeTab === "academy" ? "Academy" : activeTab === "courses" ? "IQ Academy" : "Masterclass"}`}
           >
             <Edit2 className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>
@@ -265,8 +265,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleDelete}
             className="p-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title={`Delete ${activeTab === "courses" ? "IQ Vault" : "Master Class"}`}
-            aria-label={`Delete ${activeTab === "courses" ? "IQ Vault" : "Master Class"}`}
+            title={`Delete ${activeTab === "academy" ? "Academy" : activeTab === "courses" ? "IQ Academy" : "Masterclass"}`}
+            aria-label={`Delete ${activeTab === "academy" ? "Academy" : activeTab === "courses" ? "IQ Academy" : "Masterclass"}`}
           >
             <Trash className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>

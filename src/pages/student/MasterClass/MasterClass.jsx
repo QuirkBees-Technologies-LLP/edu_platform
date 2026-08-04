@@ -150,6 +150,7 @@ const StudentMasterClass = () => {
         setSelectedStrategyId(strategyId);
         setActiveLectureId(null);
         setActiveLecture(null);
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     /**

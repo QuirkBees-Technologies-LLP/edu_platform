@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { BookOpen, Settings, Menu, X } from "lucide-react";
+import { BookOpen, Settings, Menu, X, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../../auth/useAuthContext";
 
 // components
@@ -13,6 +14,7 @@ const Content = ({ defaultActiveTab, defaultView }) => {
         return hash || defaultView || "settings";
     });
     const { auth } = useAuthContext();
+    const navigate = useNavigate();
 
     const baseNavItems = [
         // { icon: BookOpen, label: "Master Class", href: "#classroom" }, // Classroom tab removed
@@ -87,6 +89,14 @@ const Content = ({ defaultActiveTab, defaultView }) => {
                                                 {item.label}
                                             </a>
                                         ))}
+                                        {/* View Profile Button */}
+                                        <button
+                                            onClick={() => navigate(`/iq-educators/${auth?.user?._id}`)}
+                                            className="flex items-center gap-2 px-2 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary-active transition-colors duration-200"
+                                        >
+                                            <User size={16} />
+                                            View Profile
+                                        </button>
                                     </div>
                                 </div>
 
@@ -118,6 +128,14 @@ const Content = ({ defaultActiveTab, defaultView }) => {
                                             {item.label}
                                         </a>
                                     ))}
+                                    {/* View Profile Button - Mobile */}
+                                    <button
+                                        onClick={() => navigate(`/iq-educators/${auth?.user?._id}`)}
+                                        className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-base font-medium bg-primary text-white hover:bg-primary-active transition-colors duration-200"
+                                    >
+                                        <User size={16} />
+                                        View Profile
+                                    </button>
                                 </div>
                             </div>
                         )}

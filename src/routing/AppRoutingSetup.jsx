@@ -249,6 +249,7 @@ const routes = {
     },
     { path: "/educator/rating", element: <EducatorRating /> },
     { path: "/educator/tv-webhook", element: <TvWebhookSettings /> },
+    { path: "/iq-educators/:id", element: <IqEducators /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
