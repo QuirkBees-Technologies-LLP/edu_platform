@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { ChevronDown, ChevronRight, Bell, BellOff, Save, Clock, DollarSign, SlidersHorizontal } from "lucide-react";
-import { isValidPairTimeframe, getAssetClassCategories, HIERARCHICAL_STRATEGIES } from "@/config/strategyConfig";
+import { isValidPairTimeframe, getAssetClassCategories, HIERARCHICAL_STRATEGIES, REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL } from "@/config/strategyConfig";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
   useGetAlertPairPreferencesQuery,
@@ -788,15 +788,23 @@ const AlertPairPreferences = () => {
   const activeStrategies = useMemo(() => {
     const configs = filterOptions?.data?.alertPreferenceConfigs;
     if (!configs || !Array.isArray(configs)) return [];
+    const hiddenSet = new Set(REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL);
     // Only include strategies that have both pairs and timeframes
     return configs
       .filter((c) => c.pairs?.length > 0 && c.timeframes?.length > 0)
-      .map((c) => ({
-        key: c.key,
-        name: c.name,
-        pairs: c.pairs,
-        timeframes: c.timeframes,
-      }));
+      .map((c) => {
+        // For React/Defy: remove hidden hourly timeframes (H1, H2, H3, H4)
+        const isReactOrDefy = c.key === "react" || c.key === "defy";
+        const timeframes = isReactOrDefy
+          ? c.timeframes.filter((tf) => !hiddenSet.has(tf))
+          : c.timeframes;
+        return {
+          key: c.key,
+          name: c.name,
+          pairs: c.pairs,
+          timeframes,
+        };
+      });
   }, [filterOptions]);
 
   // Build ALL_KEYS from active strategies

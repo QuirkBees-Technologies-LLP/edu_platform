@@ -135,6 +135,18 @@ export const ALL_FILTER_TIMEFRAME_OPTIONS = [
   { value: "1M", label: "1M" },
 ];
 
+// ── React / Defy Timeframe Restrictions ─────────────────────────────
+// When ONLY React and/or Defy are selected (no other strategies),
+// hide these timeframes completely from the dropdown.
+export const REACT_DEFY_HIDDEN_TIMEFRAMES = ["1H", "2H", "3H"];
+
+// Same restriction in canonical (M/H) format used by strategy configs and Alert Preferences.
+export const REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL = ["H1", "H2", "H3"];
+
+// Timeframes that should be visible but auto-unchecked (excluded)
+// whenever the React/Defy-only mode activates.
+export const REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES = ["1m", "3m", "5m"];
+
 // ── Strategy Definitions ────────────────────────────────────────────
 // Each strategy defines its supported pairs, timeframes, and optional
 // per-pair timeframe constraints (pairTimeframeMap).
