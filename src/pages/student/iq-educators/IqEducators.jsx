@@ -74,6 +74,7 @@ const IqEducators = () => {
   };
 
   const userName = auth?.user?.name;
+  const isEducator = auth?.user?.role === "educator";
 
   // Get gradient background based on educator's first category from API response
   const getHeaderGradient = () => {
@@ -256,6 +257,7 @@ const IqEducators = () => {
   }, [response]);
 
   const handleShowMasterClasses = () => {
+    if (isEducator) return;
     navigate(`/master-class/${id}`);
   };
 
@@ -403,7 +405,8 @@ const IqEducators = () => {
 
               <button
                 onClick={handleShowMasterClasses}
-                className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:-translate-y-0.5 overflow-hidden`}
+                disabled={isEducator}
+                className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg overflow-hidden ${isEducator ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5'}`}
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <BookOpen size={18} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
@@ -589,8 +592,9 @@ const IqEducators = () => {
                   {liveIdea?.map((liveIdeaData) => (
                     <div
                       key={liveIdeaData?._id}
-                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
                       onClick={() => {
+                        if (isEducator) return;
                         setSelectedIdea(liveIdeaData);
                         setIsLightBoxOpen(true);
                       }}
@@ -799,12 +803,12 @@ const IqEducators = () => {
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Master Classes</h2>
-                <button
+                {!isEducator && <button
                   className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
                   onClick={() => navigate(`/master-class/${id}`)}
                 >
                   View All
-                </button>
+                </button>}
               </div>
             </div>
 
@@ -814,8 +818,8 @@ const IqEducators = () => {
                   {response?.data?.masterClasses?.map((mc) => (
                     <div
                       key={mc?._id}
-                      className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                      onClick={() => navigate(`/master-class/${id}`)}
+                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                      onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
                     >
                       <div className="rounded-t-xl overflow-hidden">
                         <img
@@ -853,12 +857,12 @@ const IqEducators = () => {
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Ideas</h2>
-                <button
+                {!isEducator && <button
                   onClick={() => setIdea((prev) => !prev)}
                   className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
                 >
                   {idea ? "Show Less" : "View All"}
-                </button>
+                </button>}
               </div>
             </div>
 
@@ -869,8 +873,9 @@ const IqEducators = () => {
                     {response?.data?.idea?.map((course) => (
                       <div
                         key={course?._id}
-                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
@@ -906,8 +911,9 @@ const IqEducators = () => {
                     {response?.data?.idea?.map((course) => (
                       <div
                         key={course?._id}
-                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
@@ -955,12 +961,12 @@ const IqEducators = () => {
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Insights</h2>
-                <button
+                {!isEducator && <button
                   onClick={() => setInsight((prev) => !prev)}
                   className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
                 >
                   {insight ? "Show Less" : "View All"}
-                </button>
+                </button>}
               </div>
             </div>
 
@@ -972,8 +978,9 @@ const IqEducators = () => {
                     {response?.data?.insight?.map((course) => (
                       <div
                         key={course?._id}
-                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
@@ -1009,8 +1016,9 @@ const IqEducators = () => {
                     {response?.data?.insight?.map((course) => (
                       <div
                         key={course?._id}
-                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
