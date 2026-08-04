@@ -14,10 +14,10 @@ const NotificationPreferences = () => {
 
   const formik = useFormik({
     initialValues: {
-      iqIdea: false,
-      iqInsights: false,
-      iqSocial: false,
-      iqLive: false,
+      iqIdea: true,
+      iqInsights: true,
+      iqSocial: true,
+      iqLive: true,
       liveIdea: false,
       tradingSignals: true,
     },

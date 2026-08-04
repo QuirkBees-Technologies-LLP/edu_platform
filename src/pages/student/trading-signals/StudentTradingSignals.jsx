@@ -75,6 +75,8 @@ import {
   ALL_FILTER_TIMEFRAME_OPTIONS,
   DB_NAME_TO_STRATEGY_KEY,
   STRATEGIES_MAP,
+  REACT_DEFY_HIDDEN_TIMEFRAMES,
+  REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES,
 } from "@/config/strategyConfig";
 
 // Derived from centralized config — used by strategy restriction logic
@@ -377,6 +379,16 @@ const StudentTradingSignals = () => {
 
   const rawIsOnlyKillshot = singleActiveStrategyKey === "killshot";
 
+  // ── React/Defy-only mode detection ──────────────────────────────
+  // True when ONLY React and/or Defy are selected (no other strategies).
+  const rawIsReactDefyOnly = useMemo(() => {
+    if (activeStrategyNames.length === 0) return false;
+    const reactDefySet = new Set(["react", "defy"]);
+    return activeStrategyNames.every(
+      (name) => reactDefySet.has(name.toLowerCase())
+    );
+  }, [activeStrategyNames]);
+
   const rawEffectiveCategories = useMemo(() => {
     if (!activeStrategyRestriction?.restrictsSymbols) return instrumentCategories;
     const allowedPairs = activeStrategyRestriction.allowedSymbols || [];
@@ -394,7 +406,14 @@ const StudentTradingSignals = () => {
   }, [activeStrategyRestriction]);
 
   const rawEffectiveTimeframes = useMemo(() => {
-    if (!activeStrategyRestriction?.restrictsTimeframes) return TIMEFRAME_OPTIONS;
+    if (!activeStrategyRestriction?.restrictsTimeframes) {
+      // React/Defy-only mode: hide 1H, 2H, 3H, 4H completely
+      if (rawIsReactDefyOnly) {
+        const hiddenSet = new Set(REACT_DEFY_HIDDEN_TIMEFRAMES);
+        return TIMEFRAME_OPTIONS.filter((opt) => !hiddenSet.has(opt.value));
+      }
+      return TIMEFRAME_OPTIONS;
+    }
     // allowedTimeframes already in frontend format (1m/5m/1H) from API strategyRestrictions
     if (activeStrategyRestriction.allowedTimeframes?.length) {
       const allowedValues = new Set(
@@ -403,7 +422,7 @@ const StudentTradingSignals = () => {
       return TIMEFRAME_OPTIONS.filter((opt) => allowedValues.has(opt.value));
     }
     return TIMEFRAME_OPTIONS;
-  }, [activeStrategyRestriction]);
+  }, [activeStrategyRestriction, rawIsReactDefyOnly]);
 
   // ── Preserve existing filter options while API request is in progress ──
   // Prevents UI flicker or dropdown state resetting during loading/fetching transitions.
@@ -415,6 +434,7 @@ const StudentTradingSignals = () => {
     strategies: [],
     sessions: [],
     isOnlyKillshot: false,
+    isReactDefyOnly: false,
   });
 
   if (!isTransitionLoading) {
@@ -423,6 +443,7 @@ const StudentTradingSignals = () => {
     if (rawStrategyOptions.length > 0) preservedOptionsRef.current.strategies = rawStrategyOptions;
     if (rawTradingSessionOptions.length > 0) preservedOptionsRef.current.sessions = rawTradingSessionOptions;
     preservedOptionsRef.current.isOnlyKillshot = rawIsOnlyKillshot;
+    preservedOptionsRef.current.isReactDefyOnly = rawIsReactDefyOnly;
   }
 
   const effectiveCategories = isTransitionLoading && preservedOptionsRef.current.categories.length > 0
@@ -444,6 +465,45 @@ const StudentTradingSignals = () => {
   const isOnlyKillshot = isTransitionLoading
     ? preservedOptionsRef.current.isOnlyKillshot
     : rawIsOnlyKillshot;
+
+  const isReactDefyOnly = isTransitionLoading
+    ? preservedOptionsRef.current.isReactDefyOnly
+    : rawIsReactDefyOnly;
+
+  // ── Auto-clean timeframe exclusions on React/Defy mode transitions ──
+  const prevReactDefyRef = useRef(rawIsReactDefyOnly);
+  useEffect(() => {
+    const wasReactDefy = prevReactDefyRef.current;
+    prevReactDefyRef.current = rawIsReactDefyOnly;
+
+    if (rawIsReactDefyOnly && !wasReactDefy) {
+      // Entering React/Defy-only mode:
+      // 1. Add hidden timeframes (1H-4H) to excluded so API won't receive them
+      // 2. Also add 1m, 5m to excluded (auto-uncheck)
+      setExclusionFilters((prev) => {
+        const currentExcluded = new Set(prev.excludedTimeframes || []);
+        REACT_DEFY_HIDDEN_TIMEFRAMES.forEach((tf) => currentExcluded.add(tf));
+        REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES.forEach((tf) => currentExcluded.add(tf));
+        return { ...prev, excludedTimeframes: [...currentExcluded] };
+      });
+    } else if (!rawIsReactDefyOnly && wasReactDefy) {
+      // Leaving React/Defy-only mode:
+      // Remove previously hidden timeframes from excluded so they re-appear checked
+      // Also re-check 1m, 5m
+      setExclusionFilters((prev) => {
+        const toRestore = new Set([
+          ...REACT_DEFY_HIDDEN_TIMEFRAMES,
+          ...REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES,
+        ]);
+        return {
+          ...prev,
+          excludedTimeframes: (prev.excludedTimeframes || []).filter(
+            (tf) => !toRestore.has(tf)
+          ),
+        };
+      });
+    }
+  }, [rawIsReactDefyOnly]);
 
   const hasActiveFilters =
     (exclusionFilters.excludedSymbols || []).length > 0 ||
