@@ -523,30 +523,30 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                 </div>
             </div>
 
-            {/* Selects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 border-t pt-8 mt-4">
+            {/* Selects Grid + Publish Toggle — all in one row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-5 border-t pt-8 mt-4 items-end">
                 {/* Content Type — only visible to admins; educators always create Masterclasses */}
                 {isAdmin && (
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                        Content Type <span className="text-rose-500">*</span>
-                    </label>
-                    <Controller
-                        name="contentType"
-                        control={control}
-                        render={({ field }) => (
-                            <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger className="w-full text-gray-700 rounded-lg h-11">
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent className="text-gray-700">
-                                    <SelectItem value="masterclass">Master Class</SelectItem>
-                                    <SelectItem value="course">Course</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        )}
-                    />
-                </div>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                            Content Type <span className="text-rose-500">*</span>
+                        </label>
+                        <Controller
+                            name="contentType"
+                            control={control}
+                            render={({ field }) => (
+                                <Select value={field.value} onValueChange={field.onChange}>
+                                    <SelectTrigger className="w-full text-gray-700 rounded-lg h-11">
+                                        <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                    <SelectContent className="text-gray-700">
+                                        <SelectItem value="masterclass">Master Class</SelectItem>
+                                        <SelectItem value="course">Course</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                    </div>
                 )}
 
                 {/* Type of Course (section) — shown only for admins when contentType=course */}
@@ -641,8 +641,27 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                     {errors?.category && <p className="text-xs text-rose-500 mt-1">{errors.category.message}</p>}
                 </div>
 
+                {/* Publish Toggle — inline */}
+                <div className="border p-3 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group h-11 box-content">
+                    <label htmlFor="published" className="text-sm font-bold text-gray-700 cursor-pointer">
+                        {isAdmin ? "Publish Course" : "Publish Masterclass"}
+                    </label>
+                    <Controller
+                        name="published"
+                        control={control}
+                        render={({ field }) => (
+                            <Checkbox
+                                id="published"
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="w-5 h-5 rounded-md data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                            />
+                        )}
+                    />
+                </div>
+
                 {/* Tier */}
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
                         Tier <span className="text-rose-500">*</span>
                     </label>
@@ -662,38 +681,13 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                         )}
                     />
                     {errors?.tier && <p className="text-xs text-rose-500 mt-1">{errors.tier.message}</p>}
-                </div>
-            </div>
+                </div> */}
 
-            {/* Toggle Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t">
-                <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
-                    <div className="text-left space-y-1">
-                        <label htmlFor="published" className="text-sm font-bold text-gray-700 cursor-pointer">
-                            {isAdmin ? "Publish Course" : "Publish Masterclass"}
-                        </label>
-                        <p className="text-xs text-gray-500">Visible to students immediately.</p>
-                    </div>
-                    <Controller
-                        name="published"
-                        control={control}
-                        render={({ field }) => (
-                            <Checkbox
-                                id="published"
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="w-6 h-6 rounded-md data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                            />
-                        )}
-                    />
-                </div>
-
-                <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
+                {/* <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
                     <div className="text-left space-y-1">
                         <label htmlFor="isPaidMasterclass" className="text-sm font-bold text-gray-700 cursor-pointer">
                             {isAdmin ? "Publish as Paid Course" : "Publish as Paid Masterclass"}
                         </label>
-                        {/* <p className="text-xs text-gray-500">Flag for upcoming marketplace — no payment gating yet.</p> */}
                     </div>
                     <Controller
                         name="isPaidMasterclass"
@@ -707,7 +701,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading, isAdmin: isAdminProp }
                             />
                         )}
                     />
-                </div>
+                </div> */}
             </div>
 
             {/* Submit Actions */}

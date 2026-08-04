@@ -37,9 +37,7 @@ const masterClassSchema = z.object({
     tags: z.array(z.string()).optional(),
     published: z.boolean().default(false),
     isFeatured: z.boolean().default(false),
-    tier: z.enum(["FREE", "PREMIUM"], {
-        required_error: "Please select a tier",
-    }),
+    tier: z.enum(["FREE", "PREMIUM"]).default("FREE"),
     section: z.string().min(1, "Please select a type"),
     language: z.string().min(1, "Please select a language"),
     isMasterClass: z.boolean().default(true),
@@ -363,8 +361,8 @@ const MasterClassForm = ({ onSubmit, initialData, isLoading }) => {
                 </div>
             </div>
 
-            {/* Selects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 border-t pt-8 mt-4">
+            {/* Selects Grid + Publish Toggle — all in one row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 border-t pt-8 mt-4 items-end">
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">Language <span className="text-rose-500">*</span></label>
                     <Controller
@@ -407,7 +405,23 @@ const MasterClassForm = ({ onSubmit, initialData, isLoading }) => {
                     {errors?.category && <p className="text-xs text-rose-500 mt-1">{errors?.category?.message}</p>}
                 </div>
 
-                <div className="space-y-2">
+                <div className="border p-3 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group h-11 box-content">
+                    <label htmlFor="mc_published" className="text-sm font-bold text-gray-700 cursor-pointer">Publish Master Class</label>
+                    <Controller
+                        name="published"
+                        control={control}
+                        render={({ field }) => (
+                            <Checkbox
+                                id="mc_published"
+                                checked={field?.value}
+                                onCheckedChange={field?.onChange}
+                                className="w-5 h-5 rounded-md data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                            />
+                        )}
+                    />
+                </div>
+
+                {/* <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">Tier <span className="text-rose-500">*</span></label>
                     <Controller
                         name="tier"
@@ -425,34 +439,11 @@ const MasterClassForm = ({ onSubmit, initialData, isLoading }) => {
                         )}
                     />
                     {errors?.tier && <p className="text-xs text-rose-500 mt-1">{errors?.tier?.message}</p>}
-                </div>
-            </div>
+                </div> */}
 
-            {/* Toggle Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t text-right">
-                <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
-                    <div className="text-left space-y-1">
-                        <label htmlFor="mc_published" className="text-sm font-bold text-gray-700 cursor-pointer">Publish Master Class</label>
-                        <p className="text-xs text-gray-500">Visible to students immediately.</p>
-                    </div>
-                    <Controller
-                        name="published"
-                        control={control}
-                        render={({ field }) => (
-                            <Checkbox
-                                id="mc_published"
-                                checked={field?.value}
-                                onCheckedChange={field?.onChange}
-                                className="w-6 h-6 rounded-md data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                            />
-                        )}
-                    />
-                </div>
-
-                <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
+                {/* <div className="border p-5 rounded-2xl flex items-center justify-between hover:border-indigo-500/30 transition-all group">
                     <div className="text-left space-y-1">
                         <label htmlFor="mc_isFeatured" className="text-sm font-bold text-gray-700 cursor-pointer">Publish as Paid Masterclass</label>
-                        {/* <p className="text-xs text-gray-500">Highlight on platform home.</p> */}
                     </div>
                     <Controller
                         name="isFeatured"
@@ -466,7 +457,7 @@ const MasterClassForm = ({ onSubmit, initialData, isLoading }) => {
                             />
                         )}
                     />
-                </div>
+                </div> */}
             </div>
 
             {/* Submit Actions */}

@@ -44,9 +44,7 @@ const createCourseSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  tier: z.enum(["FREE", "PREMIUM"], {
-    required_error: "Please select a tier",
-  }),
+  tier: z.enum(["FREE", "PREMIUM"]).default("FREE"),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
 });
@@ -71,9 +69,7 @@ const editCourseSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  tier: z.enum(["FREE", "PREMIUM"], {
-    required_error: "Please select a tier",
-  }),
+  tier: z.enum(["FREE", "PREMIUM"]).default("FREE"),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
 });
@@ -420,7 +416,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           )}
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label
             htmlFor="tier"
             className="block text-sm font-medium text-gray-700"
@@ -449,7 +445,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           {errors?.tier && (
             <p className="text-sm text-red-600">{errors?.tier?.message}</p>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="flex items-center justify-between p-4 border rounded-lg">
