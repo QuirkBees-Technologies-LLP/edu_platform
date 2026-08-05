@@ -74,7 +74,7 @@ export default function EducatorTradeSlider({
           </div>
         )}
 
-        <div className="flex flex-col gap-2 py-4.5">
+        {/* <div className="flex flex-col gap-2 py-4.5">
           <div className="flex gap-5 sm:gap-10 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="text-xs text-gray-800 uppercase">Entry</div>
@@ -111,7 +111,7 @@ export default function EducatorTradeSlider({
               )}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ import {
   useCreateEducatorTradeAnalysisMutation,
   useUpdateEducatorTradeAnalysisMutation,
 } from "../../../store/api/educator/educatorTradeAnalysisApiSlice";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 
 const CreateTradeAnalysis = forwardRef(
   (
@@ -41,26 +41,32 @@ const CreateTradeAnalysis = forwardRef(
     const [updateEducatorTradeAnalysis] =
       useUpdateEducatorTradeAnalysisMutation();
     const createdBy = auth?.user?._id ?? null;
-    const { data } = useGetEducatorAcademyCategoryQuery();
+    const { data } = useGetCommonCategoryQuery();
 
     const initialValues = {
       title: "",
       files: [],
       createdBy: "",
       description: "",
-      url: "",
       category: "",
       checkTime: false,
+      tradingViewLinks: [""],
     };
 
     const createSchema = Yup.object().shape({
       title: Yup.string().required("title is required"),
-      files: Yup.array().min(1, "At least one file is required"),
+      files: Yup.array().test(
+        'files-or-links',
+        'At least one screenshot or TradingView link is required',
+        function (files) {
+          const tvLinks = this.parent.tradingViewLinks;
+          const hasLinks = tvLinks && tvLinks.filter(l => l && l.trim()).length > 0;
+          const hasFiles = files && files.length > 0;
+          return hasLinks || hasFiles;
+        }
+      ),
       createdBy: Yup.string().required("Educator ID is required"),
       description: Yup.string().required("Entry is required"),
-      url: Yup.string()
-        .url("Please enter a valid URL")
-        .required("URL is required"),
       category: Yup.string().required("Category is required"),
     });
 
@@ -78,8 +84,20 @@ const CreateTradeAnalysis = forwardRef(
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
         formData.append("category", values.category);
-        formData.append("url", values.url);
         formData.append("checkTime", values.checkTime);
+
+        // Append TradingView links (always send, even empty, so backend can clear old links)
+        const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
+        formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+
+        // Send existing image URLs the user kept (so backend knows which to preserve)
+        if (selectedRow?._id) {
+          const keptImages = (values.files || [])
+            .filter((f) => !f?.file?.file && f?.dataURL)
+            .map((f) => f.dataURL);
+          formData.append("existingImages", JSON.stringify(keptImages));
+        }
+
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -121,13 +139,21 @@ const CreateTradeAnalysis = forwardRef(
             dataURL: img,
           })) || [];
 
+        // Backward compat: if old record has url but no tradingViewLinks, convert
+        let tvLinks = [""];
+        if (selectedRow?.tradingViewLinks?.length > 0) {
+          tvLinks = selectedRow.tradingViewLinks;
+        } else if (selectedRow?.url) {
+          tvLinks = [selectedRow.url];
+        }
+
         const initData = {
           title: selectedRow?.title,
           files: existingImages,
           description: selectedRow?.description,
           category: selectedRow?.category?._id,
-          url: selectedRow?.url,
           checkTime: selectedRow?.isUpdatedAnalysis || false,
+          tradingViewLinks: tvLinks,
         };
         formik.setValues(initData);
       }
@@ -184,7 +210,7 @@ const CreateTradeAnalysis = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id ? "Create IQ Insight" : "Create IQ Insight"}
+                {selectedRow?._id ? "Update IQ Insight" : "Create IQ Insight"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">
@@ -198,11 +224,10 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter Title"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.title && formik.touched.title
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("title")}
                     />
                     {formik.touched.title && formik.errors.title && (
@@ -238,49 +263,6 @@ const CreateTradeAnalysis = forwardRef(
                   </div>
                 </div>
 
-                <div className="col-span-12">
-                  <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Url
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter url"
-                      autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.url && formik.touched.url
-                          ? "border border-danger"
-                          : ""
-                      }`}
-                      {...formik.getFieldProps("url")}
-                    />
-                    {formik.touched.url && formik.errors.url && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.url}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {/* <div className="col-span-6">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Message <span className="text-danger">*</span>
-                  </label>
-                  <RichTextEditor
-                    content={formik.values.message}
-                    onChange={(value) => formik.setFieldValue("message", value)}
-                    onBlur={() => formik.setFieldTouched("message", true)}
-                    theme="snow"
-                    touched={formik.touched.message}
-                    error={formik.errors.message}
-                  />
-                  {formik.touched.message && formik.errors.message && (
-                    <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors.message}
-                    </span>
-                  )}
-                </div>
-              </div> */}
                 <div className="col-span-12">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -319,6 +301,50 @@ const CreateTradeAnalysis = forwardRef(
                   </div>
                 </div>
 
+
+                {/* TradingView Links */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      TradingView Links
+                    </label>
+                    {(formik.values.tradingViewLinks || [""]).map((link, idx) => (
+                      <div key={idx} className="flex items-center gap-2 mb-2">
+                        <input
+                          type="url"
+                          placeholder="https://www.tradingview.com/chart/..."
+                          className="form-control input input-md w-full"
+                          value={link}
+                          onChange={(e) => {
+                            const updated = [...formik.values.tradingViewLinks];
+                            updated[idx] = e.target.value;
+                            formik.setFieldValue('tradingViewLinks', updated);
+                          }}
+                        />
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-icon rounded-full btn-danger"
+                            onClick={() => {
+                              const updated = formik.values.tradingViewLinks.filter((_, i) => i !== idx);
+                              formik.setFieldValue('tradingViewLinks', updated);
+                            }}
+                          >
+                            <i className="ki-outline ki-cross"></i>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-light w-fit"
+                      onClick={() => formik.setFieldValue('tradingViewLinks', [...(formik.values.tradingViewLinks || []), ''])}
+                    >
+                      + Add Another TradingView Link
+                    </button>
+                  </div>
+                </div>
+
                 {selectedRow?._id && (
                   <div className="col-span-12">
                     <div className="flex items-center gap-2 h-full ">
@@ -333,7 +359,7 @@ const CreateTradeAnalysis = forwardRef(
                         htmlFor="checkTime"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                       >
-                       Do Not Update TimeStamp
+                        Do Not Update TimeStamp
                       </label>
                     </div>
                   </div>
@@ -353,10 +379,9 @@ const CreateTradeAnalysis = forwardRef(
                         >
                           <div
                             className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-                              ${
-                                formik.touched.files && formik.errors.files
-                                  ? "border-danger"
-                                  : "border-gray-200"
+                              ${formik.touched.files && formik.errors.files
+                                ? "border-danger"
+                                : "border-gray-200"
                               }`}
                           >
                             <i className="ki-filled ki-picture"></i>
