@@ -1,7 +1,6 @@
 import React from "react";
 import Slider from "react-slick";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ShowMoreLess from "../../../components/ui/showmoreless";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -82,10 +81,9 @@ export default function StudentIqSlider({
 
        
         <div className="flex flex-col gap-2 py-4.5">
-          <ShowMoreLess
+          <div
             className="text-gray-900 text-sm mt-2 leading-relaxed"
-            html={selectedIdea?.description || "No description"}
-            limit={95}
+            dangerouslySetInnerHTML={{ __html: selectedIdea?.description || "No description" }}
           />
         </div>
       </div>

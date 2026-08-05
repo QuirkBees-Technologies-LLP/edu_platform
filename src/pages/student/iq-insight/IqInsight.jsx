@@ -25,6 +25,8 @@ import {
   Container,
   ShieldAlert,
   Videotape,
+  Check,
+  ChevronDown,
 } from "lucide-react";
 import {
   Toolbar,
@@ -46,47 +48,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import CustomDateRangePicker from "../../../components/CustomDateRangePicker";
 
-const ShowMoreLess = ({
-  text = "",
-  html = "",
-  limit = 100,
-  showMoreText = " . . .",
-  showLessText = " . . .",
-  className,
-}) => {
-  const [expanded, setExpanded] = useState(false);
-
-  const isHtml = !!html;
-  const content = isHtml ? html : text;
-  const plainText = isHtml ? html.replace(/<[^>]+>/g, "") : text;
-  const isLong = plainText.length > limit;
-
-  const displayed =
-    expanded || !isLong ? content : plainText.substring(0, limit);
-
-  return (
-    <div
-      className={
-        className ? className : "text-sm text-gray-700 leading-relaxed"
-      }
-    >
-      {isHtml ? (
-        <span dangerouslySetInnerHTML={{ __html: displayed }} />
-      ) : (
-        <span>{displayed}</span>
-      )}
-      {isLong && (
-        <span
-          onClick={() => setExpanded(!expanded)}
-          className="text-primary cursor-pointer hover:underline"
-        >
-          {expanded ? showLessText : showMoreText}
-        </span>
-      )}
-    </div>
-  );
-};
+// const ShowMoreLess = ({
+//   text = "",
+//   html = "",
+//   limit = 100,
+//   showMoreText = " . . .",
+//   showLessText = " . . .",
+//   className,
+// }) => {
+//   const [expanded, setExpanded] = useState(false);
+//
+//   const isHtml = !!html;
+//   const content = isHtml ? html : text;
+//   const plainText = isHtml ? html.replace(/<[^>]+>/g, "") : text;
+//   const isLong = plainText.length > limit;
+//
+//   const displayed =
+//     expanded || !isLong ? content : plainText.substring(0, limit);
+//
+//   return (
+//     <div
+//       className={
+//         className ? className : "text-sm text-gray-700 leading-relaxed"
+//       }
+//     >
+//       {isHtml ? (
+//         <span dangerouslySetInnerHTML={{ __html: displayed }} />
+//       ) : (
+//         <span>{displayed}</span>
+//       )}
+//       {isLong && (
+//         <span
+//           onClick={() => setExpanded(!expanded)}
+//           className="text-primary cursor-pointer hover:underline"
+//         >
+//           {expanded ? showLessText : showMoreText}
+//         </span>
+//       )}
+//     </div>
+//   );
+// };
 
 const IqInsight = () => {
   const [page, setPage] = useState(1);
@@ -96,10 +105,16 @@ const IqInsight = () => {
   const [selectedIdea, setSelectedIdea] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [activeMarket, setActiveMarket] = useState("All");
   const [educator, setEducator] = useState("");
-  const [activeTimeframe, setActiveTimeframe] = useState("WEEKLY");
+  const [status, setStatus] = useState("");
+  const [category, setCategory] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const [selectedDateRange, setSelectedDateRange] = useState({
+    start: null,
+    end: null,
+    rangeName: "",
+  });
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -107,15 +122,20 @@ const IqInsight = () => {
 
   const observer = useRef();
 
-  const { data, isFetching, isLoading, isError } =
+  const { data, isFetching, isLoading, isError, refetch } =
     useGetClientTradeAnalysisQuery({
       page: page,
       limit: limit,
       search: searchText,
       educator,
-      // timeframe: activeTimeframe,
-      markets: activeMarket,
-      refreshKey,
+      status,
+      categoryName: category.length > 0 ? category : undefined,
+      startDate: selectedDateRange.start
+        ? format(selectedDateRange.start, "yyyy-MM-dd 00:00:00")
+        : "",
+      endDate: selectedDateRange.end
+        ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
+        : "",
     });
   const { data: educatorsData } = useGetAllEducatorsQuery();
 
@@ -156,6 +176,11 @@ const IqInsight = () => {
     [isFetching, page, totalPages],
   );
 
+  useEffect(() => {
+    setPage(1);
+    refetch();
+  }, [status, category]);
+
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
@@ -166,12 +191,8 @@ const IqInsight = () => {
     isReady: !isLoading,
     getSteps: () => {
       const steps = [];
-      const marketFilter = document.querySelector('.insight-market-filter');
-      if (marketFilter) steps.push({ element: marketFilter, title: '🌐 Market Filter', intro: 'Filter insights by market choose <strong>All, Forex, or Crypto</strong> to see only analysis relevant to that market.', position: 'bottom' });
-      const educatorFilter = document.querySelector('.insight-educator-filter');
-      if (educatorFilter) steps.push({ element: educatorFilter, title: '👨‍🏫 Filter by Educator', intro: 'Select a specific educator from the dropdown to view only their market insights and analysis posts.', position: 'bottom' });
-      const searchBar = document.querySelector('.insight-search');
-      if (searchBar) steps.push({ element: searchBar, title: '🔎 Search Insights', intro: 'Search for specific currency pairs, topics, or keywords to find relevant market analysis posts.', position: 'bottom' });
+      const filterBar = document.querySelector('.insight-filter-bar');
+      if (filterBar) steps.push({ element: filterBar, title: '🔍 Filter Insights', intro: 'Refine insights using the filters above — filter by date range, status, specific educator, asset class (Forex, Crypto, etc.), or search by keyword.', position: 'bottom' });
       const firstCard = document.querySelector('.insight-first-card');
       if (firstCard) steps.push({ element: firstCard, title: '📊 Market Analysis Card', intro: 'Each card shows a market analysis post from an educator including their name, post date, title, and a content preview. Click <strong>View Details</strong> to read the full analysis.', position: 'right' });
       return steps;
@@ -196,90 +217,38 @@ const IqInsight = () => {
     }
   };
 
-  const marketData = [
-    {
-      pair: "USDJPY",
-      timeframe: "4H",
-      analyst: "Ricardo Garcia",
-      timestamp: "Nov 17, 2025, 07:02 AM",
-      title: "Key resistance at 151.95 with potential reversal pattern forming",
-      description:
-        "Please refer to the weekly overview for reference. Everything is...",
-      views: "1.2K",
-      likes: "87",
-      comments: "23",
-      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
-    },
-    {
-      pair: "USDCAD",
-      timeframe: "Daily",
-      analyst: "Florian Krauß",
-      timestamp: "Nov 16, 2025, 03:02 PM",
-      title: "Bullish continuation expected after consolidation phase",
-      description:
-        "Please refer to the weekly overview for reference. Everything is...",
-      views: "2.8K",
-      likes: "156",
-      comments: "23",
-      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
-    },
-    {
-      pair: "EURUSD",
-      timeframe: "1H",
-      analyst: "Florian Krauß",
-      timestamp: "Nov 16, 2025, 02:53 PM",
-      title: "Major support zone tested, watching for breakout confirmation",
-      description:
-        "Please refer to the weekly overview for reference. Everything is...",
-      views: "3.4K",
-      likes: "203",
-      comments: "23",
-      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
-    },
-    {
-      pair: "GBPJPY",
-      timeframe: "4H",
-      analyst: "Ricardo Garcia",
-      timestamp: "Nov 17, 2025, 06:45 AM",
-      title: "Strong momentum building above key moving averages",
-      description:
-        "Please refer to the weekly overview for reference. Everything is...",
-      views: "1.5K",
-      likes: "92",
-      comments: "18",
-      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
-    },
-    {
-      pair: "XAUUSD",
-      timeframe: "Daily",
-      analyst: "Florian Krauß",
-      timestamp: "Nov 16, 2025, 01:30 PM",
-      title: "Gold reaches critical resistance, potential pullback expected",
-      description:
-        "Please refer to the weekly overview for reference. Everything is...",
-      views: "4.1K",
-      likes: "245",
-      comments: "31",
-      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
-    },
-    {
-      pair: "BTCUSD",
-      timeframe: "Weekly",
-      analyst: "Ricardo Garcia",
-      timestamp: "Nov 15, 2025, 09:15 AM",
-      title: "Weekly chart shows strong bullish structure formation",
-      description:
-        "Please refer to the weekly overview for reference. Everything is...",
-      views: "5.2K",
-      likes: "312",
-      comments: "45",
-      bgGradient: "bg-gradient-to-br from-slate-600 to-slate-800",
-    },
+  const statusLabelMap = {
+    active: "Active",
+    pending: "Pending",
+    win: "Win",
+    loss: "Loss",
+    breakEven: "Break Even",
+    partialWin: "Partial Win",
+  };
+  const statusOptions = [
+    "active",
+    "pending",
+    "win",
+    "loss",
+    "breakEven",
+    "partialWin",
   ];
 
-  // const markets = ["All", "Forex", "Crypto", "Indices"];
-  const markets = ["All", "Forex", "Crypto"];
-  const timeframes = ["1H", "4H", "DAILY", "WEEKLY"];
+  const categories = [
+    { name: "Forex", _id: "1" },
+    { name: "Crypto", _id: "2" },
+    { name: "Indices", _id: "3" },
+    { name: "Commodities", _id: "4" },
+  ];
+
+  const handleDateRangeChangeCallback = (startDate, endDate, rangeName) => {
+    setSelectedDateRange({
+      start: startDate,
+      end: endDate,
+      rangeName,
+    });
+    setPage(1);
+  };
 
   const debouncedSearch = useMemo(
     () =>
@@ -301,138 +270,220 @@ const IqInsight = () => {
     debouncedSearch(value);
   };
 
-  const ShowMoreLess = ({
-    text = "",
-    html = "",
-    limit = 100,
-    showMoreText = " . . .",
-    className,
-    onOpen,
-  }) => {
-    const isHtml = !!html;
-    const content = isHtml ? html : text;
-    const plainText = isHtml ? html.replace(/<[^>]+>/g, "") : text;
-    const isLong = plainText.length > limit;
-
-    const displayed = plainText.substring(0, limit);
-
-    return (
-      <div className={className || "text-sm text-gray-700 leading-relaxed"}>
-        {isHtml ? (
-          <span dangerouslySetInnerHTML={{ __html: displayed }} />
-        ) : (
-          <span>{displayed}</span>
-        )}
-
-        {isLong && (
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpen && onOpen();
-            }}
-            className="text-primary cursor-pointer "
-          >
-            {showMoreText}
-          </span>
-        )}
-      </div>
-    );
-  };
+  // const ShowMoreLess = ({
+  //   text = "",
+  //   html = "",
+  //   limit = 100,
+  //   showMoreText = " . . .",
+  //   className,
+  //   onOpen,
+  // }) => {
+  //   const isHtml = !!html;
+  //   const content = isHtml ? html : text;
+  //   const plainText = isHtml ? html.replace(/<[^>]+>/g, "") : text;
+  //   const isLong = plainText.length > limit;
+  //
+  //   const displayed = plainText.substring(0, limit);
+  //
+  //   return (
+  //     <div className={className || "text-sm text-gray-700 leading-relaxed"}>
+  //       {isHtml ? (
+  //         <span dangerouslySetInnerHTML={{ __html: displayed }} />
+  //       ) : (
+  //         <span>{displayed}</span>
+  //       )}
+  //
+  //       {isLong && (
+  //         <span
+  //           onClick={(e) => {
+  //             e.stopPropagation();
+  //             onOpen && onOpen();
+  //           }}
+  //           className="text-primary cursor-pointer "
+  //         >
+  //           {showMoreText}
+  //         </span>
+  //       )}
+  //     </div>
+  //   );
+  // };
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-10">
-      <div className="flex justify-between items-center flex-wrap mb-8 gap-5">
-        <div className="flex gap-3.5 flex-wrap">
-          <div className="sm:px-3 p-2 flex overflow-auto bg-gray-200 rounded-xl gap-3 sm:gap-3.5 shadow-md border-purple-200 dark:border-gray-200 insight-market-filter">
-            {markets.map((market) => (
-              <button
-                key={market}
-                onClick={() => {
-                  setActiveMarket(market);
-                  setTradeIdeas([]);
-                  setRefreshKey((prev) => prev + 1);
-                  setPage(1);
-                }}
-                className={`sm:px-4 py-2 text-xs sm:text-md rounded-lg font-semibold transition-all
-                        ${activeMarket === market
-                    ? "bg-sky-500 text-white shadow-lg shadow-primary/50"
-                    : " text-gray-600 hover:bg-gray-300"
-                  }`}
-              >
-                {market}
-              </button>
-            ))}
-          </div>
-          {/* <div className="p-2 flex overflow-auto bg-gray-200 rounded-xl gap-1 sm:gap-2 shadow-md border-purple-200 dark:border-gray-200">
-            {timeframes.map((tf) => (
-              <button
-                key={tf}
-                onClick={() => {
-                  setActiveTimeframe(tf);
-                  setTradeIdeas([]);
-                  setRefreshKey((prev) => prev + 1);
-                  setPage(1);
-                }}
-                className={`sm:px-4 py-2 text-xs sm:text-md rounded-lg font-semibold transition-all ${
-                  activeTimeframe === tf
-                    ? "bg-primary text-white shadow-lg shadow-primary/50"
-                    : "text-gray-600 hover:bg-gray-300"
-                }`}
-              >
-                {tf}
-              </button>
-            ))}
-          </div> */}
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-1 mb-2 insight-filter-bar">
+        <div className="flex gap-3 sm:gap-6 pb-2 flex-wrap">
+          <div className="flex flex-wrap items-center sm:justify-start gap-3 mb-2">
 
-        <div className="flex items-center gap-2 relative insight-educator-filter">
-          <Select
-            value={educator || ""}
-            onValueChange={(val) => {
-              setEducator(val);
-            }}
-          >
-            <SelectTrigger className="w-[190px] h-11">
-              <SelectValue placeholder="Select educator">
-                {educator
-                  ? educatorsData?.data?.find((e) => e._id === educator)
-                    ?.first_name?.last_name
-                  : "Select educator"}
-              </SelectValue>
-            </SelectTrigger>
 
-            <SelectContent>
-              {isLoading && (
-                <SelectItem value="loading" disabled>
-                  Loading...
-                </SelectItem>
+            {/* Asset Class Multi-select Filter */}
+            <div className="flex items-center gap-2 relative">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="min-w-56 h-11 flex justify-between items-center border rounded-md px-3 py-2 bg-white border-[#dce0e9] dark:border-[#363944] dark:bg-[#1c1f26]">
+                    <span className="truncate text-sm">
+                      {category.length > 0
+                        ? `${category.length} Asset Class Selected`
+                        : "Select Asset Class"}
+                    </span>
+                    <ChevronDown size={16} />
+                  </button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-[225px] p-0">
+                  <Command>
+                    {categories.length === 0 ? (
+                      <div className="p-3 text-sm text-gray-500 text-center">
+                        No Asset Class found
+                      </div>
+                    ) : (
+                      <CommandGroup>
+                        {categories.map((item) => {
+                          const selected = category.includes(item.name);
+
+                          return (
+                            <CommandItem
+                              key={item._id}
+                              onSelect={() => {
+                                setCategory((prev) => {
+                                  const exists = prev.includes(item.name);
+                                  const updated = exists
+                                    ? prev.filter((name) => name !== item.name)
+                                    : [...prev, item.name];
+
+                                  return updated;
+                                });
+                              }}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <div
+                                className={`h-4 w-4 border rounded flex items-center justify-center ${selected
+                                  ? "bg-primary text-white border-primary"
+                                  : "bg-white dark:bg-[#1c1f26]"
+                                  }`}
+                              >
+                                {selected && <Check size={14} />}
+                              </div>
+
+                              {item.name}
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    )}
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              {category?.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategory([]);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  ✖
+                </button>
               )}
+            </div>
 
-              {educatorsData?.data?.map((item) => (
-                <SelectItem key={item._id} value={item._id}>
-                  {item.first_name} {item.last_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {/* Date Filter */}
+            <div className="flex items-center gap-2 relative">
+              <CustomDateRangePicker
+                handleDateRangeChangeCallback={handleDateRangeChangeCallback}
+              />
+            </div>
 
-          {educator && (
-            <button
-              type="button"
-              onClick={() => setEducator("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              ✖
-            </button>
-          )}
-        </div>
+            {/* Status Filter */}
+            {/* <div className="flex items-center gap-2 relative">
+              <Select
+                value={status || ""}
+                onValueChange={(val) => {
+                  setStatus(val);
+                }}
+              >
+                <SelectTrigger className="w-[190px] h-11">
+                  <SelectValue placeholder="Select Status">
+                    {status ? statusLabelMap[status] : "Select Status"}
+                  </SelectValue>
+                </SelectTrigger>
 
-        <div className="flex gap-3 sm:gap-6 flex-wrap mr-3 insight-search">
-          <SearchFilterInput
-            searchText={searchText}
-            handleSearchChange={handleSearchChange}
-            className="w-full sm:w-auto rounded-xl h-11"
-          />
+                <SelectContent>
+                  {statusOptions.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {statusLabelMap[key]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {status && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatus("");
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  ✖
+                </button>
+              )}
+            </div> */}
+
+            {/* Educator Filter */}
+            <div className="flex items-center gap-2 relative">
+              <Select
+                value={educator || ""}
+                onValueChange={(val) => {
+                  setEducator(val);
+                }}
+              >
+                <SelectTrigger className="w-[190px] h-11">
+                  <SelectValue placeholder="Select educator">
+                    {educator
+                      ? educatorsData?.data?.find((e) => e._id === educator)
+                        ?.first_name?.last_name
+                      : "Select educator"}
+                  </SelectValue>
+                </SelectTrigger>
+
+                <SelectContent>
+                  {isLoading && (
+                    <SelectItem value="loading" disabled>
+                      Loading...
+                    </SelectItem>
+                  )}
+
+                  {educatorsData?.data?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.first_name} {item.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {educator && (
+                <button
+                  type="button"
+                  onClick={() => setEducator("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+
+
+
+            {/* Search Filter */}
+            <div className="flex items-center gap-2 relative insight-search">
+              <SearchFilterInput
+                searchText={searchText}
+                handleSearchChange={handleSearchChange}
+                className="w-full sm:w-auto rounded-md h-11"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

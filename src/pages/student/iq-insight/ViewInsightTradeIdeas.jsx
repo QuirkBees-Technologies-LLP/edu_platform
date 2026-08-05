@@ -51,7 +51,7 @@ const ViewInsightTradeIdeas = forwardRef(
                   <Link to={`/iq-educators/${selectedIdea?.educatorDetails?._id}`}>
                     <EducatorImage
                       educator={selectedIdea?.educatorDetails}
-                      // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                    // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
                     />
                   </Link>
                   <div className="">
@@ -71,44 +71,36 @@ const ViewInsightTradeIdeas = forwardRef(
                       : "-"}
                   </div>
                 </div>
-                <div className="grid gap-5 p-5">
-                  <div className="grid grid-cols-12 gap-4">
-                    {/* <div className="col-span-12">
-                                        <div className="flex flex-col gap-2 py-4.5">
-                                            <div className="flex gap-5 sm:gap-10 flex-wrap">
-                                                <div className='flex items-center gap-3'>
-                                                    <div className="text-xs text-gray-800 uppercase">Entry</div>
-                                                    <span class="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{selectedIdea?.entry ?? "-"}</span>
-                                                </div>
-                                                <div className='flex items-center gap-3'>
-                                                    <div className="text-2sm text-gray-800 uppercase">Invalidation</div>
-                                                    <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{selectedIdea?.invalidation ?? "-"}</span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div className="text-2sm text-gray-800 uppercase mb-3">Exits</div>
-                                                <div className="flex items-center flex-wrap gap-2">
-                                                    {selectedIdea?.exits?.length > 0 && selectedIdea?.exits?.map((exit, index) => (
-                                                        <div key={index} className="flex items-center gap-2 mt-1">
-                                                            <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">{index + 1}</div>
-                                                            <div className="text-sm text-gray-900 font-semibold">{exit}</div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div> */}
-                    {/* <div className="col-span-12">
-                                        <div className="card">
-                                            <div className="flex flex-col gap-4 px-5 py-4.5">
-                                                <div className="flex flex-col gap-3">
-                                                    <div dangerouslySetInnerHTML={{ __html: selectedIdea?.message ?? "-" }} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div> */}
+                {/* TradingView Links */}
+                {selectedIdea?.tradingViewLinks?.length > 0 && selectedIdea.tradingViewLinks.some(l => l && l.trim()) && (
+                  <div className="px-4 mt-3">
+                    <div className="text-xs text-gray-500 uppercase font-semibold mb-1.5">TradingView Charts</div>
+                    <div className="flex flex-col gap-1">
+                      {selectedIdea.tradingViewLinks.filter(l => l && l.trim()).map((link, idx) => (
+                        <a
+                          key={idx}
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline truncate"
+                        >
+                          📈 {link}
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+                {/* <div className="grid gap-5 p-5">
+                  <div className="grid grid-cols-12 gap-4">
+                    {(selectedIdea?.description || selectedIdea?.message) && (
+                      <div className="col-span-12">
+                        <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: selectedIdea?.description || selectedIdea?.message || "" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div> */}
                 {/* <div className="flex items-center p-5">
                                 <img src="/media/avatars/300-6.png" className="rounded-full size-7 me-2" alt="" />
                                 <div>
