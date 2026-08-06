@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
-import { Heart, MessageSquare, Share2, Edit } from "lucide-react";
+import { Heart, MessageSquare, Share2, Edit, MoreHorizontal, Trash2 } from "lucide-react";
+import DeletePostDialog from "@/components/DeletePostDialog";
 
 const SocialPostCard = ({ post, onEdit, refetch }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const deleteDialogRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,30 +92,66 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-[#22242A] bg-white dark:bg-[#16181D] p-6 mb-6 transition-all duration-300 w-full">
       {/* Author Info */}
-      <div className="flex items-center mb-4">
-        <img
-          onClick={() => navigate(`/iq-educators/${author?._id}`)}
-          src={
-            author?.image ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              author?.first_name || "User"
-            )}&background=random&color=fff&size=80`
-          }
-          alt={author?.first_name}
-          className="w-12 h-12 rounded-full object-contain border border-gray-300 dark:border-[#2C2F36] cursor-pointer hover:opacity-90 transition-all"
-        />
-        <div className="ml-3">
-          <p
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <img
             onClick={() => navigate(`/iq-educators/${author?._id}`)}
-            className="font-medium text-gray-900 dark:text-[#EDEDED] hover:text-blue-600 dark:hover:text-[#8B5CF6] cursor-pointer transition-colors"
-          >
-            {author?.first_name} {author?.last_name}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-[#9CA3AF]">
-            Educator •{" "}
-            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
-          </p>
+            src={
+              author?.image ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                author?.first_name || "User"
+              )}&background=random&color=fff&size=80`
+            }
+            alt={author?.first_name}
+            className="w-12 h-12 rounded-full object-contain border border-gray-300 dark:border-[#2C2F36] cursor-pointer hover:opacity-90 transition-all"
+          />
+          <div className="ml-3">
+            <p
+              onClick={() => navigate(`/iq-educators/${author?._id}`)}
+              className="font-medium text-gray-900 dark:text-[#EDEDED] hover:text-blue-600 dark:hover:text-[#8B5CF6] cursor-pointer transition-colors"
+            >
+              {author?.first_name} {author?.last_name}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-[#9CA3AF]">
+              Educator •{" "}
+              {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+            </p>
+          </div>
         </div>
+        {onEdit && (
+          <div className="relative">
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className="text-gray-500 dark:text-[#9CA3AF] hover:text-gray-900 dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-[#22242A] transition-all"
+            >
+              <MoreHorizontal size={18} />
+            </button>
+            {showOptions && (
+              <div className="absolute right-0 top-8 bg-white dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2C2F36] rounded-lg shadow-lg py-2 min-w-[120px] z-[9]">
+                <button
+                  onClick={() => {
+                    onEdit(post);
+                    setShowOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-[#EDEDED] hover:bg-gray-100 dark:hover:bg-[#22242A] flex items-center gap-2"
+                >
+                  <Edit size={14} />
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setIsDeleteOpen(true);
+                    setShowOptions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-[#22242A] flex items-center gap-2"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Post Content */}
@@ -162,18 +202,17 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       )}
       {videos.length > 0 && (
         <div
-          className={`grid ${
-            videos.length === 1 ? "grid-cols-1" : "grid-cols-2"
-          } gap-3 mt-3`}
+          className={`${
+            videos.length === 1 ? "flex justify-center" : "grid grid-cols-2 gap-3"
+          } mt-3`}
         >
           {videos.map((vid) => (
-            <div key={vid._id || vid.url} className="relative group">
+            <div key={vid._id || vid.url} className={`relative group ${videos.length === 1 ? "w-full max-w-lg" : ""}`}>
               <video
                 src={vid.url}
                 alt="post"
                 controls
-                className="w-full h-56 rounded-xl object-cover border border-gray-200 dark:border-[#22242A] cursor-pointer hover:opacity-90 transition-all"
-                // onClick={() => setSelectedImage(img.url)}
+                className={`w-full ${videos.length === 1 ? "h-[420px]" : "h-56"} rounded-xl object-contain bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-[#22242A] cursor-pointer hover:opacity-90 transition-all`}
               />
             </div>
           ))}
@@ -225,6 +264,17 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
           </button>
         )} */}
       {/* </div> */}
+
+      {/* Delete Post Dialog */}
+      {onEdit && (
+        <DeletePostDialog
+          isDeleteOpen={isDeleteOpen}
+          handleDeleteClose={() => setIsDeleteOpen(false)}
+          selectedPost={{ ...post, id: post._id }}
+          refetch={refetch}
+          ref={deleteDialogRef}
+        />
+      )}
     </div>
   );
 };

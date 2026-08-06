@@ -3,7 +3,7 @@ import { Container } from '@/components/container';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEducatorPosts, selectAllEducatorPosts, selectEducatorPostsStatus, selectEducatorPostsPagination, selectHasMoreEducatorPosts } from '@/store/reducer/postSlice';
-import PostCard from '@/components/PostCard';
+import SocialPostCard from '../../student/iq-social/SocialPostCard';
 import CreatePostModal from '@/components/CreatePostModal';
 import { useAuthContext } from '@/auth/useAuthContext';
 import {
@@ -84,6 +84,27 @@ const EducatorCommunityFeed = () => {
         setEditingPost(null);
     };
 
+    // Adapt educator post data to match SocialPostCard's expected format
+    const adaptPostForSocialCard = (post) => ({
+        _id: post.id,
+        content: post.content,
+        images: (post.images || []).map((img, idx) =>
+            typeof img === 'string' ? { _id: `img-${idx}`, url: img } : img
+        ),
+        videos: (post.videos || []).map((vid, idx) =>
+            typeof vid === 'string' ? { _id: `vid-${idx}`, url: vid } : vid
+        ),
+        author: {
+            _id: post.author?.id,
+            first_name: post.author?.first_name || post.author?.name?.split(' ')[0] || '',
+            last_name: post.author?.last_name || post.author?.name?.split(' ').slice(1).join(' ') || '',
+            image: post.author?.image,
+        },
+        createdAt: post.createdAt,
+        likeCount: post.likeCount || 0,
+        commentCount: post.commentCount || 0,
+    });
+
     return (
         <Container>
             <div className="min-h-screen font-sans">
@@ -118,7 +139,7 @@ const EducatorCommunityFeed = () => {
                         </div>
                     </div>
                     <div className="md:col-span-12 lg:col-span-3 xl:col-span-4 space-y-4 mb-5">
-                        <div className="card rounded-lg shadow-md p-4">
+                        <div className="card rounded-lg shadow-md p-4 max-w-full sm:max-w-2xl mx-auto">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full overflow-hidden">
                                     <img
@@ -182,12 +203,12 @@ const EducatorCommunityFeed = () => {
                         </div>
                         {/* Posts Feed */}
                         {postsStatus === 'loading' ? (
-                            <div className="card rounded-lg shadow-md p-8 text-center">
+                            <div className="card rounded-lg shadow-md p-8 text-center max-w-full sm:max-w-2xl mx-auto">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
                                 <p className="mt-4 text-gray-600 font-termina">Loading posts...</p>
                             </div>
                         ) : posts.length === 0 ? (
-                            <div className="card rounded-lg shadow-md p-8 text-center">
+                            <div className="card rounded-lg shadow-md p-8 text-center max-w-full sm:max-w-2xl mx-auto">
                                 <div className="text-gray-400 mb-4">
                                     <Rss size={48} className="mx-auto" />
                                 </div>
@@ -212,15 +233,16 @@ const EducatorCommunityFeed = () => {
                                     <div className="text-center text-sm text-gray-400 py-4 font-termina">No more posts</div>
                                 ) : null}
                             >
+                                <div className="container max-w-full sm:max-w-2xl mx-auto">
                                 {posts.map((post) => (
-                                    <PostCard
+                                    <SocialPostCard
                                         key={post.id}
-                                        post={post}
+                                        post={adaptPostForSocialCard(post)}
                                         onEdit={handleEditPost}
-                                        isOwnPost={true} // TODO: Compare with actual user ID
                                         refetch={() => dispatch(fetchEducatorPosts({ page: 1, limit: 10 }))}
                                     />
                                 ))}
+                                </div>
                             </InfiniteScroll>
                         )}
                     </div>
