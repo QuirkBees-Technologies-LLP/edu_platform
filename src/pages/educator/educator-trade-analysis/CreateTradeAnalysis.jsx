@@ -1,6 +1,11 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState, useCallback } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { Play, X } from "lucide-react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import DraggableImageList from "@/components/ui/DraggableImageList";
+import DraggableLinkList from "@/components/ui/DraggableLinkList";
 import {
   Select,
   SelectContent,
@@ -29,6 +34,7 @@ import {
   useUpdateEducatorTradeAnalysisMutation,
 } from "../../../store/api/educator/educatorTradeAnalysisApiSlice";
 import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
+import { isDyntubeUrl, getEmbedUrl } from "@/utils/videoUtils";
 
 const CreateTradeAnalysis = forwardRef(
   (
@@ -51,18 +57,21 @@ const CreateTradeAnalysis = forwardRef(
       category: "",
       checkTime: false,
       tradingViewLinks: [""],
+      dyntubeUrl: "",
     };
 
     const createSchema = Yup.object().shape({
       title: Yup.string().required("title is required"),
       files: Yup.array().test(
         'files-or-links',
-        'At least one screenshot or TradingView link is required',
+        'At least one screenshot, TradingView link, or DynTube URL is required',
         function (files) {
           const tvLinks = this.parent.tradingViewLinks;
+          const dyntubeUrl = this.parent.dyntubeUrl;
           const hasLinks = tvLinks && tvLinks.filter(l => l && l.trim()).length > 0;
           const hasFiles = files && files.length > 0;
-          return hasLinks || hasFiles;
+          const hasDyntube = dyntubeUrl && dyntubeUrl.trim() && isDyntubeUrl(dyntubeUrl.trim());
+          return hasLinks || hasFiles || hasDyntube;
         }
       ),
       createdBy: Yup.string().required("Educator ID is required"),
@@ -90,12 +99,24 @@ const CreateTradeAnalysis = forwardRef(
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
 
+        // Append DynTube URL
+        if (values.dyntubeUrl && values.dyntubeUrl.trim()) {
+          formData.append("dyntubeUrl", values.dyntubeUrl.trim());
+        } else if (selectedRow?._id && selectedRow?.dyntubeUrl) {
+          // Editing and URL was removed
+          formData.append("removeDyntubeUrl", "true");
+        }
+
         // Send existing image URLs the user kept (so backend knows which to preserve)
         if (selectedRow?._id) {
+          // User-managed images from the form
           const keptImages = (values.files || [])
             .filter((f) => !f?.file?.file && f?.dataURL)
             .map((f) => f.dataURL);
-          formData.append("existingImages", JSON.stringify(keptImages));
+          // Also preserve TV chart images (auto-generated, not shown in form but must not be deleted)
+          const tvChartImages = (selectedRow?.image || []).filter((img) => img.includes('tv-chart-images') || img.includes('tv-snapshot'));
+          const allKeptImages = [...keptImages, ...tvChartImages];
+          formData.append("existingImages", JSON.stringify(allKeptImages));
         }
 
         if (selectedRow?._id) {
@@ -134,16 +155,18 @@ const CreateTradeAnalysis = forwardRef(
     useEffect(() => {
       if (selectedRow?._id) {
         const existingImages =
-          selectedRow?.image?.map((img) => ({
-            file: null,
-            dataURL: img,
-          })) || [];
+          selectedRow?.image
+            ?.filter((img) => !img.includes('tv-chart-images') && !img.includes('tv-snapshot'))
+            .map((img) => ({
+              file: null,
+              dataURL: img,
+            })) || [];
 
-        // Backward compat: if old record has url but no tradingViewLinks, convert
+        // Backward compat: if old record has url but no tradingViewLinks, convert (only if it's actually a TradingView URL)
         let tvLinks = [""];
         if (selectedRow?.tradingViewLinks?.length > 0) {
           tvLinks = selectedRow.tradingViewLinks;
-        } else if (selectedRow?.url) {
+        } else if (selectedRow?.url && selectedRow.url.includes('tradingview.com')) {
           tvLinks = [selectedRow.url];
         }
 
@@ -154,6 +177,7 @@ const CreateTradeAnalysis = forwardRef(
           category: selectedRow?.category?._id,
           checkTime: selectedRow?.isUpdatedAnalysis || false,
           tradingViewLinks: tvLinks,
+          dyntubeUrl: selectedRow?.dyntubeUrl || "",
         };
         formik.setValues(initData);
       }
@@ -183,6 +207,36 @@ const CreateTradeAnalysis = forwardRef(
       formik.setFieldValue("files", newFiles);
     };
 
+    // Drag-and-drop reorder handlers
+    const handleReorderImages = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.files];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("files", items);
+    }, [formik.values.files]);
+
+    const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.tradingViewLinks];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("tradingViewLinks", items);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleLinkChange = useCallback((index, value) => {
+      const updated = [...formik.values.tradingViewLinks];
+      updated[index] = value;
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleRemoveLink = useCallback((index) => {
+      const updated = formik.values.tradingViewLinks.filter((_, i) => i !== index);
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleAddLink = useCallback(() => {
+      formik.setFieldValue("tradingViewLinks", [...(formik.values.tradingViewLinks || []), ""]);
+    }, [formik.values.tradingViewLinks]);
+
     useEffect(() => {
       if (!selectedRow) {
         formik.resetForm();
@@ -196,7 +250,7 @@ const CreateTradeAnalysis = forwardRef(
       })) || [];
 
     return (
-      <>
+      <DndProvider backend={HTML5Backend}>
         <Dialog
           open={isCreateOpen}
           onOpenChange={() => {
@@ -308,40 +362,66 @@ const CreateTradeAnalysis = forwardRef(
                     <label className="form-label text-gray-900 gap-1">
                       TradingView Links
                     </label>
-                    {(formik.values.tradingViewLinks || [""]).map((link, idx) => (
-                      <div key={idx} className="flex items-center gap-2 mb-2">
-                        <input
-                          type="url"
-                          placeholder="https://www.tradingview.com/chart/..."
-                          className="form-control input input-md w-full"
-                          value={link}
-                          onChange={(e) => {
-                            const updated = [...formik.values.tradingViewLinks];
-                            updated[idx] = e.target.value;
-                            formik.setFieldValue('tradingViewLinks', updated);
-                          }}
+                    <DraggableLinkList
+                      links={formik.values.tradingViewLinks || [""]}
+                      onReorder={handleReorderLinks}
+                      onChange={handleLinkChange}
+                      onRemove={handleRemoveLink}
+                      onAdd={handleAddLink}
+                    />
+                  </div>
+                </div>
+
+                {/* DynTube Video URL */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      DynTube Video URL
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        placeholder="https://videos.dyntube.com/iframes/..."
+                        className="form-control input input-md w-full"
+                        value={formik.values.dyntubeUrl}
+                        onChange={(e) => formik.setFieldValue('dyntubeUrl', e.target.value)}
+                      />
+                      {formik.values.dyntubeUrl && (
+                        <button
+                          type="button"
+                          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                          onClick={() => formik.setFieldValue('dyntubeUrl', '')}
+                          title="Remove DynTube URL"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                    {formik.values.dyntubeUrl && !isDyntubeUrl(formik.values.dyntubeUrl.trim()) && formik.values.dyntubeUrl.trim() && (
+                      <span className="text-danger text-xs mt-1">
+                        Please enter a valid DynTube URL (e.g. https://videos.dyntube.com/iframes/...)
+                      </span>
+                    )}
+                    {/* DynTube Preview */}
+                    {formik.values.dyntubeUrl && isDyntubeUrl(formik.values.dyntubeUrl.trim()) && (
+                      <div className="relative w-full rounded-lg overflow-hidden bg-black mt-2" style={{ aspectRatio: '16/9' }}>
+                        <iframe
+                          src={getEmbedUrl(formik.values.dyntubeUrl.trim())}
+                          className="w-full h-full"
+                          loading="lazy"
+                          tabIndex={-1}
+                          scrolling="no"
+                          style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+                          title="DynTube Video Preview"
                         />
-                        {idx > 0 && (
-                          <button
-                            type="button"
-                            className="btn btn-xs btn-icon rounded-full btn-danger"
-                            onClick={() => {
-                              const updated = formik.values.tradingViewLinks.filter((_, i) => i !== idx);
-                              formik.setFieldValue('tradingViewLinks', updated);
-                            }}
-                          >
-                            <i className="ki-outline ki-cross"></i>
-                          </button>
-                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
+                            <Play size={24} className="text-white ml-1" fill="white" />
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-light w-fit"
-                      onClick={() => formik.setFieldValue('tradingViewLinks', [...(formik.values.tradingViewLinks || []), ''])}
-                    >
-                      + Add Another TradingView Link
-                    </button>
+                    )}
                   </div>
                 </div>
 
@@ -390,27 +470,12 @@ const CreateTradeAnalysis = forwardRef(
                       )}
                     </ImageInput>
 
-                    {/* Show preview only if there are images */}
-                    {formik.values.files
-                      .filter((file) => !!file?.dataURL)
-                      .map((file, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={file.dataURL}
-                            alt="uploaded"
-                            className="rounded-lg border-2 border-success size-24 object-cover"
-                          />
-                          <div className="absolute -right-4 -top-4">
-                            <button
-                              type="button"
-                              className="btn btn-xs btn-icon rounded-full btn-danger"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <i className="ki-outline ki-cross"></i>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                    {/* Show preview with drag-and-drop reorder */}
+                    <DraggableImageList
+                      files={formik.values.files}
+                      onReorder={handleReorderImages}
+                      onRemove={handleRemoveImage}
+                    />
                   </div>
                   {formik.touched.files && formik.errors.files && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -442,7 +507,7 @@ const CreateTradeAnalysis = forwardRef(
             </div>
           </DialogContent>
         </Dialog>
-      </>
+      </DndProvider>
     );
   }
 );
