@@ -1,12 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
-import { Heart, MessageSquare, Share2, Edit, MoreHorizontal, Trash2 } from "lucide-react";
+import { Heart, MessageSquare, Share2, Edit, Play, MoreHorizontal, Trash2 } from "lucide-react";
+import { getEmbedUrl, getVideoThumbnail } from "@/utils/videoUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import DeletePostDialog from "@/components/DeletePostDialog";
 
 const SocialPostCard = ({ post, onEdit, refetch }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteDialogRef = useRef(null);
@@ -22,6 +31,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
     images = [],
     author,
     videos = [],
+    dyntubeUrl,
     createdAt,
     likeCount = 0,
     commentCount = 0,
@@ -170,9 +180,8 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       {/* Images */}
       {images.length > 0 && (
         <div
-          className={`grid ${
-            images.length === 1 ? "grid-cols-1" : "grid-cols-2"
-          } gap-3 mt-3`}
+          className={`grid ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+            } gap-3 mt-3`}
         >
           {/* {images.map((img) => (
             <div key={img._id || img.url} className="relative group">
@@ -202,9 +211,8 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       )}
       {videos.length > 0 && (
         <div
-          className={`${
-            videos.length === 1 ? "flex justify-center" : "grid grid-cols-2 gap-3"
-          } mt-3`}
+          className={`${videos.length === 1 ? "flex justify-center" : "grid grid-cols-2 gap-3"
+            } mt-3`}
         >
           {videos.map((vid) => (
             <div key={vid._id || vid.url} className={`relative group ${videos.length === 1 ? "w-full max-w-lg" : ""}`}>
@@ -216,6 +224,28 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* DynTube Thumbnail + Play Button */}
+      {dyntubeUrl && (
+        <div
+          className="mt-3 relative w-full rounded-xl overflow-hidden bg-black border border-gray-200 dark:border-[#22242A] cursor-pointer group"
+          style={{ aspectRatio: '16/9' }}
+          onClick={() => setDyntubeModalOpen(true)}
+        >
+          {/* Non-interactive iframe as thumbnail (same as StrategyVideoCarousel) */}
+          <iframe
+            src={getEmbedUrl(dyntubeUrl)}
+            className="w-full h-full"
+            loading="lazy"
+            tabIndex={-1}
+            scrolling="no"
+            style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+            title="DynTube Video"
+          />
+          {/* Invisible overlay to capture clicks safely just in case */}
+          <div className="absolute inset-0" />
         </div>
       )}
 
@@ -264,6 +294,38 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
           </button>
         )} */}
       {/* </div> */}
+      {/* DynTube Video Modal */}
+      {dyntubeUrl && (
+        <Dialog open={dyntubeModalOpen} onOpenChange={setDyntubeModalOpen}>
+          <DialogContent
+            className="max-w-5xl w-full p-0 !overflow-hidden bg-black border-gray-800 !max-h-[85vh] flex flex-col"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="px-5 pt-4 pb-2 shrink-0">
+              <DialogTitle className="text-white text-lg font-semibold truncate pr-8">
+                Video
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                DynTube video player
+              </DialogDescription>
+            </DialogHeader>
+            <div className="w-full flex-1 min-h-0 p-4 pt-0">
+              <div className="aspect-video w-full h-full max-h-full">
+                {dyntubeModalOpen && (
+                  <iframe
+                    src={getEmbedUrl(dyntubeUrl)}
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="DynTube Video Player"
+                    style={{ border: 'none' }}
+                  />
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete Post Dialog */}
       {onEdit && (

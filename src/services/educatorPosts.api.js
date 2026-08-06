@@ -87,6 +87,11 @@ export const createEducatorPost = async (postData) => {
         });
     }
     
+    // Add DynTube URL
+    if (postData.dyntubeUrl) {
+        formData.append('dyntubeUrl', postData.dyntubeUrl);
+    }
+    
     return axios.post(EDUCATOR_POSTS_API, formData, {
         headers: getAuthHeaders('multipart/form-data'),
     });
@@ -141,6 +146,14 @@ export const updateEducatorPost = async (id, postData) => {
     }
     if (postData.removeDocuments) {
         formData.append('removeDocuments', 'true');
+    }
+    
+    // Add DynTube URL
+    if (postData.dyntubeUrl !== undefined) {
+        formData.append('dyntubeUrl', postData.dyntubeUrl || '');
+    }
+    if (postData.removeDyntubeUrl) {
+        formData.append('removeDyntubeUrl', 'true');
     }
     
     return axios.put(`${EDUCATOR_POSTS_API}/${id}`, formData, {

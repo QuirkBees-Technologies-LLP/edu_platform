@@ -9,7 +9,10 @@ import {
   Lock,
   FolderOpen,
   Trash2,
+  Link2,
+  Play,
 } from "lucide-react";
+import { isDyntubeUrl, getEmbedUrl, getVideoThumbnail } from "@/utils/videoUtils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createEducatorPost,
@@ -56,6 +59,9 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [dyntubeUrl, setDyntubeUrl] = useState("");
+  const [dyntubeError, setDyntubeError] = useState("");
+  const [showDyntubeInput, setShowDyntubeInput] = useState(false);
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -78,6 +84,9 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
       setDocuments(editingPost.documents || []);
       setVisibility(editingPost.visibility || "public");
       setCategory(editingPost.category || "General Updates");
+      setDyntubeUrl(editingPost.dyntubeUrl || "");
+      setDyntubeError("");
+      setShowDyntubeInput(!!editingPost.dyntubeUrl);
 
       setTimeout(() => {
         setHasInitialized(true);
@@ -123,6 +132,9 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setIsSubmitting(false);
     setIsEditing(false);
     setHasInitialized(false);
+    setDyntubeUrl("");
+    setDyntubeError("");
+    setShowDyntubeInput(false);
     dispatch(clearCreatePostStatus());
     dispatch(clearEducatorPostsStatus());
     onClose();
@@ -193,6 +205,9 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     if (imageInputRef.current) imageInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
     if (documentInputRef.current) documentInputRef.current.value = "";
+    setDyntubeUrl("");
+    setDyntubeError("");
+    setShowDyntubeInput(false);
   };
 
   const hasFilesChanged = () => {
@@ -233,9 +248,16 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
       !content.trim() &&
       images.length === 0 &&
       videos.length === 0 &&
-      documents.length === 0
+      documents.length === 0 &&
+      !dyntubeUrl.trim()
     ) {
       toast.error("Please add some content or media to your post");
+      return;
+    }
+
+    // Validate DynTube URL if provided
+    if (dyntubeUrl.trim() && !isDyntubeUrl(dyntubeUrl.trim())) {
+      setDyntubeError("Please enter a valid DynTube URL");
       return;
     }
 
@@ -270,6 +292,11 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         postData.documents = processFiles(documents);
       }
 
+      // Add DynTube URL if provided
+      if (dyntubeUrl.trim()) {
+        postData.dyntubeUrl = dyntubeUrl.trim();
+      }
+
       // When editing, signal the backend to remove existing media if the educator cleared them
       if (editingPost) {
         if ((editingPost.images?.length > 0) && images.length === 0) {
@@ -277,6 +304,12 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         }
         if ((editingPost.videos?.length > 0) && videos.length === 0) {
           postData.removeVideos = true;
+        }
+        // Handle DynTube URL changes during edit
+        if (editingPost.dyntubeUrl && !dyntubeUrl.trim()) {
+          postData.removeDyntubeUrl = true;
+        } else if (dyntubeUrl.trim()) {
+          postData.dyntubeUrl = dyntubeUrl.trim();
         }
       }
 
@@ -506,6 +539,63 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
               </div>
             )}
 
+            {/* DynTube URL Input */}
+            {showDyntubeInput && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-700">
+                  DynTube Video URL
+                </h4>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={dyntubeUrl}
+                    onChange={(e) => {
+                      setDyntubeUrl(e.target.value);
+                      setDyntubeError("");
+                    }}
+                    onBlur={() => {
+                      if (dyntubeUrl.trim() && !isDyntubeUrl(dyntubeUrl.trim())) {
+                        setDyntubeError("Please enter a valid DynTube URL (e.g. https://videos.dyntube.com/iframes/...)");
+                      }
+                    }}
+                    placeholder="Paste DynTube video URL here..."
+                    className="flex-1 px-3 py-2 border border-gray-200 bg-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDyntubeUrl("");
+                      setDyntubeError("");
+                      setShowDyntubeInput(false);
+                    }}
+                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                    title="Remove DynTube URL"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                {dyntubeError && (
+                  <p className="text-xs text-red-500">{dyntubeError}</p>
+                )}
+                {/* DynTube Preview - Non-interactive iframe thumbnail */}
+                {dyntubeUrl.trim() && isDyntubeUrl(dyntubeUrl.trim()) && (
+                  <div className="relative w-full rounded-lg overflow-hidden bg-black" style={{ aspectRatio: '16/9' }}>
+                    <iframe
+                      src={getEmbedUrl(dyntubeUrl.trim())}
+                      className="w-full h-full"
+                      loading="lazy"
+                      tabIndex={-1}
+                      scrolling="no"
+                      style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+                      title="DynTube Video Preview"
+                    />
+                    {/* Invisible overlay to prevent any interaction if needed */}
+                    <div className="absolute inset-0" />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Media Upload Buttons */}
             <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
               {/* File Change Indicator - Removed read-only message */}
@@ -547,8 +637,23 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                 </button>
               </div>
 
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDyntubeInput(!showDyntubeInput)}
+                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+                    showDyntubeInput || dyntubeUrl
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                  }`}
+                >
+                  <Link2 size={20} />
+                  <span>DynTube</span>
+                </button>
+              </div>
+
               {/* Clear All Button - only show when files exist */}
-              {(images.length > 0 || videos.length > 0) && (
+              {(images.length > 0 || videos.length > 0 || dyntubeUrl) && (
                 <button
                   type="button"
                   onClick={clearAllFiles}
@@ -578,7 +683,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   (!content.trim() &&
                     images.length === 0 &&
                     videos.length === 0 &&
-                    documents.length === 0)
+                    documents.length === 0 &&
+                    !dyntubeUrl.trim())
                 }
                 className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >

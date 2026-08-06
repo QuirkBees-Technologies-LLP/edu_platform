@@ -10,6 +10,14 @@ import {
   X,
   FileText,
 } from "lucide-react";
+import { getEmbedUrl, getVideoThumbnail } from "@/utils/videoUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
   likePost,
@@ -28,7 +36,8 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteDialogRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-   const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
 
   
   // Extract plain text length for truncation logic, but keep HTML for display
@@ -167,8 +176,9 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     const hasImages = post.images && post.images.length > 0;
     const hasVideos = post.videos && post.videos.length > 0;
     const hasDocuments = post.documents && post.documents.length > 0;
+    const hasDyntubeUrl = !!post.dyntubeUrl;
 
-    if (!hasImages && !hasVideos && !hasDocuments) return null;
+    if (!hasImages && !hasVideos && !hasDocuments && !hasDyntubeUrl) return null;
 
     return (
       <div className="space-y-3">
@@ -272,6 +282,34 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
             ))}
           </div>
         )}
+
+        {/* DynTube Thumbnail + Play Button */}
+        {hasDyntubeUrl && (
+          <div
+            className="relative w-full rounded-lg overflow-hidden bg-black cursor-pointer group"
+            style={{ aspectRatio: '16/9' }}
+            onClick={() => setDyntubeModalOpen(true)}
+          >
+            {/* Non-interactive iframe as thumbnail (same as StrategyVideoCarousel) */}
+            <iframe
+              src={getEmbedUrl(post.dyntubeUrl)}
+              className="w-full h-full"
+              loading="lazy"
+              tabIndex={-1}
+              scrolling="no"
+              style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+              title="DynTube Video"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {/* Play button */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-200">
+                <Play size={28} className="text-white ml-1" fill="white" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -360,6 +398,39 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
         refetch={refetch}
         ref={deleteDialogRef}
       />
+
+      {/* DynTube Video Modal */}
+      {post.dyntubeUrl && (
+        <Dialog open={dyntubeModalOpen} onOpenChange={setDyntubeModalOpen}>
+          <DialogContent
+            className="max-w-5xl w-full p-0 !overflow-hidden bg-black border-gray-800 !max-h-[85vh] flex flex-col"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="px-5 pt-4 pb-2 shrink-0">
+              <DialogTitle className="text-white text-lg font-semibold truncate pr-8">
+                Video
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                DynTube video player
+              </DialogDescription>
+            </DialogHeader>
+            <div className="w-full flex-1 min-h-0 p-4 pt-0">
+              <div className="aspect-video w-full h-full max-h-full">
+                {dyntubeModalOpen && (
+                  <iframe
+                    src={getEmbedUrl(post.dyntubeUrl)}
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="DynTube Video Player"
+                    style={{ border: 'none' }}
+                  />
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
