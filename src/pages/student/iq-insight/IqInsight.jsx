@@ -27,6 +27,7 @@ import {
   Videotape,
   Check,
   ChevronDown,
+  Play,
 } from "lucide-react";
 import {
   Toolbar,
@@ -37,8 +38,16 @@ import {
 } from "@/partials/toolbar";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
+import { getEmbedUrl } from "@/utils/videoUtils";
 import Loader from "../../../components/ui/loader";
 import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import debounce from "lodash.debounce";
 import {
@@ -104,6 +113,7 @@ const IqInsight = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
+  const [dyntubeModalUrl, setDyntubeModalUrl] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [educator, setEducator] = useState("");
   const [status, setStatus] = useState("");
@@ -559,31 +569,75 @@ const IqInsight = () => {
                     </div>
                   </div>
 
-                  {/* ── Chart Image Thumbnail ── */}
-                  <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-                    {idea.image && idea.image.length > 0 ? (
-                      <>
-                        <img
-                          src={idea.image[idea.currentIndex ?? 0]}
-                          alt={idea.pair || idea.name}
-                          className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
-                          onClick={() => {
-                            setSelectedIdea(idea);
-                            setIsLightBoxOpen(true);
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedIdea(idea);
-                            setIsLightBoxOpen(true);
-                          }}
-                          className="absolute right-2 bottom-2 text-white p-1.5 bg-black/50 hover:bg-black/70 rounded-md backdrop-blur-sm transition-colors z-30"
-                        >
-                          <Eye size={14} />
-                        </button>
-                        {idea.image.length > 1 && (
+                  {/* ── Chart Image / Video Carousel ── */}
+                  {(() => {
+                    // Build carousel items: images + optional DynTube video
+                    const images = idea.image || [];
+                    const hasDyntube = !!idea.dyntubeUrl;
+                    const totalSlides = images.length + (hasDyntube ? 1 : 0);
+                    const currentIdx = idea.currentIndex ?? 0;
+                    const isDyntubeSlide = hasDyntube && currentIdx === images.length;
+
+                    if (totalSlides === 0) {
+                      return (
+                        <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
+                          <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-2 opacity-40">
+                              <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">No Chart Loading...</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
+                        {isDyntubeSlide ? (
+                          /* DynTube video slide */
+                          <div
+                            className="absolute inset-0 cursor-pointer group"
+                            onClick={() => setDyntubeModalUrl(idea.dyntubeUrl)}
+                          >
+                            <iframe
+                              src={getEmbedUrl(idea.dyntubeUrl)}
+                              className="w-full h-full"
+                              loading="lazy"
+                              tabIndex={-1}
+                              scrolling="no"
+                              style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+                              title="DynTube Video"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                          </div>
+                        ) : (
+                          /* Image slide */
+                          <>
+                            <img
+                              src={images[currentIdx]}
+                              alt={idea.pair || idea.name}
+                              className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
+                              onClick={() => {
+                                setSelectedIdea(idea);
+                                setIsLightBoxOpen(true);
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedIdea(idea);
+                                setIsLightBoxOpen(true);
+                              }}
+                              className="absolute right-2 bottom-2 text-white p-1.5 bg-black/50 hover:bg-black/70 rounded-md backdrop-blur-sm transition-colors z-30"
+                            >
+                              <Eye size={14} />
+                            </button>
+                          </>
+                        )}
+
+                        {/* Navigation arrows (show when more than 1 slide) */}
+                        {totalSlides > 1 && (
                           <>
                             <button
                               onClick={(e) => {
@@ -593,7 +647,7 @@ const IqInsight = () => {
                                     t._id === idea._id
                                       ? {
                                         ...t,
-                                        currentIndex: (t.currentIndex ?? 0) === 0 ? t.image.length - 1 : (t.currentIndex ?? 0) - 1,
+                                        currentIndex: currentIdx === 0 ? totalSlides - 1 : currentIdx - 1,
                                       }
                                       : t
                                   )
@@ -611,7 +665,7 @@ const IqInsight = () => {
                                     t._id === idea._id
                                       ? {
                                         ...t,
-                                        currentIndex: (t.currentIndex ?? 0) === t.image.length - 1 ? 0 : (t.currentIndex ?? 0) + 1,
+                                        currentIndex: currentIdx === totalSlides - 1 ? 0 : currentIdx + 1,
                                       }
                                       : t
                                   )
@@ -622,26 +676,19 @@ const IqInsight = () => {
                               <ChevronRight size={16} />
                             </button>
                             <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                              {idea.image.map((_, idx) => (
+                              {Array.from({ length: totalSlides }).map((_, idx) => (
                                 <div
                                   key={idx}
-                                  className={`w-1.5 h-1.5 rounded-full transition-colors ${(idea.currentIndex ?? 0) === idx ? "bg-white" : "bg-white/40"
+                                  className={`w-1.5 h-1.5 rounded-full transition-colors ${currentIdx === idx ? "bg-white" : "bg-white/40"
                                     }`}
                                 />
                               ))}
                             </div>
                           </>
                         )}
-                      </>
-                    ) : (
-                      <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
-                        <div className="flex flex-col items-center gap-2 opacity-40">
-                          <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
-                          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">No Chart Loading...</span>
-                        </div>
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()}
 
                   {/* ── Structured Price Levels / Content ── */}
                   <div className="mb-2 space-y-1.5 flex-1">
@@ -767,6 +814,37 @@ const IqInsight = () => {
           selectedIdea={selectedIdea}
           handleCloseView={handleCloseImageView}
         />
+
+        {/* DynTube Direct Video Player Modal */}
+        <Dialog open={!!dyntubeModalUrl} onOpenChange={(open) => { if (!open) setDyntubeModalUrl(null); }}>
+          <DialogContent
+            className="max-w-5xl w-full p-0 !overflow-hidden bg-black border-gray-800 !max-h-[85vh] flex flex-col"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="px-5 pt-4 pb-2 shrink-0">
+              <DialogTitle className="text-white text-lg font-semibold truncate pr-8">
+                Video
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                DynTube video player
+              </DialogDescription>
+            </DialogHeader>
+            <div className="w-full flex-1 min-h-0 p-4 pt-0">
+              <div className="aspect-video w-full h-full max-h-full">
+                {dyntubeModalUrl && (
+                  <iframe
+                    src={getEmbedUrl(dyntubeModalUrl)}
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="DynTube Video Player"
+                    style={{ border: 'none' }}
+                  />
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
