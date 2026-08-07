@@ -32,6 +32,7 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
     author,
     videos = [],
     dyntubeUrl,
+    tradingViewImages = [],
     createdAt,
     likeCount = 0,
     commentCount = 0,
@@ -228,6 +229,51 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       )}
 
       {/* DynTube Thumbnail + Play Button */}
+
+      {/* TradingView Chart Images */}
+      {tradingViewImages?.length > 0 && (
+        <div className="mt-3 space-y-3">
+          <div
+            className={`grid ${tradingViewImages.length === 1 ? "grid-cols-1" : "grid-cols-2"
+              } gap-3`}
+          >
+            {[...tradingViewImages]
+              .filter((tvImg) => tvImg?.url)
+              .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0))
+              .map((tvImg, index) => (
+                <div key={tvImg?._id || tvImg?.url || index} className="flex flex-col gap-1.5">
+                  <div
+                    className="relative w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 group cursor-pointer"
+                    onClick={() => setSelectedImage(tvImg?.url)}
+                  >
+                    <img
+                      src={tvImg?.url}
+                      alt="TradingView Chart"
+                      loading="lazy"
+                      className="w-full aspect-video object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  </div>
+                  {tvImg?.tradingViewUrl && (
+                    <a
+                      href={tvImg.tradingViewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 truncate transition-colors"
+                      title={tvImg.tradingViewUrl}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      <span className="truncate">{tvImg.tradingViewUrl}</span>
+                    </a>
+                  )}
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
       {dyntubeUrl && (
         <div
           className="mt-3 relative w-full rounded-xl overflow-hidden bg-black border border-gray-200 dark:border-[#22242A] cursor-pointer group"

@@ -146,6 +146,7 @@ export const REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL = ["H1", "H2", "H3"];
 // Timeframes that should be visible but auto-unchecked (excluded)
 // whenever the React/Defy-only mode activates.
 export const REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES = ["1m", "5m"];
+export const REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES_CANONICAL = ["M1", "M5"];
 
 // ── Strategy Definitions ────────────────────────────────────────────
 // Each strategy defines its supported pairs, timeframes, and optional
@@ -319,4 +320,40 @@ export function canonicalToFilterTf(tf) {
   const hourMatch = tf.match(/^H(\d+)$/);
   if (hourMatch) return `${hourMatch[1]}H`;
   return tf;
+}
+
+/**
+ * Pre-computed map of strategy key → display-format timeframes.
+ * e.g. { react: ["1m","3m","5m","15m","30m","1H","4H"], killshot: ["1m","3m","5m"], ... }
+ */
+export const STRATEGY_TIMEFRAME_MAP = Object.fromEntries(
+  STRATEGIES.map((s) => [
+    s.key,
+    s.timeframes.map(canonicalToFilterTf),
+  ])
+);
+
+/**
+ * Pre-computed map of strategy key → DEFAULT selected timeframes.
+ * e.g. React/Defy exclude 1m and 5m by default.
+ */
+export const STRATEGY_DEFAULT_TIMEFRAME_MAP = Object.fromEntries(
+  STRATEGIES.map((s) => {
+    let tfs = s.timeframes.map(canonicalToFilterTf);
+    if (s.key === "react" || s.key === "defy") {
+      tfs = tfs.filter((tf) => !REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES.includes(tf));
+    }
+    return [s.key, tfs];
+  })
+);
+
+/**
+ * Get display-format timeframe options for a given strategy.
+ * @param {string} strategyKey - e.g. "react", "killshot"
+ * @returns {Array<{value: string, label: string}>} - e.g. [{value:"1m",label:"1m"}, ...]
+ */
+export function getStrategyFilterTimeframes(strategyKey) {
+  const tfs = STRATEGY_TIMEFRAME_MAP[strategyKey];
+  if (!tfs) return [];
+  return tfs.map((tf) => ({ value: tf, label: tf }));
 }

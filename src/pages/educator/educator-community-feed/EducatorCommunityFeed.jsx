@@ -102,6 +102,8 @@ const EducatorCommunityFeed = () => {
       image: post.author?.image,
     },
     dyntubeUrl: post.dyntubeUrl,
+    tradingViewLinks: post.tradingViewLinks || [],
+    tradingViewImages: post.tradingViewImages || [],
     createdAt: post.createdAt,
     likeCount: post.likeCount || 0,
     commentCount: post.commentCount || 0,
