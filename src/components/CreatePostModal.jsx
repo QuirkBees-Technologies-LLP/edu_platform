@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   X,
   Image,
@@ -11,7 +11,11 @@ import {
   Trash2,
   Link2,
   Play,
+  BarChart3,
 } from "lucide-react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import DraggableLinkList from "@/components/ui/DraggableLinkList";
 import { isDyntubeUrl, getEmbedUrl, getVideoThumbnail } from "@/utils/videoUtils";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -62,6 +66,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const [dyntubeUrl, setDyntubeUrl] = useState("");
   const [dyntubeError, setDyntubeError] = useState("");
   const [showDyntubeInput, setShowDyntubeInput] = useState(false);
+  const [tradingViewLinks, setTradingViewLinks] = useState([""]);
+  const [showTradingViewInput, setShowTradingViewInput] = useState(false);
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -87,6 +93,9 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
       setDyntubeUrl(editingPost.dyntubeUrl || "");
       setDyntubeError("");
       setShowDyntubeInput(!!editingPost.dyntubeUrl);
+      const tvLinks = editingPost.tradingViewLinks?.length > 0 ? editingPost.tradingViewLinks : [""];
+      setTradingViewLinks(tvLinks);
+      setShowTradingViewInput(editingPost.tradingViewLinks?.length > 0);
 
       setTimeout(() => {
         setHasInitialized(true);
@@ -135,6 +144,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setDyntubeUrl("");
     setDyntubeError("");
     setShowDyntubeInput(false);
+    setTradingViewLinks([""]);
+    setShowTradingViewInput(false);
     dispatch(clearCreatePostStatus());
     dispatch(clearEducatorPostsStatus());
     onClose();
@@ -208,7 +219,35 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setDyntubeUrl("");
     setDyntubeError("");
     setShowDyntubeInput(false);
+    setTradingViewLinks([""]);
+    setShowTradingViewInput(false);
   };
+
+  // TradingView link handlers (same pattern as IQ Insight)
+  const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
+    setTradingViewLinks((prev) => {
+      const items = [...prev];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      return items;
+    });
+  }, []);
+
+  const handleLinkChange = useCallback((index, value) => {
+    setTradingViewLinks((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  }, []);
+
+  const handleRemoveLink = useCallback((index) => {
+    setTradingViewLinks((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleAddLink = useCallback(() => {
+    setTradingViewLinks((prev) => [...prev, ""]);
+  }, []);
 
   const hasFilesChanged = () => {
     if (!editingPost) return true;
@@ -244,14 +283,33 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const tvLinks = (tradingViewLinks || []).filter((l) => l && l.trim());
+
     if (
       !content.trim() &&
       images.length === 0 &&
       videos.length === 0 &&
       documents.length === 0 &&
-      !dyntubeUrl.trim()
+      !dyntubeUrl.trim() &&
+      tvLinks.length === 0
     ) {
       toast.error("Please add some content or media to your post");
+      return;
+    }
+
+    // Validate TradingView URLs
+    const tvUrlPattern = /tradingview\.com/i;
+    for (const link of tvLinks) {
+      if (!tvUrlPattern.test(link.trim())) {
+        toast.error(`Invalid TradingView URL: ${link}`);
+        return;
+      }
+    }
+
+    // Check for duplicate TradingView URLs
+    const uniqueTVLinks = new Set(tvLinks.map((l) => l.trim().toLowerCase()));
+    if (uniqueTVLinks.size !== tvLinks.length) {
+      toast.error("Duplicate TradingView links detected. Please remove duplicates.");
       return;
     }
 
@@ -297,6 +355,13 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         postData.dyntubeUrl = dyntubeUrl.trim();
       }
 
+      // Add TradingView links
+      if (tvLinks.length > 0) {
+        postData.tradingViewLinks = tvLinks;
+      } else {
+        postData.tradingViewLinks = [];
+      }
+
       // When editing, signal the backend to remove existing media if the educator cleared them
       if (editingPost) {
         if ((editingPost.images?.length > 0) && images.length === 0) {
@@ -311,6 +376,12 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         } else if (dyntubeUrl.trim()) {
           postData.dyntubeUrl = dyntubeUrl.trim();
         }
+
+        // Handle TradingView links changes during edit
+        if (editingPost.tradingViewLinks?.length > 0 && tvLinks.length === 0) {
+          postData.removeTradingViewLinks = true;
+        }
+        postData.tradingViewLinks = tvLinks;
       }
 
       if (editingPost) {
@@ -596,6 +667,24 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
               </div>
             )}
 
+            {/* TradingView Links Input */}
+            {showTradingViewInput && (
+              <DndProvider backend={HTML5Backend}>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">
+                    TradingView Links
+                  </h4>
+                  <DraggableLinkList
+                    links={tradingViewLinks}
+                    onReorder={handleReorderLinks}
+                    onChange={handleLinkChange}
+                    onRemove={handleRemoveLink}
+                    onAdd={handleAddLink}
+                  />
+                </div>
+              </DndProvider>
+            )}
+
             {/* Media Upload Buttons */}
             <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
               {/* File Change Indicator - Removed read-only message */}
@@ -652,8 +741,23 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                 </button>
               </div>
 
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTradingViewInput(!showTradingViewInput)}
+                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+                    showTradingViewInput || (tradingViewLinks || []).some((l) => l && l.trim())
+                      ? "text-green-600 bg-green-50"
+                      : "text-gray-600 hover:text-green-600 hover:bg-green-50"
+                  }`}
+                >
+                  <BarChart3 size={20} />
+                  <span>TradingView</span>
+                </button>
+              </div>
+
               {/* Clear All Button - only show when files exist */}
-              {(images.length > 0 || videos.length > 0 || dyntubeUrl) && (
+              {(images.length > 0 || videos.length > 0 || dyntubeUrl || (tradingViewLinks || []).some((l) => l && l.trim())) && (
                 <button
                   type="button"
                   onClick={clearAllFiles}
@@ -684,7 +788,8 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                     images.length === 0 &&
                     videos.length === 0 &&
                     documents.length === 0 &&
-                    !dyntubeUrl.trim())
+                    !dyntubeUrl.trim() &&
+                    !(tradingViewLinks || []).some((l) => l && l.trim()))
                 }
                 className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
