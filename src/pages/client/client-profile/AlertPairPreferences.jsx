@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { ChevronDown, ChevronRight, Bell, BellOff, Save, Clock, DollarSign, SlidersHorizontal } from "lucide-react";
-import { isValidPairTimeframe, getAssetClassCategories, HIERARCHICAL_STRATEGIES, REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL } from "@/config/strategyConfig";
+import { 
+  isValidPairTimeframe, 
+  getAssetClassCategories, 
+  HIERARCHICAL_STRATEGIES, 
+  REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL,
+  REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES_CANONICAL
+} from "@/config/strategyConfig";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
   useGetAlertPairPreferencesQuery,
@@ -77,8 +83,17 @@ function initSelectedFromSaved(savedPrefs, allPaths) {
     // New nested format: savedPrefs[strategy][pair][tf]
     allPaths.forEach((path) => {
       const [strat, pair, tf] = path.split(".");
-      if (savedPrefs[strat]?.[pair]?.[tf] !== false) {
+      const pref = savedPrefs[strat]?.[pair]?.[tf];
+      
+      if (pref === true) {
         selected.add(path);
+      } else if (pref === undefined) {
+        // If undefined, it's ON by default, unless it's a default-excluded timeframe for React/Defy
+        const isReactOrDefy = strat === "react" || strat === "defy";
+        const isDefaultExcluded = isReactOrDefy && REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES_CANONICAL.includes(tf);
+        if (!isDefaultExcluded) {
+          selected.add(path);
+        }
       }
     });
   }
@@ -750,6 +765,7 @@ const AlertPairPreferences = () => {
             excludedSignalTypes: Array.isArray(parsed.excludedSignalTypes) ? parsed.excludedSignalTypes : [],
             excludedSymbols: Array.isArray(parsed.excludedSymbols) ? parsed.excludedSymbols : [],
             excludedTimeframes: Array.isArray(parsed.excludedTimeframes) ? parsed.excludedTimeframes : [],
+            strategyTimeframes: parsed.strategyTimeframes && typeof parsed.strategyTimeframes === "object" ? parsed.strategyTimeframes : {},
             excludedSessions: Array.isArray(parsed.excludedSessions) ? parsed.excludedSessions : [],
           };
         }
@@ -766,6 +782,7 @@ const AlertPairPreferences = () => {
       excludedSignalTypes: Array.isArray(prefs.excludedSignalTypes) ? prefs.excludedSignalTypes : [],
       excludedSymbols: Array.isArray(prefs.excludedSymbols) ? prefs.excludedSymbols : [],
       excludedTimeframes: Array.isArray(prefs.excludedTimeframes) ? prefs.excludedTimeframes : [],
+      strategyTimeframes: prefs.strategyTimeframes && typeof prefs.strategyTimeframes === "object" ? prefs.strategyTimeframes : {},
       excludedSessions: Array.isArray(prefs.excludedSessions) ? prefs.excludedSessions : [],
     };
   }, [savedFilterPrefs]);
