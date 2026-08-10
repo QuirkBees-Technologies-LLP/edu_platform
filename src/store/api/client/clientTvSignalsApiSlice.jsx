@@ -14,7 +14,8 @@ export const clientTvSignalsApiSlice = createApi({
         excludedSymbols = [],
         excludedSignalTypes = [],
         excludedStrategies = [],
-        excludedTimeframes = [],
+        // Strategy-specific timeframe selections: { react: ["1m","5m"], defy: ["5m","15m"], ... }
+        strategyTimeframes = {},
         // Strategy-specific display filters
         entryType = "",          // Defy: "confirmed" | "pending" | ""
         excludedDefyTypes = [], // Defy multi-select exclusion
@@ -38,7 +39,10 @@ export const clientTvSignalsApiSlice = createApi({
         if (excludedSymbols.length > 0) params.set("excludedSymbols", excludedSymbols.join(","));
         if (excludedSignalTypes.length > 0) params.set("excludedSignalTypes", excludedSignalTypes.join(","));
         if (excludedStrategies.length > 0) params.set("excludedStrategies", excludedStrategies.join(","));
-        if (excludedTimeframes.length > 0) params.set("excludedTimeframes", excludedTimeframes.join(","));
+        // Strategy-specific timeframes (JSON-encoded map)
+        if (strategyTimeframes && Object.keys(strategyTimeframes).length > 0) {
+          params.set("strategyTimeframes", JSON.stringify(strategyTimeframes));
+        }
 
         // Defy entry type filter
         if (entryType) params.set("entryType", entryType);

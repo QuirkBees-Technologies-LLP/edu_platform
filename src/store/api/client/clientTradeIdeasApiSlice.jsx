@@ -10,7 +10,7 @@ export const clientTradeIdeasApiSlice = createApi({
         page = 1,
         limit = 9,
         status = "",
-        educator="",
+        educator = "",
         categoryName = [],
         activeIdea = "",
         startDate = "",
@@ -68,17 +68,24 @@ export const clientTradeIdeasApiSlice = createApi({
         limit = 9,
         search = "",
         educator = "",
-        // timeframe = "",
-        markets = "",
+        status = "",
+        categoryName = [],
+        startDate = "",
+        endDate = "",
       }) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-          search,
-          educator,
-          //   timeframe,
-          markets,
-        });
+        const params = new URLSearchParams();
+        params.set("page", page);
+        params.set("limit", limit);
+
+        if (search) params.set("search", search);
+        if (educator) params.set("educator", educator);
+        if (status) params.set("status", status);
+        if (startDate) params.set("startDate", startDate);
+        if (endDate) params.set("endDate", endDate);
+
+        if (Array.isArray(categoryName) && categoryName.length > 0) {
+          categoryName.forEach((name) => params.append("categoryName", name));
+        }
 
         return `/users/trade-analysis/list?${params.toString()}`;
       },

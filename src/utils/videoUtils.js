@@ -64,6 +64,21 @@ export const getEmbedUrl = (url) => {
 };
 
 /**
+ * Check whether a URL is a supported DynTube link.
+ * Returns true for any URL containing "dyntube.com".
+ */
+export const isDyntubeUrl = (url) => {
+    if (!url || typeof url !== "string") return false;
+    try {
+        const trimmed = url.trim();
+        if (!trimmed) return false;
+        return trimmed.includes("dyntube.com");
+    } catch {
+        return false;
+    }
+};
+
+/**
  * Derive a thumbnail URL from a video URL.
  * Supports: YouTube, Dyntube, Vimeo, Dailymotion.
  * Returns null if no thumbnail can be determined.

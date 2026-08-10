@@ -85,6 +85,15 @@ body {
     transition: width var(--tw-sidebar-transition-duration) var(--tw-sidebar-transition-timing);
   }
 
+  /* When collapsed sidebar is hovered, push wrapper and header to expanded width */
+  .demo1.sidebar-collapse.sidebar-fixed:has(.sidebar:hover:not(.animating)) .wrapper {
+    padding-inline-start: var(--tw-sidebar-default-width);
+  }
+
+  .demo1.sidebar-collapse.sidebar-fixed.header-fixed:has(.sidebar:hover:not(.animating)) .header {
+    inset-inline-start: var(--tw-sidebar-default-width);
+  }
+
   .demo1.sidebar-collapse .sidebar:not(:hover) .default-logo {
     display: none;
   }

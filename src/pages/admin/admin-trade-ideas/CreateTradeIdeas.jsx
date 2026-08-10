@@ -1,6 +1,10 @@
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect, useCallback } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import DraggableImageList from "@/components/ui/DraggableImageList";
+import DraggableLinkList from "@/components/ui/DraggableLinkList";
 import {
   Select,
   SelectContent,
@@ -247,7 +251,38 @@ const CreateTradeIdeas = forwardRef(
       formik.setFieldValue("files", newFiles);
     };
 
+    // Drag-and-drop reorder handlers
+    const handleReorderImages = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.files];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("files", items);
+    }, [formik.values.files]);
+
+    const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.tradingViewLinks];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("tradingViewLinks", items);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleLinkChange = useCallback((index, value) => {
+      const updated = [...formik.values.tradingViewLinks];
+      updated[index] = value;
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleRemoveLink = useCallback((index) => {
+      const updated = formik.values.tradingViewLinks.filter((_, i) => i !== index);
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleAddLink = useCallback(() => {
+      formik.setFieldValue("tradingViewLinks", [...(formik.values.tradingViewLinks || []), ""]);
+    }, [formik.values.tradingViewLinks]);
+
     return (
+      <DndProvider backend={HTML5Backend}>
       <Dialog
         open={isCreateOpen}
         onOpenChange={() => {
@@ -631,40 +666,13 @@ const CreateTradeIdeas = forwardRef(
                   <label className="form-label text-gray-900 gap-1">
                     TradingView Links
                   </label>
-                  {(formik.values.tradingViewLinks || [""]).map((link, idx) => (
-                    <div key={idx} className="flex items-center gap-2 mb-2">
-                      <input
-                        type="url"
-                        placeholder="https://www.tradingview.com/chart/..."
-                        className="form-control input input-md w-full"
-                        value={link}
-                        onChange={(e) => {
-                          const updated = [...formik.values.tradingViewLinks];
-                          updated[idx] = e.target.value;
-                          formik.setFieldValue('tradingViewLinks', updated);
-                        }}
-                      />
-                      {idx > 0 && (
-                        <button
-                          type="button"
-                          className="btn btn-xs btn-icon rounded-full btn-danger"
-                          onClick={() => {
-                            const updated = formik.values.tradingViewLinks.filter((_, i) => i !== idx);
-                            formik.setFieldValue('tradingViewLinks', updated);
-                          }}
-                        >
-                          <i className="ki-outline ki-cross"></i>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-light w-fit"
-                    onClick={() => formik.setFieldValue('tradingViewLinks', [...(formik.values.tradingViewLinks || []), ''])}
-                  >
-                    + Add Another TradingView Link
-                  </button>
+                  <DraggableLinkList
+                    links={formik.values.tradingViewLinks || [""]}
+                    onReorder={handleReorderLinks}
+                    onChange={handleLinkChange}
+                    onRemove={handleRemoveLink}
+                    onAdd={handleAddLink}
+                  />
                 </div>
               </div>
 
@@ -695,27 +703,12 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </ImageInput>
 
-                  {/* Show preview only if there are images */}
-                  {formik.values.files
-                    .filter((file) => !!file?.dataURL)
-                    .map((file, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={file.dataURL}
-                          alt="uploaded"
-                          className="rounded-lg border-2 border-success size-24 object-cover"
-                        />
-                        <div className="absolute -right-4 -top-4">
-                          <button
-                            type="button"
-                            className="btn btn-xs btn-icon rounded-full btn-danger"
-                            onClick={() => handleRemoveImage(index)}
-                          >
-                            <i className="ki-outline ki-cross"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  {/* Show preview with drag-and-drop reorder */}
+                  <DraggableImageList
+                    files={formik.values.files}
+                    onReorder={handleReorderImages}
+                    onRemove={handleRemoveImage}
+                  />
                 </div>
                 {formik.touched.files && formik.errors.files && (
                   <span role="alert" className="text-danger text-xs mt-1">
@@ -747,6 +740,7 @@ const CreateTradeIdeas = forwardRef(
           </div>
         </DialogContent>
       </Dialog>
+      </DndProvider>
     );
   }
 );

@@ -9,7 +9,11 @@
 // Strategy validation uses the centralized config (isValidPairTimeframe)
 // from src/config/strategyConfig.js — the single source of truth.
 
-import { isValidPairTimeframe, ALL_FILTER_TIMEFRAME_OPTIONS } from "@/config/strategyConfig";
+import { 
+  isValidPairTimeframe, 
+  STRATEGY_TIMEFRAME_MAP,
+  REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES_CANONICAL 
+} from "@/config/strategyConfig";
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -102,7 +106,7 @@ export function buildMatchedPreferences(
   // ── Step 1: Derive INCLUDED values from exclusion arrays ──────────
   const excludedStrategies = exclusionFilters?.excludedStrategies || [];
   const excludedSymbols = exclusionFilters?.excludedSymbols || [];
-  const excludedTimeframes = exclusionFilters?.excludedTimeframes || [];
+  const strategyTimeframes = exclusionFilters?.strategyTimeframes || {};
   const excludedSessions = exclusionFilters?.excludedSessions || [];
   const excludedSignalTypes = exclusionFilters?.excludedSignalTypes || [];
 
@@ -121,8 +125,14 @@ export function buildMatchedPreferences(
       .filter((s) => s && !normalizedExcludedSymbols.has(s))
   );
 
-  // Included timeframes — convert filter format to config format
-  const excludedTfSet = new Set(excludedTimeframes.map(mapFilterTfToConfigTf));
+  // Build per-strategy included timeframe sets (in config format)
+  // strategyTimeframes: { react: ["1m","5m"], ... } → converted to canonical
+  const strategyIncludedTfSets = {};
+  for (const [key, selectedTfs] of Object.entries(strategyTimeframes)) {
+    if (Array.isArray(selectedTfs)) {
+      strategyIncludedTfSets[key] = new Set(selectedTfs.map(mapFilterTfToConfigTf));
+    }
+  }
 
   // Included sessions
   const excludedSessionSet = new Set(excludedSessions);
@@ -164,7 +174,18 @@ export function buildMatchedPreferences(
         const pairIncluded = isPairIncluded(
           pair, normalizedIncludedSymbols, allSymbolOptions || [], normalizedExcludedSymbols
         );
-        const tfIncluded = !excludedTfSet.has(tf);
+        // Check if this timeframe is selected for this specific strategy
+        const tfSet = strategyIncludedTfSets[strategyKey];
+        // If no entry in map, use default inclusion behavior
+        let tfIncluded = true;
+        if (tfSet) {
+          tfIncluded = tfSet.has(tf);
+        } else {
+          // Exclude default-hidden timeframes for React and Defy when not explicitly set
+          if ((strategyKey === "react" || strategyKey === "defy") && REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES_CANONICAL.includes(tf)) {
+            tfIncluded = false;
+          }
+        }
 
         const isSelected = pairIncluded && tfIncluded;
         if (!prefs[strategyKey]) prefs[strategyKey] = {};
@@ -206,15 +227,24 @@ export function buildMatchedPreferences(
           .filter((opt) => !normalizedExcludedSymbols.has(normalizeSymbol(opt.symbol || opt.value || "")))
           .map((opt) => opt.symbol || opt.value)
           .slice(0, 15), // Cap at 15 for display
-    timeframes: excludedTimeframes.length === 0
+    timeframes: Object.keys(strategyTimeframes).length === 0
       ? ["All Time Frames"]
-      : excludedTimeframes.length > 0
-        ? (() => {
-            // Show included timeframes (derived from centralized config)
-            const allTfs = ALL_FILTER_TIMEFRAME_OPTIONS.map((t) => t.value);
-            return allTfs.filter((tf) => !excludedTimeframes.includes(tf));
-          })()
-        : [],
+      : (() => {
+          // Show included timeframes per strategy
+          const included = [];
+          for (const [key, tfs] of Object.entries(strategyTimeframes)) {
+            if (Array.isArray(tfs)) {
+              const allTfs = STRATEGY_TIMEFRAME_MAP[key] || [];
+              const isAll = tfs.length === allTfs.length;
+              if (isAll) {
+                included.push(`${key}: All`);
+              } else {
+                included.push(`${key}: ${tfs.join(", ")}`);
+              }
+            }
+          }
+          return included.length > 0 ? included : ["All Time Frames"];
+        })(),
     sessions: excludedSessions.length === 0
       ? ["All Sessions"]
       : includedSessions.map((s) => s.label),

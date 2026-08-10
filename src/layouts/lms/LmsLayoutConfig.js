@@ -5,7 +5,7 @@ const LmsLayoutConfig = {
     sidebar: {
       theme: "light",
       fixed: true,
-      collapse: false,
+      collapse: true,
     },
     header: {
       fixed: true,

@@ -30,6 +30,7 @@ import signalConfig from "./signalConfig";
 import SignalCard from "./SignalCard";
 import SignalDetailModal from "./SignalDetailModal";
 import FilterSelect from "./FilterSelect";
+import TimeframeFilterDropdown from "./TimeframeFilterDropdown";
 import InstrumentFilterDropdown from "./InstrumentFilterDropdown";
 import instrumentCategories from "./instrumentData";
 
@@ -46,7 +47,10 @@ const loadSavedFilters = () => {
         excludedSymbols: Array.isArray(parsed.excludedSymbols) ? parsed.excludedSymbols : [],
         excludedSignalTypes: Array.isArray(parsed.excludedSignalTypes) ? parsed.excludedSignalTypes : [],
         excludedStrategies: Array.isArray(parsed.excludedStrategies) ? parsed.excludedStrategies : [],
-        excludedTimeframes: Array.isArray(parsed.excludedTimeframes) ? parsed.excludedTimeframes : [],
+        // Strategy-specific timeframes map: { react: ["1m","5m"], defy: ["5m","15m"], ... }
+        strategyTimeframes: (parsed.strategyTimeframes && typeof parsed.strategyTimeframes === "object" && !Array.isArray(parsed.strategyTimeframes))
+          ? parsed.strategyTimeframes
+          : {},
         excludedSessions: Array.isArray(parsed.excludedSessions) ? parsed.excludedSessions : [],
       };
     }
@@ -57,7 +61,7 @@ const loadSavedFilters = () => {
     excludedSymbols: [],
     excludedSignalTypes: [],
     excludedStrategies: [],
-    excludedTimeframes: [],
+    strategyTimeframes: {},  // empty = all selected (default)
     excludedSessions: [],
   };
 };
@@ -72,15 +76,12 @@ const saveFilters = (filters) => {
 
 // ── Strategy metadata from centralized config ───────────────────────
 import {
-  ALL_FILTER_TIMEFRAME_OPTIONS,
   DB_NAME_TO_STRATEGY_KEY,
   STRATEGIES_MAP,
-  REACT_DEFY_HIDDEN_TIMEFRAMES,
-  REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES,
+  STRATEGY_TIMEFRAME_MAP,
+  STRATEGY_DEFAULT_TIMEFRAME_MAP,
 } from "@/config/strategyConfig";
 
-// Derived from centralized config — used by strategy restriction logic
-const TIMEFRAME_OPTIONS = ALL_FILTER_TIMEFRAME_OPTIONS;
 const DB_NAME_TO_RESTRICTION_KEY = DB_NAME_TO_STRATEGY_KEY;
 
 const KILLSHOT_CONFIG = STRATEGIES_MAP.killshot
@@ -110,8 +111,16 @@ const areArraysEqual = (a1, a2) => {
 
 const areFiltersEqual = (f1, f2) => {
   if (!f1 || !f2) return false;
-  const keys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedTimeframes", "excludedSessions"];
-  return keys.every((key) => areArraysEqual(f1[key], f2[key]));
+  const arrayKeys = ["excludedSymbols", "excludedSignalTypes", "excludedStrategies", "excludedSessions"];
+  if (!arrayKeys.every((key) => areArraysEqual(f1[key], f2[key]))) return false;
+  // Compare strategyTimeframes maps
+  const stf1 = f1.strategyTimeframes || {};
+  const stf2 = f2.strategyTimeframes || {};
+  const allKeys = new Set([...Object.keys(stf1), ...Object.keys(stf2)]);
+  for (const k of allKeys) {
+    if (!areArraysEqual(stf1[k], stf2[k])) return false;
+  }
+  return true;
 };
 
 // ── Student Trading Signals Page ────────────────────────────────────
@@ -159,7 +168,9 @@ const StudentTradingSignals = () => {
         excludedSymbols: Array.isArray(apiPrefs.excludedSymbols) ? apiPrefs.excludedSymbols : [],
         excludedSignalTypes: Array.isArray(apiPrefs.excludedSignalTypes) ? apiPrefs.excludedSignalTypes : [],
         excludedStrategies: Array.isArray(apiPrefs.excludedStrategies) ? apiPrefs.excludedStrategies : [],
-        excludedTimeframes: Array.isArray(apiPrefs.excludedTimeframes) ? apiPrefs.excludedTimeframes : [],
+        strategyTimeframes: (apiPrefs.strategyTimeframes && typeof apiPrefs.strategyTimeframes === "object" && !Array.isArray(apiPrefs.strategyTimeframes))
+          ? apiPrefs.strategyTimeframes
+          : {},
         excludedSessions: Array.isArray(apiPrefs.excludedSessions) ? apiPrefs.excludedSessions : [],
       };
 
@@ -167,7 +178,7 @@ const StudentTradingSignals = () => {
         (apiPrefs.excludedSymbols?.length > 0) ||
         (apiPrefs.excludedSignalTypes?.length > 0) ||
         (apiPrefs.excludedStrategies?.length > 0) ||
-        (apiPrefs.excludedTimeframes?.length > 0) ||
+        (apiPrefs.strategyTimeframes && Object.keys(apiPrefs.strategyTimeframes).length > 0) ||
         (apiPrefs.excludedSessions?.length > 0);
 
       if (hasApiData) {
@@ -245,7 +256,7 @@ const StudentTradingSignals = () => {
       excludedSymbols: exclusionFilters.excludedSymbols,
       excludedSignalTypes: exclusionFilters.excludedSignalTypes,
       excludedStrategies: exclusionFilters.excludedStrategies,
-      excludedTimeframes: exclusionFilters.excludedTimeframes,
+      strategyTimeframes: exclusionFilters.strategyTimeframes,
       excludedSessions: exclusionFilters.excludedSessions,
     },
     { pollingInterval: 30000 }
@@ -329,7 +340,7 @@ const StudentTradingSignals = () => {
       excludedSymbols: [],
       excludedSignalTypes: [],
       excludedStrategies: [],
-      excludedTimeframes: [],
+      strategyTimeframes: {},  // empty = all selected (default)
       excludedSessions: [],
     };
     setExclusionFilters(clearedExclusions);
@@ -379,16 +390,6 @@ const StudentTradingSignals = () => {
 
   const rawIsOnlyKillshot = singleActiveStrategyKey === "killshot";
 
-  // ── React/Defy-only mode detection ──────────────────────────────
-  // True when ONLY React and/or Defy are selected (no other strategies).
-  const rawIsReactDefyOnly = useMemo(() => {
-    if (activeStrategyNames.length === 0) return false;
-    const reactDefySet = new Set(["react", "defy"]);
-    return activeStrategyNames.every(
-      (name) => reactDefySet.has(name.toLowerCase())
-    );
-  }, [activeStrategyNames]);
-
   const rawEffectiveCategories = useMemo(() => {
     if (!activeStrategyRestriction?.restrictsSymbols) return instrumentCategories;
     const allowedPairs = activeStrategyRestriction.allowedSymbols || [];
@@ -405,54 +406,27 @@ const StudentTradingSignals = () => {
       .filter((cat) => cat.instruments.length > 0);
   }, [activeStrategyRestriction]);
 
-  const rawEffectiveTimeframes = useMemo(() => {
-    if (!activeStrategyRestriction?.restrictsTimeframes) {
-      // React/Defy-only mode: hide 1H, 2H, 3H, 4H completely
-      if (rawIsReactDefyOnly) {
-        const hiddenSet = new Set(REACT_DEFY_HIDDEN_TIMEFRAMES);
-        return TIMEFRAME_OPTIONS.filter((opt) => !hiddenSet.has(opt.value));
-      }
-      return TIMEFRAME_OPTIONS;
-    }
-    // allowedTimeframes already in frontend format (1m/5m/1H) from API strategyRestrictions
-    if (activeStrategyRestriction.allowedTimeframes?.length) {
-      const allowedValues = new Set(
-        activeStrategyRestriction.allowedTimeframes.map((t) => t.value)
-      );
-      return TIMEFRAME_OPTIONS.filter((opt) => allowedValues.has(opt.value));
-    }
-    return TIMEFRAME_OPTIONS;
-  }, [activeStrategyRestriction, rawIsReactDefyOnly]);
-
   // ── Preserve existing filter options while API request is in progress ──
   // Prevents UI flicker or dropdown state resetting during loading/fetching transitions.
   const isTransitionLoading = (isLoading || isFetching || isLoadingFilters || isFetchingFilters) && !isInitialLoad;
 
   const preservedOptionsRef = useRef({
     categories: instrumentCategories,
-    timeframes: TIMEFRAME_OPTIONS,
     strategies: [],
     sessions: [],
     isOnlyKillshot: false,
-    isReactDefyOnly: false,
   });
 
   if (!isTransitionLoading) {
     if (rawEffectiveCategories.length > 0) preservedOptionsRef.current.categories = rawEffectiveCategories;
-    if (rawEffectiveTimeframes.length > 0) preservedOptionsRef.current.timeframes = rawEffectiveTimeframes;
     if (rawStrategyOptions.length > 0) preservedOptionsRef.current.strategies = rawStrategyOptions;
     if (rawTradingSessionOptions.length > 0) preservedOptionsRef.current.sessions = rawTradingSessionOptions;
     preservedOptionsRef.current.isOnlyKillshot = rawIsOnlyKillshot;
-    preservedOptionsRef.current.isReactDefyOnly = rawIsReactDefyOnly;
   }
 
   const effectiveCategories = isTransitionLoading && preservedOptionsRef.current.categories.length > 0
     ? preservedOptionsRef.current.categories
     : rawEffectiveCategories;
-
-  const effectiveTimeframes = isTransitionLoading && preservedOptionsRef.current.timeframes.length > 0
-    ? preservedOptionsRef.current.timeframes
-    : rawEffectiveTimeframes;
 
   const strategyOptions = isTransitionLoading && preservedOptionsRef.current.strategies.length > 0
     ? preservedOptionsRef.current.strategies
@@ -466,50 +440,52 @@ const StudentTradingSignals = () => {
     ? preservedOptionsRef.current.isOnlyKillshot
     : rawIsOnlyKillshot;
 
-  const isReactDefyOnly = isTransitionLoading
-    ? preservedOptionsRef.current.isReactDefyOnly
-    : rawIsReactDefyOnly;
+  // ── Compute strategy-specific timeframe counts ────────────────────
+  const { tfSelectedCount, tfTotalCount } = useMemo(() => {
+    const stf = exclusionFilters.strategyTimeframes || {};
+    let selected = 0;
+    let total = 0;
+    activeStrategyNames.forEach((name) => {
+      const key = DB_NAME_TO_RESTRICTION_KEY[name?.toLowerCase()] || name?.toLowerCase();
+      const allTfs = STRATEGY_TIMEFRAME_MAP[key];
+      const defaultTfs = STRATEGY_DEFAULT_TIMEFRAME_MAP[key];
+      if (!allTfs || !defaultTfs) return;
+      total += allTfs.length;
+      // If strategy has no entry in map, the default selection is used
+      const sel = stf[key];
+      selected += sel ? sel.length : defaultTfs.length;
+    });
+    return { tfSelectedCount: selected, tfTotalCount: total };
+  }, [exclusionFilters.strategyTimeframes, activeStrategyNames]);
 
-  // ── Auto-clean timeframe exclusions on React/Defy mode transitions ──
-  const prevReactDefyRef = useRef(rawIsReactDefyOnly);
-  useEffect(() => {
-    const wasReactDefy = prevReactDefyRef.current;
-    prevReactDefyRef.current = rawIsReactDefyOnly;
-
-    if (rawIsReactDefyOnly && !wasReactDefy) {
-      // Entering React/Defy-only mode:
-      // 1. Add hidden timeframes (1H-4H) to excluded so API won't receive them
-      // 2. Also add 1m, 5m to excluded (auto-uncheck)
-      setExclusionFilters((prev) => {
-        const currentExcluded = new Set(prev.excludedTimeframes || []);
-        REACT_DEFY_HIDDEN_TIMEFRAMES.forEach((tf) => currentExcluded.add(tf));
-        REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES.forEach((tf) => currentExcluded.add(tf));
-        return { ...prev, excludedTimeframes: [...currentExcluded] };
-      });
-    } else if (!rawIsReactDefyOnly && wasReactDefy) {
-      // Leaving React/Defy-only mode:
-      // Remove previously hidden timeframes from excluded so they re-appear checked
-      // Also re-check 1m, 5m
-      setExclusionFilters((prev) => {
-        const toRestore = new Set([
-          ...REACT_DEFY_HIDDEN_TIMEFRAMES,
-          ...REACT_DEFY_DEFAULT_EXCLUDED_TIMEFRAMES,
-        ]);
-        return {
-          ...prev,
-          excludedTimeframes: (prev.excludedTimeframes || []).filter(
-            (tf) => !toRestore.has(tf)
-          ),
-        };
-      });
+  // ── Detect if any strategyTimeframes have been customized ─────────
+  const hasCustomTimeframes = useMemo(() => {
+    const stf = exclusionFilters.strategyTimeframes || {};
+    for (const name of activeStrategyNames) {
+      const key = DB_NAME_TO_RESTRICTION_KEY[name?.toLowerCase()] || name?.toLowerCase();
+      const allTfs = STRATEGY_TIMEFRAME_MAP[key];
+      const defaultTfs = STRATEGY_DEFAULT_TIMEFRAME_MAP[key];
+      if (!allTfs || !defaultTfs) continue;
+      
+      const sel = stf[key];
+      // It is customized if it's explicitly set AND it doesn't match the default selection length
+      // (or doesn't exactly match the default array, but checking length is usually enough here
+      // since users can only toggle checkboxes from the default list).
+      if (sel) {
+        if (sel.length !== defaultTfs.length) return true;
+        // Strict check: make sure every element in sel is in defaultTfs
+        const hasDifferences = sel.some((t) => !defaultTfs.includes(t)) || defaultTfs.some((t) => !sel.includes(t));
+        if (hasDifferences) return true;
+      }
     }
-  }, [rawIsReactDefyOnly]);
+    return false;
+  }, [exclusionFilters.strategyTimeframes, activeStrategyNames]);
 
   const hasActiveFilters =
     (exclusionFilters.excludedSymbols || []).length > 0 ||
     (exclusionFilters.excludedSignalTypes || []).length > 0 ||
     (exclusionFilters.excludedStrategies || []).length > 0 ||
-    (exclusionFilters.excludedTimeframes || []).length > 0 ||
+    hasCustomTimeframes ||
     (exclusionFilters.excludedSessions || []).length > 0;
 
   // ── Signal type options (from signalConfig) ─────────────────────
@@ -520,7 +496,6 @@ const StudentTradingSignals = () => {
   // ── Base filter totals (use effective values for strategy-scoped restriction) ──
   const totalSymbols = (effectiveCategories || []).flatMap((c) => c?.instruments || []).length;
   const totalSignalTypes = signalTypeOptions.length;
-  const totalTimeframes = effectiveTimeframes?.length || 0;
   const totalStrategies = strategyOptions.length;
   const totalSessions = tradingSessionOptions.length;
 
@@ -530,12 +505,12 @@ const StudentTradingSignals = () => {
   const totalSelected =
     Math.max(0, totalSymbols - (exclusionFilters.excludedSymbols?.length ?? 0)) +
     Math.max(0, totalSignalTypes - (exclusionFilters.excludedSignalTypes?.length ?? 0)) +
-    Math.max(0, totalTimeframes - (exclusionFilters.excludedTimeframes?.length ?? 0)) +
+    tfSelectedCount +
     strategySelectedCount +
     sessionSelectedCount;
 
   const totalAll =
-    totalSymbols + totalSignalTypes + totalTimeframes + totalStrategies + totalSessions;
+    totalSymbols + totalSignalTypes + tfTotalCount + totalStrategies + totalSessions;
 
   useTourStep({
     shouldStart: location?.state?.continueTour === true,
@@ -640,12 +615,11 @@ const StudentTradingSignals = () => {
                 categories={effectiveCategories}
                 flat={isOnlyKillshot}
               />
-              <FilterSelect
-                label="Time Frame"
-                excludedValues={exclusionFilters.excludedTimeframes}
-                onExcludedChange={(v) => updateExclusion("excludedTimeframes", v)}
-                placeholder="All Time Frames"
-                options={effectiveTimeframes}
+              <TimeframeFilterDropdown
+                activeStrategyNames={activeStrategyNames}
+                strategyTimeframes={exclusionFilters.strategyTimeframes || {}}
+                onStrategyTimeframesChange={(newMap) => updateExclusion("strategyTimeframes", newMap)}
+                strategyOptions={strategyOptions}
               />
               {tradingSessionOptions.length > 0 && (
                 <FilterSelect
