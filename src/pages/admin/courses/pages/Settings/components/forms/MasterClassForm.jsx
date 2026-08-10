@@ -44,7 +44,7 @@ const masterClassSchema = z.object({
 });
 
 const MasterClassForm = ({ onSubmit, initialData, isLoading }) => {
-    const [bannerPreview, setBannerPreview] = useState(initialData?.strategyBanner || null);
+    const [bannerPreview, setBannerPreview] = useState(initialData?.strategyBanner || initialData?.imageUrl || null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isStrategyOpen, setIsStrategyOpen] = useState(false);

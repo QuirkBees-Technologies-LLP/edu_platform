@@ -57,8 +57,8 @@ const DraggableCourseCard = ({
     isStrategies,
   } = course || {};
 
-  // Always prefer strategyBanner (unified form banner), fallback to imageUrl (icon)
-  const displayImage = strategyBanner || imageUrl;
+  // Use imageUrl (icon) only
+  const displayImage = imageUrl;
 
   // Fallback image URL
   const fallbackImage =

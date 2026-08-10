@@ -40,7 +40,6 @@ const strategySchema = z.object({
 
 const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     const [iconPreview, setIconPreview] = useState(initialData?.iconThumbnail || null);
-    // const [bannerPreview, setBannerPreview] = useState(initialData?.strategyBanner || null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -61,7 +60,6 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             description: "",
             aboutStrategy: "",
             iconThumbnail: undefined,
-            // strategyBanner: undefined,
             published: false,
             isFeatured: false,
             section: "Strategy",
@@ -79,15 +77,11 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             // console.log(initialData?.strategyBanner);
             // console.log(initialData?.imageUrl);
 
-            // Backend strategyBanner is the Icon, imageUrl is the Banner
+            // Backend: imageUrl = icon thumbnail
             if (initialData?.imageUrl) {
                 setIconPreview(initialData?.imageUrl);
                 setValue("iconThumbnail", initialData?.imageUrl);
             }
-            // if (initialData?.strategyBanner) {
-            //     setBannerPreview(initialData?.strategyBanner);
-            //     setValue("iconThumbnail", initialData?.strategyBanner);
-            // }
         }
     }, [initialData, setValue]);
 
@@ -98,7 +92,6 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 if (field === "iconThumbnail") setIconPreview(reader?.result);
-                // if (field === "strategyBanner") setBannerPreview(reader?.result);
             };
             reader.readAsDataURL(file);
         }
@@ -109,7 +102,6 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
     const removeFile = (field) => {
         setValue(field, undefined, { shouldValidate: true });
         if (field === "iconThumbnail") setIconPreview(null);
-        // if (field === "strategyBanner") setBannerPreview(null);
     };
 
     const submitHandler = async (values) => {
@@ -139,7 +131,6 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
             formData.append("isStrategies", true);
 
             if (values?.iconThumbnail instanceof File) formData.append("icon", values?.iconThumbnail);
-            // if (values?.strategyBanner instanceof File) formData.append("image", values?.strategyBanner);
 
             await onSubmit(formData);
             setUploadProgress(100); // Complete on success
@@ -228,43 +219,7 @@ const StrategyForm = ({ onSubmit, initialData, isLoading }) => {
                             {errors?.iconThumbnail && <p className="text-xs text-rose-500 mt-1">{errors?.iconThumbnail?.message}</p>}
                         </div>
 
-                        {/* <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">Strategy Banner <span className="text-rose-500">*</span></label>
-                            <div className="relative group border-2 border-dashed  rounded-xl p-4 transition-all hover:border-indigo-500/50 /30 text-center">
-                                {bannerPreview && (
-                                    <button
-                                        type="button"
-                                        onClick={(e) => { e?.stopPropagation(); removeFile("strategyBanner"); }}
-                                        className="absolute top-2 right-2 z-20 p-1.5 bg-rose-500/90 text-gray-700 rounded-lg hover:bg-rose-600 transition-all shadow-lg backdrop-blur-sm"
-                                    >
-                                        <CloseIcon className="w-3.5 h-3.5" />
-                                    </button>
 
-                                )}
-                                <input
-                                    type="file"
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    onChange={(e) => handleFileChange(e, "strategyBanner")}
-                                    accept="image/*"
-                                />
-                                {bannerPreview ? (
-                                    <div className="relative aspect-video rounded-lg overflow-hidden">
-                                        <img src={bannerPreview} className="w-full h-full object-cover" alt="Banner" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                                            <Upload className="text-gray-700 w-6 h-6" />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-6 space-y-3 text-gray-500 h-full">
-                                        <div className="p-3 rounded-full bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500/20 transition-all">
-                                            <Upload className="w-6 h-6" />
-                                        </div>
-                                        <span className="text-xs font-semibold">Upload Banner</span>
-                                    </div>
-                                )}
-                            </div>
-                            {errors?.strategyBanner && <p className="text-xs text-rose-500 mt-1">{errors?.strategyBanner?.message}</p>}
-                        </div> */}
                     </div>
 
 
