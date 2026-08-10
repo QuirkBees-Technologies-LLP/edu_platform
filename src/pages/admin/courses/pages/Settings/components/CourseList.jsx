@@ -15,6 +15,7 @@ import {
   fetchStrategies,
   fetchMasterClasses,
 } from "@/store/reducer/courseSlice";
+import { selectSelectedLanguagesAdmin } from "@/store/reducer/studentLanagugeSlice";
 import { useDeleteAdminStrategyMutation } from "@/store/api/admin/adminStrategyApiSlice";
 import {
   useCreateAdminMasterClassMutation,
@@ -30,6 +31,7 @@ import MasterClassForm from "./forms/MasterClassForm";
 const CourseList = ({ onCourseSelect, activeTab }) => {
   const dispatch = useDispatch();
   const courses = useSelector(selectAllCourses);
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -77,7 +79,7 @@ const CourseList = ({ onCourseSelect, activeTab }) => {
       try {
         if (activeTab === "strategies") {
           await deleteStrategy(course?._id).unwrap();
-          dispatch(fetchStrategies({ params: { isDeleted: false }, token: localStorage.getItem("token") }));
+          dispatch(fetchStrategies({ params: { isDeleted: false, ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}) }, token: localStorage.getItem("token") }));
         } else {
           await dispatch(
             deleteExistingCourse({ id: course?._id, token: localStorage.getItem("token") })

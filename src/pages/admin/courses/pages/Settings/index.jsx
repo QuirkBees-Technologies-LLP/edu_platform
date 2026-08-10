@@ -130,7 +130,7 @@ const SettingsSection = () => {
           }
           onRetry={() => {
             let action;
-            let payload = { params: { isDeleted: false }, token: auth?.token };
+            let payload = { params: { isDeleted: false, ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}) }, token: auth?.token };
 
             if (activeTab === "strategies") {
               action = fetchStrategies;

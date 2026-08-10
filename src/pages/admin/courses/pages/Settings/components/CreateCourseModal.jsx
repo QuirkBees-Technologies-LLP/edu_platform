@@ -1,5 +1,5 @@
 import { forwardRef, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 import {
@@ -27,6 +27,7 @@ import {
   useCreateAdminStrategyMutation,
   useUpdateAdminStrategyMutation
 } from "@/store/api/admin/adminStrategyApiSlice";
+import { selectSelectedLanguagesAdmin } from "@/store/reducer/studentLanagugeSlice";
 
 const CreateCourseModal = forwardRef(
   ({ isOpen, onClose, onSubmit, initialData, activeTab: parentActiveTab }, ref) => {
@@ -66,13 +67,15 @@ const CreateCourseModal = forwardRef(
       }
     }, [initialData]);
 
+    const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
+
     if (!isOpen) return null;
 
     // Fetch courses on mount and when token changes
     const fetchAllCourses = async () => {
       if (auth?.token) {
         let action;
-        let payload = { params: { isDeleted: false }, token: auth?.token };
+        let payload = { params: { isDeleted: false, ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}) }, token: auth?.token };
 
         if (activeTab === "strategies") {
           action = fetchStrategies;
