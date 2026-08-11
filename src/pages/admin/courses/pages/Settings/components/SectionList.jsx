@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const SectionList = ({
   courseId,
+  activeTab,
   onLectureSelect,
   onLectureUpdate,
   forceUpdateLectureList,
@@ -278,6 +279,7 @@ const SectionList = ({
                   <SectionItem
                     section={section}
                     courseId={courseId}
+                    activeTab={activeTab}
                     onLectureSelect={onLectureSelect}
                     onLectureUpdate={onLectureUpdate}
                     forceUpdateLectureList={forceUpdateLectureList}

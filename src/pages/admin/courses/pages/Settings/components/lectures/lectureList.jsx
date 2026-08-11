@@ -22,6 +22,8 @@ import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
 
 const LectureList = ({
   sectionId,
+  subsectionId,
+  directOnly = false,
   onLectureSelect,
   onLectureUpdate,
   forceUpdateLectureList,
@@ -41,7 +43,12 @@ const LectureList = ({
 
     setIsLoading(true);
     try {
-      const response = await getAllLectures({ section: sectionId }, auth.token);
+      const params = subsectionId
+        ? { section: sectionId, subsection: subsectionId }
+        : directOnly
+          ? { section: sectionId, directOnly: true }
+          : { section: sectionId };
+      const response = await getAllLectures(params, auth.token);
       setLectures(response.data);
     } catch (error) {
       console.error("Failed to fetch lectures:", error);
@@ -53,10 +60,10 @@ const LectureList = ({
     }
   };
 
-  // Fetch lectures when sectionId changes
+  // Fetch lectures when sectionId/subsectionId changes
   useEffect(() => {
     loadLectures();
-  }, [sectionId, auth?.token]);
+  }, [sectionId, subsectionId, auth?.token]);
 
   useEffect(() => {
     if (forceUpdateLectureList) {
@@ -281,6 +288,7 @@ const LectureList = ({
                 <div className="border border-gray-200 rounded-md bg-light p-3 mb-2">
                   <CreateLectureForm
                     sectionId={sectionId}
+                    subsectionId={subsectionId}
                     onCancel={() => setIsCreatingLecture(false)}
                     onSuccess={handleLectureCreated}
                   />
