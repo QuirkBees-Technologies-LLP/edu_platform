@@ -19,10 +19,12 @@ import {
 } from "@/store/reducer/sectionSlice";
 import { selectSectionsStatus } from "@/store/reducer/sectionSlice";
 import LectureList from "../lectures/lectureList";
+import SubsectionList from "./SubsectionList";
 
 const SectionItem = ({
   section,
   courseId,
+  activeTab,
   onLectureSelect,
   onLectureUpdate,
   forceUpdateLectureList,
@@ -30,6 +32,7 @@ const SectionItem = ({
   reorderMode,
   readOnly = false,
 }) => {
+  const supportsSubsections = activeTab === "strategies";
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(section.title);
@@ -282,14 +285,30 @@ const SectionItem = ({
       {isExpanded && (
         <div className="border border-t-0 pt-2 pb-3 px-3 rounded-b-lg">
           <div className="ml-7">
+            {supportsSubsections && (
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Lectures
+              </p>
+            )}
             <LectureList
               sectionId={section._id}
+              directOnly={supportsSubsections}
               onLectureSelect={onLectureSelect}
               onLectureUpdate={onLectureUpdate}
               forceUpdateLectureList={forceUpdateLectureList}
               setForceUpdateLectureList={setForceUpdateLectureList}
               readOnly={readOnly}
             />
+            {supportsSubsections && (
+              <SubsectionList
+                sectionId={section._id}
+                onLectureSelect={onLectureSelect}
+                onLectureUpdate={onLectureUpdate}
+                forceUpdateLectureList={forceUpdateLectureList}
+                setForceUpdateLectureList={setForceUpdateLectureList}
+                readOnly={readOnly}
+              />
+            )}
           </div>
         </div>
       )}

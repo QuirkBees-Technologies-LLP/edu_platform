@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./reducer/authSlice"; // Import auth slice
 import courseReducer from "./reducer/courseSlice";
 import sectionReducer from "./reducer/sectionSlice";
+import subsectionReducer from "./reducer/subsectionSlice";
 import lectureReducer from "./reducer/lectureSlice";
 import educatorPostReducer from "./reducer/postSlice";
 import { adminTradeIdeasApiSlice } from "./api/admin/adminTradeIdeasApiSlice";
@@ -72,6 +73,7 @@ export const store = configureStore({
     auth: authReducer,
     courses: courseReducer,
     sections: sectionReducer,
+    subsections: subsectionReducer,
     lectures: lectureReducer,
     educatorPosts: educatorPostReducer,
     language: persistedLanguageReducer,

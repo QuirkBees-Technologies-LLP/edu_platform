@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2, Video, FileText, Plus, GripVertical, Pencil, Download, Trash2, Eye } from "lucide-react";
+import { Loader2, Video, Image as ImageIcon, FileText, Plus, GripVertical, Pencil, Download, Trash2, Eye, Upload } from "lucide-react";
 import { KeenIcon } from "@/components";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   useGetLearningContentDetailQuery,
+  useUpdateLearningContentMutation,
   useAddVideoMutation,
   useUpdateVideoMutation,
   useDeleteVideoMutation,
@@ -55,6 +56,13 @@ const LearningContentDetail = () => {
 
   const { data, isLoading, isError } = useGetLearningContentDetailQuery(id);
   const content = data?.data;
+
+  // STRATEGY content has no Videos tab (replaced by Banner) - default there instead.
+  React.useEffect(() => {
+    if (content?.contentType === "STRATEGY" && activeTab === "videos") {
+      setActiveTab("banner");
+    }
+  }, [content?.contentType]);
 
   if (isLoading) {
     return (
@@ -134,16 +142,29 @@ const LearningContentDetail = () => {
 
       {/* Tabs */}
       <div className="flex items-center gap-4 mb-5">
-        <button
-          onClick={() => setActiveTab("videos")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === "videos"
-            ? "bg-primary text-white shadow-sm"
-            : "bg-gray-100 dark:bg-[#1e2028] text-gray-600 dark:text-gray-800 hover:bg-gray-200 dark:hover:bg-[#25272f]"
-            }`}
-        >
-          <Video size={16} />
-          Videos ({content.videos?.length || 0})
-        </button>
+        {content.contentType === "FAST_START" ? (
+          <button
+            onClick={() => setActiveTab("videos")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === "videos"
+              ? "bg-primary text-white shadow-sm"
+              : "bg-gray-100 dark:bg-[#1e2028] text-gray-600 dark:text-gray-800 hover:bg-gray-200 dark:hover:bg-[#25272f]"
+              }`}
+          >
+            <Video size={16} />
+            Videos ({content.videos?.length || 0})
+          </button>
+        ) : (
+          <button
+            onClick={() => setActiveTab("banner")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === "banner"
+              ? "bg-primary text-white shadow-sm"
+              : "bg-gray-100 dark:bg-[#1e2028] text-gray-600 dark:text-gray-800 hover:bg-gray-200 dark:hover:bg-[#25272f]"
+              }`}
+          >
+            <ImageIcon size={16} />
+            Banner
+          </button>
+        )}
         {content.contentType !== "FAST_START" && (
           <button
             onClick={() => setActiveTab("resources")}
@@ -159,9 +180,13 @@ const LearningContentDetail = () => {
       </div>
 
       {/* Tab Content */}
-      {activeTab === "videos" ? (
-        <VideoManager contentId={id} videos={content.videos || []} />
-      ) : content.contentType !== "FAST_START" ? (
+      {content.contentType === "FAST_START" ? (
+        activeTab === "videos" && (
+          <VideoManager contentId={id} videos={content.videos || []} />
+        )
+      ) : activeTab === "banner" ? (
+        <BannerManager contentId={id} bannerImage={content.bannerImage || ""} />
+      ) : activeTab === "resources" ? (
         <ResourceManager contentId={id} resources={content.resources || []} />
       ) : null}
     </div>
@@ -403,6 +428,69 @@ function VideoManager({ contentId, videos }) {
 }
 
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// BANNER MANAGER (STRATEGY content only — replaces the Video slider)
+// ═══════════════════════════════════════════════════════════════════════
+function BannerManager({ contentId, bannerImage }) {
+  const [file, setFile] = useState(null);
+  const [updateContent, { isLoading: isSaving }] = useUpdateLearningContentMutation();
+
+  const handleUpload = async () => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("bannerImage", file);
+    try {
+      await updateContent({ id: contentId, formData }).unwrap();
+      toast.success("Banner updated successfully");
+      setFile(null);
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to update banner");
+    }
+  };
+
+  const handleRemovePreview = () => setFile(null);
+
+  return (
+    <div className="card">
+      <div className="card-header px-6 py-4">
+        <h3 className="card-title">Banner</h3>
+      </div>
+      <div className="card-body p-6 space-y-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          This banner is shown at the top of the Strategy page and stays the
+          same regardless of which section or lecture the student is viewing.
+        </p>
+
+        <FileDropzone
+          accept=".jpg,.jpeg,.png,.gif,.webp"
+          maxSize={5 * 1024 * 1024}
+          file={file}
+          preview={bannerImage}
+          onChange={(f) => setFile(f)}
+          onRemove={handleRemovePreview}
+          label="Upload Banner Image"
+          hint="JPG, PNG, GIF, WEBP – Max 5MB · Recommended: wide, full-width image"
+        />
+
+        <div className="flex justify-end pt-2">
+          <button
+            className="btn btn-sm btn-primary"
+            disabled={!file || isSaving}
+            onClick={handleUpload}
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+            ) : (
+              <Upload size={14} className="mr-1.5" />
+            )}
+            {bannerImage ? "Replace Banner" : "Upload Banner"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // RESOURCE MANAGER

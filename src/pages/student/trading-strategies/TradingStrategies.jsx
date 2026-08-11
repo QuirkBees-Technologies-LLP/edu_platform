@@ -7,7 +7,7 @@ import { Container } from '@/components/container';
 import { useGetAdminStrategyListQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery, useGetStrategyByNameMutation } from '@/store/api/client/clientStrategiesApiSlice';
 import { useGetStrategyContentQuery } from '@/store/api/client/clientLearningContentApiSlice';
 import { useSelector } from 'react-redux';
-import { Loader2, CirclePlay, Globe } from 'lucide-react';
+import { Loader2, CirclePlay, Globe, GripVertical } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
 import {
     Select,
@@ -24,7 +24,6 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import ResourcesSection from "../../../components/ui/ResourcesSection";
-import StrategyVideoCarousel from "../../../components/ui/StrategyVideoCarousel";
 import { getEmbedUrl } from "@/utils/videoUtils";
 
 /**
@@ -65,6 +64,18 @@ const parseTags = (tags) => {
         }
     });
     return result;
+};
+
+/**
+ * First lecture of a section — checked directly on the section, then inside
+ * its subsections in order (Sections -> Subsections -> Lectures).
+ */
+const getFirstLectureOfSection = (section) => {
+    if (section?.lectures?.length > 0) return section.lectures[0];
+    for (const subsection of section?.subsections || []) {
+        if (subsection?.lectures?.length > 0) return subsection.lectures[0];
+    }
+    return null;
 };
 
 
@@ -144,8 +155,8 @@ const TradingStrategies = () => {
     useEffect(() => {
         if (currentStrategy?.sections?.length > 0) {
             const firstSection = currentStrategy?.sections?.[0];
-            if (firstSection?.lectures?.length > 0) {
-                const firstLecture = firstSection?.lectures?.[0];
+            const firstLecture = getFirstLectureOfSection(firstSection);
+            if (firstLecture) {
                 setActiveLectureId(firstLecture?._id);
                 setActiveLecture(firstLecture);
             }
@@ -315,54 +326,21 @@ const TradingStrategies = () => {
         <div className="max-w-7xl mx-auto px-4 pb-10">
             {/* <BackButton /> */}
             <Container width="fluid" className="mx-auto px-2">
-                {/* Strategy Logo — shown from learning content response (dark/light mode) */}
-                {learningContent?.darkModeImage || learningContent?.lightModeImage ? (
-                    <div className="flex items-center justify-center mb-4">
-                        {learningContent?.darkModeImage && (
-                            <img
-                                src={learningContent?.darkModeImage}
-                                alt={currentStrategy?.title || "Strategy"}
-                                className="hidden dark:block h-14 w-auto object-contain"
-                            />
-                        )}
-                        {learningContent?.lightModeImage && (
-                            <img
-                                src={learningContent?.lightModeImage}
-                                alt={currentStrategy?.title || "Strategy"}
-                                className="block dark:hidden h-14 w-auto object-contain"
-                            />
-                        )}
-                    </div>
-                ) : null}
-
-                {/* Banner or Video Carousel — conditionally rendered */}
+                {/* ========== BANNER ========== */}
+                {/* Banner — static image, replaces the old video carousel */}
                 <div className="ts-banner">
                     {currentStrategy
-                        ? (() => {
-                            // Use dynamic learning content from admin
-                            // Show banner if: error, still fetching, or no videos
-                            const hasLearningContent = !isLearningContentError && !isLearningContentFetching && learningContent?.videos?.length > 0;
-                            const strategyIconUrl = parentStrategy?.imageUrl || currentStrategy?.imageUrl;
-
-                            // If no learning content videos or error, show banner image
-                            if (!hasLearningContent) {
-                                return <Banner />;
-                            }
-
-                            const hasDarkLightImages = learningContent?.darkModeImage || learningContent?.lightModeImage;
-
-                            return (
-                                <StrategyVideoCarousel
-                                    videos={learningContent?.videos}
-                                    title={hasDarkLightImages ? undefined : (learningContent?.title || parentStrategy?.title || currentStrategy?.title)}
-                                    description={hasDarkLightImages ? undefined : learningContent?.description}
-                                    strategyIcon={hasDarkLightImages ? undefined : strategyIconUrl}
-                                    darkModeImage={learningContent?.darkModeImage || ""}
-                                    lightModeImage={learningContent?.lightModeImage || ""}
-                                    resources={learningContent?.resources || []}
-                                />
-                            );
-                        })()
+                        ? (learningContent?.bannerImage
+                            ? (
+                                <div className="rounded-2xl overflow-hidden">
+                                    <img
+                                        src={learningContent.bannerImage}
+                                        alt={currentStrategy?.title || "Strategy"}
+                                        className="w-full h-auto object-cover"
+                                    />
+                                </div>
+                            )
+                            : <Banner />)
                         : <Banner />
                     }
                 </div>
@@ -390,7 +368,7 @@ const TradingStrategies = () => {
                                                 <div
                                                     key={lecture?._id}
                                                     onClick={() => handleLectureClick(lecture)}
-                                                    className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
+                                                    className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition
                                                         ${activeLectureId === lecture?._id
                                                             ? "bg-gray-300 dark:bg-slate-800"
                                                             : "hover:bg-gray-50 dark:hover:bg-slate-900"
@@ -402,6 +380,46 @@ const TradingStrategies = () => {
                                                     </span>
                                                 </div>
                                             ))}
+                                            {section?.subsections?.length > 0 && (
+                                                <div className="border-t border-gray-100 p-3 space-y-3">
+                                                    {section.subsections.map((subsection) => (
+                                                        <div
+                                                            key={subsection?._id}
+                                                            className="rounded-lg border-l-4 border-l-primary bg-gray-50 dark:bg-slate-900/40 overflow-hidden"
+                                                        >
+                                                            <Accordion allowMultiple={false}>
+                                                                <AccordionItem
+                                                                    title={
+                                                                        <span className="flex items-center gap-2 text-primary font-semibold">
+                                                                            <GripVertical className="w-4 h-4 text-primary/60" />
+                                                                            {subsection?.title || 'Subsection'}
+                                                                        </span>
+                                                                    }
+                                                                >
+                                                                    <div className="px-2 pb-2 space-y-2">
+                                                                        {subsection?.lectures?.map((lecture) => (
+                                                                            <div
+                                                                                key={lecture?._id}
+                                                                                onClick={() => handleLectureClick(lecture)}
+                                                                                className={`flex items-center p-4 rounded-lg cursor-pointer transition
+                                                                                    ${activeLectureId === lecture?._id
+                                                                                        ? "bg-gray-300 dark:bg-slate-800"
+                                                                                        : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                                                                    }`}
+                                                                            >
+                                                                                <CirclePlay className="mr-2 text-gray-400" />
+                                                                                <span className="text-gray-800 font-medium text-xs">
+                                                                                    {lecture?.title}
+                                                                                </span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </AccordionItem>
+                                                            </Accordion>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </AccordionItem>
                                     ))}
                                 </Accordion>

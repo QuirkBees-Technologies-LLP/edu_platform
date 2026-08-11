@@ -100,6 +100,7 @@ const CourseContent = ({ courseId, activeTab }) => {
             <div className="p-5 ps-0">
               <SectionList
                 courseId={courseId}
+                activeTab={activeTab}
                 onLectureSelect={(lecture) => {
                   setSelectedLecture(lecture);
                   localStorage.setItem("selectedLectureId", lecture?._id);
