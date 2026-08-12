@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./reducer/authSlice"; // Import auth slice
 import courseReducer from "./reducer/courseSlice";
 import sectionReducer from "./reducer/sectionSlice";
+import breadcrumbReducer from "./reducer/breadcrumbSlice";
 import subsectionReducer from "./reducer/subsectionSlice";
 import lectureReducer from "./reducer/lectureSlice";
 import educatorPostReducer from "./reducer/postSlice";
@@ -73,6 +74,7 @@ export const store = configureStore({
     auth: authReducer,
     courses: courseReducer,
     sections: sectionReducer,
+    breadcrumb: breadcrumbReducer,
     subsections: subsectionReducer,
     lectures: lectureReducer,
     educatorPosts: educatorPostReducer,

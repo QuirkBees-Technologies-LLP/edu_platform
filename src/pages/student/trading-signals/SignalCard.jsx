@@ -18,6 +18,13 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
       {/* ── Header: Strategy Name (primary) + Signal Type ── */}
       <div className="flex items-start gap-1 mb-2">
         <div className="flex-1 min-w-0">
+          {/* Strategy name — primary highlighted element */}
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-0.5 rounded-lg truncate leading-tight">
+              <ChartLine size={13} className="flex-shrink-0" />
+              {signal?.strategyName || signal?.webhookConfig?.name || "—"}
+            </span>
+          </div>
 
           {/* Symbol + Signal Type + Timeframe */}
           <div className="flex items-center gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
@@ -303,24 +310,19 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
       {/* ── Chart Thumbnail ── */}
 
 
-      {/* ── Footer: Time ── */}
+      {/* ── Footer: Source + Time ── */}
       <div className="flex justify-between items-center pt-1 border-t border-slate-200 dark:border-[#1F1F35]">
-        <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
-          <Clock className="w-3.5 h-3.5" />
-          <span className="text-[11px] font-medium">
-            {(() => {
-              const ts = signal?.alertTimestamp || signal?.createdAt;
-              return ts ? getRelativeTime(ts) : "";
-            })()}
-          </span>
-        </div>
-        <span className="text-[11px] text-slate-400 dark:text-slate-500">
+        <span className="text-[12px] text-slate-500 dark:text-white/80 font-semibold truncate max-w-[180px]">
+          {signal?.webhookConfig?.name ? `${signal.webhookConfig.name}` : ""}
+        </span>
+        <span className="flex items-center gap-1.5 text-[12px] text-slate-500 dark:text-white/80 font-semibold whitespace-nowrap">
           {(() => {
             const ts = signal?.alertTimestamp || signal?.createdAt;
-            if (!ts) return "";
-            return signal?.alertTimestamp
+            const rel = ts ? getRelativeTime(ts) : null;
+            const exact = signal?.alertTimestamp
               ? formatAlertTime(signal.alertTimestamp)
-              : formatTimeAgo(signal.createdAt);
+              : (signal?.createdAt ? formatTimeAgo(signal.createdAt) : "—");
+            return rel ? `${rel} · ${exact}` : exact;
           })()}
         </span>
       </div>
