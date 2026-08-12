@@ -19,6 +19,16 @@ const SignalCard = React.forwardRef(({ signal, onClick }, ref) => {
       <div className="flex items-start gap-1 mb-2">
         <div className="flex-1 min-w-0">
 
+          {/* Strategy name — primary pill badge */}
+          {(signal?.strategyName || signal?.webhookConfig?.name) && (
+            <div className="flex items-center mb-2 min-w-0 text-blue-500 dark:text-blue-300">
+              <span className="inline-flex items-center gap-1.5 h-6 max-w-full px-2 rounded-lg text-[11px] font-extrabold uppercase tracking-wide text-blue-700 dark:text-blue-200 bg-blue-200/40 dark:bg-blue-500/20 backdrop-blur-md border border-violet-300/50 dark:border-violet-400/25 leading-none shadow-sm">
+                <ChartLine size={11} className="text-blue-500 dark:text-blue-300 flex-shrink-0" />
+                <span className="truncate">{signal?.strategyName || signal?.webhookConfig?.name}</span>
+              </span>
+            </div>
+          )}
+
           {/* Symbol + Signal Type + Timeframe */}
           <div className="flex items-center gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
             {/* Symbol — icon + glass effect */}
