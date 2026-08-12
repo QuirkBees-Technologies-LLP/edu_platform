@@ -37,9 +37,7 @@ const HeaderTopbar = () => {
     "/fast-start-training",
     "/iq-vault",
     "/iq-academy",
-    "/iq-academy-educators",
     "/master-class",
-    "/master-class/:id"
   ];
 
   const EDUCATOR_ALLOWED_ROUTES = [
