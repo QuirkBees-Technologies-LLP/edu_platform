@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from '@/components/container';
-import { useSelector } from 'react-redux';
-import { selectSelectedLanguage } from '../../../store/reducer/studentLanagugeSlice';
 import { Loader2, CirclePlay } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
 import { useGetMasterClassQuery, useLazyGetMasterClassByIdQuery } from '@/store/api/client/clientMasterClassApiSlice';
@@ -95,18 +93,15 @@ const StudentMasterClass = () => {
     const [activeLectureId, setActiveLectureId] = useState(null);
     const [activeLecture, setActiveLecture] = useState(null);
 
-    // Get selected language from Redux
-    const selectedLanguage = useSelector(selectSelectedLanguage);
-
     // ==================== API CALLS ====================
-    // Fetch all strategies
+    // Fetch all strategies — no language filtering; returns all masterclasses regardless of language
     const {
         data: strategiesData,
         isLoading: strategiesLoading,
         error: strategiesError,
         refetch: refetchStrategies,
     } = useGetMasterClassQuery(
-        { id: educatorId, params: { language: selectedLanguage } },
+        { id: educatorId, params: {} },
         // { skip: !educatorId }
     );
 

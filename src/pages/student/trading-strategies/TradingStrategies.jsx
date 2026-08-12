@@ -6,8 +6,9 @@ import { toast } from 'sonner';
 import { Container } from '@/components/container';
 import { useGetAdminStrategyListQuery, useLazyGetStrategyByIdQuery, useGetStrategyLanguagesQuery, useGetStrategyByNameMutation } from '@/store/api/client/clientStrategiesApiSlice';
 import { useGetStrategyContentQuery } from '@/store/api/client/clientLearningContentApiSlice';
-import { useSelector } from 'react-redux';
-import { Loader2, CirclePlay, Globe, GripVertical } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setBreadcrumbSuffix, clearBreadcrumbSuffix } from '@/store/reducer/breadcrumbSlice';
+import { Loader2, CirclePlay, Globe } from 'lucide-react';
 import { Accordion, AccordionItem } from '@/components/accordion';
 import {
     Select,
@@ -24,6 +25,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import ResourcesSection from "../../../components/ui/ResourcesSection";
+import StrategyResources from "../../../components/ui/StrategyResources";
 import { getEmbedUrl } from "@/utils/videoUtils";
 
 /**
@@ -82,6 +84,7 @@ const getFirstLectureOfSection = (section) => {
 const TradingStrategies = () => {
     // ==================== STATE MANAGEMENT ====================
     const [selectedStrategyId, setSelectedStrategyId] = useState(null);
+    const [activeSectionId, setActiveSectionId] = useState(null);
     const [activeLectureId, setActiveLectureId] = useState(null);
     const [activeLecture, setActiveLecture] = useState(null);
     const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -95,6 +98,7 @@ const TradingStrategies = () => {
 
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { auth } = useAuthContext();
 
     // Get selected language from Redux
@@ -141,6 +145,17 @@ const TradingStrategies = () => {
 
     // ==================== SIDE EFFECTS ====================
     /**
+     * Show the selected strategy's name in the header breadcrumb ("Strategies > Defy").
+     * Cleared on unmount so the breadcrumb doesn't leak into other pages.
+     */
+    useEffect(() => {
+        dispatch(setBreadcrumbSuffix(currentStrategy?.title || null));
+        return () => {
+            dispatch(clearBreadcrumbSuffix());
+        };
+    }, [currentStrategy?.title, dispatch]);
+
+    /**
      * When a strategy is selected, fetch its detailed data
      */
     useEffect(() => {
@@ -155,6 +170,7 @@ const TradingStrategies = () => {
     useEffect(() => {
         if (currentStrategy?.sections?.length > 0) {
             const firstSection = currentStrategy?.sections?.[0];
+            setActiveSectionId(firstSection?._id);
             const firstLecture = getFirstLectureOfSection(firstSection);
             if (firstLecture) {
                 setActiveLectureId(firstLecture?._id);
@@ -207,6 +223,7 @@ const TradingStrategies = () => {
     const selectStrategy = (strategyId) => {
         setManualStrategyData(null); // Clear manual data so fetchStrategy takes over
         setSelectedStrategyId(strategyId);
+        setActiveSectionId(null);
         setActiveLectureId(null);
         setActiveLecture(null);
     };
@@ -217,6 +234,16 @@ const TradingStrategies = () => {
     const handleLectureClick = (lecture) => {
         setActiveLectureId(lecture?._id);
         setActiveLecture(lecture);
+    };
+
+    /**
+     * Handle main section selection (sections are shown horizontally below the banner)
+     */
+    const handleSectionClick = (section) => {
+        setActiveSectionId(section?._id);
+        const firstLecture = getFirstLectureOfSection(section);
+        setActiveLectureId(firstLecture?._id || null);
+        setActiveLecture(firstLecture || null);
     };
 
     /**
@@ -253,6 +280,7 @@ const TradingStrategies = () => {
             if (strategyResult) {
                 setManualStrategyData(strategyResult);
                 setSelectedStrategyId(strategyResult?._id);
+                setActiveSectionId(null);
                 setActiveLectureId(null);
                 setActiveLecture(null);
 
@@ -321,6 +349,15 @@ const TradingStrategies = () => {
         );
     }
 
+    // The currently selected main section, and whether it has any lectures/subsections
+    const activeSection =
+        currentStrategy?.sections?.find((s) => s?._id === activeSectionId) ||
+        currentStrategy?.sections?.[0] ||
+        null;
+    const activeSectionHasContent = !!(
+        activeSection?.lectures?.length > 0 || activeSection?.subsections?.length > 0
+    );
+
     // ==================== MAIN RENDER ====================
     return (
         <div className="max-w-7xl mx-auto px-4 pb-10">
@@ -328,7 +365,7 @@ const TradingStrategies = () => {
             <Container width="fluid" className="mx-auto px-2">
                 {/* ========== BANNER ========== */}
                 {/* Banner — static image, replaces the old video carousel */}
-                <div className="ts-banner">
+                <div className="ts-banner relative">
                     {currentStrategy
                         ? (learningContent?.bannerImage
                             ? (
@@ -343,86 +380,111 @@ const TradingStrategies = () => {
                             : <Banner />)
                         : <Banner />
                     }
+
+                    {/* Resources — bottom-right of the banner, same placement the video carousel used to use.
+                        Gated on currentStrategy (language confirmed via the modal), same as the banner image
+                        above — learningContent starts loading as soon as "Start Learning" is clicked, before
+                        the language is actually applied, so it must not render until currentStrategy is set. */}
+                    {currentStrategy && learningContent?.resources?.length > 0 && (
+                        <div className="hidden md:block absolute right-2.5 bottom-2.5 z-10 w-[265px] max-w-[28%]">
+                            <StrategyResources resources={learningContent.resources} />
+                        </div>
+                    )}
                 </div>
 
+                {/* Resources — below the banner on mobile, where the overlay doesn't fit */}
+                {currentStrategy && learningContent?.resources?.length > 0 && (
+                    <div className="md:hidden mt-3">
+                        <StrategyResources resources={learningContent.resources} />
+                    </div>
+                )}
+
+                {/* ========== MAIN SECTIONS — horizontal, directly below the banner ========== */}
+                {currentStrategy?.sections?.length > 0 && (
+                    <div className="flex items-center justify-center gap-2 overflow-x-auto mt-4 pb-1">
+                        {currentStrategy.sections.map((section, index) => (
+                            <button
+                                key={section?._id || index}
+                                onClick={() => handleSectionClick(section)}
+                                className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium border transition whitespace-nowrap ${activeSectionId === section?._id
+                                    ? "bg-gradient-to-r from-purple-500 to-orange-500 text-white border-transparent"
+                                    : "bg-transparent border-gray-300 dark:border-gray-700 text-gray-800 hover:border-gray-400"
+                                    }`}
+                            >
+                                {index + 1}. {section?.title || "Section"}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
                 {/* ========== DYNAMIC CONTENT AREA ========== */}
-                {/* This section updates when a strategy is selected */}
+                {/* Shows the lectures & subsections of the selected main section */}
                 <div className="flex flex-col md:flex-row gap-6 mb-8 mt-5">
                     {/* ========== LESSONS PANEL (LEFT SIDEBAR) ========== */}
                     {currentStrategy?.sections?.length > 0 ? (
                         <div className="md:w-[430px]">
                             <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
-                                {/* <div className="p-6 border-b border-gray-300">
-                                    <h3 className="text-lg font-semibold">{currentStrategy.title}</h3>
-                                    <p className="text-sm text-gray-900 mt-2">
-                                        {currentStrategy.sections.reduce((total, section) => total + (section.lectures?.length || 0), 0)} Lessons
-                                    </p>
-                                </div> */}
-                                <Accordion allowMultiple={false} defaultIndex={0}>
-                                    {currentStrategy?.sections?.map((section, index) => (
-                                        <AccordionItem
-                                            key={section?._id || index}
-                                            title={`${index + 1}. ${section?.title || 'Section'}`}
-                                        >
-                                            {section?.lectures?.map((lecture) => (
-                                                <div
-                                                    key={lecture?._id}
-                                                    onClick={() => handleLectureClick(lecture)}
-                                                    className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition
-                                                        ${activeLectureId === lecture?._id
-                                                            ? "bg-gray-300 dark:bg-slate-800"
-                                                            : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                                        }`}
-                                                >
-                                                    <CirclePlay className="mr-2 text-gray-400" />
-                                                    <span className="text-gray-800 font-medium text-xs">
-                                                        {lecture?.title}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                            {section?.subsections?.length > 0 && (
-                                                <div className="border-t border-gray-100 p-3 space-y-3">
-                                                    {section.subsections.map((subsection) => (
-                                                        <div
-                                                            key={subsection?._id}
-                                                            className="rounded-lg border-l-4 border-l-primary bg-gray-50 dark:bg-slate-900/40 overflow-hidden"
-                                                        >
-                                                            <Accordion allowMultiple={false}>
-                                                                <AccordionItem
-                                                                    title={
-                                                                        <span className="flex items-center gap-2 text-primary font-semibold">
-                                                                            <GripVertical className="w-4 h-4 text-primary/60" />
-                                                                            {subsection?.title || 'Subsection'}
-                                                                        </span>
-                                                                    }
-                                                                >
-                                                                    <div className="px-2 pb-2 space-y-2">
-                                                                        {subsection?.lectures?.map((lecture) => (
-                                                                            <div
-                                                                                key={lecture?._id}
-                                                                                onClick={() => handleLectureClick(lecture)}
-                                                                                className={`flex items-center p-4 rounded-lg cursor-pointer transition
-                                                                                    ${activeLectureId === lecture?._id
-                                                                                        ? "bg-gray-300 dark:bg-slate-800"
-                                                                                        : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                                                                    }`}
-                                                                            >
-                                                                                <CirclePlay className="mr-2 text-gray-400" />
-                                                                                <span className="text-gray-800 font-medium text-xs">
-                                                                                    {lecture?.title}
-                                                                                </span>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </AccordionItem>
-                                                            </Accordion>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </AccordionItem>
-                                    ))}
-                                </Accordion>
+                                {activeSectionHasContent ? (
+                                    <>
+                                        {activeSection?.lectures?.map((lecture) => (
+                                            <div
+                                                key={lecture?._id}
+                                                onClick={() => handleLectureClick(lecture)}
+                                                className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition
+                                                    ${activeLectureId === lecture?._id
+                                                        ? "bg-gray-300 dark:bg-slate-800"
+                                                        : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                                    }`}
+                                            >
+                                                <CirclePlay className="mr-2 text-gray-400" />
+                                                <span className="text-gray-800 font-medium text-xs">
+                                                    {lecture?.title}
+                                                </span>
+                                            </div>
+                                        ))}
+
+                                        {/* Subsections — same accordion look sections used to have */}
+                                        {activeSection?.subsections?.length > 0 && (
+                                            <Accordion allowMultiple={false}>
+                                                {activeSection.subsections.map((subsection) => (
+                                                    <AccordionItem
+                                                        key={subsection?._id}
+                                                        title={subsection?.title || 'Subsection'}
+                                                    >
+                                                        {subsection?.lectures?.map((lecture) => (
+                                                            <div
+                                                                key={lecture?._id}
+                                                                onClick={() => handleLectureClick(lecture)}
+                                                                className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition
+                                                                    ${activeLectureId === lecture?._id
+                                                                        ? "bg-gray-300 dark:bg-slate-800"
+                                                                        : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                                                    }`}
+                                                            >
+                                                                <CirclePlay className="mr-2 text-gray-400" />
+                                                                <span className="text-gray-800 font-medium text-xs">
+                                                                    {lecture?.title}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </AccordionItem>
+                                                ))}
+                                            </Accordion>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-12 px-6">
+                                        <div className="text-center">
+                                            <div className="text-4xl mb-4"></div>
+                                            <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
+                                                Coming Soon
+                                            </h3>
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm">
+                                                Lessons will be added soon
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ) : currentStrategy ? (
@@ -462,7 +524,7 @@ const TradingStrategies = () => {
                                             allowFullScreen
                                             title={activeLecture?.title || "Video Player"}
                                         />
-                                    ) : currentStrategy?.sections?.length > 0 ? (
+                                    ) : currentStrategy?.sections?.length > 0 && activeSectionHasContent ? (
                                         <div className="text-center">
                                             <div className="text-8xl mb-5 opacity-30 text-white">▶</div>
                                             <h3 className="text-xl text-white">
@@ -470,7 +532,7 @@ const TradingStrategies = () => {
                                             </h3>
                                         </div>
                                     ) : currentStrategy ? (
-                                        // Strategy selected but no sections/lessons available
+                                        // No sections at all, or the selected section has no lectures/subsections yet
                                         <div className="text-center text-gray-400">
                                             <div className="text-8xl mb-5 opacity-30">▶</div>
                                             <h3 className="text-xl text-gray-200">No lessons available for this strategy</h3>

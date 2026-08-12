@@ -1,9 +1,11 @@
 import clsx from 'clsx';
 import { Fragment } from 'react';
 import { useLocation } from 'react-router';
+import { useSelector } from 'react-redux';
 import { KeenIcon } from '@/components';
 import { useMenuBreadcrumbs } from '@/components/menu';
 import { useMenus } from '@/providers';
+import { selectBreadcrumbSuffix } from '@/store/reducer/breadcrumbSlice';
 const Breadcrumbs = () => {
   const {
     pathname
@@ -12,7 +14,16 @@ const Breadcrumbs = () => {
     getMenuConfig
   } = useMenus();
   const menuConfig = getMenuConfig('primary');
-  const items = useMenuBreadcrumbs(pathname, menuConfig);
+  const breadcrumbSuffix = useSelector(selectBreadcrumbSuffix);
+  const baseItems = useMenuBreadcrumbs(pathname, menuConfig);
+  // Strategies page appends the selected strategy's name (e.g. "Strategies > Defy").
+  // Scoped to its own route so no other page's breadcrumb is affected.
+  const items = (breadcrumbSuffix && pathname === '/trading-strategies')
+    ? [
+      ...baseItems.map((item) => ({ ...item, active: false })),
+      { title: breadcrumbSuffix, path: pathname, active: true },
+    ]
+    : baseItems;
   const renderItems = items => {
     return items.map((item, index) => {
       const last = index === items.length - 1;
