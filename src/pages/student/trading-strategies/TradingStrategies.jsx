@@ -360,10 +360,9 @@ const TradingStrategies = () => {
 
     // ==================== MAIN RENDER ====================
     return (
-        <div className="max-w-7xl mx-auto px-4 pb-10">
+        <div className="container-fluid pb-10">
             {/* <BackButton /> */}
-            <Container width="fluid" className="mx-auto px-2">
-                {/* ========== BANNER ========== */}
+            {/* ========== BANNER ========== */}
                 {/* Banner — static image, replaces the old video carousel */}
                 <div className="ts-banner relative">
                     {currentStrategy
@@ -380,24 +379,7 @@ const TradingStrategies = () => {
                             : <Banner />)
                         : <Banner />
                     }
-
-                    {/* Resources — bottom-right of the banner, same placement the video carousel used to use.
-                        Gated on currentStrategy (language confirmed via the modal), same as the banner image
-                        above — learningContent starts loading as soon as "Start Learning" is clicked, before
-                        the language is actually applied, so it must not render until currentStrategy is set. */}
-                    {currentStrategy && learningContent?.resources?.length > 0 && (
-                        <div className="hidden md:block absolute right-2.5 bottom-2.5 z-10 w-[265px] max-w-[28%]">
-                            <StrategyResources resources={learningContent.resources} />
-                        </div>
-                    )}
                 </div>
-
-                {/* Resources — below the banner on mobile, where the overlay doesn't fit */}
-                {currentStrategy && learningContent?.resources?.length > 0 && (
-                    <div className="md:hidden mt-3">
-                        <StrategyResources resources={learningContent.resources} />
-                    </div>
-                )}
 
                 {/* ========== MAIN SECTIONS — horizontal, directly below the banner ========== */}
                 {currentStrategy?.sections?.length > 0 && (
@@ -407,7 +389,7 @@ const TradingStrategies = () => {
                                 key={section?._id || index}
                                 onClick={() => handleSectionClick(section)}
                                 className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium border transition whitespace-nowrap ${activeSectionId === section?._id
-                                    ? "bg-gradient-to-r from-purple-500 to-orange-500 text-white border-transparent"
+                                    ? "bg-blue-600 text-white border-transparent"
                                     : "bg-transparent border-gray-300 dark:border-gray-700 text-gray-800 hover:border-gray-400"
                                     }`}
                             >
@@ -419,7 +401,7 @@ const TradingStrategies = () => {
 
                 {/* ========== DYNAMIC CONTENT AREA ========== */}
                 {/* Shows the lectures & subsections of the selected main section */}
-                <div className="flex flex-col md:flex-row gap-6 mb-8 mt-5">
+                <div className="flex flex-col md:flex-row items-start gap-6 mb-8 mt-5">
                     {/* ========== LESSONS PANEL (LEFT SIDEBAR) ========== */}
                     {currentStrategy?.sections?.length > 0 ? (
                         <div className="md:w-[430px]">
@@ -486,6 +468,14 @@ const TradingStrategies = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Strategy-level resources — same design as when it lived on the banner,
+                                now placed under the lecture list where it's more visible */}
+                            {currentStrategy && learningContent?.resources?.length > 0 && (
+                                <div className="mt-3">
+                                    <StrategyResources resources={learningContent.resources} />
+                                </div>
+                            )}
                         </div>
                     ) : currentStrategy ? (
                         <div className="md:w-[350px]">
@@ -784,7 +774,6 @@ const TradingStrategies = () => {
                         </DialogContent>
                     </Dialog>
                 }
-            </Container>
         </div>
     );
 }
