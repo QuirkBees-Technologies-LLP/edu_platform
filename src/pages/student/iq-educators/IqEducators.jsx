@@ -416,7 +416,7 @@ const IqEducators = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm w-fit">
+        {/* <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm w-fit">
           <button
             onClick={toggleMute}
             className="text-white hover:text-yellow-300 transition p-1"
@@ -447,7 +447,7 @@ const IqEducators = () => {
           >
             +
           </button>
-        </div>
+        </div> */}
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-3">
             <button

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   useCall,
   useCallStateHooks,
@@ -179,6 +179,43 @@ export function createLivestreamParticipantOverlay({
     const isIOSDevice = useMemo(() => isIOS(), []);
     const captions = useLiveCaptions();
 
+    // Auto-hide control bar: hidden by default, appears on mouse movement inside
+    // the player and fades out again after a few seconds of inactivity.
+    const [mouseActive, setMouseActive] = useState(false);
+    const hideTimerRef = useRef(null);
+
+    useEffect(() => {
+      const el = participantViewElement;
+      if (!el) return;
+
+      const revealControls = () => {
+        setMouseActive(true);
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => setMouseActive(false), 3000);
+      };
+      const hideControls = () => {
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        setMouseActive(false);
+      };
+
+      el.addEventListener("mousemove", revealControls);
+      el.addEventListener("mouseenter", revealControls);
+      el.addEventListener("touchstart", revealControls);
+      el.addEventListener("mouseleave", hideControls);
+
+      return () => {
+        el.removeEventListener("mousemove", revealControls);
+        el.removeEventListener("mouseenter", revealControls);
+        el.removeEventListener("touchstart", revealControls);
+        el.removeEventListener("mouseleave", hideControls);
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+      };
+    }, [participantViewElement]);
+
+    // Keep the bar visible while a control is actively being used, even if the mouse stops moving
+    const controlsVisible =
+      mouseActive || showVolumeSlider || captions.showLangMenu;
+
     useEffect(() => {
       const handler = () => setIsFullscreen(!!document.fullscreenElement);
       document.addEventListener("fullscreenchange", handler);
@@ -235,9 +272,17 @@ export function createLivestreamParticipantOverlay({
 
     return (
       <>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+        <div
+          className={`pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/85 via-black/40 to-transparent transition-opacity duration-300 ${controlsVisible ? "opacity-100" : "opacity-0"
+            }`}
+        />
 
-        <div className="pointer-events-auto absolute inset-x-0 bottom-0 flex items-center gap-2.5 px-4 py-3">
+        <div
+          className={`absolute inset-x-0 bottom-0 flex items-center gap-2.5 px-4 py-3 transition-opacity duration-300 ${controlsVisible
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+            }`}
+        >
           <span className="shrink-0 inline-flex items-center gap-1.5 bg-blue-600 text-white text-[11px] font-bold tracking-wide px-2 py-1 rounded-md leading-none">
             <span className="w-1.5 h-1.5 rounded-full bg-white/90" />
             LIVE
