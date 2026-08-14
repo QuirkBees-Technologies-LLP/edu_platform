@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useCallStateHooks, useCall } from '@stream-io/video-react-sdk';
 import { useGetLanguageQuery } from '../store/api/client/clientLanguageApiSlice';
@@ -23,9 +23,14 @@ const LANGUAGE_NAME_TO_CODE = {
   // are NOT supported by GetStream translation API — omitted intentionally
 };
 
-const LiveClosedCaptions = () => {
+/**
+ * All closed-captions data/state logic, shared between the inline toggle
+ * control (rendered inside the player's control bar) and the floating
+ * caption text overlay (rendered over the video).
+ */
+export const useLiveCaptions = () => {
   const { useCallClosedCaptions, useIsCallLive } = useCallStateHooks();
-  const closedCaptions = useCallClosedCaptions();
+  useCallClosedCaptions();
   const isLive = useIsCallLive();
   const [showCaptions, setShowCaptions] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
@@ -33,6 +38,7 @@ const LiveClosedCaptions = () => {
   const [portalTarget, setPortalTarget] = useState(null);
   const [supportedLanguages, setSupportedLanguages] = useState([{ code: 'en', label: 'English' }]);
   const langMenuRef = useRef(null);
+  const langMenuPortalRef = useRef(null);
 
   // Fetch languages using RTK Query (clientLanguageApiSlice)
   const { data: languageData } = useGetLanguageQuery();
@@ -128,7 +134,6 @@ const LiveClosedCaptions = () => {
       return displayText['en'] || '';
     }
     // Return translated if available, else fallback to English
-
     return displayText[selectedLanguage] || displayText['en'] || '';
   }, [selectedLanguage, displayText]);
 
@@ -141,10 +146,13 @@ const LiveClosedCaptions = () => {
     setShowLangMenu(false);
   }, []);
 
-  // Close language menu when clicking outside
+  // Close language menu when clicking outside (checks both the trigger button
+  // and the portaled dropdown, since the dropdown no longer lives inside langMenuRef's DOM subtree)
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (langMenuRef?.current && !langMenuRef.current.contains(e?.target)) {
+      const insideTrigger = langMenuRef?.current?.contains(e?.target);
+      const insidePortal = langMenuPortalRef?.current?.contains(e?.target);
+      if (!insideTrigger && !insidePortal) {
         setShowLangMenu(false);
       }
     };
@@ -154,7 +162,7 @@ const LiveClosedCaptions = () => {
     }
   }, [showLangMenu]);
 
-  // Track fullscreen changes
+  // Track fullscreen changes (used to portal the floating caption text into the fullscreen element)
   useEffect(() => {
     const onFullscreenChange = () => {
       const fsEl = document?.fullscreenElement || document?.webkitFullscreenElement;
@@ -173,240 +181,230 @@ const LiveClosedCaptions = () => {
     };
   }, []);
 
-  // Inject global CSS for fullscreen captions overlay
-  useEffect(() => {
-    const styleId = 'live-captions-fullscreen-style';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = `
-        .captions-overlay-root {
-          position: absolute !important;
-          top: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          bottom: 0 !important;
-          pointer-events: none !important;
-          z-index: 99999 !important;
-        }
-        .captions-cc-btn,
-        .captions-lang-btn,
-        .captions-lang-menu {
-          pointer-events: auto !important;
-          z-index: 100000 !important;
-        }
-        .captions-lang-menu::-webkit-scrollbar {
-          width: 4px;
-        }
-        .captions-lang-menu::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .captions-lang-menu::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.3);
-          border-radius: 2px;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-    return () => {
-      const el = document.getElementById(styleId);
-      if (el) el.remove();
-    };
-  }, []);
-
-
-
   const selectedLangLabel =
     supportedLanguages?.find((l) => l?.code === selectedLanguage)?.label || 'English';
 
-  // Don't render anything if stream is not live
+  return {
+    isLive,
+    showCaptions,
+    toggleCaptions,
+    selectedLanguage,
+    selectedLangLabel,
+    supportedLanguages,
+    showLangMenu,
+    setShowLangMenu,
+    handleLanguageSelect,
+    langMenuRef,
+    langMenuPortalRef,
+    currentCaptionText,
+    captionVisible,
+    portalTarget,
+  };
+};
+
+/**
+ * Compact CC toggle + language dropdown, styled to sit as a regular flex
+ * item inside the player's control bar (no absolute positioning, so it can
+ * never collide with neighboring controls again).
+ */
+export const CaptionsInlineControl = ({ captions, iconButtonClassName }) => {
+  const {
+    isLive,
+    showCaptions,
+    toggleCaptions,
+    selectedLangLabel,
+    supportedLanguages,
+    showLangMenu,
+    setShowLangMenu,
+    handleLanguageSelect,
+    langMenuRef,
+    langMenuPortalRef,
+    selectedLanguage,
+    portalTarget,
+  } = captions;
+
+  const langBtnRef = useRef(null);
+  const [menuStyle, setMenuStyle] = useState(null);
+
+  // Position the dropdown against the trigger button's real viewport position,
+  // since it's portaled out of the player's clipped (overflow:hidden) DOM subtree.
+  useLayoutEffect(() => {
+    if (!showLangMenu) return;
+
+    const MENU_WIDTH = 150;
+    const MENU_MAX_HEIGHT = 220;
+    const GAP = 8;
+    const EDGE_PADDING = 8;
+
+    const reposition = () => {
+      const btn = langBtnRef.current;
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const openUpward = spaceAbove >= spaceBelow;
+
+      const maxHeight = Math.min(MENU_MAX_HEIGHT, (openUpward ? spaceAbove : spaceBelow) - GAP - EDGE_PADDING);
+
+      let left = rect.right - MENU_WIDTH;
+      left = Math.max(EDGE_PADDING, Math.min(left, window.innerWidth - MENU_WIDTH - EDGE_PADDING));
+
+      setMenuStyle({
+        position: 'fixed',
+        left,
+        [openUpward ? 'bottom' : 'top']: openUpward
+          ? window.innerHeight - rect.top + GAP
+          : rect.bottom + GAP,
+        width: MENU_WIDTH,
+        maxHeight: Math.max(maxHeight, 100),
+      });
+    };
+
+    reposition();
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
+  }, [showLangMenu]);
+
   if (!isLive) return null;
 
-  const content = (
-    <div className="captions-overlay-root">
-      {/* CC Toggle Button */}
+  const menu = showCaptions && showLangMenu && menuStyle && (
+    <div
+      ref={langMenuPortalRef}
+      className="iq-live-lang-menu overflow-y-auto rounded-lg border border-white/15 bg-black/90 backdrop-blur-md py-1 shadow-xl"
+      style={{ ...menuStyle, zIndex: 100000 }}
+    >
+      {supportedLanguages?.map((lang) => (
+        <button
+          key={lang?.code}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleLanguageSelect(lang?.code);
+          }}
+          className={`block w-full text-left px-3.5 py-1.5 text-xs transition-colors ${selectedLanguage === lang?.code
+            ? 'bg-white/15 text-white font-semibold'
+            : 'text-white/75 hover:bg-white/10'
+            }`}
+        >
+          {selectedLanguage === lang?.code && '✓ '}
+          {lang?.label}
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="relative flex items-center" ref={langMenuRef}>
       <button
-        className="captions-cc-btn"
+        type="button"
         onClick={(e) => {
-          e?.preventDefault();
-          e?.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
           toggleCaptions();
         }}
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          right: '60px',
-          backgroundColor: showCaptions
-            ? 'rgba(255, 255, 255, 0.25)'
-            : 'rgba(255, 255, 255, 0.08)',
-          color: showCaptions ? '#fff' : 'rgba(255, 255, 255, 0.4)',
-          border: showCaptions
-            ? '1px solid rgba(255, 255, 255, 0.5)'
-            : '1px solid rgba(255, 255, 255, 0.15)',
-          borderRadius: '4px',
-          padding: '3px 6px',
-          fontSize: '12px',
-          fontWeight: 700,
-          cursor: 'pointer',
-          letterSpacing: '0.5px',
-          lineHeight: '1',
-          transition: 'all 0.2s ease',
-        }}
-        title={showCaptions ? 'Hide Captions' : 'Show Captions'}
+        className={`${iconButtonClassName} ${showCaptions ? 'iq-live-icon-btn--active' : ''
+          } text-[10px] font-bold tracking-wide`}
+        title={showCaptions ? 'Hide captions' : 'Show captions'}
+        aria-label={showCaptions ? 'Hide captions' : 'Show captions'}
       >
         CC
       </button>
 
-      {/* Language Selector Button */}
       {showCaptions && (
-        <div
-          ref={langMenuRef}
-          style={{ position: 'absolute', bottom: '20px', right: '95px' }}
-        >
-          <button
-            className="captions-lang-btn"
-            onClick={(e) => {
-              e?.preventDefault();
-              e?.stopPropagation();
-              setShowLangMenu((prev) => !prev);
-            }}
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.15)',
-              color: '#fff',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '4px',
-              padding: '3px 8px',
-              fontSize: '10px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              letterSpacing: '0.3px',
-              lineHeight: '1',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-            title="Change caption language"
-          >
-            🌐 {selectedLangLabel}
-            <span style={{ fontSize: '8px', opacity: 0.7 }}>
-              {showLangMenu ? '▲' : '▼'}
-            </span>
-          </button>
-
-          {/* Language Dropdown Menu */}
-          {showLangMenu && (
-            <div
-              className="captions-lang-menu"
-              style={{
-                position: 'absolute',
-                bottom: '22px',
-                right: '0',
-                backgroundColor: 'rgba(0, 0, 0, 0.92)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '8px',
-                padding: '4px 0',
-                minWidth: '140px',
-                maxHeight: '220px',
-                overflowY: 'auto',
-                backdropFilter: 'blur(12px)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              }}
-            >
-              {supportedLanguages?.map((lang) => (
-                <button
-                  key={lang?.code}
-                  onClick={(e) => {
-                    e?.preventDefault();
-                    e?.stopPropagation();
-                    handleLanguageSelect(lang?.code);
-                  }}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '6px 14px',
-                    border: 'none',
-                    background:
-                      selectedLanguage === lang?.code
-                        ? 'rgba(255, 255, 255, 0.15)'
-                        : 'transparent',
-                    color:
-                      selectedLanguage === lang?.code
-                        ? '#fff'
-                        : 'rgba(255, 255, 255, 0.75)',
-                    fontSize: '12px',
-                    fontWeight: selectedLanguage === lang?.code ? 600 : 400,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'background 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedLanguage !== lang?.code) {
-                      e.target.style.background = 'rgba(255, 255, 255, 0.08)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedLanguage !== lang?.code) {
-                      e.target.style.background = 'transparent';
-                    }
-                  }}
-                >
-                  {selectedLanguage === lang?.code && '✓ '}
-                  {lang?.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Captions Text — auto-hides 4s after last speech, smooth fade */}
-      {showCaptions && currentCaptionText && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '60px',
-            left: 0,
-            right: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 16px',
-            pointerEvents: 'none',
+        <button
+          ref={langBtnRef}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowLangMenu((prev) => !prev);
           }}
+          className="iq-live-lang-btn flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-medium text-white/90 hover:bg-white/10 transition-colors"
+          title="Change caption language"
         >
-          <div
-            className={`cc-caption-box${captionVisible ? '' : ' hiding'}`}
-            style={{
-              backgroundColor: 'rgba(38, 29, 29, 0.14)',
-              color: '#ffffff',
-              padding: '7px 18px',
-              borderRadius: '8px',
-              textAlign: 'center',
-              backdropFilter: 'blur(6px)',
-              fontSize: '12px',
-              fontWeight: 500,
-              lineHeight: '1.5',
-              maxWidth: '75%',
-              letterSpacing: '0.01em',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
-            }}
-          >
-            {currentCaptionText}
-          </div>
-        </div>
+          <span className="max-w-[64px] truncate">{selectedLangLabel}</span>
+          <svg width="8" height="8" viewBox="0 0 10 6" fill="none">
+            <path
+              d={showLangMenu ? 'M1 5L5 1L9 5' : 'M1 1L5 5L9 1'}
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       )}
 
+      {menu && createPortal(menu, portalTarget || document.body)}
+    </div>
+  );
+};
+
+/**
+ * Floating caption text bubble, centered over the video. Kept independently
+ * positioned (not part of the control bar flex row) since it doesn't sit
+ * near any other controls, and portals into the real fullscreen element
+ * when active so it stays visible in fullscreen.
+ */
+export const CaptionsTextOverlay = ({ captions }) => {
+  const { isLive, showCaptions, currentCaptionText, captionVisible, portalTarget } = captions;
+
+  if (!isLive || !showCaptions || !currentCaptionText) return null;
+
+  const content = (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '76px',
+        left: 0,
+        right: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 16px',
+        pointerEvents: 'none',
+        zIndex: 99999,
+      }}
+    >
+      <div
+        className={`cc-caption-box${captionVisible ? '' : ' hiding'}`}
+        style={{
+          backgroundColor: 'rgba(38, 29, 29, 0.14)',
+          color: '#ffffff',
+          padding: '7px 18px',
+          borderRadius: '8px',
+          textAlign: 'center',
+          backdropFilter: 'blur(6px)',
+          fontSize: '12px',
+          fontWeight: 500,
+          lineHeight: '1.5',
+          maxWidth: '75%',
+          letterSpacing: '0.01em',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+        }}
+      >
+        {currentCaptionText}
+      </div>
     </div>
   );
 
-  // Fullscreen: portal into fullscreen element
-  if (portalTarget) {
-    return createPortal(content, portalTarget);
-  }
+  return portalTarget ? createPortal(content, portalTarget) : content;
+};
 
-  // Normal mode
-  return content;
+/**
+ * @deprecated kept only so nothing breaks if imported elsewhere; new code
+ * should use `useLiveCaptions` + `CaptionsInlineControl` + `CaptionsTextOverlay`
+ * so the toggle button can live inside the control bar's flex layout.
+ */
+const LiveClosedCaptions = () => {
+  const captions = useLiveCaptions();
+  return <CaptionsTextOverlay captions={captions} />;
 };
 
 export default LiveClosedCaptions;
