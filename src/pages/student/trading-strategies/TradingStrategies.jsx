@@ -401,10 +401,10 @@ const TradingStrategies = () => {
 
                 {/* ========== DYNAMIC CONTENT AREA ========== */}
                 {/* Shows the lectures & subsections of the selected main section */}
-                <div className="flex flex-col md:flex-row items-start gap-6 mb-8 mt-5">
+                <div className="flex flex-col md:flex-row gap-6 mb-8 mt-5">
                     {/* ========== LESSONS PANEL (LEFT SIDEBAR) ========== */}
                     {currentStrategy?.sections?.length > 0 ? (
-                        <div className="md:w-[430px]">
+                        <div className="md:w-[430px] flex flex-col">
                             <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
                                 {activeSectionHasContent ? (
                                     <>
@@ -469,13 +469,16 @@ const TradingStrategies = () => {
                                 )}
                             </div>
 
-                            {/* Strategy-level resources — same design as when it lived on the banner,
-                                now placed under the lecture list where it's more visible */}
+                            {/* Strategy-level resources — same design as when it lived on the banner.
+                                mt-auto pushes it to the bottom of this column (which now stretches to
+                                match the video player's height), so it stays anchored near the bottom
+                                regardless of how much lecture content is above it. */}
                             {currentStrategy && learningContent?.resources?.length > 0 && (
-                                <div className="mt-3">
+                                <div className="mt-auto pt-6">
                                     <StrategyResources resources={learningContent.resources} />
                                 </div>
                             )}
+
                         </div>
                     ) : currentStrategy ? (
                         <div className="md:w-[350px]">
