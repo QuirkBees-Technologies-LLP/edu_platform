@@ -191,23 +191,22 @@ export function createLivestreamParticipantOverlay({
       const revealControls = () => {
         setMouseActive(true);
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = setTimeout(() => setMouseActive(false), 3000);
-      };
-      const hideControls = () => {
-        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-        setMouseActive(false);
+        hideTimerRef.current = setTimeout(() => setMouseActive(false), 3500);
       };
 
+      // Note: deliberately NOT hiding on "mouseleave". On touch devices (iPhone,
+      // in-app WebViews) a single tap synthesizes a mouse-event sequence that
+      // fires a mouseleave/hover-reset almost immediately after the tap - that
+      // was hiding the bar before there was time to tap a button. The inactivity
+      // timer above is enough to hide it once the pointer actually stops.
       el.addEventListener("mousemove", revealControls);
       el.addEventListener("mouseenter", revealControls);
       el.addEventListener("touchstart", revealControls);
-      el.addEventListener("mouseleave", hideControls);
 
       return () => {
         el.removeEventListener("mousemove", revealControls);
         el.removeEventListener("mouseenter", revealControls);
         el.removeEventListener("touchstart", revealControls);
-        el.removeEventListener("mouseleave", hideControls);
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
       };
     }, [participantViewElement]);
