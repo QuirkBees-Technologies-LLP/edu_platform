@@ -486,15 +486,17 @@ body.ios-fullscreen-active {
 }
 
 /* Hide the SDK's default fullscreen button since we have our own */
+/* :not(.iq-live-icon-btn) excludes our own control-bar buttons (CC/volume/fullscreen),
+   which also carry "fullscreen" in their aria-label and would otherwise get caught here too */
 .live-player-container .str-video_livestream-layout_fullscreen-button,
 .live-player-container .str-video__fullscreen-button,
 .live-player-container .str-video__icon--fullscreen,
 .live-player-container .str-video__icon--fullscreen-exit,
 .live-player-container [data-testid="fullscreen-button"],
-.live-player-container button[aria-label*="fullscreen" i],
-.live-player-container button[aria-label*="Fullscreen" i],
-.live-player-container button[title*="fullscreen" i],
-.live-player-container button[title*="Fullscreen" i] {
+.live-player-container button[aria-label*="fullscreen" i]:not(.iq-live-icon-btn),
+.live-player-container button[aria-label*="Fullscreen" i]:not(.iq-live-icon-btn),
+.live-player-container button[title*="fullscreen" i]:not(.iq-live-icon-btn),
+.live-player-container button[title*="Fullscreen" i]:not(.iq-live-icon-btn) {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;

@@ -5,8 +5,8 @@ import {
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
 import { Copy, PhoneOff, Podcast, Radio, Route, RouteOff } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { DefaultTooltip } from "@/components";
+import React, { useEffect, useMemo, useState } from "react";
+import { DefaultTooltip, createLivestreamParticipantOverlay } from "@/components";
 import { toast } from "sonner";
 import {
   useEducatorChangeLiveStreamStatusUpdateMutation,
@@ -20,7 +20,6 @@ import RecordingControls from "./RecordingControls";
 import { useEducatorLiveStreamStatusUpdateMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { LiveClosedCaptions } from "@/components";
 
 const LiveSessionPlayer = ({
   client,
@@ -61,6 +60,11 @@ const LiveSessionPlayer = ({
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
   const [lastNote, setLastNote] = useState(false);
+
+  const ParticipantViewUI = useMemo(
+    () => createLivestreamParticipantOverlay({ showParticipantCount: true }),
+    []
+  );
 
   useEffect(() => {
     if (!call) return;
@@ -243,16 +247,11 @@ const LiveSessionPlayer = ({
         <LivestreamPlayer
           displayName="Hello guys"
           layoutProps={{
-            showLiveBadge: true,
-            showSpeakerName: true,
-            showParticipantCount: true,
-            showDuration: true,
-            enableFullScreen: true,
+            ParticipantViewUI,
           }}
           callType="livestream"
           callId={callId}
         />
-        <LiveClosedCaptions />
       </div>
 
       {isCallEnd ? (
