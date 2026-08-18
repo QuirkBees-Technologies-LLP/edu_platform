@@ -1554,19 +1554,6 @@ export const sideMenus = {
       path: "/admin/tv-webhooks",
     },
     {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
-      children: [
-        {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
-        },
-      ],
-    },
-    {
       title: "Educators",
       icon: <User />,
       path: "/admin/educators",
@@ -1694,19 +1681,6 @@ export const sideMenus = {
       title: "IQ Live Ideas",
       icon: <Lightbulb />,
       path: "/educator/live-ideas",
-    },
-    {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
-      children: [
-        {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
-        },
-      ],
     },
     {
       title: "IQ Social",

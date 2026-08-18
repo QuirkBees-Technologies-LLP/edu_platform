@@ -38,6 +38,16 @@ import RatingModal from "./RatingModel";
 import { useLayout } from "../../../providers";
 import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import EducatorFeed from "./EducatorFeed";
+
+// Strips HTML tags AND decodes entities (e.g. "&nbsp;") into plain text,
+// unlike a naive tag-stripping regex which leaves entities behind literally.
+const htmlToPlainText = (html) => {
+  if (!html) return "";
+  const el = document.createElement("div");
+  el.innerHTML = html;
+  return (el.textContent || el.innerText || "").replace(/\s+/g, " ").trim();
+};
 
 const IqEducators = () => {
   const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
@@ -60,6 +70,7 @@ const IqEducators = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [liveFeedImage, setLiveFeedImage] = useState(null);
+  const [isEducatorLive, setIsEducatorLive] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
@@ -372,6 +383,96 @@ const IqEducators = () => {
     return `${days} day${days > 1 ? "s" : ""} ago`;
   };
 
+  // Extracted so the same Live Feed card can render in its normal sidebar spot
+  // (when not live) or stacked below the Educator Feed inside the live chat
+  // column (when live), without duplicating this JSX in two places.
+  const renderLiveFeedCard = () => (
+    <div className="card rounded-2xl shadow-md overflow-hidden">
+      {/* Header */}
+      <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
+        <h3 className="text-white font-semibold text-sm">
+          Live Feed
+        </h3>
+        <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
+        </div>
+      </div>
+
+      {/* Updates */}
+      <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
+        {/* Messages */}
+        {response?.data?.PostData?.length > 0 ? (
+          response?.data?.PostData?.map((update) => (
+            <div
+              key={update?._id}
+              className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
+            >
+              <div className="flex flex-col gap-4 mb-4">
+                <img
+                  src={update?.author?.image}
+                  alt={update?.author?.name}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div>
+                  <h4 className="text-sm font-normal mb-1 text-gray-900">
+                    {update?.author?.first_name}{" "}
+                    {update?.author?.last_name}
+                  </h4>
+                  <p className="text-xs font-normal text-gray-600">
+                    {update?.createdAt
+                      ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
+                      : ""}
+                  </p>
+                </div>
+              </div>
+
+              {update?.content && (
+                <div className="mb-3">
+                  <p
+                    className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+                    dangerouslySetInnerHTML={{
+                      __html: makeClickableLinks(update?.content),
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Post Images */}
+              {update?.images?.length > 0 && (
+                <div
+                  className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
+                >
+                  {update.images.map((img, imgIdx) => {
+                    const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
+                    const imgKey = img?._id || imgUrl || imgIdx;
+                    return imgUrl ? (
+                      <div
+                        key={imgKey}
+                        className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
+                        onClick={() => setLiveFeedImage(imgUrl)}
+                      >
+                        <img
+                          src={imgUrl}
+                          alt="post"
+                          className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                        />
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
+            <div className="text-sm text-gray-900 font-medium text-center">
+              🚀 No updates available right now. Stay tuned for fresh
+              content!
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="container-fluid pb-10">
@@ -385,7 +486,8 @@ const IqEducators = () => {
 
 
       {/* speaker center */}
-      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4`}>
+      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-8 sm:p-8 flex flex-col gap-4`}>
+        <div className="w-full flex items-center justify-between sm:flex-row flex-col gap-4">
         <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
           <div className="flex items-center flex-wrap justify-center sm:justify-start gap-6">
             <div className="relative group">
@@ -398,10 +500,23 @@ const IqEducators = () => {
             </div>
 
             <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-              <h3 className="text-white font-bold text-md sm:text-xl mb-3 tracking-tight drop-shadow-md">
+              <h3 className="text-white font-bold text-md sm:text-xl mb-2 tracking-tight drop-shadow-md">
                 {response?.data?.educator?.first_name}{" "}
                 {response?.data?.educator?.last_name}
               </h3>
+
+              {response?.data?.educator?.categories?.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mb-3">
+                  {response.data.educator.categories.map((cat) => (
+                    <span
+                      key={cat?._id || cat?.name}
+                      className="bg-white/15 text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20"
+                    >
+                      {cat?.name}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <button
                 onClick={handleShowMasterClasses}
@@ -450,12 +565,12 @@ const IqEducators = () => {
         </div> */}
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-3">
-            <button
+            {/* <button
               onClick={() => setIsOpen(true)}
               className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors`}
             >
               <Volume2 size={18} />
-            </button>
+            </button> */}
 
             {isOpen && (
               <div
@@ -539,6 +654,15 @@ const IqEducators = () => {
             </button>
           </div>
         </div>
+        </div>
+
+        {response?.data?.educator?.description && (
+          <div className="w-full pt-4 border-t border-white/10">
+            <p className="text-center text-white/80 text-xs sm:text-sm leading-relaxed max-w-3xl mx-auto px-2">
+              {htmlToPlainText(response.data.educator.description)}
+            </p>
+          </div>
+        )}
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
@@ -547,6 +671,16 @@ const IqEducators = () => {
             callId={callId}
             educatorData={response?.data?.educator?.description}
             headerGradient={getHeaderGradient()}
+            feedContent={
+              <EducatorFeed
+                educatorId={id}
+                educatorName={`${response?.data?.educator?.first_name || ""} ${response?.data?.educator?.last_name || ""}`.trim()}
+                educatorAvatar={response?.data?.educator?.image}
+                headerGradient={getHeaderGradient()}
+              />
+            }
+            liveFeedContent={isEducatorLive ? renderLiveFeedCard() : null}
+            onStatusChange={(status) => setIsEducatorLive(status === "live")}
           />
         </div>
       </div>
@@ -554,10 +688,362 @@ const IqEducators = () => {
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">
 
-          {/* Live Idea - Hide for Digital Marketing */}
+          {/* Master Classes */}
+          {response?.data?.masterClasses?.length > 0 && <div className="text-gray-900 mb-8">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Master Classes</h2>
+                {!isEducator && <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => navigate(`/master-class/${id}`)}
+                >
+                  View All
+                </button>}
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.masterClasses?.length > 0 ? (
+                <div className="flex gap-4">
+                  {response?.data?.masterClasses?.map((mc) => (
+                    <div
+                      key={mc?._id}
+                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                      onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
+                    >
+                      <div className="rounded-t-xl overflow-hidden">
+                        <img
+                          src={mc?.imageUrl || mc?.strategyBanner}
+                          alt={mc?.title}
+                          className="w-full h-36 object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {mc?.title}
+                        </h3>
+                        {mc?.category?.name && (
+                          <p className="text-xs text-gray-500 mb-1">{mc?.category?.name}</p>
+                        )}
+                        {mc?.language && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {mc?.language}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Masterclasses Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Recordings */}
+          {response?.data?.recordings?.length > 0 && <div className="text-gray-900 mb-8">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Recordings</h2>
+                <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => setShowAll((prev) => !prev)}
+                >
+                  {showAll ? "Show Less" : "View All"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.recordings?.length > 0 ? (
+                showAll ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.recordings?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className="w-full cursor-pointer border rounded-xl shadow-sm"
+                      >
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.call_title}
+                          </h3>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex gap-4">
+                    {response?.data?.recordings?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
+                      >
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.call_title}
+                          </h3>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Recordings Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Ideas */}
+          {response?.data?.idea?.length > 0 && <div className="text-gray-900 mb-28">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Ideas</h2>
+                {!isEducator && <button
+                  onClick={() => setIdea((prev) => !prev)}
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                >
+                  {idea ? "Show Less" : "View All"}
+                </button>}
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.idea?.length > 0 ? (
+                idea ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.idea?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedIdea(course);
+                          setIsViewOpen(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.image?.[0]}
+                            alt={course?.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.name}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.idea?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedIdea(course);
+                          setIsViewOpen(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.image?.[0]}
+                            alt={course?.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4 d-flex">
+                          <div className="justify-between">
+                            <h3 className="text-md font-normal mb-2">
+                              {course?.name}
+                            </h3>
+                          </div>
+
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Idea Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Insights */}
+
+          {response?.data?.insight?.length > 0 && <div className="text-gray-900 mb-28">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Insights</h2>
+                {!isEducator && <button
+                  onClick={() => setInsight((prev) => !prev)}
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                >
+                  {insight ? "Show Less" : "View All"}
+                </button>}
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.insight?.length > 0 ? (
+                insight ? (
+                  // GRID VIEW (sabhi courses ek sath)
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.insight?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedInsight(course);
+                          setIsViewOpen1(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.photos?.[0]}
+                            alt={course?.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.title}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.insight?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedInsight(course);
+                          setIsViewOpen1(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.photos?.[0]}
+                            alt={course?.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.title}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">
+                    No insight Found
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Live Ideas */}
 
 
-          {!isDigitalMarketing && <div className="text-gray-900">
+          {liveIdea?.length > 0 && <div className="text-gray-900">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -700,364 +1186,6 @@ const IqEducators = () => {
               )}
             </div>
           </div>}
-
-
-
-
-
-
-
-          {/* Recordings - Show for Digital Marketing only (after Courses) */}
-          {isDigitalMarketing && <div className="text-gray-900 mb-8">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => setShowAll((prev) => !prev)}
-                >
-                  {showAll ? "Show Less" : "View All"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.recordings?.length > 0 ? (
-                showAll ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full cursor-pointer border rounded-xl shadow-sm"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">No Recordings Found</span>
-                </div>
-              )}
-            </div>
-          </div>}
-
-          {/* Master Classes — shown for ALL educators */}
-          <div className="text-gray-900 mb-8">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Master Classes</h2>
-                {!isEducator && <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => navigate(`/master-class/${id}`)}
-                >
-                  View All
-                </button>}
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.masterClasses?.length > 0 ? (
-                <div className="flex gap-4">
-                  {response?.data?.masterClasses?.map((mc) => (
-                    <div
-                      key={mc?._id}
-                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                      onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={mc?.imageUrl || mc?.strategyBanner}
-                          alt={mc?.title}
-                          className="w-full h-36 object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {mc?.title}
-                        </h3>
-                        {mc?.category?.name && (
-                          <p className="text-xs text-gray-500 mb-1">{mc?.category?.name}</p>
-                        )}
-                        {mc?.language && (
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                            {mc?.language}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">No Masterclasses Found</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Idea - Hide for Digital Marketing */}
-          {!isDigitalMarketing && <div className="text-gray-900 mb-28">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Ideas</h2>
-                {!isEducator && <button
-                  onClick={() => setIdea((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                >
-                  {idea ? "Show Less" : "View All"}
-                </button>}
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.idea?.length > 0 ? (
-                idea ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.name}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4 d-flex">
-                          <div className="justify-between">
-                            <h3 className="text-md font-normal mb-2">
-                              {course?.name}
-                            </h3>
-                          </div>
-
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">No Idea Found</span>
-                </div>
-              )}
-            </div>
-          </div>}
-
-          {/* Insight - Hide for Digital Marketing */}
-
-          {!isDigitalMarketing && <div className="text-gray-900 mb-28">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Insights</h2>
-                {!isEducator && <button
-                  onClick={() => setInsight((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                >
-                  {insight ? "Show Less" : "View All"}
-                </button>}
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.insight?.length > 0 ? (
-                insight ? (
-                  // GRID VIEW (sabhi courses ek sath)
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">
-                    No insight Found
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>}
         </div>
 
         {/* Sidebar */}
@@ -1114,160 +1242,11 @@ const IqEducators = () => {
                 </form>
               </div>
             </div> */}
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                {/* Header */}
-                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">
-                    Live Feed
-                  </h3>
-                  <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                    {/* <button
-                      onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Feed
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Ideas
-                    </button> */}
-                  </div>
-                </div>
-
-                {/* Updates */}
-                <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-                  {/* Hover Overlay */}
-                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div> */}
-
-                  {/* Messages */}
-                  {response?.data?.PostData?.length > 0 ? (
-                    response?.data?.PostData?.map((update) => (
-                      <div
-                        key={update?._id}
-                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-                      >
-                        <div className="flex flex-col gap-4 mb-4">
-                          <img
-                            src={update?.author?.image}
-                            alt={update?.author?.name}
-                            className="w-12 h-12 rounded-full"
-                          />
-                          <div>
-                            <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update?.author?.first_name}{" "}
-                              {update?.author?.last_name}
-                            </h4>
-                            <p className="text-xs font-normal text-gray-600">
-                              {update?.createdAt
-                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
-                                : ""}
-                            </p>
-                          </div>
-                        </div>
-
-                        {update?.content && (
-                          <div className="mb-3">
-                            <p
-                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                              dangerouslySetInnerHTML={{
-                                __html: makeClickableLinks(update?.content),
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Post Images */}
-                        {update?.images?.length > 0 && (
-                          <div
-                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
-                          >
-                            {update.images.map((img, imgIdx) => {
-                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
-                              const imgKey = img?._id || imgUrl || imgIdx;
-                              return imgUrl ? (
-                                <div
-                                  key={imgKey}
-                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                                  onClick={() => setLiveFeedImage(imgUrl)}
-                                >
-                                  <img
-                                    src={imgUrl}
-                                    alt="post"
-                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                                  />
-                                </div>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="text-sm text-gray-900 font-medium text-center">
-                        🚀 No updates available right now. Stay tuned for fresh
-                        content!
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cards */}
-                  {/* {trades.map((trade) => (
-                                        <div key={trade.id} className="card rounded-2xl overflow-hidden w-full relative z-0">
-                                        <img src={trade.image} alt={trade.pair} className="w-full h-40 object-cover" />
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <ArrowUp className="text-green-500 w-8 h-8 shrink-0" />
-                                                <div>
-                                                <h3 className="font-medium text-gray-800 text-sm mb-1">{trade.pair}</h3>
-                                                <p className="text-2xs font-normal text-gray-500 line-clamp-1">{trade.date}</p>
-                                                </div>
-                                            </div>
-                                            <span
-                                                className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                                            >
-                                                {trade.status}
-                                            </span>
-                                            </div>
-
-                                            <div className="mt-6 space-y-4">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Entry</span>
-                                                <span className="font-medium text-gray-800">{trade.entry}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
-                                                <span className="font-medium text-gray-800">{trade.stopLoss}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 1</span>
-                                                <span className="font-medium text-gray-800">{trade.exit1}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 2</span>
-                                                <span className="font-medium text-gray-800">{trade.exit2}</span>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    ))} */}
-                </div>
+            {!isEducatorLive && (
+              <div className="col-span-12 md:col-span-6 xl:col-span-12">
+                {renderLiveFeedCard()}
               </div>
-            </div>
+            )}
             <div className="col-span-12 md:col-span-6 xl:col-span-12">
               <div className="card rounded-2xl shadow-md overflow-hidden">
                 {/* Header */}
@@ -1424,106 +1403,6 @@ const IqEducators = () => {
             </div>
           </div>
         </div>
-
-        {/* Recording - Hide for Digital Marketing (shown above after Courses) */}
-        {!isDigitalMarketing && <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
-          <div className="text-gray-900 mb-2">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => setShowAll((prev) => !prev)}
-                >
-                  {showAll ? "Show Less" : "View All"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.recordings?.length > 0 ? (
-                showAll ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course._id}
-                        className="w-full cursor-pointer border rounded-xl shadow-sm"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(
-                                course?.start_time
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course._id}
-                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          // onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(
-                                course?.start_time
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">
-                    No Recordings Found
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>}
       </div>
 
       <VideoPlayerModal

@@ -14,7 +14,13 @@ export const clientSocialApiSlice = createApi({
     corporatePost: builder.query({
       query: () => `/users/post/corporate-post`,
     }),
+    getEducatorPosts: builder.query({
+      query: ({ educatorId, page = 1, limit = 10 }) =>
+        `/users/post/educator/${educatorId}?page=${page}&limit=${limit}`,
+      keepUnusedDataFor: 60, // individual page results cached 60s
+    }),
   }),
 });
 
-export const { usePostQuery, useCorporatePostQuery } = clientSocialApiSlice;
+export const { usePostQuery, useCorporatePostQuery, useGetEducatorPostsQuery } =
+  clientSocialApiSlice;

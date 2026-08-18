@@ -50,6 +50,9 @@ const ClientLiveSessionContent = ({
   bannerImage,
   educatorData,
   headerGradient,
+  feedContent,
+  liveFeedContent,
+  onStatusChange,
 }) => {
   const [showFull, setShowFull] = useState(false);
   const isMdUp = useResponsive("up", "md");
@@ -72,6 +75,10 @@ const ClientLiveSessionContent = ({
   };
 
   const status = getStreamStatus();
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [status, onStatusChange]);
 
   const { title, description, tags } = custom || {};
   const maxLength = 150;
@@ -182,28 +189,36 @@ const ClientLiveSessionContent = ({
       <div
         className={`${isFullScreen ? (isMdUp ? "col-span-2 xl:col-span-1" : "col-span-12 md:col-span-5 xl:col-span-2") : isMdUp ? "col-span-12 md:col-span-5 xl:col-span-4" : "col-span-12 md:col-span-5 xl:col-span-1"} space-y-8`}
       >
-        <div className={`transition-all duration-300 ease-in-out h-full`}>
+        <div className={`transition-all duration-300 ease-in-out h-full ${status === "live" ? "space-y-8" : ""}`}>
           {token && callId && status === "live" && (
-            <ChatContainer sessionToken={token} callId={callId} headerGradient={headerGradient} />
+            <>
+              <ChatContainer sessionToken={token} callId={callId} headerGradient={headerGradient} />
+              {feedContent}
+              {liveFeedContent}
+            </>
           )}
           {token && callId && status !== "live" && (
-            <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-              <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                <h3 className="text-white font-semibold text-sm">About </h3>
-              </div>
+            feedContent ? (
+              feedContent
+            ) : (
+              <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
+                <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
+                  <h3 className="text-white font-semibold text-sm">About </h3>
+                </div>
 
-              <div className="flex-1 p-4 overflow-y-auto">
-                <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-line">
-                  {educatorData && (
-                    <ShowMoreLess
-                      html={safeHtml}
-                      limit={500}
-                      className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                    />
-                  )}
-                </p>
+                <div className="flex-1 p-4 overflow-y-auto">
+                  <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-line">
+                    {educatorData && (
+                      <ShowMoreLess
+                        html={safeHtml}
+                        limit={500}
+                        className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+                      />
+                    )}
+                  </p>
+                </div>
               </div>
-            </div>
+            )
           )}
         </div>
       </div>
@@ -219,6 +234,9 @@ const ClientLiveSessionWrapper = ({
   bannerImage,
   educatorData,
   headerGradient,
+  feedContent,
+  liveFeedContent,
+  onStatusChange,
 }) => {
   return (
     <ClientLiveSessionContent
@@ -228,6 +246,9 @@ const ClientLiveSessionWrapper = ({
       bannerImage={bannerImage}
       educatorData={educatorData}
       headerGradient={headerGradient}
+      feedContent={feedContent}
+      liveFeedContent={liveFeedContent}
+      onStatusChange={onStatusChange}
     />
   );
 };

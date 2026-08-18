@@ -325,10 +325,10 @@ export const CaptionsInlineControl = ({ captions, iconButtonClassName }) => {
             e.stopPropagation();
             setShowLangMenu((prev) => !prev);
           }}
-          className="iq-live-lang-btn flex items-center gap-1 h-8 px-2 rounded-md text-[11px] font-medium text-white/90 hover:bg-white/10 transition-colors"
+          className="iq-live-lang-btn flex items-center gap-1 h-[26px] px-1.5 rounded-md text-[10px] font-medium text-white/90 hover:bg-white/10 transition-colors"
           title="Change caption language"
         >
-          <span className="max-w-[64px] truncate">{selectedLangLabel}</span>
+          <span className="max-w-[48px] truncate">{selectedLangLabel}</span>
           <svg width="8" height="8" viewBox="0 0 10 6" fill="none">
             <path
               d={showLangMenu ? 'M1 5L5 1L9 5' : 'M1 1L5 5L9 1'}
