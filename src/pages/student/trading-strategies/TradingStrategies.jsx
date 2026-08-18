@@ -27,6 +27,7 @@ import {
 import ResourcesSection from "../../../components/ui/ResourcesSection";
 import StrategyResources from "../../../components/ui/StrategyResources";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Original Strategy Banner — shown on the landing page before a strategy is selected.
@@ -83,6 +84,7 @@ const getFirstLectureOfSection = (section) => {
 
 const TradingStrategies = () => {
     // ==================== STATE MANAGEMENT ====================
+    const [bannerImageLoaded, setBannerImageLoaded] = useState(false);
     const [selectedStrategyId, setSelectedStrategyId] = useState(null);
     const [activeSectionId, setActiveSectionId] = useState(null);
     const [activeLectureId, setActiveLectureId] = useState(null);
@@ -117,6 +119,13 @@ const TradingStrategies = () => {
         { skip: !parentStrategyId }
     );
     const learningContent = learningContentData?.data;
+
+    // Reset the banner's loaded state whenever the banner image itself changes
+    // (e.g. switching strategies), so the skeleton reappears for the new image
+    // instead of staying hidden from the previous one's load event.
+    useEffect(() => {
+        setBannerImageLoaded(false);
+    }, [learningContent?.bannerImage]);
 
 
     // ==================== API CALLS ====================
@@ -368,11 +377,17 @@ const TradingStrategies = () => {
                     {currentStrategy
                         ? (learningContent?.bannerImage
                             ? (
-                                <div className="rounded-2xl overflow-hidden">
+                                <div className="relative w-full aspect-[3/1] rounded-2xl overflow-hidden">
+                                    {!bannerImageLoaded && (
+                                        <Skeleton className="absolute inset-0 w-full h-full rounded-2xl" />
+                                    )}
                                     <img
+                                        key={learningContent.bannerImage}
                                         src={learningContent.bannerImage}
                                         alt={currentStrategy?.title || "Strategy"}
-                                        className="w-full h-auto object-cover"
+                                        onLoad={() => setBannerImageLoaded(true)}
+                                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${bannerImageLoaded ? "opacity-100" : "opacity-0"
+                                            }`}
                                     />
                                 </div>
                             )
@@ -383,19 +398,30 @@ const TradingStrategies = () => {
 
                 {/* ========== MAIN SECTIONS — horizontal, directly below the banner ========== */}
                 {currentStrategy?.sections?.length > 0 && (
-                    <div className="flex items-center justify-center gap-2 overflow-x-auto mt-4 pb-1">
-                        {currentStrategy.sections.map((section, index) => (
-                            <button
-                                key={section?._id || index}
-                                onClick={() => handleSectionClick(section)}
-                                className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium border transition whitespace-nowrap ${activeSectionId === section?._id
-                                    ? "bg-blue-600 text-white border-transparent"
-                                    : "bg-transparent border-gray-300 dark:border-gray-700 text-gray-800 hover:border-gray-400"
-                                    }`}
-                            >
-                                {index + 1}. {section?.title || "Section"}
-                            </button>
-                        ))}
+                    <div className="flex items-center justify-center overflow-x-auto mt-4 pb-1">
+                        <div className="flex flex-row items-center h-10 px-3 rounded-lg bg-gradient-to-r from-[#4C63E8] to-[#4f2e7a]">
+                            {currentStrategy.sections.map((section, index) => {
+                                const isActive = activeSectionId === section?._id;
+                                return (
+                                    <React.Fragment key={section?._id || index}>
+                                        {index > 0 && (
+                                            <span className="text-white/30 select-none text-sm px-2 leading-none">|</span>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSectionClick(section)}
+                                            aria-pressed={isActive}
+                                            className={`shrink-0 inline-flex items-center justify-center h-8 px-1 text-sm whitespace-nowrap border-b-2 outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-sm transition-colors ${isActive
+                                                ? "font-bold text-white border-amber-400"
+                                                : "font-medium text-white/70 hover:text-white border-transparent"
+                                                }`}
+                                        >
+                                            {index + 1}. {section?.title || "Section"}
+                                        </button>
+                                    </React.Fragment>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
 
