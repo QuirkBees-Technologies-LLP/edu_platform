@@ -16,6 +16,7 @@ const TABS = [
   { key: "insights", label: "Insights" },
   { key: "liveIdeas", label: "Live ideas" },
 ];
+const ALL_TYPES = TABS.map((t) => t.key);
 
 const TYPE_LABELS = {
   posts: "Post",
@@ -52,9 +53,9 @@ const EducatorFeed = ({
   educatorAvatar,
   headerGradient,
 }) => {
-  // "posts" doubles as the combined/all-content view (the default); selecting
-  // any other tab exclusively filters the feed down to just that content type.
-  const [selectedTab, setSelectedTab] = useState("posts");
+  // Genuine multi-select: nothing selected (the default) shows every content type merged
+  // together; selecting one or more narrows the feed to just those types.
+  const [selectedTypes, setSelectedTypes] = useState([]);
 
   // Every tab fetches its own data from its own real, paginated backend API — 10 items
   // initially, 10 more each time the user scrolls to the bottom of that tab, independent
@@ -149,7 +150,7 @@ const EducatorFeed = ({
       liveIdeasResponse.pagination.totalPages
     : false;
 
-  // Per-tab pagination state, keyed identically to `selectedTab` / TABS[].key, so the
+  // Per-tab pagination state, keyed identically to TABS[].key, so the
   // scroll/load-more handlers below can stay generic instead of branching per tab.
   const tabState = {
     posts: {
@@ -179,8 +180,14 @@ const EducatorFeed = ({
   };
 
   const feedScrollRef = useRef(null);
-  const selectTab = (key) => {
-    setSelectedTab(key);
+  const toggleType = (key) => {
+    setSelectedTypes((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+    if (feedScrollRef.current) feedScrollRef.current.scrollTop = 0;
+  };
+  const clearTypes = () => {
+    setSelectedTypes([]);
     if (feedScrollRef.current) feedScrollRef.current.scrollTop = 0;
   };
 
@@ -247,68 +254,70 @@ const EducatorFeed = ({
     return { posts, ideas: ideasList, insights: insightsList, liveIdeas: liveIdeasList };
   }, [allPosts, allIdeas, allInsights, allLiveIdeas, educatorAvatar, educatorName]);
 
-  // Full sorted list for the active tab — this is everything currently loaded into memory
-  // for that tab (or, for "posts", everything loaded across all 4 tabs merged). Unlike the
-  // old prop-driven version, there's no separate "loaded but not yet revealed" slice anymore:
-  // each tab only ever holds exactly what's been fetched from its own paginated endpoint,
-  // so what's loaded is what's shown.
+  const activeTypes = selectedTypes.length ? selectedTypes : ALL_TYPES;
+  const isSingle = activeTypes.length === 1;
+  const activeTypesKey = activeTypes.join(",");
+
+  // Full sorted list for the active selection — everything currently loaded into memory
+  // for the selected type(s), merged when more than one is active. Each type only ever
+  // holds exactly what's been fetched from its own paginated endpoint, so what's loaded
+  // is what's shown.
   const fullFeed = useMemo(() => {
-    const merged =
-      selectedTab === "posts"
-        ? [
-          ...normalized.posts,
-          ...normalized.ideas,
-          ...normalized.insights,
-          ...normalized.liveIdeas,
-        ]
-        : normalized[selectedTab] || [];
+    const merged = activeTypes.flatMap((t) => normalized[t] || []);
     return merged.sort(
       (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
     );
-  }, [normalized, selectedTab]);
+  }, [normalized, activeTypesKey]);
 
-  // All 4 tabs' first pages load eagerly in the background (so switching tabs feels
-  // instant), but that means the merged "posts" pool already has up to 40 items in memory
-  // after the very first fetch (10 per type). The combined view must still only ever
-  // *display* 10 initially, growing by 10 per scroll — so it gets its own display cap,
-  // independent of how much raw data happens to already be sitting in memory. The other
-  // 3 tabs don't need this: what's fetched from their own single-source API IS what's shown.
-  const [postsVisibleCount, setPostsVisibleCount] = useState(PAGE_SIZE);
-  const combinedFeed =
-    selectedTab === "posts" ? fullFeed.slice(0, postsVisibleCount) : fullFeed;
+  // All 4 types' first pages load eagerly in the background (so toggling filters feels
+  // instant), but that means the merged pool can already hold up to 40 items in memory
+  // after the very first fetch (10 per type). When more than one type is active (including
+  // the default "nothing selected" combined view), the display must still only ever *show*
+  // 10 initially, growing by 10 per scroll — so it gets its own display window, independent
+  // of how much raw data happens to already be sitting in memory. A single selected type
+  // doesn't need this: what's fetched from its own single-source API IS what's shown.
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [activeTypesKey]);
 
-  const activeTabState = tabState[selectedTab];
-  const canLoadMore =
-    selectedTab === "posts"
-      ? fullFeed.length > postsVisibleCount || hasMorePosts
-      : activeTabState?.hasNext ?? false;
-  const isFetchingMore =
-    !!activeTabState?.isFetching && activeTabState.page > 1;
+  const combinedFeed = isSingle ? fullFeed : fullFeed.slice(0, visibleCount);
+
+  const activeTabState = tabState[activeTypes[0]];
+  const canLoadMore = isSingle
+    ? activeTabState?.hasNext ?? false
+    : fullFeed.length > visibleCount || activeTypes.some((t) => tabState[t].hasNext);
+  const isFetchingMore = isSingle
+    ? !!activeTabState?.isFetching && activeTabState.page > 1
+    : activeTypes.some((t) => tabState[t].isFetching && tabState[t].page > 1);
 
   const loadMoreTriggeredRef = useRef(false);
   const loadMore = () => {
     if (loadMoreTriggeredRef.current || !canLoadMore) return;
     loadMoreTriggeredRef.current = true;
 
-    if (selectedTab === "posts") {
-      const nextCount = postsVisibleCount + PAGE_SIZE;
-      setPostsVisibleCount(nextCount);
-      // Only fetch another page of posts if revealing the next batch would run past
-      // what's currently loaded across all 4 sources combined.
-      if (fullFeed.length < nextCount && hasMorePosts && !isFetchingPosts) {
-        setPostsPage((p) => p + 1);
-      }
+    if (isSingle) {
+      const state = tabState[activeTypes[0]];
+      if (!state || !state.hasNext || state.isFetching) return;
+      state.setPage((p) => p + 1);
       return;
     }
 
-    const state = tabState[selectedTab];
-    if (!state || !state.hasNext || state.isFetching) return;
-    state.setPage((p) => p + 1);
+    const nextCount = visibleCount + PAGE_SIZE;
+    setVisibleCount(nextCount);
+    // Only fetch more from a type if revealing the next batch would run past what's
+    // currently loaded for it.
+    if (fullFeed.length < nextCount) {
+      activeTypes.forEach((t) => {
+        const state = tabState[t];
+        if (state.hasNext && !state.isFetching) state.setPage((p) => p + 1);
+      });
+    }
   };
 
   useEffect(() => {
     loadMoreTriggeredRef.current = false;
-  }, [selectedTab, allPosts, allIdeas, allInsights, allLiveIdeas, postsVisibleCount]);
+  }, [activeTypesKey, allPosts, allIdeas, allInsights, allLiveIdeas, visibleCount]);
 
   const handleScroll = (e) => {
     const el = e.currentTarget;
@@ -316,16 +325,11 @@ const EducatorFeed = ({
     if (nearBottom) loadMore();
   };
 
-  // Combined "posts" tab is loading if nothing's rendered yet and any of its 4 underlying
-  // sources is still fetching its first page; every other tab just watches its own source.
+  // Loading if nothing's rendered yet and any of the currently-active types is still
+  // fetching its first page.
   const isLoading =
     fullFeed.length === 0 &&
-    (selectedTab === "posts"
-      ? (isFetchingPosts && postsPage === 1) ||
-      (isFetchingIdeas && ideasPage === 1) ||
-      (isFetchingInsights && insightsPage === 1) ||
-      (isFetchingLiveIdeas && liveIdeasPage === 1)
-      : !!activeTabState?.isFetching && activeTabState.page === 1);
+    activeTypes.some((t) => tabState[t].isFetching && tabState[t].page === 1);
 
   return (
     <div className="rounded-2xl shadow-md overflow-hidden h-full flex flex-col bg-[#151320]">
@@ -336,20 +340,21 @@ const EducatorFeed = ({
         </h3>
       </div>
 
-      {/* Tabs — "Posts" is the combined/all view; the others exclusively filter to one type */}
+      {/* Tabs — genuine multi-select: nothing selected shows everything combined; selecting
+          one or more narrows the feed down to just those types. */}
       <div
         className={`relative flex items-center h-9 px-3 flex-shrink-0 ${headerGradient || "bg-gradient-to-r from-[#2B44D3] to-[#0D0D21]"
           }`}
       >
         <div className="flex-1 flex items-center justify-center gap-2">
           {TABS.map((tab, i) => {
-            const isActive = selectedTab === tab.key;
+            const isActive = selectedTypes.includes(tab.key);
             return (
               <React.Fragment key={tab.key}>
                 {i > 0 && <span className="text-white/25 select-none text-xs leading-none">|</span>}
                 <button
                   type="button"
-                  onClick={() => selectTab(tab.key)}
+                  onClick={() => toggleType(tab.key)}
                   aria-pressed={isActive}
                   className={`select-none inline-flex items-center justify-center h-7 px-2 text-[11px] sm:text-xs leading-none whitespace-nowrap border-b-2 outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-sm transition-colors ${isActive
                     ? "font-bold text-white border-amber-400"
@@ -361,6 +366,18 @@ const EducatorFeed = ({
               </React.Fragment>
             );
           })}
+          {selectedTypes.length > 0 && (
+            <>
+              <span className="text-white/25 select-none text-xs leading-none">|</span>
+              <button
+                type="button"
+                onClick={clearTypes}
+                className="select-none inline-flex items-center justify-center h-7 px-2 text-[11px] sm:text-xs leading-none whitespace-nowrap text-white/60 hover:text-white transition-colors"
+              >
+                Clear
+              </button>
+            </>
+          )}
         </div>
         <span className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
       </div>
