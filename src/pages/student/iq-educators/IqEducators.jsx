@@ -486,183 +486,145 @@ const IqEducators = () => {
 
 
       {/* speaker center */}
-      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-8 sm:p-8 flex flex-col gap-4`}>
-        <div className="w-full flex items-center justify-between sm:flex-row flex-col gap-4">
-        <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
-          <div className="flex items-center flex-wrap justify-center sm:justify-start gap-6">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <img
-                src={response?.data?.educator?.image}
-                alt="Educator Profile"
-                className="relative w-24 h-24 sm:w-28 sm:h-28 object-cover object-top rounded-full border-4 border-white shadow-xl"
-              />
-            </div>
-
-            <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-              <h3 className="text-white font-bold text-md sm:text-xl mb-2 tracking-tight drop-shadow-md">
-                {response?.data?.educator?.first_name}{" "}
-                {response?.data?.educator?.last_name}
-              </h3>
-
-              {response?.data?.educator?.categories?.length > 0 && (
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mb-3">
-                  {response.data.educator.categories.map((cat) => (
-                    <span
-                      key={cat?._id || cat?.name}
-                      className="bg-white/15 text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20"
-                    >
-                      {cat?.name}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <button
-                onClick={handleShowMasterClasses}
-                disabled={isEducator}
-                className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg overflow-hidden ${isEducator ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5'}`}
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <BookOpen size={18} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
-                <span className="relative">Go to My MasterClass</span>
-                <ArrowRight size={16} className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
-              </button>
-            </div>
+      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-6 sm:p-8 border border-white/10 shadow-xl grid grid-cols-1 lg:grid-cols-3 items-center gap-6 lg:gap-0 lg:divide-x lg:divide-white/10`}>
+        {/* Left: identity */}
+        <div className="flex items-center flex-wrap justify-center lg:justify-start gap-6 lg:pr-6">
+          <div className="relative group shrink-0">
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <img
+              src={response?.data?.educator?.image}
+              alt="Educator Profile"
+              className="relative w-24 h-24 sm:w-28 sm:h-28 object-cover object-top rounded-full border-4 border-white shadow-xl"
+            />
           </div>
-        </div>
-        {/* <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm w-fit">
-          <button
-            onClick={toggleMute}
-            className="text-white hover:text-yellow-300 transition p-1"
-          >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          </button>
 
-          <button
-            onClick={decVolume}
-            className="text-white text-lg px-1 hover:text-yellow-300 transition"
-          >
-            –
-          </button>
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            <h3 className="text-white font-bold text-md sm:text-xl mb-2 tracking-tight drop-shadow-md">
+              {response?.data?.educator?.first_name}{" "}
+              {response?.data?.educator?.last_name}
+            </h3>
 
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={isMuted ? 0 : volume}
-            onChange={(e) => onSliderChange(e.target.value)}
-            className={`w-24 ${getSliderAccent()} cursor-pointer`}
-          />
-
-          <button
-            onClick={incVolume}
-            className="text-white text-lg px-1 hover:text-yellow-300 transition"
-          >
-            +
-          </button>
-        </div> */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-3">
-            {/* <button
-              onClick={() => setIsOpen(true)}
-              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors`}
-            >
-              <Volume2 size={18} />
-            </button> */}
-
-            {isOpen && (
-              <div
-                className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-                onClick={() => setIsOpen(false)}
-              >
-                <div
-                  className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
-                  onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
-                >
-                  <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
-                    Change in Sound Option from Automatic (Default) to Allow,{" "}
-                    <br /> like in the Image
-                  </span>
-                  <div
-                    className="overflow-hidden rounded-lg cursor-pointer"
-                    onClick={() => isVolumeOpen(true)}
-                  >
-                    <img src={InfoImage} alt="Info" />
-                  </div>
-
-                  <span
-                    className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
-
-  "
-                  >
-                    Or follow the video tutorial
-                  </span>
-                  <div className="overflow-hidden rounded-lg mx-auto block w-fit">
-                    <video width="500" height="240" muted loop controls>
-                      <source src={videotutorial} type="video/mp4" />
-                    </video>
-                  </div>
-
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className={`absolute top-3 right-3 ${getButtonColor()} text-white px-3 py-1 rounded-lg shadow`}
-                  >
-                    ✕
-                  </button>
-                </div>
+            {response?.data?.educator?.educatorRole && (
+              <div className="mb-3">
+                <span className="bg-white/15 text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20">
+                  {response.data.educator.educatorRole}
+                </span>
               </div>
             )}
 
             <button
-              onClick={() => handleShare()}
-              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors`}
+              onClick={handleShowMasterClasses}
+              disabled={isEducator}
+              className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg overflow-hidden ${isEducator ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5'}`}
             >
-              <Share2 size={16} />
-              Share
-            </button>
-
-
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleToggleFollow}
-              disabled={isFollowLoading}
-              className={`border text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all duration-300 ${isFollowing
-                ? "border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50"
-                : getButtonColor()
-                } ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-            >
-              {isFollowing ? (
-                <>
-                  <UserCheck size={16} />
-                  Following
-                </>
-              ) : (
-                <>
-                  <UserPlus size={16} />
-                  Follow
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => setShowRatingModal(true)}
-              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors w-fit`}
-            >
-              ⭐ Rate Me
+              <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <BookOpen size={18} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
+              <span className="relative">Go to My MasterClass</span>
+              <ArrowRight size={16} className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
             </button>
           </div>
         </div>
+
+        {/* Center: bio — the short "Profile Bio" field, not the longer "Trading Card Bio"
+            (that one is `description`, plain text already so no HTML stripping needed) */}
+        <div className="flex flex-col items-center justify-center text-center px-2 lg:px-6">
+          {response?.data?.educator?.bio && (
+            <>
+              <div className="flex items-center justify-center gap-2.5 mb-3">
+                <span className="h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-blue-400/70" />
+                <span className="w-1 h-1 rounded-full bg-blue-400" />
+                <span className="text-blue-400 text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase">
+                  About Me
+                </span>
+                <span className="w-1 h-1 rounded-full bg-blue-400" />
+                <span className="h-px w-6 sm:w-8 bg-gradient-to-l from-transparent to-blue-400/70" />
+              </div>
+              <p className="text-white/85 text-xs sm:text-sm leading-relaxed max-w-md">
+                {response.data.educator.bio}
+              </p>
+            </>
+          )}
         </div>
 
-        {response?.data?.educator?.description && (
-          <div className="w-full pt-4 border-t border-white/10">
-            <p className="text-center text-white/80 text-xs sm:text-sm leading-relaxed max-w-3xl mx-auto px-2">
-              {htmlToPlainText(response.data.educator.description)}
-            </p>
-          </div>
-        )}
+        {/* Right: actions — stacked one per line, Rate Me styled as the primary CTA */}
+        <div className="flex flex-col items-center lg:items-end gap-2 lg:pl-6">
+          {isOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+              onClick={() => setIsOpen(false)}
+            >
+              <div
+                className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
+                onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
+              >
+                <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
+                  Change in Sound Option from Automatic (Default) to Allow,{" "}
+                  <br /> like in the Image
+                </span>
+                <div
+                  className="overflow-hidden rounded-lg cursor-pointer"
+                  onClick={() => isVolumeOpen(true)}
+                >
+                  <img src={InfoImage} alt="Info" />
+                </div>
+
+                <span
+                  className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+
+  "
+                >
+                  Or follow the video tutorial
+                </span>
+                <div className="overflow-hidden rounded-lg mx-auto block w-fit">
+                  <video width="500" height="240" muted loop controls>
+                    <source src={videotutorial} type="video/mp4" />
+                  </video>
+                </div>
+
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className={`absolute top-3 right-3 ${getButtonColor()} text-white px-3 py-1 rounded-lg shadow`}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => handleShare()}
+            className="border border-white/25 bg-white/5 hover:bg-white/10 hover:border-white/40 text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors w-full lg:w-auto justify-center"
+          >
+            <Share2 size={13} />
+            Share
+          </button>
+
+          <button
+            onClick={handleToggleFollow}
+            disabled={isFollowLoading}
+            className={`border border-white/25 bg-white/5 hover:bg-white/10 hover:border-white/40 text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors w-full lg:w-auto justify-center ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+              }`}
+          >
+            {isFollowing ? (
+              <>
+                <UserCheck size={13} />
+                Following
+              </>
+            ) : (
+              <>
+                <UserPlus size={13} />
+                Follow
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={() => setShowRatingModal(true)}
+            className={`border ${getButtonColor()} text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 shadow-md transition-colors w-full lg:w-auto justify-center`}
+          >
+            <span className="text-yellow-300">⭐</span> Rate Me
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">

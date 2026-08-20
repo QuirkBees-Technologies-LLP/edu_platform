@@ -396,35 +396,6 @@ const TradingStrategies = () => {
                     }
                 </div>
 
-                {/* ========== MAIN SECTIONS — horizontal, directly below the banner ========== */}
-                {currentStrategy?.sections?.length > 0 && (
-                    <div className="flex items-center justify-center overflow-x-auto mt-4 pb-1">
-                        <div className="flex flex-row items-center h-10 px-3 rounded-lg bg-gradient-to-r from-[#4C63E8] to-[#4f2e7a]">
-                            {currentStrategy.sections.map((section, index) => {
-                                const isActive = activeSectionId === section?._id;
-                                return (
-                                    <React.Fragment key={section?._id || index}>
-                                        {index > 0 && (
-                                            <span className="text-white/30 select-none text-sm px-2 leading-none">|</span>
-                                        )}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleSectionClick(section)}
-                                            aria-pressed={isActive}
-                                            className={`shrink-0 inline-flex items-center justify-center h-8 px-1 text-sm whitespace-nowrap border-b-2 outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-sm transition-colors ${isActive
-                                                ? "font-bold text-white border-amber-400"
-                                                : "font-medium text-white/70 hover:text-white border-transparent"
-                                                }`}
-                                        >
-                                            {index + 1}. {section?.title || "Section"}
-                                        </button>
-                                    </React.Fragment>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
                 {/* ========== DYNAMIC CONTENT AREA ========== */}
                 {/* Shows the lectures & subsections of the selected main section */}
                 <div className="flex flex-col md:flex-row gap-6 mb-8 mt-5">
@@ -527,6 +498,34 @@ const TradingStrategies = () => {
                     {/* ========== VIDEO PLAYER AREA (MAIN CONTENT) ========== */}
                     {currentStrategy && (
                         <div className="flex-1">
+                            {/* Section tabs — sit directly above the video player, in the same column */}
+                            {currentStrategy?.sections?.length > 0 && (
+                                <div className="flex items-center overflow-x-auto mb-4">
+                                    <div className="flex flex-row items-center h-10 px-3 rounded-lg bg-gradient-to-r from-[#4C63E8] to-[#4f2e7a]">
+                                        {currentStrategy.sections.map((section, index) => {
+                                            const isActive = activeSectionId === section?._id;
+                                            return (
+                                                <React.Fragment key={section?._id || index}>
+                                                    {index > 0 && (
+                                                        <span className="text-white/30 select-none text-sm px-2 leading-none">|</span>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSectionClick(section)}
+                                                        aria-pressed={isActive}
+                                                        className={`shrink-0 inline-flex items-center justify-center h-8 px-1 text-sm whitespace-nowrap border-b-2 outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-sm transition-colors ${isActive
+                                                            ? "font-bold text-white border-amber-400"
+                                                            : "font-medium text-white/70 hover:text-white border-transparent"
+                                                            }`}
+                                                    >
+                                                        {index + 1}. {section?.title || "Section"}
+                                                    </button>
+                                                </React.Fragment>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                             <div className="card rounded-2xl border border-gray-300 overflow-hidden">
                                 <div className="w-full h-[425px] dark:bg-black flex items-center justify-center bg-gray-200">
                                     {/* Show loading while fetching strategy details */}

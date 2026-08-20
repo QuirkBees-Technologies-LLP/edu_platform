@@ -32,7 +32,14 @@ import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEduct
 
 const CreateTradeIdeas = forwardRef(
   (
-    { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
+    {
+      setSelectedRow,
+      isCreateOpen,
+      handleCloseCreate,
+      selectedRow,
+      refetch,
+      onSubmitSuccess,
+    },
     ref
   ) => {
     const { auth } = useAuthContext();
@@ -169,6 +176,7 @@ const CreateTradeIdeas = forwardRef(
           setSelectedRow(null);
           refetch();
           handleCloseCreate();
+          if (onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =
