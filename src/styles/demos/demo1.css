@@ -1494,10 +1494,6 @@ chat */
   height: 100%;
 }
 
-.educator_chatbox_chat .str-chat__main-panel-inner {
-  height: calc(100% - 130px);
-}
-
 .educator_chatbox_chat .chat-sidebar {
   height: 100%;
 }
@@ -1520,6 +1516,28 @@ chat */
 
 .educator_chatbox_chat .str-chat__main-panel {
   height: 100%;
+}
+
+/* ChatAutoComplete ignores any className passed to it and always renders with its own
+   fixed class (str-chat__textarea__textarea) — this is the only way to actually style it. */
+.educator_chatbox_chat .str-chat__textarea__textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #16171d;
+  color: #f4f4f5;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.educator_chatbox_chat .str-chat__textarea__textarea:focus {
+  border-color: #6366f1;
+}
+
+.educator_chatbox_chat .str-chat__textarea__textarea::placeholder {
+  color: rgba(244, 244, 245, 0.5);
 }
 
 .live_chat .input-ui-input textarea {

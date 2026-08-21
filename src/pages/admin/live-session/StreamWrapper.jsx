@@ -4,47 +4,7 @@ import { Send } from "lucide-react";
 import { toAbsoluteUrl } from "@/utils/Assets";
 import { useEffect, useRef, useState } from "react";
 
-const makeClickableLinks = (htmlOrText) => {
-  if (!htmlOrText) return "";
-  return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-    const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-    return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-  });
-};
-
-const ShowMoreLess = ({
-  text = "",
-  html = "",
-  limit = 120,
-  showMoreText = " Show More",
-  showLessText = " Show Less",
-  className = "text-sm text-gray-700 leading-relaxed",
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const isHtml = !!html;
-  const content = isHtml ? html : text;
-  const plainText = isHtml ? content.replace(/<[^>]+>/g, "") : text;
-  const isLong = plainText.length > limit;
-
-  return (
-    <div className={className}>
-      <div
-        className={`${!expanded && isLong ? "line-clamp-4" : ""}`}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-      {isLong && (
-        <span
-          onClick={() => setExpanded(!expanded)}
-          className="text-blue-600 cursor-pointer hover:underline font-medium"
-        >
-          {expanded ? showLessText : showMoreText}
-        </span>
-      )}
-    </div>
-  );
-};
-
-const StreamWrapper = ({ call, children, bannerImage, educatorData, headerGradient, feedContent }) => {
+const StreamWrapper = ({ call, children, bannerImage, feedContent }) => {
   // Right column (feed) always conforms to the left column's (image) natural
   // height — never the other way around. Measured via ResizeObserver since
   // the image's rendered height depends on its own aspect ratio at whatever
@@ -63,7 +23,6 @@ const StreamWrapper = ({ call, children, bannerImage, educatorData, headerGradie
     return () => observer.disconnect();
   }, []);
 
-  const safeHtml = makeClickableLinks(educatorData || "");
   if (!call)
     return (
       <div className="">
@@ -123,27 +82,7 @@ const StreamWrapper = ({ call, children, bannerImage, educatorData, headerGradie
             className="col-span-12 lg:col-span-4"
             style={imageColHeight ? { height: imageColHeight, maxHeight: imageColHeight, overflow: "hidden" } : undefined}
           >
-            {feedContent ? (
-              feedContent
-            ) : (
-              <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-                <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">About Me </h3>
-                </div>
-
-                <div className="flex-1 p-4 overflow-y-auto">
-                  <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-line">
-                    {educatorData && (
-                      <ShowMoreLess
-                        html={safeHtml}
-                        limit={500}
-                        className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                      />
-                    )}
-                  </p>
-                </div>
-              </div>
-            )}
+            {feedContent}
           </div>
         </div>
       </div>

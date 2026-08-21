@@ -10,38 +10,6 @@ import truncate from "html-truncate";
 import { useLivestreamStatus } from "./liveStreamStatus";
 import { Send } from "lucide-react";
 
-const ShowMoreLess = ({
-  text = "",
-  html = "",
-  limit = 120,
-  showMoreText = " Show More",
-  showLessText = " Show Less",
-  className = "text-sm text-gray-700 leading-relaxed",
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const isHtml = !!html;
-  const content = isHtml ? html : text;
-  const plainText = isHtml ? content.replace(/<[^>]+>/g, "") : text;
-  const isLong = plainText.length > limit;
-
-  return (
-    <div className={className}>
-      <div
-        className={`${!expanded && isLong ? "line-clamp-4" : ""}`}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-      {isLong && (
-        <span
-          onClick={() => setExpanded(!expanded)}
-          className="text-blue-600 cursor-pointer hover:underline font-medium"
-        >
-          {expanded ? showLessText : showMoreText}
-        </span>
-      )}
-    </div>
-  );
-};
-
 // Inner component that uses Stream Video hooks (guaranteed to be within StreamCall context)
 const ClientLiveSessionContent = ({
   client,
@@ -51,7 +19,6 @@ const ClientLiveSessionContent = ({
   educatorData,
   headerGradient,
   feedContent,
-  liveFeedContent,
   onStatusChange,
 }) => {
   const [showFull, setShowFull] = useState(false);
@@ -152,25 +119,21 @@ const ClientLiveSessionContent = ({
     );
   }
 
-  const makeClickableLinks = (htmlOrText) => {
-    if (!htmlOrText) return "";
-    return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
-  };
-
-  const safeHtml = makeClickableLinks(educatorData || "");
-
   return (
     <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 chatbox_chat">
       <div
         className={`${isFullScreen ? (isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10") : isMdUp ? "col-span-12 md:col-span-7 xl:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}
       >
-        <div className={`transition-all duration-300 ease-in-out h-full`}>
-          <div className="grid gap-5 h-full">
-            <div className="flex flex-col rounded-lg items-center justify-start text-white h-full">
-              <div className="flex flex-col gap-12 bg-black rounded-xl text-center w-full h-full">
+        {/* Bounded by aspect ratio (rooted height) instead of an unrooted h-full chain,
+            so the player can't inflate to match whatever height the chat column ends up at. */}
+        <div className="transition-all duration-300 ease-in-out aspect-video max-h-[640px] min-h-[320px]">
+          <div className="grid gap-5 h-full min-h-0">
+            {/* min-h-0 overrides the flex default of min-height:auto — without it, the
+                Stream SDK's no-video avatar placeholder (aspect-ratio: 4/3) forces this
+                flex column to grow to fit it instead of respecting h-full, which is what
+                was making the player taller than the chat box. */}
+            <div className="flex flex-col rounded-lg items-center justify-start text-white h-full min-h-0">
+              <div className="flex flex-col gap-12 bg-black rounded-xl text-center w-full h-full min-h-0">
                 {renderLiveStatus(
                   status,
                   custom,
@@ -189,37 +152,13 @@ const ClientLiveSessionContent = ({
       <div
         className={`${isFullScreen ? (isMdUp ? "col-span-2 xl:col-span-1" : "col-span-12 md:col-span-5 xl:col-span-2") : isMdUp ? "col-span-12 md:col-span-5 xl:col-span-4" : "col-span-12 md:col-span-5 xl:col-span-1"} space-y-8`}
       >
-        <div className={`transition-all duration-300 ease-in-out h-full ${status === "live" ? "space-y-8" : ""}`}>
+        <div className="transition-all duration-300 ease-in-out h-full">
+          {/* Chat fills its column exactly like the video fills its own (both stretch
+              to the grid row's height), so they pair as a single, matched-height row. */}
           {token && callId && status === "live" && (
-            <>
-              <ChatContainer sessionToken={token} callId={callId} headerGradient={headerGradient} />
-              {feedContent}
-              {liveFeedContent}
-            </>
+            <ChatContainer sessionToken={token} callId={callId} headerGradient={headerGradient} />
           )}
-          {token && callId && status !== "live" && (
-            feedContent ? (
-              feedContent
-            ) : (
-              <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-                <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">About </h3>
-                </div>
-
-                <div className="flex-1 p-4 overflow-y-auto">
-                  <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-line">
-                    {educatorData && (
-                      <ShowMoreLess
-                        html={safeHtml}
-                        limit={500}
-                        className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                      />
-                    )}
-                  </p>
-                </div>
-              </div>
-            )
-          )}
+          {token && callId && status !== "live" && feedContent}
         </div>
       </div>
     </div>
@@ -235,7 +174,6 @@ const ClientLiveSessionWrapper = ({
   educatorData,
   headerGradient,
   feedContent,
-  liveFeedContent,
   onStatusChange,
 }) => {
   return (
@@ -247,7 +185,6 @@ const ClientLiveSessionWrapper = ({
       educatorData={educatorData}
       headerGradient={headerGradient}
       feedContent={feedContent}
-      liveFeedContent={liveFeedContent}
       onStatusChange={onStatusChange}
     />
   );

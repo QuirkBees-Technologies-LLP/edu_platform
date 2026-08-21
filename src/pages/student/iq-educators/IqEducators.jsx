@@ -639,7 +639,6 @@ const IqEducators = () => {
                 headerGradient={getHeaderGradient()}
               />
             }
-            liveFeedContent={isEducatorLive ? renderLiveFeedCard() : null}
             onStatusChange={(status) => setIsEducatorLive(status === "live")}
           />
         </div>
@@ -1202,11 +1201,18 @@ const IqEducators = () => {
                 </form>
               </div>
             </div> */}
-            {!isEducatorLive && (
-              <div className="col-span-12 md:col-span-6 xl:col-span-12">
-                {renderLiveFeedCard()}
+            {/* Educator feed — sits next to Master Classes only once the stream is live.
+                Before that, the same EducatorFeed instance renders in place of the old
+                "About Me" card (up in the video/chat row via feedContent), so it's never
+                shown in both places at once. */}
+            {isEducatorLive && (
+              <div className="col-span-12 md:col-span-6 xl:col-span-12 h-[500px]">
+                <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
               </div>
             )}
+            <div className="col-span-12 md:col-span-6 xl:col-span-12">
+              {renderLiveFeedCard()}
+            </div>
             <div className="col-span-12 md:col-span-6 xl:col-span-12">
               <div className="card rounded-2xl shadow-md overflow-hidden">
                 {/* Header */}
