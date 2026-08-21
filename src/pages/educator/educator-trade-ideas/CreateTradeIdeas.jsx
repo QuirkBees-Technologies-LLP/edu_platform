@@ -172,11 +172,14 @@ const CreateTradeIdeas = forwardRef(
 
             toast.success("Idea created successfully!");
           }
+          const wasUpdate = !!selectedRow?._id;
           formik.resetForm();
           setSelectedRow(null);
           refetch();
           handleCloseCreate();
-          if (onSubmitSuccess) onSubmitSuccess();
+          // Share-to-social prompt only makes sense when updating an existing idea, not
+          // when creating a brand new one.
+          if (wasUpdate && onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =

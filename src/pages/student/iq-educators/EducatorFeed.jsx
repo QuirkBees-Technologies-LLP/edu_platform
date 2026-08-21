@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { TrendingDown, TrendingUp } from "lucide-react";
 import { useGetEducatorPostsQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import {
   useGetEducatorIdeasQuery,
   useGetEducatorInsightsQuery,
   useGetLiveTradeIdeaQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import SocialPostCard from "../iq-social/SocialPostCard";
+import IdeaFeedCard from "./IdeaFeedCard";
+import InsightFeedCard from "./InsightFeedCard";
+import LiveIdeaFeedCard from "./LiveIdeaFeedCard";
 
 const PAGE_SIZE = 10;
 
@@ -18,41 +21,7 @@ const TABS = [
 ];
 const ALL_TYPES = TABS.map((t) => t.key);
 
-const TYPE_LABELS = {
-  posts: "Post",
-  ideas: "Idea",
-  insights: "Insight",
-  liveIdeas: "Live Idea",
-};
-
-// Same relative-time convention already used elsewhere in IqEducators.jsx for Live Ideas
-// (kept local here since that helper isn't exported from the parent file).
-const getRelativeTime = (date) => {
-  if (!date) return "";
-
-  const now = new Date();
-  const past = new Date(date);
-  const diffInSeconds = Math.floor((now - past) / 1000);
-
-  const minutes = Math.floor(diffInSeconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (diffInSeconds < 60) return "Just now";
-  if (minutes < 60) return `${minutes} min ago`;
-  if (hours < 24) return `${hours} hr ago`;
-  return `${days} day${days > 1 ? "s" : ""} ago`;
-};
-
-// Same HTML-stripping convention already used for the bio in IqEducators.jsx.
-const stripHtml = (html) => (html ? html.replace(/<[^>]+>/g, " ").trim() : "");
-
-const EducatorFeed = ({
-  educatorId,
-  educatorName,
-  educatorAvatar,
-  headerGradient,
-}) => {
+const EducatorFeed = ({ educatorId, headerGradient }) => {
   // Genuine multi-select: nothing selected (the default) shows every content type merged
   // together; selecting one or more narrows the feed to just those types.
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -191,83 +160,37 @@ const EducatorFeed = ({
     if (feedScrollRef.current) feedScrollRef.current.scrollTop = 0;
   };
 
-  // Normalize each source type into a single common card shape.
-  const normalized = useMemo(() => {
-    const posts = allPosts.map((p) => ({
-      id: `posts-${p._id}`,
-      type: "posts",
-      avatar: p?.author?.image,
-      name: [p?.author?.first_name, p?.author?.last_name]
-        .filter(Boolean)
-        .join(" ") || "Educator",
-      createdAt: p?.createdAt,
-      text: stripHtml(p?.content),
-      image: p?.tradingViewImages?.[0]?.url || p?.images?.[0]?.url || null,
-    }));
-
-    const ideasList = allIdeas.map((it) => ({
-      id: `ideas-${it._id}`,
-      type: "ideas",
-      avatar: it?.educatorId?.image || educatorAvatar,
-      name:
-        [it?.educatorId?.first_name, it?.educatorId?.last_name]
-          .filter(Boolean)
-          .join(" ") ||
-        educatorName ||
-        "Educator",
-      createdAt: it?.createdAt,
-      text: it?.name,
-      image: it?.image?.[0] || null,
-    }));
-
-    const insightsList = allInsights.map((it) => ({
-      id: `insights-${it._id}`,
-      type: "insights",
-      avatar: it?.createdBy?.image || educatorAvatar,
-      name:
-        [it?.createdBy?.first_name, it?.createdBy?.last_name]
-          .filter(Boolean)
-          .join(" ") ||
-        educatorName ||
-        "Educator",
-      createdAt: it?.createdAt,
-      text: it?.title,
-      image: it?.photos?.[0] || null,
-    }));
-
-    const liveIdeasList = allLiveIdeas.map((it) => ({
-      id: `liveIdeas-${it._id}`,
-      type: "liveIdeas",
-      avatar: it?.educatorId?.image || educatorAvatar,
-      name:
-        [it?.educatorId?.first_name, it?.educatorId?.last_name]
-          .filter(Boolean)
-          .join(" ") ||
-        educatorName ||
-        "Educator",
-      createdAt: it?.createdAt,
-      text: it?.name,
-      image: it?.image?.[0] || null,
-      tradeType: it?.type, // "buy" | "sell"
-    }));
-
-    return { posts, ideas: ideasList, insights: insightsList, liveIdeas: liveIdeasList };
-  }, [allPosts, allIdeas, allInsights, allLiveIdeas, educatorAvatar, educatorName]);
+  // No normalization — each source's raw API documents are kept exactly as returned
+  // (original fields, original structure). Combining is just deciding WHICH raw items
+  // are in play and in WHAT order; each one still carries its own real shape through to
+  // render, where it's handed to its own real card component (SocialPostCard, IdeaFeedCard,
+  // InsightFeedCard, LiveIdeaFeedCard) — never a shared/generic one.
+  const rawListsByType = {
+    posts: allPosts,
+    ideas: allIdeas,
+    insights: allInsights,
+    liveIdeas: allLiveIdeas,
+  };
 
   const activeTypes = selectedTypes.length ? selectedTypes : ALL_TYPES;
   const isSingle = activeTypes.length === 1;
   const activeTypesKey = activeTypes.join(",");
 
-  // Full sorted list for the active selection — everything currently loaded into memory
-  // for the selected type(s), merged when more than one is active. Each type only ever
-  // holds exactly what's been fetched from its own paginated endpoint, so what's loaded
-  // is what's shown.
+  // Full sorted list for the active selection — a thin {type, raw} wrapper per item, used
+  // only so the list knows which real card component to render each entry with. `raw` is
+  // the literal, untouched document from that type's own API response.
   const fullFeed = useMemo(() => {
-    const merged = activeTypes.flatMap((t) => normalized[t] || []);
-    return merged.sort(
-      (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    const merged = activeTypes.flatMap((t) =>
+      (rawListsByType[t] || []).map((raw) => ({
+        id: `${t}-${raw._id}`,
+        type: t,
+        raw,
+      }))
     );
-  }, [normalized, activeTypesKey]);
+    return merged.sort(
+      (a, b) => new Date(b.raw?.createdAt || 0) - new Date(a.raw?.createdAt || 0)
+    );
+  }, [allPosts, allIdeas, allInsights, allLiveIdeas, activeTypesKey]);
 
   // All 4 types' first pages load eagerly in the background (so toggling filters feels
   // instant), but that means the merged pool can already hold up to 40 items in memory
@@ -401,60 +324,20 @@ const EducatorFeed = ({
             </span>
           </div>
         ) : (
-          combinedFeed.map((item) => (
-            <div key={item.id} className="bg-white/[0.05] border border-white/[0.06] rounded-xl p-3">
-              {/* Avatar */}
-              {item.avatar ? (
-                <img
-                  src={item.avatar}
-                  alt={item.name}
-                  className="w-8 h-8 rounded-full object-cover mb-1.5"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-1.5" />
-              )}
-
-              {/* Name */}
-              <p className="text-white font-semibold text-xs">{item.name}</p>
-
-              {/* Timestamp */}
-              <div
-                className="text-[11px] text-white/40 mb-1.5"
-                title={item.createdAt ? new Date(item.createdAt).toLocaleString() : ""}
-              >
-                {getRelativeTime(item.createdAt)}
-                {item.type === "liveIdeas" && item.tradeType && (
-                  <span className="inline-flex items-center ml-1.5 align-middle">
-                    {item.tradeType === "buy" ? (
-                      <TrendingUp size={10} className="text-emerald-400" />
-                    ) : (
-                      <TrendingDown size={10} className="text-red-400" />
-                    )}
-                  </span>
-                )}
-              </div>
-
-              {/* Text/content line */}
-              {item.text && (
-                <p className="text-white/90 text-xs leading-relaxed whitespace-pre-wrap break-words mb-2">
-                  {item.text}
-                </p>
-              )}
-
-              {/* Chart/image */}
-              <div className="rounded-lg overflow-hidden bg-black min-h-[100px] flex items-center justify-center border border-white/[0.06]">
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt={item.text || TYPE_LABELS[item.type]}
-                    className="w-full max-h-40 object-cover"
-                  />
-                ) : (
-                  <span className="text-white/25 text-xs">chart image</span>
-                )}
-              </div>
-            </div>
-          ))
+          combinedFeed.map((entry) => {
+            switch (entry.type) {
+              case "posts":
+                return <SocialPostCard key={entry.id} post={entry.raw} showTypeBadge />;
+              case "ideas":
+                return <IdeaFeedCard key={entry.id} idea={entry.raw} />;
+              case "insights":
+                return <InsightFeedCard key={entry.id} insight={entry.raw} />;
+              case "liveIdeas":
+                return <LiveIdeaFeedCard key={entry.id} liveIdea={entry.raw} />;
+              default:
+                return null;
+            }
+          })
         )}
 
         {!isLoading && combinedFeed.length > 0 && (isFetchingMore || canLoadMore) && (

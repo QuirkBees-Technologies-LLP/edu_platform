@@ -636,8 +636,6 @@ const IqEducators = () => {
             feedContent={
               <EducatorFeed
                 educatorId={id}
-                educatorName={`${response?.data?.educator?.first_name || ""} ${response?.data?.educator?.last_name || ""}`.trim()}
-                educatorAvatar={response?.data?.educator?.image}
                 headerGradient={getHeaderGradient()}
               />
             }

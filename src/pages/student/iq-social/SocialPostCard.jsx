@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import DeletePostDialog from "@/components/DeletePostDialog";
 
-const SocialPostCard = ({ post, onEdit, refetch }) => {
+const SocialPostCard = ({ post, onEdit, refetch, showTypeBadge }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
@@ -101,7 +101,12 @@ const SocialPostCard = ({ post, onEdit, refetch }) => {
       : "");
 
   return (
-    <div className="rounded-2xl border border-gray-200 dark:border-[#22242A] bg-white dark:bg-[#16181D] p-6 mb-6 transition-all duration-300 w-full">
+    <div className="relative rounded-2xl border border-gray-200 dark:border-[#22242A] bg-white dark:bg-[#16181D] p-6 mb-6 transition-all duration-300 w-full">
+      {showTypeBadge && (
+        <span className="absolute right-3 top-3 z-20 px-2 py-0.5 rounded-md text-[10px] font-extrabold capitalize tracking-wide text-white bg-slate-500/90 backdrop-blur-sm">
+          Post
+        </span>
+      )}
       {/* Author Info */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">

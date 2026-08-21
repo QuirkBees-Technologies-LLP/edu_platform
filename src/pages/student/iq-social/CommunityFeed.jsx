@@ -9,7 +9,9 @@ import {
   useGetClientLiveIdeasQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import SocialPostCard from "./SocialPostCard";
-import SocialFeedItemCard from "./SocialFeedItemCard";
+import SocialIdeaCard from "./SocialIdeaCard";
+import SocialInsightCard from "./SocialInsightCard";
+import SocialLiveIdeaCard from "./SocialLiveIdeaCard";
 import SocialSideBanner from "./SocialSideBanner";
 import { Rss } from "lucide-react";
 import {
@@ -20,9 +22,9 @@ import {
 
 const PAGE_SIZE = 10;
 
-// Tabs — same selection model as the Educator Feed: "Posts" is the combined/all view
-// (the default), and selecting Ideas/Insights/Live Ideas exclusively filters the feed
-// down to just that content type.
+// Tabs — same selection model as the Educator Feed: nothing selected (the default) shows
+// every content type merged together; selecting one or more narrows the feed down to just
+// those types.
 const FILTERS = [
   { key: "posts", label: "Posts" },
   { key: "ideas", label: "Ideas" },
@@ -36,17 +38,6 @@ const ALL_TYPES = FILTERS.map((f) => f.key);
 // here once they're available and it'll switch over automatically.
 const LEFT_BANNER_IMAGE = null;
 const RIGHT_BANNER_IMAGE = null;
-
-const stripHtml = (html) => {
-  if (!html) return "";
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    return (doc.body.textContent || "").trim();
-  } catch {
-    return html.replace(/<[^>]+>/g, " ").trim();
-  }
-};
 
 const CommunityFeed = () => {
   // Genuine multi-select (task 2.6): nothing selected (the default) shows every content
@@ -222,79 +213,42 @@ const CommunityFeed = () => {
     liveIdeas: { page: liveIdeasPage, setPage: setLiveIdeasPage, hasNext: hasMoreLiveIdeas, isFetching: isFetchingLiveIdeas },
   };
 
-  // Normalize every source into one common card shape so they can be merged/sorted together.
-  const normalized = useMemo(() => {
-    const posts = allPosts.map((p) => ({
-      id: `posts-${p._id}`,
-      type: "posts",
-      raw: p,
-      avatar: p?.author?.image,
-      name:
-        [p?.author?.first_name, p?.author?.last_name].filter(Boolean).join(" ") ||
-        "IQonic",
-      createdAt: p?.createdAt,
-      text: stripHtml(p?.content),
-      image: p?.tradingViewImages?.[0]?.url || p?.images?.[0]?.url || null,
-    }));
-
-    const ideas = allIdeas.map((it) => ({
-      id: `ideas-${it._id}`,
-      type: "ideas",
-      raw: it,
-      avatar: it?.educatorDetails?.image,
-      name:
-        [it?.educatorDetails?.first_name, it?.educatorDetails?.last_name]
-          .filter(Boolean)
-          .join(" ") || "Educator",
-      createdAt: it?.createdAt,
-      text: it?.name,
-      image: Array.isArray(it?.image) ? it.image[0] : it?.image,
-      tradeType: it?.type,
-    }));
-
-    const insights = allInsights.map((it) => ({
-      id: `insights-${it._id}`,
-      type: "insights",
-      raw: it,
-      avatar: it?.educatorDetails?.image,
-      name:
-        [it?.educatorDetails?.first_name, it?.educatorDetails?.last_name]
-          .filter(Boolean)
-          .join(" ") || "Educator",
-      // webTradeAnalysis returns the timestamp under "createAt" (typo upstream), not "createdAt".
-      createdAt: it?.createAt || it?.createdAt,
-      text: it?.name,
-      image: Array.isArray(it?.image) ? it.image[0] : it?.image,
-    }));
-
-    const liveIdeas = allLiveIdeas.map((it) => ({
-      id: `liveIdeas-${it._id}`,
-      type: "liveIdeas",
-      raw: it,
-      avatar: it?.educatorDetails?.image,
-      name:
-        [it?.educatorDetails?.first_name, it?.educatorDetails?.last_name]
-          .filter(Boolean)
-          .join(" ") || "Educator",
-      createdAt: it?.createdAt,
-      text: it?.name,
-      image: Array.isArray(it?.image) ? it.image[0] : it?.image,
-      tradeType: it?.type,
-    }));
-
-    return { posts, ideas, insights, liveIdeas };
-  }, [allPosts, allIdeas, allInsights, allLiveIdeas]);
+  // No normalization — each source's raw API documents are kept exactly as returned
+  // (original fields, original structure, same as their own dedicated pages: /ideas,
+  // /iq-insight, /live-ideas). Combining is just deciding WHICH raw items are in play and
+  // in WHAT order; each one still carries its own real shape through to render, where it's
+  // handed to its own real card component (SocialPostCard, SocialIdeaCard,
+  // SocialInsightCard, SocialLiveIdeaCard) — never a shared/generic one.
+  const rawListsByType = {
+    posts: allPosts,
+    ideas: allIdeas,
+    insights: allInsights,
+    liveIdeas: allLiveIdeas,
+  };
 
   const activeTypes = selectedTypes.length ? selectedTypes : ALL_TYPES;
   const isSingle = activeTypes.length === 1;
   const activeTypesKey = activeTypes.join(",");
 
+  // Full sorted list for the active selection — a thin {type, raw} wrapper per item, used
+  // only so the list knows which real card component to render each entry with. `raw` is
+  // the literal, untouched document from that type's own API response.
   const fullFeed = useMemo(() => {
-    const merged = activeTypes.flatMap((t) => normalized[t] || []);
-    return merged.sort(
-      (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    const merged = activeTypes.flatMap((t) =>
+      (rawListsByType[t] || []).map((raw) => ({
+        id: `${t}-${raw._id}`,
+        type: t,
+        raw,
+      }))
     );
-  }, [normalized, activeTypesKey]);
+    // webTradeAnalysis (insights) returns the timestamp under "createAt" (typo upstream),
+    // not "createdAt" — every other type uses the real "createdAt".
+    return merged.sort(
+      (a, b) =>
+        new Date(b.raw?.createdAt || b.raw?.createAt || 0) -
+        new Date(a.raw?.createdAt || a.raw?.createAt || 0)
+    );
+  }, [allPosts, allIdeas, allInsights, allLiveIdeas, activeTypesKey]);
 
   // When exactly one type is active, its own accumulated array IS what's shown (no cap
   // needed — its own API pagination already governs it). When several types are combined
@@ -477,12 +431,20 @@ const CommunityFeed = () => {
             scrollThreshold={0.9}
           >
             {display.map((item, index) => {
-              const card =
-                item.type === "posts" ? (
-                  <SocialPostCard post={item.raw} />
-                ) : (
-                  <SocialFeedItemCard item={item} />
-                );
+              const card = (() => {
+                switch (item.type) {
+                  case "posts":
+                    return <SocialPostCard post={item.raw} showTypeBadge />;
+                  case "ideas":
+                    return <SocialIdeaCard idea={item.raw} />;
+                  case "insights":
+                    return <SocialInsightCard insight={item.raw} />;
+                  case "liveIdeas":
+                    return <SocialLiveIdeaCard liveIdea={item.raw} />;
+                  default:
+                    return null;
+                }
+              })();
               return index === 0 ? (
                 <div key={item.id} className="social-first-post">
                   {card}
