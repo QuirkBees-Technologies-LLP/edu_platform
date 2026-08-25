@@ -55,7 +55,7 @@ const HeaderLogo = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: [0, 10] // [skid, distance]
+              offset: [0, 10]
             }
           }]
         }}>
@@ -86,7 +86,7 @@ const HeaderLogo = () => {
           modifiers: [{
             name: 'offset',
             options: {
-              offset: [0, 0] // [skid, distance]
+              offset: [0, 0]
             }
           }]
         }}>

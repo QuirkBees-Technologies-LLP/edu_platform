@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import clsx from "clsx";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -42,31 +47,15 @@ const ClientLogin = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
-    // onSubmit: async (values, { setStatus, setSubmitting }) => {
-    //   setLoading(true);
-    //   try {
-    //     if (!login) {
-    //       throw new Error("JWTProvider is required for this form.");
-    //     }
-    //     await login(values.email, values.password, dispatch);
-    //     if (values.remember) {
-    //       localStorage.setItem("email", values.email);
-    //     } else {
-    //       localStorage.removeItem("email");
-    //     }
-    //     navigate("/", {
-    //       replace: true,
-    //     });
-    //   } catch (error) {
-    //     setStatus(error.message);
-    //     setSubmitting(false);
-    //   }
-    //   setLoading(false);
-    // },
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
-        const res = await clientSignin(values.email, values.password, clientCreateUpdate, dispatch);
+        const res = await clientSignin(
+          values.email,
+          values.password,
+          clientCreateUpdate,
+          dispatch
+        );
         if (values.remember) {
           localStorage.setItem("email", values.email);
         } else {
@@ -74,11 +63,9 @@ const ClientLogin = () => {
         }
 
         if (res?.redirect) {
-          // Already redirected
           return;
         }
         if (res?.success) {
-          // Optional: save token/user here if needed
           navigate("/dashboard", { replace: true });
         }
         if (res?.error) {
@@ -99,15 +86,25 @@ const ClientLogin = () => {
   return (
     <div className="login card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
       <form className="card-body flex flex-col gap-5 p-7 relative" noValidate>
-
         <div className="text-center">
           <div className="flex justify-start mb-8">
-            <Link to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'} className="text-sm gap-2 text-gray-300 dark:text-gray-600 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]">
+            <Link
+              to={
+                currentLayout?.name === "auth-branded"
+                  ? "/auth/login"
+                  : "/auth/classic/login"
+              }
+              className="text-sm gap-2 text-gray-300 dark:text-gray-600 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]"
+            >
               <KeenIcon icon="black-left" />
             </Link>
           </div>
           <div class="flex justify-center mb-8">
-            <img src="/media/app/default-logo-dark.png" class="w-100 h-5" alt="" />
+            <img
+              src="/media/app/default-logo-dark.png"
+              class="w-100 h-5"
+              alt=""
+            />
             {/* <img src="/media/app/default-logo-dark.png" class="w-100 h-5 dark_mode" alt="" /> */}
           </div>
           <h3 className="text-xl font-medium text-gray-100 dark:text-gray-900 leading-none mb-3 text-center">
@@ -120,10 +117,10 @@ const ClientLogin = () => {
           {/* <label className="form-label text-gray-900">Email</label> */}
           <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs !text-gray-300 font-normal p-0">
             <input
-            placeholder="Email"
+              placeholder="Email"
               autoComplete="off"
               {...formik.getFieldProps("email")}
-              className={clsx("text-gray-100 form-control", {
+              className={clsx("text-gray-100 dark:text-white form-control", {
                 "is-invalid": formik.touched.email && formik.errors.email,
               })}
             />
@@ -138,15 +135,14 @@ const ClientLogin = () => {
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-1">
             {/* <label className="form-label text-gray-900">Password</label> */}
-
           </div>
           <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs !text-gray-300 font-normal p-0">
             <input
-            placeholder="Password"
+              placeholder="Password"
               type={showPassword ? "text" : "password"}
               autoComplete="off"
               {...formik.getFieldProps("password")}
-              className={clsx("text-gray-100 form-control", {
+              className={clsx("text-gray-100  dark:text-white form-control", {
                 "is-invalid": formik.touched.password && formik.errors.password,
               })}
             />
@@ -172,14 +168,7 @@ const ClientLogin = () => {
           )}
         </div>
         <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
-          {/* <label className="checkbox-group">
-            <input
-              className="checkbox checkbox-sm"
-              type="checkbox"
-              {...formik.getFieldProps("remember")}
-            />
-            <span className="checkbox-label">Remember me</span>
-          </label> */}
+
         </div>
 
         <button
@@ -189,31 +178,9 @@ const ClientLogin = () => {
         >
           {loading ? "Please wait..." : "Login"}
         </button>
-        
+
         <div className="font-normal text-center">
-          {/* <Link
-            to={
-              currentLayout?.name === "auth-branded"
-                ? "/auth/reset-password"
-                : "/auth/classic/reset-password"
-            }
-            className="text-xs text-[#8D79FF] link shrink-0"
-          >
-            Forgot Password?
-          </Link> */}
-          {/* <span className="text-2sm text-gray-600 me-1.5">
-            Need an account ?
-          </span>
-          <Link
-            to={
-              currentLayout?.name === "auth-branded"
-                ? "/auth/signup"
-                : "/auth/classic/signup"
-            }
-            className="text-2sm link"
-          >
-            Sign up
-          </Link> */}
+          
         </div>
       </form>
     </div>

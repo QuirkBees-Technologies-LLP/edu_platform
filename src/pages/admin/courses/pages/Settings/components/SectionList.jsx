@@ -26,11 +26,13 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const SectionList = ({
   courseId,
+  activeTab,
   onLectureSelect,
   onLectureUpdate,
   forceUpdateLectureList,
   setForceUpdateLectureList,
   isLoading,
+  readOnly = false,
 }) => {
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [newSectionTitle, setNewSectionTitle] = useState("");
@@ -119,27 +121,28 @@ const SectionList = ({
             <h3 className="text-lg font-semibold text-gray-800">Sections</h3>
           </div>
           <div className="flex items-center gap-2">
-            {sections.length > 1 && (
+            {!readOnly && sections.length > 1 && (
               <button
                 onClick={() => setReorderMode(!reorderMode)}
-                className={`p-2 rounded-full transition-colors ${
-                  reorderMode
+                className={`p-2 rounded-full transition-colors ${reorderMode
                     ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                     : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
                 title={reorderMode ? "Exit reorder mode" : "Reorder sections"}
               >
                 <MoveVertical className="w-4 h-4" />
               </button>
             )}
-            <button
-              onClick={() => setIsAddingSection(true)}
-              disabled={isAddingSection}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-light text-primary hover:bg-primary-light rounded-lg transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="text-sm font-medium">Add Section</span>
-            </button>
+            {!readOnly && (
+              <button
+                onClick={() => setIsAddingSection(true)}
+                disabled={isAddingSection}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-light text-primary hover:bg-primary-light rounded-lg transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm font-medium">Add Section</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -214,15 +217,17 @@ const SectionList = ({
             </div>
             <p className="text-gray-500 mb-1">No sections found</p>
             <p className="text-gray-400 text-sm mb-4">
-              Create a section to get started
+              {readOnly ? "This master class has no sections yet." : "Create a section to get started"}
             </p>
-            <button
-              onClick={() => setIsAddingSection(true)}
-              className="px-4 py-2 btn border-primary text-primary hover:bg-primary hover:text-white rounded-md flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add First Section</span>
-            </button>
+            {!readOnly && (
+              <button
+                onClick={() => setIsAddingSection(true)}
+                className="px-4 py-2 btn border-primary text-primary hover:bg-primary hover:text-white rounded-md flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add First Section</span>
+              </button>
+            )}
           </div>
         ) : (
           <div
@@ -252,21 +257,21 @@ const SectionList = ({
                     moveSection={moveSection}
                     sections={sections}
                     onReorder={handleReorder} // ✅ Pass this prop
-                    // onReorder={async (newOrder) => {
-                    //   try {
-                    //     const reorderedPayload = newOrder.map(
-                    //       ({ id, order }) => ({
-                    //         _id: id,
-                    //         order,
-                    //       })
-                    //     );
-                    //     await dispatch(
-                    //       reorderSections(reorderedPayload, auth.token)
-                    //     ).unwrap();
-                    //   } catch (error) {
-                    //     console.error("Failed to reorder:", error);
-                    //   }
-                    // }}
+                  // onReorder={async (newOrder) => {
+                  //   try {
+                  //     const reorderedPayload = newOrder.map(
+                  //       ({ id, order }) => ({
+                  //         _id: id,
+                  //         order,
+                  //       })
+                  //     );
+                  //     await dispatch(
+                  //       reorderSections(reorderedPayload, auth.token)
+                  //     ).unwrap();
+                  //   } catch (error) {
+                  //     console.error("Failed to reorder:", error);
+                  //   }
+                  // }}
                   >
                     <SectionItem section={section} reorderMode={true} />
                   </DraggableSection>
@@ -274,11 +279,13 @@ const SectionList = ({
                   <SectionItem
                     section={section}
                     courseId={courseId}
+                    activeTab={activeTab}
                     onLectureSelect={onLectureSelect}
                     onLectureUpdate={onLectureUpdate}
                     forceUpdateLectureList={forceUpdateLectureList}
                     setForceUpdateLectureList={setForceUpdateLectureList}
                     reorderMode={false}
+                    readOnly={readOnly}
                   />
                 )}
               </motion.div>

@@ -13,7 +13,6 @@ import { Link, useParams } from "react-router-dom";
 import { useSettings } from "@/providers";
 import { toAbsoluteUrl } from "@/utils";
 import Spinner from "@/components/common/LoadingSpinner"; // Optional loader component
-import { it } from "@faker-js/faker";
 import VideoPlayerModal from "./VideoPlayerModal";
 import { useLazyGetEducatorRecordingQuery } from "../../../store/api/educator/educatorRecordingApiSlice";
 import VideoThumbnail from "../live-session/VideoThumbnail";
@@ -280,7 +279,7 @@ const EducatorRecordingSession = () => {
                   <div className="card">
                     {/* Image with Play Button */}
                     <div
-                      className="relative w-full h-52 rounded-2xl overflow-hidden"
+                      className="relative w-full h-52 rounded-t-2xl overflow-hidden"
                       onClick={() => setRecording(item)}
                     >
                       <RecordingThumbnail

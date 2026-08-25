@@ -87,6 +87,17 @@ export const createEducatorPost = async (postData) => {
         });
     }
     
+    // Add DynTube URL
+    if (postData.dyntubeUrl) {
+        formData.append('dyntubeUrl', postData.dyntubeUrl);
+    }
+    
+    // Add TradingView Links (always send so backend can process)
+    if (postData.tradingViewLinks) {
+        const tvLinks = (postData.tradingViewLinks || []).filter(l => l && l.trim());
+        formData.append('tradingViewLinks', JSON.stringify(tvLinks));
+    }
+    
     return axios.post(EDUCATOR_POSTS_API, formData, {
         headers: getAuthHeaders('multipart/form-data'),
     });
@@ -141,6 +152,23 @@ export const updateEducatorPost = async (id, postData) => {
     }
     if (postData.removeDocuments) {
         formData.append('removeDocuments', 'true');
+    }
+    
+    // Add DynTube URL
+    if (postData.dyntubeUrl !== undefined) {
+        formData.append('dyntubeUrl', postData.dyntubeUrl || '');
+    }
+    if (postData.removeDyntubeUrl) {
+        formData.append('removeDyntubeUrl', 'true');
+    }
+    
+    // Add TradingView Links (always send so backend can diff against existing)
+    if (postData.tradingViewLinks !== undefined) {
+        const tvLinks = (postData.tradingViewLinks || []).filter(l => l && l.trim());
+        formData.append('tradingViewLinks', JSON.stringify(tvLinks));
+    }
+    if (postData.removeTradingViewLinks) {
+        formData.append('removeTradingViewLinks', 'true');
     }
     
     return axios.put(`${EDUCATOR_POSTS_API}/${id}`, formData, {

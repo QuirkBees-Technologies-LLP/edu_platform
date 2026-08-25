@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+
 import { useMemo } from 'react';
 import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid, DefaultTooltip } from '@/components';
 import { toast } from 'sonner';
@@ -31,7 +31,6 @@ const Device = () => {
     cell: ({
       row
     }) => {
-      // 'row' argumentini cell funksiyasiga qo'shdik
       return <div className="flex items-center gap-4">
               <KeenIcon icon={row.original.device.icon} className="text-2xl text-gray-500" />
 

@@ -1,20 +1,14 @@
-// Defining the demo1 layout configuration using the ILayoutConfig type
+
 const LmsLayoutConfig = {
-  // Setting the layout name to 'demo1-layout'
   name: "lms-layout",
-  // Defining configuration options for the layout
   options: {
-    // Sidebar configuration
     sidebar: {
       theme: "light",
-      // Sidebar theme set to light
       fixed: true,
-      // Sidebar is fixed in position
-      collapse: false, // Sidebar is not collapsed by default
+      collapse: true,
     },
-    // Header configuration
     header: {
-      fixed: true, // Header is fixed in position
+      fixed: true,
     },
   },
 };

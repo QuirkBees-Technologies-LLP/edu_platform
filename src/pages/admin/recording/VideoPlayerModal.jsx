@@ -105,13 +105,12 @@ const VideoPlayerModal = ({ open, onOpenChange, videoUrl, data }) => {
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden">
         <DialogHeader className="p-4 pb-0">
           <DialogTitle>{data?.call_title || "Recording Playback"}</DialogTitle>
-          <ShowMoreLess
-            html={
-              data?.call_description ||
-              "View and access all video recordings uploaded by educators and admins."
-            }
-            limit={100}
-          />
+          {data?.call_description ? (
+            <ShowMoreLess
+              html={data.call_description}
+              limit={100}
+            />
+          ) : null}
         </DialogHeader>
 
         {/* <div className="mt-2">

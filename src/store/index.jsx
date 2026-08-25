@@ -2,6 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./reducer/authSlice"; // Import auth slice
 import courseReducer from "./reducer/courseSlice";
 import sectionReducer from "./reducer/sectionSlice";
+import breadcrumbReducer from "./reducer/breadcrumbSlice";
+import subsectionReducer from "./reducer/subsectionSlice";
 import lectureReducer from "./reducer/lectureSlice";
 import educatorPostReducer from "./reducer/postSlice";
 import { adminTradeIdeasApiSlice } from "./api/admin/adminTradeIdeasApiSlice";
@@ -29,7 +31,7 @@ import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSli
 import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
 import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
 import { persistReducer, persistStore } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // localStorage
+import storage from "redux-persist/lib/storage";
 import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
 import { clientEducatorApiSlice } from "./api/client/clientEductorApiSlice";
@@ -37,6 +39,24 @@ import { clientSocialApiSlice } from "./api/client/clientSocialApiSlilce";
 import { adminPackageApiSlice } from "./api/admin/adminPackageApiSlice";
 import { superAdminApiSlice } from "./api/admin/superAdminApiSlice";
 import { adminTaskManagementApiSlice } from "./api/admin/adminTaskManagementApiSlice";
+import { ratingApiSlice } from "./api/admin/adminRatingApiSlice";
+import { educatorCryptoAnalysisApiSlice } from "./api/educator/educatorCryptoAnalysisApiSlice";
+import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiSlice";
+import { educatorLiveTradeIdeasApiSlice } from "./api/educator/educatorLiveTradeIdeasApiSlice"
+import { adminLiveTradeIdeasApiSlice } from "./api/admin/adminLiveTradeIdeasApiSlice"
+import { adminStrategyApiSlice } from "./api/admin/adminStrategyApiSlice";
+import { clientStrategiesApiSlice } from "./api/client/clientStrategiesApiSlice";
+import { educatorMasterClassApiSlice } from "./api/educator/educatorMasterClassApiSlice";
+import { clientMasterClassApiSlice } from "./api/client/clientMasterClassApiSlice";
+import { adminMasterClassApiSlice } from "./api/admin/adminMasterClassApiSlice";
+import { adminStrategyModelApiSlice } from "./api/admin/adminStrategyModelApiSlice";
+import { adminMetricsApiSlice } from "./api/admin/adminMetricsApiSlice";
+import { educatorTvWebhookApiSlice } from "./api/educator/educatorTvWebhookApiSlice";
+import { clientTvSignalsApiSlice } from "./api/client/clientTvSignalsApiSlice";
+import { adminTvWebhookApiSlice } from "./api/admin/adminTvWebhookApiSlice";
+import { adminLearningContentApiSlice } from "./api/admin/adminLearningContentApiSlice";
+import { clientLearningContentApiSlice } from "./api/client/clientLearningContentApiSlice";
+
 
 const languagePersistConfig = {
   key: "language",
@@ -54,6 +74,8 @@ export const store = configureStore({
     auth: authReducer,
     courses: courseReducer,
     sections: sectionReducer,
+    breadcrumb: breadcrumbReducer,
+    subsections: subsectionReducer,
     lectures: lectureReducer,
     educatorPosts: educatorPostReducer,
     language: persistedLanguageReducer,
@@ -98,6 +120,27 @@ export const store = configureStore({
     [superAdminApiSlice.reducerPath]: superAdminApiSlice.reducer,
     [adminTaskManagementApiSlice.reducerPath]:
       adminTaskManagementApiSlice.reducer,
+    [ratingApiSlice.reducerPath]: ratingApiSlice.reducer,
+    [educatorCryptoAnalysisApiSlice.reducerPath]:
+      educatorCryptoAnalysisApiSlice.reducer,
+    [adminCryptoAnalysisApiSlice.reducerPath]:
+      adminCryptoAnalysisApiSlice.reducer,
+    [educatorLiveTradeIdeasApiSlice.reducerPath]:
+      educatorLiveTradeIdeasApiSlice.reducer,
+    [adminLiveTradeIdeasApiSlice.reducerPath]:
+      adminLiveTradeIdeasApiSlice.reducer,
+    [adminStrategyApiSlice.reducerPath]: adminStrategyApiSlice.reducer,
+    [clientStrategiesApiSlice.reducerPath]: clientStrategiesApiSlice.reducer,
+    [educatorMasterClassApiSlice.reducerPath]: educatorMasterClassApiSlice.reducer,
+    [clientMasterClassApiSlice.reducerPath]: clientMasterClassApiSlice.reducer,
+    [adminMasterClassApiSlice.reducerPath]: adminMasterClassApiSlice.reducer,
+    [adminStrategyModelApiSlice.reducerPath]: adminStrategyModelApiSlice.reducer,
+    [adminMetricsApiSlice.reducerPath]: adminMetricsApiSlice.reducer,
+    [educatorTvWebhookApiSlice.reducerPath]: educatorTvWebhookApiSlice.reducer,
+    [clientTvSignalsApiSlice.reducerPath]: clientTvSignalsApiSlice.reducer,
+    [adminTvWebhookApiSlice.reducerPath]: adminTvWebhookApiSlice.reducer,
+    [adminLearningContentApiSlice.reducerPath]: adminLearningContentApiSlice.reducer,
+    [clientLearningContentApiSlice.reducerPath]: clientLearningContentApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -130,7 +173,24 @@ export const store = configureStore({
       clientSocialApiSlice.middleware,
       adminPackageApiSlice.middleware,
       superAdminApiSlice.middleware,
-      adminTaskManagementApiSlice.middleware
+      adminTaskManagementApiSlice.middleware,
+      ratingApiSlice.middleware,
+      educatorCryptoAnalysisApiSlice.middleware,
+      adminCryptoAnalysisApiSlice.middleware,
+      educatorLiveTradeIdeasApiSlice.middleware,
+      adminLiveTradeIdeasApiSlice.middleware,
+      adminStrategyApiSlice.middleware,
+      clientStrategiesApiSlice.middleware,
+      educatorMasterClassApiSlice.middleware,
+      clientMasterClassApiSlice.middleware,
+      adminMasterClassApiSlice.middleware,
+      adminStrategyModelApiSlice.middleware,
+      adminMetricsApiSlice.middleware,
+      educatorTvWebhookApiSlice.middleware,
+      clientTvSignalsApiSlice.middleware,
+      adminTvWebhookApiSlice.middleware,
+      adminLearningContentApiSlice.middleware,
+      clientLearningContentApiSlice.middleware,
     ),
 });
 

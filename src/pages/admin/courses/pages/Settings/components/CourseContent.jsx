@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const CourseContent = ({ courseId }) => {
+const CourseContent = ({ courseId, activeTab }) => {
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
   const [selectedLecture, setSelectedLecture] = useState();
@@ -29,10 +29,10 @@ const CourseContent = ({ courseId }) => {
   useEffect(() => {
     if (courseId && auth?.token) {
       setIsLoading(true);
-      dispatch(fetchSections({ courseId, token: auth.token }))
+      dispatch(fetchSections({ courseId, token: auth?.token }))
         .unwrap()
         .then((data) => {
-          setSections(data.sections || []); // ✅ Save sections locally
+          setSections(data?.sections || []); // ✅ Save sections locally
         })
         .finally(() => {
           setIsLoading(false);
@@ -75,13 +75,13 @@ const CourseContent = ({ courseId }) => {
           <div className="flex items-center gap-3">
             <Layers className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-gray-800">
-              IQ Vault Structure
+              {activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"} Structure
             </h1>
           </div>
           {selectedLecture && (
             <div className="text-sm px-3 py-1.5 bg-primary-light text-primary rounded-md flex items-center">
               <FileText className="w-4 h-4 mr-2" />
-              <span>Editing: {selectedLecture.title}</span>
+              <span>Editing: {selectedLecture?.title}</span>
             </div>
           )}
         </div>
@@ -91,9 +91,8 @@ const CourseContent = ({ courseId }) => {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar with sections */}
         <div
-          className={`relative transition-all duration-300 ease-in-out border-r border-gray-200 min-w-0  ${
-            sidebarCollapsed ? "w-0" : "w-[400px]"
-          }`}
+          className={`relative transition-all duration-300 ease-in-out border-r border-gray-200 min-w-0  ${sidebarCollapsed ? "w-0" : "w-[400px]"
+            }`}
         >
           <div
             className={`h-full overflow-y-auto ${sidebarCollapsed ? "opacity-0" : "opacity-100"}`}
@@ -101,9 +100,10 @@ const CourseContent = ({ courseId }) => {
             <div className="p-5 ps-0">
               <SectionList
                 courseId={courseId}
+                activeTab={activeTab}
                 onLectureSelect={(lecture) => {
                   setSelectedLecture(lecture);
-                  localStorage.setItem("selectedLectureId", lecture._id);
+                  localStorage.setItem("selectedLectureId", lecture?._id);
                   if (window.innerWidth < 768) {
                     setSidebarCollapsed(true);
                   }
@@ -112,6 +112,7 @@ const CourseContent = ({ courseId }) => {
                 forceUpdateLectureList={forceUpdateLectureList}
                 setForceUpdateLectureList={setForceUpdateLectureList}
                 isLoading={isLoading}
+                readOnly={false}
               />
             </div>
           </div>
@@ -134,9 +135,8 @@ const CourseContent = ({ courseId }) => {
 
         {/* Main content area */}
         <div
-          className={`flex-1 transition-all duration-300 ease-in-out ${
-            sidebarCollapsed ? "pl-0" : "pl-0 md:pl-6"
-          }`}
+          className={`flex-1 transition-all duration-300 ease-in-out ${sidebarCollapsed ? "pl-0" : "pl-0 md:pl-6"
+            }`}
         >
           <div className="h-full overflow-y-auto p-6">
             {selectedLecture ? (

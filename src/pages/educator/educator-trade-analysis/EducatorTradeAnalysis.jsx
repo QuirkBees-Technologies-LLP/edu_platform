@@ -41,6 +41,9 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  // The insight a new chained insight should be created from — set by the "Update" action,
+  // distinct from "Edit" (selectedRow), which mutates the same document in place.
+  const [chainFrom, setChainFrom] = useState(null);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [category, setCategory] = useState(null);
   const [getEducatorTradeAnalysis, { data, isLoading, refetch }] =
@@ -111,6 +114,22 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
             <MenuTitle>Edit</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            // Update = create a brand-new, chained insight — never mutate this row, so
+            // selectedRow stays empty (create mode) while chainFrom carries the source.
+            setSelectedRow(null);
+            setChainFrom(row);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="arrow-circle-right" />
+            </MenuIcon>
+            <MenuTitle>Update</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem
@@ -291,6 +310,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
 
   const handleCloseCreate = () => {
     setSelectedRow(null);
+    setChainFrom(null);
     setIsCreateOpen(false);
   };
 
@@ -391,7 +411,8 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
         </Toolbar>
 
         <DataGrid
-          key={tableKey}
+          key={category?._id || ""}
+          reloadTrigger={tableKey}
           serverSide={true}
           loading={isLoading}
           columns={columns}
@@ -417,6 +438,8 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
           isCreateOpen={isCreateOpen}
           setIsCreateOpen={setIsCreateOpen}
           selectedRow={selectedRow}
+          chainFrom={chainFrom}
+          setChainFrom={setChainFrom}
         />
 
         {isDeleteOpen && (

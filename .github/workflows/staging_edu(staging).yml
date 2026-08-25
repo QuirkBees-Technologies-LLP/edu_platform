@@ -1,5 +1,6 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
 name: Build and deploy Vite app to Azure Web App - edu (Staging)
-
 on:
   push:
     branches:
@@ -39,9 +40,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_7418B2132FDB474CA49D0B809C085439 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F6B61FEDF7C24ADFB93495C2F3F8D674 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_1E708C7368B54B6EA3BCD1696261A5F9 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4905028732654A2392D9E4EA425A3F77 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0A743F3603404696B587754BA075F752 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_28B8DAC023274A68B488DCACC8E929EE }}
 
       - name: Deploy to Azure Web App (Staging)
         uses: azure/webapps-deploy@v3
@@ -49,4 +50,6 @@ jobs:
           app-name: 'edu'
           slot-name: 'staging'
           package: site.zip
+
+
 

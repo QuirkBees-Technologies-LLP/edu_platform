@@ -19,16 +19,20 @@ import {
 } from "@/store/reducer/sectionSlice";
 import { selectSectionsStatus } from "@/store/reducer/sectionSlice";
 import LectureList from "../lectures/lectureList";
+import SubsectionList from "./SubsectionList";
 
 const SectionItem = ({
   section,
   courseId,
+  activeTab,
   onLectureSelect,
   onLectureUpdate,
   forceUpdateLectureList,
   setForceUpdateLectureList,
   reorderMode,
+  readOnly = false,
 }) => {
+  const supportsSubsections = activeTab === "strategies";
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(section.title);
@@ -175,11 +179,10 @@ const SectionItem = ({
 
             <button
               onClick={handleToggleExpand}
-              className={`p-1.5 rounded-full transition-colors ${
-                isExpanded
+              className={`p-1.5 rounded-full transition-colors ${isExpanded
                   ? "text-primary bg-primary-light hover:bg-primary-clarity"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
               aria-label={isExpanded ? "Collapse section" : "Expand section"}
             >
               {isExpanded ? (
@@ -249,11 +252,10 @@ const SectionItem = ({
             )}
           </div>
 
-          {!isEditing && !reorderMode && (
+          {!isEditing && !reorderMode && !readOnly && (
             <div
-              className={`flex items-center gap-1 transition-opacity ${
-                isHovered ? "opacity-100" : "opacity-0"
-              }`}
+              className={`flex items-center gap-1 transition-opacity ${isHovered ? "opacity-100" : "opacity-0"
+                }`}
             >
               <button
                 onClick={handleStartEditing}
@@ -283,13 +285,30 @@ const SectionItem = ({
       {isExpanded && (
         <div className="border border-t-0 pt-2 pb-3 px-3 rounded-b-lg">
           <div className="ml-7">
+            {supportsSubsections && (
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Lectures
+              </p>
+            )}
             <LectureList
               sectionId={section._id}
+              directOnly={supportsSubsections}
               onLectureSelect={onLectureSelect}
               onLectureUpdate={onLectureUpdate}
               forceUpdateLectureList={forceUpdateLectureList}
               setForceUpdateLectureList={setForceUpdateLectureList}
+              readOnly={readOnly}
             />
+            {supportsSubsections && (
+              <SubsectionList
+                sectionId={section._id}
+                onLectureSelect={onLectureSelect}
+                onLectureUpdate={onLectureUpdate}
+                forceUpdateLectureList={forceUpdateLectureList}
+                setForceUpdateLectureList={setForceUpdateLectureList}
+                readOnly={readOnly}
+              />
+            )}
           </div>
         </div>
       )}

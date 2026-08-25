@@ -8,49 +8,227 @@ import {
   Volume2,
   Calendar,
   Clock3,
+  VolumeX,
+  TrendingDown,
+  TrendingUp,
+  UserPlus,
+  UserCheck,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
-import { Sparkles, TrendingUpDown } from "lucide-react";
-import { Bitcoin, BarChart3, ArrowRight } from "lucide-react";
+import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
+import { Bitcoin, BarChart3, ArrowRight, BookOpen } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useGetEducatorWithCoursesQuery } from "../../../store/api/client/clientCoursesApiSlice";
+import {
+  useGetEducatorWithCoursesQuery,
+  useLazyGetSecureVideoQuery,
+} from "../../../store/api/client/clientCoursesApiSlice";
+import { useToggleFollowMutation } from "../../../store/api/client/clientEductorApiSlice";
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import RatingModal from "./RatingModel";
+import { useLayout } from "../../../providers";
+import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import EducatorFeed from "./EducatorFeed";
+
+// Strips HTML tags AND decodes entities (e.g. "&nbsp;") into plain text,
+// unlike a naive tag-stripping regex which leaves entities behind literally.
+const htmlToPlainText = (html) => {
+  if (!html) return "";
+  const el = document.createElement("div");
+  el.innerHTML = html;
+  return (el.textContent || el.innerText || "").replace(/\s+/g, " ").trim();
+};
 
 const IqEducators = () => {
-  const navigate = useNavigate();
-  const { auth } = useAuthContext();
-
-  const userName = auth?.user?.name;
-
-  const { id } = useParams();
-  const { data: response } = useGetEducatorWithCoursesQuery(id);
+  const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
+  const [toggleFollow, { isLoading: isFollowLoading }] = useToggleFollowMutation();
   const [callId, setCallId] = useState(null);
   const [showShareToast, setShowShareToast] = useState(false); // Add toast state
+  const [isFollowing, setIsFollowing] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [courseAll, setCourseAll] = useState(false);
   const [recording, setRecording] = useState(null);
   const [idea, setIdea] = useState(null);
+  const [liveIdea, setLiveIdea] = useState(null);
   const [insight, setInsight] = useState(null);
-
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [isViewOpen1, setIsViewOpen1] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState({});
   const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
+  const [liveFeedImage, setLiveFeedImage] = useState(null);
+  const [isEducatorLive, setIsEducatorLive] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const navigate = useNavigate();
+  const { auth } = useAuthContext();
+  const LabelMap = {
+    active: "Active",
+    pending: "Pending",
+    win: "Win",
+    partialWin: "Partial Win",
+    loss: "Loss",
+    breakEven: "Break Even",
+  };
+
+  const userName = auth?.user?.name;
+  const isEducator = auth?.user?.role === "educator";
+
+  // Get gradient background based on educator's first category from API response
+  const getHeaderGradient = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      // Crypto - Purple gradient
+      return "bg-gradient-to-r from-[#7C3AED] to-[#1a0a2e]";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      // Digital Marketing - Light Blue gradient
+      return "bg-gradient-to-r from-[#38BDF8] to-[#0c4a6e]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      // E-commerce - Teal gradient (3-stop)
+      return "bg-gradient-to-r from-[#167E8C] via-[#1B2746] to-[#152B37]";
+    } else {
+      // Forex (default) - Blue gradient
+      return "bg-gradient-to-r from-[#2B44D3] to-[#0D0D21]";
+    }
+  };
+
+  // Get button color based on educator's first category
+  const getButtonColor = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      // Crypto - Purple
+      return "border-[#7C3AED] bg-[#7C3AED] hover:bg-[#6D28D9]";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      // Digital Marketing - Light Blue
+      return "border-[#38BDF8] bg-[#38BDF8] hover:bg-[#0EA5E9]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      // E-commerce
+      return "border-[#16B8C7] bg-[#16B8C7] hover:bg-[#073439]";
+    } else {
+      // Forex (default) - Blue
+      return "border-[#2B44D3] bg-[#2B44D3] hover:bg-[#1E3A8A]";
+    }
+  };
+
+  // Get slider accent color based on educator's first category
+  const getSliderAccent = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      return "accent-[#7C3AED]";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      return "accent-[#38BDF8]";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      return "accent-[#16B8C7]";
+    } else {
+      return "accent-[#2B44D3]";
+    }
+  };
+
+
+  const getMasterClassButtonStyle = () => {
+    const firstCategory = response?.data?.educator?.categories?.[0];
+    const categoryName = firstCategory?.name?.toLowerCase() || "";
+
+    if (categoryName.includes("crypto")) {
+      return "bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border-[#7C3AED]/50 hover:shadow-[#7C3AED]/30";
+    } else if (categoryName.includes("digital marketing") || categoryName.includes("digitalmarketing")) {
+      return "bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border-[#38BDF8]/50 hover:shadow-[#38BDF8]/30";
+    } else if (categoryName.includes("e-commerce") || categoryName.includes("ecommerce") || categoryName.includes("e commerce")) {
+      return "bg-[#16B8C7]/20 hover:bg-[#16B8C7]/30 border-[#16B8C7]/50 hover:shadow-[#16B8C7]/30";
+    } else {
+      return "bg-[#2B44D3]/20 hover:bg-[#2B44D3]/30 border-[#2B44D3]/50 hover:shadow-[#2B44D3]/30";
+    }
+  };
+
+  const { id } = useParams();
+  const {
+    data: response,
+    refetch: refetchEducator,
+    isFetching: isFetchingEducator,
+  } = useGetEducatorWithCoursesQuery(id, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  // Check if educator's first category is Digital Marketing or E-commerce
+  const educatorCategoryName = response?.data?.educator?.categories?.[0]?.name?.toLowerCase() ?? "";
+  const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing") || educatorCategoryName.includes("e-commerce") || educatorCategoryName.includes("ecommerce") || educatorCategoryName.includes("e commerce");
+
+  const {
+    data: liveTradeIdeas,
+    refetch: refetchLiveIdeas,
+    isFetching: isFetchingLiveIdeas,
+  } = useGetLiveTradeIdeaQuery({
+    page: 1,
+    limit: 10,
+    id: id,
+  }, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  useEffect(() => {
+
+    if (liveTradeIdeas && liveTradeIdeas?.data) {
+      setLiveIdea(liveTradeIdeas?.data);
+    }
+
+  }, [liveTradeIdeas, liveIdea]);
+
+  // Sync follow state from API response
+  useEffect(() => {
+    if (response?.data?.educator?.isFollowing !== undefined) {
+      setIsFollowing(response.data.educator.isFollowing);
+    }
+  }, [response]);
+
+  const handleToggleFollow = async () => {
+    if (isFollowLoading) return;
+    // Optimistic update
+    setIsFollowing((prev) => !prev);
+    try {
+      await toggleFollow(id).unwrap();
+      refetchEducator();
+    } catch (error) {
+      // Revert on error
+      setIsFollowing((prev) => !prev);
+      console.error("Follow toggle error:", error);
+    }
+  };
+
+  const handleRefresh = () => {
+    // refetchEducator();
+    refetchLiveIdeas();
+  };
+
+  const { volume, setVolume, isMuted, setIsMuted } = useLayout();
+
+  const toggleMute = () => setIsMuted((v) => !v);
+  const decVolume = () => setVolume((v) => Math.max(0, +(v - 0.1).toFixed(2)));
+  const incVolume = () => setVolume((v) => Math.min(1, +(v + 0.1).toFixed(2)));
+  const onSliderChange = (val) => {
+    setVolume(Number(val));
+    if (isMuted && Number(val) > 0) setIsMuted(false);
+  };
+
+
 
   const handleCloseView = () => {
     setIsViewOpen(false);
@@ -89,96 +267,11 @@ const IqEducators = () => {
     }
   }, [response]);
 
-  const updates = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-    {
-      id: 2,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-15.png",
-    },
-    {
-      id: 3,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-  ];
+  const handleShowMasterClasses = () => {
+    if (isEducator) return;
+    navigate(`/master-class/${id}`);
+  };
 
-  const feedData = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-    {
-      id: 2,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-15.png",
-    },
-    {
-      id: 3,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-    {
-      id: 4,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-16.png",
-    },
-  ];
-
-  const ideasData = [
-    {
-      id: 1,
-      name: "Jenny Klabber",
-      time: "Week ago",
-      message: "I just released a new bootcamp covering my trading strategy.",
-      avatar: "/media/avatars/300-14.png",
-    },
-  ];
-  const trades = [
-    {
-      id: 1,
-      pair: "EUR/USD",
-      date: "WED, FEB 16, 12:30 CET",
-      status: "Partial Win",
-      statusColor: "green",
-      entry: 3639.234,
-      stopLoss: 3323.989,
-      exit1: 3639.234,
-      exit2: 3639.234,
-      image: "/media/images/2600x1600/chart.jpg",
-    },
-    {
-      id: 2,
-      pair: "GBP/USD",
-      date: "THU, FEB 17, 14:00 CET",
-      status: "Full Win",
-      statusColor: "blue",
-      entry: 4450.5,
-      stopLoss: 4300.25,
-      exit1: 4500.0,
-      exit2: 4550.0,
-      image: "/media/images/2600x1600/chart.jpg",
-    },
-  ];
 
   const [messages, setMessages] = useState([
     {
@@ -234,11 +327,14 @@ const IqEducators = () => {
     ]);
     setNewMessage(""); // Clear the input field
   };
-  const [activeTab, setActiveTab] = useState("feed");
-  const data = activeTab === "feed" ? feedData : ideasData;
 
-  const handleOpen = (url) => {
-    setVideoUrl(url);
+  const handleOpen = async (videoKey) => {
+    // const { data } = await triggerSecureVideo(videoKey);
+    // if (data?.url) {
+    //   setVideoUrl(data.url);
+    //   setOpen(true);
+    // }
+    setVideoUrl(videoKey);
     setOpen(true);
   };
 
@@ -270,6 +366,114 @@ const IqEducators = () => {
       return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
     });
 
+  const getRelativeTime = (date) => {
+    if (!date) return "";
+
+    const now = new Date();
+    const past = new Date(date);
+    const diffInSeconds = Math.floor((now - past) / 1000);
+
+    const minutes = Math.floor(diffInSeconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (diffInSeconds < 60) return "Just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hr ago`;
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+  };
+
+  // Extracted so the same Live Feed card can render in its normal sidebar spot
+  // (when not live) or stacked below the Educator Feed inside the live chat
+  // column (when live), without duplicating this JSX in two places.
+  const renderLiveFeedCard = () => (
+    <div className="card rounded-2xl shadow-md overflow-hidden">
+      {/* Header */}
+      <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
+        <h3 className="text-white font-semibold text-sm">
+          Live Feed
+        </h3>
+        <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
+        </div>
+      </div>
+
+      {/* Updates */}
+      <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
+        {/* Messages */}
+        {response?.data?.PostData?.length > 0 ? (
+          response?.data?.PostData?.map((update) => (
+            <div
+              key={update?._id}
+              className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
+            >
+              <div className="flex flex-col gap-4 mb-4">
+                <img
+                  src={update?.author?.image}
+                  alt={update?.author?.name}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div>
+                  <h4 className="text-sm font-normal mb-1 text-gray-900">
+                    {update?.author?.first_name}{" "}
+                    {update?.author?.last_name}
+                  </h4>
+                  <p className="text-xs font-normal text-gray-600">
+                    {update?.createdAt
+                      ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
+                      : ""}
+                  </p>
+                </div>
+              </div>
+
+              {update?.content && (
+                <div className="mb-3">
+                  <p
+                    className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+                    dangerouslySetInnerHTML={{
+                      __html: makeClickableLinks(update?.content),
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Post Images */}
+              {update?.images?.length > 0 && (
+                <div
+                  className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
+                >
+                  {update.images.map((img, imgIdx) => {
+                    const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
+                    const imgKey = img?._id || imgUrl || imgIdx;
+                    return imgUrl ? (
+                      <div
+                        key={imgKey}
+                        className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
+                        onClick={() => setLiveFeedImage(imgUrl)}
+                      >
+                        <img
+                          src={imgUrl}
+                          alt="post"
+                          className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                        />
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
+            <div className="text-sm text-gray-900 font-medium text-center">
+              🚀 No updates available right now. Stay tuned for fresh
+              content!
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="container-fluid pb-10">
       {/* Share Toast Notification */}
@@ -280,41 +484,77 @@ const IqEducators = () => {
         </div>
       )}
 
-      <div className="bg-gradient-to-r from-[#2B44D3] to-[#0D0D21] rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4">
-        {/* Image + Name */}
-        <div className="flex items-center gap-4 sm:flex-row flex-col sm:justify-start justify-center">
-          <img
-            src={response?.data?.educator?.image}
-            alt={`${response?.data?.educator?.first_name} ${response?.data?.educator?.last_name}`}
-            className="w-20 h-20 object-cover object-top rounded-full border-2 border-white"
-          />
-          <div className="text-center sm:text-start">
-            <h3 className="text-white font-semibold text-base sm:text-lg mb-1">
+
+      {/* speaker center */}
+      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-6 sm:p-8 border border-white/10 shadow-xl grid grid-cols-1 lg:grid-cols-3 items-center gap-6 lg:gap-0 lg:divide-x lg:divide-white/10`}>
+        {/* Left: identity */}
+        <div className="flex items-center flex-wrap justify-center lg:justify-start gap-6 lg:pr-6">
+          <div className="relative group shrink-0">
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <img
+              src={response?.data?.educator?.image}
+              alt="Educator Profile"
+              className="relative w-24 h-24 sm:w-28 sm:h-28 object-cover object-top rounded-full border-4 border-white shadow-xl"
+            />
+          </div>
+
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            <h3 className="text-white font-bold text-md sm:text-xl mb-2 tracking-tight drop-shadow-md">
               {response?.data?.educator?.first_name}{" "}
               {response?.data?.educator?.last_name}
             </h3>
-            {/* <p className="text-gray-300 dark:text-gray-50 text-xs sm:text-sm">
-        Forex Day Trading, Price Action, Risk Management
-      </p> */}
+
+            {response?.data?.educator?.educatorRole && (
+              <div className="mb-3">
+                <span className="bg-white/15 text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20">
+                  {response.data.educator.educatorRole}
+                </span>
+              </div>
+            )}
+
+            <button
+              onClick={handleShowMasterClasses}
+              disabled={isEducator}
+              className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg overflow-hidden ${isEducator ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5'}`}
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <BookOpen size={18} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
+              <span className="relative">Go to My MasterClass</span>
+              <ArrowRight size={16} className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
+            </button>
           </div>
         </div>
 
-        {/* Buttons side by side */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsOpen(true)}
-            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
-          >
-            <Volume2 size={18} />
-          </button>
+        {/* Center: bio — the short "Profile Bio" field, not the longer "Trading Card Bio"
+            (that one is `description`, plain text already so no HTML stripping needed) */}
+        <div className="flex flex-col items-center justify-center text-center px-2 lg:px-6">
+          {response?.data?.educator?.bio && (
+            <>
+              <div className="flex items-center justify-center gap-2.5 mb-3">
+                <span className="h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-blue-400/70" />
+                <span className="w-1 h-1 rounded-full bg-blue-400" />
+                <span className="text-blue-400 text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase">
+                  About Me
+                </span>
+                <span className="w-1 h-1 rounded-full bg-blue-400" />
+                <span className="h-px w-6 sm:w-8 bg-gradient-to-l from-transparent to-blue-400/70" />
+              </div>
+              <p className="text-white/85 text-xs sm:text-sm leading-relaxed max-w-md">
+                {response.data.educator.bio}
+              </p>
+            </>
+          )}
+        </div>
 
+        {/* Right: actions — stacked one per line, Rate Me styled as the primary CTA */}
+        <div className="flex flex-col items-center lg:items-end gap-2 lg:pl-6">
           {isOpen && (
             <div
               className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
               onClick={() => setIsOpen(false)}
             >
               <div
-                className="relative w-full sm:w-[800px] bg-white rounded-2xl p-6 shadow-lg"
+                className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
               >
                 <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
@@ -331,17 +571,10 @@ const IqEducators = () => {
                 <span
                   className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
 
-"
+  "
                 >
                   Or follow the video tutorial
                 </span>
-                {/* <p className="text-gray-700 mb-1">
-                  <strong>Specialization:</strong> Forex Day Trading, Price
-                  Action
-                </p> */}
-                {/* <p className="text-gray-700 mb-4">
-              <strong>Experience:</strong> 5+ Years
-            </p> */}
                 <div className="overflow-hidden rounded-lg mx-auto block w-fit">
                   <video width="500" height="240" muted loop controls>
                     <source src={videotutorial} type="video/mp4" />
@@ -350,7 +583,7 @@ const IqEducators = () => {
 
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-lg shadow"
+                  className={`absolute top-3 right-3 ${getButtonColor()} text-white px-3 py-1 rounded-lg shadow`}
                 >
                   ✕
                 </button>
@@ -360,152 +593,192 @@ const IqEducators = () => {
 
           <button
             onClick={() => handleShare()}
-            className="border border-primary bg-primary text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+            className="border border-white/25 bg-white/5 hover:bg-white/10 hover:border-white/40 text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors w-full lg:w-auto justify-center"
           >
-            <Share2 size={16} />
+            <Share2 size={13} />
             Share
+          </button>
+
+          <button
+            onClick={handleToggleFollow}
+            disabled={isFollowLoading}
+            className={`border border-white/25 bg-white/5 hover:bg-white/10 hover:border-white/40 text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors w-full lg:w-auto justify-center ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+              }`}
+          >
+            {isFollowing ? (
+              <>
+                <UserCheck size={13} />
+                Following
+              </>
+            ) : (
+              <>
+                <UserPlus size={13} />
+                Follow
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={() => setShowRatingModal(true)}
+            className={`border ${getButtonColor()} text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 shadow-md transition-colors w-full lg:w-auto justify-center`}
+          >
+            <span className="text-yellow-300">⭐</span> Rate Me
           </button>
         </div>
       </div>
-
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
           <ClientViewLiveSession
             bannerImage={response?.data?.educator?.bannerImage}
             callId={callId}
+            educatorData={response?.data?.educator?.description}
+            headerGradient={getHeaderGradient()}
+            feedContent={
+              <EducatorFeed
+                educatorId={id}
+                headerGradient={getHeaderGradient()}
+              />
+            }
+            onStatusChange={(status) => setIsEducatorLive(status === "live")}
           />
         </div>
       </div>
+
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">
-          {/* <div className="">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-y-8 lg:gap-x-8 md:gap-y-8">
-              <div className="col-span-12 lg:col-span-12">
-                <div className="card rounded-none rounded-b-xl">
-                  <img
-                    src="/media/images/2600x1600/iq_educators.jpg"
-                    alt=""
-                    className="w-full h-full rounded-xl object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div> */}
-          {/* <ClientViewLiveSession /> */}
 
-          {/* <div className="text-gray-900 mb-2">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+          {/* Master Classes */}
+          {response?.data?.masterClasses?.length > 0 && <div className="text-gray-900 mb-8">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <Link className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary">
+                <h2 className="text-xl font-medium">Master Classes</h2>
+                {!isEducator && <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => navigate(`/master-class/${id}`)}
+                >
                   View All
-                </Link>
+                </button>}
               </div>
             </div>
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              <div className="flex gap-4">
-                {response?.data?.recordings?.map((course) => (
-                  <div
-                    key={course.id}
-                    className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                  >
-                    <div className="rounded-t-xl overflow-hidden" onClick={() => setRecording(course)}>
-                      
-                      <RecordingThumbnail
-                        videoUrl={course?.url}
-                        seekTime={2}
-                        image={course?.thumbnail}
-                        onRecordingClick={() => handleOpen(course?.url)}
-                      />
-
-                  
+              {response?.data?.masterClasses?.length > 0 ? (
+                <div className="flex gap-4">
+                  {response?.data?.masterClasses?.map((mc) => (
+                    <div
+                      key={mc?._id}
+                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                      onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
+                    >
+                      <div className="rounded-t-xl overflow-hidden">
+                        <img
+                          src={mc?.imageUrl || mc?.strategyBanner}
+                          alt={mc?.title}
+                          className="w-full h-36 object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {mc?.title}
+                        </h3>
+                        {mc?.category?.name && (
+                          <p className="text-xs text-gray-500 mb-1">{mc?.category?.name}</p>
+                        )}
+                        {mc?.language && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {mc?.language}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="p-4">
-                      <h3 className="text-md font-normal mb-2">
-                        {course.call_title}
-                      </h3>
-                      <p className="text-xs text-gray-600">{course.address}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Masterclasses Found</span>
+                </div>
+              )}
             </div>
-          </div> */}
-          {/* Course  */}
-          <div className="text-gray-900 ">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+          </div>}
+
+          {/* Recordings */}
+          {response?.data?.recordings?.length > 0 && <div className="text-gray-900 mb-8">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Courses</h2>
+                <h2 className="text-xl font-medium">Recordings</h2>
                 <button
-                  onClick={() => setCourseAll((prev) => !prev)}
                   className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => setShowAll((prev) => !prev)}
                 >
-                  {courseAll ? "Show Less" : "View All"}
+                  {showAll ? "Show Less" : "View All"}
                 </button>
               </div>
             </div>
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.courses?.length > 0 ? (
-                courseAll ? (
-                  // GRID VIEW (sabhi courses ek sath)
+              {response?.data?.recordings?.length > 0 ? (
+                showAll ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.courses?.map((course) => (
+                    {response?.data?.recordings?.map((course) => (
                       <div
-                        key={course.id}
-                        className="w-full border rounded-xl shadow-sm cursor-pointer"
-                        onClick={() =>
-                          navigate(
-                            `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                          )
-                        }
+                        key={course?._id}
+                        className="w-full cursor-pointer border rounded-xl shadow-sm"
                       >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course.imageUrl}
-                            alt={course.title}
-                            className="w-full h-36 object-cover"
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
                           />
                         </div>
                         <div className="p-4">
                           <h3 className="text-md font-normal mb-2">
-                            {course.title}
+                            {course?.call_title}
                           </h3>
-                          <p className="text-xs text-gray-600">
-                            {course.address}
-                          </p>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  // SLIDER VIEW (default horizontal scroll)
                   <div className="flex gap-4">
-                    {response?.data?.courses?.map((course) => (
+                    {response?.data?.recordings?.map((course) => (
                       <div
-                        key={course.id}
-                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                        onClick={() =>
-                          navigate(
-                            `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                          )
-                        }
+                        key={course?._id}
+                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
                       >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course.imageUrl}
-                            alt={course.title}
-                            className="w-full h-36 object-cover"
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
                           />
                         </div>
                         <div className="p-4">
                           <h3 className="text-md font-normal mb-2">
-                            {course.title}
+                            {course?.call_title}
                           </h3>
-                          <p className="text-xs text-gray-600">
-                            {course.address}
-                          </p>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -513,66 +786,23 @@ const IqEducators = () => {
                 )
               ) : (
                 <div className="text-center">
-                  <span className="text-sm text-gray-600">
-                    No Courses Found
-                  </span>
+                  <span className="text-sm text-gray-600">No Recordings Found</span>
                 </div>
               )}
             </div>
-          </div>
+          </div>}
 
-          {/* <div className="text-gray-900 mb-28">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+          {/* Ideas */}
+          {response?.data?.idea?.length > 0 && <div className="text-gray-900 mb-28">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Courses</h2>
-                <Link className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary">
-                  View All
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              <div className="flex gap-4">
-                {response?.data?.courses?.map((course) => (
-                  <div
-                    key={course.id}
-                    className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
-                    onClick={() =>
-                      navigate(
-                        `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      )
-                    }
-                  >
-                    <div className="rounded-t-xl overflow-hidden">
-                      <img
-                        src={course.imageUrl}
-                        alt={course.title}
-                        className="w-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-md font-normal mb-2">
-                        {course.title}
-                      </h3>
-                      <p className="text-xs text-gray-600">{course.address}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div> */}
-
-          {/* Idea  */}
-          <div className="text-gray-900 mb-28">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Idea</h2>
-                <button
+                <h2 className="text-xl font-medium">Ideas</h2>
+                {!isEducator && <button
                   onClick={() => setIdea((prev) => !prev)}
                   className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
                 >
                   {idea ? "Show Less" : "View All"}
-                </button>
+                </button>}
               </div>
             </div>
 
@@ -582,28 +812,29 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.idea?.map((course) => (
                       <div
-                        key={course.id}
-                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        key={course?._id}
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course.image[0]}
-                            alt={course.name}
+                            src={course?.image?.[0]}
+                            alt={course?.name}
                             className="w-full h-36 object-cover"
                           />
                         </div>
                         <div className="p-4">
                           <h3 className="text-md font-normal mb-2">
-                            {course.name}
+                            {course?.name}
                           </h3>
                           <ShowMoreLess
                             className="text-xs text-gray-600"
@@ -619,29 +850,30 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.idea?.map((course) => (
                       <div
-                        key={course.id}
-                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        key={course?._id}
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedIdea(course);
                           setIsViewOpen(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course.image[0]}
-                            alt={course.name}
+                            src={course?.image?.[0]}
+                            alt={course?.name}
                             className="w-full h-36 object-cover"
                           />
                         </div>
                         <div className="p-4 d-flex">
                           <div className="justify-between">
                             <h3 className="text-md font-normal mb-2">
-                              {course.name}
+                              {course?.name}
                             </h3>
                           </div>
 
@@ -661,20 +893,20 @@ const IqEducators = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div>}
 
-          {/* Insight  */}
+          {/* Insights */}
 
-          <div className="text-gray-900 mb-28">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
+          {response?.data?.insight?.length > 0 && <div className="text-gray-900 mb-28">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Insights</h2>
-                <button
+                {!isEducator && <button
                   onClick={() => setInsight((prev) => !prev)}
                   className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
                 >
                   {insight ? "Show Less" : "View All"}
-                </button>
+                </button>}
               </div>
             </div>
 
@@ -685,21 +917,22 @@ const IqEducators = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {response?.data?.insight?.map((course) => (
                       <div
-                        key={course.id}
-                        className="w-full border rounded-xl shadow-sm cursor-pointer"
+                        key={course?._id}
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course?.photos[0]}
+                            src={course?.photos?.[0]}
                             alt={course?.title}
                             className="w-full h-36 object-cover"
                           />
@@ -722,21 +955,22 @@ const IqEducators = () => {
                   <div className="flex gap-4">
                     {response?.data?.insight?.map((course) => (
                       <div
-                        key={course.id}
-                        className="w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer"
+                        key={course?._id}
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
                         onClick={() => {
+                          if (isEducator) return;
                           setSelectedInsight(course);
                           setIsViewOpen1(true);
                         }}
-                        // onClick={() =>
-                        //   navigate(
-                        //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                        //   )
-                        // }
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
                       >
                         <div className="rounded-t-xl overflow-hidden">
                           <img
-                            src={course?.photos[0]}
+                            src={course?.photos?.[0]}
                             alt={course?.title}
                             className="w-full h-36 object-cover"
                           />
@@ -763,7 +997,154 @@ const IqEducators = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div>}
+
+          {/* Live Ideas */}
+
+
+          {liveIdea?.length > 0 && <div className="text-gray-900">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-medium">Live Ideas</h2>
+
+                </div>
+                <button
+                  onClick={() => {
+                    setLiveIdea((prev) => !prev)
+                    handleRefresh()
+                  }}
+                  disabled={isFetchingLiveIdeas}
+                  className="text-white hover:text-gray-300 transition-colors"
+                >
+                  <RotateCw
+                    size={18}
+                    className={
+                      isFetchingLiveIdeas
+                        ? "animate-spin"
+                        : ""
+                    }
+
+                  />
+
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {liveIdea?.length > 0 ? (
+                <div className="flex gap-4">
+                  {liveIdea?.map((liveIdeaData) => (
+                    <div
+                      key={liveIdeaData?._id}
+                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                      onClick={() => {
+                        if (isEducator) return;
+                        setSelectedIdea(liveIdeaData);
+                        setIsLightBoxOpen(true);
+                      }}
+                    >
+                      {/* IMAGE CONTAINER */}
+                      <div className="relative rounded-t-xl overflow-hidden">
+                        <img
+                          src={liveIdeaData?.image?.[0]}
+                          alt={liveIdeaData?.name}
+                          className="w-full h-36 object-cover"
+                        />
+
+                        {/* 🔥 OVERLAY START */}
+                        <div className="absolute top-2 left-2 right-2 flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${liveIdeaData?.type === "buy"
+                                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                                : "bg-red-500 hover:bg-red-600 text-white"
+                                }`}
+                            >
+                              {liveIdeaData?.type === "buy" ? (
+                                <TrendingUp size={16} />
+                              ) : (
+                                <TrendingDown size={16} />
+                              )}
+                              {liveIdeaData?.type?.toUpperCase()}
+                            </button>
+
+                            <div className="bg-gray-800 px-2 py-1 rounded-lg font-semibold text-xs text-white">
+                              {liveIdeaData?.name}
+                            </div>
+                          </div>
+
+                          {LabelMap[liveIdeaData?.status] === "Active" && (
+                            <div className="bg-cyan-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                              Active
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Pending" && (
+                            <div className="bg-purple-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                              Pending
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Win" && (
+                            <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              ★ WIN +{liveIdeaData?.pips} pips
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Loss" && (
+                            <div className="bg-red-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              ▲ LOSS -{liveIdeaData?.pips} pips
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Partial Win" && (
+                            <div className="bg-purple-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
+                              ▲ PARTIAL WIN {liveIdeaData?.pips} pips
+                            </div>
+                          )}
+
+                          {LabelMap[liveIdeaData?.status] === "Break Even" && (
+                            <div className="bg-blue-500 text-white px-2 py-1 rounded-lg font-semibold text-xs">
+                              Break Even
+                            </div>
+                          )}
+
+                        </div>
+                        {/* 🔥 OVERLAY END */}
+                      </div>
+
+                      {/* DATE */}
+                      <div className="p-4 flex items-center justify-between">
+                        {/* LEFT: Full Date */}
+                        <div className="text-sm text-gray-600">
+                          {format(new Date(liveIdeaData?.createdAt), "dd/MM/yyyy hh:mm a")}
+                        </div>
+
+                        {/* RIGHT: Relative Time */}
+                        <div
+                          className="text-sm text-gray-600"
+                          title={format(new Date(liveIdeaData?.createdAt), "dd MMM yyyy, hh:mm a")}
+                        >
+                          {getRelativeTime(liveIdeaData?.createdAt)}
+                        </div>
+                      </div>
+
+
+                    </div>
+
+                  ))}
+                </div>
+
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Live idea Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
         </div>
 
         {/* Sidebar */}
@@ -771,7 +1152,7 @@ const IqEducators = () => {
           <div className="grid grid-cols-12 gap-6">
             {/* <div className="col-span-12 md:col-span-6 xl:col-span-12 space-y-6">
               <div className="card rounded-2xl shadow-md overflow-hidden">
-                <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                   <h3 className="text-white font-semibold text-sm">Chatbox</h3>
                 </div>
 
@@ -820,142 +1201,22 @@ const IqEducators = () => {
                 </form>
               </div>
             </div> */}
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                {/* Header */}
-                <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
-                  <h3 className="text-white font-semibold text-sm">
-                    Live Feed
-                  </h3>
-                  <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                    {/* <button
-                      onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Feed
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Ideas
-                    </button> */}
-                  </div>
-                </div>
-
-                {/* Updates */}
-                <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-                  {/* Hover Overlay */}
-                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div> */}
-
-                  {/* Messages */}
-                  {response?.data?.PostData?.length > 0 ? (
-                    response?.data?.PostData?.map((update) => (
-                      <div
-                        key={update.id}
-                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-                      >
-                        <div className="flex flex-col gap-4 mb-4">
-                          <img
-                            src={update.author.image}
-                            alt={update.author.name}
-                            className="w-12 h-12 rounded-full"
-                          />
-                          <div>
-                            <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update.author.first_name}{" "}
-                              {update.author.last_name}
-                            </h4>
-                            <p className="text-xs font-normal text-gray-600">
-                              {formatDistanceToNow(new Date(update.createdAt), {
-                                addSuffix: true,
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                        {/* <p className="text-sm font-normal text-gray-700">
-                          {update.content}
-                        </p> */}
-
-                        {update?.content && (
-                          <div className="mb-3">
-                            <p
-                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                              dangerouslySetInnerHTML={{
-                                __html: makeClickableLinks(update?.content),
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="text-sm text-gray-900 font-medium text-center">
-                        🚀 No updates available right now. Stay tuned for fresh
-                        content!
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cards */}
-                  {/* {trades.map((trade) => (
-                                        <div key={trade.id} className="card rounded-2xl overflow-hidden w-full relative z-0">
-                                        <img src={trade.image} alt={trade.pair} className="w-full h-40 object-cover" />
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <ArrowUp className="text-green-500 w-8 h-8 shrink-0" />
-                                                <div>
-                                                <h3 className="font-medium text-gray-800 text-sm mb-1">{trade.pair}</h3>
-                                                <p className="text-2xs font-normal text-gray-500 line-clamp-1">{trade.date}</p>
-                                                </div>
-                                            </div>
-                                            <span
-                                                className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                                            >
-                                                {trade.status}
-                                            </span>
-                                            </div>
-
-                                            <div className="mt-6 space-y-4">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Entry</span>
-                                                <span className="font-medium text-gray-800">{trade.entry}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
-                                                <span className="font-medium text-gray-800">{trade.stopLoss}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 1</span>
-                                                <span className="font-medium text-gray-800">{trade.exit1}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 2</span>
-                                                <span className="font-medium text-gray-800">{trade.exit2}</span>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    ))} */}
-                </div>
+            {/* Educator feed — sits next to Master Classes only once the stream is live.
+                Before that, the same EducatorFeed instance renders in place of the old
+                "About Me" card (up in the video/chat row via feedContent), so it's never
+                shown in both places at once. */}
+            {isEducatorLive && (
+              <div className="col-span-12 md:col-span-6 xl:col-span-12 h-[500px]">
+                <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
               </div>
+            )}
+            <div className="col-span-12 md:col-span-6 xl:col-span-12">
+              {renderLiveFeedCard()}
             </div>
             <div className="col-span-12 md:col-span-6 xl:col-span-12">
               <div className="card rounded-2xl shadow-md overflow-hidden">
                 {/* Header */}
-                <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
                   <h3 className="text-white font-semibold text-sm">
                     Analysis Updates
                   </h3>
@@ -992,32 +1253,29 @@ const IqEducators = () => {
 
                   {/* Messages */}
                   {response?.data?.analysisData?.length > 0 ? (
-                    response.data.analysisData.map((update) => (
+                    response?.data?.analysisData?.map((update) => (
                       <div
-                        key={update.id}
+                        key={update?._id}
                         className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
                       >
                         <div className="flex flex-col gap-4 mb-4">
                           <img
-                            src={update.author.image}
-                            alt={update.author.name}
+                            src={update?.author?.image}
+                            alt={update?.author?.name}
                             className="w-12 h-12 rounded-full"
                           />
                           <div>
                             <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update.author.first_name}{" "}
-                              {update.author.last_name}
+                              {update?.author?.first_name}{" "}
+                              {update?.author?.last_name}
                             </h4>
                             <p className="text-xs font-normal text-gray-600">
-                              {formatDistanceToNow(new Date(update.createdAt), {
-                                addSuffix: true,
-                              })}
+                              {update?.createdAt
+                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
+                                : ""}
                             </p>
                           </div>
                         </div>
-                        {/* <p className="text-sm font-normal text-gray-700">
-                          {update.content}
-                        </p> */}
 
                         {update?.content && (
                           <div className="mb-3">
@@ -1027,6 +1285,31 @@ const IqEducators = () => {
                                 __html: makeClickableLinks(update?.content),
                               }}
                             />
+                          </div>
+                        )}
+
+                        {/* Post Images */}
+                        {update?.images?.length > 0 && (
+                          <div
+                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
+                          >
+                            {update.images.map((img, imgIdx) => {
+                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
+                              const imgKey = img?._id || imgUrl || imgIdx;
+                              return imgUrl ? (
+                                <div
+                                  key={imgKey}
+                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
+                                  onClick={() => setLiveFeedImage(imgUrl)}
+                                >
+                                  <img
+                                    src={imgUrl}
+                                    alt="post"
+                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                                  />
+                                </div>
+                              ) : null;
+                            })}
                           </div>
                         )}
                       </div>
@@ -1086,105 +1369,6 @@ const IqEducators = () => {
             </div>
           </div>
         </div>
-
-        {/* Recording  */}
-        <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
-          <div className="text-gray-900 mb-2">
-            <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => setShowAll((prev) => !prev)}
-                >
-                  {showAll ? "Show Less" : "View All"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.recordings?.length > 0 ? (
-                showAll ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course.id}
-                        className="w-full cursor-pointer border rounded-xl shadow-sm"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(
-                                course?.start_time
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course.id}
-                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(
-                                course?.start_time
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">
-                    No Recordings Found
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
       <VideoPlayerModal
@@ -1212,6 +1396,44 @@ const IqEducators = () => {
         close={() => setIsVolumeOpen(false)}
         slides={[{ src: InfoImage }]}
       />
+
+      {/* Live Feed / Analysis Image Lightbox */}
+      {liveFeedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+          onClick={() => setLiveFeedImage(null)}
+        >
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={liveFeedImage}
+              alt="post"
+              className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
+            />
+            <button
+              onClick={() => setLiveFeedImage(null)}
+              className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+      {showRatingModal && (
+        <RatingModal
+          showRatingModal={showRatingModal}
+          setShowRatingModal={setShowRatingModal}
+          educatorId={id}
+        />
+      )}
+      {
+        isLightBoxOpen && (
+          <ImageLightBox
+            isLightBoxOpen={isLightBoxOpen}
+            setIsLightBoxOpen={setIsLightBoxOpen}
+            selectedIdea={selectedIdea}
+          />
+        )
+      }
     </div>
   );
 };

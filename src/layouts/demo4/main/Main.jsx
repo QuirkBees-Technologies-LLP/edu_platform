@@ -52,7 +52,7 @@ const Main = () => {
                       modifiers: [{
                         name: 'offset',
                         options: {
-                          offset: [10, 10] // [skid, distance]
+                          offset: [10, 10]
                         }
                       }]
                     }}>

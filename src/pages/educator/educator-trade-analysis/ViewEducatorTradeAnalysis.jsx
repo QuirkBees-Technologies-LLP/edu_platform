@@ -1,18 +1,22 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
+import { Play } from "lucide-react";
 import { format } from "date-fns";
 import EducatorTradeAnalysisSlider from "./EducatorTradeAnalysisSlider";
+import { getEmbedUrl } from "@/utils/videoUtils";
 
 const ViewEducatorTradeAnalysis = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
+    const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
 
     return (
-      
+      <>
         <Dialog
           asChild
           open={isViewOpen}
@@ -29,63 +33,76 @@ const ViewEducatorTradeAnalysis = forwardRef(
                 <div className="col-span-12">
                   <div className="flex items-center px-4 pb-3 pt-3">
                     <div className="mr-2 text-lg text-gray-900 font-semibold">
-                      {selectedIdea?.name}
+                      {selectedIdea?.title || selectedIdea?.name}
                     </div>
                   </div>
-                  {/* <div className="flex px-4">
-                                  <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Buy</div>
-                                  <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
-                                  <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">5m</div>
-                                  <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">•</div>
-                                  <div className="mr-2 mb-3 text-md text-gray-900 font-semibold">Scalp</div>
-                              </div> */}
-                  <div className="">
-                    <EducatorTradeAnalysisSlider
-                      sliderImages={selectedIdea?.image}
-                      setIsLightBoxOpen={setIsLightBoxOpen}
-                      selectedIdea={selectedIdea}
-                    />
-                  </div>
-                  <div className="grid gap-5 p-5">
-                    <div className="grid grid-cols-12 gap-4">
-                      <div className="col-span-12">
-                        {/* <div className="flex flex-col gap-2 py-4.5">
-                                              <div className="flex gap-5 sm:gap-10 flex-wrap">
-                                                  <div className='flex items-center gap-3'>
-                                                      <div className="text-xs text-gray-800 uppercase">Entry</div>
-                                                      <span class="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{selectedIdea?.entry ?? "-"}</span>
-                                                  </div>
-                                                  <div className='flex items-center gap-3'>
-                                                      <div className="text-2sm text-gray-800 uppercase">Invalidation</div>
-                                                      <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{selectedIdea?.invalidation ?? "-"}</span>
-                                                  </div>
-                                              </div>
-                                              <div>
-                                                  <div className="text-2sm text-gray-800 uppercase mb-3">Exits</div>
-                                                  <div className="flex items-center flex-wrap gap-2">
-                                                      {selectedIdea?.exits?.length > 0 && selectedIdea?.exits?.map((exit, index) => (
-                                                          <div key={index} className="flex items-center gap-2 mt-1">
-                                                              <div className="inline-flex items-center justify-center shrink-0 rounded-full border-2 border-primary text-dark text-sm size-5 bg-white">{index + 1}</div>
-                                                              <div className="text-sm text-gray-900 font-semibold">{exit}</div>
-                                                          </div>
-                                                      ))}
-                                                  </div>
-                                              </div>
-                                          </div> */}
-                      </div>
-                      {/* <div className="col-span-12">
-                        <div className="card">
-                          <div className="flex flex-col gap-4 px-5 py-4.5">
-                            <div className="flex flex-col gap-3">
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html: selectedIdea?.message ?? "-",
-                                }}
-                              />
-                            </div>
-                          </div>
+                  {selectedIdea?.image?.length > 0 && (
+                    <div className="">
+                      <EducatorTradeAnalysisSlider
+                        sliderImages={selectedIdea?.image}
+                        setIsLightBoxOpen={setIsLightBoxOpen}
+                        selectedIdea={selectedIdea}
+                      />
+                    </div>
+                  )}
+
+                  {/* DynTube Thumbnail + Play Button */}
+                  {selectedIdea?.dyntubeUrl && (
+                    <div className="px-4 mt-3">
+                      <div
+                        className="relative w-full rounded-xl overflow-hidden bg-black cursor-pointer group"
+                        style={{ aspectRatio: '16/9' }}
+                        onClick={() => setDyntubeModalOpen(true)}
+                      >
+                        <iframe
+                          src={getEmbedUrl(selectedIdea.dyntubeUrl)}
+                          className="w-full h-full"
+                          loading="lazy"
+                          tabIndex={-1}
+                          scrolling="no"
+                          style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+                          title="DynTube Video"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        {/* <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-200">
+                          <Play size={28} className="text-white ml-1" fill="white" />
                         </div>
                       </div> */}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid gap-5 p-5">
+                    <div className="grid grid-cols-12 gap-4">
+                      {/* Description — shown fully, no ShowMoreLess */}
+                      {(selectedIdea?.description) && (
+                        <div className="col-span-12">
+                          <div className="text-gray-900 text-sm mt-2 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: selectedIdea?.description }}
+                          />
+                        </div>
+                      )}
+                      {/* TradingView Links */}
+                      {selectedIdea?.tradingViewLinks?.length > 0 && selectedIdea.tradingViewLinks.some(l => l && l.trim()) && (
+                        <div className="col-span-12">
+                          <div className="text-xs text-gray-500 uppercase font-semibold mb-1.5">TradingView Charts</div>
+                          <div className="flex flex-col gap-1">
+                            {selectedIdea.tradingViewLinks.filter(l => l && l.trim()).map((link, idx) => (
+                              <a
+                                key={idx}
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-primary hover:underline truncate"
+                              >
+                                📈 {link}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                     </div>
                   </div>
                   <div className="flex items-center py-5">
@@ -116,8 +133,43 @@ const ViewEducatorTradeAnalysis = forwardRef(
             </div>
           </DialogContent>
         </Dialog>
-      
+
+        {/* DynTube Video Modal */}
+        {selectedIdea?.dyntubeUrl && (
+          <Dialog open={dyntubeModalOpen} onOpenChange={setDyntubeModalOpen}>
+            <DialogContent
+              className="max-w-5xl w-full p-0 !overflow-hidden bg-black border-gray-800 !max-h-[85vh] flex flex-col"
+              onCloseAutoFocus={(e) => e.preventDefault()}
+            >
+              <DialogHeader className="px-5 pt-4 pb-2 shrink-0">
+                <DialogTitle className="text-white text-lg font-semibold truncate pr-8">
+                  Video
+                </DialogTitle>
+                <DialogDescription className="sr-only">
+                  DynTube video player
+                </DialogDescription>
+              </DialogHeader>
+              <div className="w-full flex-1 min-h-0 p-4 pt-0">
+                <div className="aspect-video w-full h-full max-h-full">
+                  {dyntubeModalOpen && (
+                    <iframe
+                      src={getEmbedUrl(selectedIdea.dyntubeUrl)}
+                      className="w-full h-full rounded-lg"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="DynTube Video Player"
+                      style={{ border: 'none' }}
+                    />
+                  )}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+      </>
     );
   }
 );
 export default ViewEducatorTradeAnalysis;
+

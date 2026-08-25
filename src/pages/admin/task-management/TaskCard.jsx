@@ -4,14 +4,44 @@ import { MoreHorizontal, Edit, Trash2, FileText, Flag } from "lucide-react";
 const priorityColors = {
   low: "bg-green-100 text-green-700",
   medium: "bg-yellow-100 text-yellow-700",
-  historyigh: "bg-orange-100 text-orange-700",
+  high: "bg-orange-100 text-orange-700",
   critical: "bg-red-100 text-red-700",
+};
+
+const ShowMoreLess = ({
+  text = "",
+  html = "",
+  limit = 120,
+  showMoreText = " Show More",
+  showLessText = " Show Less",
+  className = "text-sm text-gray-700 leading-relaxed",
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const isHtml = !!html;
+  const content = isHtml ? html : text;
+  const plainText = isHtml ? content.replace(/<[^>]+>/g, "") : text;
+  const isLong = plainText.length > limit;
+
+  return (
+    <div className={className}>
+      <div
+        className={`${!expanded && isLong ? "line-clamp-4" : ""}`}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+      {isLong && (
+        <span
+          onClick={() => setExpanded(!expanded)}
+          className="text-blue-600 cursor-pointer hover:underline font-medium"
+        >
+          {expanded ? showLessText : showMoreText}
+        </span>
+      )}
+    </div>
+  );
 };
 
 const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
   const [showOptions, setShowOptions] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
@@ -30,22 +60,12 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
     }
   };
 
-  const plainTextDescription = htmlToPlainText(task?.description || "");
-
-  const makeClickableLinks = (text) =>
-    text.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
+  const makeClickableLinks = (htmlOrText) => {
+    if (!htmlOrText) return "";
+    return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
       const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
       return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
     });
-
-  const handleDelete = () => {
-    onDelete?.(task);
-    setShowOptions(false);
-  };
-
-  const handleEdit = () => {
-    onEdit?.(task);
-    setShowOptions(false);
   };
 
   const formatDate = (dateString) => {
@@ -83,7 +103,7 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
                     <img
                       src={getUrl(img)}
                       alt="Task"
-                      className="w-full h-32 object-cover rounded-lg cursor-pointer"
+                      className="w-full h-96 object-cover rounded-lg cursor-pointer"
                       onClick={() => setSelectedImage(getUrl(img))}
                     />
                     {i === 3 && images.length > 4 && (
@@ -101,7 +121,7 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
         )}
 
         {videos.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2 ">
             {videos.map((video, i) => (
               <video
                 key={i}
@@ -114,7 +134,7 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
         )}
 
         {documents.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2 ">
             {documents.map((doc, i) => (
               <div
                 key={i}
@@ -145,27 +165,29 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
     );
   };
 
-  const displayText = isExpanded
-    ? plainTextDescription
-    : plainTextDescription.substring(0, 200);
+  const handleDelete = () => {
+    onDelete?.(task);
+    setShowOptions(false);
+  };
 
-  const finalHtml =
-    makeClickableLinks(displayText) +
-    (plainTextDescription.length > 200
-      ? isExpanded
-        ? ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
-        : ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
-      : "");
+  const handleEdit = () => {
+    onEdit?.(task);
+    setShowOptions(false);
+  };
+
+  const safeHtml = makeClickableLinks(task?.description || "");
+
+  console.log(safeHtml, "safeHtml");
 
   return (
     <>
       <div className="card rounded-lg shadow-md p-5 mb-4 transition hover:shadow-lg">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <h3 className="font-semibold text-gray-900 text-lg font-termina">
+            <h3 className="font-semibold text-gray-900 text-lg">
               {task.title || "Untitled Task"}
             </h3>
-            <p className="text-gray-500 text-xs font-termina flex items-center gap-2">
+            <p className="text-gray-500 text-xs flex items-center gap-2">
               Created by{" "}
               {task.author
                 ? `${task.author.first_name || ""} ${task.author.last_name || ""}`
@@ -177,7 +199,9 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
                     priorityColors[task.priority] || "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  <Flag size={10} /> {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                  <Flag size={10} />{" "}
+                  {task.priority.charAt(0).toUpperCase() +
+                    task.priority.slice(1)}
                 </span>
               )}
             </p>
@@ -193,17 +217,26 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
               </button>
 
               {showOptions && (
-                <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 min-w-[120px]">
+                <div
+                  className="absolute right-0 top-8 min-w-[140px] 
+               bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50
+               dark:bg-slate-800 dark:border-slate-700 dark:text-gray-100"
+                >
                   <button
                     onClick={handleEdit}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-sm flex items-center gap-2
+                 text-gray-700 hover:bg-gray-100
+                 dark:text-gray-800 dark:hover:bg-slate-700"
                   >
                     <Edit size={14} />
                     Edit
                   </button>
+
                   <button
                     onClick={handleDelete}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-sm flex items-center gap-2
+                 text-red-600 hover:bg-red-50
+                 dark:text-red-400 dark:hover:bg-slate-700"
                   >
                     <Trash2 size={14} />
                     Delete
@@ -214,26 +247,12 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
           )}
         </div>
 
-        {/* {task.priority && (
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${
-              priorityColors[task.priority] || "bg-gray-100 text-gray-700"
-            }`}
-          >
-            <Flag size={12} /> {task.priority}
-          </span>
-        )} */}
-
-        {plainTextDescription && (
-          <div className="mt-3">
-            <p
-              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-              dangerouslySetInnerHTML={{ __html: finalHtml }}
-              onClick={(e) => {
-                if (e.target.id === "toggleText") setIsExpanded(!isExpanded);
-              }}
-            />
-          </div>
+        {task?.description && (
+          <ShowMoreLess
+            html={safeHtml}
+            limit={500}
+            className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+          />
         )}
 
         {renderMedia()}
@@ -250,7 +269,6 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
               alt="Task"
               className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200"
             />
-
             <button
               onClick={() => setSelectedImage(null)}
               className="absolute top-3 right-3 bg-white text-black hover:bg-gray-200 px-3 py-1 rounded-lg shadow-md transition"

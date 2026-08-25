@@ -6,7 +6,6 @@ import React from 'react';
 const Collapsible = CollapsiblePrimitive.Root;
 const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger;
 
-// Extended CollapsibleContent with default classes
 const CollapsibleContent = React.forwardRef(({
   className,
   children,

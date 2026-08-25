@@ -6,6 +6,8 @@ import { App } from './App';
 import { setupAxios } from './auth';
 import { ProvidersWrapper } from './providers';
 import React from 'react';
+import "swiper/css";
+import "swiper/css/pagination";
 
 /**
  * Inject interceptors for axios.

@@ -76,7 +76,7 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "flex items-center grow cursor-pointer border border-transparent",
+              "flex items-center grow cursor-pointer border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg dark:hover:!text-gray-50",
               accordionLinkGap[0],
               linkPl,
               linkPr,
@@ -85,13 +85,13 @@ const SidebarMenu = () => {
           >
             <MenuIcon
               className={clsx(
-                "items-start text-gray-400 dark:text-gray-900 ",
+                "items-start text-gray-400 dark:text-gray-900 dark:menu-item-active:text-gray-900 dark:hover:!text-gray-900 menu-item-active:text-gray-100",
                 iconWidth
               )}
             >
               {item.icon && item.icon}
             </MenuIcon>
-            <MenuTitle className="text-sm text-gray-400 dark:text-gray-900 font-noraml dark:menu-item-active:text-gray-900 menu-item-active:text-gray-100">
+            <MenuTitle className="text-sm text-gray-400 dark:text-gray-900 font-noraml dark:menu-item-active:text-gray-900 dark:hover:!text-gray-900 menu-item-active:text-gray-100">
               {item.title}
             </MenuTitle>
             {buildMenuArrow()}
@@ -119,7 +119,7 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-blue-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-blue-gradient dark:hover:border-gray-100 hover:rounded-lg dark:hover:!text-gray-50",
+              "border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg dark:hover:!text-gray-50",
               accordionLinkGap[0],
               linkPy,
               linkPl,
@@ -243,14 +243,6 @@ const SidebarMenu = () => {
         </MenuItem>
       );
     } else {
-      // return <MenuItem key={index}>
-      //   <MenuLink path={item.path} className={clsx('border mt-2 border-transparent items-center grow text-gray-100 dark:text-gray-800 menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-gray-200 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg gap-4', accordionLinkGap[level], accordionLinkPl, linkPr, subLinkPy)}>
-      //     {buildMenuBullet()}
-      //     <MenuTitle className="text-2sm font-normal menu-item-active:text-white menu-item-active:font-semibold menu-link-hover:!text-white">
-      //       {item.title}
-      //     </MenuTitle>
-      //   </MenuLink>
-      // </MenuItem>;
       return (
         <MenuItem key={index}>
           <MenuLink
@@ -258,7 +250,7 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "border mt-2 border-transparent items-center grow text-gray-100 dark:text-gray-800 menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-blue-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-blue-gradient dark:hover:border-gray-100 hover:rounded-lg gap-4",
+              "border mt-2 border-transparent items-center grow text-gray-100 dark:text-gray-800 menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg gap-4",
               accordionLinkGap[level],
               accordionLinkPl,
               linkPr,

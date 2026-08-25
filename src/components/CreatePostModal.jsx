@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   X,
   Image,
@@ -8,7 +8,15 @@ import {
   Users,
   Lock,
   FolderOpen,
+  Trash2,
+  Link2,
+  Play,
+  BarChart3,
 } from "lucide-react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import DraggableLinkList from "@/components/ui/DraggableLinkList";
+import { isDyntubeUrl, getEmbedUrl, getVideoThumbnail } from "@/utils/videoUtils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createEducatorPost,
@@ -38,7 +46,11 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { isJwtExpiredError, handleJwtExpired } from "@/utils/authUtils";
 
-const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
+// showCategorySelector: the real social-feed composer (EducatorCommunityFeed) lets the
+// author pick a category; the "share this update as a post" composer opened from the
+// Idea/Live Idea update flow doesn't need that choice — it always posts as "General
+// Updates" — so callers there pass showCategorySelector={false}.
+const CreatePostModal = ({ isOpen, onClose, editingPost = null, showCategorySelector = true }) => {
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
   const createStatus = useSelector(selectCreateEducatorPostStatus);
@@ -55,15 +67,18 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [dyntubeUrl, setDyntubeUrl] = useState("");
+  const [dyntubeError, setDyntubeError] = useState("");
+  const [showDyntubeInput, setShowDyntubeInput] = useState(false);
+  const [tradingViewLinks, setTradingViewLinks] = useState([""]);
+  const [showTradingViewInput, setShowTradingViewInput] = useState(false);
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const documentInputRef = useRef(null);
 
-  // Reset all statuses when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Clear any previous statuses to prevent immediate closure
       dispatch(clearCreatePostStatus());
       dispatch(clearEducatorPostsStatus());
       setHasInitialized(false);
@@ -74,47 +89,43 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     if (editingPost) {
       setIsEditing(true);
       setContent(editingPost.content || "");
-      // For editing, images/videos/documents might be URLs, not File objects
-      // We'll keep them as is for display, but new uploads will be File objects
       setImages(editingPost.images || []);
       setVideos(editingPost.videos || []);
       setDocuments(editingPost.documents || []);
       setVisibility(editingPost.visibility || "public");
       setCategory(editingPost.category || "General Updates");
+      setDyntubeUrl(editingPost.dyntubeUrl || "");
+      setDyntubeError("");
+      setShowDyntubeInput(!!editingPost.dyntubeUrl);
+      const tvLinks = editingPost.tradingViewLinks?.length > 0 ? editingPost.tradingViewLinks : [""];
+      setTradingViewLinks(tvLinks);
+      setShowTradingViewInput(editingPost.tradingViewLinks?.length > 0);
 
-      // Set initialization flag after a short delay to prevent immediate closure
       setTimeout(() => {
         setHasInitialized(true);
       }, 100);
     } else {
       setIsEditing(false);
-      // For new posts, set hasInitialized to true immediately
       setHasInitialized(true);
     }
   }, [editingPost]);
 
   useEffect(() => {
-    // Only handle success after component has properly initialized
     if (!hasInitialized) return;
 
-    // Handle create post success (only when not editing)
     if (createStatus === "succeeded" && !isEditing) {
       handleClose();
       dispatch(clearCreatePostStatus());
     }
 
-    // Handle update post success (only when actively editing)
     if (generalStatus === "succeeded" && isEditing) {
       handleClose();
-      // Clear the general error state when update succeeds
       dispatch(clearEducatorPostsStatus());
     }
   }, [createStatus, generalStatus, dispatch, isEditing, hasInitialized]);
 
-  // Cleanup object URLs when component unmounts or files change
   useEffect(() => {
     return () => {
-      // Clean up any object URLs to prevent memory leaks
       images.forEach((file) => {
         if (file instanceof File) {
           // Note: URL.revokeObjectURL is not needed here as the URL will be garbage collected
@@ -134,7 +145,11 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setIsSubmitting(false);
     setIsEditing(false);
     setHasInitialized(false);
-    // Clear any Redux errors when closing
+    setDyntubeUrl("");
+    setDyntubeError("");
+    setShowDyntubeInput(false);
+    setTradingViewLinks([""]);
+    setShowTradingViewInput(false);
     dispatch(clearCreatePostStatus());
     dispatch(clearEducatorPostsStatus());
     onClose();
@@ -187,16 +202,15 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     }
   };
 
-  // Helper function to get the display source for files
   const getFileSource = (file) => {
     if (file instanceof File) {
       return URL.createObjectURL(file);
     } else if (typeof file === "string") {
-      return file; // URL string
+      return file;
     } else if (file && file.url) {
-      return file.url; // Object with url property
+      return file.url;
     }
-    return ""; // Fallback
+    return "";
   };
 
   const clearAllFiles = () => {
@@ -206,18 +220,46 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     if (imageInputRef.current) imageInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
     if (documentInputRef.current) documentInputRef.current.value = "";
+    setDyntubeUrl("");
+    setDyntubeError("");
+    setShowDyntubeInput(false);
+    setTradingViewLinks([""]);
+    setShowTradingViewInput(false);
   };
 
-  // Helper function to detect if files have changed during editing
-  const hasFilesChanged = () => {
-    if (!editingPost) return true; // Always true for new posts
+  // TradingView link handlers (same pattern as IQ Insight)
+  const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
+    setTradingViewLinks((prev) => {
+      const items = [...prev];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      return items;
+    });
+  }, []);
 
-    // Check if any new files were added
+  const handleLinkChange = useCallback((index, value) => {
+    setTradingViewLinks((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  }, []);
+
+  const handleRemoveLink = useCallback((index) => {
+    setTradingViewLinks((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleAddLink = useCallback(() => {
+    setTradingViewLinks((prev) => [...prev, ""]);
+  }, []);
+
+  const hasFilesChanged = () => {
+    if (!editingPost) return true;
+
     const hasNewImages = images.some((file) => file instanceof File);
     const hasNewVideos = videos.some((file) => file instanceof File);
     const hasNewDocuments = documents.some((file) => file instanceof File);
 
-    // Check if any existing files were removed
     const originalImageCount = editingPost.images?.length || 0;
     const originalVideoCount = editingPost.videos?.length || 0;
     const originalDocumentCount = editingPost.documents?.length || 0;
@@ -245,35 +287,56 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const tvLinks = (tradingViewLinks || []).filter((l) => l && l.trim());
+
     if (
       !content.trim() &&
       images.length === 0 &&
       videos.length === 0 &&
-      documents.length === 0
+      documents.length === 0 &&
+      !dyntubeUrl.trim() &&
+      tvLinks.length === 0
     ) {
       toast.error("Please add some content or media to your post");
+      return;
+    }
+
+    // Validate TradingView URLs
+    const tvUrlPattern = /tradingview\.com/i;
+    for (const link of tvLinks) {
+      if (!tvUrlPattern.test(link.trim())) {
+        toast.error(`Invalid TradingView URL: ${link}`);
+        return;
+      }
+    }
+
+    // Check for duplicate TradingView URLs
+    const uniqueTVLinks = new Set(tvLinks.map((l) => l.trim().toLowerCase()));
+    if (uniqueTVLinks.size !== tvLinks.length) {
+      toast.error("Duplicate TradingView links detected. Please remove duplicates.");
+      return;
+    }
+
+    // Validate DynTube URL if provided
+    if (dyntubeUrl.trim() && !isDyntubeUrl(dyntubeUrl.trim())) {
+      setDyntubeError("Please enter a valid DynTube URL");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // When editing, we need to separate existing files (URLs) from new files (File objects)
       const processFiles = (files) => {
         if (!files || files.length === 0) return undefined;
 
         return files.map((file) => {
           if (file instanceof File) {
-            // New file - keep as is for FormData
             return file;
           } else if (typeof file === "string") {
-            // Existing file URL - convert to object with url property
             return { url: file };
           } else if (file && file.url) {
-            // Already in correct format
             return file;
           } else {
-            // Fallback - keep as is
             return file;
           }
         });
@@ -285,11 +348,44 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         category,
       };
 
-      // Only include files in the API call if they've actually changed
       if (hasFilesChanged()) {
         postData.images = processFiles(images);
         postData.videos = processFiles(videos);
         postData.documents = processFiles(documents);
+      }
+
+      // Add DynTube URL if provided
+      if (dyntubeUrl.trim()) {
+        postData.dyntubeUrl = dyntubeUrl.trim();
+      }
+
+      // Add TradingView links
+      if (tvLinks.length > 0) {
+        postData.tradingViewLinks = tvLinks;
+      } else {
+        postData.tradingViewLinks = [];
+      }
+
+      // When editing, signal the backend to remove existing media if the educator cleared them
+      if (editingPost) {
+        if ((editingPost.images?.length > 0) && images.length === 0) {
+          postData.removeImages = true;
+        }
+        if ((editingPost.videos?.length > 0) && videos.length === 0) {
+          postData.removeVideos = true;
+        }
+        // Handle DynTube URL changes during edit
+        if (editingPost.dyntubeUrl && !dyntubeUrl.trim()) {
+          postData.removeDyntubeUrl = true;
+        } else if (dyntubeUrl.trim()) {
+          postData.dyntubeUrl = dyntubeUrl.trim();
+        }
+
+        // Handle TradingView links changes during edit
+        if (editingPost.tradingViewLinks?.length > 0 && tvLinks.length === 0) {
+          postData.removeTradingViewLinks = true;
+        }
+        postData.tradingViewLinks = tvLinks;
       }
 
       if (editingPost) {
@@ -297,7 +393,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
           updateEducatorPost({ id: editingPost.id, postData })
         ).unwrap();
         toast.success("Post updated successfully!");
-        // Close modal after a short delay so user can see the success message
         setTimeout(() => {
           handleClose();
         }, 1000);
@@ -305,9 +400,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         const result = await dispatch(createEducatorPost(postData)).unwrap();
 
         toast.success("Post created successfully!");
-        // Close modal immediately and also after a delay as backup
         handleClose();
-        // Additional backup close after delay
         setTimeout(() => {
           onClose();
         }, 1000);
@@ -315,14 +408,10 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     } catch (error) {
       console.error("Failed to submit post:", error);
 
-      // Check for JWT expired error
       if (isJwtExpiredError(error)) {
         handleJwtExpired(handleClose, "/auth/login", 1500);
         return;
       }
-
-      // Don't show toast here - let the Redux error state handle it
-      // The error will be displayed in the Alert component above the form
     } finally {
       setIsSubmitting(false);
     }
@@ -353,19 +442,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         return "Anyone";
     }
   };
-
-  const categories = [
-    "General Updates",
-    "Analysis Updates",
-    // 'general',
-    // 'education',
-    // 'trading',
-    // 'technology',
-    // 'business',
-    // 'lifestyle',
-    // 'news',
-    // 'other'
-  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -435,26 +511,27 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                 </div>
               </div>
 
-              {/* Category Selection */}
-              <div className="flex items-center gap-2">
-                <FolderOpen size={16} className="text-gray-500" />
-                <Select
-                  value={category}
-                  onValueChange={(value) => setCategory(value)}
-                  defaultValue={category}
-                >
-                  <SelectTrigger className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {showCategorySelector && (
+                <div className="flex items-center gap-2">
+                  <FolderOpen size={16} className="text-gray-500" />
+                  <Select
+                    value={category}
+                    onValueChange={(value) => setCategory(value)}
+                    defaultValue={category}
+                  >
+                    <SelectTrigger className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["General Updates", "Analysis Updates"].map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* Content Textarea */}
@@ -462,7 +539,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-32 p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-lg"
+                className="w-full min-h-32 p-3 border border-gray-200 bg-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-600 text-lg"
                 placeholder="What do you want to talk about?"
                 maxLength={2000}
               />
@@ -491,17 +568,13 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                             alt={`Image ${index + 1}`}
                             className="w-full h-24 object-cover rounded-lg"
                           />
-                          {/* Only show remove button when not editing OR when editing but no existing images */}
-                          {(!editingPost ||
-                            (editingPost && !editingPost.images?.length)) && (
-                            <button
-                              type="button"
-                              onClick={() => removeFile(image, "image")}
-                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X size={12} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeFile(image, "image")}
+                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -522,64 +595,94 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                             controls
                             className="w-full max-h-48 object-cover rounded-lg"
                           />
-                          {/* Only show remove button when not editing OR when editing but no existing videos */}
-                          {(!editingPost ||
-                            (editingPost && !editingPost.videos?.length)) && (
-                            <button
-                              type="button"
-                              onClick={() => removeFile(video, "video")}
-                              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X size={12} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeFile(video, "video")}
+                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+              </div>
+            )}
 
-                {/* Documents - Button commented out but functionality remains */}
-                {/* {documents.length > 0 && (
-                                     <div>
-                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Documents ({documents.length})</h4>
-                                         <div className="space-y-2">
-                                             {documents.map((doc, index) => (
-                                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg group">
-                                                     <div className="flex items-center gap-2">
-                                                         <FileText size={20} className="text-blue-500" />
-                                                         <span className="text-sm text-gray-700">{doc.name}</span>
-                                                     </div>
-                                                     {(!editingPost || (editingPost && !editingPost.documents?.length)) && (
-                                                         <button
-                                                             type="button"
-                                                             onClick={() => removeFile(doc, 'document')}
-                                                             className="p-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                         >
-                                                             <X size={16} />
-                                                         </button>
-                                                     )}
-                                                 </div>
-                                             ))}
-                                         </div>
-                                     </div>
-                                 )} */}
-
-                {/* Clear All Button - Only show when not editing OR when editing but no existing files */}
-                {(!editingPost ||
-                  (editingPost &&
-                    !editingPost.images?.length &&
-                    !editingPost.videos?.length &&
-                    !editingPost.documents?.length)) && (
+            {/* DynTube URL Input */}
+            {showDyntubeInput && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-700">
+                  DynTube Video URL
+                </h4>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={dyntubeUrl}
+                    onChange={(e) => {
+                      setDyntubeUrl(e.target.value);
+                      setDyntubeError("");
+                    }}
+                    onBlur={() => {
+                      if (dyntubeUrl.trim() && !isDyntubeUrl(dyntubeUrl.trim())) {
+                        setDyntubeError("Please enter a valid DynTube URL (e.g. https://videos.dyntube.com/iframes/...)");
+                      }
+                    }}
+                    placeholder="Paste DynTube video URL here..."
+                    className="flex-1 px-3 py-2 border border-gray-200 bg-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
+                  />
                   <button
                     type="button"
-                    onClick={clearAllFiles}
-                    className="text-sm text-red-600 hover:text-red-800 hover:underline"
+                    onClick={() => {
+                      setDyntubeUrl("");
+                      setDyntubeError("");
+                      setShowDyntubeInput(false);
+                    }}
+                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                    title="Remove DynTube URL"
                   >
-                    Clear all files
+                    <X size={16} />
                   </button>
+                </div>
+                {dyntubeError && (
+                  <p className="text-xs text-red-500">{dyntubeError}</p>
+                )}
+                {/* DynTube Preview - Non-interactive iframe thumbnail */}
+                {dyntubeUrl.trim() && isDyntubeUrl(dyntubeUrl.trim()) && (
+                  <div className="relative w-full rounded-lg overflow-hidden bg-black" style={{ aspectRatio: '16/9' }}>
+                    <iframe
+                      src={getEmbedUrl(dyntubeUrl.trim())}
+                      className="w-full h-full"
+                      loading="lazy"
+                      tabIndex={-1}
+                      scrolling="no"
+                      style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+                      title="DynTube Video Preview"
+                    />
+                    {/* Invisible overlay to prevent any interaction if needed */}
+                    <div className="absolute inset-0" />
+                  </div>
                 )}
               </div>
+            )}
+
+            {/* TradingView Links Input */}
+            {showTradingViewInput && (
+              <DndProvider backend={HTML5Backend}>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">
+                    TradingView Links
+                  </h4>
+                  <DraggableLinkList
+                    links={tradingViewLinks}
+                    onReorder={handleReorderLinks}
+                    onChange={handleLinkChange}
+                    onRemove={handleRemoveLink}
+                    onAdd={handleAddLink}
+                  />
+                </div>
+              </DndProvider>
             )}
 
             {/* Media Upload Buttons */}
@@ -593,27 +696,14 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   className="hidden"
                   accept="image/*"
                   multiple
-                  disabled={editingPost && editingPost.images?.length > 0}
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    if (
-                      !editingPost ||
-                      (editingPost && !editingPost.images?.length)
-                    ) {
-                      imageInputRef.current?.click();
-                    }
-                  }}
-                  disabled={editingPost && editingPost.images?.length > 0}
-                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                    editingPost && editingPost.images?.length > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-                  }`}
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex items-center gap-2 p-2 rounded-md transition-colors text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                 >
                   <Image size={20} />
-                  <span>{editingPost ? "Images" : "Images"}</span>
+                  <span>Images</span>
                 </button>
               </div>
 
@@ -625,64 +715,58 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   className="hidden"
                   accept="video/*"
                   multiple
-                  disabled={editingPost && editingPost.videos?.length > 0}
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    if (
-                      !editingPost ||
-                      (editingPost && !editingPost.videos?.length)
-                    ) {
-                      videoInputRef.current?.click();
-                    }
-                  }}
-                  disabled={editingPost && editingPost.videos?.length > 0}
-                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                    editingPost && editingPost.videos?.length > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:text-red-600 hover:bg-red-50"
-                  }`}
+                  onClick={() => videoInputRef.current?.click()}
+                  className="flex items-center gap-2 p-2 rounded-md transition-colors text-gray-600 hover:text-red-600 hover:bg-red-50"
                 >
                   <Video size={20} />
-                  <span>{editingPost ? "Videos" : "Videos"}</span>
+                  <span>Videos</span>
                 </button>
               </div>
 
-              {/* Document upload button - Commented out but functionality remains */}
-              {/* <div className="flex items-center gap-2">
-                                     <input
-                                         type="file"
-                                         ref={documentInputRef}
-                                         onChange={(e) => handleFileChange(e, 'document')}
-                                         className="hidden"
-                                         accept=".pdf,.doc,.docx,.txt"
-                                         multiple
-                                         disabled={editingPost && (editingPost.documents?.length > 0)}
-                                     />
-                                     <button 
-                                         type="button"
-                                         onClick={() => {
-                                             if (!editingPost || (editingPost && !editingPost.documents?.length)) {
-                                                 documentInputRef.current?.click();
-                                             }
-                                         }} 
-                                         disabled={editingPost && (editingPost.documents?.length > 0)}
-                                         className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                                             editingPost && (editingPost.documents?.length > 0)
-                                                 ? 'text-gray-400 cursor-not-allowed' 
-                                                 : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
-                                         }`}
-                                     >
-                                         <FileText size={20} />
-                                         <span>
-                                             {editingPost 
-                                                 ? 'Documents'
-                                                 : 'Documents'
-                                             }
-                                         </span>
-                                     </button>
-                                 </div> */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDyntubeInput(!showDyntubeInput)}
+                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+                    showDyntubeInput || dyntubeUrl
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                  }`}
+                >
+                  <Link2 size={20} />
+                  <span>DynTube</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTradingViewInput(!showTradingViewInput)}
+                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
+                    showTradingViewInput || (tradingViewLinks || []).some((l) => l && l.trim())
+                      ? "text-green-600 bg-green-50"
+                      : "text-gray-600 hover:text-green-600 hover:bg-green-50"
+                  }`}
+                >
+                  <BarChart3 size={20} />
+                  <span>TradingView</span>
+                </button>
+              </div>
+
+              {/* Clear All Button - only show when files exist */}
+              {(images.length > 0 || videos.length > 0 || dyntubeUrl || (tradingViewLinks || []).some((l) => l && l.trim())) && (
+                <button
+                  type="button"
+                  onClick={clearAllFiles}
+                  className="flex items-center gap-2 p-2 ml-auto rounded-md transition-colors text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200 hover:border-red-400"
+                >
+                  <Trash2 size={18} />
+                  <span>Clear All</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -703,7 +787,9 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   (!content.trim() &&
                     images.length === 0 &&
                     videos.length === 0 &&
-                    documents.length === 0)
+                    documents.length === 0 &&
+                    !dyntubeUrl.trim() &&
+                    !(tradingViewLinks || []).some((l) => l && l.trim()))
                 }
                 className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { KeenIcon } from "@/components/keenicons";
+import { useLocation } from "react-router-dom";
+
 import { toAbsoluteUrl } from "@/utils";
 import { Menu, MenuItem, MenuToggle } from "@/components";
 import { DropdownUser } from "@/partials/dropdowns/user";
@@ -15,9 +17,12 @@ import { useSelector } from "react-redux";
 import {
   selectLanguages,
   selectSelectedLanguage,
+  selectSelectedLanguagesAdmin,
   setLanguages,
   setSelectedLanguage,
+  toggleLanguageAdmin,
 } from "../../../store/reducer/studentLanagugeSlice";
+import { MultiSelectLanguage } from "@/components/ui/MultiSelectLanguage";
 import {
   Select,
   SelectContent,
@@ -28,11 +33,56 @@ import {
 import { useGetLanguageQuery } from "../../../store/api/client/clientLanguageApiSlice";
 
 const HeaderTopbar = () => {
+  const STUDENT_ALLOWED_ROUTES = [
+    "/fast-start-training",
+    "/iq-vault",
+    "/iq-academy",
+    "/master-class",
+  ];
+
+  const EDUCATOR_ALLOWED_ROUTES = [
+    "/educator/master-class",
+    "/educator/stream-schedule",
+    "/educator/ended-stream-schedule",
+    "/educator/live-session",
+    "/educator/ended-live-sessions"
+  ];
+
+  const ADMIN_ALLOWED_ROUTES = [
+    "/admin/courses",
+    "/admin/stream-schedule",
+    "/admin/educator-ended-schedule",
+    "/admin/live-session",
+    "/admin/ended-live-sessions",
+    "/admin/stream-recording"
+  ];
+
+  const location = useLocation();
   const { isRTL } = useLanguage();
   const itemChatRef = useRef(null);
   const itemAppsRef = useRef(null);
   const itemUserRef = useRef(null);
   const { auth } = useAuthContext();
+
+  const user = auth?.user;
+  const role = user?.role;
+  const planRoutes = user?.plan?.allowedSideBar || [];
+
+  const showLanguageSelector = (() => {
+    if (role === "student") {
+      const allowedRoutes = planRoutes.filter((r) => STUDENT_ALLOWED_ROUTES.includes(r));
+      return allowedRoutes.includes(location.pathname);
+    }
+    if (role === "educator") {
+      return EDUCATOR_ALLOWED_ROUTES.includes(location.pathname);
+    }
+    // Admin, super_admin, marketer — whitelist
+    if (role === "admin" || role === "super_admin" || role === "marketer") {
+      return ADMIN_ALLOWED_ROUTES.includes(location.pathname);
+    }
+    return false;
+  })();
+
   const profilePhoto = auth?.user?.image;
   const itemNotificationsRef = useRef(null);
   const handleShow = () => {
@@ -49,39 +99,19 @@ const HeaderTopbar = () => {
   const dispatch = useDispatch();
   const languages = useSelector(selectLanguages);
   const selectedLanguage = useSelector(selectSelectedLanguage);
+  const selectedLanguagesAdmin = useSelector(selectSelectedLanguagesAdmin);
   const { data } = useGetLanguageQuery();
 
   useEffect(() => {
     if (data) {
       dispatch(setLanguages(data.data));
-      // Set English as default language if no language is selected
-      if (!selectedLanguage) {
-        const englishLanguage = data.data.find(
-          (lang) => lang.name === "English"
-        );
-        if (englishLanguage) {
-          dispatch(setSelectedLanguage(englishLanguage.name));
-        }
-      }
     }
-  }, [data, selectedLanguage, dispatch]);
-
-  // Fallback: Set English as default if no language is selected and no API data
-  useEffect(() => {
-    if (!selectedLanguage && !data) {
-      dispatch(setSelectedLanguage("English"));
-    }
-  }, [selectedLanguage, data, dispatch]);
+  }, [data, dispatch]);
 
   return (
     <>
       {" "}
       <div className="flex items-center gap-2 lg:gap-3.5">
-        {/* <button onClick={handleOpen} className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary text-gray-500">
-        <KeenIcon icon="magnifier" />
-      </button> */}
-        {/* <ModalSearch open={searchModalOpen} onOpenChange={handleClose} /> */}
-
         <Menu>
           <MenuItem
             ref={itemChatRef}
@@ -100,9 +130,6 @@ const HeaderTopbar = () => {
               ],
             }}
           >
-            {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
-          <KeenIcon icon="messages" />
-        </MenuToggle> */}
 
             {DropdownChat({
               menuTtemRef: itemChatRef,
@@ -127,9 +154,6 @@ const HeaderTopbar = () => {
               ],
             }}
           >
-            {/* <MenuToggle className="btn btn-icon btn-icon-lg size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
-          <KeenIcon icon="element-11" />
-        </MenuToggle> */}
 
             {DropdownApps()}
           </MenuItem>
@@ -146,76 +170,50 @@ const HeaderTopbar = () => {
                 {
                   name: "offset",
                   options: {
-                    offset: isRTL() ? [-70, 10] : [70, 10], // [skid, distance]
+                    offset: isRTL() ? [-70, 10] : [70, 10],
                   },
                 },
               ],
             }}
           >
-            {/* <MenuToggle className="btn btn-icon btn-icon-lg relative cursor-pointer size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
-          <KeenIcon icon="notification-status" />
-        </MenuToggle> */}
             {DropdownNotifications({
               menuTtemRef: itemNotificationsRef,
             })}
           </MenuItem>
         </Menu>
-        <div className="relative sm:w-56 language_select">
-          {/* <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white dark:bg-gray-100 text-gray-600 shadow-sm hover:border-gray-400 transition"
-      >
-        {selected}
-        <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""
-            }`}
-        />
-      </button>
-
-      {open && (
-        <ul className="absolute mt-1 w-full bg-white dark:bg-gray-100 border border-gray-200 rounded-lg shadow-md z-10">
-          {languages.map((lang, index) => (
-            <li
-              key={index}
-              onClick={() => {
-                setSelected(lang);
-                setOpen(false);
-              }}
-              className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-200  text-xs text-gray-700"
-            >
-              <span className='hidden sm:block'>
-                {lang.name}
-              </span>
-              <span className='sm:hidden block'>
-                {lang.flag}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )} */}
-          <Select
-            value={selectedLanguage}
-            onValueChange={(value) => dispatch(setSelectedLanguage(value))}
-            className={`form-control input input-md w-full`}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.isArray(languages) && languages.length > 0 ? (
-                languages?.map((item) => (
-                  <SelectItem key={item._id} value={item.name}>
-                    {item.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">
-                  No options available
-                </div>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
+        {showLanguageSelector && (
+          <div className="relative sm:w-56 language_select">
+            {auth?.user?.role === "admin" || auth?.user?.role === "educator" || auth?.user?.role === "super_admin" || auth?.user?.role === "marketer" ? (
+              <MultiSelectLanguage
+                options={Array.isArray(languages) ? languages : []}
+                selectedValues={selectedLanguagesAdmin || []}
+                onToggle={(value) => dispatch(toggleLanguageAdmin(value))}
+              />
+            ) : (
+              <Select
+                value={selectedLanguage || ""}
+                onValueChange={(value) => dispatch(setSelectedLanguage(value))}
+              >
+                <SelectTrigger className="w-full bg-light-light h-10 rounded-md border border-input px-3 py-2 text-[0.8125rem] font-medium hover:border-gray-400 focus:border-primary focus:ring-0 focus:ring-offset-0 focus:outline-none">
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent className="max-h-64 z-[99999999]">
+                  {data?.data?.length > 0 ? (
+                    data?.data?.map((item) => (
+                      <SelectItem key={item._id} value={item.name} className="cursor-pointer">
+                        {item.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-gray-500">
+                      No options available
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
         <Menu>
           <MenuItem
             ref={itemUserRef}

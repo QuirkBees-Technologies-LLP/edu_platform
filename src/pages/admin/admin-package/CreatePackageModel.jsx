@@ -17,7 +17,7 @@ import CustomSelect from "../../../components/CustomSelect";
 
 const CreatePackageModel = forwardRef(
   (
-    { isOpen, handleClose, selectedRow, setSelectedRow = () => {}, refetch },
+    { isOpen, handleClose, selectedRow, setSelectedRow = () => { }, refetch },
     ref
   ) => {
     const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
@@ -36,14 +36,24 @@ const CreatePackageModel = forwardRef(
       { label: "/dashboard", value: "/dashboard" },
       { label: "/iq-vault", value: "/iq-vault" },
       { label: "/iq-insight", value: "/iq-insight" },
+      { label: "/iq-crypto", value: "/iq-crypto" },
       { label: "/iq-academy", value: "/iq-academy" },
       { label: "/ideas", value: "/ideas" },
+      { label: "/live-ideas", value: "/live-ideas" },
       { label: "/iq-educators/:id", value: "/iq-educators/:id" },
       { label: "/iq-academy-educators", value: "/iq-academy-educators" },
       { label: "/iq-social", value: "/iq-social" },
+      { label: "/trading-strategies", value: "/trading-strategies" },
+      { label: "/master-class", value: "/master-class" },
+      { label: "/master-class/:id", value: "/master-class/:id" },
+      { label: "/IQ-Strategies-Alerts", value: "/trading-signals" },
       {
         label: "https://www.iqcharts.com/",
         value: "https://www.iqcharts.com/",
+      },
+      {
+        label: "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
+        value: "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
       },
     ];
 
@@ -127,11 +137,10 @@ const CreatePackageModel = forwardRef(
                       type="text"
                       placeholder="Enter package name"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.name && formik.touched.name
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input dark:bg-[#2b2b2b] input-md w-full ${formik.errors.name && formik.touched.name
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("name")}
                     />
                     {formik.touched.name && formik.errors.name && (

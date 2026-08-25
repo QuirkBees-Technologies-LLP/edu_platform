@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import useCourseStore from "../store/courseStoreV3";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 // Draggable Course Card Component
 const DraggableCourseCard = ({

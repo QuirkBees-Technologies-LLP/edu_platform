@@ -284,6 +284,9 @@ const educatorPostSlice = createSlice({
           likeCount: post.likeCount || 0,
           commentCount: post.commentCount || 0,
           shareCount: post.shareCount || 0,
+          dyntubeUrl: post.dyntubeUrl || null,
+          tradingViewLinks: post.tradingViewLinks || [],
+          tradingViewImages: post.tradingViewImages || [],
         }));
         if (action.payload.append) {
           state.posts = [...state.posts, ...postsToAdd];
@@ -352,6 +355,9 @@ const educatorPostSlice = createSlice({
           likeCount: postData.likeCount || 0,
           commentCount: postData.commentCount || 0,
           shareCount: postData.shareCount || 0,
+          dyntubeUrl: postData.dyntubeUrl || null,
+          tradingViewLinks: postData.tradingViewLinks || [],
+          tradingViewImages: postData.tradingViewImages || [],
         };
 
         state.posts.unshift(newPost);
@@ -403,6 +409,9 @@ const educatorPostSlice = createSlice({
           likeCount: postData.likeCount || 0,
           commentCount: postData.commentCount || 0,
           shareCount: postData.shareCount || 0,
+          dyntubeUrl: postData.dyntubeUrl || null,
+          tradingViewLinks: postData.tradingViewLinks || [],
+          tradingViewImages: postData.tradingViewImages || [],
         };
         const index = state.posts.findIndex(
           (post) => post.id === updatedPost.id

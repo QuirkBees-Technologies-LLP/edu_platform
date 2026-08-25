@@ -5,8 +5,11 @@ import Loader from "../../../components/ui/loader";
 import { useSelector } from "react-redux";
 import { selectSelectedLanguage } from "../../../store/reducer/studentLanagugeSlice";
 import { Accordion, AccordionItem } from "@/components/accordion";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import ShowMoreLess from "../../../components/ui/showmoreless";
+import { useAuthContext } from "@/auth";
+import { useTourStep } from "@/hooks/useTourStep";
+import ResourcesSection from "../../../components/ui/ResourcesSection";
 
 export default function IqVault() {
   const [activeTab, setActiveTab] = useState("");
@@ -15,13 +18,16 @@ export default function IqVault() {
   const [category, setCategory] = useState();
   const [activeLectureId, setActiveLectureId] = useState(null);
 
+  const { auth } = useAuthContext();
+  const navigate = useNavigate();
+
   const selectedLanguage = useSelector(selectSelectedLanguage);
 
   const handleClick = (id) => {
-    setId(id); // or simply: id, based on your API setup
+    setId(id);
   };
-  const { search } = useLocation();
-  const params = new URLSearchParams(search);
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
 
   const mainSection = params.get("mainSection");
   const language = params.get("language");
@@ -56,11 +62,10 @@ export default function IqVault() {
     if (hasValidCourseData && tabMatches) {
       setCurrentCourse(data.course);
 
-      // 🟢 Also auto select first lecture whenever data changes
-      const firstCourse = data.course[0];
+      const firstCourse = data.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
-        const firstLecture = firstCourse.lectures[0];
-        setActiveLectureId(firstLecture._id);
+        const firstLecture = firstCourse?.lectures?.[0];
+        setActiveLectureId(firstLecture?._id);
         setLecture(firstLecture);
       }
     } else {
@@ -71,11 +76,9 @@ export default function IqVault() {
   const categories = data?.category || [];
   const course = data?.course || [];
 
-  // Reset course data when activeTab changes to prevent showing old data
   const [currentCourse, setCurrentCourse] = useState([]);
 
   useEffect(() => {
-    // Only set course data if we have course data AND the active tab matches
     if (
       data?.course &&
       data.course.length > 0 &&
@@ -83,31 +86,26 @@ export default function IqVault() {
     ) {
       setCurrentCourse(data.course);
     } else {
-      // Reset course data if no course data or tab doesn't match
       setCurrentCourse([]);
     }
   }, [data, activeTab]);
 
   useEffect(() => {
-    // Auto-select first category tab when data loads
     if (data?.ActiveCategory?.length > 0 && !activeTab) {
       setActiveTab(data.ActiveCategory[0]?.categoryId);
     }
 
-    // Auto-select first tab from categories if no active tab
     if (data?.categories?.length > 0 && !activeTab) {
       setActiveTab(data.categories[0]?._id);
     }
 
-    // 🟢 Auto-select first lecture when data loads
     if (data?.course?.length > 0) {
-      const firstCourse = data.course[0];
+      const firstCourse = data.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
-        const firstLectureId = firstCourse.lectures[0]._id;
-        // Only set if no lecture is currently selected
+        const firstLectureId = firstCourse?.lectures?.[0]?._id;
         if (!activeLectureId) {
           setActiveLectureId(firstLectureId);
-          setLecture(firstCourse.lectures[0] || {});
+          setLecture(firstCourse?.lectures?.[0] || {});
         }
       } else {
         setLecture({});
@@ -115,34 +113,20 @@ export default function IqVault() {
     }
   }, [data, activeTab, activeLectureId, selectedLanguage]);
 
-  // Force select first tab when data changes and no tab is selected
   useEffect(() => {
     if (data && !activeTab) {
-      // Priority 1: Try to select from ActiveCategory
       if (data.ActiveCategory?.length > 0) {
         setActiveTab(data.ActiveCategory[0]?.categoryId);
       }
-      // Priority 2: Try to select from categories
       else if (data.categories?.length > 0) {
         setActiveTab(data.categories[0]?._id);
       }
     }
   }, [data, activeTab, selectedLanguage]);
 
-  // Reset state when language changes
-  // useEffect(() => {
-  //   setActiveTab("");
-  //   setActiveLectureId(null);
-  //   setLecture({});
-  //   setCurrentCourse([]); // Also reset course data when language changes
-  // }, [selectedLanguage]);
-
-  // Refetch data when component mounts or when returning to page
   useEffect(() => {
-    // Refetch data when component mounts
     refetch();
 
-    // Listen for visibility change to refetch when user returns to page
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         refetch();
@@ -151,36 +135,51 @@ export default function IqVault() {
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Cleanup listener on unmount
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [refetch]);
 
-  // Ensure active tab is set when returning to page
   useEffect(() => {
     if (data && !activeTab) {
-      // Priority 1: Try to select from ActiveCategory
       if (data.ActiveCategory?.length > 0) {
         setActiveTab(data.ActiveCategory[0]?.categoryId);
       }
-      // Priority 2: Try to select from categories
       else if (data.categories?.length > 0) {
         setActiveTab(data.categories[0]?._id);
       }
     }
   }, [data, activeTab]);
 
-  // Reset everything when categoryName (URL param) changes
   useEffect(() => {
     if (categoryName) {
-      // Force UI to pick the category from URL
       setActiveTab(categoryName);
-      setCurrentCourse([]); // reset previous course
-      setLecture({}); // reset previous lecture
-      setActiveLectureId(null); // reset active lecture
+      setCurrentCourse([]);
+      setLecture({});
+      setActiveLectureId(null);
     }
   }, [categoryName]);
+
+  useTourStep({
+    shouldStart: location?.state?.continueTour === true,
+    isReady: !isCategoryLoading &&
+      Array.isArray(data?.categories) && data.categories.length > 0 &&
+      Array.isArray(data?.upcomingCourse),
+    getSteps: () => {
+      const steps = [];
+      const tabArea = document.querySelector('.iq-vault-tab-area');
+      if (tabArea) steps.push({ element: tabArea, title: '📑 Course Categories', intro: 'Switch between subject areas using these tabs. Each tab shows courses for a different topic like Trading or Digital Marketing.', position: 'bottom' });
+      const sectionEl = document.querySelector('.accordion-item');
+      if (sectionEl) steps.push({ element: sectionEl, title: '📂 Course Sections', intro: 'Lectures are grouped into sections. Click a section to expand it and see the individual lectures inside.', position: 'right' });
+      const lectureEl = document.querySelector('.iq-vault-lecture-item');
+      if (lectureEl) steps.push({ element: lectureEl, title: '🎬 Watch a Lecture', intro: 'Click any lecture to play it in the video player. Your progress is saved automatically.', position: 'right' });
+      const vaultSection = document.querySelector('.iq-vault-suggestions-section');
+      if (vaultSection) steps.push({ element: vaultSection, title: '📚 IQ Vault Extra Courses', intro: 'Browse additional recommended courses below the video player. Use the <strong>Experience</strong> and <strong>Style</strong> filters to find courses that match your level and learning approach.', position: 'top' });
+      return steps;
+    },
+    onDone: () => navigate('/master-class', { state: { continueTour: true } }),
+    delay: 800,
+  });
 
   const handleBannerClick = (clickedLectureId) => {
     const lectureData = currentCourse.flatMap((c) => c.lectures || []);
@@ -206,11 +205,6 @@ export default function IqVault() {
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    // if (url.includes("vimeo.com/")) {
-    //   const videoId = url.split("vimeo.com/")[1].split("?")[0];
-    //   return `https://player.vimeo.com/video/${videoId}`;
-    // }
-
     if (url.includes("vimeo.com/")) {
       const parts = url.split("vimeo.com/")[1].split("/");
       const videoId = parts[0].split("?")[0];
@@ -225,36 +219,26 @@ export default function IqVault() {
       return `https://www.dailymotion.com/embed/video/${videoId}`;
     }
 
-    // Loom
     if (url.includes("loom.com/share/")) {
       const videoId = url.split("loom.com/share/")[1].split("?")[0];
       return `https://www.loom.com/embed/${videoId}`;
     }
 
-    // Dyntube
-    //  if (url.includes("dyntube.com/video/")) {
-    //     let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
-    //     videoId = videoId.replace(/\/$/, "");
-    //     return `https://player.dyntube.com/video/${videoId}`;
-    //   }
     if (url.includes("app.dyntube.com/#/video/")) {
       const match = url.match(/video\/([^/]+)/);
       if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
     }
 
-    // CASE 2: https://videos.dyntube.com/iframes/<id>
     if (url.includes("videos.dyntube.com/iframes/")) {
       const match = url.match(/iframes\/([^/?#]+)/);
       if (match?.[1]) return `https://videos.dyntube.com/iframes/${match[1]}`;
     }
 
-    // CASE 3: https://player.dyntube.com/video/<id>
     if (url.includes("player.dyntube.com/video/")) {
       const match = url.match(/video\/([^/?#]+)/);
       if (match?.[1]) return `https://player.dyntube.com/video/${match[1]}`;
     }
 
-    // CASE 4: fallback generic
     if (url.includes("dyntube.com/")) return url;
 
     return url;
@@ -264,7 +248,7 @@ export default function IqVault() {
     {
       id: "Forex",
       name: "Forex",
-      content: "Select the lactures", // Dynamic content rendered based on `lecture`
+      content: "Select the lactures",
     },
     {
       id: "Crypto",
@@ -331,7 +315,7 @@ export default function IqVault() {
           </div>
         ) : (
           <div className="container-fluid pb-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Header Banner */}
               <div className="col-span-full">
                 {data?.ActiveCategory && data.ActiveCategory.length > 0 ? (
@@ -347,12 +331,12 @@ export default function IqVault() {
                       </h1>
 
                       <p className="text-lg sm:text-xl tracking-widest">
-                        ACADEMY
+                        Academy in {language ? language : selectedLanguage}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gray-100 dark:bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
+                  <div className="bg-gray-100in  dark:bg-gray-100 py-12 rounded-2xl flex justify-center items-center h-72 w-full">
                     <div className="text-center">
                       <h1 className="text-4xl font-bold tracking-wider pb-2 text-gray-600 dark:text-gray-300">
                         {selectedLanguage}
@@ -366,87 +350,109 @@ export default function IqVault() {
               </div>
 
               {/* Sidebar - Course + Lectures */}
-              {data?.ActiveCategory &&
-              data.ActiveCategory.length > 0 &&
-              activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
-                <>
-                  {currentCourse?.length > 0 ? (
-                    <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
-                      <Accordion
-                        allowMultiple={false}
-                        defaultIndex={0} // 🟢 First accordion open by default
+              <div className="order-2 md:order-1 mb-6">
+                {data?.ActiveCategory &&
+                  data.ActiveCategory.length > 0 &&
+                  activeTab === `${data.ActiveCategory[0]?.categoryId}` ? (
+                  <>
+                    {currentCourse?.length > 0 ? (
+                      <div className="max-h-[675px] left_sidebar overflow-y-auto rounded-xl shadow card divide-y divide-gray-200">
+                        <Accordion
+                          allowMultiple={false}
+                          defaultIndex={0}
+                        >
+                          {currentCourse.map((c, index) => (
+                            <AccordionItem
+                              key={c._id}
+                              title={`${index + 1}. ${c.title}`}
+                            >
+                              {c?.lectures?.map((t, lIdx) => (
+                                <div
+                                  key={t._id}
+                                  onClick={() => handleBannerClick(t._id)}
+                                  className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition ${lIdx === 0 && currentCourse.indexOf(c) === 0 ? 'iq-vault-lecture-item' : ''}
+                                   ${activeLectureId === t._id
+                                      ? "bg-gray-300 dark:bg-slate-800"
+                                      : "hover:bg-gray-50 dark:hover:bg-slate-900"
+                                    }`}
+                                >
+                                  <CirclePlay className="mr-2 text-gray-400" />
+                                  <span className="text-gray-800 font-medium text-xs">
+                                    {t.title}
+                                  </span>
+                                </div>
+                              ))}
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      </div>
+                    ) : (
+                      <div
+                        className="max-h-[675px] left_sidebar rounded-xl shadow card overflow-hidden relative"
+                        style={{
+                          backgroundImage: data?.ActiveCategory?.[0]?.categoryName
+                            ? `url(/media/banners/${data.ActiveCategory[0].categoryName.replace(/\s+/g, "-")}.jpg)`
+                            : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                        }}
                       >
-                        {currentCourse.map((c, index) => (
-                          <AccordionItem
-                            key={c._id}
-                            title={`${index + 1}. ${c.title}`}
-                          >
-                            {c?.lectures?.map((t) => (
-                              <div
-                                key={t._id}
-                                onClick={() => handleBannerClick(t._id)} // 🟢 Simplified click handler
-                                className={`flex items-center p-4 border-t border-gray-100 cursor-pointer transition 
-                                   ${
-                                     activeLectureId === t._id
-                                       ? "bg-gray-300 dark:bg-slate-800"
-                                       : "hover:bg-gray-50 dark:hover:bg-slate-900"
-                                   }`}
-                              >
-                                <CirclePlay className="mr-2 text-gray-400" />
-                                <span className="text-gray-800 font-medium text-xs">
-                                  {t.title}
-                                </span>
-                              </div>
-                            ))}
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                    </div>
-                  ) : (
-                    <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center py-12 px-6">
-                        <div className="text-center">
-                          <div className="text-4xl mb-4">📚</div>
-                          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
-                            Coming Soon
-                          </h3>
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            Coming Soon
-                          </p>
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+                        <div className="flex flex-col items-center justify-center py-12 px-6 relative z-10">
+                          <div className="text-center">
+                            <div className="text-4xl mb-4">📚</div>
+                            <h3 className="text-lg font-medium text-white mb-2">
+                              Coming Soon
+                            </h3>
+                            <p className="text-gray-300 text-sm">
+                              Coming Soon
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="max-h-[675px] left_sidebar rounded-xl shadow card bg-gray-50 dark:bg-gray-100">
-                  <div className="flex flex-col items-center justify-center py-12 px-6">
-                    <div className="text-center">
-                      <div className="text-4xl mb-4">📚</div>
-                      <h3 className="text-lg font-medium text-gray-700 dark:text-gray-600 mb-2">
-                        Coming Soon
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        Coming Soon
-                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div
+                    className="max-h-[675px] left_sidebar rounded-xl shadow card overflow-hidden relative"
+                    style={{
+                      backgroundImage: data?.categories?.find(c => c._id === activeTab)?.name
+                        ? `url(/media/banners/${data.categories.find(c => c._id === activeTab).name.replace(/\s+/g, "-")}.jpg)`
+                        : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+                    <div className="flex flex-col items-center justify-center py-12 px-6 relative z-10">
+                      <div className="text-center">
+                        <div className="text-4xl mb-4">📚</div>
+                        <h3 className="text-lg font-medium text-white mb-2">
+                          Coming Soon
+                        </h3>
+                        <p className="text-gray-300 text-sm">
+                          Coming Soon
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Tab + Lecture Display */}
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 order-1 md:order-2">
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <div className="flex gap-3 sm:gap-6 flex-wrap">
+                    <div className="flex gap-3 sm:gap-6 flex-wrap iq-vault-tab-area">
                       {data?.categories?.map((tab) => (
                         <button
                           key={tab._id}
-                          className={`pb-4 border-b-2 ${
-                            activeTab === tab._id
-                              ? "border-black dark:border-white text-gray-900"
-                              : "border-transparent text-gray-500 hover:text-gray-900"
-                          }`}
+                          className={`pb-4 border-b-2 ${activeTab === tab._id
+                            ? "border-black dark:border-white text-gray-900"
+                            : "border-transparent text-gray-500 hover:text-gray-900"
+                            }`}
                           onClick={() => setActiveTab(tab._id)}
                         >
                           {tab.name}
@@ -464,8 +470,8 @@ export default function IqVault() {
                       >
                         {/* Dynamic content for active tab */}
                         {data?.ActiveCategory &&
-                        data.ActiveCategory.length > 0 &&
-                        activeTab ===
+                          data.ActiveCategory.length > 0 &&
+                          activeTab ===
                           `${data.ActiveCategory[0]?.categoryId}` ? (
                           currentCourse?.length > 0 && lecture ? (
                             <div className="card">
@@ -485,9 +491,6 @@ export default function IqVault() {
                               )}
 
                               <div className="px-6 py-8 rounded-bl-md rounded-br-md">
-                                {/* <h3 className="text-sm tracking-widest font-normal text-gray-600 mb-2">
-                                  {lecture.title}
-                                </h3> */}
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center flex-wrap justify-between mb-3 gap-2">
                                   <h4 className="sm:text-2xl font-medium text-gray-900">
                                     {lecture.title}
@@ -517,40 +520,39 @@ export default function IqVault() {
                                     }}
                                   />
                                 )}
+                                {/* Resources — view only */}
+                                <ResourcesSection
+                                  resources={lecture?.resources || []}
+                                  viewOnly
+                                  className="mt-4"
+                                />
                               </div>
                             </div>
                           ) : (
-                            <div className="card">
-                              <div className="flex flex-col items-center justify-center py-20 px-6">
+                            <div
+                              className="card overflow-hidden relative"
+                              style={{
+                                backgroundImage: data?.ActiveCategory?.[0]?.categoryName
+                                  ? `url(/media/banners/${data.ActiveCategory[0].categoryName.replace(/\s+/g, "-")}.jpg)`
+                                  : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                              }}
+                            >
+                              <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+                              <div className="flex flex-col items-center justify-center py-20 px-6 relative z-10">
                                 <div className="text-center">
                                   <div className="text-6xl mb-4">📚</div>
-                                  <h3 className="text-xl font-medium text-gray-700 mb-2">
+                                  <h3 className="text-xl font-medium text-white mb-2">
                                     Coming Soon
                                   </h3>
-                                  <p className="text-gray-500">Coming Soon</p>
+                                  <p className="text-gray-300">Coming Soon</p>
                                 </div>
                               </div>
                             </div>
-                            // <div className="card">
-                            //   <div className="flex flex-col items-center justify-center py-20 px-6">
-                            //     <div className="justify-center">
-                            //       <Loader />
-                            //     </div>
-                            //   </div>
-                            // </div>
                           )
                         ) : (
-                          // <div className="card">
-                          //   <div className="flex flex-col items-center justify-center py-20 px-6">
-                          //     <div className="text-center">
-                          //       <div className="text-6xl mb-4">📚</div>
-                          //       <h3 className="text-xl font-medium text-gray-700 mb-2">
-                          //         Coming Soon
-                          //       </h3>
-                          //       <p className="text-gray-500">Coming Soon</p>
-                          //     </div>
-                          //   </div>
-                          // </div>
                           <div className="card">
                             <div className="flex flex-col items-center justify-center py-20 px-6">
                               <div className="justify-center">
@@ -564,79 +566,8 @@ export default function IqVault() {
                   </div>
                 </div>
               </div>
-
-              {/* IQ Vault Section */}
-              {data?.ActiveCategory &&
-                data.ActiveCategory.length > 0 &&
-                data?.upcomingCourse?.length > 0 && (
-                  <div className="col-span-full">
-                    <div className="text-gray-900">
-                      <div className="bg-[#1f103f] text-white p-6 rounded-t-2xl">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                          <h2 className="text-xl font-medium">IQ Vault</h2>
-                          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                            <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
-                              <option>Experience</option>
-                              <option>Beginner</option>
-                              <option>Advanced</option>
-                            </select>
-                            <select className="bg-[#2a165d] text-white p-2 px-7 rounded-md w-full sm:w-auto">
-                              <option>Style</option>
-                              <option>Technical</option>
-                              <option>Fundamental</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="card rounded-t-none">
-                        <div className="rounded-t-none rounded-b-2xl pb-2 m-6 overflow-x-auto">
-                          <div className="flex gap-4 pb-0">
-                            {/* Static Course Cards - Optional, not connected to lecture data */}
-                            {data?.upcomingCourse?.map((i) => (
-                              <div
-                                key={i}
-                                className={`w-full sm:w-1/2 md:w-1/3 lg:w-1/4 border rounded-xl shadow-sm flex-shrink-0 cursor-pointer ${i?._id === id ? `border-primary border-2` : ``} `}
-                              >
-                                <div
-                                  className="rounded-t-xl overflow-hidden"
-                                  onClick={() => handleClick(i?._id)}
-                                >
-                                  <img
-                                    src={
-                                      i.imageUrl
-                                        ? i.imageUrl
-                                        : "public/media/images/video-thumbail.jpg"
-                                    }
-                                    alt="Course Title"
-                                    className="w-full object-cover h-44 rounded-t-xl "
-                                    onError={(e) => {
-                                      e.target.onerror = null;
-                                      e.target.src =
-                                        "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-                                    }}
-                                  />
-                                </div>
-                                <div className="p-5">
-                                  <div className="flex items-center justify-between">
-                                    <h3 className="text-md text-gray-800 font-medium mb-2">
-                                      {i?.title}
-                                    </h3>
-                                  </div>
-                                  <ShowMoreLess
-                                    className="text-gray-900 text-sm mt-2 leading-relaxed"
-                                    html={i?.description || "No description"}
-                                    limit={60}
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
             </div>
+
           </div>
         )}
       </div>

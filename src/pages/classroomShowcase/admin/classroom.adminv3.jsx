@@ -15,7 +15,7 @@ import {
 import CourseListPageV3 from "./components/CourseListPageV3";
 import useCourseStore from "@/store/courseStore";
 import CreateCourseModal from "@/pages/classroomShowcase/pages/Settings/components/CreateCourseModal";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import ContentManagementPage from "./features/content-management/ContentManagementPage";
 
 /**

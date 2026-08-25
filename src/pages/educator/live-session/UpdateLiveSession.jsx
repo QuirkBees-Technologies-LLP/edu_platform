@@ -92,7 +92,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <div className="grid grid-cols-12 gap-5">
-        <div className="col-span-6">
+        <div className="col-span-12 md:col-span-6">
           <div className="flex flex-col gap-1">
             <label className="form-label text-gray-900 gap-1">
               Title<span className="text-danger">*</span>
@@ -112,7 +112,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
           </div>
         </div>
 
-        <div className="col-span-6">
+        <div className="col-span-12 md:col-span-6">
           <div className="flex flex-col gap-1">
             <label className="form-label text-gray-900 gap-1">
               Description<span className="text-danger">*</span>
@@ -131,7 +131,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
             )}
           </div>
         </div>
-        <div className="col-span-6">
+        <div className="col-span-12 md:col-span-6">
           <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-1">
               <label className="form-label text-gray-900 gap-1">
@@ -167,7 +167,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
             </div>
           </div>
         </div>
-        <div className="col-span-6">
+        <div className="col-span-12 md:col-span-6">
           <div className="flex flex-col gap-1 tag-input">
             <label className="form-label text-gray-900 gap-1">
               Tags<span className="text-danger">*</span>
@@ -185,7 +185,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
             )}
           </div>
         </div>
-        <div className="col-span-6">
+        <div className="col-span-12">
           <button
             disabled={formik?.isSubmitting}
             type="submit"

@@ -1,7 +1,6 @@
 import useBodyClasses from '@/hooks/useBodyClasses';
 import { Demo4LayoutProvider, Main } from '.';
 const Demo4Layout = () => {
-  // Using the custom hook to set multiple CSS variables and class properties
   useBodyClasses(`
     [--tw-page-bg:#F6F6F9]
     [--tw-page-bg-dark:var(--tw-coal-200)]
@@ -15,7 +14,6 @@ const Demo4Layout = () => {
     lg:overflow-hidden
   `);
   return (
-    // Providing layout context and rendering the main content
     <Demo4LayoutProvider>
       <Main />
     </Demo4LayoutProvider>

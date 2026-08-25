@@ -10,6 +10,14 @@ import {
   X,
   FileText,
 } from "lucide-react";
+import { getEmbedUrl, getVideoThumbnail } from "@/utils/videoUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
   likePost,
@@ -28,32 +36,72 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteDialogRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-   const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
 
   
-  const htmlToPlainText = (html) => {
+  // Extract plain text length for truncation logic, but keep HTML for display
+  const getPlainTextLength = (html) => {
+    if (!html) return 0;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      return (doc.body.textContent || "").trim().length;
+    } catch {
+      return html.replace(/<[^>]+>/g, "").trim().length;
+    }
+  };
+
+  const richContent = post?.content || "";
+  const contentLength = getPlainTextLength(richContent);
+
+  // For truncation: use a safe HTML truncation that doesn't break tags
+  const truncateHtml = (html, maxLen) => {
     if (!html) return "";
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
       const text = doc.body.textContent || "";
-      return text.trim();
-    } catch (err) {
-      return html.replace(/<[^>]+>/g, "").trim(); // fallback
+      if (text.length <= maxLen) return html;
+
+      // Walk the DOM and truncate text nodes
+      let remaining = maxLen;
+      const truncateNode = (node) => {
+        if (remaining <= 0) {
+          node.remove();
+          return;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (node.textContent.length > remaining) {
+            node.textContent = node.textContent.substring(0, remaining) + "…";
+            remaining = 0;
+          } else {
+            remaining -= node.textContent.length;
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const children = Array.from(node.childNodes);
+          for (const child of children) {
+            truncateNode(child);
+          }
+        }
+      };
+
+      truncateNode(doc.body);
+      return doc.body.innerHTML;
+    } catch {
+      return html.substring(0, maxLen) + "…";
     }
   };
 
+  const displayHtml = isExpanded ? richContent : truncateHtml(richContent, 200);
+  const finalHtml =
+    displayHtml +
+    (contentLength > 200
+      ? isExpanded
+        ? ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
+        : ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
+      : "");
 
-  const plainTextContent = htmlToPlainText(post?.content || "");
-
-
-  const makeClickableLinks = (text) =>
-    text.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
-
-  // Prevent background scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -61,7 +109,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       document.body.style.overflow = "auto";
     }
 
-    // Cleanup (jab component unmount ya modal close thaye)
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -125,14 +172,13 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     }
   };
 
- 
-
   const renderMedia = () => {
     const hasImages = post.images && post.images.length > 0;
     const hasVideos = post.videos && post.videos.length > 0;
     const hasDocuments = post.documents && post.documents.length > 0;
+    const hasDyntubeUrl = !!post.dyntubeUrl;
 
-    if (!hasImages && !hasVideos && !hasDocuments) return null;
+    if (!hasImages && !hasVideos && !hasDocuments && !hasDyntubeUrl) return null;
 
     return (
       <div className="space-y-3">
@@ -236,20 +282,37 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
             ))}
           </div>
         )}
+
+        {/* DynTube Thumbnail + Play Button */}
+        {hasDyntubeUrl && (
+          <div
+            className="relative w-full rounded-lg overflow-hidden bg-black cursor-pointer group"
+            style={{ aspectRatio: '16/9' }}
+            onClick={() => setDyntubeModalOpen(true)}
+          >
+            {/* Non-interactive iframe as thumbnail (same as StrategyVideoCarousel) */}
+            <iframe
+              src={getEmbedUrl(post.dyntubeUrl)}
+              className="w-full h-full"
+              loading="lazy"
+              tabIndex={-1}
+              scrolling="no"
+              style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+              title="DynTube Video"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {/* Play button */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-200">
+                <Play size={28} className="text-white ml-1" fill="white" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
-
-    const displayText = isExpanded
-    ? plainTextContent
-    : plainTextContent.substring(0, 200);
-  const finalHtml =
-    makeClickableLinks(displayText) +
-    (plainTextContent.length > 200
-      ? isExpanded
-        ? ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
-        : ` <span id="toggleText" class="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
-      : "");
 
   return (
     <div className="card rounded-lg shadow-md p-4 mb-4">
@@ -289,7 +352,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                 </button>
 
                 {showOptions && (
-                  <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-999 min-w-[120px]">
+                  <div className="absolute right-0 top-8 bg-white dark:bg-gray-200 border border-gray-200 rounded-lg shadow-lg py-2 min-w-[120px] z-[9]">
                     <button
                       onClick={handleEdit}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
@@ -299,7 +362,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-gray-100 flex items-center gap-2"
                     >
                       <Trash2 size={14} />
                       Delete
@@ -312,37 +375,10 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
         </div>
       </div>
 
-      {/* Post Content */}
-        {/* {post.content && (
-                <div className="mb-3">
-                    <p className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words">
-                        {post.content.length > 200 && !isContentExpanded
-                            ? (
-                                <>
-                                    {post.content.substring(0, 200)}
-                                    <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium" onClick={toggleContent}>
-                                        ...more
-                                    </span>
-                                </>
-                            )
-                            : (
-                                <>
-                                    {post.content}
-                                    {post.content.length > 200 && (
-                                        <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1" onClick={toggleContent}>
-                                            Show less
-                                        </span>
-                                    )}
-                                </>
-                            )
-                        }
-                    </p>
-                </div>
-            )} */}
-     {plainTextContent && (
+     {richContent && (
         <div className="mb-3">
-          <p
-            className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+          <div
+            className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words prose prose-sm max-w-none"
             dangerouslySetInnerHTML={{ __html: finalHtml }}
             onClick={(e) => {
               if (e.target.id === "toggleText") setIsExpanded(!isExpanded);
@@ -354,33 +390,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       {/* Post Media */}
       {renderMedia()}
 
-      {/* Post Actions - Commented out */}
-      {/* <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-6">
-                    <button 
-                        onClick={handleLike}
-                        className={`flex items-center gap-2 text-sm transition-colors ${
-                            isLiked 
-                                ? 'text-red-500' 
-                                : 'text-gray-600 hover:text-red-500'
-                        }`}
-                    >
-                        <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-                        <span className="font-termina">{post.likeCount || 0}</span>
-                    </button>
-                    
-                    <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-500 transition-colors">
-                        <MessageCircle size={18} />
-                        <span className="font-termina">{post.commentCount || 0}</span>
-                    </button>
-                    
-                    <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-500 transition-colors">
-                        <Share2 size={18} />
-                        <span className="font-termina">{post.shareCount || 0}</span>
-                    </button>
-                </div>
-            </div> */}
-
       {/* Delete Post Dialog */}
       <DeletePostDialog
         isDeleteOpen={isDeleteOpen}
@@ -389,6 +398,39 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
         refetch={refetch}
         ref={deleteDialogRef}
       />
+
+      {/* DynTube Video Modal */}
+      {post.dyntubeUrl && (
+        <Dialog open={dyntubeModalOpen} onOpenChange={setDyntubeModalOpen}>
+          <DialogContent
+            className="max-w-5xl w-full p-0 !overflow-hidden bg-black border-gray-800 !max-h-[85vh] flex flex-col"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="px-5 pt-4 pb-2 shrink-0">
+              <DialogTitle className="text-white text-lg font-semibold truncate pr-8">
+                Video
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                DynTube video player
+              </DialogDescription>
+            </DialogHeader>
+            <div className="w-full flex-1 min-h-0 p-4 pt-0">
+              <div className="aspect-video w-full h-full max-h-full">
+                {dyntubeModalOpen && (
+                  <iframe
+                    src={getEmbedUrl(post.dyntubeUrl)}
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="DynTube Video Player"
+                    style={{ border: 'none' }}
+                  />
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

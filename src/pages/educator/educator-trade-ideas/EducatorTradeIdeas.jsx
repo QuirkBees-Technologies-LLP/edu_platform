@@ -38,6 +38,8 @@ import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 import EducatorTradeCards from "./EducatorTradeCards";
 import { set } from "date-fns";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import SocialPostPrompt from "@/components/SocialPostPrompt";
+import CreatePostModal from "@/components/CreatePostModal";
 
 const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -48,6 +50,8 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState({});
   const [category, setCategory] = useState(null);
+  const [isSocialPromptOpen, setIsSocialPromptOpen] = useState(false);
+  const [isSocialComposerOpen, setIsSocialComposerOpen] = useState(false);
   const [getEducatorTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetEducatorTradeIdeasQuery();
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
@@ -115,7 +119,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
-            <MenuTitle>Edit</MenuTitle>
+            <MenuTitle>Update</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem
@@ -205,7 +209,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[100px]",
         },
       },
 
@@ -229,7 +233,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           );
         },
         meta: {
-          headerClassName: "w-[225px]",
+          headerClassName: "w-[100px]",
         },
       },
       {
@@ -259,7 +263,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         enableSorting: true,
         cell: (info) => info.getValue(),
         meta: {
-          headerClassName: "min-w-[125px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
@@ -277,7 +281,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[125px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
@@ -295,7 +299,37 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[100px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.createdAt,
+        id: "date",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Date" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => {
+          const value = info.row.original.createdAt;
+          if (!value) return <span className="text-gray-500">-</span>;
+          const parsed = new Date(value);
+          if (isNaN(parsed)) return <span className="text-gray-500">-</span>;
+          return (
+            <span>
+              {parsed.toLocaleString("en-US", {
+                timeZone: "America/Panama",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
+          );
+        },
+        meta: {
+          headerClassName: "min-w-[160px]",
         },
       },
       {
@@ -425,21 +459,19 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         <div className="inline-flex bg-gray-200 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("TableView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === "TableView"
-                ? "bg-gray-100 text-gray-900 shadow"
-                : "text-gray-600"
-            }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "TableView"
+              ? "bg-gray-100 text-gray-900 shadow"
+              : "text-gray-600"
+              }`}
           >
             Table View
           </button>
           <button
             onClick={() => setActiveTab("UserView")}
-            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === "UserView"
-                ? "bg-gray-100 text-gray-900 shadow"
-                : "text-gray-600"
-            }`}
+            className={`px-2 sm:px-4 py-2 text-sm rounded-lg font-semibold transition-all duration-200 ${activeTab === "UserView"
+              ? "bg-gray-100 text-gray-900 shadow"
+              : "text-gray-600"
+              }`}
           >
             User View
           </button>
@@ -512,7 +544,8 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
           </Toolbar>
 
           <DataGrid
-            key={tableKey}
+            key={category?._id || ""}
+            reloadTrigger={tableKey}
             serverSide={true}
             loading={isLoading}
             columns={columns}
@@ -538,6 +571,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
             selectedRow={selectedRow}
+            onSubmitSuccess={() => setIsSocialPromptOpen(true)}
           />
 
           {isDeleteOpen && (
@@ -549,6 +583,22 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
               setSelectedRow={setSelectedRow}
             />
           )}
+
+          <SocialPostPrompt
+            isOpen={isSocialPromptOpen}
+            onClose={() => setIsSocialPromptOpen(false)}
+            onConfirm={() => {
+              setIsSocialPromptOpen(false);
+              setIsSocialComposerOpen(true);
+            }}
+          />
+
+          <CreatePostModal
+            isOpen={isSocialComposerOpen}
+            onClose={() => setIsSocialComposerOpen(false)}
+            editingPost={null}
+            showCategorySelector={false}
+          />
         </>
       )}
       {activeTab === "UserView" && <EducatorTradeCards />}

@@ -5,14 +5,30 @@ export const clientEducatorApiSlice = createApi({
   reducerPath: "ClientEducator",
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Educator"],
+  keepUnusedDataFor: 30, // Cache results for 30s — reduces re-fetches on navigation
   endpoints: (builder) => ({
     getEducatorsList: builder.query({
-      query: ({ search = "" , category = "" }) =>
-        search
-          ? `/users/educator-course?search=${encodeURIComponent(search)}&category=${category}`
-          : `/users/educator-course?category=${category}`,
+      query: ({
+        search = "",
+        tab = "all",
+        category = "",
+        page = 1,
+        limit = 9,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (search) params.append("search", search);
+        if (tab === "following") params.append("tab", tab);
+        if (category) params.append("category", category);
+
+        params.append("page", page);
+        params.append("limit", limit);
+
+        return `/users/educator-course?${params.toString()}`;
+      },
       providesTags: ["Educator"],
     }),
+
     toggleFollow: builder.mutation({
       query: (educatorId) => ({
         url: `/users/auth/${educatorId}/follow`,
@@ -20,10 +36,17 @@ export const clientEducatorApiSlice = createApi({
       }),
       invalidatesTags: ["Educator"],
     }),
+
     getClientEducatorAcademyCategory: builder.query({
       query: () => `/users/category/list`,
+      keepUnusedDataFor: 300, // categories rarely change — cache for 5 min
+      providesTags: ["Educator"],
     }),
-     providesTags: ["Educator"]
+    getCommonCategory: builder.query({
+      query: () => `/common/category/get`,
+      keepUnusedDataFor: 300,
+      providesTags: ["Educator"],
+    }),
   }),
 });
 
@@ -31,4 +54,5 @@ export const {
   useGetEducatorsListQuery,
   useToggleFollowMutation,
   useGetClientEducatorAcademyCategoryQuery,
+  useGetCommonCategoryQuery,
 } = clientEducatorApiSlice;

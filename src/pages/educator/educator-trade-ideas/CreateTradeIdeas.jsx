@@ -1,6 +1,10 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState, useCallback } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import DraggableImageList from "@/components/ui/DraggableImageList";
+import DraggableLinkList from "@/components/ui/DraggableLinkList";
 import {
   Select,
   SelectContent,
@@ -8,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -18,20 +23,23 @@ import { useAuthContext } from "../../../auth/useAuthContext";
 import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
-import {
-  useCreateTradeIdeasMutation,
-  useUpdateTradeIdeaMutation,
-} from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import {
   useCreateEducatorTradeIdeasMutation,
   useUpdateEducatorTradeIdeaMutation,
 } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 
 const CreateTradeIdeas = forwardRef(
   (
-    { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
+    {
+      setSelectedRow,
+      isCreateOpen,
+      handleCloseCreate,
+      selectedRow,
+      refetch,
+      onSubmitSuccess,
+    },
     ref
   ) => {
     const { auth } = useAuthContext();
@@ -39,7 +47,7 @@ const CreateTradeIdeas = forwardRef(
     const [updateEducatorTradeIdea] = useUpdateEducatorTradeIdeaMutation();
 
     const educatorId = auth?.user?._id ?? null;
-    const { data } = useGetEducatorAcademyCategoryQuery();
+    const { data } = useGetCommonCategoryQuery();
 
     const initialValues = {
       name: "",
@@ -53,18 +61,38 @@ const CreateTradeIdeas = forwardRef(
       exits: [""],
       description: "",
       category: "",
+      pips: 0,
+      checkTime: false,
+      tradingViewLinks: [""],
     };
+    const numberField = () =>
+      Yup.number()
+        .nullable()
+        .transform((value, originalValue) => {
+          if (originalValue === "" || originalValue === undefined) return null;
+          const cleaned = Number(originalValue);
+          return isNaN(cleaned) ? 0 : cleaned;
+        });
 
     const createSchema = Yup.object().shape({
       name: Yup.string().required("symbol is required"),
-      files: Yup.array().min(1, "At least one file is required"),
+      files: Yup.array().test(
+        'files-or-links',
+        'At least one screenshot or TradingView link is required',
+        function (files) {
+          const tvLinks = this.parent.tradingViewLinks;
+          const hasLinks = tvLinks && tvLinks.filter(l => l && l.trim()).length > 0;
+          const hasFiles = files && files.length > 0;
+          return hasLinks || hasFiles;
+        }
+      ),
       type: Yup.string().oneOf(["buy", "sell"]).required("Type is required"),
       status: Yup.string()
         .oneOf(["active", "pending", "win", "partialWin", "loss", "breakEven"])
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      // entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
+      entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
       description: Yup.string().required("Description is required"),
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
@@ -78,6 +106,16 @@ const CreateTradeIdeas = forwardRef(
         )
         .min(1, "At least one exit is required"),
       category: Yup.string().required("Category is required"),
+      pips: Yup.number()
+        .typeError("Pips must be a number")
+        .when("status", {
+          is: (status) => ["win", "loss", "partialWin"].includes(status),
+          then: (schema) =>
+            schema
+              .required("Pips is required")
+              .notOneOf([0], "Pips cannot be zero"),
+          otherwise: (schema) => schema.notRequired().default(0),
+        }),
     });
 
     const formik = useFormik({
@@ -97,6 +135,7 @@ const CreateTradeIdeas = forwardRef(
           formData.append("files", file?.file?.file)
         );
         formData.append("type", values.type);
+        formData.append("pips", values.pips ?? 0);
         formData.append("timeFrame[]", [values.timeFrame]);
         formData.append("educatorId", values.educatorId);
         formData.append("status", values.status);
@@ -104,7 +143,21 @@ const CreateTradeIdeas = forwardRef(
         formData.append("invalidation", values.invalidation);
         formData.append("description", values.description);
         formData.append("category", values.category);
+        formData.append("checkTime", values.checkTime);
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
+
+        // Append TradingView links (always send, even empty, so backend can clear old links)
+        const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
+        formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+
+        // Send existing image URLs the user kept (so backend knows which to preserve)
+        if (selectedRow?._id) {
+          const keptImages = (values.files || [])
+            .filter((f) => !f?.file?.file && f?.dataURL)
+            .map((f) => f.dataURL);
+          formData.append("existingImages", JSON.stringify(keptImages));
+        }
+
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -113,16 +166,20 @@ const CreateTradeIdeas = forwardRef(
           if (selectedRow?._id) {
             await updateEducatorTradeIdea(formData).unwrap();
 
-            toast.success("Trade idea updated successfully!");
+            toast.success("Idea updated successfully!");
           } else {
             await createEducatorTradeIdeas(formData).unwrap();
 
-            toast.success("Trade idea created successfully!");
+            toast.success("Idea created successfully!");
           }
+          const wasUpdate = !!selectedRow?._id;
           formik.resetForm();
           setSelectedRow(null);
           refetch();
           handleCloseCreate();
+          // Share-to-social prompt only makes sense when updating an existing idea, not
+          // when creating a brand new one.
+          if (wasUpdate && onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =
@@ -131,6 +188,8 @@ const CreateTradeIdeas = forwardRef(
         }
       },
     });
+
+    console.log("formik", formik);
 
     useEffect(() => {
       if (educatorId && formik.values) {
@@ -157,6 +216,9 @@ const CreateTradeIdeas = forwardRef(
           invalidation: selectedRow?.invalidation,
           description: selectedRow?.description,
           exits: selectedRow?.exits,
+          pips: selectedRow?.pips,
+          checkTime: selectedRow?.isUpdatedIdea || false,
+          tradingViewLinks: selectedRow?.tradingViewLinks?.length > 0 ? selectedRow.tradingViewLinks : [""],
         };
         formik.setValues(initData);
       }
@@ -200,19 +262,45 @@ const CreateTradeIdeas = forwardRef(
       formik.setFieldValue("files", newFiles);
     };
 
-    useEffect(() => {
-      if (!selectedRow) {
-        formik.resetForm();
-      }
-    }, [selectedRow]);
+    // Drag-and-drop reorder handlers
+    const handleReorderImages = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.files];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("files", items);
+    }, [formik.values.files]);
+
+    const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.tradingViewLinks];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("tradingViewLinks", items);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleLinkChange = useCallback((index, value) => {
+      const updated = [...formik.values.tradingViewLinks];
+      updated[index] = value;
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleRemoveLink = useCallback((index) => {
+      const updated = formik.values.tradingViewLinks.filter((_, i) => i !== index);
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleAddLink = useCallback(() => {
+      formik.setFieldValue("tradingViewLinks", [...(formik.values.tradingViewLinks || []), ""]);
+    }, [formik.values.tradingViewLinks]);
 
     return (
-      <>
+      <DndProvider backend={HTML5Backend}>
         <Dialog
           open={isCreateOpen}
+          // Closing the dialog (outside click, Escape, the X button) must NOT clear the
+          // form — only the explicit Cancel button does that. selectedRow is still reset
+          // here since it tracks edit-vs-create mode, not the form's field values.
           onOpenChange={() => {
             setSelectedRow({});
-            formik.resetForm();
             handleCloseCreate();
           }}
         >
@@ -225,7 +313,7 @@ const CreateTradeIdeas = forwardRef(
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">
               <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Symbol<span className="text-danger">*</span>
@@ -234,11 +322,10 @@ const CreateTradeIdeas = forwardRef(
                       type="text"
                       placeholder="Enter symbol"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.name && formik.touched.name
+                      className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                       {...formik.getFieldProps("name")}
                     />
                     {formik.touched.name && formik.errors.name && (
@@ -248,7 +335,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Direction <span className="text-danger">*</span>
@@ -263,11 +350,10 @@ const CreateTradeIdeas = forwardRef(
                       onBlur={() => formik.setFieldTouched("type", true)}
                     >
                       <SelectTrigger
-                        className={`form-control input input-md w-full ${
-                          formik.errors.type && formik.touched.type
+                        className={`form-control input input-md w-full ${formik.errors.type && formik.touched.type
                             ? "border border-danger"
                             : ""
-                        }`}
+                          }`}
                       >
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -285,7 +371,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Description<span className="text-danger">*</span>
@@ -311,7 +397,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Type <span className="text-danger">*</span>
@@ -326,11 +412,10 @@ const CreateTradeIdeas = forwardRef(
                       onBlur={() => formik.setFieldTouched("timeFrame", true)}
                     >
                       <SelectTrigger
-                        className={`form-control input input-md w-full ${
-                          formik.errors.timeFrame && formik.touched.timeFrame
+                        className={`form-control input input-md w-full ${formik.errors.timeFrame && formik.touched.timeFrame
                             ? "border border-danger"
                             : ""
-                        }`}
+                          }`}
                       >
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -348,7 +433,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Status <span className="text-danger">*</span>
@@ -363,11 +448,10 @@ const CreateTradeIdeas = forwardRef(
                       onBlur={() => formik.setFieldTouched("status", true)}
                     >
                       <SelectTrigger
-                        className={`form-control input input-md w-full ${
-                          formik.errors.status && formik.touched.status
+                        className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
                             ? "border border-danger"
                             : ""
-                        }`}
+                          }`}
                       >
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -389,21 +473,20 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Entry <span className="text-danger">*</span>
                     </label>
                     <input
                       {...formik.getFieldProps("entry")}
-                      type="string"
+                      type="number"
                       placeholder="Enter entry"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.entry && formik.touched.entry
+                      className={`form-control input input-md w-full ${formik.errors.entry && formik.touched.entry
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     />
                     {formik.touched.entry && formik.errors.entry && (
                       <span role="alert" className="text-danger text-xs mt-1">
@@ -412,7 +495,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Invalidation <span className="text-danger">*</span>
@@ -422,12 +505,11 @@ const CreateTradeIdeas = forwardRef(
                       placeholder="Enter invalidation"
                       autoComplete="off"
                       {...formik.getFieldProps("invalidation")}
-                      className={`form-control input input-md w-full ${
-                        formik.errors.invalidation &&
-                        formik.touched.invalidation
+                      className={`form-control input input-md w-full ${formik.errors.invalidation &&
+                          formik.touched.invalidation
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     />
                     {formik.touched.invalidation &&
                       formik.errors.invalidation && (
@@ -437,7 +519,7 @@ const CreateTradeIdeas = forwardRef(
                       )}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Exits <span className="text-danger">*</span>
@@ -459,12 +541,11 @@ const CreateTradeIdeas = forwardRef(
                               newExits[index] = e.target.value;
                               formik.setFieldValue("exits", newExits);
                             }}
-                            className={`form-control input input-md w-full ${
-                              formik.errors.exits?.[index] &&
-                              formik.touched.exits?.[index]
+                            className={`form-control input input-md w-full ${formik.errors.exits?.[index] &&
+                                formik.touched.exits?.[index]
                                 ? "border border-danger"
                                 : ""
-                            }`}
+                              }`}
                           />
 
                           {/* Remove Button (if more than 1 exit) */}
@@ -490,7 +571,7 @@ const CreateTradeIdeas = forwardRef(
                     ))}
                   </div>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
                       Category <span className="text-danger">*</span>
@@ -526,6 +607,26 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
+
+                {selectedRow?._id && (
+                  <div className="col-span-12 md:col-span-6">
+                    <div className="flex items-center gap-2 h-full ">
+                      <Checkbox
+                        id="checkTime"
+                        checked={formik.values.checkTime}
+                        onCheckedChange={(checked) =>
+                          formik.setFieldValue("checkTime", checked)
+                        }
+                      />
+                      <label
+                        htmlFor="checkTime"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        Do Not Update TimeStamp
+                      </label>
+                    </div>
+                  </div>
+                )}
                 {/* <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -546,6 +647,53 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div> */}
+
+                {["win", "loss", "partialWin"].includes(
+                  formik.values.status
+                ) && (
+                    <div className="col-span-12 md:col-span-6">
+                      <div className="flex flex-col gap-1">
+                        <label className="form-label text-gray-900 gap-1">
+                          Pips <span className="text-danger">*</span>
+                        </label>
+
+                        <input
+                          type="number"
+                          placeholder="Enter Pips"
+                          autoComplete="off"
+                          className={`form-control input input-md w-full ${formik.errors.pips && formik.touched.pips
+                              ? "border border-danger"
+                              : ""
+                            }`}
+                          {...formik.getFieldProps("pips")}
+                        />
+
+                        {formik.touched.pips && formik.errors.pips && (
+                          <span role="alert" className="text-danger text-xs mt-1">
+                            {formik.errors.pips}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* TradingView Links */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      TradingView Links
+                    </label>
+                    <DraggableLinkList
+                      links={formik.values.tradingViewLinks || [""]}
+                      onReorder={handleReorderLinks}
+                      onChange={handleLinkChange}
+                      onRemove={handleRemoveLink}
+                      onAdd={handleAddLink}
+                    />
+                  </div>
+                </div>
+
+
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
                     {/* Upload Box - always shown */}
@@ -561,10 +709,9 @@ const CreateTradeIdeas = forwardRef(
                         >
                           <div
                             className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-                              ${
-                                formik.touched.files && formik.errors.files
-                                  ? "border-danger"
-                                  : "border-gray-200"
+                              ${formik.touched.files && formik.errors.files
+                                ? "border-danger"
+                                : "border-gray-200"
                               }`}
                           >
                             <i className="ki-filled ki-picture"></i>
@@ -573,27 +720,12 @@ const CreateTradeIdeas = forwardRef(
                       )}
                     </ImageInput>
 
-                    {/* Show preview only if there are images */}
-                    {formik.values.files
-                      .filter((file) => !!file?.dataURL)
-                      .map((file, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={file.dataURL}
-                            alt="uploaded"
-                            className="rounded-lg border-2 border-success size-24 object-cover"
-                          />
-                          <div className="absolute -right-4 -top-4">
-                            <button
-                              type="button"
-                              className="btn btn-xs btn-icon rounded-full btn-danger"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <i className="ki-outline ki-cross"></i>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                    {/* Show preview with drag-and-drop reorder */}
+                    <DraggableImageList
+                      files={formik.values.files}
+                      onReorder={handleReorderImages}
+                      onRemove={handleRemoveImage}
+                    />
                   </div>
                   {formik.touched.files && formik.errors.files && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -625,7 +757,7 @@ const CreateTradeIdeas = forwardRef(
             </div>
           </DialogContent>
         </Dialog>
-      </>
+      </DndProvider>
     );
   }
 );

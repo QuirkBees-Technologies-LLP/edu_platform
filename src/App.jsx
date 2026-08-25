@@ -4,6 +4,7 @@ import { useSettings } from '@/providers/SettingsProvider';
 import { AppRouting } from '@/routing';
 import { PathnameProvider } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
+
 import { Provider } from 'react-redux';
 import { persistor, store } from './store';
 import "yet-another-react-lightbox/plugins/counter.css";
@@ -13,6 +14,7 @@ import "slick-carousel/slick/slick-theme.css";
 import 'react-quill/dist/quill.snow.css';
 import "react-datepicker/dist/react-datepicker.css";
 import { PersistGate } from 'redux-persist/integration/react';
+
 
 const {
   BASE_URL
@@ -36,6 +38,7 @@ const App = () => {
           <AppRouting />
         </PathnameProvider>
         <Toaster />
+
       </PersistGate>
     </Provider>
   </BrowserRouter>;

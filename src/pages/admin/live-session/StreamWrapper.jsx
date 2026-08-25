@@ -2,17 +2,40 @@ import { StreamCall } from "@stream-io/video-react-sdk";
 import Loader from "../../../components/ui/loader";
 import { Send } from "lucide-react";
 import { toAbsoluteUrl } from "@/utils/Assets";
+import { useEffect, useRef, useState } from "react";
 
-const StreamWrapper = ({ call, children, bannerImage }) => {
+const StreamWrapper = ({ call, children, bannerImage, feedContent }) => {
+  // Right column (feed) always conforms to the left column's (image) natural
+  // height — never the other way around. Measured via ResizeObserver since
+  // the image's rendered height depends on its own aspect ratio at whatever
+  // width it ends up with, which isn't known until layout/paint.
+  const imageColRef = useRef(null);
+  const [imageColHeight, setImageColHeight] = useState(null);
+
+  useEffect(() => {
+    const el = imageColRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect?.height;
+      if (height) setImageColHeight(height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   if (!call)
     return (
       <div className="">
         <div className="grid grid-cols-12 gap-6">
           {/* Image Section */}
-          <div className="col-span-12 lg:col-span-8">
+          <div className="col-span-12 lg:col-span-8" ref={imageColRef}>
             <div className="card rounded-none rounded-b-xl">
               <img
-                src={bannerImage ? bannerImage : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg")}
+                src={
+                  bannerImage
+                    ? bannerImage
+                    : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg")
+                }
                 alt=""
                 className="w-full h-full rounded-xl object-cover"
               />
@@ -20,10 +43,10 @@ const StreamWrapper = ({ call, children, bannerImage }) => {
           </div>
 
           {/* Chatbox Section */}
-          <div className="col-span-12 lg:col-span-4">
+          {/* <div className="col-span-12 lg:col-span-4">
             <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-              <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
-                <h3 className="text-white font-semibold text-sm">Chatbox</h3>
+              <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
+                <h3 className="text-white font-semibold text-sm">Chatbox </h3>
               </div>
 
               <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-4">
@@ -53,6 +76,13 @@ const StreamWrapper = ({ call, children, bannerImage }) => {
                 </div>
               </form>
             </div>
+          </div> */}
+
+          <div
+            className="col-span-12 lg:col-span-4"
+            style={imageColHeight ? { height: imageColHeight, maxHeight: imageColHeight, overflow: "hidden" } : undefined}
+          >
+            {feedContent}
           </div>
         </div>
       </div>

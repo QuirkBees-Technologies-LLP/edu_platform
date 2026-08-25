@@ -1,6 +1,8 @@
 import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useLanguage } from "@/i18n";
 import debounce from "lodash.debounce";
 import {
@@ -47,7 +49,6 @@ import {
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { ro, tr } from "@faker-js/faker";
 import CreateLiveStream from "./CreateLiveNow";
 import { SearchFilterInput } from "@/components";
 
@@ -68,6 +69,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [lastNote, setLastNote] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -473,6 +475,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         page: newPage,
         limit: newLimit,
         search: searchTextInput || "",
+        ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
       }).unwrap();
 
       return {
@@ -510,7 +513,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <div className="flex gap-2 flex-wrap">
-          <ToolbarActions>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <div className="relative w-full md:w-80">
               <SearchFilterInput
                 searchText={searchText}
@@ -526,7 +529,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
                 It won't appear in the schedule
               </div>
             </div>
-          </ToolbarActions>
+          </div>
         </div>
         {/* <ToolbarActions>
           <div className="text-end pb-4">
@@ -538,8 +541,9 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
       </Toolbar>
 
       <DataGrid
+        key={searchTextInput}
         serverSide={true}
-        key={tableKey}
+        reloadTrigger={`${tableKey}-${selectedLanguage}`}
         loading={isLoading}
         columns={columns}
         rowSelection={true}

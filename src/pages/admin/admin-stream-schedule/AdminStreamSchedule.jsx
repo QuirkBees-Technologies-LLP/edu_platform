@@ -1,6 +1,8 @@
 import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useLanguage } from "@/i18n";
 import {
   DataGrid,
@@ -68,6 +70,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
   const [selectedEducator, setSelectedEducator] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -248,13 +251,12 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           {info.row.original.status}
         </span> */}
             <span
-              className={`badge capitalize badge-outline ${
-                info.row.original.status === "active"
-                  ? "badge-primary"
-                  : info.row.original.status === "pending"
-                    ? "badge-warning"
-                    : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ${info.row.original.status === "active"
+                ? "badge-primary"
+                : info.row.original.status === "pending"
+                  ? "badge-warning"
+                  : "badge-danger"
+                }`}
             >
               {info.row.original.status}
             </span>
@@ -282,9 +284,8 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span
-              className={`badge capitalize badge-outline ml-9 ${
-                info.row.original.isRecurent ? "badge-success" : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ml-9 ${info.row.original.isRecurent ? "badge-success" : "badge-danger"
+                }`}
             >
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>
@@ -394,6 +395,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
             limit: newLimit,
             educator: selectedEducator?._id || "",
             search: searchTextInput || "",
+            ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
           }).unwrap();
 
           return {
@@ -405,7 +407,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           return { data: [], totalCount: 0 };
         }
       },
-    [getAdminStreamSchedule, selectedEducator, searchTextInput]
+    [getAdminStreamSchedule, selectedEducator, searchTextInput, selectedLanguage]
   );
 
   const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
@@ -447,7 +449,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
           </ToolbarDescription>
         </ToolbarHeading>
         <div className="flex flex-wrap items-center gap-2">
-          <ToolbarActions>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <div className="flex-1 min-w-[200px] md:min-w-[300px]">
               <SearchFilterInput
                 searchText={searchText}
@@ -512,12 +514,13 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
                 Create Recurring Schedule
               </button>
             </div>
-          </ToolbarActions>
+          </div>
         </div>
       </Toolbar>
       <DataGrid
+        key={`${searchTextInput}-${selectedEducator?._id || ""}`}
         serverSide={true}
-        key={tableKey}
+        reloadTrigger={`${tableKey}-${selectedLanguage}`}
         loading={isLoading}
         columns={columns}
         rowSelection={true}

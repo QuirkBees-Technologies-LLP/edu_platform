@@ -5,13 +5,15 @@ import {
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
 import { Copy, PhoneOff, Podcast, Radio, Route, RouteOff } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { DefaultTooltip } from "@/components";
+import React, { useEffect, useMemo, useState } from "react";
+import { DefaultTooltip, createLivestreamParticipantOverlay } from "@/components";
 import { toast } from "sonner";
 import {
   useEducatorChangeLiveStreamStatusUpdateMutation,
   useEndAndCreateMutation,
   useEndCallMutation,
+  useStartCaptionsMutation,
+  useStopCaptionsMutation,
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import { useNavigate } from "react-router";
 import RecordingControls from "./RecordingControls";
@@ -33,6 +35,7 @@ const LiveSessionPlayer = ({
 }) => {
   const [isCallEnd, setIsCallEnd] = useState(null);
   const [isCallStarted, setIsCallStarted] = useState(null);
+  const [isOBSConnected, setIsOBSConnected] = useState(false);
   const [isLoadingRecordings, setIsLoadingRecordings] = useState(false);
   const [streamRecordings, setStreamRecordings] = useState([]);
   const call = useCall();
@@ -44,6 +47,8 @@ const LiveSessionPlayer = ({
     useEducatorLiveStreamStatusUpdateMutation();
   const [updateChangeLiveStatus, { isLoading: isLoading }] =
     useEducatorChangeLiveStreamStatusUpdateMutation();
+  const [startCaptions] = useStartCaptionsMutation();
+  const [stopCaptions] = useStopCaptionsMutation();
 
   const { useIsCallLive, useCallMembers } = useCallStateHooks();
   const [goLiveStartedAt, setGoLiveStartedAt] = useState(null);
@@ -55,6 +60,11 @@ const LiveSessionPlayer = ({
   const [endAndCreate, { isLoading: isEndingAndCreating }] =
     useEndAndCreateMutation();
   const [lastNote, setLastNote] = useState(false);
+
+  const ParticipantViewUI = useMemo(
+    () => createLivestreamParticipantOverlay({ showParticipantCount: true }),
+    []
+  );
 
   useEffect(() => {
     if (!call) return;
@@ -87,9 +97,15 @@ const LiveSessionPlayer = ({
           console.log("🎭 isBackstage:", isBackstage);
         });
 
-        // 🎥 RTMP Broadcast Event
+        // 🎥 RTMP Broadcast Events — track OBS connection
         call.on("rtmp_broadcast_started", (event) => {
-          console.log("🎥 RTMP Stream Started:", event);
+          console.log("🎥 OBS/RTMP Connected:", event);
+          setIsOBSConnected(true);
+        });
+
+        call.on("rtmp_broadcast_stopped", (event) => {
+          console.log("🛑 OBS/RTMP Disconnected:", event);
+          setIsOBSConnected(false);
         });
 
         // Save all subscriptions for cleanup
@@ -227,18 +243,16 @@ const LiveSessionPlayer = ({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "unset" }}>
-      <LivestreamPlayer
-        displayName="Hello guys"
-        layoutProps={{
-          showLiveBadge: true,
-          showSpeakerName: true,
-          showParticipantCount: true,
-          showDuration: true,
-          enableFullScreen: true,
-        }}
-        callType="livestream"
-        callId={callId}
-      />
+      <div className="relative w-full h-full rounded-xl overflow-hidden live-player-container">
+        <LivestreamPlayer
+          displayName="Hello guys"
+          layoutProps={{
+            ParticipantViewUI,
+          }}
+          callType="livestream"
+          callId={callId}
+        />
+      </div>
 
       {isCallEnd ? (
         <div className="flex flex-col justify-center items-center gap-5 pb-20 pt-20">
@@ -262,165 +276,166 @@ const LiveSessionPlayer = ({
         </div>
       ) : (
         <>
-          {!isCallStarted && (
-            <div className="flex flex-col justify-center items-center gap-7">
-              <Podcast size={44} className="text-primary" />
-              <p className="text-gray-300 dark:text-gray-700 mb-0">
-                To start streaming, select your preferred streaming app and
-                <span className="font-bold text-white">
-                  {" "}
-                  enter the RTMP URL along with the RTMP Stream key.
-                </span>
-              </p>
-              <div className="flex justify-center gap-3">
-                <DefaultTooltip
-                  title="Copied to clipboard!"
-                  open={isTooltipOpen?.rtmp_url_left}
-                  placement="bottom"
-                  className="max-w-48"
-                >
+          {!isOBSConnected ? (
+            // ✅ Show RTMP instructions + all controls ONLY when OBS is NOT yet connected
+            <>
+              {!isLive && (
+                <div className="flex flex-col justify-center items-center gap-7">
+                  <Podcast size={44} className="text-primary" />
+                  <p className="text-gray-300 dark:text-gray-700 mb-0">
+                    To start streaming, select your preferred streaming app and
+                    <span className="font-bold text-white">
+                      {" "}
+                      enter the RTMP URL along with the RTMP Stream key.
+                    </span>
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <DefaultTooltip
+                      title="Copied to clipboard!"
+                      open={isTooltipOpen?.rtmp_url_left}
+                      placement="bottom"
+                      className="max-w-48"
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-md btn-light rounded-full text-gray-700 font-semibold py-3"
+                        onClick={() => handleCopy(rtmp_url, "rtmp_url_left")}
+                      >
+                        Copy RTMP URL <Copy size={16} className="shrink-0" />
+                      </button>
+                    </DefaultTooltip>
+                    <DefaultTooltip
+                      title="Copied to clipboard!"
+                      open={isTooltipOpen?.rtmp_stream_key_left}
+                      placement="bottom"
+                      className="max-w-48"
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-md btn-light rounded-full text-gray-700 font-semibold py-3"
+                        onClick={() =>
+                          handleCopy(rtmp_stream_key, "rtmp_stream_key_left")
+                        }
+                      >
+                        Copy Stream Key <Copy size={16} className="shrink-0" />
+                      </button>
+                    </DefaultTooltip>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-center gap-3 mt-10">
+                <div className="flex justify-center gap-3 mt-10">
+                  {/* ✅ End Call */}
                   <button
                     type="button"
-                    className="btn btn-md btn-light rounded-full text-gray-700 font-semibold py-3"
-                    onClick={() => handleCopy(rtmp_url, "rtmp_url_left")}
+                    className="btn btn-md btn-danger"
+                    onClick={handleEndCallModel}
                   >
-                    Copy RTMP URL <Copy size={16} className="shrink-0" />
+                    <PhoneOff size={16} />
+                    End Call
                   </button>
-                </DefaultTooltip>
-                <DefaultTooltip
-                  title="Copied to clipboard!"
-                  open={isTooltipOpen?.rtmp_stream_key_left}
-                  placement="bottom"
-                  className="max-w-48"
-                >
+
+                  {/* ✅ Go Live / Stop Live */}
                   <button
                     type="button"
-                    className="btn btn-md btn-light rounded-full text-gray-700 font-semibold py-3"
-                    onClick={() =>
-                      handleCopy(rtmp_stream_key, "rtmp_stream_key_left")
-                    }
+                    className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`}
+                    onClick={async () => {
+                      try {
+                        if (isLive) {
+                          console.log("👉 Stopping live for:", callId);
+
+                          if (isRecording) {
+                            try {
+                              await call.stopRecording();
+                            } catch (err) {
+                              console.warn("⚠ stopRecording failed:", err);
+                            }
+                          }
+
+                          // Stop closed captions via server-side API
+                          try {
+                            await stopCaptions({ callId }).unwrap();
+                          } catch (err) {
+                            console.warn("⚠ stopCaptions failed:", err);
+                          }
+
+                          await call.stopLive();
+                          await updateLiveStatus({
+                            callId,
+                            status: "pending",
+                          }).unwrap();
+
+                          // ✅ Fetch ALL recordings
+                          await fetchStreamRecordings();
+
+                          toast.success("Stream stopped successfully");
+                        } else {
+                          console.log("👉 Going live for:", callId);
+                          await call.goLive();
+                          setGoLiveStartedAt(new Date());
+
+                          // Start closed captions via server-side API (bypasses user permission)
+                          try {
+                            await startCaptions({ callId }).unwrap();
+                            console.log("✅ Closed captions started (server-side)");
+                          } catch (err) {
+                            console.warn("⚠ startCaptions failed:", err);
+                          }
+
+                          await new Promise((resolve) => setTimeout(resolve, 1500));
+
+                          if (!isRecording) {
+                            try {
+                              await call.startRecording({
+                                mode: "single",
+                                options: {
+                                  "participant.filter": {
+                                    isPinned: true,
+                                  },
+                                  "participant.border_radius": "0px",
+                                  "participant.video_border_rounded": false,
+                                  "grid.margin": 0,
+                                  "grid.cell_padding": 4,
+                                },
+                              });
+                            } catch (err) {
+                              console.warn("⚠ startRecording failed:", err);
+                            }
+                          }
+
+                          await updateLiveStatus({
+                            callId,
+                            status: "active",
+                          }).unwrap();
+                          toast.success("Stream started successfully");
+                        }
+                      } catch (err) {
+                        console.error("❌ Error updating live status:", err);
+                        toast.error(
+                          err?.data?.message || "Failed to update live status"
+                        );
+                      }
+                    }}
+                    disabled={isLoadingRecordings || isUpdating}
                   >
-                    Copy Stream Key <Copy size={16} className="shrink-0" />
+                    {isLive ? <RouteOff size={16} /> : <Route size={16} />}
+                    {isLive ? "Stop Live" : "Go Live"}
                   </button>
-                </DefaultTooltip>
+                </div>
               </div>
-            </div>
-          )}
-          <div className="flex justify-center gap-3 mt-10">
-            {/* <RecordingControls call={call} /> */}
-            {/* <button
-              type="button"
-              onClick={async () => {
-                try {
-                  if (!callId) {
-                    toast.error("Missing callId");
-                    return;
-                  }
-                  await endCall({ callId }).unwrap();
-                  setIsCallEnd(true);
-                  toast.success("Call ended successfully");
-                } catch (error) {
-                  console.error("Failed to end stream", error);
-                  const message = error?.data?.message || "Failed to end call";
-                  toast.error(message);
-                }
-              }}
-              disabled={isEnding}
-              className="btn btn-md btn-danger"
-            >
-              <PhoneOff size={16} />
-              End Call
-            </button> */}
-            <div className="flex justify-center gap-3 mt-10">
-              {/* ✅ End Call */}
-              <button
-                type="button"
-                className="btn btn-md btn-danger"
-                onClick={handleEndCallModel}
-              >
-                <PhoneOff size={16} />
-                End Call
-              </button>
 
-              {/* ✅ Go Live / Stop Live */}
-              <button
-                type="button"
-                className={`btn btn-md ${!isLive ? "btn-success" : "btn-danger"}`}
-                onClick={async () => {
-                  try {
-                    if (isLive) {
-                      console.log("👉 Stopping live for:", callId);
-
-                      if (isRecording) {
-                        try {
-                          await call.stopRecording();
-                        } catch (err) {
-                          console.warn("⚠ stopRecording failed:", err);
-                        }
-                      }
-
-                      await call.stopLive();
-                      await updateLiveStatus({
-                        callId,
-                        status: "pending",
-                      }).unwrap();
-
-                      // ✅ Fetch ALL recordings
-                      await fetchStreamRecordings();
-
-                      toast.success("Stream stopped successfully");
-                    } else {
-                      console.log("👉 Going live for:", callId);
-                      await call.goLive();
-                      setGoLiveStartedAt(new Date());
-
-                      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-                      if (!isRecording) {
-                        try {
-                          await call.startRecording({
-                            mode: "single",
-                            options: {
-                              "participant.filter": {
-                                isPinned: true,
-                              },
-                            },
-                          });
-                        } catch (err) {
-                          console.warn("⚠ startRecording failed:", err);
-                        }
-                      }
-
-                      await updateLiveStatus({
-                        callId,
-                        status: "active",
-                      }).unwrap();
-                      toast.success("Stream started successfully");
-                    }
-                  } catch (err) {
-                    console.error("❌ Error updating live status:", err);
-                    toast.error(
-                      err?.data?.message || "Failed to update live status"
-                    );
-                  }
-                }}
-                disabled={isLoadingRecordings || isUpdating}
-              >
-                {isLive ? <RouteOff size={16} /> : <Route size={16} />}
-                {isLive ? "Stop Live" : "Go Live"}
-              </button>
-            </div>
-          </div>
-
-          {/* Loading indicator for recordings */}
-          {isLoadingRecordings && (
-            <div className="text-center mt-3">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading recordings...</span>
-              </div>
-              <p className="mt-2">Fetching recordings...</p>
-            </div>
-          )}
+              {/* Loading indicator for recordings */}
+              {isLoadingRecordings && (
+                <div className="text-center mt-3">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading recordings...</span>
+                  </div>
+                  <p className="mt-2">Fetching recordings...</p>
+                </div>
+              )}
+            </>
+          ) : null}
         </>
       )}
       {isEndOpen && (

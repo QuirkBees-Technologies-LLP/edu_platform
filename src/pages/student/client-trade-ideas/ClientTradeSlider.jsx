@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy } from "lucide-react";
 
 function PrevArrow(props) {
   const { className, onClick } = props;
@@ -56,6 +56,18 @@ export default function ClientTradeSlider({
     ),
   };
 
+  const [copiedField, setCopiedField] = useState({ id: null, field: "" });
+
+  const handleCopyField = async (ideaId, fieldName, value) => {
+    await navigator.clipboard.writeText(value);
+    setCopiedField({ id: ideaId, field: fieldName });
+
+    setTimeout(() => {
+      setCopiedField({ id: null, field: "" });
+    }, 1200);
+  };
+
+
   return (
     <div className="grid grid-cols-12 gap-4">
       <div className="col-span-12 relative">
@@ -81,35 +93,126 @@ export default function ClientTradeSlider({
           </div>
         )}
 
+
+
         <div className="mt-6 space-y-4">
-          <div className="flex justify-between text-sm">
+
+          {/* Entry */}
+          <div className="flex justify-between text-sm items-center">
             <span className="text-gray-600">Entry</span>
-            <span className="font-medium text-gray-800">
+
+            <span className="font-medium text-gray-800 flex items-center gap-2">
+              {copiedField.id === selectedIdea?._id &&
+                copiedField.field === "Entry" ? (
+                <span className="text-xs text-green-600">Copied!</span>
+              ) : (
+                selectedIdea?.entry && (
+                  <button
+                    onClick={() =>
+                      handleCopyField(selectedIdea._id, "Entry", selectedIdea.entry)
+                    }
+                    className="text-gray-600 flex items-center"
+                  >
+                    <Copy size={14} />
+                  </button>
+                )
+              )}
+
               {selectedIdea?.entry}
             </span>
           </div>
 
-          <div className="flex justify-between text-sm">
+          {/* Stop Loss */}
+          <div className="flex justify-between text-sm items-center">
             <span className="text-gray-600">Stop Loss</span>
-            <span className="font-medium text-gray-800">
+
+            <span className="font-medium text-gray-800 flex items-center gap-2">
+              {copiedField.id === selectedIdea?._id &&
+                copiedField.field === "Stop Loss" ? (
+                <span className="text-xs text-green-600">Copied!</span>
+              ) : (
+                selectedIdea?.invalidation && (
+                  <button
+                    onClick={() =>
+                      handleCopyField(
+                        selectedIdea._id,
+                        "Stop Loss",
+                        selectedIdea.invalidation
+                      )
+                    }
+                    className="text-gray-600 flex items-center"
+                  >
+                    <Copy size={14} />
+                  </button>
+                )
+              )}
+
               {selectedIdea?.invalidation}
             </span>
           </div>
 
-          {[0, 1, 2].map((idx) => (
-            <div key={idx} className="flex justify-between text-sm">
-              <span className="text-gray-600">{`Exit ${idx + 1}`}</span>
-              <span className="font-medium text-gray-800">
-                {selectedIdea?.exits?.[idx] ?? "N/A"}
-              </span>
+          {/* Exit 1 / Exit 2 / Exit 3 */}
+          {[0, 1, 2].map((idx) => {
+            const value = selectedIdea?.exits?.[idx];
+            if (!value && value !== 0) return null;
+            const fieldName = `Exit ${idx + 1}`;
+
+            return (
+              <div key={idx} className="flex justify-between text-sm items-center">
+                <span className="text-gray-600">{fieldName}</span>
+
+                <span className="font-medium text-gray-800 flex items-center gap-2">
+                  {copiedField.id === selectedIdea?._id &&
+                    copiedField.field === fieldName ? (
+                    <span className="text-xs text-green-600">Copied!</span>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        handleCopyField(selectedIdea._id, fieldName, value)
+                      }
+                      className="text-gray-600 flex items-center"
+                    >
+                      <Copy size={14} />
+                    </button>
+                  )}
+
+                  {value}
+                </span>
+              </div>
+            );
+          })}
+
+          {/* TradingView Links */}
+          {selectedIdea?.tradingViewLinks?.length > 0 && (
+            <div className="pt-3 border-t border-gray-100">
+              <span className="text-gray-600 text-sm font-medium block mb-2">TradingView Charts</span>
+              <div className="flex flex-col gap-2">
+                {selectedIdea.tradingViewLinks.map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                  >
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    TradingView Chart {selectedIdea.tradingViewLinks.length > 1 ? `#${idx + 1}` : ''}
+                  </a>
+                ))}
+              </div>
             </div>
-          ))}
+          )}
 
           <ShowMoreLess
             html={selectedIdea?.description || "No description"}
             limit={95}
           />
         </div>
+
       </div>
     </div>
   );

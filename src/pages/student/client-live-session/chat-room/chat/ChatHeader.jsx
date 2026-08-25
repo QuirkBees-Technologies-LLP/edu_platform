@@ -5,7 +5,7 @@ import { useEventContext } from '../context/EventContext';
 import { ArrowBigLeft, ArrowBigRight, UserRound } from 'lucide-react';
 import { useResponsive } from '../../../../../hooks';
 
-export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) => {
+export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread, headerGradient }) => {
     const {
         chatType,
         eventName,
@@ -44,7 +44,7 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
 
     return (
         <>
-            {!isFullScreen && <div className='bg-[#1A1446] px-4 py-3 chat-components-header border border-b-0'>
+            {!isFullScreen && <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 chat-components-header border border-b-0`}>
                 <div className='chat-components-header-top flex gap-3 items-center'>
                     <button onClick={() => setIsFullScreen((prev) => !prev)} class="flex btn btn-xs btn-icon btn-primary btn-outline md:flex btn btn-xs btn-icon btn-primary btn-outline ">
                         <ArrowBigRight size={18} />

@@ -53,7 +53,6 @@ export default function EducatorTradeSlider({
   return (
     <div className="grid grid-cols-12 gap-4">
       <div className="col-span-12">
-       
         {sliderImages?.length > 0 ? (
           <Slider {...settings}>
             {sliderImages.map((image, index) => (
@@ -65,7 +64,7 @@ export default function EducatorTradeSlider({
                 <img
                   className="w-full h-96 object-cover rounded-lg"
                   src={image}
-                  alt={`Trade image ${index}`}
+                  alt={`Idea image ${index}`}
                 />
               </div>
             ))}
@@ -76,7 +75,6 @@ export default function EducatorTradeSlider({
           </div>
         )}
 
-       
         <div className="mt-6 space-y-4">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600 font-normal text-sm">Entry</span>
@@ -92,16 +90,20 @@ export default function EducatorTradeSlider({
             </span>
           </div>
 
-          {[0, 1, 2].map((idx) => (
-            <div key={idx} className="flex justify-between text-sm">
-              <span className="text-gray-600 font-normal text-sm">
-                {`Exit ${idx + 1}`}
-              </span>
-              <span className="font-medium text-gray-800">
-                {selectedIdea?.exits?.[idx] ?? "N/A"}
-              </span>
-            </div>
-          ))}
+          {[0, 1, 2].map((idx) => {
+            const exitValue = selectedIdea?.exits?.[idx];
+            if (!exitValue && exitValue !== 0) return null;
+            return (
+              <div key={idx} className="flex justify-between text-sm">
+                <span className="text-gray-600 font-normal text-sm">
+                  {`Exit ${idx + 1}`}
+                </span>
+                <span className="font-medium text-gray-800">
+                  {exitValue}
+                </span>
+              </div>
+            );
+          })}
 
           <ShowMoreLess
             html={selectedIdea?.description || "No description"}

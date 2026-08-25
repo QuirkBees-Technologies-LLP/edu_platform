@@ -3,7 +3,7 @@ import { Check, X } from "lucide-react";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { lmsLectures } from "../../../../../../../services";
 
-const CreateLectureForm = ({ sectionId, onCancel, onSuccess }) => {
+const CreateLectureForm = ({ sectionId, subsectionId, onCancel, onSuccess }) => {
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { auth } = useAuthContext();
@@ -20,6 +20,7 @@ const CreateLectureForm = ({ sectionId, onCancel, onSuccess }) => {
         {
           title,
           section: sectionId,
+          ...(subsectionId ? { subsection: subsectionId } : {}),
           order: 0,
         },
         auth.token

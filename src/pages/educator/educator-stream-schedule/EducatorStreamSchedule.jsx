@@ -1,6 +1,8 @@
 import React from "react";
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectSelectedLanguagesAdmin } from "../../../store/reducer/studentLanagugeSlice";
 import { useLanguage } from "@/i18n";
 import debounce from "lodash.debounce";
 import {
@@ -55,6 +57,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
+  const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
   const [isReccurenceScheduleOpen, setIsReccurenceScheduleOpen] =
     useState(false);
 
@@ -254,13 +257,12 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span
-              className={`badge capitalize badge-outline ${
-                info.row.original.status === "active"
-                  ? "badge-primary"
-                  : info.row.original.status === "pending"
-                    ? "badge-warning"
-                    : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ${info.row.original.status === "active"
+                ? "badge-primary"
+                : info.row.original.status === "pending"
+                  ? "badge-warning"
+                  : "badge-danger"
+                }`}
             >
               {info.row.original.status}
             </span>
@@ -288,9 +290,8 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span
-              className={`badge capitalize badge-outline ml-9 ${
-                info.row.original.isRecurent ? "badge-success" : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ml-9 ${info.row.original.isRecurent ? "badge-success" : "badge-danger"
+                }`}
             >
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>
@@ -440,6 +441,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         page: newPage,
         limit: newLimit,
         search: searchTextInput || "",
+        ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
       }).unwrap();
 
       return {
@@ -483,7 +485,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
               </button>
             </div>
           </ToolbarActions> */}
-          <ToolbarActions>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <div className="relative w-full md:w-80">
               <SearchFilterInput
                 searchText={searchText}
@@ -498,12 +500,13 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
                 Create Recurring Schedule
               </button>
             </div>
-          </ToolbarActions>
+          </div>
         </div>
       </Toolbar>
       <DataGrid
+        key={searchTextInput}
         serverSide={true}
-        key={tableKey}
+        reloadTrigger={`${tableKey}-${selectedLanguage}`}
         loading={isLoading}
         columns={columns}
         rowSelection={true}

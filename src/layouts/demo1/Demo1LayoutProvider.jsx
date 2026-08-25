@@ -45,7 +45,6 @@ const Demo1LayoutProvider = ({ children }) => {
   const scrollPosition = useScrollPosition();
   const headerSticky = scrollPosition > 0;
 
-  // ✅ SET MENU BASED ON ROLE & PLAN
   useEffect(() => {
     if (!auth?.user) return;
 
@@ -62,7 +61,33 @@ const Demo1LayoutProvider = ({ children }) => {
       setMenuConfig("primary", filteredMenu);
       setMenuConfig("secondary", secondaryMenu);
     } else {
-      const fullMenu = sideMenus[userRole] || [];
+      let fullMenu = sideMenus[userRole] || [];
+
+      if (userRole === "educator") {
+        const isDigitalMarketing = auth.user?.categories?.some(
+          (cat) =>
+            cat?.slug?.toLowerCase() === "digital-marketing" ||
+            cat?.name?.toLowerCase() === "digital marketing" ||
+            cat?.name?.toLowerCase() === "digitalmarketing" ||
+            cat?.slug?.toLowerCase() === "e-commerce" ||
+            cat?.slug?.toLowerCase() === "ecommerce" ||
+            cat?.name?.toLowerCase() === "e-commerce" ||
+            cat?.name?.toLowerCase() === "ecommerce" ||
+            cat?.name?.toLowerCase() === "e commerce"
+        );
+
+        if (isDigitalMarketing) {
+          const hiddenPaths = [
+            "/educator/trade-analysis",
+            "/educator/ideas",
+            "/educator/live-ideas",
+          ];
+          fullMenu = fullMenu.filter(
+            (item) => !hiddenPaths.includes(item.path)
+          );
+        }
+      }
+
       const secondaryMenu = useMenuChildren(pathname, fullMenu, 0);
 
       setMenuConfig("primary", fullMenu);
@@ -70,7 +95,6 @@ const Demo1LayoutProvider = ({ children }) => {
     }
   }, [auth, pathname]);
 
-  // Update layout whenever state changes
   useEffect(() => {
     setCurrentLayout(layout);
   }, [layout]);
@@ -116,5 +140,4 @@ const Demo1LayoutProvider = ({ children }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export { Demo1LayoutProvider, useDemo1Layout };

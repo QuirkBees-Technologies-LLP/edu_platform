@@ -27,38 +27,94 @@ const testUsers = {
       last_name: "User",
       status: "Active",
       role: "student",
-      plan: "iq-max",
+      plan: "iq-plus",
       expire_at: new Date("2027-10-29"),
     },
   },
-  // "daud@student.com": {
-  //   password: "Daud123!",
-  //   data: {
-  //     name: "Daud",
-  //     email: "daud@student.com",
-  //     crm_id: 67890,
-  //     first_name: "Daud",
-  //     last_name: "Student",
-  //     status: "Active",
-  //     role: "student",
-  //     plan: "iq-max",
-  //     expire_at: new Date("2027-10-29"),
-  //   },
-  // },
-  // "daud1@student.com": {
-  //   password: "Daud1234!",
-  //   data: {
-  //     name: "Daud",
-  //     email: "daud1@student.com",
-  //     crm_id: 67890,
-  //     first_name: "Daud",
-  //     last_name: "Student",
-  //     status: "Active",
-  //     role: "student",
-  //     plan: "iq-max",
-  //     expire_at: new Date("2027-10-29"),
-  //   },
-  // },
+  "daud@student.com": {
+    password: "Daud123!",
+    data: {
+      name: "Daud",
+      email: "daud@student.com",
+      crm_id: 67890,
+      first_name: "Daud",
+      last_name: "Student",
+      status: "Active",
+      role: "student",
+      plan: "iq-max",
+      expire_at: new Date("2027-12-29"),
+    },
+  },
+  "kwame@coaching.com": {
+    password: "Password123!",
+    data: {
+      name: "Kwame Coaching",
+      email: "kwame@coaching.com",
+      crm_id: 11111,
+      first_name: "Kwame",
+      last_name: "Coaching",
+      status: "Active",
+      role: "student",
+      plan: "iq-max",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
+  "giuseppe@iqonic.vip": {
+    password: "Gp!7kW#mQ2x",
+    data: {
+      name: "Giuseppe",
+      email: "giuseppe@iqonic.vip",
+      crm_id: 22222,
+      first_name: "Giuseppe",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
+  "Simone@iqonic.vip": {
+    password: "Sm!9nR#vL4wK",
+    data: {
+      name: "Simone Iqonic",
+      email: "Simone@iqonic.vip",
+      crm_id: 33333,
+      first_name: "Simone",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
+  "Loris@iqonic.vip": {
+    password: "Lr@6tX#pJ8mZ",
+    data: {
+      name: "Loris Iqonic",
+      email: "Loris@iqonic.vip",
+      crm_id: 44444,
+      first_name: "Loris",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
+  "User@iqonic.vip": {
+    password: "Us#2bN!qH7cW",
+    data: {
+      name: "User Iqonic",
+      email: "User@iqonic.vip",
+      crm_id: 55555,
+      first_name: "User",
+      last_name: "Iqonic",
+      status: "Active",
+      role: "student",
+      plan: "iq-plus",
+      expire_at: new Date("2027-12-31"),
+    },
+  },
 };
 
 const AuthContext = createContext(null);
@@ -66,21 +122,6 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState(authHelper.getAuth());
   const [currentUser, setCurrentUser] = useState();
-  // const verify = async () => {
-  //   if (auth) {
-  //     try {
-  //       // const {
-  //       //   data: user
-  //       // } = await getUser();
-  //       if(auth?.token){
-  //         setCurrentUser(auth);
-  //       }
-  //     } catch {
-  //       saveAuth(undefined);
-  //       setCurrentUser(undefined);
-  //     }
-  //   }
-  // };
 
   const verify = async () => {
     try {
@@ -111,9 +152,6 @@ const AuthProvider = ({ children }) => {
         user: data.user,
       };
       saveAuth(auth);
-      // const {
-      //   data: user
-      // } = await getUser();
       dispatch(setToken(auth.token));
       setCurrentUser(auth?.user);
     } catch (error) {
@@ -141,15 +179,11 @@ const AuthProvider = ({ children }) => {
         role,
       });
 
-      // const { data } = await lmsApi.register(credentials);
       const authData = {
         token: auth.token,
         user: auth.user,
       };
       saveAuth(authData);
-      // const {
-      //   data: user
-      // } = await getUser();
       setCurrentUser(authData?.user);
     } catch (error) {
       saveAuth(undefined);
@@ -174,9 +208,6 @@ const AuthProvider = ({ children }) => {
       password_confirmation,
     });
   };
-  // const getUser = async () => {
-  //   return await axios.get(GET_USER_URL);
-  // };
   const logout = (dispatch) => {
     saveAuth(undefined);
     setCurrentUser(undefined);
@@ -194,17 +225,6 @@ const AuthProvider = ({ children }) => {
   ) => {
     if (testUsers[email] && testUsers[email].password === password) {
       try {
-        // const res = await clientCreateUpdate({
-        //   name: "Test user",
-        //   email: "test.student@yopmail.com",
-        //   crm_id: 12345,
-        //   first_name: "Test",
-        //   last_name: "User",
-        //   status: "active",
-        //   role: "student",
-        //   plan: "IQ Max",
-        //   expire_at: new Date("2027-10-29"),
-        // }).unwrap();
 
         const res = await clientCreateUpdate(testUsers[email].data).unwrap();
         const auth = {
@@ -230,7 +250,6 @@ const AuthProvider = ({ children }) => {
       }
     } else {
       try {
-        // Step 1: External Login
         const loginRes = await axios.get(
           "https://shield.iqonic.life/outerinfo.dhtml",
           {
@@ -240,13 +259,8 @@ const AuthProvider = ({ children }) => {
               distid: email,
               password: password,
             },
-            // headers: {
-            //   "api-key": API_KEY,
-            // },
           }
         );
-
-        // const loginData = await loginRes.json();
 
         if (loginRes?.data[0].error) {
           return {
@@ -255,7 +269,6 @@ const AuthProvider = ({ children }) => {
           };
         } else {
           let {
-            // userid,
             username,
             first,
             last,
@@ -266,54 +279,14 @@ const AuthProvider = ({ children }) => {
             plan,
           } = loginRes?.data[0];
 
-          // const {  } = loginRes?.data?.data;
-
-          // Step 2: Check Plan Expiry
-          // const isExpired = new Date(expiration) < new Date();
-          // const isExpired = new Date(expire_at) < new Date() ? status === "active" ? false : true : false;
-
           if (active === "Inactive") {
-            // Step 3: Get token and redirect
-            // const tokenRes = await fetch(
-            //   `https://api.iqonic.life/api/cb/outbound/iqverse/user/token?user_id=${userId}`,
-            //   {
-            //     method: "GET",
-            //     headers: {
-            //       "api-key": API_KEY,
-            //     },
-            //   }
-            // );
-
-            // const tokenRes = await axios.get(
-            //   "https://api.iqonic.life/api/cb/outbound/iqverse/user/token",
-            //   {
-            //     params: {
-            //       user_id: userId,
-            //     },
-            //     headers: {
-            //       "api-key": API_KEY,
-            //     },
-            //   }
-            // );
-            // const tokenData = await tokenRes.json();
-
-            // const token = tokenRes?.data?.data?.token;
-            // if (!token) {
-            //   return {
-            //     success: false,
-            //     error: "Token not received for subscription renewal.",
-            //   };
-            // }
             const { email } = loginRes?.data[0];
 
             const redirectUrl = `https://shield.iqonic.life/qiqonic/orderproducts.dhtml?alzq=1&username=${email}&site=iqonic&language=EN&setform=ordering.html&thisform=ordering.html&shipto=base&scountry=US&products=PLAN`;
             window.location.href = redirectUrl;
 
-            return { success: true, redirect: true }; // Optional success response before redirect
+            return { success: true, redirect: true };
           } else {
-            // ✅ Step 4: Plan active — create educator
-            // const [, ...rest] = name.trim().split(" ");
-            // const lastName = rest.join(" ");
 
             try {
               const { email } = loginRes?.data[0];
@@ -379,7 +352,6 @@ const AuthProvider = ({ children }) => {
         register,
         requestPasswordResetLink,
         changePassword,
-        // getUser,
         logout,
         verify,
         clientSignin,

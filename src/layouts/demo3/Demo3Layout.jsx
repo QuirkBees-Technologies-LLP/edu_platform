@@ -7,7 +7,6 @@ const Demo3Layout = () => {
     updateSettings
   } = useSettings();
 
-  // Using the custom hook to set multiple CSS variables and class properties
   useBodyClasses(`
     [--tw-page-bg:#f6f6f6]
     [--tw-page-bg-dark:var(--tw-coal-200)]
@@ -27,7 +26,6 @@ const Demo3Layout = () => {
     });
   }, []);
   return (
-    // Providing layout context and rendering the main content
     <Demo3LayoutProvider>
       <Main />
     </Demo3LayoutProvider>

@@ -1,6 +1,10 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState, useCallback } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import DraggableImageList from "@/components/ui/DraggableImageList";
+import DraggableLinkList from "@/components/ui/DraggableLinkList";
 import {
   Select,
   SelectContent,
@@ -8,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -27,18 +32,29 @@ import {
   useCreateAdminTradeAnalysisMutation,
   useUpdateAdminTradeAnalysisMutation,
 } from "../../../store/api/admin/adminTradeAnalysisApiSlice";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 
 const CreateTradeAnalysis = forwardRef(
   (
-    { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
+    {
+      setSelectedRow,
+      isCreateOpen,
+      handleCloseCreate,
+      selectedRow,
+      refetch,
+      // The insight this new one should chain from (Task 4.2's "Update" action, distinct
+      // from Edit). Only meaningful when selectedRow is empty — a chained insight is always
+      // a brand-new document, never an in-place edit.
+      chainFrom,
+      setChainFrom,
+    },
     ref
   ) => {
     const { auth } = useAuthContext();
     const [createAdminTradeAnalysis] = useCreateAdminTradeAnalysisMutation();
     const [updateAdminTradeAnalysis] = useUpdateAdminTradeAnalysisMutation();
     const createdBy = auth?.user?._id ?? null;
-    const { data } = useGetEducatorAcademyCategoryQuery();
+    const { data } = useGetCommonCategoryQuery();
 
     const initialValues = {
       title: "",
@@ -46,17 +62,24 @@ const CreateTradeAnalysis = forwardRef(
       createdBy: "",
       description: "",
       category: "",
-      url: "",
+      checkTime: false,
+      tradingViewLinks: [""],
     };
 
     const createSchema = Yup.object().shape({
       title: Yup.string().required("Title is required"),
-      files: Yup.array().min(1, "At least one file is required"),
+      files: Yup.array().test(
+        'files-or-links',
+        'At least one screenshot or TradingView link is required',
+        function (files) {
+          const tvLinks = this.parent.tradingViewLinks;
+          const hasLinks = tvLinks && tvLinks.filter(l => l && l.trim()).length > 0;
+          const hasFiles = files && files.length > 0;
+          return hasLinks || hasFiles;
+        }
+      ),
       createdBy: Yup.string().required("Educator ID is required"),
       description: Yup.string().required("Entry is required"),
-      url: Yup.string()
-        .url("Please enter a valid URL")
-        .optional("URL is required"),
       category: Yup.string().required("Category is required"),
     });
 
@@ -74,7 +97,26 @@ const CreateTradeAnalysis = forwardRef(
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
         formData.append("category", values.category);
-        formData.append("url", values.url);
+        formData.append("checkTime", values.checkTime);
+
+        // Append TradingView links (always send, even empty, so backend can clear old links)
+        const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
+        formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+
+        // Chained create (Task 4.2's "Update" action): link this brand-new insight back to
+        // the one it follows up on. Only applies when actually creating (not editing).
+        if (!selectedRow?._id && chainFrom?._id) {
+          formData.append("previousAnalysis", chainFrom._id);
+        }
+
+        // Send existing image URLs the user kept (so backend knows which to preserve)
+        if (selectedRow?._id) {
+          const keptImages = (values.files || [])
+            .filter((f) => !f?.file?.file && f?.dataURL)
+            .map((f) => f.dataURL);
+          formData.append("existingImages", JSON.stringify(keptImages));
+        }
+
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -91,6 +133,7 @@ const CreateTradeAnalysis = forwardRef(
             toast.success("IQ Insight created successfully!");
           }
           formik.resetForm();
+          setChainFrom?.(null);
           handleCloseCreate();
         } catch (err) {
           console.log(err);
@@ -115,16 +158,47 @@ const CreateTradeAnalysis = forwardRef(
             dataURL: img,
           })) || [];
 
+        // Backward compat: if old record has url but no tradingViewLinks, convert
+        let tvLinks = [""];
+        if (selectedRow?.tradingViewLinks?.length > 0) {
+          tvLinks = selectedRow.tradingViewLinks;
+        } else if (selectedRow?.url) {
+          tvLinks = [selectedRow.url];
+        }
+
         const initData = {
           title: selectedRow?.title,
           files: existingImages,
           description: selectedRow?.description,
           category: selectedRow?.category?._id,
-          url: selectedRow?.url,
+          checkTime: selectedRow?.isUpdatedAnalysis || false,
+          tradingViewLinks: tvLinks,
         };
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
+
+    // "Update" (chain) action: prefill text fields from the source insight so the admin
+    // isn't starting from scratch, but leave files empty — a follow-up insight naturally
+    // wants fresh charts, and the create endpoint (unlike update) has no mechanism to carry
+    // forward previously-uploaded image URLs without re-uploading them.
+    useEffect(() => {
+      if (!selectedRow?._id && chainFrom?._id) {
+        let tvLinks = [""];
+        if (chainFrom?.tradingViewLinks?.length > 0) {
+          tvLinks = chainFrom.tradingViewLinks;
+        }
+
+        formik.setValues({
+          title: chainFrom?.title || "",
+          files: [],
+          description: chainFrom?.description || "",
+          category: chainFrom?.category?._id || "",
+          checkTime: false,
+          tradingViewLinks: tvLinks,
+        });
+      }
+    }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
 
     // Handle multiple image selection
     const handleImageChange = (selectedFiles) => {
@@ -146,12 +220,43 @@ const CreateTradeAnalysis = forwardRef(
       formik.setFieldValue("files", newFiles);
     };
 
+    // Drag-and-drop reorder handlers
+    const handleReorderImages = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.files];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("files", items);
+    }, [formik.values.files]);
+
+    const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.tradingViewLinks];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("tradingViewLinks", items);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleLinkChange = useCallback((index, value) => {
+      const updated = [...formik.values.tradingViewLinks];
+      updated[index] = value;
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleRemoveLink = useCallback((index) => {
+      const updated = formik.values.tradingViewLinks.filter((_, i) => i !== index);
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleAddLink = useCallback(() => {
+      formik.setFieldValue("tradingViewLinks", [...(formik.values.tradingViewLinks || []), ""]);
+    }, [formik.values.tradingViewLinks]);
+
     return (
-      <>
+      <DndProvider backend={HTML5Backend}>
         <Dialog
           open={isCreateOpen}
           onOpenChange={() => {
             setSelectedRow({});
+            setChainFrom?.(null);
             formik.resetForm();
             handleCloseCreate();
           }}
@@ -160,8 +265,17 @@ const CreateTradeAnalysis = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader className="pb-5 pt-0 px-0">
               <DialogTitle>
-                {selectedRow?._id ? "Update IQ Insight" : " Create IQ Insight"}
+                {selectedRow?._id
+                  ? "Edit IQ Insight"
+                  : chainFrom?._id
+                    ? "Update IQ Insight"
+                    : "Create IQ Insight"}
               </DialogTitle>
+              {chainFrom?._id && !selectedRow?._id && (
+                <p className="text-xs text-gray-500 mt-1">
+                  This creates a new insight chained to “{chainFrom.title}”.
+                </p>
+              )}
             </DialogHeader>
             <div className="grid gap-5 px-0 pb-5">
               <div className="grid grid-cols-12 gap-4">
@@ -174,11 +288,10 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter Title"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.title && formik.touched.title
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("title")}
                     />
                     {formik.touched.title && formik.errors.title && (
@@ -213,31 +326,6 @@ const CreateTradeAnalysis = forwardRef(
                       )}
                   </div>
                 </div>
-
-                <div className="col-span-12">
-                  <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
-                      Url
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter url"
-                      autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.url && formik.touched.url
-                          ? "border border-danger"
-                          : ""
-                      }`}
-                      {...formik.getFieldProps("url")}
-                    />
-                    {formik.touched.url && formik.errors.url && (
-                      <span role="alert" className="text-danger text-xs mt-1">
-                        {formik.errors.url}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
                 <div className="col-span-12">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -275,6 +363,43 @@ const CreateTradeAnalysis = forwardRef(
                     )}
                   </div>
                 </div>
+
+                {selectedRow?._id && (
+                  <div className="col-span-12">
+                    <div className="flex items-center gap-2 h-full ">
+                      <Checkbox
+                        id="checkTime"
+                        checked={formik.values.checkTime}
+                        onCheckedChange={(checked) =>
+                          formik.setFieldValue("checkTime", checked)
+                        }
+                      />
+                      <label
+                        htmlFor="checkTime"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        Do Not Update TimeStamp
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* TradingView Links */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      TradingView Links
+                    </label>
+                    <DraggableLinkList
+                      links={formik.values.tradingViewLinks || [""]}
+                      onReorder={handleReorderLinks}
+                      onChange={handleLinkChange}
+                      onRemove={handleRemoveLink}
+                      onAdd={handleAddLink}
+                    />
+                  </div>
+                </div>
+
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
                     {/* Upload Box - always shown */}
@@ -290,11 +415,10 @@ const CreateTradeAnalysis = forwardRef(
                         >
                           <div
                             className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-            ${
-              formik.touched.files && formik.errors.files
-                ? "border-danger"
-                : "border-gray-200"
-            }`}
+            ${formik.touched.files && formik.errors.files
+                                ? "border-danger"
+                                : "border-gray-200"
+                              }`}
                           >
                             <i className="ki-filled ki-picture"></i>
                           </div>
@@ -302,27 +426,12 @@ const CreateTradeAnalysis = forwardRef(
                       )}
                     </ImageInput>
 
-                    {/* Show preview only if there are images */}
-                    {formik.values.files
-                      .filter((file) => !!file?.dataURL)
-                      .map((file, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={file.dataURL}
-                            alt="uploaded"
-                            className="rounded-lg border-2 border-success size-24 object-cover"
-                          />
-                          <div className="absolute -right-4 -top-4">
-                            <button
-                              type="button"
-                              className="btn btn-xs btn-icon rounded-full btn-danger"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <i className="ki-outline ki-cross"></i>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                    {/* Show preview with drag-and-drop reorder */}
+                    <DraggableImageList
+                      files={formik.values.files}
+                      onReorder={handleReorderImages}
+                      onRemove={handleRemoveImage}
+                    />
                   </div>
                   {formik.touched.files && formik.errors.files && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -337,6 +446,7 @@ const CreateTradeAnalysis = forwardRef(
                 className="btn btn-light"
                 onClick={() => {
                   setSelectedRow({});
+                  setChainFrom?.(null);
                   formik.resetForm();
                   handleCloseCreate();
                 }}
@@ -354,7 +464,7 @@ const CreateTradeAnalysis = forwardRef(
             </div>
           </DialogContent>
         </Dialog>
-      </>
+      </DndProvider>
     );
   }
 );

@@ -37,11 +37,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import SocialPostPrompt from "@/components/SocialPostPrompt";
+import CreatePostModal from "@/components/CreatePostModal";
 
 const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  const [isSocialPromptOpen, setIsSocialPromptOpen] = useState(false);
+  const [isSocialComposerOpen, setIsSocialComposerOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -108,7 +112,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
-            <MenuTitle>Edit</MenuTitle>
+            <MenuTitle>Update</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem onClick={handleDeleteOpen}>
@@ -193,7 +197,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           </div>
         ),
         meta: {
-          headerClassName: "min-w-[200px]",
+          headerClassName: "min-w-[100px]",
         },
       },
       {
@@ -216,7 +220,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
           );
         },
         meta: {
-          headerClassName: "w-[225px]",
+          headerClassName: "w-[100px]",
         },
       },
       {
@@ -268,6 +272,36 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
       {
+        accessorFn: (row) => row.createdAt,
+        id: "date",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Date" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => {
+          const value = info.row.original.createdAt;
+          if (!value) return <span className="text-gray-500">-</span>;
+          const parsed = new Date(value);
+          if (isNaN(parsed)) return <span className="text-gray-500">-</span>;
+          return (
+            <span>
+              {parsed.toLocaleString("en-US", {
+                timeZone: "America/Panama",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
+          );
+        },
+        meta: {
+          headerClassName: "min-w-[160px]",
+        },
+      },
+      {
         id: "click",
         header: () => "",
         enableSorting: false,
@@ -301,7 +335,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         },
       },
     ],
-    [isRTL]
+    [isRTL],
   );
 
   // Initialize search term from localStorage if available
@@ -385,6 +419,10 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
     setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
   };
   const [activeTab, setActiveTab] = useState("TableView");
+
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedEducator, setSelectedEducator] = useState("");
+  const [educatorsList, setEducatorsList] = useState([]);
 
   return (
     <div className="container-fluid pb-5">
@@ -477,7 +515,8 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             </ToolbarActions>
           </Toolbar>
           <DataGrid
-            key={tableKey}
+            key={category?._id || ""}
+            reloadTrigger={tableKey}
             serverSide={true}
             loading={isLoading}
             columns={columns}
@@ -512,6 +551,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
             selectedRow={selectedRow}
+            onSubmitSuccess={() => setIsSocialPromptOpen(true)}
           />
           {isDeleteOpen && (
             <DeleteAdminTradeIdeas
@@ -521,9 +561,64 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
               selectedRow={selectedRow}
             />
           )}
+
+          <SocialPostPrompt
+            isOpen={isSocialPromptOpen}
+            onClose={() => setIsSocialPromptOpen(false)}
+            onConfirm={() => {
+              setIsSocialPromptOpen(false);
+              setIsSocialComposerOpen(true);
+            }}
+          />
+
+          <CreatePostModal
+            isOpen={isSocialComposerOpen}
+            onClose={() => setIsSocialComposerOpen(false)}
+            editingPost={null}
+            showCategorySelector={false}
+          />
         </>
       )}
-      {activeTab === "UserView" && <AdminTradeCards />}
+      {activeTab === "UserView" && (
+        <>
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3 mb-5">
+            {/* Status Filter */}
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-3 py-2 bg-gray-800 text-white rounded"
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="win">Win</option>
+              <option value="loss">Loss</option>
+            </select>
+
+            {/* Educator Filter */}
+            <select
+              value={selectedEducator}
+              onChange={(e) => setSelectedEducator(e.target.value)}
+              className="px-3 py-2 bg-gray-800 text-white rounded"
+            >
+              <option value="">All Educators</option>
+              {educatorsList?.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Cards */}
+          <AdminTradeCards
+            selectedStatus={selectedStatus}
+            selectedEducator={selectedEducator}
+            setEducatorsList={setEducatorsList}
+          />
+        </>
+      )}
     </div>
   );
 };

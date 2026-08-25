@@ -30,12 +30,12 @@ const statusColorMap = {
   win: "blue",
   partialWin: "violet",
   loss: "red",
-  breakEven: "gray"  
+  breakEven: "gray",
 };
 const TradeUserView = [
   {
     _id: "687e23fae13aa9e329fad8ec",
-    name: "BTC/USD",
+    name: "BTCUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],
@@ -53,7 +53,7 @@ const TradeUserView = [
   },
   {
     _id: "d7f3e8c5d928d5a42d98d9a2",
-    name: "ETH/USD",
+    name: "ETHUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],
@@ -71,7 +71,7 @@ const TradeUserView = [
   },
   {
     _id: "23e234ae23b8df9485f7f9a7",
-    name: "XRP/USD",
+    name: "XRPUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],
@@ -89,7 +89,7 @@ const TradeUserView = [
   },
   {
     _id: "a4f3c0db7a2f6b7d98a6a5bb",
-    name: "SOL/USD",
+    name: "SOLUSD",
     image: [
       "https://edulms.blob.core.windows.net/trade-ideas-images/738dcdad-dd77-4351-a81d-54295a85bd7a-BTCUSDT.ecn_2025-07-21_13-26-25.png",
     ],
@@ -106,7 +106,11 @@ const TradeUserView = [
     createAt: "2025-07-21T11:40:30.746Z",
   },
 ];
-const AdminTradeCards = () => {
+const AdminTradeCards = ({
+  selectedStatus,
+  selectedEducator,
+  setEducatorsList,
+}) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [tradeIdeas, setTradeIdeas] = useState([]);
@@ -120,10 +124,24 @@ const AdminTradeCards = () => {
   //   page: page,
   //   limit: limit,
   // });
-  
+
   const { data: fetchData, isFetching } = useGetAdminWithoutTradeIdeasQuery({
     isview: false,
   });
+
+  useEffect(() => {
+    if (fetchData?.data) {
+      const unique = [
+        ...new Set(
+          fetchData.data.map(
+            (trade) =>
+              `${trade?.educatorDetails?.first_name} ${trade?.educatorDetails?.last_name}`,
+          ),
+        ),
+      ];
+      setEducatorsList(unique);
+    }
+  }, [fetchData]);
 
   // const totalPages = fetchData?.pagination?.totalPages || 1;
 
@@ -162,6 +180,17 @@ const AdminTradeCards = () => {
   const handleCloseView = () => {
     setIsViewOpen(false);
   };
+
+  const filteredTrades = fetchData?.data?.filter((trade) => {
+    const statusMatch = selectedStatus ? trade.status === selectedStatus : true;
+
+    const educatorMatch = selectedEducator
+      ? `${trade?.educatorDetails?.first_name} ${trade?.educatorDetails?.last_name}`.toLowerCase() ===
+        selectedEducator.toLowerCase()
+      : true;
+
+    return statusMatch && educatorMatch;
+  });
 
   return (
     <div className="container-fluid p-0">
@@ -245,7 +274,7 @@ const AdminTradeCards = () => {
           </div> */}
 
           <div className="grid grid-cols-12 gap-5 md:gap-6">
-            {fetchData?.data?.map((trade, index) => (
+            {filteredTrades?.map((trade, index) => (
               <div
                 key={trade._id}
                 className="col-span-12 sm:col-span-6 xl:col-span-4 card rounded-2xl overflow-hidden"
@@ -345,7 +374,8 @@ const AdminTradeCards = () => {
                       </span>
                     </div>
                     {[0, 1, 2].map((idx) => {
-                      const exitValue = trade?.exits?.[idx] ?? "N/A";
+                      const exitValue = trade?.exits?.[idx];
+                      if (!exitValue && exitValue !== 0) return null;
                       const fieldName = `Exit ${idx + 1}`;
 
                       return (
@@ -448,10 +478,10 @@ const AdminTradeCards = () => {
           selectedIdea={selectedIdea}
         />
         <ImageLightBox
-            isLightBoxOpen={isLightBoxOpen}
-            setIsLightBoxOpen={setIsLightBoxOpen}
-            selectedIdea={selectedIdea}
-          />
+          isLightBoxOpen={isLightBoxOpen}
+          setIsLightBoxOpen={setIsLightBoxOpen}
+          selectedIdea={selectedIdea}
+        />
       </div>
     </div>
   );

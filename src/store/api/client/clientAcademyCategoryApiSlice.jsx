@@ -11,10 +11,15 @@ export const clientAcademyCategoryApiSlice = createApi({
     getAcademySingleCategory: builder.query({
       query: (params) => {
         const searchParams = new URLSearchParams();
-        
+
         if (params?.language) searchParams.append("language", params.language);
         if (params?.startDate) searchParams.append("startDate", params.startDate);
         if (params?.endDate) searchParams.append("endDate", params.endDate);
+        if (params?.tradingType) searchParams.append("tradingType", params.tradingType);
+        if (params?.tradingMethod) searchParams.append("tradingMethod", params.tradingMethod);
+        if (params?.timeZone) searchParams.append("timeZone", params.timeZone);
+        if (params?.strategyId) searchParams.append("strategyId", params.strategyId);
+
         const queryString = searchParams.toString();
         return `/users/course/category/${params.id}${queryString ? `?${queryString}` : ''}`;
       },

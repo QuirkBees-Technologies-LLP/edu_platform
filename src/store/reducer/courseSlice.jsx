@@ -6,6 +6,9 @@ import {
   updateCourse,
   deleteCourse,
   reorderCourses as reorderCoursesApi,
+  getAllStrategies,
+  reorderStrategies as reorderStrategiesApi,
+  getAllMasterClasses,
 } from "@/services/lms.courses";
 import { getCourseByEducatorId } from "../../services/lms.courses";
 
@@ -23,10 +26,38 @@ export const fetchCourses = createAsyncThunk(
   async ({ params = {}, token }, { rejectWithValue }) => {
     try {
       const response = await getAllCourses(params, token);
-      return response.data;
+      return response?.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch courses"
+      );
+    }
+  }
+);
+
+export const fetchStrategies = createAsyncThunk(
+  "strategies/fetchAll",
+  async ({ params = {}, token }, { rejectWithValue }) => {
+    try {
+      const response = await getAllStrategies(params, token);
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch strategies"
+      );
+    }
+  }
+);
+
+export const fetchMasterClasses = createAsyncThunk(
+  "master-classes/fetchAll",
+  async ({ params = {}, token }, { rejectWithValue }) => {
+    try {
+      const response = await getAllMasterClasses(params, token);
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch master classes"
       );
     }
   }
@@ -37,7 +68,7 @@ export const fetchCoursesByEducatorId = createAsyncThunk(
   async ({ id, token }, { rejectWithValue }) => {
     try {
       const response = await getCourseByEducatorId(id, token);
-      return response.data;
+      return response?.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch courses"
@@ -51,7 +82,7 @@ export const fetchCourseById = createAsyncThunk(
   async ({ id, token }, { rejectWithValue }) => {
     try {
       const response = await getCourseById(id, token);
-      return response.data;
+      return response?.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch course"
@@ -65,7 +96,7 @@ export const createNewCourse = createAsyncThunk(
   async ({ courseData, token }, { rejectWithValue }) => {
     try {
       const response = await createCourse(courseData, token);
-      return response.data;
+      return response?.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to create course"
@@ -116,6 +147,20 @@ export const reorderCourses = createAsyncThunk(
   }
 );
 
+export const reorderStrategies = createAsyncThunk(
+  "strategies/reorder",
+  async ({ strategies, token }, { rejectWithValue }) => {
+    try {
+      const response = await reorderStrategiesApi(strategies, token);
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to reorder strategies"
+      );
+    }
+  }
+);
+
 const initialState = {
   courses: [],
   selectedCourse: null,
@@ -155,15 +200,55 @@ const courseSlice = createSlice({
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.status = COURSE_STATUS.SUCCEEDED;
-        state.courses = action.payload;
+        state.courses = action?.payload || [];
         state.pagination = {
           currentPage: 1,
-          limit: action.payload.length,
+          limit: action?.payload?.length || 0,
           totalPages: 1,
-          totalRecords: action.payload.length,
+          totalRecords: action?.payload?.length || 0,
         };
       })
       .addCase(fetchCourses.rejected, (state, action) => {
+        state.status = COURSE_STATUS.FAILED;
+        state.error = action.payload;
+      })
+
+      // Fetch All Strategies
+      .addCase(fetchStrategies.pending, (state) => {
+        state.status = COURSE_STATUS.LOADING;
+        state.error = null;
+      })
+      .addCase(fetchStrategies.fulfilled, (state, action) => {
+        state.status = COURSE_STATUS.SUCCEEDED;
+        state.courses = action?.payload || [];
+        state.pagination = {
+          currentPage: 1,
+          limit: action?.payload?.length || 0,
+          totalPages: 1,
+          totalRecords: action?.payload?.length || 0,
+        };
+      })
+      .addCase(fetchStrategies.rejected, (state, action) => {
+        state.status = COURSE_STATUS.FAILED;
+        state.error = action.payload;
+      })
+
+      // Fetch All Master Classes
+      .addCase(fetchMasterClasses.pending, (state) => {
+        state.status = COURSE_STATUS.LOADING;
+        state.error = null;
+      })
+      .addCase(fetchMasterClasses.fulfilled, (state, action) => {
+        state.status = COURSE_STATUS.SUCCEEDED;
+        state.courses = action?.payload || [];
+        state.pagination = {
+          currentPage: 1,
+          limit: action?.payload?.length || 0,
+          totalPages: 1,
+          totalRecords: action?.payload?.length || 0,
+        };
+      })
+      .addCase(fetchMasterClasses.rejected, (state, action) => {
         state.status = COURSE_STATUS.FAILED;
         state.error = action.payload;
       })
@@ -226,7 +311,7 @@ const courseSlice = createSlice({
       .addCase(updateExistingCourse.fulfilled, (state, action) => {
         state.status = COURSE_STATUS.SUCCEEDED;
         const index = state.courses.findIndex(
-          (course) => course._id === action.payload._id
+          (course) => course?._id === action?.payload?._id
         );
         if (index !== -1) {
           state.courses[index] = action.payload;
@@ -247,7 +332,7 @@ const courseSlice = createSlice({
       .addCase(deleteExistingCourse.fulfilled, (state, action) => {
         state.status = COURSE_STATUS.SUCCEEDED;
         state.courses = state.courses.filter(
-          (course) => course._id !== action.payload
+          (course) => course?._id !== action?.payload
         );
         state.pagination.totalRecords -= 1;
         state.pagination.totalPages = Math.ceil(
@@ -270,9 +355,9 @@ const courseSlice = createSlice({
         state.status = COURSE_STATUS.SUCCEEDED;
         // Update the order of courses in the state
         const newCourses = [...state.courses];
-        action.payload.forEach(({ id, order }) => {
-          const courseIndex = newCourses.findIndex(
-            (course) => course._id === id
+        action?.payload?.forEach(({ id, order }) => {
+          const courseIndex = newCourses?.findIndex(
+            (course) => course?._id === id
           );
           if (courseIndex !== -1) {
             newCourses[courseIndex] = {
@@ -287,6 +372,33 @@ const courseSlice = createSlice({
       .addCase(reorderCourses.rejected, (state, action) => {
         state.status = COURSE_STATUS.FAILED;
         state.error = action.payload;
+      })
+      // Reorder Strategies
+      .addCase(reorderStrategies.pending, (state) => {
+        state.status = COURSE_STATUS.LOADING;
+        state.error = null;
+      })
+      .addCase(reorderStrategies.fulfilled, (state, action) => {
+        state.status = COURSE_STATUS.SUCCEEDED;
+        // Update the order of strategies in the state
+        const newStrategies = [...state.courses];
+        action?.payload?.forEach(({ id, order }) => {
+          const strategyIndex = newStrategies?.findIndex(
+            (s) => s?._id === id
+          );
+          if (strategyIndex !== -1) {
+            newStrategies[strategyIndex] = {
+              ...newStrategies[strategyIndex],
+              order,
+            };
+          }
+        });
+        // Sort strategies by order and update state
+        state.courses = newStrategies?.sort((a, b) => a.order - b.order);
+      })
+      .addCase(reorderStrategies.rejected, (state, action) => {
+        state.status = COURSE_STATUS.FAILED;
+        state.error = action.payload;
       });
   },
 });
@@ -299,9 +411,9 @@ export const {
 } = courseSlice.actions;
 
 // Selectors
-export const selectAllCourses = (state) => state.courses.courses;
+export const selectAllCourses = (state) => state?.courses?.courses;
 export const selectCourseById = (id) => (state) =>
-  state.courses.courses.find((course) => course._id === id);
+  state?.courses?.courses?.find((course) => course?._id === id);
 export const selectSelectedCourse = (state) => state.courses.selectedCourse;
 export const selectCoursesStatus = (state) => state.courses.status;
 export const selectCoursesError = (state) => state.courses.error;

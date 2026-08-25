@@ -14,6 +14,7 @@ import {
   Eye,
 } from "lucide-react";
 import PropTypes from "prop-types";
+import { getEmbedUrl } from "@/utils/videoUtils";
 
 /**
  * Represents a draggable course card component.
@@ -32,6 +33,9 @@ const DraggableCourseCard = ({
   onMove,
   onDelete,
   onSelect,
+  onDragEnd,
+  activeTab,
+  hideMetadata,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -42,12 +46,19 @@ const DraggableCourseCard = ({
     title,
     description,
     imageUrl,
+    strategyBanner,
     category,
     published,
     tier,
     instructor,
     section,
-  } = course;
+    videoUrl,
+    isMasterClass,
+    isStrategies,
+  } = course || {};
+
+  // Use imageUrl (icon) only
+  const displayImage = imageUrl;
 
   // Fallback image URL
   const fallbackImage =
@@ -56,10 +67,13 @@ const DraggableCourseCard = ({
   // Drag and drop configuration
   const [{ isDragging }, drag] = useDrag({
     type: "COURSE_CARD",
-    item: { id: course._id, index },
+    item: { id: course?._id, index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: () => {
+      onDragEnd?.();
+    },
   });
 
   const [, drop] = useDrop({
@@ -122,28 +136,36 @@ const DraggableCourseCard = ({
   return (
     <div
       ref={ref}
-      className={`relative rounded-xl shadow-md overflow-hidden transition-all duration-300 ${
-        isDragging
-          ? "opacity-50 scale-105 rotate-1 shadow-xl"
-          : isHovered
-            ? "shadow-lg transform translate-y-[-4px]"
-            : "opacity-100 hover:shadow-lg"
-      }`}
+      className={`relative rounded-xl shadow-md overflow-hidden transition-all duration-300 ${isDragging
+        ? "opacity-50 scale-105 rotate-1 shadow-xl"
+        : isHovered
+          ? "shadow-lg transform translate-y-[-4px]"
+          : "opacity-100 hover:shadow-lg"
+        }`}
       role="article"
-      aria-label={`Course: ${title}`}
+      aria-label={`${activeTab === "courses" ? "Course" : "Strategy"}: ${title}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div onClick={handleSelect} className="cursor-pointer">
         {/** Thumbnail Section */}
         <div className="relative aspect-video overflow-hidden">
-          {imageUrl ? (
+          {videoUrl?.includes("dyntube.com") ? (
+            <iframe
+              src={getEmbedUrl(videoUrl)}
+              className="w-full h-full"
+              loading="lazy"
+              tabIndex={-1}
+              scrolling="no"
+              style={{ pointerEvents: "none", border: "none", overflow: "hidden" }}
+              title={title || ""}
+            />
+          ) : displayImage ? (
             <img
-              src={imageError ? fallbackImage : imageUrl}
+              src={imageError ? fallbackImage : displayImage}
               alt={title}
-              className={`w-full h-full object-cover transition-transform duration-500 ${
-                isHovered ? "scale-110" : ""
-              }`}
+              className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? "scale-110" : ""
+                }`}
               onError={handleImageError}
               loading="lazy"
             />
@@ -155,9 +177,8 @@ const DraggableCourseCard = ({
 
           {/* Overlay when hovered */}
           <div
-            className={`absolute inset-0 bg-black transition-opacity duration-300 ${
-              isHovered ? "bg-opacity-20" : "bg-opacity-0"
-            }`}
+            className={`absolute inset-0 bg-black transition-opacity duration-300 ${isHovered ? "bg-opacity-20" : "bg-opacity-0"
+              }`}
           >
             {isHovered && (
               <div className="absolute bottom-4 right-4 p-2 bg-white bg-opacity-90 rounded-full shadow-md animate-fadeIn">
@@ -178,23 +199,42 @@ const DraggableCourseCard = ({
           )}
         </div>
 
-        {/** Status Badges */}
-        <div className="absolute top-2 right-2 flex flex-col gap-2">
-          {tier === "PRO" && (
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
-              <Star className="w-3.5 h-3.5" />
-              <span>Pro</span>
+        {/** Status Badges — top right */}
+        {!hideMetadata && (
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
+            {tier === "PRO" && (
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
+                <Star className="w-3.5 h-3.5" />
+                <span>Pro</span>
+              </div>
+            )}
+            {published ? (
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
+                <Globe className="w-3.5 h-3.5" />
+                <span>Live</span>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
+                <Lock className="w-3 h-3" />
+                <span>Draft</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/** Content Type Badge — top left */}
+        <div className="absolute top-2 left-2">
+          {(activeTab === "strategies" || isStrategies === true) ? (
+            <div className="bg-green-800 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Strategy
             </div>
-          )}
-          {published ? (
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
-              <Globe className="w-3.5 h-3.5" />
-              <span>Live</span>
+          ) : (activeTab === "master-class" || isMasterClass === true) ? (
+            <div className="bg-yellow-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Masterclass
             </div>
           ) : (
-            <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 shadow-md transform transition-transform duration-200 hover:scale-105">
-              <Lock className="w-3 h-3" />
-              <span>Draft</span>
+            <div className="bg-blue-900 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Academy
             </div>
           )}
         </div>
@@ -209,42 +249,48 @@ const DraggableCourseCard = ({
               {section}
             </span>
           </div>
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-            {description}
-          </p>
+          {!hideMetadata && (
+            <>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                {description}
+              </p>
 
-          {/* Course metadata with improved styling */}
-          <div className="flex items-center gap-3 flex-wrap text-sm">
-            <div className="flex items-center gap-1.5 text-blue-600">
-              <Book className="w-4 h-4 text-primary shrink-0" />
-              <span className="font-medium text-primary">
-                {category?.name || "Uncategorized"}
-              </span>
-            </div>
+              {/* Course metadata with improved styling */}
+              <div className="flex items-center gap-3 flex-wrap text-sm">
+                {activeTab !== "strategies" && (
+                  <>
+                    <div className="flex items-center gap-1.5 text-blue-600">
+                      <Book className="w-4 h-4 text-primary shrink-0" />
+                      <span className="font-medium text-primary">
+                        {category?.name || "Uncategorized"}
+                      </span>
+                    </div>
 
-            <div className="h-4 w-px bg-gray-300"></div>
+                    <div className="h-4 w-px bg-gray-300"></div>
+                  </>
+                )}
 
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <Users className="w-4 h-4" />
-              <span>
-                {instructor?.first_name + " " + instructor?.last_name ||
-                  "Unknown Instructor"}
-              </span>
-            </div>
-          </div>
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <Users className="w-4 h-4" />
+                  <span>
+                    {(instructor?.first_name && instructor?.last_name) ? `${instructor.first_name} ${instructor.last_name}` : "Unknown Instructor"}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        {/** Action Buttons */}
+        {/** Action Buttons - Edit & Delete for all tabs */}
         <div
-          className={`absolute top-2 left-2 flex flex-col gap-2 transition-opacity duration-300 ${
-            isHovered ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute top-2 left-2 flex flex-col gap-2 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+            }`}
         >
           <button
             onClick={handleEdit}
             className="p-2.5 bg-primary rounded-full shadow-lg transition-all duration-200 hover:bg-primary-active hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title="Edit IQ Vault"
-            aria-label="Edit IQ Vault"
+            title={`Edit ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            aria-label={`Edit ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
           >
             <Edit2 className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>
@@ -252,8 +298,8 @@ const DraggableCourseCard = ({
           <button
             onClick={handleDelete}
             className="p-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl hover:scale-110 hover:rotate-12 group"
-            title="Delete IQ Vault"
-            aria-label="Delete IQ Vault"
+            title={`Delete ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
+            aria-label={`Delete ${activeTab === "courses" ? "Academy" : activeTab === "strategies" ? "Strategy" : "Master Class"}`}
           >
             <Trash className="w-5 h-5 text-white group-hover:animate-pulse" />
           </button>
@@ -262,9 +308,8 @@ const DraggableCourseCard = ({
 
       {/* Bottom border indicator */}
       <div
-        className={`h-1 w-full bg-gradient-to-r bg-primary to-indigo-600 transition-opacity duration-300 ${
-          isHovered ? "opacity-100" : "opacity-0"
-        }`}
+        className={`h-1 w-full bg-gradient-to-r bg-primary to-indigo-600 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+          }`}
       ></div>
     </div>
   );
@@ -273,10 +318,12 @@ const DraggableCourseCard = ({
 
 
 DraggableCourseCard.defaultProps = {
-  onEdit: () => {},
-  onMove: () => {},
-  onDelete: () => {},
-  onSelect: () => {},
+  onEdit: () => { },
+  onMove: () => { },
+  onDelete: () => { },
+  onSelect: () => { },
+  onDragEnd: () => { },
+  hideMetadata: false,
 };
 
 export default DraggableCourseCard;

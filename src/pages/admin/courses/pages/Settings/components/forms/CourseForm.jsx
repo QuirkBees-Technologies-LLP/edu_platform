@@ -79,13 +79,24 @@ const editCourseSchema = z.object({
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
+  // Normalize section: educator courses may use "Academy" instead of "IQ Academy"
+  const normalizeSection = (section) => {
+    if (!section) return "IQ Academy";
+    // Map "Academy" to "IQ Academy" so dropdown matches
+    if (section === "Academy") return "IQ Academy";
+    return section;
+  };
+
+  const normalizedSection = normalizeSection(initialData?.section);
+
   const [thumbnailPreview, setThumbnailPreview] = useState(
-    initialData?.imageUrl || null
+    initialData?.imageUrl || initialData?.strategyBanner || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
-  const { data } = useGetEducatorAcademyCategoryQuery();
+  const [sectionSelect, setSectionSelect] = useState(normalizedSection || "");
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetCoursesTypesQuery();
+  const { data } = useGetEducatorAcademyCategoryQuery(sectionSelect);
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
@@ -100,30 +111,48 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     watch,
   } = useForm({
     resolver: zodResolver(courseSchema),
-    defaultValues: initialData || {
-      title: "",
-      description: "",
-      imageFile: undefined,
-      category: "",
-      published: false,
-      isFeatured: false,
-      section: "",
-      language: "",
-      tier: "FREE",
-    },
+    defaultValues: initialData
+      ? {
+          title: initialData.title || "",
+          description: initialData.description || "",
+          imageFile: undefined,
+          category: initialData.category?._id || initialData.category || "",
+          published: initialData.published === true || initialData.published === "true",
+          isFeatured: initialData.isFeatured === true || initialData.isFeatured === "true",
+          section: normalizedSection,
+          language: initialData.language || "",
+          tier: initialData.tier || "FREE",
+        }
+      : {
+          title: "",
+          description: "",
+          imageFile: undefined,
+          category: "",
+          published: false,
+          isFeatured: false,
+          section: "IQ Academy",
+          language: "",
+          tier: "FREE",
+        },
   });
+
+
 
   useEffect(() => {
     if (initialData) {
-      if (initialData.imageUrl) {
-        setThumbnailPreview(initialData.imageUrl);
-        // setValue("imageFile", initialData.imageUrl);
+      const existingImage = initialData.imageUrl || initialData.strategyBanner;
+      if (existingImage) {
+        setThumbnailPreview(existingImage);
       }
-      if (initialData.category?._id) {
-        setValue("category", initialData.category._id);
+      // Set category when categories list is loaded
+      const catId = initialData?.category?._id || initialData?.category;
+      if (catId && data?.data?.length > 0) {
+        setValue("category", catId);
       }
+      // Set section to normalized value
+      setValue("section", normalizedSection);
     }
-  }, [initialData, setValue]);
+  }, [initialData, data, setValue, normalizedSection]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -140,6 +169,14 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 
   const selectedTier = watch("tier");
   const selectedSection = watch("section");
+  console.log("selectedSection", selectedSection);
+  useEffect(() => {
+    if (selectedSection) {
+      setSectionSelect(selectedSection);
+    } else {
+      setSectionSelect(""); // optional: ALL case
+    }
+  }, [selectedSection]);
   const selectedLanguage = watch("language");
   const submitHandler = async (data) => {
     const formData = new FormData();
@@ -157,8 +194,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     // Handle image file - required for new courses, optional for edits with existing image
     if (data.imageFile instanceof File && data.imageFile.size > 0) {
       formData.append("imageUrl", data.imageFile);
-    } else if (!initialData?.imageUrl) {
-      // Only require image for new courses
+    } else if (!initialData) {
+      // Only require image for new courses (not editing)
       console.error("No valid image file provided for new course");
       return;
     }
@@ -173,7 +210,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 
   return (
     <form
-      onSubmit={handleSubmit(submitHandler)}
+      onSubmit={handleSubmit(submitHandler, (formErrors) => {
+        console.error("Form validation errors:", formErrors);
+      })}
       className="space-y-6"
       encType="multipart/form-data"
     >
@@ -191,8 +230,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           placeholder="Enter course title"
           {...register("title")}
         />
-        {errors.title && (
-          <p className="text-sm text-red-600">{errors.title.message}</p>
+        {errors?.title && (
+          <p className="text-sm text-red-600">{errors?.title?.message}</p>
         )}
       </div>
 
@@ -209,8 +248,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           placeholder="Enter course description"
           {...register("description")}
         />
-        {errors.description && (
-          <p className="text-sm text-red-600">{errors.description.message}</p>
+        {errors?.description && (
+          <p className="text-sm text-red-600">{errors?.description?.message}</p>
         )}
       </div>
 
@@ -254,9 +293,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         )}
 
         {/* Error message for thumbnail */}
-        {errors.imageFile && (
+        {errors?.imageFile && (
           <p className="text-sm text-red-600 mt-2">
-            {errors.imageFile.message}
+            {errors?.imageFile?.message}
           </p>
         )}
       </div>
@@ -275,7 +314,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             render={({ field }) => (
               <Select
                 value={field.value}
-                onValueChange={field.onChange}
+                onValueChange={(value) => {
+                  field.onChange(value); // 👈 RHF update
+                }}
                 className={`form-control input input-md w-full ${errors.section ? "border border-danger" : ""}`}
               >
                 <SelectTrigger>
@@ -283,9 +324,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                 </SelectTrigger>
                 <SelectContent>
                   {courseTypesList?.data?.length > 0 ? (
-                    courseTypesList.data.map((type) => (
-                      <SelectItem key={type._id} value={type.name}>
-                        {type.name}
+                    courseTypesList?.data?.map((type) => (
+                      <SelectItem key={type?._id} value={type?.name}>
+                        {type?.name}
                       </SelectItem>
                     ))
                   ) : (
@@ -297,8 +338,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               </Select>
             )}
           />
-          {errors.section && (
-            <p className="text-sm text-red-600">{errors.section.message}</p>
+          {errors?.section && (
+            <p className="text-sm text-red-600">{errors?.section?.message}</p>
           )}
         </div>
 
@@ -316,16 +357,16 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <Select
                 value={field.value}
                 onValueChange={field.onChange}
-                className={`form-control input input-md w-full ${errors.language ? "border border-danger" : ""}`}
+                className={`form-control input input-md w-full ${errors.language ? "border border-danger " : ""}`}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
                   {languagesList?.data?.length > 0 ? (
-                    languagesList.data.map((lang) => (
-                      <SelectItem key={lang._id} value={lang.name}>
-                        {lang.name}
+                    languagesList?.data?.map((lang) => (
+                      <SelectItem key={lang?._id} value={lang?.name}>
+                        {lang?.name}
                       </SelectItem>
                     ))
                   ) : (
@@ -337,8 +378,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               </Select>
             )}
           />
-          {errors.language && (
-            <p className="text-sm text-red-600">{errors.language.message}</p>
+          {errors?.language && (
+            <p className="text-sm text-red-600">{errors?.language?.message}</p>
           )}
         </div>
       </div>
@@ -365,16 +406,16 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                 </SelectTrigger>
                 <SelectContent>
                   {data?.data?.map((item) => (
-                    <SelectItem key={item._id} value={item._id}>
-                      {item.name}
+                    <SelectItem key={item?._id} value={item?._id}>
+                      {item?.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             )}
           />
-          {errors.category && (
-            <p className="text-sm text-red-600">{errors.category.message}</p>
+          {errors?.category && (
+            <p className="text-sm text-red-600">{errors?.category?.message}</p>
           )}
         </div>
 
@@ -398,8 +439,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <SelectItem value="PREMIUM">Pro</SelectItem>
             </SelectContent>
           </Select>
-          {errors.tier && (
-            <p className="text-sm text-red-600">{errors.tier.message}</p>
+          {errors?.tier && (
+            <p className="text-sm text-red-600">{errors?.tier?.message}</p>
           )}
         </div>
       </div>

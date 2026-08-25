@@ -11,10 +11,11 @@ import { EventProvider } from "./chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "./ClientLiveSessionWrapper";
 import StreamWrapper from "../../admin/live-session/StreamWrapper";
 import { format } from "date-fns";
+import { isSafari } from "../../../utils/Devices";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
-const ClientViewLiveSession = ({ bannerImage, callId }) => {
+const ClientViewLiveSession = ({ bannerImage, callId, educatorData, headerGradient, feedContent, onStatusChange }) => {
   const [client, setClient] = useState(null);
 
   const [call, setCall] = useState(null);
@@ -48,12 +49,45 @@ const ClientViewLiveSession = ({ bannerImage, callId }) => {
       if (!token || client || isInitializing.current || !callId) return;
       isInitializing.current = true;
 
+      // const isSafariBrowser = isSafari();
       let newClient;
       try {
         newClient = new StreamVideoClient({ apiKey });
         await newClient.connectUser({ id: userId }, token); // Authenticate FIRST
+
+        // For Safari, add a delay to ensure WebRTC initialization completes
+        // if (isSafariBrowser) {
+        //   await new Promise((resolve) => setTimeout(resolve, 200));
+        // }
+
         const newCall = newClient.call("livestream", callId);
-        // await newCall.get(); // Verify call exists
+
+        // For Safari, use get() instead of getOrCreate to avoid reconnection issues
+        // if (isSafariBrowser) {
+        //   try {
+        //     await newCall.get();
+        //   } catch (getError) {
+        //     // If get() fails, fallback to getOrCreate
+        //     console.warn("[Safari] Call get() failed, using getOrCreate:", getError);
+        //     await newCall.getOrCreate({
+        //       data: {
+        //         settings: {
+        //           recording: {
+        //             mode: "available",
+        //             audio_only: false,
+        //             quality: "1080p",
+        //             layout: {
+        //               name: "single_participant",
+        //               options: {
+        //                 video_border_radius: "0",
+        //               },
+        //             },
+        //           },
+        //         },
+        //       },
+        //     });
+        //   }
+        // } else {
         await newCall.getOrCreate({
           data: {
             settings: {
@@ -65,16 +99,27 @@ const ClientViewLiveSession = ({ bannerImage, callId }) => {
                   name: "single_participant",
                   options: {
                     video_border_radius: "0",
+                    "participant.border_radius": "0px",
+                    "participant.video_border_rounded": false,
+                    "grid.margin": 0,
+                    "grid.cell_padding": 4,
                   },
                 },
               },
             },
           },
         });
+        // }
+
         setClient(newClient);
         setCall(newCall);
       } catch (err) {
         console.error("Stream init failed:", err);
+        // if (isSafariBrowser) {
+        //   console.error(
+        //     "[Safari] If connection issues persist, try refreshing the page."
+        //   );
+        // }
         if (newClient) await newClient.disconnectUser(); // Cleanup on failure
       } finally {
         isInitializing.current = false;
@@ -126,7 +171,14 @@ const ClientViewLiveSession = ({ bannerImage, callId }) => {
         </div>
       ) : ( */}
       <EventProvider>
-        <StreamWrapper call={call} callId={callId} bannerImage={bannerImage}>
+        <StreamWrapper
+          call={call}
+          callId={callId}
+          bannerImage={bannerImage}
+          educatorData={educatorData}
+          headerGradient={headerGradient}
+          feedContent={feedContent}
+        >
           <StreamTheme style={{ fontFamily: "sans-serif", color: "white" }}>
             {
               <ClientLiveSessionWrapper
@@ -134,6 +186,10 @@ const ClientViewLiveSession = ({ bannerImage, callId }) => {
                 client={client}
                 callId={callId}
                 token={token}
+                educatorData={educatorData}
+                headerGradient={headerGradient}
+                feedContent={feedContent}
+                onStatusChange={onStatusChange}
               />
             }
           </StreamTheme>

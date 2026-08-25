@@ -8,15 +8,17 @@ const TagInput = ({ value, onChange, touched, error }) => {
   const handleKeyDown = (e) => {
     if ((e.key === 'Enter' || e.key === ',') && input.trim()) {
       e.preventDefault();
-      if (!value.includes(input.trim())) {
-        onChange([...value, input.trim()]);
+      const safeValue = Array.isArray(value) ? value : [];
+      if (!safeValue.includes(input.trim())) {
+        onChange([...safeValue, input.trim()]);
         setInput('');
       }
     }
   };
 
   const removeTag = (index) => {
-    const newTags = value?.filter((_, i) => i !== index);
+    const safeValue = Array.isArray(value) ? value : [];
+    const newTags = safeValue.filter((_, i) => i !== index);
     onChange(newTags);
   };
 
@@ -25,7 +27,7 @@ const TagInput = ({ value, onChange, touched, error }) => {
       className={`w-full bg-light rounded-md px-3 py-2 flex flex-wrap items-center gap-2 border transition-colors duration-150 ${isFocused ? 'border-primary' : 'border-gray-300 hover:border-gray-400'
         } ${touched && error ? 'validation-error-border' : ''}`}
     >
-      {value?.map((tag, index) => (
+      {Array.isArray(value) && value.map((tag, index) => (
         <span
           key={index}
           className="bg-primary text-white text-sm px-3 py-1 rounded-xl flex items-center gap-1"

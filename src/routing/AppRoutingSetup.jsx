@@ -85,6 +85,7 @@ import AdminTradeIdeas from "../pages/admin/admin-trade-ideas/AdminTradeIdeas";
 import LiveSession from "../pages/admin/live-session/LiveSession";
 import ViewLiveSession from "../pages/admin/live-session/AdminLiveSessionView";
 import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionView";
+import AdminEducatorLiveSession from "../pages/admin/live-session/AdminEducatorLiveSession";
 import Courses from "../pages/admin/courses/Courses";
 import { EducatorDetailPage } from "../pages/educatorDetail";
 import ClientLiveSession from "../pages/student/client-live-session/ClientLiveSession";
@@ -128,7 +129,6 @@ import CommunityFeed from "../pages/student/iq-social/CommunityFeed";
 import IqAcademy from "../pages/student/iq-academy/IqAcademy";
 import IqEducators from "../pages/student/iq-educators/IqEducators";
 import IqAcademyEducators from "../pages/student/iq-academy-educators/IqAcademyEducators";
-import ForexAcademy from "../pages/student/client-dashboard/forex-academy/ForexAcademy";
 import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
 import PersonalIqInsight from "../pages/student/personal-iq-insight/PersonalIqInsight";
 import IqVault from "../pages/student/iq-vault/IqVault";
@@ -148,13 +148,41 @@ import Package from "../pages/admin/admin-package/Package";
 import AdminLogs from "../pages/admin/admin-Logs/AdminLogs";
 import Admin from "../pages/superAdmin/admin/Admin";
 import Task from "../pages/admin/task-management/Task";
-
+import AdminRating from "../pages/admin/admin-educator-rating/AdminRating";
+import EducatorRating from "../pages/educator/educator-rating/EducatoRating";
+import AdminEducatorRatings from "../pages/admin/admin-educator-rating/AdminEducatorRatings";
+import EducatorIqCrypto from "../pages/educator/educator-iq-crypto/EducatorIqCrypto";
+import IqCrypto from "../pages/student/iq-crypto/IqCrypto";
+import AdminIqCrypto from "../pages/admin/admin-iq-crypto/AdminIqCrypto";
+import EducatorLiveTradeIdeas from "../pages/educator/educator-live-trade-ideas/EducatorTradeIdeas";
+import AdminLiveTradeIdeas from "../pages/admin/admin-live-trade-ideas/AdminTradeIdeas";
+import ClientLiveIdeas from "../pages/student/client-live-ideas/ClientLiveIdeas";
+import TradingStrategies from "../pages/student/trading-strategies/TradingStrategies";
+import MasterClass from "../pages/educator/master-class/MasterClass";
+import TvWebhookSettings from "../pages/educator/educator-tv-webhook/TvWebhookSettings";
+import StudentMasterClass from "../pages/student/MasterClass/MasterClass.jsx";
+import MasterClassStudent from "../pages/student/MasterClass/MasterClassForStudent.jsx";
+import { IdeasLayout } from "../layouts/ideas/IdeasLayout";
+import StrategyAlerts from "../pages/student/strategy-alerts/StrategyAlerts";
+import AdminMetrixDashboard from "../pages/admin/admin-MetrixDashboard/AdminMetrixDashboard.jsx";
+import AdminTvWebhookPage from "../pages/admin/admin-tv-webhook/AdminTvWebhookPage";
+import StudentTradingSignals from "../pages/student/trading-signals/StudentTradingSignals";
+import LearningContentList from "../pages/admin/learning-content/LearningContentList";
+import LearningContentForm from "../pages/admin/learning-content/LearningContentForm";
+import LearningContentDetail from "../pages/admin/learning-content/LearningContentDetail";
 const routes = {
   student: [
     { path: "/", element: <DefaultPage /> },
     { path: "/live-session", element: <ClientLiveSession /> },
     { path: "/live-session/:callId", element: <ClientViewLiveSession /> },
-    { path: "/ideas", element: <ClientTradeIdeas /> },
+    {
+      element: <IdeasLayout />,
+      children: [
+        { path: "/ideas", element: <ClientTradeIdeas /> },
+        { path: "/live-ideas", element: <ClientLiveIdeas /> },
+        { path: "/iq-insight", element: <IqInsight /> },
+      ],
+    },
     { path: "/video-library", element: <VideoLibrary /> },
     { path: "/profile", element: <ClientProfile /> },
     { path: "/academy", element: <StudentLiveSessionCategory /> },
@@ -164,6 +192,8 @@ const routes = {
     { path: "/tranding-platform", element: <TrandingPlatform /> },
     { path: "/dashboard", element: <ClientDashboard /> },
     { path: "/recording-session", element: <RecordingSession /> },
+    { path: "/master-class", element: <MasterClassStudent /> },
+    { path: "/master-class/:id", element: <StudentMasterClass /> },
     {
       path: "/educator-recording-session/:id",
       element: <UserRecordingSession />,
@@ -174,16 +204,21 @@ const routes = {
     { path: "/iq-academy", element: <IqAcademy /> },
     { path: "/iq-educators/:id", element: <IqEducators /> },
     { path: "/iq-academy-educators", element: <IqAcademyEducators /> },
-    { path: "/forex-academy", element: <ForexAcademy /> },
     { path: "/personal-iq-insight", element: <PersonalIqInsight /> },
-    { path: "/iq-insight", element: <IqInsight /> },
+    { path: "/iq-crypto", element: <IqCrypto /> },
     { path: "/iq-social", element: <CommunityFeed /> },
+    { path: "/trading-strategies", element: <TradingStrategies /> },
+    { path: "/strategy-alerts", element: <StrategyAlerts /> },
+    { path: "/trading-signals", element: <StudentTradingSignals /> },
   ],
   educator: [
     { path: "/", element: <DefaultPage /> },
     { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
+    { path: "/educator/live-ideas", element: <EducatorLiveTradeIdeas /> },
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
-    { path: "/educator/courses", element: <Courses /> },
+    { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
+    { path: "/educator/courses", element: <Navigate to="/educator/master-class" replace /> },
+    { path: "/educator/master-class", element: <MasterClass /> },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/recordings", element: <EducatorRecording /> },
     {
@@ -212,10 +247,15 @@ const routes = {
       path: "/educator/iq-social",
       element: <EducatorCommunityFeed />,
     },
+    { path: "/educator/rating", element: <EducatorRating /> },
+    { path: "/educator/tv-webhook", element: <TvWebhookSettings /> },
+    { path: "/iq-educators/:id", element: <IqEducators /> },
   ],
   admin: [
     { path: "/", element: <DefaultPage /> },
+    { path: "/admin/metrix-dashboard", element: <AdminMetrixDashboard /> },
     { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/admin/live-ideas", element: <AdminLiveTradeIdeas /> },
     { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
     { path: "/admin/courses", element: <Courses /> },
     { path: "/admin/live-session", element: <LiveSession /> },
@@ -232,10 +272,22 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/ticket", element: <Task /> },
     // { path: "/admin/logs", element: <AdminLogs /> },
+    { path: "/admin/educator-rating", element: <AdminRating /> },
+    {
+      path: "/admin/educator-rating/:educatorId",
+      element: <AdminEducatorRatings />,
+    },
+    { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
+    { path: "/admin/tv-webhooks", element: <AdminTvWebhookPage /> },
+    { path: "/admin/learning-content", element: <LearningContentList /> },
+    { path: "/admin/learning-content/create", element: <LearningContentForm /> },
+    { path: "/admin/learning-content/:id", element: <LearningContentDetail /> },
+    { path: "/admin/learning-content/:id/edit", element: <LearningContentForm /> },
   ],
   super_admin: [
     { path: "/", element: <DefaultPage /> },
@@ -256,11 +308,23 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },
     { path: "/member", element: <Admin /> },
     { path: "/admin/ticket", element: <Task /> },
+    { path: "/admin/educator-rating", element: <AdminRating /> },
+    {
+      path: "/admin/educator-rating/:educatorId",
+      element: <AdminEducatorRatings />,
+    },
+    { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
+    { path: "/admin/tv-webhooks", element: <AdminTvWebhookPage /> },
+    { path: "/admin/learning-content", element: <LearningContentList /> },
+    { path: "/admin/learning-content/create", element: <LearningContentForm /> },
+    { path: "/admin/learning-content/:id", element: <LearningContentDetail /> },
+    { path: "/admin/learning-content/:id/edit", element: <LearningContentForm /> },
   ],
   marketer: [
     { path: "/", element: <DefaultPage /> },
@@ -281,6 +345,7 @@ const routes = {
     { path: "/admin/kpis", element: <EducatorKpi /> },
     { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
     { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
+    { path: "/admin/educator-live-session/:callId", element: <AdminEducatorLiveSession /> },
     { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
     { path: "/admin/package", element: <Package /> },
     { path: "/admin/logs", element: <AdminLogs /> },
@@ -289,7 +354,27 @@ const routes = {
 
 const getStudentRoutesByPlan = (plan) => {
   const allowedPaths = plan?.allowedSideBar || [];
-  return routes.student.filter((route) => allowedPaths.includes(route.path));
+  const alwaysAllowedRoutes = [
+    "/",
+    "/dashboard",
+    "/profile"
+  ];
+
+  return routes?.student?.reduce((acc, route) => {
+    if (route?.children) {
+      const allowedChildren = route?.children?.filter((child) =>
+        allowedPaths?.includes(child?.path) || alwaysAllowedRoutes?.includes(child?.path),
+      );
+      if (allowedChildren?.length > 0) {
+        acc.push({ ...route, children: allowedChildren });
+      }
+    } else {
+      if (allowedPaths?.includes(route?.path) || alwaysAllowedRoutes?.includes(route?.path)) {
+        acc.push(route);
+      }
+    }
+    return acc;
+  }, []);
 };
 
 const AppRoutingSetup = () => {
@@ -306,17 +391,29 @@ const AppRoutingSetup = () => {
 
   return (
     <Routes>
-      <Route element={<RequireAuth />}></Route>
+      <Route element={<RequireAuth />}>
+        {userRole === "student" && (
+          <Route index element={<Navigate to="/dashboard" replace />} />
+        )}
 
-      {userRole === "student" && (
-        <Route index element={<Navigate to="/dashboard" replace />} />
-      )}
-
-      {roleRoutes.map((route, index) => (
-        <Route key={index} element={<Demo1Layout />}>
-          <Route path={route.path} element={route.element} />
-        </Route>
-      ))}
+        {roleRoutes?.map((route, index) => (
+          <Route key={index} element={<Demo1Layout />}>
+            {route?.children ? (
+              <Route element={route?.element}>
+                {route?.children?.map((child, childIndex) => (
+                  <Route
+                    key={childIndex}
+                    path={child?.path}
+                    element={child?.element}
+                  />
+                ))}
+              </Route>
+            ) : (
+              <Route path={route?.path} element={route?.element} />
+            )}
+          </Route>
+        ))}
+      </Route>
 
       {/* {roleRoutes.map((route, index) => (
         <Route key={index} element={<RequireAuth />}>
@@ -332,6 +429,7 @@ const AppRoutingSetup = () => {
       <Route path="error/*" element={<ErrorsRouting />} />
       <Route path="auth/*" element={<AuthPage />} />
       {/* <Route path="*" element={<Navigate to="/error/404" />} /> */}
+
       <Route
         path="*"
         element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />}

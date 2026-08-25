@@ -46,7 +46,7 @@ const SidebarMenu = () => {
         modifiers: [{
           name: 'offset',
           options: {
-            offset: isRTL() ? [10, 14] : [-10, 14] // [skid, distance]
+            offset: isRTL() ? [10, 14] : [-10, 14]
           }
         }]
       }}>

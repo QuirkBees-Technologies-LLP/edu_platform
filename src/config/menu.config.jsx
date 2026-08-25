@@ -1,24 +1,27 @@
 import {
+  LayoutDashboard,
   BookOpen,
   CalendarClock,
-  ChartCandlestick,
-  CircleDot,
-  Clapperboard,
-  Layers,
-  LayoutDashboard,
-  Lightbulb,
   PlayCircle,
+  CircleDot,
+  ChartCandlestick,
   User,
-  Dot,
-  School,
-  Tv,
-  ChartLine,
-  ChartNoAxesCombined,
-  MessageCircleMore,
   ChartSpline,
   Package,
-  UserRoundCog,
+  Layers,
+  MessageCircleMore,
   ListTodo,
+  Star,
+  BadgeCent,
+  Lightbulb,
+  ChartNoAxesCombined,
+  Dot,
+  UserRoundCog,
+  GraduationCap,
+  School,
+  MonitorPlay,
+  Clapperboard,
+  ChartLine,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1305,7 +1308,6 @@ export const ADMIN_MENU = [
   },
 ];
 
-// utils/filterStudentSidebar.js
 export const filterSidebarByPlan = (sidebarItems = [], allowedPaths = []) => {
   return sidebarItems
     .map((item) => {
@@ -1336,12 +1338,18 @@ export const sideMenus = {
       title: "Academy",
       icon: <BookOpen />,
       path: "/admin/courses",
+      children: [
+        {
+          title: "Page Headers",
+          icon: <Dot />,
+          path: "/admin/learning-content",
+        },
+      ],
     },
 
     {
       title: "IQ Live",
       icon: <CalendarClock />,
-      // path: "/admin/stream-schedule",
       children: [
         {
           title: "Live Schedule",
@@ -1359,27 +1367,49 @@ export const sideMenus = {
           path: "/admin/live-session",
         },
         {
-          title: "Ended Sessions ",
+          title: "Ended Sessions",
           icon: <PlayCircle />,
           path: "/admin/ended-live-sessions",
+        },
+        {
+          title: "Recorded Sessions",
+          icon: <CircleDot />,
+          path: "/admin/stream-recording",
         },
       ],
     },
 
     {
-      title: "Recorded Live",
-      icon: <CircleDot />,
-      path: "/admin/stream-recording",
-    },
-    {
-      title: "IQ Insight",
-      icon: <ChartCandlestick />,
-      path: "/admin/trade-analysis",
-    },
-    {
-      title: "IQ Ideas",
+      title: "IQ Ideas & Insights",
       icon: <Lightbulb />,
-      path: "/admin/ideas",
+      children: [
+        {
+          title: "Ideas",
+          icon: <Dot />,
+          path: "/admin/ideas",
+        },
+        {
+          title: "Insights",
+          icon: <Dot />,
+          path: "/admin/trade-analysis",
+        },
+        {
+          title: "Live Ideas",
+          icon: <Dot />,
+          path: "/admin/live-ideas",
+        },
+      ],
+    },
+    {
+      title: "IQ Strategies Alerts",
+      icon: <ChartLine />,
+      path: "/admin/tv-webhooks",
+    },
+
+    {
+      title: "IQ Crypto Projects",
+      icon: <BadgeCent />,
+      path: "/admin/iq-crypto",
     },
     {
       title: "IQ Strategies",
@@ -1400,28 +1430,22 @@ export const sideMenus = {
       path: "/admin/educators",
     },
     {
+      title: "Educator Ratings",
+      icon: <Star />,
+      path: "/admin/educator-rating",
+    },
+    {
       title: "Members",
       icon: <UserRoundCog />,
       path: "/member",
     },
-    // {
-    //   title: 'Video Library',
-    //   icon: <Clapperboard />,
-    //   path: '/admin/video-library'
-    // },
-    // {
-    //   title: 'Academy Category',
-    //   icon: <Layers />,
-    //   path: '/admin/academy-category'
-    // },
-
     {
       title: "KPIs",
       icon: <ChartSpline />,
       path: "/admin/kpis",
     },
     {
-      title: "Package",
+      title: "SKUs",
       icon: <Package />,
       path: "/admin/package",
     },
@@ -1442,7 +1466,7 @@ export const sideMenus = {
       path: "/admin/logs",
     },
     {
-      title: "tickets",
+      title: "Tickets",
       icon: <ListTodo />,
       path: "/admin/ticket",
     },
@@ -1453,16 +1477,27 @@ export const sideMenus = {
       icon: <LayoutDashboard />,
       path: "/",
     },
+    // {
+    //   title: "Admin Dashboard",
+    //   icon: <LayoutDashboard />,
+    //   path: "/admin/metrix-dashboard",
+    // },
     {
       title: "Academy",
       icon: <BookOpen />,
       path: "/admin/courses",
+      children: [
+        {
+          title: "Page Headers",
+          icon: <Dot />,
+          path: "/admin/learning-content",
+        },
+      ],
     },
 
     {
       title: "IQ Live",
       icon: <CalendarClock />,
-      // path: "/admin/stream-schedule",
       children: [
         {
           title: "Live Schedule",
@@ -1480,63 +1515,61 @@ export const sideMenus = {
           path: "/admin/live-session",
         },
         {
-          title: "Ended Sessions ",
+          title: "Ended Sessions",
           icon: <PlayCircle />,
           path: "/admin/ended-live-sessions",
+        },
+        {
+          title: "Recorded Sessions",
+          icon: <CircleDot />,
+          path: "/admin/stream-recording",
         },
       ],
     },
 
     {
-      title: "Recorded Live",
-      icon: <CircleDot />,
-      path: "/admin/stream-recording",
-    },
-    {
-      title: "IQ Insight",
-      icon: <ChartCandlestick />,
-      path: "/admin/trade-analysis",
-    },
-    {
-      title: "IQ Ideas",
+      title: "IQ Ideas & Insights",
       icon: <Lightbulb />,
-      path: "/admin/ideas",
-    },
-    {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
       children: [
         {
-          title: "IQ Charts",
+          title: "Ideas",
           icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
+          path: "/admin/ideas",
+        },
+        {
+          title: "Insights",
+          icon: <Dot />,
+          path: "/admin/trade-analysis",
+        },
+        {
+          title: "Live Ideas",
+          icon: <Dot />,
+          path: "/admin/live-ideas",
         },
       ],
+    },
+    {
+      title: "IQ Strategies Alerts",
+      icon: <ChartLine />,
+      path: "/admin/tv-webhooks",
     },
     {
       title: "Educators",
       icon: <User />,
       path: "/admin/educators",
     },
-    // {
-    //   title: 'Video Library',
-    //   icon: <Clapperboard />,
-    //   path: '/admin/video-library'
-    // },
-    // {
-    //   title: 'Academy Category',
-    //   icon: <Layers />,
-    //   path: '/admin/academy-category'
-    // },
+    {
+      title: "Educator Ratings",
+      icon: <Star />,
+      path: "/admin/educator-rating",
+    },
     {
       title: "KPIs",
       icon: <ChartSpline />,
       path: "/admin/kpis",
     },
     {
-      title: "Package",
+      title: "SKUs",
       icon: <Package />,
       path: "/admin/package",
     },
@@ -1552,10 +1585,11 @@ export const sideMenus = {
       path: "/admin/iq-social",
     },
     {
-      title: "tickets",
-      icon: <ListTodo/>,
+      title: "Tickets",
+      icon: <ListTodo />,
       path: "/admin/ticket",
     },
+
   ],
   marketer: [
     {
@@ -1568,88 +1602,16 @@ export const sideMenus = {
       icon: <BookOpen />,
       path: "/admin/courses",
     },
-
-    // {
-    //   title: "IQ Live",
-    //   icon: <CalendarClock />,
-    //   // path: "/admin/stream-schedule",
-    //   children: [
-    //     {
-    //       title: "Live Schedule",
-    //       icon: <CalendarClock />,
-    //       path: "/admin/stream-schedule",
-    //     },
-    //     {
-    //       title: "Ended Schedule",
-    //       icon: <CalendarClock />,
-    //       path: "/admin/educator-ended-schedule",
-    //     },
-    //     {
-    //       title: "Live Sessions",
-    //       icon: <PlayCircle />,
-    //       path: "/admin/live-session",
-    //     },
-    //     {
-    //       title: "Ended Sessions ",
-    //       icon: <PlayCircle />,
-    //       path: "/admin/ended-live-sessions",
-    //     },
-    //   ],
-    // },
-
     {
       title: "Recorded Live",
       icon: <CircleDot />,
       path: "/admin/stream-recording",
     },
-    // {
-    //   title: "IQ Insight",
-    //   icon: <ChartCandlestick />,
-    //   path: "/admin/trade-analysis",
-    // },
-    // {
-    //   title: "IQ Ideas",
-    //   icon: <Lightbulb />,
-    //   path: "/admin/ideas",
-    // },
-    // {
-    //   title: "IQ Strategies",
-    //   icon: <ChartNoAxesCombined />,
-    //   children: [
-    //     {
-    //       title: "IQ Charts",
-    //       icon: <Dot />,
-    //       path: "https://www.iqcharts.com/",
-    //       externalLink: true,
-    //       newTab: true,
-    //     },
-    //   ],
-    // },
     {
       title: "Educators",
       icon: <User />,
       path: "/admin/educators",
     },
-    // {
-    //   title: 'Video Library',
-    //   icon: <Clapperboard />,
-    //   path: '/admin/video-library'
-    // },
-    // {
-    //   title: 'Academy Category',
-    //   icon: <Layers />,
-    //   path: '/admin/academy-category'
-    // },
-    // {
-    //   title: "KPIs",
-    //   icon: <ChartSpline />,
-    //   path: "/admin/kpis",
-    // },
-    // {
-    //   title: "Package",
-    //   icon: <Package />,
-    //   path: "/admin/package",
-    // },
     {
       title: "General Setting",
       icon: <Layers />,
@@ -1661,11 +1623,6 @@ export const sideMenus = {
       icon: <MessageCircleMore />,
       path: "/admin/iq-social",
     },
-    // {
-    //   title: "Logs",
-    //   icon: <MessageCircleMore />,
-    //   path: "/admin/logs",
-    // },
   ],
   educator: [
     {
@@ -1674,15 +1631,14 @@ export const sideMenus = {
       path: "/",
     },
     {
-      title: "Academy",
-      icon: <BookOpen />,
-      path: "/educator/courses",
+      title: "Masterclasses",
+      icon: <GraduationCap />,
+      path: "/educator/master-class",
     },
 
     {
       title: "IQ Live",
       icon: <CalendarClock />,
-      // path: "/admin/stream-schedule",
       children: [
         {
           title: "Live Schedule",
@@ -1722,45 +1678,27 @@ export const sideMenus = {
       path: "/educator/ideas",
     },
     {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
-      children: [
-        {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
-        },
-      ],
+      title: "IQ Live Ideas",
+      icon: <Lightbulb />,
+      path: "/educator/live-ideas",
     },
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/educator/iq-social",
     },
-    // {
-    //   title: 'Video Library',
-    //   icon: <Clapperboard />,
-    //   path: '/educator/video-library'
-    // },
-    // {
-    //   title: 'Community Feed',
-    //   icon: <LayoutDashboard />,
-    //   path: '/community-feed'
-    // },
+    {
+      title: "Educator Ratings",
+      icon: <Star />,
+      path: "/educator/rating",
+    },
   ],
   student: [
     {
-      title: "Dashboard",
+      title: "Home",
       icon: <LayoutDashboard />,
-      // path: '/dashboard',
+      path: '/dashboard',
       children: [
-        {
-          title: "Home",
-          icon: <Dot />,
-          path: "/dashboard",
-        },
         {
           title: "Fast Start Training",
           icon: <Dot />,
@@ -1771,98 +1709,69 @@ export const sideMenus = {
     {
       title: "Academy",
       icon: <School />,
-      path: "/iq-vault",
-    },
-    {
-      title: "IQ Live",
-      icon: <LayoutDashboard />,
-      // path: '/dashboard',
+      path: '/iq-vault',
       children: [
         {
-          title: "Live Sessions",
+          title: "Masterclasses",
           icon: <Dot />,
-          path: "/iq-academy",
+          path: "/master-class",
         },
+      ],
+    },
+
+    {
+      title: "Live Streams",
+      icon: <MonitorPlay />,
+      path: "/iq-academy",
+      children: [
         {
           title: "Educators",
           icon: <Dot />,
           path: "/iq-academy-educators",
         },
+
       ],
     },
     {
-      title: "IQ Insight",
-      icon: <ChartLine />,
-      path: "/iq-insight",
-    },
-    {
-      title: "IQ Ideas",
+      title: "Ideas & Insights",
       icon: <Lightbulb />,
-      path: "/ideas",
+      path: "/ideas"
     },
-
-    // {
-    //   title: 'IQ Academy',
-    //   icon: <Tv />,
-    //   path: '/iq-academy',
-    // },
-    // {
-    //   title: 'IQ Academy Educators',
-    //   icon: <Dot />,
-    //   path: '/iq-academy-educators'
-    // },
-    // {
-    //   title: 'IQ Educators',
-    //   icon: <Dot />,
-    //   path: '/iq-educators'
-    // },
-    // {
-    //   title: 'IQ Vault',
-    //   icon: <Clapperboard />,
-    //   path: '/video-library'
-    // },
-    // {
-    //   title: 'IQ Academy',
-    //   icon: <PlayCircle />,
-    //   path: '/academy'
-    // },
-    // {
-    //   title: "IQ Strategies",
-    //   icon: <School />,
-    //   path: "/iq-strategies",
-    // },
     {
-      title: "IQ Strategies",
+      title: 'IQ Vault',
+      icon: <Clapperboard />,
+      path: '/video-library'
+    },
+    {
+      title: "Strategies",
       icon: <ChartNoAxesCombined />,
+      path: "/trading-strategies",
       children: [
+        // {
+        //   title: "Strategy Alerts",
+        //   icon: <Dot />,
+        //   path: "/strategy-alerts",
+        // },
         {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
+          title: "Strategy Access",
+          icon: <ChartNoAxesCombined />,
+          path: "https://shield.iqonic.life/news.dhtml?usepage=ScannerAccess.html",
           externalLink: true,
           newTab: true,
+
         },
       ],
+    },
+    {
+      title: "IQ Strategies Alerts",
+      icon: <ChartLine />,
+      path: "/trading-signals",
     },
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/iq-social",
     },
-    // {
-    //   title: "IQ Social",
-    //   icon: <MessageCircleMore />,
-    //   path: '/iq-social',
-    // },
-    // {
-    //   title: 'Forex Academy',
-    //   icon: <Dot />,
-    //   path: '/forex-academy'
-    // },
-    // {
-    //   title: 'Personal IQ Insight',
-    //   icon: <Dot />,
-    //   path: '/personal-iq-insight'
-    // },
+
   ],
 };
