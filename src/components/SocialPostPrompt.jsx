@@ -26,14 +26,14 @@ const SocialPostPrompt = ({ isOpen, onClose, onConfirm }) => {
         <div className="flex items-center justify-center gap-3">
           <button
             type="button"
-            className="btn btn-light min-w-[100px]"
+            className="btn btn-light inline-flex items-center justify-center min-w-[100px] leading-none"
             onClick={onClose}
           >
             No
           </button>
           <button
             type="button"
-            className="btn btn-primary min-w-[100px]"
+            className="btn btn-primary inline-flex items-center justify-center min-w-[100px] leading-none"
             onClick={onConfirm}
           >
             Yes, post it

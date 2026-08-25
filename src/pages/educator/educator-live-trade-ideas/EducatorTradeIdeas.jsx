@@ -638,6 +638,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             isOpen={isSocialComposerOpen}
             onClose={() => setIsSocialComposerOpen(false)}
             editingPost={null}
+            showCategorySelector={false}
           />
         </>
       )}

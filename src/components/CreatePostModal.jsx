@@ -46,7 +46,11 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { isJwtExpiredError, handleJwtExpired } from "@/utils/authUtils";
 
-const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
+// showCategorySelector: the real social-feed composer (EducatorCommunityFeed) lets the
+// author pick a category; the "share this update as a post" composer opened from the
+// Idea/Live Idea update flow doesn't need that choice — it always posts as "General
+// Updates" — so callers there pass showCategorySelector={false}.
+const CreatePostModal = ({ isOpen, onClose, editingPost = null, showCategorySelector = true }) => {
   const dispatch = useDispatch();
   const { auth } = useAuthContext();
   const createStatus = useSelector(selectCreateEducatorPostStatus);
@@ -439,11 +443,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     }
   };
 
-  const categories = [
-    "General Updates",
-    "Analysis Updates",
-  ];
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="p-5 max-w-[800px]">
@@ -512,26 +511,27 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                 </div>
               </div>
 
-              {/* Category Selection */}
-              <div className="flex items-center gap-2">
-                <FolderOpen size={16} className="text-gray-500" />
-                <Select
-                  value={category}
-                  onValueChange={(value) => setCategory(value)}
-                  defaultValue={category}
-                >
-                  <SelectTrigger className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {showCategorySelector && (
+                <div className="flex items-center gap-2">
+                  <FolderOpen size={16} className="text-gray-500" />
+                  <Select
+                    value={category}
+                    onValueChange={(value) => setCategory(value)}
+                    defaultValue={category}
+                  >
+                    <SelectTrigger className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["General Updates", "Analysis Updates"].map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* Content Textarea */}
