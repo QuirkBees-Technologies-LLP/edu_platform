@@ -297,9 +297,11 @@ const CreateTradeIdeas = forwardRef(
       <DndProvider backend={HTML5Backend}>
       <Dialog
         open={isCreateOpen}
+        // Closing the dialog (outside click, Escape, the X button) must NOT clear the
+        // form — only the explicit Cancel button does that. selectedRow is still reset
+        // here since it tracks edit-vs-create mode, not the form's field values.
         onOpenChange={() => {
           setSelectedRow({});
-          formik.resetForm();
           handleCloseCreate();
         }}
       >
