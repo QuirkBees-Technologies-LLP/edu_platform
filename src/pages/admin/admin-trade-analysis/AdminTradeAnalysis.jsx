@@ -41,6 +41,15 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  // Whether the create dialog should open in "Update" (chain) mode rather than plain
+  // create/edit. Deliberately just a boolean, not "which row to chain from" — ActionMenu()
+  // is invoked with no arguments and closes over this component's scope, but that closure
+  // gets frozen inside the `columns` useMemo (deps: [isRTL], which never changes), so any
+  // *state value* it reads (like selectedRow) is permanently stuck at whatever it was on
+  // first render. Booleans set via a stable setter are unaffected by that staleness — only
+  // reading a value back out of the closure is. The actual row to chain from is derived
+  // below, in the component's normal (non-frozen) render, where selectedRow is always current.
+  const [isChainMode, setIsChainMode] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [category, setCategory] = useState(null);
   const [getAdminTradeAnalysis, { data, isLoading, refetch }] =
@@ -99,12 +108,34 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
   const ActionMenu = () => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem
+          onClick={() => {
+            setIsChainMode(false);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
             <MenuTitle>Edit</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            // Update = create a brand-new, chained insight — never mutate this row. Only
+            // flip a boolean here (see isChainMode's declaration for why) — the actual
+            // source row is derived from the live selectedRow where CreateTradeAnalysis
+            // is rendered below, not read here.
+            setIsChainMode(true);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="arrow-circle-right" />
+            </MenuIcon>
+            <MenuTitle>Update</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem onClick={handleDeleteOpen}>
@@ -279,6 +310,7 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
   };
 
   const handleCloseCreate = () => {
+    setIsChainMode(false);
     setIsCreateOpen(false);
   };
 
@@ -405,7 +437,12 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
           refetch={reloadTable}
           isCreateOpen={isCreateOpen}
           setIsCreateOpen={setIsCreateOpen}
-          selectedRow={selectedRow}
+          // selectedRow is read live here (this JSX isn't frozen by the columns useMemo the
+          // way ActionMenu() is), so it's always the row the toggle most recently set —
+          // isChainMode just decides which of these two props it becomes.
+          selectedRow={isChainMode ? {} : selectedRow}
+          chainFrom={isChainMode ? selectedRow : null}
+          setChainFrom={() => setIsChainMode(false)}
         />
 
         {isDeleteOpen && (

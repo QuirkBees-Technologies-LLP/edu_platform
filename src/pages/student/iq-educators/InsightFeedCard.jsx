@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { Eye, ChevronLeft, ChevronRight, ChartLine } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, ChartLine, Link2 } from "lucide-react";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
 
@@ -34,6 +34,21 @@ const InsightFeedCard = ({ insight }) => {
   return (
     <>
       <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35]">
+        {/* Thread indicator: this insight is a chained follow-up to a previous one */}
+        {insight?.previousAnalysis && (
+          <div className="mb-2">
+            <div className="flex items-center gap-1.5 px-1 text-[11px] text-slate-500 dark:text-white/50">
+              <Link2 size={11} className="flex-shrink-0" />
+              <span className="truncate">
+                Follow-up to{" "}
+                <span className="font-semibold text-slate-700 dark:text-white/80">
+                  {insight.previousAnalysis.title}
+                </span>
+              </span>
+            </div>
+            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
+          </div>
+        )}
         {/* Header: educator */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">

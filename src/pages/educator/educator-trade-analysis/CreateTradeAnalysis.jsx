@@ -38,7 +38,18 @@ import { isDyntubeUrl, getEmbedUrl } from "@/utils/videoUtils";
 
 const CreateTradeAnalysis = forwardRef(
   (
-    { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
+    {
+      setSelectedRow,
+      isCreateOpen,
+      handleCloseCreate,
+      selectedRow,
+      refetch,
+      // The insight this new one should chain from (Task 4.2's "Update" action, distinct
+      // from Edit). Only meaningful when selectedRow is empty — a chained insight is always
+      // a brand-new document, never an in-place edit.
+      chainFrom,
+      setChainFrom,
+    },
     ref
   ) => {
     const { auth } = useAuthContext();
@@ -99,6 +110,12 @@ const CreateTradeAnalysis = forwardRef(
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
 
+        // Chained create (Task 4.2's "Update" action): link this brand-new insight back to
+        // the one it follows up on. Only applies when actually creating (not editing).
+        if (!selectedRow?._id && chainFrom?._id) {
+          formData.append("previousAnalysis", chainFrom._id);
+        }
+
         // Append DynTube URL
         if (values.dyntubeUrl && values.dyntubeUrl.trim()) {
           formData.append("dyntubeUrl", values.dyntubeUrl.trim());
@@ -135,6 +152,7 @@ const CreateTradeAnalysis = forwardRef(
           }
           formik.resetForm();
           setSelectedRow({});
+          setChainFrom?.(null);
           refetch();
           handleCloseCreate();
         } catch (err) {
@@ -182,6 +200,29 @@ const CreateTradeAnalysis = forwardRef(
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
+
+    // "Update" (chain) action: prefill text fields from the source insight so the educator
+    // isn't starting from scratch, but leave files empty — a follow-up insight naturally
+    // wants fresh charts, and the create endpoint (unlike update) has no mechanism to carry
+    // forward previously-uploaded image URLs without re-uploading them.
+    useEffect(() => {
+      if (!selectedRow?._id && chainFrom?._id) {
+        let tvLinks = [""];
+        if (chainFrom?.tradingViewLinks?.length > 0) {
+          tvLinks = chainFrom.tradingViewLinks;
+        }
+
+        formik.setValues({
+          title: chainFrom?.title || "",
+          files: [],
+          description: chainFrom?.description || "",
+          category: chainFrom?.category?._id || "",
+          checkTime: false,
+          tradingViewLinks: tvLinks,
+          dyntubeUrl: "",
+        });
+      }
+    }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
 
     // Function to add a new exit input
 
@@ -256,6 +297,7 @@ const CreateTradeAnalysis = forwardRef(
           onOpenChange={() => {
             formik.resetForm();
             setSelectedRow({});
+            setChainFrom?.(null);
 
             handleCloseCreate();
           }}
@@ -264,8 +306,17 @@ const CreateTradeAnalysis = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id ? "Update IQ Insight" : "Create IQ Insight"}
+                {selectedRow?._id
+                  ? "Edit IQ Insight"
+                  : chainFrom?._id
+                    ? "Update IQ Insight"
+                    : "Create IQ Insight"}
               </DialogTitle>
+              {chainFrom?._id && !selectedRow?._id && (
+                <p className="text-xs text-gray-500 mt-1">
+                  This creates a new insight chained to “{chainFrom.title}”.
+                </p>
+              )}
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">
               <div className="grid grid-cols-12 gap-4">
@@ -490,6 +541,7 @@ const CreateTradeAnalysis = forwardRef(
                 className="btn btn-light"
                 onClick={() => {
                   setSelectedRow(null);
+                  setChainFrom?.(null);
                   formik.resetForm();
                   handleCloseCreate();
                 }}

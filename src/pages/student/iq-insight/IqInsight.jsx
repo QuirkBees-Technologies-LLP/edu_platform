@@ -40,7 +40,7 @@ import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
 import { getEmbedUrl } from "@/utils/videoUtils";
 import Loader from "../../../components/ui/loader";
-import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown, Link2 as LinkIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -693,11 +693,21 @@ const IqInsight = () => {
                   {/* ── Structured Price Levels / Content ── */}
                   <div className="mb-2 space-y-1.5 flex-1">
                     <div className="px-1 py-1 flex items-center justify-between gap-2 flex-wrap">
-                      {(idea.pair || idea.name) && (
-                        <span className="text-[14px] font-extrabold text-slate-800 dark:text-white">
-                          {idea.pair || idea.name}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 min-w-0">
+                        {(idea.pair || idea.name) && (
+                          <span className="text-[14px] font-extrabold text-slate-800 dark:text-white truncate">
+                            {idea.pair || idea.name}
+                          </span>
+                        )}
+                        {idea.previousAnalysis && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 flex-shrink-0"
+                            title={`Follow-up to "${idea.previousAnalysis.title}"`}
+                          >
+                            <LinkIcon size={10} /> Follow-up
+                          </span>
+                        )}
+                      </div>
                       {idea.status && (
                         <span
                           className={`inline-block px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${idea.status === 'Active' || idea.status === 'active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
