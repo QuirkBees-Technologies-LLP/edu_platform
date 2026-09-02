@@ -474,6 +474,12 @@ const IqEducators = () => {
               </div>
             );
           })}
+          {courseIdea?.description && (
+            <div
+              className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: courseIdea.description }}
+            />
+          )}
         </div>
       </div>
     );

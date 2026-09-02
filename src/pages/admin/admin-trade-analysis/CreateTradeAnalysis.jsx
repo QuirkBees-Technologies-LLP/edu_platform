@@ -179,12 +179,13 @@ const CreateTradeAnalysis = forwardRef(
     }, [selectedRow?._id, isCreateOpen]);
 
     // "Update" (chain) action: this is a brand-new, standalone follow-up insight, not an
-    // edit of the source one — every field starts blank, same as a plain Create. Only the
-    // chain link itself (previousAnalysis, set on submit) ties it back to the source.
+    // edit of the source one — every field starts blank except the title, which is carried
+    // over so the admin isn't retyping it. Only the chain link itself (previousAnalysis,
+    // set on submit) ties it back to the source.
     useEffect(() => {
       if (!selectedRow?._id && chainFrom?._id) {
         formik.setValues({
-          title: "",
+          title: chainFrom?.title || "",
           files: [],
           description: "",
           category: "",

@@ -10,6 +10,15 @@ import { format } from "date-fns";
 import EducatorImage from "./EducatorImage";
 import { Link } from "react-router-dom";
 
+const LabelMap = {
+  active: "Active",
+  pending: "Pending",
+  win: "Win",
+  partialWin: "Partial Win",
+  loss: "Loss",
+  breakEven: "Break Even",
+};
+
 const ViewClientTradeIdeas = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
     return (
@@ -27,10 +36,32 @@ const ViewClientTradeIdeas = forwardRef(
           <div className="grid gap-5 px-0">
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-12">
-                <div className="flex items-center px-4 pb-3 pt-3">
+                <div className="flex items-center justify-between px-4 pb-3 pt-3">
                   <div className="mr-2 text-lg text-gray-900 font-semibold">
                     {selectedIdea?.name}
                   </div>
+                  {selectedIdea?.status && (
+                    <span
+                      className={`inline-block px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${LabelMap[selectedIdea.status] === "Active"
+                        ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400"
+                        : LabelMap[selectedIdea.status] === "Pending"
+                          ? "bg-purple-500/15 text-purple-600 dark:text-purple-400"
+                          : LabelMap[selectedIdea.status] === "Win"
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                            : LabelMap[selectedIdea.status] === "Partial Win"
+                              ? "bg-emerald-400/15 text-emerald-500 dark:text-emerald-400"
+                              : LabelMap[selectedIdea.status] === "Loss"
+                                ? "bg-red-500/15 text-red-600 dark:text-red-400"
+                                : "bg-slate-500/15 text-slate-600 dark:text-slate-400"
+                        }`}
+                    >
+                      {LabelMap[selectedIdea.status] === "Win" && selectedIdea.pips
+                        ? `WIN +${selectedIdea.pips} pips`
+                        : LabelMap[selectedIdea.status] === "Loss" && selectedIdea.pips
+                          ? `LOSS -${selectedIdea.pips} pips`
+                          : LabelMap[selectedIdea.status]}
+                    </span>
+                  )}
                 </div>
 
                 <div className="">
@@ -41,7 +72,7 @@ const ViewClientTradeIdeas = forwardRef(
                   />
                 </div>
 
-                <div className="flex items-center mt-5">
+                <div className="flex items-center mt-5 px-4">
                   <Link to={`/iq-educators/${selectedIdea?.educatorDetails?._id}`}>
                     <EducatorImage
                       educator={selectedIdea?.educatorDetails}
@@ -58,7 +89,7 @@ const ViewClientTradeIdeas = forwardRef(
                     </Link>
                   </div>
                 </div>
-                <div className="flex mt-2">
+                <div className="flex mt-2 px-4">
                   <div className="text-2sm text-gray-700 mb-px">
                     {/* {selectedIdea?.educatorDetails?.categories
                           ? selectedIdea?.categories?.name
@@ -68,12 +99,9 @@ const ViewClientTradeIdeas = forwardRef(
                       ? selectedIdea?.educatorDetails?.categories
                         .map((cat) => cat)
                         .join(", ")
-                      : "Category not assigned"}
+                      : selectedIdea?.category?.name || "Category not assigned"}
                   </div>
                 </div>
-                {/* <div className="border-1 border-solid border-current bg-gray-100 px-5 py-3 mt-5">
-                   
-                  </div> */}
               </div>
             </div>
           </div>
