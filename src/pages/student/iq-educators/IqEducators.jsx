@@ -13,6 +13,9 @@ import {
   TrendingUp,
   UserPlus,
   UserCheck,
+  Copy,
+  ChartLine,
+  Link2,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
@@ -26,9 +29,11 @@ import { useToggleFollowMutation } from "../../../store/api/client/clientEductor
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
-import ShowMoreLess from "../../../components/ui/showmoreless";
-import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
-import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
+import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
+import InsightImageLightBox from "../iq-insight/ImageLightBox";
+import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
+import ViewClientLiveIdeas from "../client-live-ideas/ViewClientLiveIdeas";
+import LiveIdeaImageLightBox from "../client-live-ideas/ImageLightBox";
 import { format, formatDistanceToNow } from "date-fns";
 import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
@@ -36,7 +41,12 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import RatingModal from "./RatingModel";
 import { useLayout } from "../../../providers";
-import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import {
+  useGetLiveTradeIdeaQuery,
+  useLazyGetTradeAnalysisByIdQuery,
+  useLazyGetIdeaByIdQuery,
+  useLazyGetLiveIdeaSingleQuery,
+} from "../../../store/api/client/clientTradeIdeasApiSlice";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import EducatorFeed from "./EducatorFeed";
 
@@ -66,10 +76,13 @@ const IqEducators = () => {
   const [isViewOpen1, setIsViewOpen1] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState({});
   const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
+  const [isLiveIdeaViewOpen, setIsLiveIdeaViewOpen] = useState(false);
+  const [selectedLiveIdea, setSelectedLiveIdea] = useState({});
+  const [isLiveIdeaLightBoxOpen, setIsLiveIdeaLightBoxOpen] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-  const [liveFeedImage, setLiveFeedImage] = useState(null);
   const [isEducatorLive, setIsEducatorLive] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -183,6 +196,9 @@ const IqEducators = () => {
   }, {
     refetchOnMountOrArgChange: true,
   });
+  const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
+  const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
+  const [fetchLiveIdeaById] = useLazyGetLiveIdeaSingleQuery();
 
   useEffect(() => {
 
@@ -235,6 +251,548 @@ const IqEducators = () => {
   };
   const handleCloseView1 = () => {
     setIsViewOpen1(false);
+  };
+  const handleCloseLiveIdeaView = () => {
+    setIsLiveIdeaViewOpen(false);
+  };
+
+  const handleCopyField = async (id, fieldName, value) => {
+    try {
+      await navigator.clipboard.writeText(value ?? "N/A");
+      setCopiedField({ id, field: fieldName });
+      setTimeout(() => setCopiedField(null), 1200);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  // "Follow-up to X" opens the ORIGINAL idea being replied to, not the follow-up itself
+  // (quote-reply style) — previousIdea on the list item is only shallow-populated
+  // (name/createdAt), so the full original is fetched on demand here.
+  const handleOpenPreviousIdea = async (previousIdeaId) => {
+    if (!previousIdeaId) return;
+    try {
+      const original = await fetchIdeaById(previousIdeaId).unwrap();
+      setSelectedIdea(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original idea", err);
+    }
+  };
+
+  // Same for Live Ideas.
+  const handleOpenPreviousLiveIdea = async (previousLiveIdeaId) => {
+    if (!previousLiveIdeaId) return;
+    try {
+      const original = await fetchLiveIdeaById(previousLiveIdeaId).unwrap();
+      setSelectedLiveIdea(original?.data || original);
+      setIsLiveIdeaViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original live idea", err);
+    }
+  };
+
+  // Ported from the Educator Feed's IdeaFeedCard — same card content, minus the "View
+  // Details" button: clicking the chart image opens the same details modal Social Feed
+  // uses instead.
+  const renderIdeaCard = (courseIdea, extraClassName = "") => {
+    const modalIdea = { ...courseIdea, educatorDetails: courseIdea?.educatorId };
+    return (
+      <div
+        key={courseIdea?._id}
+        className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+      >
+        {/* Thread indicator: this idea is a chained follow-up to a previous one. Clicking
+            it opens the ORIGINAL idea being replied to (quote-reply style), not this
+            card's own content. Always rendered (using `invisible` rather than omitting the
+            block) so every card reserves the same vertical space here — otherwise cards
+            without a follow-up sit shorter and the grid/slider rows misalign depending on
+            which cards happen to have one. */}
+        <div className="mb-2">
+          <div
+            className={`flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary w-fit ${courseIdea?.previousIdea ? "cursor-pointer hover:underline" : "invisible"
+              }`}
+            onClick={(e) => {
+              if (!courseIdea?.previousIdea) return;
+              e.stopPropagation();
+              handleOpenPreviousIdea(courseIdea.previousIdea._id);
+            }}
+          >
+            <Link2 size={11} className="flex-shrink-0" />
+            <span className="truncate">
+              Follow-up to <span className="font-bold">{courseIdea?.previousIdea?.name}</span>
+            </span>
+          </div>
+          <div
+            className={`ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15 ${courseIdea?.previousIdea ? "" : "invisible"
+              }`}
+          />
+        </div>
+        {/* Header: name + status */}
+        <div className="flex items-start gap-1 mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%] truncate">
+                {courseIdea?.name || "—"}
+              </span>
+              {courseIdea?.status && (
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[courseIdea.status] === "Active"
+                    ? "text-cyan-600 dark:text-cyan-400"
+                    : LabelMap[courseIdea.status] === "Pending"
+                      ? "text-purple-600 dark:text-purple-400"
+                      : LabelMap[courseIdea.status] === "Win"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : LabelMap[courseIdea.status] === "Partial Win"
+                          ? "text-emerald-500 dark:text-emerald-400"
+                          : LabelMap[courseIdea.status] === "Loss"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-600 dark:text-slate-400"
+                    }`}
+                >
+                  {LabelMap[courseIdea.status] === "Win"
+                    ? `WIN +${courseIdea.pips} pips`
+                    : LabelMap[courseIdea.status] === "Loss"
+                      ? `LOSS -${courseIdea.pips} pips`
+                      : LabelMap[courseIdea.status]}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
+              {(courseIdea?.type || courseIdea?.timeFrame) && (
+                <span
+                  className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-extrabold flex-shrink-0 border leading-none ${courseIdea.type === "buy"
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-600 border-red-500/20"
+                    }`}
+                >
+                  {courseIdea.type === "buy" ? (
+                    <TrendingUp size={14} />
+                  ) : (
+                    <TrendingDown size={14} />
+                  )}
+                  {courseIdea.type
+                    ? courseIdea.type.charAt(0).toUpperCase() + courseIdea.type.slice(1).toLowerCase()
+                    : ""}
+                  {courseIdea.timeFrame
+                    ? ` - ${Array.isArray(courseIdea.timeFrame) ? courseIdea.timeFrame.join("/") : courseIdea.timeFrame}`
+                    : ""}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                {courseIdea?.createdAt ? format(new Date(courseIdea.createdAt), "MMM dd, hh:mm a") : ""}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart image — click opens the details modal */}
+        <div
+          className={`-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] ${isEducator ? "" : "cursor-pointer"}`}
+          onClick={() => {
+            if (isEducator) return;
+            setSelectedIdea(modalIdea);
+            setIsViewOpen(true);
+          }}
+        >
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
+            Idea
+          </span>
+          {courseIdea?.image?.length > 0 ? (
+            <img
+              src={courseIdea.image[0]}
+              alt={courseIdea?.name}
+              className="w-full h-[220px] object-cover object-right"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 opacity-40">
+                <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">
+                  No Chart Loading...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Price levels */}
+        <div className="mb-2 space-y-1.5">
+          {courseIdea?.entry && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(courseIdea._id, "Entry", courseIdea.entry)}
+            >
+              <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
+              <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+                {copiedField?.id === courseIdea._id && copiedField?.field === "Entry" ? (
+                  <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[10px]">📍</span> {courseIdea.entry}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {courseIdea?.invalidation && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(courseIdea._id, "Stop Loss", courseIdea.invalidation)}
+            >
+              <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+                Invalidation
+              </span>
+              <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+                {copiedField?.id === courseIdea._id && copiedField?.field === "Stop Loss" ? (
+                  <span className="text-[9px] text-red-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[10px]">❌</span> {courseIdea.invalidation}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
+            const tpValue = courseIdea?.exits?.[idx];
+            if (!tpValue && tpValue !== 0) return null;
+            const fieldName = `Exit ${idx + 1}`;
+            return (
+              <div
+                key={tpField}
+                className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                onClick={() => handleCopyField(courseIdea._id, fieldName, tpValue)}
+              >
+                <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+                  {fieldName}
+                </span>
+                <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  {copiedField?.id === courseIdea._id && copiedField?.field === fieldName ? (
+                    <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                  ) : null}
+                  <span className="text-[10px]">🎯</span> {tpValue}
+                  <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Ported from the Educator Feed's LiveIdeaFeedCard — same treatment as renderIdeaCard.
+  const renderLiveIdeaCard = (liveIdeaData, extraClassName = "") => {
+    const modalLiveIdea = { ...liveIdeaData, educatorDetails: liveIdeaData?.educatorId };
+    return (
+      <div
+        key={liveIdeaData?._id}
+        className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+      >
+        {/* Thread indicator: this live idea is a chained follow-up to a previous one.
+            Clicking it opens the ORIGINAL live idea being replied to (quote-reply style),
+            not this card's own content. Always rendered (using `invisible` rather than
+            omitting the block) so every card reserves the same vertical space here —
+            otherwise cards without a follow-up sit shorter and the grid/slider rows
+            misalign depending on which cards happen to have one. */}
+        <div className="mb-2">
+          <div
+            className={`flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary w-fit ${liveIdeaData?.previousLiveIdea ? "cursor-pointer hover:underline" : "invisible"
+              }`}
+            onClick={(e) => {
+              if (!liveIdeaData?.previousLiveIdea) return;
+              e.stopPropagation();
+              handleOpenPreviousLiveIdea(liveIdeaData.previousLiveIdea._id);
+            }}
+          >
+            <Link2 size={11} className="flex-shrink-0" />
+            <span className="truncate">
+              Follow-up to <span className="font-bold">{liveIdeaData?.previousLiveIdea?.name}</span>
+            </span>
+          </div>
+          <div
+            className={`ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15 ${liveIdeaData?.previousLiveIdea ? "" : "invisible"
+              }`}
+          />
+        </div>
+        {/* Header: name + status */}
+        <div className="flex items-start gap-1 mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%] truncate">
+                {liveIdeaData?.name || "—"}
+              </span>
+              {liveIdeaData?.status && (
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[liveIdeaData.status] === "Active"
+                    ? "text-cyan-600 dark:text-cyan-400"
+                    : LabelMap[liveIdeaData.status] === "Pending"
+                      ? "text-purple-600 dark:text-purple-400"
+                      : LabelMap[liveIdeaData.status] === "Win"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : LabelMap[liveIdeaData.status] === "Partial Win"
+                          ? "text-emerald-500 dark:text-emerald-400"
+                          : LabelMap[liveIdeaData.status] === "Loss"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-600 dark:text-slate-400"
+                    }`}
+                >
+                  {LabelMap[liveIdeaData.status] === "Win"
+                    ? `WIN +${liveIdeaData.pips} pips`
+                    : LabelMap[liveIdeaData.status] === "Loss"
+                      ? `LOSS -${liveIdeaData.pips} pips`
+                      : LabelMap[liveIdeaData.status]}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
+              {(liveIdeaData?.type || liveIdeaData?.timeFrame) && (
+                <span
+                  className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-extrabold flex-shrink-0 border leading-none ${liveIdeaData.type === "buy"
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-600 border-red-500/20"
+                    }`}
+                >
+                  {liveIdeaData.type === "buy" ? (
+                    <TrendingUp size={14} />
+                  ) : (
+                    <TrendingDown size={14} />
+                  )}
+                  {liveIdeaData.type
+                    ? liveIdeaData.type.charAt(0).toUpperCase() + liveIdeaData.type.slice(1).toLowerCase()
+                    : ""}
+                  {liveIdeaData.timeFrame
+                    ? ` - ${Array.isArray(liveIdeaData.timeFrame) ? liveIdeaData.timeFrame.join("/") : liveIdeaData.timeFrame}`
+                    : ""}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                {liveIdeaData?.createdAt ? format(new Date(liveIdeaData.createdAt), "MMM dd, hh:mm a") : ""}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart image — click opens the details modal */}
+        <div
+          className={`-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] ${isEducator ? "" : "cursor-pointer"}`}
+          onClick={() => {
+            if (isEducator) return;
+            setSelectedLiveIdea(modalLiveIdea);
+            setIsLiveIdeaViewOpen(true);
+          }}
+        >
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-amber-500/55 backdrop-blur-sm">
+            Live Idea
+          </span>
+          {liveIdeaData?.image?.length > 0 ? (
+            <img
+              src={liveIdeaData.image[0]}
+              alt={liveIdeaData?.name}
+              className="w-full h-[220px] object-cover object-right"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 opacity-40">
+                <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">
+                  No Chart Loading...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Price levels */}
+        <div className="mb-2 space-y-1.5 flex-1">
+          {liveIdeaData?.entry && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(liveIdeaData._id, "Entry", liveIdeaData.entry)}
+            >
+              <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
+              <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+                {copiedField?.id === liveIdeaData._id && copiedField?.field === "Entry" ? (
+                  <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[10px]">📍</span> {liveIdeaData.entry}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {liveIdeaData?.invalidation && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(liveIdeaData._id, "Stop Loss", liveIdeaData.invalidation)}
+            >
+              <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+                Invalidation
+              </span>
+              <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+                {copiedField?.id === liveIdeaData._id && copiedField?.field === "Stop Loss" ? (
+                  <span className="text-[9px] text-red-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[10px]">❌</span> {liveIdeaData.invalidation}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
+            const tpValue = liveIdeaData?.exits?.[idx];
+            if (!tpValue && tpValue !== 0) return null;
+            const fieldName = `Exit ${idx + 1}`;
+            return (
+              <div
+                key={tpField}
+                className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                onClick={() => handleCopyField(liveIdeaData._id, fieldName, tpValue)}
+              >
+                <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+                  {fieldName}
+                </span>
+                <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  {copiedField?.id === liveIdeaData._id && copiedField?.field === fieldName ? (
+                    <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                  ) : null}
+                  <span className="text-[10px]">🎯</span> {tpValue}
+                  <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                </span>
+              </div>
+            );
+          })}
+          {!liveIdeaData?.entry &&
+            !liveIdeaData?.invalidation &&
+            (!liveIdeaData?.exits || liveIdeaData.exits.length === 0) &&
+            (liveIdeaData?.description || liveIdeaData?.message) && (
+              <div className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: liveIdeaData.description || liveIdeaData.message,
+                  }}
+                />
+              </div>
+            )}
+        </div>
+      </div>
+    );
+  };
+
+  // "Follow-up to X" opens the ORIGINAL insight being replied to, not the follow-up
+  // itself (quote-reply style) — previousAnalysis on the list item is only shallow-
+  // populated (title/createdAt), so the full original is fetched on demand here.
+  const handleOpenPreviousAnalysisInsight = async (previousAnalysisId) => {
+    if (!previousAnalysisId) return;
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setSelectedInsight(original?.data || original);
+      setIsViewOpen1(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+    }
+  };
+
+  // Ported from the Educator Feed's InsightFeedCard — same card content, minus the "View
+  // Details" button: clicking the chart image opens the same details modal Social Feed
+  // uses instead. This source (TradeAnalysisModel via getEductorAndCourses) carries the
+  // real field names (`.title`, `.photos`, `.createdBy`) while the shared
+  // ViewInsightTradeIdeas/EducatorImage components read `.name`, `.image`,
+  // `.educatorDetails` — so a new object carrying those aliases is built only at the
+  // point of handing data to the modal, same adapter pattern as renderIdeaCard.
+  const renderInsightCard = (insight, extraClassName = "") => {
+    const modalInsight = {
+      ...insight,
+      name: insight?.title,
+      image: insight?.photos,
+      educatorDetails: insight?.createdBy,
+    };
+    return (
+      <div
+        key={insight?._id}
+        className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+      >
+        {/* Thread indicator: this insight is a chained follow-up to a previous one.
+            Clicking it opens the ORIGINAL insight being replied to (quote-reply style),
+            not this card's own content. Always rendered (using `invisible` rather than
+            omitting the block) so every card reserves the same vertical space here —
+            otherwise cards without a follow-up sit shorter and the grid/slider rows
+            misalign depending on which cards happen to have one. */}
+        <div className="mb-2">
+          <div
+            className={`flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary w-fit ${insight?.previousAnalysis ? "cursor-pointer hover:underline" : "invisible"
+              }`}
+            onClick={(e) => {
+              if (!insight?.previousAnalysis) return;
+              e.stopPropagation();
+              handleOpenPreviousAnalysisInsight(insight.previousAnalysis._id);
+            }}
+          >
+            <Link2 size={11} className="flex-shrink-0" />
+            <span className="truncate">
+              Follow-up to <span className="font-bold">{insight?.previousAnalysis?.title}</span>
+            </span>
+          </div>
+          <div
+            className={`ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15 ${insight?.previousAnalysis ? "" : "invisible"
+              }`}
+          />
+        </div>
+        {/* Header — date/time, same treatment as the Educator Feed's InsightFeedCard */}
+        <div className="flex items-start gap-1 mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                {insight?.createdAt ? format(new Date(insight.createdAt), "MMM dd, hh:mm a") : ""}
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Chart image — click opens the details modal */}
+        <div
+          className={`-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] ${isEducator ? "" : "cursor-pointer"}`}
+          onClick={() => {
+            if (isEducator) return;
+            setSelectedInsight(modalInsight);
+            setIsViewOpen1(true);
+          }}
+        >
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-violet-500/55 backdrop-blur-sm">
+            Insight
+          </span>
+          {insight?.photos?.length > 0 ? (
+            <img
+              src={insight.photos[0]}
+              alt={insight?.title}
+              className="w-full h-[220px] object-cover object-center"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 opacity-40">
+                <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">
+                  No Chart Loading...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Title + description */}
+        <div className="mb-2 space-y-1.5 flex-1">
+          {insight?.title && (
+            <div className="px-1 py-1">
+              <span className="text-[14px] font-extrabold text-slate-800 dark:text-white">
+                {insight.title}
+              </span>
+            </div>
+          )}
+          {insight?.description && (
+            <div
+              className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: insight.description }}
+            />
+          )}
+        </div>
+      </div>
+    );
   };
   //  useEffect(() => {
   //   if (response?.data?.schedules?.length > 0) {
@@ -365,114 +923,6 @@ const IqEducators = () => {
       const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
       return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
     });
-
-  const getRelativeTime = (date) => {
-    if (!date) return "";
-
-    const now = new Date();
-    const past = new Date(date);
-    const diffInSeconds = Math.floor((now - past) / 1000);
-
-    const minutes = Math.floor(diffInSeconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (diffInSeconds < 60) return "Just now";
-    if (minutes < 60) return `${minutes} min ago`;
-    if (hours < 24) return `${hours} hr ago`;
-    return `${days} day${days > 1 ? "s" : ""} ago`;
-  };
-
-  // Extracted so the same Live Feed card can render in its normal sidebar spot
-  // (when not live) or stacked below the Educator Feed inside the live chat
-  // column (when live), without duplicating this JSX in two places.
-  const renderLiveFeedCard = () => (
-    <div className="card rounded-2xl shadow-md overflow-hidden">
-      {/* Header */}
-      <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-        <h3 className="text-white font-semibold text-sm">
-          Live Feed
-        </h3>
-        <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-        </div>
-      </div>
-
-      {/* Updates */}
-      <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-        {/* Messages */}
-        {response?.data?.PostData?.length > 0 ? (
-          response?.data?.PostData?.map((update) => (
-            <div
-              key={update?._id}
-              className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-            >
-              <div className="flex flex-col gap-4 mb-4">
-                <img
-                  src={update?.author?.image}
-                  alt={update?.author?.name}
-                  className="w-12 h-12 rounded-full"
-                />
-                <div>
-                  <h4 className="text-sm font-normal mb-1 text-gray-900">
-                    {update?.author?.first_name}{" "}
-                    {update?.author?.last_name}
-                  </h4>
-                  <p className="text-xs font-normal text-gray-600">
-                    {update?.createdAt
-                      ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
-                      : ""}
-                  </p>
-                </div>
-              </div>
-
-              {update?.content && (
-                <div className="mb-3">
-                  <p
-                    className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                    dangerouslySetInnerHTML={{
-                      __html: makeClickableLinks(update?.content),
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Post Images */}
-              {update?.images?.length > 0 && (
-                <div
-                  className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
-                >
-                  {update.images.map((img, imgIdx) => {
-                    const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
-                    const imgKey = img?._id || imgUrl || imgIdx;
-                    return imgUrl ? (
-                      <div
-                        key={imgKey}
-                        className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                        onClick={() => setLiveFeedImage(imgUrl)}
-                      >
-                        <img
-                          src={imgUrl}
-                          alt="post"
-                          className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                        />
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-            <div className="text-sm text-gray-900 font-medium text-center">
-              🚀 No updates available right now. Stay tuned for fresh
-              content!
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="container-fluid pb-10">
@@ -644,7 +1094,7 @@ const IqEducators = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
+      <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 items-start">
         <div className="col-span-12 xl:col-span-8 space-y-8">
 
           {/* Master Classes */}
@@ -810,81 +1260,14 @@ const IqEducators = () => {
               {response?.data?.idea?.length > 0 ? (
                 idea ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.name}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                    {response?.data?.idea?.map((course) => renderIdeaCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
                   <div className="flex gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4 d-flex">
-                          <div className="justify-between">
-                            <h3 className="text-md font-normal mb-2">
-                              {course?.name}
-                            </h3>
-                          </div>
-
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                    {response?.data?.idea?.map((course) =>
+                      renderIdeaCard(course, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
+                    )}
                   </div>
                 )
               ) : (
@@ -915,78 +1298,14 @@ const IqEducators = () => {
                 insight ? (
                   // GRID VIEW (sabhi courses ek sath)
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                    {response?.data?.insight?.map((course) => renderInsightCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
                   <div className="flex gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                    {response?.data?.insight?.map((course) =>
+                      renderInsightCard(course, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
+                    )}
                   </div>
                 )
               ) : (
@@ -1034,108 +1353,9 @@ const IqEducators = () => {
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {liveIdea?.length > 0 ? (
                 <div className="flex gap-4">
-                  {liveIdea?.map((liveIdeaData) => (
-                    <div
-                      key={liveIdeaData?._id}
-                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                      onClick={() => {
-                        if (isEducator) return;
-                        setSelectedIdea(liveIdeaData);
-                        setIsLightBoxOpen(true);
-                      }}
-                    >
-                      {/* IMAGE CONTAINER */}
-                      <div className="relative rounded-t-xl overflow-hidden">
-                        <img
-                          src={liveIdeaData?.image?.[0]}
-                          alt={liveIdeaData?.name}
-                          className="w-full h-36 object-cover"
-                        />
-
-                        {/* 🔥 OVERLAY START */}
-                        <div className="absolute top-2 left-2 right-2 flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${liveIdeaData?.type === "buy"
-                                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                                : "bg-red-500 hover:bg-red-600 text-white"
-                                }`}
-                            >
-                              {liveIdeaData?.type === "buy" ? (
-                                <TrendingUp size={16} />
-                              ) : (
-                                <TrendingDown size={16} />
-                              )}
-                              {liveIdeaData?.type?.toUpperCase()}
-                            </button>
-
-                            <div className="bg-gray-800 px-2 py-1 rounded-lg font-semibold text-xs text-white">
-                              {liveIdeaData?.name}
-                            </div>
-                          </div>
-
-                          {LabelMap[liveIdeaData?.status] === "Active" && (
-                            <div className="bg-cyan-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                              Active
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Pending" && (
-                            <div className="bg-purple-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                              Pending
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Win" && (
-                            <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              ★ WIN +{liveIdeaData?.pips} pips
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Loss" && (
-                            <div className="bg-red-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              ▲ LOSS -{liveIdeaData?.pips} pips
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Partial Win" && (
-                            <div className="bg-purple-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              ▲ PARTIAL WIN {liveIdeaData?.pips} pips
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Break Even" && (
-                            <div className="bg-blue-500 text-white px-2 py-1 rounded-lg font-semibold text-xs">
-                              Break Even
-                            </div>
-                          )}
-
-                        </div>
-                        {/* 🔥 OVERLAY END */}
-                      </div>
-
-                      {/* DATE */}
-                      <div className="p-4 flex items-center justify-between">
-                        {/* LEFT: Full Date */}
-                        <div className="text-sm text-gray-600">
-                          {format(new Date(liveIdeaData?.createdAt), "dd/MM/yyyy hh:mm a")}
-                        </div>
-
-                        {/* RIGHT: Relative Time */}
-                        <div
-                          className="text-sm text-gray-600"
-                          title={format(new Date(liveIdeaData?.createdAt), "dd MMM yyyy, hh:mm a")}
-                        >
-                          {getRelativeTime(liveIdeaData?.createdAt)}
-                        </div>
-                      </div>
-
-
-                    </div>
-
-                  ))}
+                  {liveIdea?.map((liveIdeaData) =>
+                    renderLiveIdeaCard(liveIdeaData, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
+                  )}
                 </div>
 
               ) : (
@@ -1201,172 +1421,17 @@ const IqEducators = () => {
                 </form>
               </div>
             </div> */}
-            {/* Educator feed — sits next to Master Classes only once the stream is live.
-                Before that, the same EducatorFeed instance renders in place of the old
-                "About Me" card (up in the video/chat row via feedContent), so it's never
-                shown in both places at once. */}
+            {/* Educator feed — Live Feed / Analysis Updates were dropped from this
+                sidebar spot (already removed on IQ Social). This instance only takes
+                over once the stream goes live and shifts next to Master Classes; before
+                that, the same EducatorFeed already renders up top in place of the old
+                "About Me" card (via feedContent), so it's never shown in both places
+                at once. */}
             {isEducatorLive && (
-              <div className="col-span-12 md:col-span-6 xl:col-span-12 h-[500px]">
+              <div className="col-span-12 md:col-span-6 xl:col-span-12 h-[900px]">
                 <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
               </div>
             )}
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              {renderLiveFeedCard()}
-            </div>
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                {/* Header */}
-                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">
-                    Analysis Updates
-                  </h3>
-                  <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                    {/* <button
-                      onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Feed
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Ideas
-                    </button> */}
-                  </div>
-                </div>
-
-                {/* Updates */}
-                <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-                  {/* Hover Overlay */}
-                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div> */}
-
-                  {/* Messages */}
-                  {response?.data?.analysisData?.length > 0 ? (
-                    response?.data?.analysisData?.map((update) => (
-                      <div
-                        key={update?._id}
-                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-                      >
-                        <div className="flex flex-col gap-4 mb-4">
-                          <img
-                            src={update?.author?.image}
-                            alt={update?.author?.name}
-                            className="w-12 h-12 rounded-full"
-                          />
-                          <div>
-                            <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update?.author?.first_name}{" "}
-                              {update?.author?.last_name}
-                            </h4>
-                            <p className="text-xs font-normal text-gray-600">
-                              {update?.createdAt
-                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
-                                : ""}
-                            </p>
-                          </div>
-                        </div>
-
-                        {update?.content && (
-                          <div className="mb-3">
-                            <p
-                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                              dangerouslySetInnerHTML={{
-                                __html: makeClickableLinks(update?.content),
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Post Images */}
-                        {update?.images?.length > 0 && (
-                          <div
-                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
-                          >
-                            {update.images.map((img, imgIdx) => {
-                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
-                              const imgKey = img?._id || imgUrl || imgIdx;
-                              return imgUrl ? (
-                                <div
-                                  key={imgKey}
-                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                                  onClick={() => setLiveFeedImage(imgUrl)}
-                                >
-                                  <img
-                                    src={imgUrl}
-                                    alt="post"
-                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                                  />
-                                </div>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="text-sm text-gray-900 font-medium text-center">
-                        🚀 No updates available right now. Stay tuned for fresh
-                        content!
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cards */}
-                  {/* {trades.map((trade) => (
-                                        <div key={trade.id} className="card rounded-2xl overflow-hidden w-full relative z-0">
-                                        <img src={trade.image} alt={trade.pair} className="w-full h-40 object-cover" />
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <ArrowUp className="text-green-500 w-8 h-8 shrink-0" />
-                                                <div>
-                                                <h3 className="font-medium text-gray-800 text-sm mb-1">{trade.pair}</h3>
-                                                <p className="text-2xs font-normal text-gray-500 line-clamp-1">{trade.date}</p>
-                                                </div>
-                                            </div>
-                                            <span
-                                                className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                                            >
-                                                {trade.status}
-                                            </span>
-                                            </div>
-
-                                            <div className="mt-6 space-y-4">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Entry</span>
-                                                <span className="font-medium text-gray-800">{trade.entry}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
-                                                <span className="font-medium text-gray-800">{trade.stopLoss}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 1</span>
-                                                <span className="font-medium text-gray-800">{trade.exit1}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 2</span>
-                                                <span className="font-medium text-gray-800">{trade.exit2}</span>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    ))} */}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1385,6 +1450,13 @@ const IqEducators = () => {
         selectedIdea={selectedIdea}
       />
 
+      <ViewClientLiveIdeas
+        isViewOpen={isLiveIdeaViewOpen}
+        setIsLightBoxOpen={setIsLiveIdeaLightBoxOpen}
+        handleCloseView={handleCloseLiveIdeaView}
+        selectedIdea={selectedLiveIdea}
+      />
+
       <ViewInsightTradeIdeas
         isViewOpen={isViewOpen1}
         setIsLightBoxOpen={setIsLightBoxOpen1}
@@ -1397,27 +1469,6 @@ const IqEducators = () => {
         slides={[{ src: InfoImage }]}
       />
 
-      {/* Live Feed / Analysis Image Lightbox */}
-      {liveFeedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-          onClick={() => setLiveFeedImage(null)}
-        >
-          <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={liveFeedImage}
-              alt="post"
-              className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
-            />
-            <button
-              onClick={() => setLiveFeedImage(null)}
-              className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
       {showRatingModal && (
         <RatingModal
           showRatingModal={showRatingModal}
@@ -1431,6 +1482,24 @@ const IqEducators = () => {
             isLightBoxOpen={isLightBoxOpen}
             setIsLightBoxOpen={setIsLightBoxOpen}
             selectedIdea={selectedIdea}
+          />
+        )
+      }
+      {
+        isLiveIdeaLightBoxOpen && (
+          <LiveIdeaImageLightBox
+            isLightBoxOpen={isLiveIdeaLightBoxOpen}
+            setIsLightBoxOpen={setIsLiveIdeaLightBoxOpen}
+            selectedIdea={selectedLiveIdea}
+          />
+        )
+      }
+      {
+        isLightBoxOpen1 && (
+          <InsightImageLightBox
+            isLightBoxOpen={isLightBoxOpen1}
+            setIsLightBoxOpen={setIsLightBoxOpen1}
+            selectedIdea={selectedInsight}
           />
         )
       }

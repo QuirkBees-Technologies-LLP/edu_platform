@@ -6,6 +6,7 @@ import {
   useGetAllEducatorsQuery,
   useGetClientLiveIdeasQuery,
   useGetClientTradeIdeasQuery,
+  useLazyGetLiveIdeaSingleQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientLiveIdeas";
@@ -18,6 +19,7 @@ import {
   Copy,
   Eye,
   ChartLine,
+  Link2,
 } from "lucide-react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import {
@@ -94,6 +96,21 @@ const ClientLiveIdeas = () => {
         ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
         : "",
     });
+
+  const [fetchLiveIdeaById] = useLazyGetLiveIdeaSingleQuery();
+  // Thread indicator handler: opens the ORIGINAL live idea a "Follow-up to X" link
+  // references (quote-reply style) in the same shared modal state this page already uses
+  // for its own cards' "View Details".
+  const handleOpenPreviousLiveIdea = async (previousLiveIdeaId) => {
+    if (!previousLiveIdeaId) return;
+    try {
+      const original = await fetchLiveIdeaById(previousLiveIdeaId).unwrap();
+      setSelectedIdea(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original live idea", err);
+    }
+  };
 
   const { data: categoryList } = useGetCommonCategoryQuery();
   const { data: educatorsData } = useGetAllEducatorsQuery();
@@ -505,6 +522,26 @@ const ClientLiveIdeas = () => {
               className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' li-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
+              {/* Thread indicator: this live idea is a chained follow-up to a previous one.
+                  Clicking it opens the ORIGINAL live idea being replied to (quote-reply
+                  style), not this card's own content. */}
+              {trade?.previousLiveIdea && (
+                <div className="mb-2">
+                  <div
+                    className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenPreviousLiveIdea(trade.previousLiveIdea._id);
+                    }}
+                  >
+                    <Link2 size={11} className="flex-shrink-0" />
+                    <span className="truncate">
+                      Follow-up to <span className="font-bold">{trade.previousLiveIdea.name}</span>
+                    </span>
+                  </div>
+                  <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
+                </div>
+              )}
               {/* ── Header: Strategy Name (primary) + Signal Type ── */}
               <div className="flex items-start gap-1 mb-2">
                 <div className="flex-1 min-w-0">

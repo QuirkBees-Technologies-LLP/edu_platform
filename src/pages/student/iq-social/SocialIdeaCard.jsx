@@ -8,9 +8,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ChartLine,
+  Link2,
 } from "lucide-react";
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 
 const LabelMap = {
   active: "Active",
@@ -35,6 +37,23 @@ const SocialIdeaCard = ({ idea }) => {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [copiedField, setCopiedField] = useState(null);
+  // Overrides `idea` in the modal when the user opened it via "Follow-up to X" — shows the
+  // ORIGINAL idea being replied to (quote-reply style), not this card's own content. Null
+  // means the modal shows this card's own `idea` as usual.
+  const [modalOverride, setModalOverride] = useState(null);
+  const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
+
+  const handleOpenPreviousIdea = async () => {
+    const previousIdeaId = idea?.previousIdea?._id;
+    if (!previousIdeaId) return;
+    try {
+      const original = await fetchIdeaById(previousIdeaId).unwrap();
+      setModalOverride(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original idea", err);
+    }
+  };
 
   const handleCopyField = async (fieldName, value) => {
     try {
@@ -49,6 +68,23 @@ const SocialIdeaCard = ({ idea }) => {
   return (
     <>
       <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
+        {/* Thread indicator: this idea is a chained follow-up to a previous one. Clicking
+            it opens the ORIGINAL idea being replied to (quote-reply style), not this
+            card's own content — matching a reply linking back to the message it quotes. */}
+        {idea?.previousIdea && (
+          <div className="mb-2">
+            <div
+              className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
+              onClick={handleOpenPreviousIdea}
+            >
+              <Link2 size={11} className="flex-shrink-0" />
+              <span className="truncate">
+                Follow-up to <span className="font-bold">{idea.previousIdea.name}</span>
+              </span>
+            </div>
+            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
+          </div>
+        )}
         {/* Header: educator - pair + status */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
@@ -70,17 +106,17 @@ const SocialIdeaCard = ({ idea }) => {
               </span>
               {idea?.status && (
                 <span
-                  className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
-                    ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
+                    ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[idea.status] === "Pending"
-                      ? "bg-purple-500/15 text-purple-600 dark:text-purple-400"
+                      ? "text-purple-600 dark:text-purple-400"
                       : LabelMap[idea.status] === "Win"
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                        ? "text-emerald-600 dark:text-emerald-400"
                         : LabelMap[idea.status] === "Partial Win"
-                          ? "bg-emerald-400/15 text-emerald-500 dark:text-emerald-400"
+                          ? "text-emerald-500 dark:text-emerald-400"
                           : LabelMap[idea.status] === "Loss"
-                            ? "bg-red-500/15 text-red-600 dark:text-red-400"
-                            : "bg-slate-500/15 text-slate-600 dark:text-slate-400"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-600 dark:text-slate-400"
                     }`}
                 >
                   {LabelMap[idea.status] === "Win"
@@ -123,7 +159,7 @@ const SocialIdeaCard = ({ idea }) => {
 
         {/* Chart image */}
         <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-extrabold capitalize tracking-wide text-white bg-indigo-500/90 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
             Idea
           </span>
           {idea?.image && idea.image.length > 0 ? (
@@ -250,7 +286,10 @@ const SocialIdeaCard = ({ idea }) => {
         {/* View Details */}
         <button
           className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors"
-          onClick={() => setIsViewOpen(true)}
+          onClick={() => {
+            setModalOverride(null);
+            setIsViewOpen(true);
+          }}
         >
           <Eye size={14} /> View Details
         </button>
@@ -258,14 +297,17 @@ const SocialIdeaCard = ({ idea }) => {
 
       <ViewClientTradeIdeas
         isViewOpen={isViewOpen}
-        handleCloseView={() => setIsViewOpen(false)}
-        selectedIdea={idea}
+        handleCloseView={() => {
+          setIsViewOpen(false);
+          setModalOverride(null);
+        }}
+        selectedIdea={modalOverride || idea}
         setIsLightBoxOpen={setIsLightBoxOpen}
       />
       <ImageLightBox
         isLightBoxOpen={isLightBoxOpen}
         setIsLightBoxOpen={setIsLightBoxOpen}
-        selectedIdea={idea}
+        selectedIdea={modalOverride || idea}
       />
     </>
   );

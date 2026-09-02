@@ -3,14 +3,13 @@ import { format } from "date-fns";
 import {
   TrendingUp,
   TrendingDown,
-  Eye,
   Copy,
-  ChevronLeft,
-  ChevronRight,
   ChartLine,
+  Link2,
 } from "lucide-react";
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 
 const LabelMap = {
   active: "Active",
@@ -35,8 +34,25 @@ const LabelMap = {
 const IdeaFeedCard = ({ idea }) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [copiedField, setCopiedField] = useState(null);
+  // Overrides `idea` in the modal when the user opened it via "Follow-up to X" — shows the
+  // ORIGINAL idea being replied to (quote-reply style), not this card's own content. Already
+  // carries `educatorDetails` (from getIdeaById's own response mapping), so unlike `idea`
+  // it needs no adapter. Null means the modal shows this card's own `idea` as usual.
+  const [modalOverride, setModalOverride] = useState(null);
+  const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
+
+  const handleOpenPreviousIdea = async () => {
+    const previousIdeaId = idea?.previousIdea?._id;
+    if (!previousIdeaId) return;
+    try {
+      const original = await fetchIdeaById(previousIdeaId).unwrap();
+      setModalOverride(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original idea", err);
+    }
+  };
 
   const handleCopyField = async (fieldName, value) => {
     try {
@@ -53,38 +69,45 @@ const IdeaFeedCard = ({ idea }) => {
   return (
     <>
       <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35]">
-        {/* Header: educator - pair + status */}
+        {/* Thread indicator: this idea is a chained follow-up to a previous one. Clicking
+            it opens the ORIGINAL idea being replied to (quote-reply style), not this
+            card's own content — matching a reply linking back to the message it quotes. */}
+        {idea?.previousIdea && (
+          <div className="mb-2">
+            <div
+              className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
+              onClick={handleOpenPreviousIdea}
+            >
+              <Link2 size={11} className="flex-shrink-0" />
+              <span className="truncate">
+                Follow-up to <span className="font-bold">{idea.previousIdea.name}</span>
+              </span>
+            </div>
+            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
+          </div>
+        )}
+        {/* Header: pair + status — no educator name here, this is already the educator's
+            own profile, so naming them on every card is redundant (kept on the general
+            social feed, where posts from multiple educators mix together). */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%]">
-                <img
-                  src={idea?.educatorId?.image || ""}
-                  alt={idea?.educatorId?.first_name}
-                  className="w-4 h-4 rounded-full object-cover flex-shrink-0"
-                />
-                <span className="flex items-center min-w-0">
-                  <span className="truncate">
-                    {idea?.educatorId?.first_name} {idea?.educatorId?.last_name}
-                  </span>
-                  <span className="flex-shrink-0 whitespace-nowrap">
-                    &nbsp;- {idea?.name || "—"}
-                  </span>
-                </span>
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%] truncate">
+                {idea?.name || "—"}
               </span>
               {idea?.status && (
                 <span
-                  className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
-                    ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
+                    ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[idea.status] === "Pending"
-                      ? "bg-purple-500/15 text-purple-600 dark:text-purple-400"
+                      ? "text-purple-600 dark:text-purple-400"
                       : LabelMap[idea.status] === "Win"
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                        ? "text-emerald-600 dark:text-emerald-400"
                         : LabelMap[idea.status] === "Partial Win"
-                          ? "bg-emerald-400/15 text-emerald-500 dark:text-emerald-400"
+                          ? "text-emerald-500 dark:text-emerald-400"
                           : LabelMap[idea.status] === "Loss"
-                            ? "bg-red-500/15 text-red-600 dark:text-red-400"
-                            : "bg-slate-500/15 text-slate-600 dark:text-slate-400"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-600 dark:text-slate-400"
                     }`}
                 >
                   {LabelMap[idea.status] === "Win"
@@ -125,61 +148,23 @@ const IdeaFeedCard = ({ idea }) => {
           </div>
         </div>
 
-        {/* Chart image */}
-        <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-extrabold capitalize tracking-wide text-white bg-indigo-500/90 backdrop-blur-sm">
+        {/* Chart image — click opens the details modal */}
+        <div
+          className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] cursor-pointer"
+          onClick={() => {
+            setModalOverride(null);
+            setIsViewOpen(true);
+          }}
+        >
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
             Idea
           </span>
           {idea?.image && idea.image.length > 0 ? (
-            <>
-              <img
-                src={idea.image[currentIndex] || idea.image[0]}
-                alt={idea?.name}
-                className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
-                onClick={() => setIsLightBoxOpen(true)}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsLightBoxOpen(true);
-                }}
-                className="absolute right-2 bottom-2 text-white p-1.5 bg-black/50 hover:bg-black/70 rounded-md backdrop-blur-sm transition-colors z-30"
-              >
-                <Eye size={14} />
-              </button>
-              {idea.image.length > 1 && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentIndex((i) => (i === 0 ? idea.image.length - 1 : i - 1));
-                    }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentIndex((i) => (i === idea.image.length - 1 ? 0 : i + 1));
-                    }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                    {idea.image.map((_, idx) => (
-                      <div
-                        key={idx}
-                        className={`w-1.5 h-1.5 rounded-full transition-colors ${currentIndex === idx ? "bg-white" : "bg-white/40"
-                          }`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
+            <img
+              src={idea.image[0]}
+              alt={idea?.name}
+              className="w-full h-[220px] object-cover object-right"
+            />
           ) : (
             <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
               <div className="flex flex-col items-center gap-2 opacity-40">
@@ -250,26 +235,21 @@ const IdeaFeedCard = ({ idea }) => {
             );
           })}
         </div>
-
-        {/* View Details */}
-        <button
-          className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors"
-          onClick={() => setIsViewOpen(true)}
-        >
-          <Eye size={14} /> View Details
-        </button>
       </div>
 
       <ViewClientTradeIdeas
         isViewOpen={isViewOpen}
-        handleCloseView={() => setIsViewOpen(false)}
-        selectedIdea={modalIdea}
+        handleCloseView={() => {
+          setIsViewOpen(false);
+          setModalOverride(null);
+        }}
+        selectedIdea={modalOverride || modalIdea}
         setIsLightBoxOpen={setIsLightBoxOpen}
       />
       <ImageLightBox
         isLightBoxOpen={isLightBoxOpen}
         setIsLightBoxOpen={setIsLightBoxOpen}
-        selectedIdea={idea}
+        selectedIdea={modalOverride || idea}
       />
     </>
   );

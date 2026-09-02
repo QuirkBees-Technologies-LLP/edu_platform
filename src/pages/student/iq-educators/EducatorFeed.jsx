@@ -327,7 +327,14 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
           combinedFeed.map((entry) => {
             switch (entry.type) {
               case "posts":
-                return <SocialPostCard key={entry.id} post={entry.raw} showTypeBadge />;
+                return (
+                  <SocialPostCard
+                    key={entry.id}
+                    post={entry.raw}
+                    showTypeBadge
+                    showAuthorName={false}
+                  />
+                );
               case "ideas":
                 return <IdeaFeedCard key={entry.id} idea={entry.raw} />;
               case "insights":

@@ -39,6 +39,11 @@ const CreateTradeIdeas = forwardRef(
       selectedRow,
       refetch,
       onSubmitSuccess,
+      // "Update" (chain) action: the source idea to link the new one back to via
+      // previousIdea, forming a thread — see AdminTradeIdeas.jsx's ActionMenu. Always
+      // creates a brand-new document, never an in-place edit.
+      chainFrom,
+      setChainFrom,
     },
     ref
   ) => {
@@ -47,6 +52,7 @@ const CreateTradeIdeas = forwardRef(
     const [updateTradeIdea] = useUpdateTradeIdeaMutation();
     const educatorId = auth?.user?._id;
     const { data } = useGetCommonCategoryQuery();
+    const isChainMode = !selectedRow?._id && !!chainFrom?._id;
 
     const initialValues = {
       name: "",
@@ -112,7 +118,11 @@ const CreateTradeIdeas = forwardRef(
       pips: Yup.number()
         .typeError("Pips must be a number")
         .when("status", {
-          is: (status) => ["win", "loss", "partialWin"].includes(status),
+          is: (status) =>
+            (isChainMode
+              ? ["win", "loss", "partialWin", "breakEven"]
+              : ["win", "loss", "partialWin"]
+            ).includes(status),
           then: (schema) =>
             schema
               .required("Pips is required")
@@ -153,8 +163,10 @@ const CreateTradeIdeas = forwardRef(
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
 
-        // Send existing image URLs the user kept (so backend knows which to preserve)
-        if (selectedRow?._id) {
+        // Send existing image URLs the user kept (so backend knows which to preserve) —
+        // both for editing in place, and for a chain-create where images were pre-loaded
+        // from the source idea and the educator may have pruned some.
+        if (selectedRow?._id || isChainMode) {
           const keptImages = (values.files || [])
             .filter((f) => !f?.file?.file && f?.dataURL)
             .map((f) => f.dataURL);
@@ -163,6 +175,10 @@ const CreateTradeIdeas = forwardRef(
 
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
+        }
+
+        if (isChainMode) {
+          formData.append("previousIdea", chainFrom._id);
         }
 
         const wasUpdate = !!selectedRow?._id;
@@ -175,12 +191,13 @@ const CreateTradeIdeas = forwardRef(
           } else {
             await createTradeIdeas(formData).unwrap();
             refetch();
-            toast.success("Idea created successfully!");
+            toast.success(isChainMode ? "Update published successfully!" : "Idea created successfully!");
           }
           formik.resetForm();
+          setChainFrom?.(null);
           handleCloseCreate();
           // Share-to-social prompt only makes sense when updating an existing idea, not
-          // when creating a brand new one.
+          // when creating a brand new one (chained or plain).
           if (wasUpdate && onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
@@ -224,6 +241,41 @@ const CreateTradeIdeas = forwardRef(
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
+
+    // "Update" (chain) action: reference fields (symbol/direction/type/entry/invalidation/
+    // exits/category) are copied from the source idea — they're rendered read-only below,
+    // not editable, since this is reporting an outcome on the same trade setup, not a new
+    // one. Images ARE pre-loaded (unlike Insights' chain form, which starts blank) so the
+    // educator can keep "before" images alongside new "after" ones, per Task 11. Status/
+    // pips/description start fresh — this is a new outcome being reported.
+    useEffect(() => {
+      if (!selectedRow?._id && chainFrom?._id) {
+        const seedImages = (chainFrom?.image || []).map((img) => ({
+          file: null,
+          dataURL: img,
+        }));
+
+        formik.setValues({
+          name: chainFrom?.name || "",
+          files: seedImages,
+          type: chainFrom?.type || "",
+          pips: 0,
+          timeFrame: Array.isArray(chainFrom?.timeFrame)
+            ? chainFrom.timeFrame[0]
+            : chainFrom?.timeFrame || "",
+          status: "active",
+          entry: chainFrom?.entry || "",
+          invalidation: chainFrom?.invalidation || "",
+          description: "",
+          category: chainFrom?.category?._id || "",
+          exits: chainFrom?.exits?.length > 0 ? chainFrom.exits : [""],
+          educatorId: chainFrom?.educatorDetails?._id || educatorId,
+          checkTime: false,
+          tradingViewLinks:
+            chainFrom?.tradingViewLinks?.length > 0 ? chainFrom.tradingViewLinks : [""],
+        });
+      }
+    }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
 
     // Function to add a new exit input
     const addExit = () => {
@@ -302,6 +354,7 @@ const CreateTradeIdeas = forwardRef(
         // here since it tracks edit-vs-create mode, not the form's field values.
         onOpenChange={() => {
           setSelectedRow({});
+          setChainFrom?.(null);
           handleCloseCreate();
         }}
       >
@@ -309,11 +362,33 @@ const CreateTradeIdeas = forwardRef(
         <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
           <DialogHeader>
             <DialogTitle>
-              {selectedRow?._id ? "Create IQ Idea" : "Create IQ Idea"}
+              {selectedRow?._id ? "Edit IQ Idea" : isChainMode ? "Update IQ Idea" : "Create IQ Idea"}
             </DialogTitle>
+            {isChainMode && (
+              <p className="text-xs text-gray-500 mt-1">
+                This publishes a follow-up idea chained to "{chainFrom?.name}".
+              </p>
+            )}
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
+              {isChainMode && (
+                <div className="col-span-12">
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-600">
+                    <span className="font-semibold uppercase text-gray-400 tracking-wide w-full mb-1">
+                      Reference — read-only, from the original idea
+                    </span>
+                    <span><strong className="text-gray-800">Symbol:</strong> {chainFrom?.name}</span>
+                    <span><strong className="text-gray-800">Direction:</strong> {chainFrom?.type}</span>
+                    <span><strong className="text-gray-800">Type:</strong> {Array.isArray(chainFrom?.timeFrame) ? chainFrom.timeFrame.join("/") : chainFrom?.timeFrame}</span>
+                    <span><strong className="text-gray-800">Entry:</strong> {chainFrom?.entry}</span>
+                    <span><strong className="text-gray-800">Invalidation:</strong> {chainFrom?.invalidation}</span>
+                    <span><strong className="text-gray-800">Exits:</strong> {chainFrom?.exits?.join(", ")}</span>
+                    <span><strong className="text-gray-800">Category:</strong> {chainFrom?.category?.name}</span>
+                  </div>
+                </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -336,6 +411,8 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -371,6 +448,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
 
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
@@ -395,6 +473,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -431,6 +510,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
 
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
@@ -455,7 +535,7 @@ const CreateTradeIdeas = forwardRef(
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
+                      {!isChainMode && <SelectItem value="pending">Pending</SelectItem>}
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="win">Win</SelectItem>
                       <SelectItem value="partialWin">Partial Win</SelectItem>
@@ -472,6 +552,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -494,6 +575,8 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -517,6 +600,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                 </div>
               </div>
+              )}
 
               {selectedRow?._id && (
                 <div className="col-span-12 md:col-span-6">
@@ -537,6 +621,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
               )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -589,6 +674,8 @@ const CreateTradeIdeas = forwardRef(
                   ))}
                 </div>
               </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -626,6 +713,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
               {/* <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -647,7 +735,10 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div> */}
 
-              {["win", "loss", "partialWin"].includes(formik.values.status) && (
+              {(isChainMode
+                ? ["win", "loss", "partialWin", "breakEven"]
+                : ["win", "loss", "partialWin"]
+              ).includes(formik.values.status) && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -737,6 +828,7 @@ const CreateTradeIdeas = forwardRef(
               className="btn btn-light"
               onClick={() => {
                 setSelectedRow({});
+                setChainFrom?.(null);
                 formik.resetForm();
                 handleCloseCreate();
               }}

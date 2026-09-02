@@ -8,6 +8,7 @@ import {
   useGetAllEducatorsQuery,
   useGetClientTradeAnalysisQuery,
   useGetClientTradeIdeasQuery,
+  useLazyGetTradeAnalysisByIdQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ImageLightBox from "./ImageLightBox";
@@ -148,6 +149,8 @@ const IqInsight = () => {
         : "",
     });
   const { data: educatorsData } = useGetAllEducatorsQuery();
+  const [fetchTradeAnalysisById, { isFetching: isFetchingPreviousAnalysis }] =
+    useLazyGetTradeAnalysisByIdQuery();
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -193,6 +196,20 @@ const IqInsight = () => {
 
   const handleCloseView = () => {
     setIsViewOpen(false);
+  };
+
+  // "Follow-up to X" opens the ORIGINAL insight being replied to, not the follow-up
+  // itself (quote-reply style) — previousAnalysis on the list item is only shallow-
+  // populated (title/createdAt), so the full original is fetched on demand here.
+  const handleOpenPreviousAnalysis = async (previousAnalysisId) => {
+    if (!previousAnalysisId) return;
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setSelectedIdea(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+    }
   };
 
   // ─── IQ Insight Tour ───────────────────────────────────────────────────────────────────────────────
@@ -701,8 +718,12 @@ const IqInsight = () => {
                         )}
                         {idea.previousAnalysis && (
                           <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 flex-shrink-0"
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary flex-shrink-0 cursor-pointer hover:underline"
                             title={`Follow-up to "${idea.previousAnalysis.title}"`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenPreviousAnalysis(idea.previousAnalysis._id);
+                            }}
                           >
                             <LinkIcon size={10} /> Follow-up
                           </span>

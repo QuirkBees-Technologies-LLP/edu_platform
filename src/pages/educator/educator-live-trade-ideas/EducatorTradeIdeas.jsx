@@ -45,6 +45,9 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  // Whether the create dialog should open in "Update" (chain) mode rather than plain
+  // Edit — see educator-trade-ideas/EducatorTradeIdeas.jsx for the equivalent flag.
+  const [isChainMode, setIsChainMode] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [category, setCategory] = useState("");
   const [selectedEducator, setSelectedEducator] = useState("");
@@ -130,12 +133,28 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         <MenuItem
           onClick={() => {
             setSelectedRow(raw);
+            setIsChainMode(false);
             setIsCreateOpen(!isCreateOpen);
           }}
         >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
+            </MenuIcon>
+            <MenuTitle>Edit</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            // Update = create a brand-new, chained live idea — never mutate this row.
+            setSelectedRow(raw);
+            setIsChainMode(true);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="arrow-circle-right" />
             </MenuIcon>
             <MenuTitle>Update</MenuTitle>
           </MenuLink>
@@ -611,7 +630,9 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             refetch={reloadTable}
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
-            selectedRow={selectedRow}
+            selectedRow={isChainMode ? {} : selectedRow}
+            chainFrom={isChainMode ? selectedRow : null}
+            setChainFrom={() => setIsChainMode(false)}
             onSubmitSuccess={() => setIsSocialPromptOpen(true)}
           />
 
