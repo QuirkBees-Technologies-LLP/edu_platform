@@ -20,6 +20,7 @@ import {
 import { getEmbedUrl } from "@/utils/videoUtils";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
+import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 
 const LabelMap = {
   active: "Active",
@@ -45,6 +46,24 @@ const SocialInsightCard = ({ insight }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [copiedField, setCopiedField] = useState(null);
   const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
+  // Overrides `insight` in the modal when the user opened it via "Follow-up to X" —
+  // shows the ORIGINAL insight being replied to (quote-reply style), not this card's
+  // own content. Null means the modal shows this card's own `insight` as usual.
+  const [modalOverride, setModalOverride] = useState(null);
+  const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
+
+  const handleOpenPreviousAnalysis = async (e) => {
+    e.stopPropagation();
+    const previousAnalysisId = insight?.previousAnalysis?._id;
+    if (!previousAnalysisId) return;
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setModalOverride(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+    }
+  };
 
   const handleCopyField = async (fieldName, value) => {
     try {
@@ -67,7 +86,11 @@ const SocialInsightCard = ({ insight }) => {
         {/* Thread indicator: this insight is a chained follow-up to a previous one */}
         {insight?.previousAnalysis && (
           <div className="mb-2">
-            <div className="flex items-center gap-1.5 px-1 text-[11px] text-slate-500 dark:text-white/50">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-1 text-[11px] text-slate-500 dark:text-white/50 cursor-pointer hover:text-primary hover:underline w-fit"
+              onClick={handleOpenPreviousAnalysis}
+            >
               <Link2 size={11} className="flex-shrink-0" />
               <span className="truncate">
                 Follow-up to{" "}
@@ -75,7 +98,7 @@ const SocialInsightCard = ({ insight }) => {
                   {insight.previousAnalysis.title}
                 </span>
               </span>
-            </div>
+            </button>
             <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
           </div>
         )}
@@ -315,7 +338,10 @@ const SocialInsightCard = ({ insight }) => {
         {/* View Details */}
         <button
           className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors"
-          onClick={() => setIsViewOpen(true)}
+          onClick={() => {
+            setModalOverride(null);
+            setIsViewOpen(true);
+          }}
         >
           <Eye size={14} /> View Details
         </button>
@@ -323,14 +349,17 @@ const SocialInsightCard = ({ insight }) => {
 
       <ViewInsightTradeIdeas
         isViewOpen={isViewOpen}
-        handleCloseView={() => setIsViewOpen(false)}
-        selectedIdea={insight}
+        handleCloseView={() => {
+          setIsViewOpen(false);
+          setModalOverride(null);
+        }}
+        selectedIdea={modalOverride || insight}
         setIsLightBoxOpen={setIsLightBoxOpen}
       />
       <ImageLightBox
         isLightBoxOpen={isLightBoxOpen}
         setIsLightBoxOpen={setIsLightBoxOpen}
-        selectedIdea={insight}
+        selectedIdea={modalOverride || insight}
       />
 
       {/* DynTube Direct Video Player Modal (for the card's own carousel slide) */}

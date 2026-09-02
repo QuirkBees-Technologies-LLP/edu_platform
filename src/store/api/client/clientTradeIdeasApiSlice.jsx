@@ -90,6 +90,12 @@ export const clientTradeIdeasApiSlice = createApi({
         return `/users/trade-analysis/list?${params.toString()}`;
       },
     }),
+    // Single insight, fully populated — used to open the *original* insight a "Follow-up
+    // to X" link references. The list endpoints only shallow-populate previousAnalysis
+    // with title/createdAt, not enough to render the details modal.
+    getTradeAnalysisById: builder.query({
+      query: (id) => `/users/trade-analysis/${id}`,
+    }),
     getClientCryptoAnalysis: builder.query({
       query: ({
         page = 1,
@@ -143,4 +149,5 @@ export const {
   useGetAllEducatorsQuery,
   useGetEducatorIdeasQuery,
   useGetEducatorInsightsQuery,
+  useLazyGetTradeAnalysisByIdQuery,
 } = clientTradeIdeasApiSlice;
