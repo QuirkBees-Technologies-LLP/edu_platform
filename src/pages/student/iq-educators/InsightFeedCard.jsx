@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Eye, ChevronLeft, ChevronRight, ChartLine, Link2 } from "lucide-react";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
+import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 
 // The exact card design used on /iq-insight (IqInsight.jsx) for a plain Insight (no
 // entry/invalidation/exit/status — those are trade-idea-only fields TradeAnalysis
@@ -23,6 +24,24 @@ const InsightFeedCard = ({ insight }) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  // Overrides `modalInsight` in the modal when the user opened it via "Follow-up to X" —
+  // shows the ORIGINAL insight being replied to (quote-reply style), not this card's own
+  // content. Null means the modal shows this card's own insight as usual.
+  const [modalOverride, setModalOverride] = useState(null);
+  const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
+
+  const handleOpenPreviousAnalysis = async (e) => {
+    e.stopPropagation();
+    const previousAnalysisId = insight?.previousAnalysis?._id;
+    if (!previousAnalysisId) return;
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setModalOverride(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+    }
+  };
 
   const modalInsight = {
     ...insight,
@@ -37,7 +56,11 @@ const InsightFeedCard = ({ insight }) => {
         {/* Thread indicator: this insight is a chained follow-up to a previous one */}
         {insight?.previousAnalysis && (
           <div className="mb-2">
-            <div className="flex items-center gap-1.5 px-1 text-[11px] text-slate-500 dark:text-white/50">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-1 text-[11px] text-slate-500 dark:text-white/50 cursor-pointer hover:text-primary hover:underline w-fit"
+              onClick={handleOpenPreviousAnalysis}
+            >
               <Link2 size={11} className="flex-shrink-0" />
               <span className="truncate">
                 Follow-up to{" "}
@@ -45,7 +68,7 @@ const InsightFeedCard = ({ insight }) => {
                   {insight.previousAnalysis.title}
                 </span>
               </span>
-            </div>
+            </button>
             <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
           </div>
         )}
@@ -169,7 +192,10 @@ const InsightFeedCard = ({ insight }) => {
         {/* View Details */}
         <button
           className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors"
-          onClick={() => setIsViewOpen(true)}
+          onClick={() => {
+            setModalOverride(null);
+            setIsViewOpen(true);
+          }}
         >
           <Eye size={14} /> View Details
         </button>
@@ -177,14 +203,17 @@ const InsightFeedCard = ({ insight }) => {
 
       <ViewInsightTradeIdeas
         isViewOpen={isViewOpen}
-        handleCloseView={() => setIsViewOpen(false)}
-        selectedIdea={modalInsight}
+        handleCloseView={() => {
+          setIsViewOpen(false);
+          setModalOverride(null);
+        }}
+        selectedIdea={modalOverride || modalInsight}
         setIsLightBoxOpen={setIsLightBoxOpen}
       />
       <ImageLightBox
         isLightBoxOpen={isLightBoxOpen}
         setIsLightBoxOpen={setIsLightBoxOpen}
-        selectedIdea={modalInsight}
+        selectedIdea={modalOverride || modalInsight}
       />
     </>
   );
