@@ -10,6 +10,7 @@ import {
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 
 const LabelMap = {
   active: "Active",
@@ -65,6 +66,10 @@ const IdeaFeedCard = ({ idea }) => {
   };
 
   const modalIdea = { ...idea, educatorDetails: idea?.educatorId };
+
+  // Educator-chosen display order (Task 14) — this card only shows a single static
+  // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
+  const orderedThumbnail = getOrderedImageUrls(idea)[0];
 
   return (
     <>
@@ -159,9 +164,9 @@ const IdeaFeedCard = ({ idea }) => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
             Idea
           </span>
-          {idea?.image && idea.image.length > 0 ? (
+          {orderedThumbnail ? (
             <img
-              src={idea.image[0]}
+              src={orderedThumbnail}
               alt={idea?.name}
               className="w-full h-[220px] object-cover object-right"
             />

@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -64,7 +63,6 @@ const CreateLiveTradeIdea = forwardRef(
       status: "",
       pips: 0,
       description: "",
-      checkTime: false,
       tradingViewLinks: [""],
     };
     const numberField = () =>
@@ -118,7 +116,6 @@ const CreateLiveTradeIdea = forwardRef(
         formData.append("isLiveIdea", true);
         formData.append("timeFrame", values.timeFrame);
         formData.append("description", values.description || "");
-        formData.append("checkTime", values.checkTime);
 
         // Append TradingView links (always send, even empty, so backend can clear old links)
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
@@ -187,7 +184,6 @@ const CreateLiveTradeIdea = forwardRef(
           streamCallId: selectedRow?.streamCallId,
            isLiveIdea: selectedRow?.isLiveIdea,
           timeFrame: selectedRow?.timeFrame,
-          checkTime: selectedRow?.isUpdatedLiveIdea || false,
           tradingViewLinks: selectedRow?.tradingViewLinks?.length > 0 ? selectedRow.tradingViewLinks : [""],
         };
         formik.setValues(initData);
@@ -220,7 +216,6 @@ const CreateLiveTradeIdea = forwardRef(
             ? chainFrom.timeFrame[0]
             : chainFrom?.timeFrame || "",
           description: "",
-          checkTime: false,
           tradingViewLinks: chainFrom?.tradingViewLinks?.length > 0 ? chainFrom.tradingViewLinks : [""],
         });
       }
@@ -515,26 +510,6 @@ const CreateLiveTradeIdea = forwardRef(
                     )}
                   </div>
                 </div>
-
-                {selectedRow?._id && (
-                  <div className="col-span-12 md:col-span-6">
-                    <div className="flex items-center gap-2 h-full">
-                      <Checkbox
-                        id="checkTime"
-                        checked={formik.values.checkTime}
-                        onCheckedChange={(checked) =>
-                          formik.setFieldValue("checkTime", checked)
-                        }
-                      />
-                      <label
-                        htmlFor="checkTime"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                       Do Not Update TimeStamp
-                      </label>
-                    </div>
-                  </div>
-                )}
 
                 {(isChainMode
                   ? ["win", "loss", "partialWin", "breakEven"]

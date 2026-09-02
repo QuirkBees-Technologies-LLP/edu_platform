@@ -5,6 +5,8 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DraggableImageList from "@/components/ui/DraggableImageList";
 import DraggableLinkList from "@/components/ui/DraggableLinkList";
+import DraggableMediaOrder from "@/components/ui/DraggableMediaOrder";
+import { ImageIcon, Link2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -68,8 +69,11 @@ const CreateTradeIdeas = forwardRef(
       description: "",
       category: "",
       pips: 0,
-      checkTime: false,
       tradingViewLinks: [""],
+      // Educator-chosen display order between images and TradingView charts (Task 14) —
+      // whichever group is first here is what students see first. Ideas have no video
+      // field, so only these two groups apply.
+      mediaOrder: ["image", "tradingview"],
     };
     const numberField = () =>
       Yup.number()
@@ -153,12 +157,14 @@ const CreateTradeIdeas = forwardRef(
         formData.append("invalidation", values.invalidation);
         formData.append("description", values.description);
         formData.append("category", values.category);
-        formData.append("checkTime", values.checkTime);
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
 
         // Append TradingView links (always send, even empty, so backend can clear old links)
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+
+        // Educator-chosen display order between the media groups (Task 14).
+        formData.append("mediaOrder", JSON.stringify(values.mediaOrder || ["image", "tradingview"]));
 
         // Send existing image URLs the user kept (so backend knows which to preserve) —
         // both for editing in place, and for a chain-create where images were pre-loaded
@@ -234,8 +240,8 @@ const CreateTradeIdeas = forwardRef(
           description: selectedRow?.description,
           exits: selectedRow?.exits,
           pips: selectedRow?.pips,
-          checkTime: selectedRow?.isUpdatedIdea || false,
           tradingViewLinks: selectedRow?.tradingViewLinks?.length > 0 ? selectedRow.tradingViewLinks : [""],
+          mediaOrder: selectedRow?.mediaOrder?.length > 0 ? selectedRow.mediaOrder : ["image", "tradingview"],
         };
         formik.setValues(initData);
       }
@@ -269,9 +275,9 @@ const CreateTradeIdeas = forwardRef(
           exits: chainFrom?.exits?.length > 0 ? chainFrom.exits : [""],
           pips: 0,
           educatorId: chainFrom?.educatorDetails?._id || educatorId,
-          checkTime: false,
           tradingViewLinks:
             chainFrom?.tradingViewLinks?.length > 0 ? chainFrom.tradingViewLinks : [""],
+          mediaOrder: chainFrom?.mediaOrder?.length > 0 ? chainFrom.mediaOrder : ["image", "tradingview"],
         });
       }
     }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
@@ -696,25 +702,6 @@ const CreateTradeIdeas = forwardRef(
                 </div>
                 )}
 
-                {selectedRow?._id && (
-                  <div className="col-span-12 md:col-span-6">
-                    <div className="flex items-center gap-2 h-full ">
-                      <Checkbox
-                        id="checkTime"
-                        checked={formik.values.checkTime}
-                        onCheckedChange={(checked) =>
-                          formik.setFieldValue("checkTime", checked)
-                        }
-                      />
-                      <label
-                        htmlFor="checkTime"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        Do Not Update TimeStamp
-                      </label>
-                    </div>
-                  </div>
-                )}
                 {/* <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -782,6 +769,25 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
+                {/* Display order (Task 14): which media type students see first */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      Display Order
+                    </label>
+                    <p className="text-xs text-gray-500 mb-1">
+                      Drag to choose which media students see first.
+                    </p>
+                    <DraggableMediaOrder
+                      order={formik.values.mediaOrder || ["image", "tradingview"]}
+                      onChange={(next) => formik.setFieldValue("mediaOrder", next)}
+                      labels={{
+                        image: { label: "Image", icon: <ImageIcon size={14} className="text-gray-400" /> },
+                        tradingview: { label: "TradingView Chart", icon: <Link2 size={14} className="text-gray-400" /> },
+                      }}
+                    />
+                  </div>
+                </div>
 
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">

@@ -40,6 +40,7 @@ import {
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { getOrderedMediaSlides } from "@/utils/mediaOrder";
 import Loader from "../../../components/ui/loader";
 import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown, Link2 as LinkIcon } from "lucide-react";
 import {
@@ -588,12 +589,13 @@ const IqInsight = () => {
 
                   {/* ── Chart Image / Video Carousel ── */}
                   {(() => {
-                    // Build carousel items: images + optional DynTube video
-                    const images = idea.image || [];
-                    const hasDyntube = !!idea.dyntubeUrl;
-                    const totalSlides = images.length + (hasDyntube ? 1 : 0);
+                    // Build carousel items in the educator-chosen display order between
+                    // images / TradingView snapshots / DynTube video (Task 14).
+                    const slides = getOrderedMediaSlides(idea);
+                    const totalSlides = slides.length;
                     const currentIdx = idea.currentIndex ?? 0;
-                    const isDyntubeSlide = hasDyntube && currentIdx === images.length;
+                    const currentSlide = slides[currentIdx];
+                    const isDyntubeSlide = currentSlide?.type === "dyntube";
 
                     if (totalSlides === 0) {
                       return (
@@ -631,7 +633,7 @@ const IqInsight = () => {
                           /* Image slide */
                           <>
                             <img
-                              src={images[currentIdx]}
+                              src={currentSlide?.url}
                               alt={idea.pair || idea.name}
                               className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                               onClick={() => {

@@ -1,11 +1,12 @@
 import React, { forwardRef, useEffect, useState, useCallback } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Play, X } from "lucide-react";
+import { Play, X, ImageIcon, Link2, Video } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DraggableImageList from "@/components/ui/DraggableImageList";
 import DraggableLinkList from "@/components/ui/DraggableLinkList";
+import DraggableMediaOrder from "@/components/ui/DraggableMediaOrder";
 import {
   Select,
   SelectContent,
@@ -13,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -66,9 +66,11 @@ const CreateTradeAnalysis = forwardRef(
       createdBy: "",
       description: "",
       category: "",
-      checkTime: false,
       tradingViewLinks: [""],
       dyntubeUrl: "",
+      // Educator-chosen display order between images / TradingView charts / DynTube video
+      // (Task 14) — whichever group is first here is what students see first.
+      mediaOrder: ["image", "tradingview", "dyntube"],
     };
 
     const createSchema = Yup.object().shape({
@@ -104,11 +106,13 @@ const CreateTradeAnalysis = forwardRef(
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
         formData.append("category", values.category);
-        formData.append("checkTime", values.checkTime);
 
         // Append TradingView links (always send, even empty, so backend can clear old links)
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+
+        // Educator-chosen display order between the media groups (Task 14).
+        formData.append("mediaOrder", JSON.stringify(values.mediaOrder || ["image", "tradingview", "dyntube"]));
 
         // Chained create (Task 4.2's "Update" action): link this brand-new insight back to
         // the one it follows up on. Only applies when actually creating (not editing).
@@ -193,9 +197,9 @@ const CreateTradeAnalysis = forwardRef(
           files: existingImages,
           description: selectedRow?.description,
           category: selectedRow?.category?._id,
-          checkTime: selectedRow?.isUpdatedAnalysis || false,
           tradingViewLinks: tvLinks,
           dyntubeUrl: selectedRow?.dyntubeUrl || "",
+          mediaOrder: selectedRow?.mediaOrder?.length > 0 ? selectedRow.mediaOrder : ["image", "tradingview", "dyntube"],
         };
         formik.setValues(initData);
       }
@@ -212,9 +216,9 @@ const CreateTradeAnalysis = forwardRef(
           files: [],
           description: "",
           category: "",
-          checkTime: false,
           tradingViewLinks: [""],
           dyntubeUrl: "",
+          mediaOrder: ["image", "tradingview", "dyntube"],
         });
       }
     }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
@@ -471,25 +475,27 @@ const CreateTradeAnalysis = forwardRef(
                   </div>
                 </div>
 
-                {selectedRow?._id && (
-                  <div className="col-span-12">
-                    <div className="flex items-center gap-2 h-full ">
-                      <Checkbox
-                        id="checkTime"
-                        checked={formik.values.checkTime}
-                        onCheckedChange={(checked) =>
-                          formik.setFieldValue("checkTime", checked)
-                        }
-                      />
-                      <label
-                        htmlFor="checkTime"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        Do Not Update TimeStamp
-                      </label>
-                    </div>
+                {/* Display order (Task 14): which media type students see first */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      Display Order
+                    </label>
+                    <p className="text-xs text-gray-500 mb-1">
+                      Drag to choose which media students see first.
+                    </p>
+                    <DraggableMediaOrder
+                      order={formik.values.mediaOrder || ["image", "tradingview", "dyntube"]}
+                      onChange={(next) => formik.setFieldValue("mediaOrder", next)}
+                      labels={{
+                        image: { label: "Image", icon: <ImageIcon size={14} className="text-gray-400" /> },
+                        tradingview: { label: "TradingView Chart", icon: <Link2 size={14} className="text-gray-400" /> },
+                        dyntube: { label: "Video", icon: <Video size={14} className="text-gray-400" /> },
+                      }}
+                    />
                   </div>
-                )}
+                </div>
+
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
                     {/* Upload Box - always shown */}

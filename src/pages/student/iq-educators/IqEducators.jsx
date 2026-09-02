@@ -48,6 +48,7 @@ import {
   useLazyGetLiveIdeaSingleQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import EducatorFeed from "./EducatorFeed";
 
 // Strips HTML tags AND decodes entities (e.g. "&nbsp;") into plain text,
@@ -297,6 +298,9 @@ const IqEducators = () => {
   // uses instead.
   const renderIdeaCard = (courseIdea, extraClassName = "") => {
     const modalIdea = { ...courseIdea, educatorDetails: courseIdea?.educatorId };
+    // Educator-chosen display order (Task 14) — this card only shows a single static
+    // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
+    const orderedThumbnail = getOrderedImageUrls(courseIdea)[0];
     return (
       <div
         key={courseIdea?._id}
@@ -399,9 +403,9 @@ const IqEducators = () => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
             Idea
           </span>
-          {courseIdea?.image?.length > 0 ? (
+          {orderedThumbnail ? (
             <img
-              src={courseIdea.image[0]}
+              src={orderedThumbnail}
               alt={courseIdea?.name}
               className="w-full h-[220px] object-cover object-right"
             />
@@ -710,6 +714,9 @@ const IqEducators = () => {
       image: insight?.photos,
       educatorDetails: insight?.createdBy,
     };
+    // Educator-chosen display order (Task 14) — this card only shows a single static
+    // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
+    const orderedThumbnail = getOrderedImageUrls(insight)[0];
     return (
       <div
         key={insight?._id}
@@ -763,9 +770,9 @@ const IqEducators = () => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-violet-500/55 backdrop-blur-sm">
             Insight
           </span>
-          {insight?.photos?.length > 0 ? (
+          {orderedThumbnail ? (
             <img
-              src={insight.photos[0]}
+              src={orderedThumbnail}
               alt={insight?.title}
               className="w-full h-[220px] object-cover object-center"
             />

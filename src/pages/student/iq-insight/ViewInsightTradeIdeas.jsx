@@ -12,10 +12,61 @@ import StudentIqSlider from "./StudentIqSlider";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
 import { Link } from "react-router-dom";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 
 const ViewInsightTradeIdeas = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
     const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
+
+    // Educator-chosen display order (Task 14). The slider itself only ever holds
+    // image/TradingView-snapshot slides (getOrderedImageUrls already interleaves those
+    // two correctly) — the DynTube video isn't a slide here, it's its own block, so the
+    // one more thing "order" can express at this level is whether that block appears
+    // above or below the slider.
+    const orderedImages = getOrderedImageUrls(selectedIdea);
+    const mediaOrder =
+      selectedIdea?.mediaOrder?.length > 0
+        ? selectedIdea.mediaOrder
+        : ["image", "tradingview", "dyntube"];
+    const dyntubeIndex = mediaOrder.indexOf("dyntube");
+    const firstImageGroupIndex = Math.min(
+      ...["image", "tradingview"]
+        .map((key) => mediaOrder.indexOf(key))
+        .filter((idx) => idx !== -1)
+    );
+    const dyntubeFirst =
+      dyntubeIndex !== -1 &&
+      (firstImageGroupIndex === -1 || dyntubeIndex < firstImageGroupIndex);
+
+    const sliderBlock = orderedImages.length > 0 && (
+      <div className="">
+        <StudentIqSlider
+          sliderImages={orderedImages}
+          setIsLightBoxOpen={setIsLightBoxOpen}
+          selectedIdea={selectedIdea}
+        />
+      </div>
+    );
+
+    const dyntubeBlock = selectedIdea?.dyntubeUrl && (
+      <div className="px-4 mt-3">
+        <div
+          className="relative w-full rounded-xl overflow-hidden bg-black cursor-pointer group"
+          style={{ aspectRatio: '16/9' }}
+          onClick={() => setDyntubeModalOpen(true)}
+        >
+          <iframe
+            src={getEmbedUrl(selectedIdea.dyntubeUrl)}
+            className="w-full h-full"
+            loading="lazy"
+            tabIndex={-1}
+            scrolling="no"
+            style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
+            title="DynTube Video"
+          />
+        </div>
+      </div>
+    );
 
     return (
       <>
@@ -38,41 +89,16 @@ const ViewInsightTradeIdeas = forwardRef(
                       {selectedIdea?.name}
                     </div>
                   </div>
-                  {selectedIdea?.image?.length > 0 && (
-                    <div className="">
-                      <StudentIqSlider
-                        sliderImages={selectedIdea?.image}
-                        setIsLightBoxOpen={setIsLightBoxOpen}
-                        selectedIdea={selectedIdea}
-                      />
-                    </div>
-                  )}
-
-                  {/* DynTube Thumbnail + Play Button */}
-                  {selectedIdea?.dyntubeUrl && (
-                    <div className="px-4 mt-3">
-                      <div
-                        className="relative w-full rounded-xl overflow-hidden bg-black cursor-pointer group"
-                        style={{ aspectRatio: '16/9' }}
-                        onClick={() => setDyntubeModalOpen(true)}
-                      >
-                        <iframe
-                          src={getEmbedUrl(selectedIdea.dyntubeUrl)}
-                          className="w-full h-full"
-                          loading="lazy"
-                          tabIndex={-1}
-                          scrolling="no"
-                          style={{ pointerEvents: 'none', border: 'none', overflow: 'hidden' }}
-                          title="DynTube Video"
-                        />
-                        <div className="" />
-                        {/* <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-200">
-                          <Play size={28} className="text-white ml-1" fill="white" />
-                        </div>
-                      </div> */}
-                      </div>
-                    </div>
+                  {dyntubeFirst ? (
+                    <>
+                      {dyntubeBlock}
+                      {sliderBlock}
+                    </>
+                  ) : (
+                    <>
+                      {sliderBlock}
+                      {dyntubeBlock}
+                    </>
                   )}
 
                   <div className="flex items-center">

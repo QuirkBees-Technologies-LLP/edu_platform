@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { ChartLine, Link2 } from "lucide-react";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
 import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
@@ -33,6 +34,11 @@ const InsightFeedCard = ({ insight }) => {
     image: insight?.photos,
     educatorDetails: insight?.createdBy,
   };
+
+  // Educator-chosen display order (Task 14) — this card only shows a single static
+  // thumbnail, so it's just the first image/TradingView-snapshot slide in that order
+  // (no dyntube here since this card never renders video).
+  const orderedThumbnail = getOrderedImageUrls(insight)[0];
 
   const handleOpenPreviousAnalysis = async () => {
     const previousAnalysisId = insight?.previousAnalysis?._id;
@@ -90,9 +96,9 @@ const InsightFeedCard = ({ insight }) => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-violet-500/55 backdrop-blur-sm">
             Insight
           </span>
-          {insight?.photos && insight.photos.length > 0 ? (
+          {orderedThumbnail ? (
             <img
-              src={insight.photos[0]}
+              src={orderedThumbnail}
               alt={insight?.title}
               className="w-full h-[220px] object-cover object-center"
             />

@@ -13,6 +13,7 @@ import {
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 
 const LabelMap = {
   active: "Active",
@@ -64,6 +65,9 @@ const SocialIdeaCard = ({ idea }) => {
       console.error("Copy failed", err);
     }
   };
+
+  // Educator-chosen display order between images and TradingView snapshots (Task 14).
+  const orderedImages = getOrderedImageUrls(idea);
 
   return (
     <>
@@ -162,10 +166,10 @@ const SocialIdeaCard = ({ idea }) => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
             Idea
           </span>
-          {idea?.image && idea.image.length > 0 ? (
+          {orderedImages.length > 0 ? (
             <>
               <img
-                src={idea.image[currentIndex] || idea.image[0]}
+                src={orderedImages[currentIndex] || orderedImages[0]}
                 alt={idea?.name}
                 className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                 onClick={() => setIsLightBoxOpen(true)}
@@ -180,12 +184,12 @@ const SocialIdeaCard = ({ idea }) => {
               >
                 <Eye size={14} />
               </button>
-              {idea.image.length > 1 && (
+              {orderedImages.length > 1 && (
                 <>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === 0 ? idea.image.length - 1 : i - 1));
+                      setCurrentIndex((i) => (i === 0 ? orderedImages.length - 1 : i - 1));
                     }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
@@ -194,14 +198,14 @@ const SocialIdeaCard = ({ idea }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === idea.image.length - 1 ? 0 : i + 1));
+                      setCurrentIndex((i) => (i === orderedImages.length - 1 ? 0 : i + 1));
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                    {idea.image.map((_, idx) => (
+                    {orderedImages.map((_, idx) => (
                       <div
                         key={idx}
                         className={`w-1.5 h-1.5 rounded-full transition-colors ${currentIndex === idx ? "bg-white" : "bg-white/40"

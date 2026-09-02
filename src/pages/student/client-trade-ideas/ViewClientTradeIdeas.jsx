@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import ClientTradeSlider from "./ClientTradeSlider";
 import { format } from "date-fns";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import EducatorImage from "./EducatorImage";
 import { Link } from "react-router-dom";
 
@@ -66,7 +67,7 @@ const ViewClientTradeIdeas = forwardRef(
 
                 <div className="">
                   <ClientTradeSlider
-                    sliderImages={selectedIdea?.image}
+                    sliderImages={getOrderedImageUrls(selectedIdea)}
                     setIsLightBoxOpen={setIsLightBoxOpen}
                     selectedIdea={selectedIdea}
                   />

@@ -10,6 +10,7 @@ import {
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -515,7 +516,11 @@ const ClientTradeIdeas = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tradeIdeas?.map((trade, index) => (
+          {tradeIdeas?.map((trade, index) => {
+            // Educator-chosen display order between images and TradingView snapshots
+            // (Task 14).
+            const orderedTradeImages = getOrderedImageUrls(trade);
+            return (
             <div
               key={trade._id}
               className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
@@ -596,10 +601,10 @@ const ClientTradeIdeas = () => {
 
               {/* ── Chart Image Thumbnail ── */}
               <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-                {trade.image && trade.image.length > 0 ? (
+                {orderedTradeImages.length > 0 ? (
                   <>
                     <img
-                      src={trade.image[trade.currentIndex ?? 0]}
+                      src={orderedTradeImages[trade.currentIndex ?? 0]}
                       alt={trade.pair}
                       className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                       onClick={() => {
@@ -618,7 +623,7 @@ const ClientTradeIdeas = () => {
                     >
                       <Eye size={14} />
                     </button>
-                    {trade.image.length > 1 && (
+                    {orderedTradeImages.length > 1 && (
                       <>
                         <button
                           onClick={(e) => {
@@ -657,7 +662,7 @@ const ClientTradeIdeas = () => {
                           <ChevronRight size={16} />
                         </button>
                         <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                          {trade.image.map((_, idx) => (
+                          {orderedTradeImages.map((_, idx) => (
                             <div
                               key={idx}
                               className={`w-1.5 h-1.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx ? "bg-white" : "bg-white/40"
@@ -753,7 +758,8 @@ const ClientTradeIdeas = () => {
                 <Eye size={14} /> View Details
               </button>
             </div>
-          ))}
+            );
+          })}
 
           <ViewClientTradeIdeas
             isViewOpen={isViewOpen}

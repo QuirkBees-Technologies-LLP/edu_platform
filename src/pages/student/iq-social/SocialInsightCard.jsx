@@ -18,6 +18,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { getOrderedMediaSlides } from "@/utils/mediaOrder";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
 import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
@@ -74,10 +75,12 @@ const SocialInsightCard = ({ insight }) => {
     }
   };
 
-  const images = insight?.image || [];
-  const hasDyntube = !!insight?.dyntubeUrl;
-  const totalSlides = images.length + (hasDyntube ? 1 : 0);
-  const isDyntubeSlide = hasDyntube && currentIndex === images.length;
+  // Educator-chosen display order between images / TradingView snapshots / DynTube video
+  // (Task 14) — slides render in whichever order was picked, not a hardcoded sequence.
+  const slides = getOrderedMediaSlides(insight);
+  const totalSlides = slides.length;
+  const currentSlide = slides[currentIndex];
+  const isDyntubeSlide = currentSlide?.type === "dyntube";
 
   return (
     <>
@@ -175,7 +178,7 @@ const SocialInsightCard = ({ insight }) => {
               ) : (
                 <>
                   <img
-                    src={images[currentIndex]}
+                    src={currentSlide?.url}
                     alt={insight?.name}
                     className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                     onClick={() => setIsLightBoxOpen(true)}
