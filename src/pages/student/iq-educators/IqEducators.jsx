@@ -29,7 +29,7 @@ import RecordingThumbnail from "./RecordingThumbnail";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
@@ -69,7 +69,6 @@ const IqEducators = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-  const [liveFeedImage, setLiveFeedImage] = useState(null);
   const [isEducatorLive, setIsEducatorLive] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -360,12 +359,6 @@ const IqEducators = () => {
       });
   }
 
-  const makeClickableLinks = (text) =>
-    text?.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
-
   const getRelativeTime = (date) => {
     if (!date) return "";
 
@@ -382,97 +375,6 @@ const IqEducators = () => {
     if (hours < 24) return `${hours} hr ago`;
     return `${days} day${days > 1 ? "s" : ""} ago`;
   };
-
-  // Extracted so the same Live Feed card can render in its normal sidebar spot
-  // (when not live) or stacked below the Educator Feed inside the live chat
-  // column (when live), without duplicating this JSX in two places.
-  const renderLiveFeedCard = () => (
-    <div className="card rounded-2xl shadow-md overflow-hidden">
-      {/* Header */}
-      <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-        <h3 className="text-white font-semibold text-sm">
-          Live Feed
-        </h3>
-        <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-        </div>
-      </div>
-
-      {/* Updates */}
-      <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-        {/* Messages */}
-        {response?.data?.PostData?.length > 0 ? (
-          response?.data?.PostData?.map((update) => (
-            <div
-              key={update?._id}
-              className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-            >
-              <div className="flex flex-col gap-4 mb-4">
-                <img
-                  src={update?.author?.image}
-                  alt={update?.author?.name}
-                  className="w-12 h-12 rounded-full"
-                />
-                <div>
-                  <h4 className="text-sm font-normal mb-1 text-gray-900">
-                    {update?.author?.first_name}{" "}
-                    {update?.author?.last_name}
-                  </h4>
-                  <p className="text-xs font-normal text-gray-600">
-                    {update?.createdAt
-                      ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
-                      : ""}
-                  </p>
-                </div>
-              </div>
-
-              {update?.content && (
-                <div className="mb-3">
-                  <p
-                    className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                    dangerouslySetInnerHTML={{
-                      __html: makeClickableLinks(update?.content),
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Post Images */}
-              {update?.images?.length > 0 && (
-                <div
-                  className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
-                >
-                  {update.images.map((img, imgIdx) => {
-                    const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
-                    const imgKey = img?._id || imgUrl || imgIdx;
-                    return imgUrl ? (
-                      <div
-                        key={imgKey}
-                        className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                        onClick={() => setLiveFeedImage(imgUrl)}
-                      >
-                        <img
-                          src={imgUrl}
-                          alt="post"
-                          className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                        />
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-            <div className="text-sm text-gray-900 font-medium text-center">
-              🚀 No updates available right now. Stay tuned for fresh
-              content!
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="container-fluid pb-10">
@@ -1210,163 +1112,6 @@ const IqEducators = () => {
                 <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
               </div>
             )}
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              {renderLiveFeedCard()}
-            </div>
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                {/* Header */}
-                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">
-                    Analysis Updates
-                  </h3>
-                  <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                    {/* <button
-                      onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Feed
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Ideas
-                    </button> */}
-                  </div>
-                </div>
-
-                {/* Updates */}
-                <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-                  {/* Hover Overlay */}
-                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div> */}
-
-                  {/* Messages */}
-                  {response?.data?.analysisData?.length > 0 ? (
-                    response?.data?.analysisData?.map((update) => (
-                      <div
-                        key={update?._id}
-                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-                      >
-                        <div className="flex flex-col gap-4 mb-4">
-                          <img
-                            src={update?.author?.image}
-                            alt={update?.author?.name}
-                            className="w-12 h-12 rounded-full"
-                          />
-                          <div>
-                            <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update?.author?.first_name}{" "}
-                              {update?.author?.last_name}
-                            </h4>
-                            <p className="text-xs font-normal text-gray-600">
-                              {update?.createdAt
-                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
-                                : ""}
-                            </p>
-                          </div>
-                        </div>
-
-                        {update?.content && (
-                          <div className="mb-3">
-                            <p
-                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                              dangerouslySetInnerHTML={{
-                                __html: makeClickableLinks(update?.content),
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Post Images */}
-                        {update?.images?.length > 0 && (
-                          <div
-                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
-                          >
-                            {update.images.map((img, imgIdx) => {
-                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
-                              const imgKey = img?._id || imgUrl || imgIdx;
-                              return imgUrl ? (
-                                <div
-                                  key={imgKey}
-                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                                  onClick={() => setLiveFeedImage(imgUrl)}
-                                >
-                                  <img
-                                    src={imgUrl}
-                                    alt="post"
-                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                                  />
-                                </div>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="text-sm text-gray-900 font-medium text-center">
-                        🚀 No updates available right now. Stay tuned for fresh
-                        content!
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cards */}
-                  {/* {trades.map((trade) => (
-                                        <div key={trade.id} className="card rounded-2xl overflow-hidden w-full relative z-0">
-                                        <img src={trade.image} alt={trade.pair} className="w-full h-40 object-cover" />
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <ArrowUp className="text-green-500 w-8 h-8 shrink-0" />
-                                                <div>
-                                                <h3 className="font-medium text-gray-800 text-sm mb-1">{trade.pair}</h3>
-                                                <p className="text-2xs font-normal text-gray-500 line-clamp-1">{trade.date}</p>
-                                                </div>
-                                            </div>
-                                            <span
-                                                className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                                            >
-                                                {trade.status}
-                                            </span>
-                                            </div>
-
-                                            <div className="mt-6 space-y-4">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Entry</span>
-                                                <span className="font-medium text-gray-800">{trade.entry}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
-                                                <span className="font-medium text-gray-800">{trade.stopLoss}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 1</span>
-                                                <span className="font-medium text-gray-800">{trade.exit1}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 2</span>
-                                                <span className="font-medium text-gray-800">{trade.exit2}</span>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    ))} */}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1397,27 +1142,6 @@ const IqEducators = () => {
         slides={[{ src: InfoImage }]}
       />
 
-      {/* Live Feed / Analysis Image Lightbox */}
-      {liveFeedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-          onClick={() => setLiveFeedImage(null)}
-        >
-          <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={liveFeedImage}
-              alt="post"
-              className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
-            />
-            <button
-              onClick={() => setLiveFeedImage(null)}
-              className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
       {showRatingModal && (
         <RatingModal
           showRatingModal={showRatingModal}
