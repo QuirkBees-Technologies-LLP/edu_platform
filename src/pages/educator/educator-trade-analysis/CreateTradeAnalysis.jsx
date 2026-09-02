@@ -201,24 +201,19 @@ const CreateTradeAnalysis = forwardRef(
       }
     }, [selectedRow?._id, isCreateOpen]);
 
-    // "Update" (chain) action: prefill text fields from the source insight so the educator
-    // isn't starting from scratch, but leave files empty — a follow-up insight naturally
-    // wants fresh charts, and the create endpoint (unlike update) has no mechanism to carry
-    // forward previously-uploaded image URLs without re-uploading them.
+    // "Update" (chain) action: this is a brand-new, standalone follow-up insight, not an
+    // edit of the source one — every field starts blank except the title, which is carried
+    // over so the educator isn't retyping it. Only the chain link itself (previousAnalysis,
+    // set on submit) ties it back to the source.
     useEffect(() => {
       if (!selectedRow?._id && chainFrom?._id) {
-        let tvLinks = [""];
-        if (chainFrom?.tradingViewLinks?.length > 0) {
-          tvLinks = chainFrom.tradingViewLinks;
-        }
-
         formik.setValues({
           title: chainFrom?.title || "",
           files: [],
-          description: chainFrom?.description || "",
-          category: chainFrom?.category?._id || "",
+          description: "",
+          category: "",
           checkTime: false,
-          tradingViewLinks: tvLinks,
+          tradingViewLinks: [""],
           dyntubeUrl: "",
         });
       }
