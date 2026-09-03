@@ -79,6 +79,7 @@ const AcademyForm = ({ onSubmit, initialData, isLoading }) => {
     reset,
     formState: { errors },
     setValue,
+    setError,
     watch,
   } = useForm({
     resolver: zodResolver(academySchema),
@@ -161,7 +162,10 @@ const AcademyForm = ({ onSubmit, initialData, isLoading }) => {
     if (values.imageFile instanceof File && values.imageFile.size > 0) {
       formData.append("image", values.imageFile);
     } else if (!initialData?.strategyBanner && !initialData?.imageUrl) {
-      console.error("No valid image file provided for new academy");
+      setError("imageFile", {
+        type: "manual",
+        message: "Please select a thumbnail image before saving.",
+      });
       return;
     }
 
