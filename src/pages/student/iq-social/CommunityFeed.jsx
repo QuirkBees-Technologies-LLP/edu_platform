@@ -34,10 +34,11 @@ const FILTERS = [
 const ALL_TYPES = FILTERS.map((f) => f.key);
 
 // Task 2.2 — left/right rail banners. Marketing hasn't delivered assets yet, so these
-// stay null and SocialSideBanner shows its skeleton placeholder; drop the real URLs in
-// here once they're available and it'll switch over automatically.
+// stay null and SocialSideBanner renders nothing; drop the real URLs in here once
+// they're available and it'll switch over automatically, reserved column and all.
 const LEFT_BANNER_IMAGE = null;
 const RIGHT_BANNER_IMAGE = null;
+const HAS_SIDE_BANNERS = !!(LEFT_BANNER_IMAGE || RIGHT_BANNER_IMAGE);
 
 const CommunityFeed = () => {
   // Genuine multi-select (task 2.6): nothing selected (the default) shows every content
@@ -388,8 +389,14 @@ const CommunityFeed = () => {
         <div className="hidden md:block" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_220px] gap-3 items-start">
-        <SocialSideBanner position="left" image={LEFT_BANNER_IMAGE} alt="IQ Social left banner" stickyTop={bannerStickyTop} />
+      <div
+        className={`grid grid-cols-1 gap-3 items-start ${
+          HAS_SIDE_BANNERS ? "lg:grid-cols-[220px_minmax(0,1fr)_220px]" : ""
+        }`}
+      >
+        {HAS_SIDE_BANNERS && (
+          <SocialSideBanner position="left" image={LEFT_BANNER_IMAGE} alt="IQ Social left banner" stickyTop={bannerStickyTop} />
+        )}
 
         <div className="max-w-full sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto w-full">
         {isInitialLoading ? (
@@ -457,7 +464,9 @@ const CommunityFeed = () => {
         )}
         </div>
 
-        <SocialSideBanner position="right" image={RIGHT_BANNER_IMAGE} alt="IQ Social right banner" stickyTop={bannerStickyTop} />
+        {HAS_SIDE_BANNERS && (
+          <SocialSideBanner position="right" image={RIGHT_BANNER_IMAGE} alt="IQ Social right banner" stickyTop={bannerStickyTop} />
+        )}
       </div>
     </div>
   );
