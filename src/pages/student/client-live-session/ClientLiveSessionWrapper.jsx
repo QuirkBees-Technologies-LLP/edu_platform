@@ -153,21 +153,31 @@ const ClientLiveSessionContent = ({
   return (
     <div className="grid grid-cols-12 gap-y-8 lg:gap-x-8 chatbox_chat">
       <div
-        ref={videoColRef}
         className={`${isFullScreen ? (isLgUp ? "col-span-10 xl:col-span-11" : "col-span-12 lg:col-span-7 xl:col-span-10") : isLgUp ? "col-span-12 lg:col-span-7 xl:col-span-8" : "col-span-12 lg:col-span-7 xl:col-span-11"} space-y-8`}
       >
-        <div className="grid gap-5 h-full">
-          <div className="flex flex-col rounded-lg items-center justify-start text-white h-full">
-            <div className="flex flex-col gap-12 bg-black rounded-xl text-center w-full h-full">
-              {renderLiveStatus(
-                status,
-                custom,
-                <ClientLiveSessionPlayer
-                  call={call}
-                  callId={callId}
-                  client={client}
-                />
-              )}
+        {/* Rooted (aspect-video + max/min-height) instead of a bare h-full chain — the
+            "not live" branch of renderLiveStatus renders a plain <img>, which has no
+            self-limiting aspect ratio the way the Stream video player does. Without a cap
+            here, an unusually large/tall banner image renders at its full intrinsic pixel
+            height (thousands of px in practice) instead of scaling to fit, which then also
+            inflated the chat/feed column since its height is matched to this one below. */}
+        <div
+          ref={videoColRef}
+          className="aspect-video max-h-[640px] min-h-[320px]"
+        >
+          <div className="grid gap-5 h-full min-h-0">
+            <div className="flex flex-col rounded-lg items-center justify-start text-white h-full min-h-0">
+              <div className="flex flex-col gap-12 bg-black rounded-xl text-center w-full h-full min-h-0">
+                {renderLiveStatus(
+                  status,
+                  custom,
+                  <ClientLiveSessionPlayer
+                    call={call}
+                    callId={callId}
+                    client={client}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
