@@ -90,6 +90,12 @@ export const clientTradeIdeasApiSlice = createApi({
         return `/users/trade-analysis/list?${params.toString()}`;
       },
     }),
+    // Single insight, fully populated — used to open the *original* insight a "Follow-up
+    // to X" link references. The list endpoints only shallow-populate previousAnalysis
+    // with title/createdAt, not enough to render the details modal.
+    getTradeAnalysisById: builder.query({
+      query: (id) => `/users/trade-analysis/${id}`,
+    }),
     getClientCryptoAnalysis: builder.query({
       query: ({
         page = 1,
@@ -115,6 +121,22 @@ export const clientTradeIdeasApiSlice = createApi({
     getAllEducators: builder.query({
       query: () => `/users/educator-course/list`,
     }),
+    // Public-facing educator profile feed (Educator Feed's "Ideas" tab) — a single
+    // educator's ideas, paginated. Deliberately separate from getClientTradeIdeas,
+    // which is scoped to the requesting user's allowed categories/plan.
+    getEducatorIdeas: builder.query({
+      query: ({ educatorId, page = 1, limit = 10 }) =>
+        `/users/idea/educator/${educatorId}?page=${page}&limit=${limit}`,
+      keepUnusedDataFor: 60, // individual page results cached 60s
+    }),
+    // Public-facing educator profile feed (Educator Feed's "Insights" tab) — a single
+    // educator's insights, paginated. Deliberately separate from getClientTradeAnalysis,
+    // which is scoped to the requesting user's allowed categories/plan.
+    getEducatorInsights: builder.query({
+      query: ({ educatorId, page = 1, limit = 10 }) =>
+        `/users/trade-analysis/educator/${educatorId}?page=${page}&limit=${limit}`,
+      keepUnusedDataFor: 60, // individual page results cached 60s
+    }),
   }),
 });
 
@@ -125,4 +147,7 @@ export const {
   useGetClientCryptoAnalysisQuery,
   useGetLiveTradeIdeaQuery,
   useGetAllEducatorsQuery,
+  useGetEducatorIdeasQuery,
+  useGetEducatorInsightsQuery,
+  useLazyGetTradeAnalysisByIdQuery,
 } = clientTradeIdeasApiSlice;

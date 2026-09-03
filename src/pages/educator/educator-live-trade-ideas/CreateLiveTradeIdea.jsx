@@ -1,6 +1,9 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState, useCallback } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import DraggableLinkList from "@/components/ui/DraggableLinkList";
 import {
   Select,
   SelectContent,
@@ -25,7 +28,17 @@ import {
 } from "../../../store/api/educator/educatorLiveTradeIdeasApiSlice";
 
 const CreateLiveTradeIdea = forwardRef(
-  ({ isCreateOpen, handleCloseCreate, callId, selectedRow, refetch }, ref) => {
+  (
+    {
+      isCreateOpen,
+      handleCloseCreate,
+      callId,
+      selectedRow,
+      refetch,
+      onSubmitSuccess,
+    },
+    ref
+  ) => {
     const { auth } = useAuthContext();
     const [createEducatorLiveTradeIdea] =
       useCreateEducatorLiveTradeIdeaMutation();
@@ -45,6 +58,7 @@ const CreateLiveTradeIdea = forwardRef(
       status: "",
       pips: 0,
       checkTime: false,
+      tradingViewLinks: [""],
     };
     const numberField = () =>
       Yup.number()
@@ -57,7 +71,16 @@ const CreateLiveTradeIdea = forwardRef(
 
     const createSchema = Yup.object().shape({
       name: Yup.string().required("symbol is required"),
-      files: Yup.array().min(1, "At least one file is required"),
+      files: Yup.array().test(
+        'files-or-links',
+        'At least one screenshot or TradingView link is required',
+        function (files) {
+          const tvLinks = this.parent.tradingViewLinks;
+          const hasLinks = tvLinks && tvLinks.filter(l => l && l.trim()).length > 0;
+          const hasFiles = files && files.length > 0;
+          return hasLinks || hasFiles;
+        }
+      ),
       type: Yup.string().oneOf(["buy", "sell"]).required("Type is required"),
       status: Yup.string()
         .oneOf(["active", "pending", "win", "partialWin", "loss", "breakEven"])
@@ -88,6 +111,11 @@ const CreateLiveTradeIdea = forwardRef(
         formData.append("isLiveIdea", true);
         formData.append("timeFrame", values.timeFrame);
         formData.append("checkTime", values.checkTime);
+
+        // Append TradingView links (always send, even empty, so backend can clear old links)
+        const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
+        formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -108,6 +136,7 @@ const CreateLiveTradeIdea = forwardRef(
           formik.resetForm();
           if (refetch) refetch();
           handleCloseCreate();
+          if (onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =
@@ -143,10 +172,34 @@ const CreateLiveTradeIdea = forwardRef(
            isLiveIdea: selectedRow?.isLiveIdea,
           timeFrame: selectedRow?.timeFrame,
           checkTime: selectedRow?.isUpdatedLiveIdea || false,
+          tradingViewLinks: selectedRow?.tradingViewLinks?.length > 0 ? selectedRow.tradingViewLinks : [""],
         };
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
+
+    // TradingView link handlers (same pattern as Ideas)
+    const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
+      const items = [...formik.values.tradingViewLinks];
+      const [removed] = items.splice(dragIndex, 1);
+      items.splice(hoverIndex, 0, removed);
+      formik.setFieldValue("tradingViewLinks", items);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleLinkChange = useCallback((index, value) => {
+      const updated = [...formik.values.tradingViewLinks];
+      updated[index] = value;
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleRemoveLink = useCallback((index) => {
+      const updated = formik.values.tradingViewLinks.filter((_, i) => i !== index);
+      formik.setFieldValue("tradingViewLinks", updated);
+    }, [formik.values.tradingViewLinks]);
+
+    const handleAddLink = useCallback(() => {
+      formik.setFieldValue("tradingViewLinks", [...(formik.values.tradingViewLinks || []), ""]);
+    }, [formik.values.tradingViewLinks]);
 
     // Handle multiple image selection
     const handleImageChange = (selectedFiles) => {
@@ -175,7 +228,7 @@ const CreateLiveTradeIdea = forwardRef(
     }, [selectedRow]);
 
     return (
-      <>
+      <DndProvider backend={HTML5Backend}>
         <Dialog
           open={isCreateOpen}
           onOpenChange={() => {
@@ -413,6 +466,22 @@ const CreateLiveTradeIdea = forwardRef(
                     </div>
                   )}
 
+                {/* TradingView Links */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-gray-900 gap-1">
+                      TradingView Links
+                    </label>
+                    <DraggableLinkList
+                      links={formik.values.tradingViewLinks || [""]}
+                      onReorder={handleReorderLinks}
+                      onChange={handleLinkChange}
+                      onRemove={handleRemoveLink}
+                      onAdd={handleAddLink}
+                    />
+                  </div>
+                </div>
+
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
                     {/* Upload Box - always shown */}
@@ -490,7 +559,7 @@ const CreateLiveTradeIdea = forwardRef(
             </div>
           </DialogContent>
         </Dialog>
-      </>
+      </DndProvider>
     );
   }
 );

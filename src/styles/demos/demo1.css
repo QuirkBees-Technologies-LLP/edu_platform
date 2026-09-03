@@ -486,15 +486,17 @@ body.ios-fullscreen-active {
 }
 
 /* Hide the SDK's default fullscreen button since we have our own */
+/* :not(.iq-live-icon-btn) excludes our own control-bar buttons (CC/volume/fullscreen),
+   which also carry "fullscreen" in their aria-label and would otherwise get caught here too */
 .live-player-container .str-video_livestream-layout_fullscreen-button,
 .live-player-container .str-video__fullscreen-button,
 .live-player-container .str-video__icon--fullscreen,
 .live-player-container .str-video__icon--fullscreen-exit,
 .live-player-container [data-testid="fullscreen-button"],
-.live-player-container button[aria-label*="fullscreen" i],
-.live-player-container button[aria-label*="Fullscreen" i],
-.live-player-container button[title*="fullscreen" i],
-.live-player-container button[title*="Fullscreen" i] {
+.live-player-container button[aria-label*="fullscreen" i]:not(.iq-live-icon-btn),
+.live-player-container button[aria-label*="Fullscreen" i]:not(.iq-live-icon-btn),
+.live-player-container button[title*="fullscreen" i]:not(.iq-live-icon-btn),
+.live-player-container button[title*="Fullscreen" i]:not(.iq-live-icon-btn) {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -1492,10 +1494,6 @@ chat */
   height: 100%;
 }
 
-.educator_chatbox_chat .str-chat__main-panel-inner {
-  height: calc(100% - 130px);
-}
-
 .educator_chatbox_chat .chat-sidebar {
   height: 100%;
 }
@@ -1518,6 +1516,28 @@ chat */
 
 .educator_chatbox_chat .str-chat__main-panel {
   height: 100%;
+}
+
+/* ChatAutoComplete ignores any className passed to it and always renders with its own
+   fixed class (str-chat__textarea__textarea) — this is the only way to actually style it. */
+.educator_chatbox_chat .str-chat__textarea__textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #16171d;
+  color: #f4f4f5;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.educator_chatbox_chat .str-chat__textarea__textarea:focus {
+  border-color: #6366f1;
+}
+
+.educator_chatbox_chat .str-chat__textarea__textarea::placeholder {
+  color: rgba(244, 244, 245, 0.5);
 }
 
 .live_chat .input-ui-input textarea {

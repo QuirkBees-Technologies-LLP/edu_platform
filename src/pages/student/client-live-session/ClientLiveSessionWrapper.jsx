@@ -1,5 +1,5 @@
 import { useCall, useCallStateHooks } from "@stream-io/video-react-sdk";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatContainer from "./chat-room/chat/ChatContainer";
 import ClientLiveSessionPlayer from "./ClientLiveSessionPlayer";
 import { useEventContext } from "./chat-room/context/EventContext";
@@ -10,38 +10,6 @@ import truncate from "html-truncate";
 import { useLivestreamStatus } from "./liveStreamStatus";
 import { Send } from "lucide-react";
 
-const ShowMoreLess = ({
-  text = "",
-  html = "",
-  limit = 120,
-  showMoreText = " Show More",
-  showLessText = " Show Less",
-  className = "text-sm text-gray-700 leading-relaxed",
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const isHtml = !!html;
-  const content = isHtml ? html : text;
-  const plainText = isHtml ? content.replace(/<[^>]+>/g, "") : text;
-  const isLong = plainText.length > limit;
-
-  return (
-    <div className={className}>
-      <div
-        className={`${!expanded && isLong ? "line-clamp-4" : ""}`}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-      {isLong && (
-        <span
-          onClick={() => setExpanded(!expanded)}
-          className="text-blue-600 cursor-pointer hover:underline font-medium"
-        >
-          {expanded ? showLessText : showMoreText}
-        </span>
-      )}
-    </div>
-  );
-};
-
 // Inner component that uses Stream Video hooks (guaranteed to be within StreamCall context)
 const ClientLiveSessionContent = ({
   client,
@@ -50,9 +18,36 @@ const ClientLiveSessionContent = ({
   bannerImage,
   educatorData,
   headerGradient,
+  feedContent,
+  onStatusChange,
 }) => {
   const [showFull, setShowFull] = useState(false);
-  const isMdUp = useResponsive("up", "md");
+  // Tablet-and-below vs. laptop/desktop split, matching StreamWrapper.jsx's no-call
+  // banner+feed layout — both sections stay col-span-12 (stacked) below "lg" (1024px),
+  // and only go side-by-side at lg and up. This used to switch at "md" (768px), which
+  // is too narrow for two columns of live video + chat/feed to share a row without
+  // overlapping or cramping — exactly what was breaking on tablet-width screens.
+  const isLgUp = useResponsive("up", "lg");
+
+  // feedContent (EducatorFeed) has no natural height cap — unlike ChatContainer, which
+  // sits in this exact same column slot when live and works fine with plain h-full (see
+  // StreamClient.jsx, which this grid otherwise mirrors exactly). Only bound this branch,
+  // by measuring the video column's real rendered height, same technique StreamWrapper.jsx
+  // already uses for its own banner+feed layout — a fixed height doesn't work here since
+  // it can't also fit that other, differently-sized layout (see IqEducators.jsx).
+  const videoColRef = useRef(null);
+  const [videoColHeight, setVideoColHeight] = useState(null);
+  useEffect(() => {
+    const el = videoColRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect?.height;
+      if (height) setVideoColHeight(height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const call = useCall();
   const { useCallCustomData, useIsCallLive, useCallIngress, useCallEndedAt } =
     useCallStateHooks();
@@ -73,16 +68,20 @@ const ClientLiveSessionContent = ({
 
   const status = getStreamStatus();
 
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [status, onStatusChange]);
+
   const { title, description, tags } = custom || {};
   const maxLength = 150;
 
   const { isFullScreen, setIsFullScreen } = useEventContext();
 
   useEffect(() => {
-    if (!isMdUp) {
+    if (!isLgUp) {
       setIsFullScreen(false);
     }
-  }, [isMdUp]);
+  }, [isLgUp]);
 
   // Handler for toggling
   const handleToggle = (e) => {
@@ -145,67 +144,52 @@ const ClientLiveSessionContent = ({
     );
   }
 
-  const makeClickableLinks = (htmlOrText) => {
-    if (!htmlOrText) return "";
-    return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
-  };
-
-  const safeHtml = makeClickableLinks(educatorData || "");
-
+  // Mirrors the educator's own live-session view (StreamClient.jsx) — same grid, same
+  // col-span breakpoints, same plain h-full video column. ChatContainer, in the chat/feed
+  // column below, is left exactly as simple as the reference page too, since it never had
+  // a height problem here. Only the feedContent (EducatorFeed) branch gets its height
+  // explicitly matched to the video column (videoColHeight, measured above) — it's the
+  // one piece of content in this row with no natural height cap of its own.
   return (
-    <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 chatbox_chat">
+    <div className="grid grid-cols-12 gap-y-8 lg:gap-x-8 chatbox_chat">
       <div
-        className={`${isFullScreen ? (isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10") : isMdUp ? "col-span-12 md:col-span-7 xl:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}
+        ref={videoColRef}
+        className={`${isFullScreen ? (isLgUp ? "col-span-10 xl:col-span-11" : "col-span-12 lg:col-span-7 xl:col-span-10") : isLgUp ? "col-span-12 lg:col-span-7 xl:col-span-8" : "col-span-12 lg:col-span-7 xl:col-span-11"} space-y-8`}
       >
-        <div className={`transition-all duration-300 ease-in-out h-full`}>
-          <div className="grid gap-5 h-full">
-            <div className="flex flex-col rounded-lg items-center justify-start text-white h-full">
-              <div className="flex flex-col gap-12 bg-black rounded-xl text-center w-full h-full">
-                {renderLiveStatus(
-                  status,
-                  custom,
-                  <ClientLiveSessionPlayer
-                    call={call}
-                    callId={callId}
-                    client={client}
-                  />
-                )}
-              </div>
+        <div className="grid gap-5 h-full">
+          <div className="flex flex-col rounded-lg items-center justify-start text-white h-full">
+            <div className="flex flex-col gap-12 bg-black rounded-xl text-center w-full h-full">
+              {renderLiveStatus(
+                status,
+                custom,
+                <ClientLiveSessionPlayer
+                  call={call}
+                  callId={callId}
+                  client={client}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
 
       <div
-        className={`${isFullScreen ? (isMdUp ? "col-span-2 xl:col-span-1" : "col-span-12 md:col-span-5 xl:col-span-2") : isMdUp ? "col-span-12 md:col-span-5 xl:col-span-4" : "col-span-12 md:col-span-5 xl:col-span-1"} space-y-8`}
+        className={`${isFullScreen ? (isLgUp ? "col-span-2 xl:col-span-1" : "col-span-12 lg:col-span-5 xl:col-span-2") : isLgUp ? "col-span-12 lg:col-span-5 xl:col-span-4" : "col-span-12 lg:col-span-5 xl:col-span-1"} space-y-8`}
       >
-        <div className={`transition-all duration-300 ease-in-out h-full`}>
-          {token && callId && status === "live" && (
-            <ChatContainer sessionToken={token} callId={callId} headerGradient={headerGradient} />
-          )}
-          {token && callId && status !== "live" && (
-            <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-              <div className={`${headerGradient || 'bg-[#1A1446]'} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                <h3 className="text-white font-semibold text-sm">About </h3>
-              </div>
-
-              <div className="flex-1 p-4 overflow-y-auto">
-                <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-line">
-                  {educatorData && (
-                    <ShowMoreLess
-                      html={safeHtml}
-                      limit={500}
-                      className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                    />
-                  )}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+        {token && callId && status === "live" && (
+          <ChatContainer sessionToken={token} callId={callId} headerGradient={headerGradient} />
+        )}
+        {token && callId && status !== "live" && (
+          <div
+            style={
+              videoColHeight
+                ? { height: videoColHeight, maxHeight: videoColHeight, overflow: "hidden" }
+                : undefined
+            }
+          >
+            {feedContent}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -219,6 +203,8 @@ const ClientLiveSessionWrapper = ({
   bannerImage,
   educatorData,
   headerGradient,
+  feedContent,
+  onStatusChange,
 }) => {
   return (
     <ClientLiveSessionContent
@@ -228,6 +214,8 @@ const ClientLiveSessionWrapper = ({
       bannerImage={bannerImage}
       educatorData={educatorData}
       headerGradient={headerGradient}
+      feedContent={feedContent}
+      onStatusChange={onStatusChange}
     />
   );
 };

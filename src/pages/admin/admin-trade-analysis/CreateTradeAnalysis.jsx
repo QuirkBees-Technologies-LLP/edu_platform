@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState, useCallback } from "react";
+import React, { forwardRef, useEffect, useState, useCallback, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { DndProvider } from "react-dnd";
@@ -36,7 +36,18 @@ import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEduct
 
 const CreateTradeAnalysis = forwardRef(
   (
-    { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
+    {
+      setSelectedRow,
+      isCreateOpen,
+      handleCloseCreate,
+      selectedRow,
+      refetch,
+      // The insight this new one should chain from (Task 4.2's "Update" action, distinct
+      // from Edit). Only meaningful when selectedRow is empty — a chained insight is always
+      // a brand-new document, never an in-place edit.
+      chainFrom,
+      setChainFrom,
+    },
     ref
   ) => {
     const { auth } = useAuthContext();
@@ -45,15 +56,56 @@ const CreateTradeAnalysis = forwardRef(
     const createdBy = auth?.user?._id ?? null;
     const { data } = useGetCommonCategoryQuery();
 
-    const initialValues = {
-      title: "",
-      files: [],
-      createdBy: "",
-      description: "",
-      category: "",
-      checkTime: false,
-      tradingViewLinks: [""],
-    };
+    // Computed synchronously from props on every render (not via a post-mount effect) so
+    // the dialog's very first paint already has the right values — no flash of blank
+    // fields while an effect catches up, which was most noticeable on a cold first open.
+    // `enableReinitialize: true` below makes Formik pick up changes to this whenever
+    // selectedRow/chainFrom/createdBy change.
+    const initialValues = useMemo(() => {
+      if (selectedRow?._id) {
+        // Edit: pre-fill everything from the existing insight.
+        const existingImages =
+          selectedRow.image?.map((img) => ({ file: null, dataURL: img })) || [];
+        let tvLinks = [""];
+        if (selectedRow?.tradingViewLinks?.length > 0) {
+          tvLinks = selectedRow.tradingViewLinks;
+        } else if (selectedRow?.url) {
+          tvLinks = [selectedRow.url];
+        }
+        return {
+          title: selectedRow?.title || "",
+          files: existingImages,
+          createdBy: createdBy || "",
+          description: selectedRow?.description || "",
+          category: selectedRow?.category?._id || "",
+          checkTime: selectedRow?.isUpdatedAnalysis || false,
+          tradingViewLinks: tvLinks,
+        };
+      }
+      if (chainFrom?._id) {
+        // "Update" (chain) action: a brand-new, standalone follow-up insight, not an edit
+        // of the source one — every field starts blank except the title, which is carried
+        // over so the admin isn't retyping it.
+        return {
+          title: chainFrom?.title || "",
+          files: [],
+          createdBy: createdBy || "",
+          description: "",
+          category: "",
+          checkTime: false,
+          tradingViewLinks: [""],
+        };
+      }
+      return {
+        title: "",
+        files: [],
+        createdBy: createdBy || "",
+        description: "",
+        category: "",
+        checkTime: false,
+        tradingViewLinks: [""],
+      };
+    }, [selectedRow?._id, chainFrom?._id, createdBy]);
 
     const createSchema = Yup.object().shape({
       title: Yup.string().required("Title is required"),
@@ -92,6 +144,12 @@ const CreateTradeAnalysis = forwardRef(
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
 
+        // Chained create (Task 4.2's "Update" action): link this brand-new insight back to
+        // the one it follows up on. Only applies when actually creating (not editing).
+        if (!selectedRow?._id && chainFrom?._id) {
+          formData.append("previousAnalysis", chainFrom._id);
+        }
+
         // Send existing image URLs the user kept (so backend knows which to preserve)
         if (selectedRow?._id) {
           const keptImages = (values.files || [])
@@ -116,6 +174,7 @@ const CreateTradeAnalysis = forwardRef(
             toast.success("IQ Insight created successfully!");
           }
           formik.resetForm();
+          setChainFrom?.(null);
           handleCloseCreate();
         } catch (err) {
           console.log(err);
@@ -126,40 +185,6 @@ const CreateTradeAnalysis = forwardRef(
         }
       },
     });
-    useEffect(() => {
-      if (createdBy && formik.values) {
-        formik.setFieldValue("createdBy", createdBy);
-      }
-    }, [createdBy, formik.values]);
-
-    useEffect(() => {
-      if (selectedRow?._id) {
-        const existingImages =
-          selectedRow.image?.map((img) => ({
-            file: null,
-            dataURL: img,
-          })) || [];
-
-        // Backward compat: if old record has url but no tradingViewLinks, convert
-        let tvLinks = [""];
-        if (selectedRow?.tradingViewLinks?.length > 0) {
-          tvLinks = selectedRow.tradingViewLinks;
-        } else if (selectedRow?.url) {
-          tvLinks = [selectedRow.url];
-        }
-
-        const initData = {
-          title: selectedRow?.title,
-          files: existingImages,
-          description: selectedRow?.description,
-          category: selectedRow?.category?._id,
-          checkTime: selectedRow?.isUpdatedAnalysis || false,
-          tradingViewLinks: tvLinks,
-        };
-        formik.setValues(initData);
-      }
-    }, [selectedRow?._id, isCreateOpen]);
-
     // Handle multiple image selection
     const handleImageChange = (selectedFiles) => {
       if (selectedFiles.length > 0) {
@@ -216,6 +241,7 @@ const CreateTradeAnalysis = forwardRef(
           open={isCreateOpen}
           onOpenChange={() => {
             setSelectedRow({});
+            setChainFrom?.(null);
             formik.resetForm();
             handleCloseCreate();
           }}
@@ -224,8 +250,17 @@ const CreateTradeAnalysis = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader className="pb-5 pt-0 px-0">
               <DialogTitle>
-                {selectedRow?._id ? "Update IQ Insight" : " Create IQ Insight"}
+                {selectedRow?._id
+                  ? "Edit IQ Insight"
+                  : chainFrom?._id
+                    ? "Update IQ Insight"
+                    : "Create IQ Insight"}
               </DialogTitle>
+              {chainFrom?._id && !selectedRow?._id && (
+                <p className="text-xs text-gray-500 mt-1">
+                  This creates a new insight chained to “{chainFrom.title}”.
+                </p>
+              )}
             </DialogHeader>
             <div className="grid gap-5 px-0 pb-5">
               <div className="grid grid-cols-12 gap-4">
@@ -396,6 +431,7 @@ const CreateTradeAnalysis = forwardRef(
                 className="btn btn-light"
                 onClick={() => {
                   setSelectedRow({});
+                  setChainFrom?.(null);
                   formik.resetForm();
                   handleCloseCreate();
                 }}

@@ -37,11 +37,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import SocialPostPrompt from "@/components/SocialPostPrompt";
+import CreatePostModal from "@/components/CreatePostModal";
 
 const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  const [isSocialPromptOpen, setIsSocialPromptOpen] = useState(false);
+  const [isSocialComposerOpen, setIsSocialComposerOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -108,7 +112,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
-            <MenuTitle>Edit</MenuTitle>
+            <MenuTitle>Update</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem onClick={handleDeleteOpen}>
@@ -265,6 +269,36 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         ),
         meta: {
           headerClassName: "min-w-[200px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.createdAt,
+        id: "date",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Date" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => {
+          const value = info.row.original.createdAt;
+          if (!value) return <span className="text-gray-500">-</span>;
+          const parsed = new Date(value);
+          if (isNaN(parsed)) return <span className="text-gray-500">-</span>;
+          return (
+            <span>
+              {parsed.toLocaleString("en-US", {
+                timeZone: "America/Panama",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
+          );
+        },
+        meta: {
+          headerClassName: "min-w-[160px]",
         },
       },
       {
@@ -517,6 +551,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
             selectedRow={selectedRow}
+            onSubmitSuccess={() => setIsSocialPromptOpen(true)}
           />
           {isDeleteOpen && (
             <DeleteAdminTradeIdeas
@@ -526,6 +561,22 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
               selectedRow={selectedRow}
             />
           )}
+
+          <SocialPostPrompt
+            isOpen={isSocialPromptOpen}
+            onClose={() => setIsSocialPromptOpen(false)}
+            onConfirm={() => {
+              setIsSocialPromptOpen(false);
+              setIsSocialComposerOpen(true);
+            }}
+          />
+
+          <CreatePostModal
+            isOpen={isSocialComposerOpen}
+            onClose={() => setIsSocialComposerOpen(false)}
+            editingPost={null}
+            showCategorySelector={false}
+          />
         </>
       )}
       {activeTab === "UserView" && (

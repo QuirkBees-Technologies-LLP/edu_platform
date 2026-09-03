@@ -32,7 +32,14 @@ import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEduct
 
 const CreateTradeIdeas = forwardRef(
   (
-    { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
+    {
+      setSelectedRow,
+      isCreateOpen,
+      handleCloseCreate,
+      selectedRow,
+      refetch,
+      onSubmitSuccess,
+    },
     ref
   ) => {
     const { auth } = useAuthContext();
@@ -165,10 +172,14 @@ const CreateTradeIdeas = forwardRef(
 
             toast.success("Idea created successfully!");
           }
+          const wasUpdate = !!selectedRow?._id;
           formik.resetForm();
           setSelectedRow(null);
           refetch();
           handleCloseCreate();
+          // Share-to-social prompt only makes sense when updating an existing idea, not
+          // when creating a brand new one.
+          if (wasUpdate && onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =
@@ -281,19 +292,15 @@ const CreateTradeIdeas = forwardRef(
       formik.setFieldValue("tradingViewLinks", [...(formik.values.tradingViewLinks || []), ""]);
     }, [formik.values.tradingViewLinks]);
 
-    useEffect(() => {
-      if (!selectedRow) {
-        formik.resetForm();
-      }
-    }, [selectedRow]);
-
     return (
       <DndProvider backend={HTML5Backend}>
         <Dialog
           open={isCreateOpen}
+          // Closing the dialog (outside click, Escape, the X button) must NOT clear the
+          // form — only the explicit Cancel button does that. selectedRow is still reset
+          // here since it tracks edit-vs-create mode, not the form's field values.
           onOpenChange={() => {
             setSelectedRow({});
-            formik.resetForm();
             handleCloseCreate();
           }}
         >

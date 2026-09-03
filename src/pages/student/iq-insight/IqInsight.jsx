@@ -8,6 +8,7 @@ import {
   useGetAllEducatorsQuery,
   useGetClientTradeAnalysisQuery,
   useGetClientTradeIdeasQuery,
+  useLazyGetTradeAnalysisByIdQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ImageLightBox from "./ImageLightBox";
@@ -40,7 +41,7 @@ import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
 import { getEmbedUrl } from "@/utils/videoUtils";
 import Loader from "../../../components/ui/loader";
-import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown, Link2 as LinkIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -148,6 +149,20 @@ const IqInsight = () => {
         : "",
     });
   const { data: educatorsData } = useGetAllEducatorsQuery();
+  const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
+  // "Follow-up" badge opens the ORIGINAL insight being replied to (quote-reply style), not
+  // the follow-up card itself — previousAnalysis on the list item is only shallow-populated
+  // (title/createdAt), so the full original is fetched on demand here.
+  const handleOpenPreviousAnalysis = async (previousAnalysisId) => {
+    if (!previousAnalysisId) return;
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setSelectedIdea(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+    }
+  };
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -693,11 +708,26 @@ const IqInsight = () => {
                   {/* ── Structured Price Levels / Content ── */}
                   <div className="mb-2 space-y-1.5 flex-1">
                     <div className="px-1 py-1 flex items-center justify-between gap-2 flex-wrap">
-                      {(idea.pair || idea.name) && (
-                        <span className="text-[14px] font-extrabold text-slate-800 dark:text-white">
-                          {idea.pair || idea.name}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 min-w-0">
+                        {(idea.pair || idea.name) && (
+                          <span className="text-[14px] font-extrabold text-slate-800 dark:text-white truncate">
+                            {idea.pair || idea.name}
+                          </span>
+                        )}
+                        {idea.previousAnalysis && (
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 flex-shrink-0 cursor-pointer hover:bg-indigo-500/20 transition-colors"
+                            title={`Follow-up to "${idea.previousAnalysis.title}"`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenPreviousAnalysis(idea.previousAnalysis._id);
+                            }}
+                          >
+                            <LinkIcon size={10} /> Follow-up
+                          </button>
+                        )}
+                      </div>
                       {idea.status && (
                         <span
                           className={`inline-block px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${idea.status === 'Active' || idea.status === 'active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :

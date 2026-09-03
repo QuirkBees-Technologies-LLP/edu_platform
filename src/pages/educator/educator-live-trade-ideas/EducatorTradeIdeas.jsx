@@ -38,6 +38,8 @@ import { useLazyGetEducatorLiveTradeIdeasQuery } from "../../../store/api/educat
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import { debounce } from "lodash";
 import SearchFilterInput from "../../../components/SearchFilterInput";
+import SocialPostPrompt from "@/components/SocialPostPrompt";
+import CreatePostModal from "@/components/CreatePostModal";
 
 const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -48,6 +50,8 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [selectedEducator, setSelectedEducator] = useState("");
   const [searchText, setSearchText] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [isSocialPromptOpen, setIsSocialPromptOpen] = useState(false);
+  const [isSocialComposerOpen, setIsSocialComposerOpen] = useState(false);
 
 
   const [getEducatorTradeIdeas, { data, isLoading, refetch }] =
@@ -133,7 +137,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
-            <MenuTitle>Edit</MenuTitle>
+            <MenuTitle>Update</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem
@@ -306,6 +310,36 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         ),
         meta: {
           headerClassName: "min-w-[100px]",
+        },
+      },
+      {
+        accessorFn: (row) => row.createdAt,
+        id: "date",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Date" column={column} />
+        ),
+        enableSorting: true,
+        cell: (info) => {
+          const value = info.row.original.createdAt;
+          if (!value) return <span className="text-gray-500">-</span>;
+          const parsed = new Date(value);
+          if (isNaN(parsed)) return <span className="text-gray-500">-</span>;
+          return (
+            <span>
+              {parsed.toLocaleString("en-US", {
+                timeZone: "America/Panama",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
+          );
+        },
+        meta: {
+          headerClassName: "min-w-[160px]",
         },
       },
       {
@@ -578,6 +612,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
             selectedRow={selectedRow}
+            onSubmitSuccess={() => setIsSocialPromptOpen(true)}
           />
 
           {isDeleteOpen && (
@@ -589,6 +624,22 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
               setSelectedRow={setSelectedRow}
             />
           )}
+
+          <SocialPostPrompt
+            isOpen={isSocialPromptOpen}
+            onClose={() => setIsSocialPromptOpen(false)}
+            onConfirm={() => {
+              setIsSocialPromptOpen(false);
+              setIsSocialComposerOpen(true);
+            }}
+          />
+
+          <CreatePostModal
+            isOpen={isSocialComposerOpen}
+            onClose={() => setIsSocialComposerOpen(false)}
+            editingPost={null}
+            showCategorySelector={false}
+          />
         </>
       )}
       {activeTab === "UserView" && <EducatorTradeCards />}

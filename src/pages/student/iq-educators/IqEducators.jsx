@@ -29,7 +29,7 @@ import RecordingThumbnail from "./RecordingThumbnail";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
@@ -38,6 +38,16 @@ import RatingModal from "./RatingModel";
 import { useLayout } from "../../../providers";
 import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import EducatorFeed from "./EducatorFeed";
+
+// Strips HTML tags AND decodes entities (e.g. "&nbsp;") into plain text,
+// unlike a naive tag-stripping regex which leaves entities behind literally.
+const htmlToPlainText = (html) => {
+  if (!html) return "";
+  const el = document.createElement("div");
+  el.innerHTML = html;
+  return (el.textContent || el.innerText || "").replace(/\s+/g, " ").trim();
+};
 
 const IqEducators = () => {
   const [triggerSecureVideo] = useLazyGetSecureVideoQuery();
@@ -59,7 +69,7 @@ const IqEducators = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-  const [liveFeedImage, setLiveFeedImage] = useState(null);
+  const [isEducatorLive, setIsEducatorLive] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
@@ -349,12 +359,6 @@ const IqEducators = () => {
       });
   }
 
-  const makeClickableLinks = (text) =>
-    text?.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
-
   const getRelativeTime = (date) => {
     if (!date) return "";
 
@@ -372,7 +376,6 @@ const IqEducators = () => {
     return `${days} day${days > 1 ? "s" : ""} ago`;
   };
 
-
   return (
     <div className="container-fluid pb-10">
       {/* Share Toast Notification */}
@@ -385,159 +388,144 @@ const IqEducators = () => {
 
 
       {/* speaker center */}
-      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-8 sm:p-8 flex items-center justify-between sm:flex-row flex-col gap-4`}>
-        <div className="flex items-center gap-20 sm:flex-row flex-col sm:justify-start justify-center">
-          <div className="flex items-center flex-wrap justify-center sm:justify-start gap-6">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <img
-                src={response?.data?.educator?.image}
-                alt="Educator Profile"
-                className="relative w-24 h-24 sm:w-28 sm:h-28 object-cover object-top rounded-full border-4 border-white shadow-xl"
-              />
-            </div>
-
-            <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-              <h3 className="text-white font-bold text-md sm:text-xl mb-3 tracking-tight drop-shadow-md">
-                {response?.data?.educator?.first_name}{" "}
-                {response?.data?.educator?.last_name}
-              </h3>
-
-              <button
-                onClick={handleShowMasterClasses}
-                disabled={isEducator}
-                className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg overflow-hidden ${isEducator ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5'}`}
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <BookOpen size={18} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
-                <span className="relative">Go to My MasterClass</span>
-                <ArrowRight size={16} className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
-              </button>
-            </div>
+      <div className={`${getHeaderGradient()} rounded-2xl mb-8 p-6 sm:p-8 border border-white/10 shadow-xl grid grid-cols-1 lg:grid-cols-3 items-center gap-6 lg:gap-0 lg:divide-x lg:divide-white/10`}>
+        {/* Left: identity */}
+        <div className="flex items-center flex-wrap justify-center lg:justify-start gap-6 lg:pr-6">
+          <div className="relative group shrink-0">
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <img
+              src={response?.data?.educator?.image}
+              alt="Educator Profile"
+              className="relative w-24 h-24 sm:w-28 sm:h-28 object-cover object-top rounded-full border-4 border-white shadow-xl"
+            />
           </div>
-        </div>
-        <div className="flex items-center gap-2 bg-white/10 px-4 py-1 rounded-lg border border-white/20 backdrop-blur-sm w-fit">
-          <button
-            onClick={toggleMute}
-            className="text-white hover:text-yellow-300 transition p-1"
-          >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          </button>
 
-          <button
-            onClick={decVolume}
-            className="text-white text-lg px-1 hover:text-yellow-300 transition"
-          >
-            –
-          </button>
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            <h3 className="text-white font-bold text-md sm:text-xl mb-2 tracking-tight drop-shadow-md">
+              {response?.data?.educator?.first_name}{" "}
+              {response?.data?.educator?.last_name}
+            </h3>
 
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={isMuted ? 0 : volume}
-            onChange={(e) => onSliderChange(e.target.value)}
-            className={`w-24 ${getSliderAccent()} cursor-pointer`}
-          />
-
-          <button
-            onClick={incVolume}
-            className="text-white text-lg px-1 hover:text-yellow-300 transition"
-          >
-            +
-          </button>
-        </div>
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsOpen(true)}
-              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors`}
-            >
-              <Volume2 size={18} />
-            </button>
-
-            {isOpen && (
-              <div
-                className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-                onClick={() => setIsOpen(false)}
-              >
-                <div
-                  className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
-                  onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
-                >
-                  <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
-                    Change in Sound Option from Automatic (Default) to Allow,{" "}
-                    <br /> like in the Image
-                  </span>
-                  <div
-                    className="overflow-hidden rounded-lg cursor-pointer"
-                    onClick={() => isVolumeOpen(true)}
-                  >
-                    <img src={InfoImage} alt="Info" />
-                  </div>
-
-                  <span
-                    className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
-
-  "
-                  >
-                    Or follow the video tutorial
-                  </span>
-                  <div className="overflow-hidden rounded-lg mx-auto block w-fit">
-                    <video width="500" height="240" muted loop controls>
-                      <source src={videotutorial} type="video/mp4" />
-                    </video>
-                  </div>
-
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className={`absolute top-3 right-3 ${getButtonColor()} text-white px-3 py-1 rounded-lg shadow`}
-                  >
-                    ✕
-                  </button>
-                </div>
+            {response?.data?.educator?.educatorRole && (
+              <div className="mb-3">
+                <span className="bg-white/15 text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/20">
+                  {response.data.educator.educatorRole}
+                </span>
               </div>
             )}
 
             <button
-              onClick={() => handleShare()}
-              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors`}
+              onClick={handleShowMasterClasses}
+              disabled={isEducator}
+              className={`group relative inline-flex items-center gap-2 px-6 py-2.5 ${getMasterClassButtonStyle()} text-white rounded-full text-sm font-medium transition-all duration-300 shadow-lg overflow-hidden ${isEducator ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5'}`}
             >
-              <Share2 size={16} />
-              Share
-            </button>
-
-
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleToggleFollow}
-              disabled={isFollowLoading}
-              className={`border text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all duration-300 ${isFollowing
-                ? "border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50"
-                : getButtonColor()
-                } ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-            >
-              {isFollowing ? (
-                <>
-                  <UserCheck size={16} />
-                  Following
-                </>
-              ) : (
-                <>
-                  <UserPlus size={16} />
-                  Follow
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => setShowRatingModal(true)}
-              className={`border ${getButtonColor()} text-white px-4 py-1 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1 transition-colors w-fit`}
-            >
-              ⭐ Rate Me
+              <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <BookOpen size={18} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
+              <span className="relative">Go to My MasterClass</span>
+              <ArrowRight size={16} className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
             </button>
           </div>
+        </div>
+
+        {/* Center: bio — the short "Profile Bio" field, not the longer "Trading Card Bio"
+            (that one is `description`, plain text already so no HTML stripping needed) */}
+        <div className="flex flex-col items-center justify-center text-center px-2 lg:px-6">
+          {response?.data?.educator?.bio && (
+            <>
+              <div className="flex items-center justify-center gap-2.5 mb-3">
+                <span className="h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-blue-400/70" />
+                <span className="w-1 h-1 rounded-full bg-blue-400" />
+                <span className="text-blue-400 text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase">
+                  About Me
+                </span>
+                <span className="w-1 h-1 rounded-full bg-blue-400" />
+                <span className="h-px w-6 sm:w-8 bg-gradient-to-l from-transparent to-blue-400/70" />
+              </div>
+              <p className="text-white/85 text-xs sm:text-sm leading-relaxed max-w-md">
+                {response.data.educator.bio}
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* Right: actions — stacked one per line, Rate Me styled as the primary CTA */}
+        <div className="flex flex-col items-center lg:items-end gap-2 lg:pl-6">
+          {isOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+              onClick={() => setIsOpen(false)}
+            >
+              <div
+                className="relative w-full sm:w-[800px] bg-white dark:bg-gray-100 rounded-2xl p-6 shadow-lg"
+                onClick={(e) => e.stopPropagation()} // prevent modal close on inner click
+              >
+                <span className="text-gray-700  mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center">
+                  Change in Sound Option from Automatic (Default) to Allow,{" "}
+                  <br /> like in the Image
+                </span>
+                <div
+                  className="overflow-hidden rounded-lg cursor-pointer"
+                  onClick={() => isVolumeOpen(true)}
+                >
+                  <img src={InfoImage} alt="Info" />
+                </div>
+
+                <span
+                  className=" text-gray-700 mb-3 font-semibold text-xs md:text-xs lg:text-sm mt-5 block text-center
+
+  "
+                >
+                  Or follow the video tutorial
+                </span>
+                <div className="overflow-hidden rounded-lg mx-auto block w-fit">
+                  <video width="500" height="240" muted loop controls>
+                    <source src={videotutorial} type="video/mp4" />
+                  </video>
+                </div>
+
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className={`absolute top-3 right-3 ${getButtonColor()} text-white px-3 py-1 rounded-lg shadow`}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => handleShare()}
+            className="border border-white/25 bg-white/5 hover:bg-white/10 hover:border-white/40 text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors w-full lg:w-auto justify-center"
+          >
+            <Share2 size={13} />
+            Share
+          </button>
+
+          <button
+            onClick={handleToggleFollow}
+            disabled={isFollowLoading}
+            className={`border border-white/25 bg-white/5 hover:bg-white/10 hover:border-white/40 text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors w-full lg:w-auto justify-center ${isFollowLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+              }`}
+          >
+            {isFollowing ? (
+              <>
+                <UserCheck size={13} />
+                Following
+              </>
+            ) : (
+              <>
+                <UserPlus size={13} />
+                Follow
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={() => setShowRatingModal(true)}
+            className={`border ${getButtonColor()} text-white px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 shadow-md transition-colors w-full lg:w-auto justify-center`}
+          >
+            <span className="text-yellow-300">⭐</span> Rate Me
+          </button>
         </div>
       </div>
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
@@ -547,6 +535,19 @@ const IqEducators = () => {
             callId={callId}
             educatorData={response?.data?.educator?.description}
             headerGradient={getHeaderGradient()}
+            feedContent={
+              // Deliberately unwrapped — each consumer of feedContent (StreamWrapper's
+              // no-call banner layout, ClientLiveSessionWrapper's video/chat grid) is
+              // responsible for giving this its own bounded height, since they measure
+              // against different sibling content (a static banner vs. a live video) and
+              // a height baked in here can't fit both. See StreamWrapper.jsx and
+              // ClientLiveSessionWrapper.jsx.
+              <EducatorFeed
+                educatorId={id}
+                headerGradient={getHeaderGradient()}
+              />
+            }
+            onStatusChange={(status) => setIsEducatorLive(status === "live")}
           />
         </div>
       </div>
@@ -554,10 +555,362 @@ const IqEducators = () => {
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-8 space-y-8">
 
-          {/* Live Idea - Hide for Digital Marketing */}
+          {/* Master Classes */}
+          {response?.data?.masterClasses?.length > 0 && <div className="text-gray-900 mb-8">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Master Classes</h2>
+                {!isEducator && <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => navigate(`/master-class/${id}`)}
+                >
+                  View All
+                </button>}
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.masterClasses?.length > 0 ? (
+                <div className="flex gap-4">
+                  {response?.data?.masterClasses?.map((mc) => (
+                    <div
+                      key={mc?._id}
+                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                      onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
+                    >
+                      <div className="rounded-t-xl overflow-hidden">
+                        <img
+                          src={mc?.imageUrl || mc?.strategyBanner}
+                          alt={mc?.title}
+                          className="w-full h-36 object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-md font-normal mb-2">
+                          {mc?.title}
+                        </h3>
+                        {mc?.category?.name && (
+                          <p className="text-xs text-gray-500 mb-1">{mc?.category?.name}</p>
+                        )}
+                        {mc?.language && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {mc?.language}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Masterclasses Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Recordings */}
+          {response?.data?.recordings?.length > 0 && <div className="text-gray-900 mb-8">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Recordings</h2>
+                <button
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  onClick={() => setShowAll((prev) => !prev)}
+                >
+                  {showAll ? "Show Less" : "View All"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.recordings?.length > 0 ? (
+                showAll ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.recordings?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className="w-full cursor-pointer border rounded-xl shadow-sm"
+                      >
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.call_title}
+                          </h3>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex gap-4">
+                    {response?.data?.recordings?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
+                      >
+                        <div
+                          className="rounded-t-xl overflow-hidden"
+                          onClick={() => setRecording(course)}
+                        >
+                          <RecordingThumbnail
+                            videoUrl={course?.url}
+                            seekTime={2}
+                            image={course?.thumbnail}
+                            defaultImage={response?.data?.educator?.bannerImage}
+                            onRecordingClick={() => handleOpen(course?.url)}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.call_title}
+                          </h3>
+                          <div className="card-footer justify-between pt-4 p-0 mt-4">
+                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+                              <Calendar size={16} />{" "}
+                              {new Date(course?.start_time).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Recordings Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Ideas */}
+          {response?.data?.idea?.length > 0 && <div className="text-gray-900 mb-28">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Ideas</h2>
+                {!isEducator && <button
+                  onClick={() => setIdea((prev) => !prev)}
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                >
+                  {idea ? "Show Less" : "View All"}
+                </button>}
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.idea?.length > 0 ? (
+                idea ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.idea?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedIdea(course);
+                          setIsViewOpen(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.image?.[0]}
+                            alt={course?.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.name}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.idea?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedIdea(course);
+                          setIsViewOpen(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.image?.[0]}
+                            alt={course?.name}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4 d-flex">
+                          <div className="justify-between">
+                            <h3 className="text-md font-normal mb-2">
+                              {course?.name}
+                            </h3>
+                          </div>
+
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">No Idea Found</span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Insights */}
+
+          {response?.data?.insight?.length > 0 && <div className="text-gray-900 mb-28">
+            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Insights</h2>
+                {!isEducator && <button
+                  onClick={() => setInsight((prev) => !prev)}
+                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                >
+                  {insight ? "Show Less" : "View All"}
+                </button>}
+              </div>
+            </div>
+
+            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
+              {response?.data?.insight?.length > 0 ? (
+                insight ? (
+                  // GRID VIEW (sabhi courses ek sath)
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {response?.data?.insight?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedInsight(course);
+                          setIsViewOpen1(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.photos?.[0]}
+                            alt={course?.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.title}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // SLIDER VIEW (default horizontal scroll)
+                  <div className="flex gap-4">
+                    {response?.data?.insight?.map((course) => (
+                      <div
+                        key={course?._id}
+                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                        onClick={() => {
+                          if (isEducator) return;
+                          setSelectedInsight(course);
+                          setIsViewOpen1(true);
+                        }}
+                      // onClick={() =>
+                      //   navigate(
+                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
+                      //   )
+                      // }
+                      >
+                        <div className="rounded-t-xl overflow-hidden">
+                          <img
+                            src={course?.photos?.[0]}
+                            alt={course?.title}
+                            className="w-full h-36 object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-md font-normal mb-2">
+                            {course?.title}
+                          </h3>
+                          <ShowMoreLess
+                            className="text-xs text-gray-600"
+                            html={course?.description || "No description"}
+                            limit={65}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center">
+                  <span className="text-sm text-gray-600">
+                    No insight Found
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>}
+
+          {/* Live Ideas */}
 
 
-          {!isDigitalMarketing && <div className="text-gray-900">
+          {liveIdea?.length > 0 && <div className="text-gray-900">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -700,364 +1053,6 @@ const IqEducators = () => {
               )}
             </div>
           </div>}
-
-
-
-
-
-
-
-          {/* Recordings - Show for Digital Marketing only (after Courses) */}
-          {isDigitalMarketing && <div className="text-gray-900 mb-8">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => setShowAll((prev) => !prev)}
-                >
-                  {showAll ? "Show Less" : "View All"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.recordings?.length > 0 ? (
-                showAll ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full cursor-pointer border rounded-xl shadow-sm"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">No Recordings Found</span>
-                </div>
-              )}
-            </div>
-          </div>}
-
-          {/* Master Classes — shown for ALL educators */}
-          <div className="text-gray-900 mb-8">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Master Classes</h2>
-                {!isEducator && <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => navigate(`/master-class/${id}`)}
-                >
-                  View All
-                </button>}
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.masterClasses?.length > 0 ? (
-                <div className="flex gap-4">
-                  {response?.data?.masterClasses?.map((mc) => (
-                    <div
-                      key={mc?._id}
-                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                      onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
-                    >
-                      <div className="rounded-t-xl overflow-hidden">
-                        <img
-                          src={mc?.imageUrl || mc?.strategyBanner}
-                          alt={mc?.title}
-                          className="w-full h-36 object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-md font-normal mb-2">
-                          {mc?.title}
-                        </h3>
-                        {mc?.category?.name && (
-                          <p className="text-xs text-gray-500 mb-1">{mc?.category?.name}</p>
-                        )}
-                        {mc?.language && (
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                            {mc?.language}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">No Masterclasses Found</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Idea - Hide for Digital Marketing */}
-          {!isDigitalMarketing && <div className="text-gray-900 mb-28">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Ideas</h2>
-                {!isEducator && <button
-                  onClick={() => setIdea((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                >
-                  {idea ? "Show Less" : "View All"}
-                </button>}
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.idea?.length > 0 ? (
-                idea ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.name}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4 d-flex">
-                          <div className="justify-between">
-                            <h3 className="text-md font-normal mb-2">
-                              {course?.name}
-                            </h3>
-                          </div>
-
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">No Idea Found</span>
-                </div>
-              )}
-            </div>
-          </div>}
-
-          {/* Insight - Hide for Digital Marketing */}
-
-          {!isDigitalMarketing && <div className="text-gray-900 mb-28">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Insights</h2>
-                {!isEducator && <button
-                  onClick={() => setInsight((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                >
-                  {insight ? "Show Less" : "View All"}
-                </button>}
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.insight?.length > 0 ? (
-                insight ? (
-                  // GRID VIEW (sabhi courses ek sath)
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">
-                    No insight Found
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>}
         </div>
 
         {/* Sidebar */}
@@ -1114,416 +1109,17 @@ const IqEducators = () => {
                 </form>
               </div>
             </div> */}
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                {/* Header */}
-                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">
-                    Live Feed
-                  </h3>
-                  <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                    {/* <button
-                      onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Feed
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Ideas
-                    </button> */}
-                  </div>
-                </div>
-
-                {/* Updates */}
-                <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-                  {/* Hover Overlay */}
-                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div> */}
-
-                  {/* Messages */}
-                  {response?.data?.PostData?.length > 0 ? (
-                    response?.data?.PostData?.map((update) => (
-                      <div
-                        key={update?._id}
-                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-                      >
-                        <div className="flex flex-col gap-4 mb-4">
-                          <img
-                            src={update?.author?.image}
-                            alt={update?.author?.name}
-                            className="w-12 h-12 rounded-full"
-                          />
-                          <div>
-                            <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update?.author?.first_name}{" "}
-                              {update?.author?.last_name}
-                            </h4>
-                            <p className="text-xs font-normal text-gray-600">
-                              {update?.createdAt
-                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
-                                : ""}
-                            </p>
-                          </div>
-                        </div>
-
-                        {update?.content && (
-                          <div className="mb-3">
-                            <p
-                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                              dangerouslySetInnerHTML={{
-                                __html: makeClickableLinks(update?.content),
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Post Images */}
-                        {update?.images?.length > 0 && (
-                          <div
-                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
-                          >
-                            {update.images.map((img, imgIdx) => {
-                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
-                              const imgKey = img?._id || imgUrl || imgIdx;
-                              return imgUrl ? (
-                                <div
-                                  key={imgKey}
-                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                                  onClick={() => setLiveFeedImage(imgUrl)}
-                                >
-                                  <img
-                                    src={imgUrl}
-                                    alt="post"
-                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                                  />
-                                </div>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="text-sm text-gray-900 font-medium text-center">
-                        🚀 No updates available right now. Stay tuned for fresh
-                        content!
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cards */}
-                  {/* {trades.map((trade) => (
-                                        <div key={trade.id} className="card rounded-2xl overflow-hidden w-full relative z-0">
-                                        <img src={trade.image} alt={trade.pair} className="w-full h-40 object-cover" />
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <ArrowUp className="text-green-500 w-8 h-8 shrink-0" />
-                                                <div>
-                                                <h3 className="font-medium text-gray-800 text-sm mb-1">{trade.pair}</h3>
-                                                <p className="text-2xs font-normal text-gray-500 line-clamp-1">{trade.date}</p>
-                                                </div>
-                                            </div>
-                                            <span
-                                                className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                                            >
-                                                {trade.status}
-                                            </span>
-                                            </div>
-
-                                            <div className="mt-6 space-y-4">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Entry</span>
-                                                <span className="font-medium text-gray-800">{trade.entry}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
-                                                <span className="font-medium text-gray-800">{trade.stopLoss}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 1</span>
-                                                <span className="font-medium text-gray-800">{trade.exit1}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 2</span>
-                                                <span className="font-medium text-gray-800">{trade.exit2}</span>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    ))} */}
-                </div>
+            {/* Educator feed — sits next to Master Classes only once the stream is live.
+                Before that, the same EducatorFeed instance renders in place of the old
+                "About Me" card (up in the video/chat row via feedContent), so it's never
+                shown in both places at once. */}
+            {isEducatorLive && (
+              <div className="col-span-12 md:col-span-6 xl:col-span-12 h-[500px]">
+                <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
               </div>
-            </div>
-            <div className="col-span-12 md:col-span-6 xl:col-span-12">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                {/* Header */}
-                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">
-                    Analysis Updates
-                  </h3>
-                  <div className="flex space-x-2 bg-[#2D265F] rounded-full p-1">
-                    {/* <button
-                      onClick={() => setActiveTab("feed")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "feed"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Feed
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("ideas")}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        activeTab === "ideas"
-                          ? "bg-white text-[#1A1446]"
-                          : "text-white"
-                      }`}
-                    >
-                      Ideas
-                    </button> */}
-                  </div>
-                </div>
-
-                {/* Updates */}
-                <div className="p-4 space-y-3 live_updates iq_educators overflow-auto relative group">
-                  {/* Hover Overlay */}
-                  {/* <div className="absolute h-screen inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div> */}
-
-                  {/* Messages */}
-                  {response?.data?.analysisData?.length > 0 ? (
-                    response?.data?.analysisData?.map((update) => (
-                      <div
-                        key={update?._id}
-                        className="bg-[#F5F2FF] dark:bg-gray-100 rounded-xl p-4"
-                      >
-                        <div className="flex flex-col gap-4 mb-4">
-                          <img
-                            src={update?.author?.image}
-                            alt={update?.author?.name}
-                            className="w-12 h-12 rounded-full"
-                          />
-                          <div>
-                            <h4 className="text-sm font-normal mb-1 text-gray-900">
-                              {update?.author?.first_name}{" "}
-                              {update?.author?.last_name}
-                            </h4>
-                            <p className="text-xs font-normal text-gray-600">
-                              {update?.createdAt
-                                ? formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })
-                                : ""}
-                            </p>
-                          </div>
-                        </div>
-
-                        {update?.content && (
-                          <div className="mb-3">
-                            <p
-                              className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
-                              dangerouslySetInnerHTML={{
-                                __html: makeClickableLinks(update?.content),
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Post Images */}
-                        {update?.images?.length > 0 && (
-                          <div
-                            className={`grid ${update?.images?.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-2 mt-2`}
-                          >
-                            {update.images.map((img, imgIdx) => {
-                              const imgUrl = img?.url ?? (typeof img === "string" ? img : null);
-                              const imgKey = img?._id || imgUrl || imgIdx;
-                              return imgUrl ? (
-                                <div
-                                  key={imgKey}
-                                  className="relative w-full overflow-hidden rounded-xl bg-black/5 group cursor-pointer"
-                                  onClick={() => setLiveFeedImage(imgUrl)}
-                                >
-                                  <img
-                                    src={imgUrl}
-                                    alt="post"
-                                    className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
-                                  />
-                                </div>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="text-sm text-gray-900 font-medium text-center">
-                        🚀 No updates available right now. Stay tuned for fresh
-                        content!
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cards */}
-                  {/* {trades.map((trade) => (
-                                        <div key={trade.id} className="card rounded-2xl overflow-hidden w-full relative z-0">
-                                        <img src={trade.image} alt={trade.pair} className="w-full h-40 object-cover" />
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start sm:flex-row flex-col sm:gap-0 gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <ArrowUp className="text-green-500 w-8 h-8 shrink-0" />
-                                                <div>
-                                                <h3 className="font-medium text-gray-800 text-sm mb-1">{trade.pair}</h3>
-                                                <p className="text-2xs font-normal text-gray-500 line-clamp-1">{trade.date}</p>
-                                                </div>
-                                            </div>
-                                            <span
-                                                className={`bg-${trade.statusColor}-100 text-${trade.statusColor}-700 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                                            >
-                                                {trade.status}
-                                            </span>
-                                            </div>
-
-                                            <div className="mt-6 space-y-4">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Entry</span>
-                                                <span className="font-medium text-gray-800">{trade.entry}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Stop Loss</span>
-                                                <span className="font-medium text-gray-800">{trade.stopLoss}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 1</span>
-                                                <span className="font-medium text-gray-800">{trade.exit1}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600 font-normal text-sm">Exit 2</span>
-                                                <span className="font-medium text-gray-800">{trade.exit2}</span>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    ))} */}
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
-
-        {/* Recording - Hide for Digital Marketing (shown above after Courses) */}
-        {!isDigitalMarketing && <div className=" col-span-12 xl:col-span-12 mt-8 space-y-8 mb-8 ">
-          <div className="text-gray-900 mb-2">
-            <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Recordings</h2>
-                <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
-                  onClick={() => setShowAll((prev) => !prev)}
-                >
-                  {showAll ? "Show Less" : "View All"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
-              {response?.data?.recordings?.length > 0 ? (
-                showAll ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course._id}
-                        className="w-full cursor-pointer border rounded-xl shadow-sm"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(
-                                course?.start_time
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course._id}
-                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          // onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(
-                                course?.start_time
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className="text-center">
-                  <span className="text-sm text-gray-600">
-                    No Recordings Found
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>}
       </div>
 
       <VideoPlayerModal
@@ -1552,27 +1148,6 @@ const IqEducators = () => {
         slides={[{ src: InfoImage }]}
       />
 
-      {/* Live Feed / Analysis Image Lightbox */}
-      {liveFeedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-          onClick={() => setLiveFeedImage(null)}
-        >
-          <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={liveFeedImage}
-              alt="post"
-              className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
-            />
-            <button
-              onClick={() => setLiveFeedImage(null)}
-              className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
       {showRatingModal && (
         <RatingModal
           showRatingModal={showRatingModal}

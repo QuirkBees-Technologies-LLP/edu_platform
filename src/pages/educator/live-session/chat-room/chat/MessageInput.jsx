@@ -276,55 +276,23 @@ export const MessageInputUI = () => {
 
   return (
     <>
-      <div
-        style={{
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-        }}
-      >
+      <div className="relative flex flex-col w-full gap-2">
         {/* Input Row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "8px", // optional spacing
-          }}
-        >
-          {/* Buttons */}
+        <div className="flex items-center gap-2">
+          {/* Emoji Button */}
           {chatType !== "qa" && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker((prev) => !prev)}
+              className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-lg leading-none select-none bg-transparent border-0 p-0 outline-none transition-colors hover:bg-black/5 dark:hover:bg-white/10"
             >
-              {/* Emoji Button */}
-              <div
-                onClick={() => setShowEmojiPicker((prev) => !prev)}
-                style={{
-                  fontSize: "22px",
-                  cursor: "pointer",
-                  transition: "transform 0.2s",
-                  userSelect: "none",
-                }}
-                onMouseOver={(e) => (e.target.style.transform = "scale(1.2)")}
-                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-              >
-                😊
-              </div>
-            </div>
+              😊
+            </button>
           )}
 
           {/* Chat Input */}
-          <div style={{ flex: 1 }}>
+          <div className="flex-1 min-w-0">
             <ChatAutoComplete
-              style={{
-                width: "100%",
-              }}
               onChange={onChange}
               value={text}
               placeholder="Say anything."
@@ -334,16 +302,7 @@ export const MessageInputUI = () => {
 
         {/* Emoji Picker Popup */}
         {showEmojiPicker && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "60px",
-              left: "0",
-              zIndex: 50,
-              boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-              borderRadius: "10px",
-            }}
-          >
+          <div className="absolute bottom-full left-0 z-50 mb-2 rounded-xl shadow-lg">
             <EmojiPicker
               onEmojiClick={onEmojiClick}
               theme="light"
@@ -353,35 +312,25 @@ export const MessageInputUI = () => {
           </div>
         )}
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+        <div className="flex items-center justify-end gap-2.5">
           <button
-            className="btn btn-sm btn-primary mt-3"
-            style={{
-              outline: "none",
-              border: "none",
-            }}
+            type="button"
+            className="btn btn-sm btn-primary"
             onClick={() => setIsCreateIdeaOpen(true)}
           >
             Create Live Idea
           </button>
           {/* Send Button */}
           <button
-            className={`btn btn-sm btn-primary mt-3 input-ui-send-button ${text ? "text" : ""
+            className={`btn btn-sm btn-primary input-ui-send-button disabled:opacity-60 disabled:cursor-not-allowed ${text ? "text" : ""
               } ${cooldownRemaining ? "cooldown" : ""}`}
             disabled={!text}
             onClick={handleSend}
-            style={{
-              alignSelf: "flex-end",
-              marginTop: "10px",
-              opacity: !text ? 0.6 : 1,
-              cursor: !text ? "not-allowed" : "pointer",
-              transition: "opacity 0.3s",
-            }}
           >
             {giphyState ? (
               <></>
             ) : cooldownRemaining ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <div className="flex items-center gap-1.5">
                 <CooldownTimer
                   cooldownInterval={cooldownInterval}
                   setCooldownRemaining={setCooldownRemaining}
@@ -390,7 +339,7 @@ export const MessageInputUI = () => {
             ) : (
               <>
                 <i className="ki-filled ki-arrow-right"></i>
-                <div style={{ marginLeft: "5px" }}>{269 - text.length}</div>
+                <div className="ml-1">{269 - text.length}</div>
               </>
             )}
           </button>
