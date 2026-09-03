@@ -536,6 +536,12 @@ const IqEducators = () => {
             educatorData={response?.data?.educator?.description}
             headerGradient={getHeaderGradient()}
             feedContent={
+              // Deliberately unwrapped — each consumer of feedContent (StreamWrapper's
+              // no-call banner layout, ClientLiveSessionWrapper's video/chat grid) is
+              // responsible for giving this its own bounded height, since they measure
+              // against different sibling content (a static banner vs. a live video) and
+              // a height baked in here can't fit both. See StreamWrapper.jsx and
+              // ClientLiveSessionWrapper.jsx.
               <EducatorFeed
                 educatorId={id}
                 headerGradient={getHeaderGradient()}
