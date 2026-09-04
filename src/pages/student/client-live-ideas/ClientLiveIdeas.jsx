@@ -101,9 +101,13 @@ const ClientLiveIdeas = () => {
   const [fetchLiveIdeaById] = useLazyGetLiveIdeaSingleQuery();
   // Thread indicator handler: opens the ORIGINAL live idea a "Follow-up to X" link
   // references (quote-reply style) in the same shared modal state this page already uses
-  // for its own cards' "View Details".
+  // for its own cards' "View Details". Tracked by id (not a plain boolean) since this
+  // handler is shared across every card in the list — only the card whose follow-up was
+  // actually clicked should show a spinner.
+  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
   const handleOpenPreviousLiveIdea = async (previousLiveIdeaId) => {
-    if (!previousLiveIdeaId) return;
+    if (!previousLiveIdeaId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousLiveIdeaId);
     try {
       const original = await fetchLiveIdeaById(previousLiveIdeaId).unwrap();
       setSelectedIdea(original?.data || original);
@@ -111,6 +115,8 @@ const ClientLiveIdeas = () => {
     } catch (err) {
       console.error("Failed to load original live idea", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
     }
   };
 
@@ -530,12 +536,12 @@ const ClientLiveIdeas = () => {
               {trade?.previousLiveIdea && (
                 <QuotedReplyPreview
                   title={trade.previousLiveIdea.name}
-                  description={trade.previousLiveIdea.description}
                   thumbnail={trade.previousLiveIdea.image?.[0]}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleOpenPreviousLiveIdea(trade.previousLiveIdea._id);
                   }}
+                  isLoading={loadingFollowUpId === trade.previousLiveIdea._id}
                 />
               )}
               {/* ── Header: Strategy Name (primary) + Signal Type ── */}

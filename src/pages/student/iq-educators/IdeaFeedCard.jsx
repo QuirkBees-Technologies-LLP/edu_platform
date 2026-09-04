@@ -42,11 +42,13 @@ const IdeaFeedCard = ({ idea }) => {
   // carries `educatorDetails` (from getIdeaById's own response mapping), so unlike `idea`
   // it needs no adapter. Null means the modal shows this card's own `idea` as usual.
   const [modalOverride, setModalOverride] = useState(null);
+  const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
 
   const handleOpenPreviousIdea = async () => {
     const previousIdeaId = idea?.previousIdea?._id;
-    if (!previousIdeaId) return;
+    if (!previousIdeaId || isLoadingFollowUp) return;
+    setIsLoadingFollowUp(true);
     try {
       const original = await fetchIdeaById(previousIdeaId).unwrap();
       setModalOverride(original?.data || original);
@@ -54,6 +56,8 @@ const IdeaFeedCard = ({ idea }) => {
     } catch (err) {
       console.error("Failed to load original idea", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setIsLoadingFollowUp(false);
     }
   };
 
@@ -82,9 +86,9 @@ const IdeaFeedCard = ({ idea }) => {
         {idea?.previousIdea && (
           <QuotedReplyPreview
             title={idea.previousIdea.name}
-            description={idea.previousIdea.description}
             thumbnail={idea.previousIdea.image?.[0]}
             onClick={handleOpenPreviousIdea}
+            isLoading={isLoadingFollowUp}
           />
         )}
         {/* Header: pair + status — no educator name here, this is already the educator's

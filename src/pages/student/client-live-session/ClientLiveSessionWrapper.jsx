@@ -201,6 +201,20 @@ const ClientLiveSessionContent = ({
           </div>
         )}
       </div>
+
+      {/* Tablet/mobile only, while live: both columns above are col-span-12 below "lg", so
+          they stack (video, then Chat) — this is a THIRD col-span-12 grid item, a sibling
+          to those two columns rather than nested inside either one, so it lands directly
+          below Chat in that stacked flow purely through document order, without touching
+          the video/chat columns' own internals. On desktop it doesn't render at all (not
+          just hidden), so the existing side-by-side layout there is untouched. Guarded on
+          `feedContent` since this wrapper is also used without it (the standalone
+          /client-live-session route), where this must stay a no-op. IqEducators.jsx's own
+          bottom-of-page EducatorFeed likewise only mounts on desktop, so exactly one
+          instance is ever live at a time. */}
+      {!isLgUp && status === "live" && feedContent && (
+        <div className="col-span-12 h-[900px]">{feedContent}</div>
+      )}
     </div>
   );
 };

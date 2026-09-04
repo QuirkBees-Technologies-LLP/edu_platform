@@ -42,11 +42,13 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
   // the ORIGINAL live idea being replied to (quote-reply style), not this card's own
   // content. Null means the modal shows this card's own `liveIdea` as usual.
   const [modalOverride, setModalOverride] = useState(null);
+  const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [fetchLiveIdeaById] = useLazyGetLiveIdeaSingleQuery();
 
   const handleOpenPreviousLiveIdea = async () => {
     const previousLiveIdeaId = liveIdea?.previousLiveIdea?._id;
-    if (!previousLiveIdeaId) return;
+    if (!previousLiveIdeaId || isLoadingFollowUp) return;
+    setIsLoadingFollowUp(true);
     try {
       const original = await fetchLiveIdeaById(previousLiveIdeaId).unwrap();
       setModalOverride(original?.data || original);
@@ -54,6 +56,8 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
     } catch (err) {
       console.error("Failed to load original live idea", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setIsLoadingFollowUp(false);
     }
   };
 
@@ -77,9 +81,9 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
         {liveIdea?.previousLiveIdea && (
           <QuotedReplyPreview
             title={liveIdea.previousLiveIdea.name}
-            description={liveIdea.previousLiveIdea.description}
             thumbnail={liveIdea.previousLiveIdea.image?.[0]}
             onClick={handleOpenPreviousLiveIdea}
+            isLoading={isLoadingFollowUp}
           />
         )}
         {/* Header: educator - pair + status */}

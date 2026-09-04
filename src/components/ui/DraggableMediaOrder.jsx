@@ -39,13 +39,16 @@ const MediaOrderChip = ({ item, index, onMove }) => {
   return (
     <div
       ref={ref}
-      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white cursor-grab select-none"
+      // Explicit slate + dark: pairs (not the ambiguous --tw-gray-* theme tokens,
+      // which produced low-contrast text here) — the same convention already
+      // proven legible in dark mode on the social feed cards.
+      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 cursor-grab select-none"
       style={{ opacity: isDragging ? 0.4 : 1 }}
     >
-      <GripVertical size={14} className="text-gray-400 flex-shrink-0" />
-      <span className="text-xs font-semibold text-gray-500 w-4">{index + 1}</span>
+      <GripVertical size={14} className="text-slate-400 dark:text-slate-500 flex-shrink-0" />
+      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 w-4">{index + 1}</span>
       {item.icon}
-      <span className="text-sm text-gray-800">{item.label}</span>
+      <span className="text-sm font-medium text-slate-800 dark:text-slate-100">{item.label}</span>
     </div>
   );
 };

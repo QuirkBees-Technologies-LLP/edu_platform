@@ -87,10 +87,10 @@ const CreateTradeAnalysis = forwardRef(
       }
       if (chainFrom?._id) {
         // "Update" (chain) action: a brand-new, standalone follow-up insight, not an edit
-        // of the source one — every field starts blank except the title, which is carried
-        // over so the admin isn't retyping it.
+        // of the source one — every field, including the title, starts blank so the admin
+        // writes a fresh title for this follow-up rather than reusing the original's.
         return {
-          title: chainFrom?.title || "",
+          title: "",
           files: [],
           createdBy: createdBy || "",
           description: "",
@@ -206,8 +206,28 @@ const CreateTradeAnalysis = forwardRef(
 
     const handleRemoveImage = (index) => {
       const newFiles = [...formik.values.files];
-      newFiles.splice(index, 1);
+      const [removed] = newFiles.splice(index, 1);
       formik.setFieldValue("files", newFiles);
+
+      // Removing an auto-generated TradingView chart image (tv-chart-images container)
+      // should also drop its source link — otherwise the next save regenerates the
+      // very image the user just removed. Snapshot images are appended in the same
+      // order as their (non-empty) source links, so the Nth TV image maps to the
+      // Nth non-empty link.
+      if (removed?.dataURL?.includes("tv-chart-images")) {
+        const tvImageIndex = newFiles
+          .slice(0, index)
+          .filter((f) => f?.dataURL?.includes("tv-chart-images")).length;
+        const links = [...(formik.values.tradingViewLinks || [])];
+        const nonEmptyLinkIndexes = links
+          .map((link, i) => (link && link.trim() ? i : -1))
+          .filter((i) => i !== -1);
+        const linkIndexToRemove = nonEmptyLinkIndexes[tvImageIndex];
+        if (linkIndexToRemove !== undefined) {
+          links.splice(linkIndexToRemove, 1);
+          formik.setFieldValue("tradingViewLinks", links.length > 0 ? links : [""]);
+        }
+      }
     };
 
     // Drag-and-drop reorder handlers
@@ -373,10 +393,10 @@ const CreateTradeAnalysis = forwardRef(
                 {/* Display order (Task 14): which media type students see first */}
                 <div className="col-span-12">
                   <div className="flex flex-col gap-1">
-                    <label className="form-label text-gray-900 gap-1">
+                    <label className="form-label text-slate-800 dark:text-slate-100 gap-1">
                       Display Order
                     </label>
-                    <p className="text-xs text-gray-500 mb-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
                       Drag to choose which media students see first.
                     </p>
                     <DraggableMediaOrder

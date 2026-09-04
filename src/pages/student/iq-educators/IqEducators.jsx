@@ -51,6 +51,7 @@ import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import EducatorFeed from "./EducatorFeed";
+import { useResponsive } from "../../../hooks";
 
 // Strips HTML tags AND decodes entities (e.g. "&nbsp;") into plain text,
 // unlike a naive tag-stripping regex which leaves entities behind literally.
@@ -86,6 +87,11 @@ const IqEducators = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [isEducatorLive, setIsEducatorLive] = useState(false);
+  // Matches ClientLiveSessionWrapper's own "lg" split for its video/chat grid — below it,
+  // that wrapper renders the Educator Feed itself right after Chat, so the bottom-of-page
+  // copy below must not mount there too (a real conditional, not just CSS-hidden — a
+  // hidden-but-mounted duplicate was still fetching/rendering behind the scenes).
+  const isLgUp = useResponsive("up", "lg");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
@@ -268,11 +274,17 @@ const IqEducators = () => {
     }
   };
 
+  // Tracked by id (not a plain boolean) since all three "Follow-up to X" handlers below
+  // are shared across every card in their respective section — only the card whose
+  // follow-up was actually clicked should show a spinner.
+  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
+
   // "Follow-up to X" opens the ORIGINAL idea being replied to, not the follow-up itself
   // (quote-reply style) — previousIdea on the list item is only shallow-populated
   // (name/createdAt), so the full original is fetched on demand here.
   const handleOpenPreviousIdea = async (previousIdeaId) => {
-    if (!previousIdeaId) return;
+    if (!previousIdeaId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousIdeaId);
     try {
       const original = await fetchIdeaById(previousIdeaId).unwrap();
       setSelectedIdea(original?.data || original);
@@ -280,12 +292,15 @@ const IqEducators = () => {
     } catch (err) {
       console.error("Failed to load original idea", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
     }
   };
 
   // Same for Live Ideas.
   const handleOpenPreviousLiveIdea = async (previousLiveIdeaId) => {
-    if (!previousLiveIdeaId) return;
+    if (!previousLiveIdeaId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousLiveIdeaId);
     try {
       const original = await fetchLiveIdeaById(previousLiveIdeaId).unwrap();
       setSelectedLiveIdea(original?.data || original);
@@ -293,6 +308,8 @@ const IqEducators = () => {
     } catch (err) {
       console.error("Failed to load original live idea", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
     }
   };
 
@@ -316,7 +333,6 @@ const IqEducators = () => {
             misalign depending on which cards happen to have one. */}
         <QuotedReplyPreview
           title={courseIdea?.previousIdea?.name}
-          description={courseIdea?.previousIdea?.description}
           thumbnail={courseIdea?.previousIdea?.image?.[0]}
           reserveSpace
           onClick={(e) => {
@@ -324,6 +340,7 @@ const IqEducators = () => {
             e.stopPropagation();
             handleOpenPreviousIdea(courseIdea.previousIdea._id);
           }}
+          isLoading={!!courseIdea?.previousIdea && loadingFollowUpId === courseIdea.previousIdea._id}
         />
         {/* Header: name + status */}
         <div className="flex items-start gap-1 mb-2">
@@ -393,9 +410,6 @@ const IqEducators = () => {
             setIsViewOpen(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20">
-            Idea
-          </span>
           {orderedThumbnail ? (
             <img
               src={orderedThumbnail}
@@ -497,7 +511,6 @@ const IqEducators = () => {
             the grid/slider rows misalign depending on which cards happen to have one. */}
         <QuotedReplyPreview
           title={liveIdeaData?.previousLiveIdea?.name}
-          description={liveIdeaData?.previousLiveIdea?.description}
           thumbnail={liveIdeaData?.previousLiveIdea?.image?.[0]}
           reserveSpace
           onClick={(e) => {
@@ -505,6 +518,7 @@ const IqEducators = () => {
             e.stopPropagation();
             handleOpenPreviousLiveIdea(liveIdeaData.previousLiveIdea._id);
           }}
+          isLoading={!!liveIdeaData?.previousLiveIdea && loadingFollowUpId === liveIdeaData.previousLiveIdea._id}
         />
         {/* Header: name + status */}
         <div className="flex items-start gap-1 mb-2">
@@ -574,9 +588,6 @@ const IqEducators = () => {
             setIsLiveIdeaViewOpen(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-amber-600 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20">
-            Live Idea
-          </span>
           {liveIdeaData?.image?.length > 0 ? (
             <img
               src={liveIdeaData.image[0]}
@@ -596,7 +607,7 @@ const IqEducators = () => {
         </div>
 
         {/* Price levels */}
-        <div className="mb-2 space-y-1.5 flex-1">
+        <div className="mb-2 space-y-1.5">
           {liveIdeaData?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
@@ -673,7 +684,8 @@ const IqEducators = () => {
   // itself (quote-reply style) — previousAnalysis on the list item is only shallow-
   // populated (title/createdAt), so the full original is fetched on demand here.
   const handleOpenPreviousAnalysisInsight = async (previousAnalysisId) => {
-    if (!previousAnalysisId) return;
+    if (!previousAnalysisId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousAnalysisId);
     try {
       const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
       setSelectedInsight(original?.data || original);
@@ -681,6 +693,8 @@ const IqEducators = () => {
     } catch (err) {
       console.error("Failed to load original insight", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
     }
   };
 
@@ -713,7 +727,6 @@ const IqEducators = () => {
             the grid/slider rows misalign depending on which cards happen to have one. */}
         <QuotedReplyPreview
           title={insight?.previousAnalysis?.title}
-          description={insight?.previousAnalysis?.description}
           thumbnail={insight?.previousAnalysis?.photos?.[0]}
           reserveSpace
           onClick={(e) => {
@@ -721,6 +734,7 @@ const IqEducators = () => {
             e.stopPropagation();
             handleOpenPreviousAnalysisInsight(insight.previousAnalysis._id);
           }}
+          isLoading={!!insight?.previousAnalysis && loadingFollowUpId === insight.previousAnalysis._id}
         />
         {/* Header — date/time, same treatment as the Educator Feed's InsightFeedCard */}
         <div className="flex items-start gap-1 mb-2">
@@ -741,9 +755,6 @@ const IqEducators = () => {
             setIsViewOpen1(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-violet-600 dark:text-violet-300 bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/20">
-            Insight
-          </span>
           {orderedThumbnail ? (
             <img
               src={orderedThumbnail}
@@ -763,7 +774,7 @@ const IqEducators = () => {
         </div>
 
         {/* Title + description */}
-        <div className="mb-2 space-y-1.5 flex-1">
+        <div className="mb-2 space-y-1.5">
           {insight?.title && (
             <div className="px-1 py-1">
               <span className="text-[14px] font-extrabold text-slate-800 dark:text-white">
@@ -1246,12 +1257,12 @@ const IqEducators = () => {
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {response?.data?.idea?.length > 0 ? (
                 idea ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
                     {response?.data?.idea?.map((course) => renderIdeaCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 items-start">
                     {response?.data?.idea?.map((course) =>
                       renderIdeaCard(course, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
                     )}
@@ -1284,12 +1295,12 @@ const IqEducators = () => {
               {response?.data?.insight?.length > 0 ? (
                 insight ? (
                   // GRID VIEW (sabhi courses ek sath)
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
                     {response?.data?.insight?.map((course) => renderInsightCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 items-start">
                     {response?.data?.insight?.map((course) =>
                       renderInsightCard(course, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
                     )}
@@ -1339,7 +1350,7 @@ const IqEducators = () => {
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {liveIdea?.length > 0 ? (
-                <div className="flex gap-4">
+                <div className="flex gap-4 items-start">
                   {liveIdea?.map((liveIdeaData) =>
                     renderLiveIdeaCard(liveIdeaData, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
                   )}
@@ -1419,7 +1430,11 @@ const IqEducators = () => {
                 needed half the row; that sibling is gone, but a leftover md:col-span-6
                 kept this card at half width anyway, leaving a blank gap next to it on
                 medium screens. Full width now that nothing else shares the row. */}
-            {isEducatorLive && (
+            {/* Desktop ("lg" and up) only. Below "lg", ClientLiveSessionWrapper renders
+                this same feed itself, directly under Chat once the video/chat columns
+                stack — this copy must not also mount there, or two separate live
+                EducatorFeed instances end up fetching/rendering at once. */}
+            {isEducatorLive && isLgUp && (
               <div className="col-span-12 h-[900px]">
                 <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
               </div>

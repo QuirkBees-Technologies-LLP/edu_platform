@@ -28,6 +28,7 @@ const InsightFeedCard = ({ insight }) => {
   // the ORIGINAL insight being replied to (quote-reply style), not this card's own
   // content. Null means the modal shows this card's own insight as usual.
   const [modalOverride, setModalOverride] = useState(null);
+  const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
 
   const modalInsight = {
@@ -45,7 +46,8 @@ const InsightFeedCard = ({ insight }) => {
   const handleOpenPreviousAnalysis = async (e) => {
     e.stopPropagation();
     const previousAnalysisId = insight?.previousAnalysis?._id;
-    if (!previousAnalysisId) return;
+    if (!previousAnalysisId || isLoadingFollowUp) return;
+    setIsLoadingFollowUp(true);
     try {
       const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
       setModalOverride(original?.data || original);
@@ -53,6 +55,8 @@ const InsightFeedCard = ({ insight }) => {
     } catch (err) {
       console.error("Failed to load original insight", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setIsLoadingFollowUp(false);
     }
   };
 
@@ -65,9 +69,9 @@ const InsightFeedCard = ({ insight }) => {
         {insight?.previousAnalysis && (
           <QuotedReplyPreview
             title={insight.previousAnalysis.title}
-            description={insight.previousAnalysis.description}
             thumbnail={insight.previousAnalysis.photos?.[0]}
             onClick={handleOpenPreviousAnalysis}
+            isLoading={isLoadingFollowUp}
           />
         )}
         {/* Header — no educator name here, this is already the educator's own profile, so

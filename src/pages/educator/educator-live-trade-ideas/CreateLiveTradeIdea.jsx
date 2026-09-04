@@ -260,8 +260,28 @@ const CreateLiveTradeIdea = forwardRef(
 
     const handleRemoveImage = (index) => {
       const newFiles = [...formik.values.files];
-      newFiles.splice(index, 1);
+      const [removed] = newFiles.splice(index, 1);
       formik.setFieldValue("files", newFiles);
+
+      // Removing an auto-generated TradingView chart image (tv-chart-images container)
+      // should also drop its source link — otherwise the next save regenerates the
+      // very image the user just removed. Snapshot images are appended in the same
+      // order as their (non-empty) source links, so the Nth TV image maps to the
+      // Nth non-empty link.
+      if (removed?.dataURL?.includes("tv-chart-images")) {
+        const tvImageIndex = newFiles
+          .slice(0, index)
+          .filter((f) => f?.dataURL?.includes("tv-chart-images")).length;
+        const links = [...(formik.values.tradingViewLinks || [])];
+        const nonEmptyLinkIndexes = links
+          .map((link, i) => (link && link.trim() ? i : -1))
+          .filter((i) => i !== -1);
+        const linkIndexToRemove = nonEmptyLinkIndexes[tvImageIndex];
+        if (linkIndexToRemove !== undefined) {
+          links.splice(linkIndexToRemove, 1);
+          formik.setFieldValue("tradingViewLinks", links.length > 0 ? links : [""]);
+        }
+      }
     };
 
     useEffect(() => {
@@ -300,14 +320,23 @@ const CreateLiveTradeIdea = forwardRef(
               <div className="grid grid-cols-12 gap-4">
                 {isChainMode && (
                   <div className="col-span-12">
-                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-600">
-                      <span className="font-semibold uppercase text-gray-400 tracking-wide w-full mb-1">
-                        Reference — read-only, from the original live idea
+                    <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-3 flex flex-wrap gap-x-6 gap-y-2">
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Symbol</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.name || "—"}</span>
                       </span>
-                      <span><strong className="text-gray-800">Symbol:</strong> {chainFrom?.name}</span>
-                      <span><strong className="text-gray-800">Direction:</strong> {chainFrom?.type}</span>
-                      <span><strong className="text-gray-800">Type:</strong> {Array.isArray(chainFrom?.timeFrame) ? chainFrom.timeFrame.join("/") : chainFrom?.timeFrame}</span>
-                      <span><strong className="text-gray-800">Category:</strong> {chainFrom?.category?.name}</span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Direction</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100 capitalize">{chainFrom?.type || "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Type</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100 capitalize">{Array.isArray(chainFrom?.timeFrame) ? chainFrom.timeFrame.join("/") : chainFrom?.timeFrame || "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Category</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.category?.name || "—"}</span>
+                      </span>
                     </div>
                   </div>
                 )}

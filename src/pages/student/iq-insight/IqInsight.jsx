@@ -203,8 +203,12 @@ const IqInsight = () => {
   // "Follow-up to X" opens the ORIGINAL insight being replied to, not the follow-up
   // itself (quote-reply style) — previousAnalysis on the list item is only shallow-
   // populated (title/createdAt), so the full original is fetched on demand here.
+  // Tracked by id (not a plain boolean) since this handler is shared across every card in
+  // the list — only the card whose follow-up was actually clicked should show a spinner.
+  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
   const handleOpenPreviousAnalysis = async (previousAnalysisId) => {
-    if (!previousAnalysisId) return;
+    if (!previousAnalysisId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousAnalysisId);
     try {
       const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
       setSelectedIdea(original?.data || original);
@@ -212,6 +216,8 @@ const IqInsight = () => {
     } catch (err) {
       console.error("Failed to load original insight", err);
       toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
     }
   };
 
@@ -552,12 +558,12 @@ const IqInsight = () => {
                   {idea?.previousAnalysis && (
                     <QuotedReplyPreview
                       title={idea.previousAnalysis.title}
-                      description={idea.previousAnalysis.description}
                       thumbnail={idea.previousAnalysis.photos?.[0]}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenPreviousAnalysis(idea.previousAnalysis._id);
                       }}
+                      isLoading={loadingFollowUpId === idea.previousAnalysis._id}
                     />
                   )}
                   {/* ── Header: Strategy Name (primary) + Signal Type ── */}
