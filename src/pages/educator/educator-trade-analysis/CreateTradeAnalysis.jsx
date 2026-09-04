@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState, useCallback } from "react";
+import React, { forwardRef, useEffect, useState, useCallback, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Play, X, ImageIcon, Link2, Video } from "lucide-react";
@@ -60,18 +60,63 @@ const CreateTradeAnalysis = forwardRef(
     const createdBy = auth?.user?._id ?? null;
     const { data } = useGetCommonCategoryQuery();
 
-    const initialValues = {
-      title: "",
-      files: [],
-      createdBy: "",
-      description: "",
-      category: "",
-      tradingViewLinks: [""],
-      dyntubeUrl: "",
-      // Educator-chosen display order between images / TradingView charts / DynTube video
-      // (Task 14) — whichever group is first here is what students see first.
-      mediaOrder: ["image", "tradingview", "dyntube"],
-    };
+    // Computed synchronously from props on every render (not via a post-mount effect) so
+    // the dialog's very first paint already has the right values — no flash of blank
+    // fields while an effect catches up, which was most noticeable on a cold first open.
+    // `enableReinitialize: true` below makes Formik pick up changes to this whenever
+    // selectedRow/chainFrom/createdBy change.
+    const initialValues = useMemo(() => {
+      if (selectedRow?._id) {
+        // Edit: pre-fill everything from the existing insight.
+        const existingImages =
+          selectedRow?.image
+            ?.filter((img) => !img.includes('tv-chart-images') && !img.includes('tv-snapshot'))
+            .map((img) => ({ file: null, dataURL: img })) || [];
+        let tvLinks = [""];
+        if (selectedRow?.tradingViewLinks?.length > 0) {
+          tvLinks = selectedRow.tradingViewLinks;
+        } else if (selectedRow?.url && selectedRow.url.includes('tradingview.com')) {
+          tvLinks = [selectedRow.url];
+        }
+        return {
+          title: selectedRow?.title || "",
+          files: existingImages,
+          createdBy: createdBy || "",
+          description: selectedRow?.description || "",
+          category: selectedRow?.category?._id || "",
+          tradingViewLinks: tvLinks,
+          dyntubeUrl: selectedRow?.dyntubeUrl || "",
+          // Educator-chosen display order between images / TradingView charts / DynTube
+          // video (Task 14) — whichever group is first here is what students see first.
+          mediaOrder: selectedRow?.mediaOrder?.length > 0 ? selectedRow.mediaOrder : ["image", "tradingview", "dyntube"],
+        };
+      }
+      if (chainFrom?._id) {
+        // "Update" (chain) action: a brand-new, standalone follow-up insight, not an edit
+        // of the source one — every field starts blank except the title, which is carried
+        // over so the educator isn't retyping it.
+        return {
+          title: chainFrom?.title || "",
+          files: [],
+          createdBy: createdBy || "",
+          description: "",
+          category: "",
+          tradingViewLinks: [""],
+          dyntubeUrl: "",
+          mediaOrder: ["image", "tradingview", "dyntube"],
+        };
+      }
+      return {
+        title: "",
+        files: [],
+        createdBy: createdBy || "",
+        description: "",
+        category: "",
+        tradingViewLinks: [""],
+        dyntubeUrl: "",
+        mediaOrder: ["image", "tradingview", "dyntube"],
+      };
+    }, [selectedRow?._id, chainFrom?._id, createdBy]);
 
     const createSchema = Yup.object().shape({
       title: Yup.string().required("title is required"),
@@ -168,61 +213,6 @@ const CreateTradeAnalysis = forwardRef(
         }
       },
     });
-    useEffect(() => {
-      if (createdBy && formik.values) {
-        formik.setFieldValue("createdBy", createdBy);
-      }
-    }, [createdBy, formik.values]);
-
-    useEffect(() => {
-      if (selectedRow?._id) {
-        const existingImages =
-          selectedRow?.image
-            ?.filter((img) => !img.includes('tv-chart-images') && !img.includes('tv-snapshot'))
-            .map((img) => ({
-              file: null,
-              dataURL: img,
-            })) || [];
-
-        // Backward compat: if old record has url but no tradingViewLinks, convert (only if it's actually a TradingView URL)
-        let tvLinks = [""];
-        if (selectedRow?.tradingViewLinks?.length > 0) {
-          tvLinks = selectedRow.tradingViewLinks;
-        } else if (selectedRow?.url && selectedRow.url.includes('tradingview.com')) {
-          tvLinks = [selectedRow.url];
-        }
-
-        const initData = {
-          title: selectedRow?.title,
-          files: existingImages,
-          description: selectedRow?.description,
-          category: selectedRow?.category?._id,
-          tradingViewLinks: tvLinks,
-          dyntubeUrl: selectedRow?.dyntubeUrl || "",
-          mediaOrder: selectedRow?.mediaOrder?.length > 0 ? selectedRow.mediaOrder : ["image", "tradingview", "dyntube"],
-        };
-        formik.setValues(initData);
-      }
-    }, [selectedRow?._id, isCreateOpen]);
-
-    // "Update" (chain) action: this is a brand-new, standalone follow-up insight, not an
-    // edit of the source one — every field starts blank except the title, which is carried
-    // over so the educator isn't retyping it. Only the chain link itself (previousAnalysis,
-    // set on submit) ties it back to the source.
-    useEffect(() => {
-      if (!selectedRow?._id && chainFrom?._id) {
-        formik.setValues({
-          title: chainFrom?.title || "",
-          files: [],
-          description: "",
-          category: "",
-          tradingViewLinks: [""],
-          dyntubeUrl: "",
-          mediaOrder: ["image", "tradingview", "dyntube"],
-        });
-      }
-    }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
-
     // Function to add a new exit input
 
     // Function to remove an exit input

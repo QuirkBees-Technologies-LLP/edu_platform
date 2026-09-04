@@ -151,8 +151,7 @@ const IqInsight = () => {
         : "",
     });
   const { data: educatorsData } = useGetAllEducatorsQuery();
-  const [fetchTradeAnalysisById, { isFetching: isFetchingPreviousAnalysis }] =
-    useLazyGetTradeAnalysisByIdQuery();
+  const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
 
   const totalPages = data?.pagination?.totalPages || 1;
 

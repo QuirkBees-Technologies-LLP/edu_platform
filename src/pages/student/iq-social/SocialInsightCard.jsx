@@ -53,7 +53,8 @@ const SocialInsightCard = ({ insight }) => {
   const [modalOverride, setModalOverride] = useState(null);
   const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
 
-  const handleOpenPreviousAnalysis = async () => {
+  const handleOpenPreviousAnalysis = async (e) => {
+    e.stopPropagation();
     const previousAnalysisId = insight?.previousAnalysis?._id;
     if (!previousAnalysisId) return;
     try {

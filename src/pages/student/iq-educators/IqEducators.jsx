@@ -33,7 +33,7 @@ import InsightImageLightBox from "../iq-insight/ImageLightBox";
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ViewClientLiveIdeas from "../client-live-ideas/ViewClientLiveIdeas";
 import LiveIdeaImageLightBox from "../client-live-ideas/ImageLightBox";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
 import Lightbox from "yet-another-react-lightbox";
@@ -901,12 +901,6 @@ const IqEducators = () => {
       });
   }
 
-  const makeClickableLinks = (text) =>
-    text?.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
-      const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
-    });
-
   return (
     <div className="container-fluid pb-10">
       {/* Share Toast Notification */}
@@ -1067,6 +1061,12 @@ const IqEducators = () => {
             educatorData={response?.data?.educator?.description}
             headerGradient={getHeaderGradient()}
             feedContent={
+              // Deliberately unwrapped — each consumer of feedContent (StreamWrapper's
+              // no-call banner layout, ClientLiveSessionWrapper's video/chat grid) is
+              // responsible for giving this its own bounded height, since they measure
+              // against different sibling content (a static banner vs. a live video) and
+              // a height baked in here can't fit both. See StreamWrapper.jsx and
+              // ClientLiveSessionWrapper.jsx.
               <EducatorFeed
                 educatorId={id}
                 headerGradient={getHeaderGradient()}

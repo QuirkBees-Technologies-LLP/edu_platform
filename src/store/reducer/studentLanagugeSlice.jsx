@@ -8,7 +8,12 @@ const initialState = {
     { _id: '4', name: 'German' }
   ],
   selectedLanguage: 'English',
-  selectedLanguagesAdmin: ['English', 'Hindi', 'Spanish', 'German'],
+  // Empty until setLanguages() syncs from the real language list — an admin/educator
+  // query built from this must treat empty as "no filter" (see SettingsSection.jsx),
+  // otherwise anything created before that sync resolves gets hidden by a stale,
+  // hardcoded partial language list (e.g. Italian/Japanese/Portuguese records
+  // wouldn't match the old 4-language default).
+  selectedLanguagesAdmin: [],
   hasInitializedAdminLanguages: false
 };
 

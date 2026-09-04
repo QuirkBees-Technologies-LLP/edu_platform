@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { ChartLine } from "lucide-react";
+import { ChartLine, Eye } from "lucide-react";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
@@ -41,7 +41,8 @@ const InsightFeedCard = ({ insight }) => {
   // (no dyntube here since this card never renders video).
   const orderedThumbnail = getOrderedImageUrls(insight)[0];
 
-  const handleOpenPreviousAnalysis = async () => {
+  const handleOpenPreviousAnalysis = async (e) => {
+    e.stopPropagation();
     const previousAnalysisId = insight?.previousAnalysis?._id;
     if (!previousAnalysisId) return;
     try {
@@ -125,6 +126,17 @@ const InsightFeedCard = ({ insight }) => {
             />
           )}
         </div>
+
+        {/* View Details */}
+        <button
+          className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors"
+          onClick={() => {
+            setModalOverride(null);
+            setIsViewOpen(true);
+          }}
+        >
+          <Eye size={14} /> View Details
+        </button>
       </div>
 
       <ViewInsightTradeIdeas
