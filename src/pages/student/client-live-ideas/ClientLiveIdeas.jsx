@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { useTourStep } from "@/hooks/useTourStep";
@@ -6,10 +7,12 @@ import {
   useGetAllEducatorsQuery,
   useGetClientLiveIdeasQuery,
   useGetClientTradeIdeasQuery,
+  useLazyGetLiveIdeaSingleQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientLiveIdeas";
 import ImageLightBox from "./ImageLightBox";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -94,6 +97,28 @@ const ClientLiveIdeas = () => {
         ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
         : "",
     });
+
+  const [fetchLiveIdeaById] = useLazyGetLiveIdeaSingleQuery();
+  // Thread indicator handler: opens the ORIGINAL live idea a "Follow-up to X" link
+  // references (quote-reply style) in the same shared modal state this page already uses
+  // for its own cards' "View Details". Tracked by id (not a plain boolean) since this
+  // handler is shared across every card in the list — only the card whose follow-up was
+  // actually clicked should show a spinner.
+  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
+  const handleOpenPreviousLiveIdea = async (previousLiveIdeaId) => {
+    if (!previousLiveIdeaId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousLiveIdeaId);
+    try {
+      const original = await fetchLiveIdeaById(previousLiveIdeaId).unwrap();
+      setSelectedIdea(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original live idea", err);
+      toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
+    }
+  };
 
   const { data: categoryList } = useGetCommonCategoryQuery();
   const { data: educatorsData } = useGetAllEducatorsQuery();
@@ -505,6 +530,20 @@ const ClientLiveIdeas = () => {
               className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' li-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
+              {/* Quote-reply preview: this live idea is a chained follow-up to a previous
+                  one — shows a condensed preview of that ORIGINAL live idea, not this
+                  card's own content. */}
+              {trade?.previousLiveIdea && (
+                <QuotedReplyPreview
+                  title={trade.previousLiveIdea.name}
+                  thumbnail={trade.previousLiveIdea.image?.[0]}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenPreviousLiveIdea(trade.previousLiveIdea._id);
+                  }}
+                  isLoading={loadingFollowUpId === trade.previousLiveIdea._id}
+                />
+              )}
               {/* ── Header: Strategy Name (primary) + Signal Type ── */}
               <div className="flex items-start gap-1 mb-2">
                 <div className="flex-1 min-w-0">

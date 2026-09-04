@@ -10,7 +10,7 @@ export const adminLiveTradeIdeasApiSlice = createApi({
     }),
     createAdminLiveTradeIdea: builder.mutation({
       query: (data) => ({
-        url: '/admin/live-idea',
+        url: '/admin/live-idea/create',
         method: 'POST',
         body: data,
       }),

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { format } from "date-fns";
-import { Eye, ChevronLeft, ChevronRight, ChartLine, Link2 } from "lucide-react";
+import { ChartLine, Eye } from "lucide-react";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
 import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
@@ -20,28 +22,14 @@ import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clie
 // new object carrying those aliases is built only at the point of handing data to that
 // modal — the original `insight` prop is never touched.
 const InsightFeedCard = ({ insight }) => {
-  const navigate = useNavigate();
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  // Overrides `modalInsight` in the modal when the user opened it via "Follow-up to X" —
-  // shows the ORIGINAL insight being replied to (quote-reply style), not this card's own
+  // Overrides modalInsight when the user opened the modal via "Follow-up to X" — shows
+  // the ORIGINAL insight being replied to (quote-reply style), not this card's own
   // content. Null means the modal shows this card's own insight as usual.
   const [modalOverride, setModalOverride] = useState(null);
+  const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
-
-  const handleOpenPreviousAnalysis = async (e) => {
-    e.stopPropagation();
-    const previousAnalysisId = insight?.previousAnalysis?._id;
-    if (!previousAnalysisId) return;
-    try {
-      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
-      setModalOverride(original?.data || original);
-      setIsViewOpen(true);
-    } catch (err) {
-      console.error("Failed to load original insight", err);
-    }
-  };
 
   const modalInsight = {
     ...insight,
@@ -50,53 +38,47 @@ const InsightFeedCard = ({ insight }) => {
     educatorDetails: insight?.createdBy,
   };
 
+  // Educator-chosen display order (Task 14) — this card only shows a single static
+  // thumbnail, so it's just the first image/TradingView-snapshot slide in that order
+  // (no dyntube here since this card never renders video).
+  const orderedThumbnail = getOrderedImageUrls(insight)[0];
+
+  const handleOpenPreviousAnalysis = async (e) => {
+    e.stopPropagation();
+    const previousAnalysisId = insight?.previousAnalysis?._id;
+    if (!previousAnalysisId || isLoadingFollowUp) return;
+    setIsLoadingFollowUp(true);
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setModalOverride(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+      toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setIsLoadingFollowUp(false);
+    }
+  };
+
   return (
     <>
       <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35]">
-        {/* Thread indicator: this insight is a chained follow-up to a previous one */}
+        {/* Thread indicator: this insight is a chained follow-up to a previous one.
+            Clicking it opens the ORIGINAL insight being replied to (quote-reply style),
+            not this card's own content. */}
         {insight?.previousAnalysis && (
-          <div className="mb-2">
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-1 text-[11px] text-slate-500 dark:text-white/50 cursor-pointer hover:text-primary hover:underline w-fit"
-              onClick={handleOpenPreviousAnalysis}
-            >
-              <Link2 size={11} className="flex-shrink-0" />
-              <span className="truncate">
-                Follow-up to{" "}
-                <span className="font-semibold text-slate-700 dark:text-white/80">
-                  {insight.previousAnalysis.title}
-                </span>
-              </span>
-            </button>
-            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
-          </div>
+          <QuotedReplyPreview
+            title={insight.previousAnalysis.title}
+            thumbnail={insight.previousAnalysis.photos?.[0]}
+            onClick={handleOpenPreviousAnalysis}
+            isLoading={isLoadingFollowUp}
+          />
         )}
-        {/* Header: educator */}
+        {/* Header — no educator name here, this is already the educator's own profile, so
+            naming them on every card is redundant (kept on the general social feed, where
+            posts from multiple educators mix together). */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
-            <div className="flex justify-between items-start gap-2 mb-2">
-              <span
-                className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-full cursor-pointer hover:bg-blue-500/20 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (insight?.createdBy?._id) {
-                    navigate(`/iq-educators/${insight.createdBy._id}`);
-                  }
-                }}
-                title={`View ${insight?.createdBy?.first_name || ""}'s profile`}
-              >
-                <img
-                  src={insight?.createdBy?.image || ""}
-                  alt={insight?.createdBy?.first_name}
-                  className="w-4 h-4 rounded-full object-cover flex-shrink-0"
-                />
-                <span className="truncate">
-                  {insight?.createdBy?.first_name} {insight?.createdBy?.last_name}
-                </span>
-              </span>
-            </div>
-
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
                 {insight?.createdAt ? format(new Date(insight.createdAt), "MMM dd, hh:mm a") : ""}
@@ -105,61 +87,23 @@ const InsightFeedCard = ({ insight }) => {
           </div>
         </div>
 
-        {/* Chart image */}
-        <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-extrabold capitalize tracking-wide text-white bg-violet-500/90 backdrop-blur-sm">
+        {/* Chart image — click opens the details modal */}
+        <div
+          className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] cursor-pointer"
+          onClick={() => {
+            setModalOverride(null);
+            setIsViewOpen(true);
+          }}
+        >
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-violet-600 dark:text-violet-300 bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/20">
             Insight
           </span>
-          {insight?.photos && insight.photos.length > 0 ? (
-            <>
-              <img
-                src={insight.photos[currentIndex] || insight.photos[0]}
-                alt={insight?.title}
-                className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
-                onClick={() => setIsLightBoxOpen(true)}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsLightBoxOpen(true);
-                }}
-                className="absolute right-2 bottom-2 text-white p-1.5 bg-black/50 hover:bg-black/70 rounded-md backdrop-blur-sm transition-colors z-30"
-              >
-                <Eye size={14} />
-              </button>
-              {insight.photos.length > 1 && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentIndex((i) => (i === 0 ? insight.photos.length - 1 : i - 1));
-                    }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentIndex((i) => (i === insight.photos.length - 1 ? 0 : i + 1));
-                    }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                    {insight.photos.map((_, idx) => (
-                      <div
-                        key={idx}
-                        className={`w-1.5 h-1.5 rounded-full transition-colors ${currentIndex === idx ? "bg-white" : "bg-white/40"
-                          }`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
+          {orderedThumbnail ? (
+            <img
+              src={orderedThumbnail}
+              alt={insight?.title}
+              className="w-full h-[220px] object-cover object-center"
+            />
           ) : (
             <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
               <div className="flex flex-col items-center gap-2 opacity-40">
