@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { ChartLine, Link2 } from "lucide-react";
+import { ChartLine } from "lucide-react";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
 import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
@@ -59,18 +60,12 @@ const InsightFeedCard = ({ insight }) => {
             Clicking it opens the ORIGINAL insight being replied to (quote-reply style),
             not this card's own content. */}
         {insight?.previousAnalysis && (
-          <div className="mb-2">
-            <div
-              className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
-              onClick={handleOpenPreviousAnalysis}
-            >
-              <Link2 size={11} className="flex-shrink-0" />
-              <span className="truncate">
-                Follow-up to <span className="font-bold">{insight.previousAnalysis.title}</span>
-              </span>
-            </div>
-            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
-          </div>
+          <QuotedReplyPreview
+            title={insight.previousAnalysis.title}
+            description={insight.previousAnalysis.description}
+            thumbnail={insight.previousAnalysis.photos?.[0]}
+            onClick={handleOpenPreviousAnalysis}
+          />
         )}
         {/* Header — no educator name here, this is already the educator's own profile, so
             naming them on every card is redundant (kept on the general social feed, where
@@ -93,7 +88,7 @@ const InsightFeedCard = ({ insight }) => {
             setIsViewOpen(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-violet-500/55 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-violet-600 dark:text-violet-300 bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/20">
             Insight
           </span>
           {orderedThumbnail ? (

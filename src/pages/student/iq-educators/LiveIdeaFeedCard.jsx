@@ -5,11 +5,11 @@ import {
   TrendingDown,
   Copy,
   ChartLine,
-  Link2,
 } from "lucide-react";
 import ViewClientLiveIdeas from "../client-live-ideas/ViewClientLiveIdeas";
 import ImageLightBox from "../client-live-ideas/ImageLightBox";
 import { useLazyGetLiveIdeaSingleQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 
 const LabelMap = {
   active: "Active",
@@ -75,18 +75,12 @@ const LiveIdeaFeedCard = ({ liveIdea }) => {
             not this card's own content — matching a reply linking back to the message it
             quotes. */}
         {liveIdea?.previousLiveIdea && (
-          <div className="mb-2">
-            <div
-              className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
-              onClick={handleOpenPreviousLiveIdea}
-            >
-              <Link2 size={11} className="flex-shrink-0" />
-              <span className="truncate">
-                Follow-up to <span className="font-bold">{liveIdea.previousLiveIdea.name}</span>
-              </span>
-            </div>
-            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
-          </div>
+          <QuotedReplyPreview
+            title={liveIdea.previousLiveIdea.name}
+            description={liveIdea.previousLiveIdea.description}
+            thumbnail={liveIdea.previousLiveIdea.image?.[0]}
+            onClick={handleOpenPreviousLiveIdea}
+          />
         )}
         {/* Header: pair + status — no educator name here, this is already the educator's
             own profile, so naming them on every card is redundant (kept on the general
@@ -158,7 +152,7 @@ const LiveIdeaFeedCard = ({ liveIdea }) => {
             setIsViewOpen(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-amber-500/55 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-amber-600 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20">
             Live Idea
           </span>
           {liveIdea?.image && liveIdea.image.length > 0 ? (

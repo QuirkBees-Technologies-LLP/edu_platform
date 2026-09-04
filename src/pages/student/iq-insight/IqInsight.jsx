@@ -42,7 +42,8 @@ import EducatorImage from "../client-trade-ideas/EducatorImage";
 import { getEmbedUrl } from "@/utils/videoUtils";
 import { getOrderedMediaSlides } from "@/utils/mediaOrder";
 import Loader from "../../../components/ui/loader";
-import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown, Link2 as LinkIcon } from "lucide-react";
+import QuotedReplyPreview from "../../../components/ui/QuotedReplyPreview";
+import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -544,6 +545,20 @@ const IqInsight = () => {
                   className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' insight-first-card' : ''}`}
                   ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
                 >
+                  {/* Quote-reply preview: this insight is a chained follow-up to a previous
+                      one — shows a condensed preview of that ORIGINAL insight, not this
+                      card's own content. */}
+                  {idea?.previousAnalysis && (
+                    <QuotedReplyPreview
+                      title={idea.previousAnalysis.title}
+                      description={idea.previousAnalysis.description}
+                      thumbnail={idea.previousAnalysis.photos?.[0]}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenPreviousAnalysis(idea.previousAnalysis._id);
+                      }}
+                    />
+                  )}
                   {/* ── Header: Strategy Name (primary) + Signal Type ── */}
                   <div className="flex items-start gap-1 mb-2">
                     <div className="flex-1 min-w-0">
@@ -716,18 +731,6 @@ const IqInsight = () => {
                         {(idea.pair || idea.name) && (
                           <span className="text-[14px] font-extrabold text-slate-800 dark:text-white truncate">
                             {idea.pair || idea.name}
-                          </span>
-                        )}
-                        {idea.previousAnalysis && (
-                          <span
-                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary flex-shrink-0 cursor-pointer hover:underline"
-                            title={`Follow-up to "${idea.previousAnalysis.title}"`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenPreviousAnalysis(idea.previousAnalysis._id);
-                            }}
-                          >
-                            <LinkIcon size={10} /> Follow-up
                           </span>
                         )}
                       </div>

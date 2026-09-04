@@ -15,7 +15,6 @@ import {
   UserCheck,
   Copy,
   ChartLine,
-  Link2,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
@@ -49,6 +48,7 @@ import {
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import EducatorFeed from "./EducatorFeed";
 
 // Strips HTML tags AND decodes entities (e.g. "&nbsp;") into plain text,
@@ -306,32 +306,22 @@ const IqEducators = () => {
         key={courseIdea?._id}
         className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
       >
-        {/* Thread indicator: this idea is a chained follow-up to a previous one. Clicking
-            it opens the ORIGINAL idea being replied to (quote-reply style), not this
-            card's own content. Always rendered (using `invisible` rather than omitting the
-            block) so every card reserves the same vertical space here — otherwise cards
-            without a follow-up sit shorter and the grid/slider rows misalign depending on
-            which cards happen to have one. */}
-        <div className="mb-2">
-          <div
-            className={`flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary w-fit ${courseIdea?.previousIdea ? "cursor-pointer hover:underline" : "invisible"
-              }`}
-            onClick={(e) => {
-              if (!courseIdea?.previousIdea) return;
-              e.stopPropagation();
-              handleOpenPreviousIdea(courseIdea.previousIdea._id);
-            }}
-          >
-            <Link2 size={11} className="flex-shrink-0" />
-            <span className="truncate">
-              Follow-up to <span className="font-bold">{courseIdea?.previousIdea?.name}</span>
-            </span>
-          </div>
-          <div
-            className={`ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15 ${courseIdea?.previousIdea ? "" : "invisible"
-              }`}
-          />
-        </div>
+        {/* Quote-reply preview: this idea is a chained follow-up to a previous one — shows
+            a condensed preview of that ORIGINAL idea (thumbnail + name + snippet), not this
+            card's own content. reserveSpace keeps the same vertical space even without a
+            follow-up, otherwise cards without one sit shorter and the grid/slider rows
+            misalign depending on which cards happen to have one. */}
+        <QuotedReplyPreview
+          title={courseIdea?.previousIdea?.name}
+          description={courseIdea?.previousIdea?.description}
+          thumbnail={courseIdea?.previousIdea?.image?.[0]}
+          reserveSpace
+          onClick={(e) => {
+            if (!courseIdea?.previousIdea) return;
+            e.stopPropagation();
+            handleOpenPreviousIdea(courseIdea.previousIdea._id);
+          }}
+        />
         {/* Header: name + status */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
@@ -400,7 +390,7 @@ const IqEducators = () => {
             setIsViewOpen(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20">
             Idea
           </span>
           {orderedThumbnail ? (
@@ -497,32 +487,22 @@ const IqEducators = () => {
         key={liveIdeaData?._id}
         className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
       >
-        {/* Thread indicator: this live idea is a chained follow-up to a previous one.
-            Clicking it opens the ORIGINAL live idea being replied to (quote-reply style),
-            not this card's own content. Always rendered (using `invisible` rather than
-            omitting the block) so every card reserves the same vertical space here —
-            otherwise cards without a follow-up sit shorter and the grid/slider rows
-            misalign depending on which cards happen to have one. */}
-        <div className="mb-2">
-          <div
-            className={`flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary w-fit ${liveIdeaData?.previousLiveIdea ? "cursor-pointer hover:underline" : "invisible"
-              }`}
-            onClick={(e) => {
-              if (!liveIdeaData?.previousLiveIdea) return;
-              e.stopPropagation();
-              handleOpenPreviousLiveIdea(liveIdeaData.previousLiveIdea._id);
-            }}
-          >
-            <Link2 size={11} className="flex-shrink-0" />
-            <span className="truncate">
-              Follow-up to <span className="font-bold">{liveIdeaData?.previousLiveIdea?.name}</span>
-            </span>
-          </div>
-          <div
-            className={`ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15 ${liveIdeaData?.previousLiveIdea ? "" : "invisible"
-              }`}
-          />
-        </div>
+        {/* Quote-reply preview: this live idea is a chained follow-up to a previous one —
+            shows a condensed preview of that ORIGINAL live idea (thumbnail + name +
+            snippet), not this card's own content. reserveSpace keeps the same vertical
+            space even without a follow-up, otherwise cards without one sit shorter and
+            the grid/slider rows misalign depending on which cards happen to have one. */}
+        <QuotedReplyPreview
+          title={liveIdeaData?.previousLiveIdea?.name}
+          description={liveIdeaData?.previousLiveIdea?.description}
+          thumbnail={liveIdeaData?.previousLiveIdea?.image?.[0]}
+          reserveSpace
+          onClick={(e) => {
+            if (!liveIdeaData?.previousLiveIdea) return;
+            e.stopPropagation();
+            handleOpenPreviousLiveIdea(liveIdeaData.previousLiveIdea._id);
+          }}
+        />
         {/* Header: name + status */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
@@ -591,7 +571,7 @@ const IqEducators = () => {
             setIsLiveIdeaViewOpen(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-amber-500/55 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-amber-600 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20">
             Live Idea
           </span>
           {liveIdeaData?.image?.length > 0 ? (
@@ -722,32 +702,22 @@ const IqEducators = () => {
         key={insight?._id}
         className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
       >
-        {/* Thread indicator: this insight is a chained follow-up to a previous one.
-            Clicking it opens the ORIGINAL insight being replied to (quote-reply style),
-            not this card's own content. Always rendered (using `invisible` rather than
-            omitting the block) so every card reserves the same vertical space here —
-            otherwise cards without a follow-up sit shorter and the grid/slider rows
-            misalign depending on which cards happen to have one. */}
-        <div className="mb-2">
-          <div
-            className={`flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary w-fit ${insight?.previousAnalysis ? "cursor-pointer hover:underline" : "invisible"
-              }`}
-            onClick={(e) => {
-              if (!insight?.previousAnalysis) return;
-              e.stopPropagation();
-              handleOpenPreviousAnalysisInsight(insight.previousAnalysis._id);
-            }}
-          >
-            <Link2 size={11} className="flex-shrink-0" />
-            <span className="truncate">
-              Follow-up to <span className="font-bold">{insight?.previousAnalysis?.title}</span>
-            </span>
-          </div>
-          <div
-            className={`ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15 ${insight?.previousAnalysis ? "" : "invisible"
-              }`}
-          />
-        </div>
+        {/* Quote-reply preview: this insight is a chained follow-up to a previous one —
+            shows a condensed preview of that ORIGINAL insight (thumbnail + title +
+            snippet), not this card's own content. reserveSpace keeps the same vertical
+            space even without a follow-up, otherwise cards without one sit shorter and
+            the grid/slider rows misalign depending on which cards happen to have one. */}
+        <QuotedReplyPreview
+          title={insight?.previousAnalysis?.title}
+          description={insight?.previousAnalysis?.description}
+          thumbnail={insight?.previousAnalysis?.photos?.[0]}
+          reserveSpace
+          onClick={(e) => {
+            if (!insight?.previousAnalysis) return;
+            e.stopPropagation();
+            handleOpenPreviousAnalysisInsight(insight.previousAnalysis._id);
+          }}
+        />
         {/* Header — date/time, same treatment as the Educator Feed's InsightFeedCard */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
@@ -767,7 +737,7 @@ const IqEducators = () => {
             setIsViewOpen1(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-violet-500/55 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-violet-600 dark:text-violet-300 bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/20">
             Insight
           </span>
           {orderedThumbnail ? (

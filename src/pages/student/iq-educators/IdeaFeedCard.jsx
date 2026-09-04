@@ -5,12 +5,12 @@ import {
   TrendingDown,
   Copy,
   ChartLine,
-  Link2,
 } from "lucide-react";
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 
 const LabelMap = {
   active: "Active",
@@ -78,18 +78,12 @@ const IdeaFeedCard = ({ idea }) => {
             it opens the ORIGINAL idea being replied to (quote-reply style), not this
             card's own content — matching a reply linking back to the message it quotes. */}
         {idea?.previousIdea && (
-          <div className="mb-2">
-            <div
-              className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
-              onClick={handleOpenPreviousIdea}
-            >
-              <Link2 size={11} className="flex-shrink-0" />
-              <span className="truncate">
-                Follow-up to <span className="font-bold">{idea.previousIdea.name}</span>
-              </span>
-            </div>
-            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
-          </div>
+          <QuotedReplyPreview
+            title={idea.previousIdea.name}
+            description={idea.previousIdea.description}
+            thumbnail={idea.previousIdea.image?.[0]}
+            onClick={handleOpenPreviousIdea}
+          />
         )}
         {/* Header: pair + status — no educator name here, this is already the educator's
             own profile, so naming them on every card is redundant (kept on the general
@@ -161,7 +155,7 @@ const IdeaFeedCard = ({ idea }) => {
             setIsViewOpen(true);
           }}
         >
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-indigo-500/55 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20">
             Idea
           </span>
           {orderedThumbnail ? (

@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -20,7 +21,6 @@ import {
   Eye,
   ChartLine,
   Clock,
-  Link2,
 } from "lucide-react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import {
@@ -526,25 +526,19 @@ const ClientTradeIdeas = () => {
               className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
-              {/* Thread indicator: this idea is a chained follow-up to a previous one.
-                  Clicking it opens the ORIGINAL idea being replied to (quote-reply style),
-                  not this card's own content. */}
+              {/* Quote-reply preview: this idea is a chained follow-up to a previous one —
+                  shows a condensed preview of that ORIGINAL idea, not this card's own
+                  content. */}
               {trade?.previousIdea && (
-                <div className="mb-2">
-                  <div
-                    className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenPreviousIdea(trade.previousIdea._id);
-                    }}
-                  >
-                    <Link2 size={11} className="flex-shrink-0" />
-                    <span className="truncate">
-                      Follow-up to <span className="font-bold">{trade.previousIdea.name}</span>
-                    </span>
-                  </div>
-                  <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
-                </div>
+                <QuotedReplyPreview
+                  title={trade.previousIdea.name}
+                  description={trade.previousIdea.description}
+                  thumbnail={trade.previousIdea.image?.[0]}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenPreviousIdea(trade.previousIdea._id);
+                  }}
+                />
               )}
               {/* ── Header: Strategy Name (primary) + Signal Type ── */}
               <div className="flex items-start gap-1 mb-2">

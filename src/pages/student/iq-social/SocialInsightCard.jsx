@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChartLine,
-  Link2,
 } from "lucide-react";
 import {
   Dialog,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { getEmbedUrl } from "@/utils/videoUtils";
 import { getOrderedMediaSlides } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
 import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
@@ -90,18 +90,12 @@ const SocialInsightCard = ({ insight }) => {
             not this card's own content — matching a reply linking back to the message
             it quotes. */}
         {insight?.previousAnalysis && (
-          <div className="mb-2">
-            <div
-              className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-primary cursor-pointer hover:underline w-fit"
-              onClick={handleOpenPreviousAnalysis}
-            >
-              <Link2 size={11} className="flex-shrink-0" />
-              <span className="truncate">
-                Follow-up to <span className="font-bold">{insight.previousAnalysis.title}</span>
-              </span>
-            </div>
-            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
-          </div>
+          <QuotedReplyPreview
+            title={insight.previousAnalysis.title}
+            description={insight.previousAnalysis.description}
+            thumbnail={insight.previousAnalysis.photos?.[0]}
+            onClick={handleOpenPreviousAnalysis}
+          />
         )}
         {/* Header: educator */}
         <div className="flex items-start gap-1 mb-2">
@@ -154,7 +148,7 @@ const SocialInsightCard = ({ insight }) => {
 
         {/* Chart image / DynTube video carousel */}
         <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-white bg-violet-500/55 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-violet-600 dark:text-violet-300 bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/20">
             Insight
           </span>
           {totalSlides > 0 ? (
