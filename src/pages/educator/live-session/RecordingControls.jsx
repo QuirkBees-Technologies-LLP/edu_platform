@@ -1,5 +1,6 @@
 import { useCallStateHooks } from "@stream-io/video-react-sdk";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const RecordingControls = ({ call }) => {
   const { useIsCallRecordingInProgress } = useCallStateHooks();
@@ -12,6 +13,11 @@ const RecordingControls = ({ call }) => {
       await call.startRecording();
     } catch (err) {
       console.error("Failed to start recording:", err);
+      toast.error(
+        err?.message?.includes("no active session")
+          ? "Can't start recording yet — make sure you're live first, then try again."
+          : "Failed to start recording. Please try again."
+      );
     }
   };
 
@@ -20,6 +26,7 @@ const RecordingControls = ({ call }) => {
       await call.stopRecording();
     } catch (err) {
       console.error("Failed to stop recording:", err);
+      toast.error("Failed to stop recording.");
     }
   };
 

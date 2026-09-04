@@ -96,6 +96,17 @@ export const clientTradeIdeasApiSlice = createApi({
     getTradeAnalysisById: builder.query({
       query: (id) => `/users/trade-analysis/${id}`,
     }),
+    // Single idea, fully populated — used to open the *original* idea a "Follow-up to X"
+    // link references. The list endpoints only shallow-populate previousIdea with
+    // name/createdAt, not enough to render the details modal.
+    getIdeaById: builder.query({
+      query: (id) => `/users/idea/${id}`,
+    }),
+    // Single live idea, fully populated — same purpose as getIdeaById, for Live Ideas'
+    // "Follow-up to X" link. Distinct path from the paginated /users/live-idea/:id.
+    getLiveIdeaSingle: builder.query({
+      query: (id) => `/users/live-idea/single/${id}`,
+    }),
     getClientCryptoAnalysis: builder.query({
       query: ({
         page = 1,
@@ -150,4 +161,6 @@ export const {
   useGetEducatorIdeasQuery,
   useGetEducatorInsightsQuery,
   useLazyGetTradeAnalysisByIdQuery,
+  useLazyGetIdeaByIdQuery,
+  useLazyGetLiveIdeaSingleQuery,
 } = clientTradeIdeasApiSlice;

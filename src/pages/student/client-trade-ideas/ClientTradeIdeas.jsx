@@ -1,14 +1,18 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { useTourStep } from "@/hooks/useTourStep";
 import {
   useGetAllEducatorsQuery,
   useGetClientTradeIdeasQuery,
+  useLazyGetIdeaByIdQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -94,6 +98,28 @@ const ClientTradeIdeas = () => {
         ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
         : "",
     });
+
+  const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
+  // Thread indicator handler: opens the ORIGINAL idea a "Follow-up to X" link references
+  // (quote-reply style) in the same shared modal state this page already uses for its own
+  // cards' "View Details". Tracked by id (not a plain boolean) since this handler is shared
+  // across every card in the list — only the card whose follow-up was actually clicked
+  // should show a spinner.
+  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
+  const handleOpenPreviousIdea = async (previousIdeaId) => {
+    if (!previousIdeaId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousIdeaId);
+    try {
+      const original = await fetchIdeaById(previousIdeaId).unwrap();
+      setSelectedIdea(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original idea", err);
+      toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
+    }
+  };
 
   const { data: educatorsData } = useGetAllEducatorsQuery();
   const { data: categoryList } = useGetCommonCategoryQuery();
@@ -498,12 +524,30 @@ const ClientTradeIdeas = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tradeIdeas?.map((trade, index) => (
+          {tradeIdeas?.map((trade, index) => {
+            // Educator-chosen display order between images and TradingView snapshots
+            // (Task 14).
+            const orderedTradeImages = getOrderedImageUrls(trade);
+            return (
             <div
               key={trade._id}
               className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
+              {/* Quote-reply preview: this idea is a chained follow-up to a previous one —
+                  shows a condensed preview of that ORIGINAL idea, not this card's own
+                  content. */}
+              {trade?.previousIdea && (
+                <QuotedReplyPreview
+                  title={trade.previousIdea.name}
+                  thumbnail={trade.previousIdea.image?.[0]}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenPreviousIdea(trade.previousIdea._id);
+                  }}
+                  isLoading={loadingFollowUpId === trade.previousIdea._id}
+                />
+              )}
               {/* ── Header: Strategy Name (primary) + Signal Type ── */}
               <div className="flex items-start gap-1 mb-2">
                 <div className="flex-1 min-w-0">
@@ -559,10 +603,10 @@ const ClientTradeIdeas = () => {
 
               {/* ── Chart Image Thumbnail ── */}
               <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-                {trade.image && trade.image.length > 0 ? (
+                {orderedTradeImages.length > 0 ? (
                   <>
                     <img
-                      src={trade.image[trade.currentIndex ?? 0]}
+                      src={orderedTradeImages[trade.currentIndex ?? 0]}
                       alt={trade.pair}
                       className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                       onClick={() => {
@@ -581,7 +625,7 @@ const ClientTradeIdeas = () => {
                     >
                       <Eye size={14} />
                     </button>
-                    {trade.image.length > 1 && (
+                    {orderedTradeImages.length > 1 && (
                       <>
                         <button
                           onClick={(e) => {
@@ -620,7 +664,7 @@ const ClientTradeIdeas = () => {
                           <ChevronRight size={16} />
                         </button>
                         <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                          {trade.image.map((_, idx) => (
+                          {orderedTradeImages.map((_, idx) => (
                             <div
                               key={idx}
                               className={`w-1.5 h-1.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx ? "bg-white" : "bg-white/40"
@@ -694,6 +738,12 @@ const ClientTradeIdeas = () => {
                     </div>
                   );
                 })}
+                {trade?.description && (
+                  <div
+                    className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: trade.description }}
+                  />
+                )}
               </div>
 
               {/* ── Footer: Source + Time ── */}
@@ -710,7 +760,8 @@ const ClientTradeIdeas = () => {
                 <Eye size={14} /> View Details
               </button>
             </div>
-          ))}
+            );
+          })}
 
           <ViewClientTradeIdeas
             isViewOpen={isViewOpen}

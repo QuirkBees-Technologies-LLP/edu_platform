@@ -12,7 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import DeletePostDialog from "@/components/DeletePostDialog";
 
-const SocialPostCard = ({ post, onEdit, refetch, showTypeBadge }) => {
+// showAuthorName: the general social feed mixes posts from many educators, so the author
+// name is needed there — but on an educator's own profile feed it's redundant (every card
+// is obviously theirs), so EducatorFeed passes showAuthorName={false}.
+const SocialPostCard = ({ post, onEdit, refetch, showTypeBadge, showAuthorName = true }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [dyntubeModalOpen, setDyntubeModalOpen] = useState(false);
@@ -103,37 +106,44 @@ const SocialPostCard = ({ post, onEdit, refetch, showTypeBadge }) => {
   return (
     <div className="relative rounded-2xl border border-gray-200 dark:border-[#22242A] bg-white dark:bg-[#16181D] p-6 mb-6 transition-all duration-300 w-full">
       {showTypeBadge && (
-        <span className="absolute right-3 top-3 z-20 px-2 py-0.5 rounded-md text-[10px] font-extrabold capitalize tracking-wide text-white bg-slate-500/90 backdrop-blur-sm">
+        <span className="absolute right-3 top-3 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-slate-600 dark:text-slate-300 bg-slate-500/10 dark:bg-slate-500/15 border border-slate-500/20">
           Post
         </span>
       )}
-      {/* Author Info */}
+      {/* Author Info — hidden on the educator's own profile feed (redundant there); shown
+          on the general social feed, where posts from multiple educators mix together. */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <img
-            onClick={() => navigate(`/iq-educators/${author?._id}`)}
-            src={
-              author?.image ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                author?.first_name || "User"
-              )}&background=random&color=fff&size=80`
-            }
-            alt={author?.first_name}
-            className="w-12 h-12 rounded-full object-contain border border-gray-300 dark:border-[#2C2F36] cursor-pointer hover:opacity-90 transition-all"
-          />
-          <div className="ml-3">
-            <p
+        {showAuthorName ? (
+          <div className="flex items-center">
+            <img
               onClick={() => navigate(`/iq-educators/${author?._id}`)}
-              className="font-medium text-gray-900 dark:text-[#EDEDED] hover:text-blue-600 dark:hover:text-[#8B5CF6] cursor-pointer transition-colors"
-            >
-              {author?.first_name} {author?.last_name}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-[#9CA3AF]">
-              Educator •{" "}
-              {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
-            </p>
+              src={
+                author?.image ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  author?.first_name || "User"
+                )}&background=random&color=fff&size=80`
+              }
+              alt={author?.first_name}
+              className="w-12 h-12 rounded-full object-contain border border-gray-300 dark:border-[#2C2F36] cursor-pointer hover:opacity-90 transition-all"
+            />
+            <div className="ml-3">
+              <p
+                onClick={() => navigate(`/iq-educators/${author?._id}`)}
+                className="font-medium text-gray-900 dark:text-[#EDEDED] hover:text-blue-600 dark:hover:text-[#8B5CF6] cursor-pointer transition-colors"
+              >
+                {author?.first_name} {author?.last_name}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-[#9CA3AF]">
+                Educator •{" "}
+                {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <p className="text-xs text-gray-500 dark:text-[#9CA3AF]">
+            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+          </p>
+        )}
         {onEdit && (
           <div className="relative">
             <button

@@ -5,6 +5,8 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DraggableImageList from "@/components/ui/DraggableImageList";
 import DraggableLinkList from "@/components/ui/DraggableLinkList";
+import DraggableMediaOrder from "@/components/ui/DraggableMediaOrder";
+import { ImageIcon, Link2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,11 @@ const CreateTradeIdeas = forwardRef(
       selectedRow,
       refetch,
       onSubmitSuccess,
+      // "Update" (chain) action: the source idea to link the new one back to via
+      // previousIdea, forming a thread — see AdminTradeIdeas.jsx's ActionMenu. Always
+      // creates a brand-new document, never an in-place edit.
+      chainFrom,
+      setChainFrom,
     },
     ref
   ) => {
@@ -47,6 +53,7 @@ const CreateTradeIdeas = forwardRef(
     const [updateTradeIdea] = useUpdateTradeIdeaMutation();
     const educatorId = auth?.user?._id;
     const { data } = useGetCommonCategoryQuery();
+    const isChainMode = !selectedRow?._id && !!chainFrom?._id;
 
     const initialValues = {
       name: "",
@@ -61,8 +68,11 @@ const CreateTradeIdeas = forwardRef(
       description: "",
       category: "",
       pips: 0,
-      checkTime: false,
       tradingViewLinks: [""],
+      // Educator-chosen display order between images and TradingView charts (Task 14) —
+      // whichever group is first here is what students see first. Ideas have no video
+      // field, so only these two groups apply.
+      mediaOrder: ["image", "tradingview"],
     };
 
     const numberField = () =>
@@ -112,7 +122,11 @@ const CreateTradeIdeas = forwardRef(
       pips: Yup.number()
         .typeError("Pips must be a number")
         .when("status", {
-          is: (status) => ["win", "loss", "partialWin"].includes(status),
+          is: (status) =>
+            (isChainMode
+              ? ["win", "loss", "partialWin", "breakEven"]
+              : ["win", "loss", "partialWin"]
+            ).includes(status),
           then: (schema) =>
             schema
               .required("Pips is required")
@@ -146,15 +160,19 @@ const CreateTradeIdeas = forwardRef(
         formData.append("invalidation", values.invalidation);
         formData.append("description", values.description);
         formData.append("category", values.category);
-        formData.append("checkTime", values.checkTime);
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
 
         // Append TradingView links (always send, even empty, so backend can clear old links)
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
 
-        // Send existing image URLs the user kept (so backend knows which to preserve)
-        if (selectedRow?._id) {
+        // Educator-chosen display order between the media groups (Task 14).
+        formData.append("mediaOrder", JSON.stringify(values.mediaOrder || ["image", "tradingview"]));
+
+        // Send existing image URLs the user kept (so backend knows which to preserve) —
+        // both for editing in place, and for a chain-create where images were pre-loaded
+        // from the source idea and the educator may have pruned some.
+        if (selectedRow?._id || isChainMode) {
           const keptImages = (values.files || [])
             .filter((f) => !f?.file?.file && f?.dataURL)
             .map((f) => f.dataURL);
@@ -163,6 +181,10 @@ const CreateTradeIdeas = forwardRef(
 
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
+        }
+
+        if (isChainMode) {
+          formData.append("previousIdea", chainFrom._id);
         }
 
         const wasUpdate = !!selectedRow?._id;
@@ -175,12 +197,13 @@ const CreateTradeIdeas = forwardRef(
           } else {
             await createTradeIdeas(formData).unwrap();
             refetch();
-            toast.success("Idea created successfully!");
+            toast.success(isChainMode ? "Update published successfully!" : "Idea created successfully!");
           }
           formik.resetForm();
+          setChainFrom?.(null);
           handleCloseCreate();
           // Share-to-social prompt only makes sense when updating an existing idea, not
-          // when creating a brand new one.
+          // when creating a brand new one (chained or plain).
           if (wasUpdate && onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
@@ -218,12 +241,47 @@ const CreateTradeIdeas = forwardRef(
           category: selectedRow?.category?._id,
           exits: selectedRow?.exits,
           educatorId: selectedRow?.educatorDetails?._id,
-          checkTime: selectedRow?.isUpdatedIdea || false,
           tradingViewLinks: selectedRow?.tradingViewLinks?.length > 0 ? selectedRow.tradingViewLinks : [""],
+          mediaOrder: selectedRow?.mediaOrder?.length > 0 ? selectedRow.mediaOrder : ["image", "tradingview"],
         };
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
+
+    // "Update" (chain) action: reference fields (symbol/direction/type/entry/invalidation/
+    // exits/category) are copied from the source idea — they're rendered read-only below,
+    // not editable, since this is reporting an outcome on the same trade setup, not a new
+    // one. Images ARE pre-loaded (unlike Insights' chain form, which starts blank) so the
+    // educator can keep "before" images alongside new "after" ones, per Task 11. Status/
+    // pips/description start fresh — this is a new outcome being reported.
+    useEffect(() => {
+      if (!selectedRow?._id && chainFrom?._id) {
+        const seedImages = (chainFrom?.image || []).map((img) => ({
+          file: null,
+          dataURL: img,
+        }));
+
+        formik.setValues({
+          name: chainFrom?.name || "",
+          files: seedImages,
+          type: chainFrom?.type || "",
+          pips: 0,
+          timeFrame: Array.isArray(chainFrom?.timeFrame)
+            ? chainFrom.timeFrame[0]
+            : chainFrom?.timeFrame || "",
+          status: "active",
+          entry: chainFrom?.entry || "",
+          invalidation: chainFrom?.invalidation || "",
+          description: "",
+          category: chainFrom?.category?._id || "",
+          exits: chainFrom?.exits?.length > 0 ? chainFrom.exits : [""],
+          educatorId: chainFrom?.educatorDetails?._id || educatorId,
+          tradingViewLinks:
+            chainFrom?.tradingViewLinks?.length > 0 ? chainFrom.tradingViewLinks : [""],
+          mediaOrder: chainFrom?.mediaOrder?.length > 0 ? chainFrom.mediaOrder : ["image", "tradingview"],
+        });
+      }
+    }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
 
     // Function to add a new exit input
     const addExit = () => {
@@ -259,8 +317,28 @@ const CreateTradeIdeas = forwardRef(
 
     const handleRemoveImage = (index) => {
       const newFiles = [...formik.values.files];
-      newFiles.splice(index, 1);
+      const [removed] = newFiles.splice(index, 1);
       formik.setFieldValue("files", newFiles);
+
+      // Removing an auto-generated TradingView chart image (tv-chart-images container)
+      // should also drop its source link — otherwise the next save regenerates the
+      // very image the user just removed. Snapshot images are appended in the same
+      // order as their (non-empty) source links, so the Nth TV image maps to the
+      // Nth non-empty link.
+      if (removed?.dataURL?.includes("tv-chart-images")) {
+        const tvImageIndex = newFiles
+          .slice(0, index)
+          .filter((f) => f?.dataURL?.includes("tv-chart-images")).length;
+        const links = [...(formik.values.tradingViewLinks || [])];
+        const nonEmptyLinkIndexes = links
+          .map((link, i) => (link && link.trim() ? i : -1))
+          .filter((i) => i !== -1);
+        const linkIndexToRemove = nonEmptyLinkIndexes[tvImageIndex];
+        if (linkIndexToRemove !== undefined) {
+          links.splice(linkIndexToRemove, 1);
+          formik.setFieldValue("tradingViewLinks", links.length > 0 ? links : [""]);
+        }
+      }
     };
 
     // Drag-and-drop reorder handlers
@@ -302,6 +380,7 @@ const CreateTradeIdeas = forwardRef(
         // here since it tracks edit-vs-create mode, not the form's field values.
         onOpenChange={() => {
           setSelectedRow({});
+          setChainFrom?.(null);
           handleCloseCreate();
         }}
       >
@@ -309,11 +388,51 @@ const CreateTradeIdeas = forwardRef(
         <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
           <DialogHeader>
             <DialogTitle>
-              {selectedRow?._id ? "Create IQ Idea" : "Create IQ Idea"}
+              {selectedRow?._id ? "Edit IQ Idea" : isChainMode ? "Update IQ Idea" : "Create IQ Idea"}
             </DialogTitle>
+            {isChainMode && (
+              <p className="text-xs text-gray-500 mt-1">
+                This publishes a follow-up idea chained to "{chainFrom?.name}".
+              </p>
+            )}
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
+              {isChainMode && (
+                <div className="col-span-12">
+                  <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-3 flex flex-wrap gap-x-6 gap-y-2">
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Symbol</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.name || "—"}</span>
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Direction</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-100 capitalize">{chainFrom?.type || "—"}</span>
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Type</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-100 capitalize">{Array.isArray(chainFrom?.timeFrame) ? chainFrom.timeFrame.join("/") : chainFrom?.timeFrame || "—"}</span>
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Entry</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.entry ?? "—"}</span>
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Invalidation</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.invalidation ?? "—"}</span>
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Exits</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.exits?.join(", ") || "—"}</span>
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Category</span>
+                      <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.category?.name || "—"}</span>
+                    </span>
+                  </div>
+                </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -336,6 +455,8 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -371,6 +492,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
 
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
@@ -395,6 +517,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -431,6 +554,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
 
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
@@ -455,7 +579,7 @@ const CreateTradeIdeas = forwardRef(
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
+                      {!isChainMode && <SelectItem value="pending">Pending</SelectItem>}
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="win">Win</SelectItem>
                       <SelectItem value="partialWin">Partial Win</SelectItem>
@@ -472,6 +596,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -494,6 +619,8 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -517,26 +644,9 @@ const CreateTradeIdeas = forwardRef(
                     )}
                 </div>
               </div>
-
-              {selectedRow?._id && (
-                <div className="col-span-12 md:col-span-6">
-                  <div className="flex items-center gap-2 h-full ">
-                    <Checkbox
-                      id="checkTime"
-                      checked={formik.values.checkTime}
-                      onCheckedChange={(checked) =>
-                        formik.setFieldValue("checkTime", checked)
-                      }
-                    />
-                    <label
-                      htmlFor="checkTime"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Do Not Update TimeStamp
-                    </label>
-                  </div>
-                </div>
               )}
+
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -589,6 +699,8 @@ const CreateTradeIdeas = forwardRef(
                   ))}
                 </div>
               </div>
+              )}
+              {!isChainMode && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -626,6 +738,7 @@ const CreateTradeIdeas = forwardRef(
                   )}
                 </div>
               </div>
+              )}
               {/* <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -647,7 +760,10 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div> */}
 
-              {["win", "loss", "partialWin"].includes(formik.values.status) && (
+              {(isChainMode
+                ? ["win", "loss", "partialWin", "breakEven"]
+                : ["win", "loss", "partialWin"]
+              ).includes(formik.values.status) && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -690,6 +806,25 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
+              {/* Display order (Task 14): which media type students see first */}
+              <div className="col-span-12">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-slate-800 dark:text-slate-100 gap-1">
+                    Display Order
+                  </label>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                    Drag to choose which media students see first.
+                  </p>
+                  <DraggableMediaOrder
+                    order={formik.values.mediaOrder || ["image", "tradingview"]}
+                    onChange={(next) => formik.setFieldValue("mediaOrder", next)}
+                    labels={{
+                      image: { label: "Image", icon: <ImageIcon size={14} className="text-gray-400" /> },
+                      tradingview: { label: "TradingView Chart", icon: <Link2 size={14} className="text-gray-400" /> },
+                    }}
+                  />
+                </div>
+              </div>
 
               <div className="col-span-12">
                 <div className="flex flex-wrap gap-5">
@@ -737,6 +872,7 @@ const CreateTradeIdeas = forwardRef(
               className="btn btn-light"
               onClick={() => {
                 setSelectedRow({});
+                setChainFrom?.(null);
                 formik.resetForm();
                 handleCloseCreate();
               }}

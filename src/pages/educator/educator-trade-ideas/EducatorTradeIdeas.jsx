@@ -45,6 +45,12 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  // Whether the create dialog should open in "Update" (chain) mode rather than plain
+  // Edit — see admin's AdminTradeAnalysis.jsx for the equivalent flag. Here ActionMenu
+  // takes the row directly as an argument (not a frozen closure), so this could in
+  // principle be derived inline, but keeping it as a separate flag matches the shape
+  // CreateTradeIdeas expects everywhere else (selectedRow vs. chainFrom).
+  const [isChainMode, setIsChainMode] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -112,12 +118,28 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         <MenuItem
           onClick={() => {
             setSelectedRow(raw);
+            setIsChainMode(false);
             setIsCreateOpen(!isCreateOpen);
           }}
         >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
+            </MenuIcon>
+            <MenuTitle>Edit</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            // Update = create a brand-new, chained idea — never mutate this row.
+            setSelectedRow(raw);
+            setIsChainMode(true);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="arrow-circle-right" />
             </MenuIcon>
             <MenuTitle>Update</MenuTitle>
           </MenuLink>
@@ -570,7 +592,9 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
             refetch={reloadTable}
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
-            selectedRow={selectedRow}
+            selectedRow={isChainMode ? {} : selectedRow}
+            chainFrom={isChainMode ? selectedRow : null}
+            setChainFrom={() => setIsChainMode(false)}
             onSubmitSuccess={() => setIsSocialPromptOpen(true)}
           />
 

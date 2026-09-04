@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { useTourStep } from "@/hooks/useTourStep";
@@ -40,8 +41,10 @@ import {
 import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
 import EducatorImage from "../client-trade-ideas/EducatorImage";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { getOrderedMediaSlides } from "@/utils/mediaOrder";
 import Loader from "../../../components/ui/loader";
-import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown, Link2 as LinkIcon } from "lucide-react";
+import QuotedReplyPreview from "../../../components/ui/QuotedReplyPreview";
+import { Eye, ThumbsUp, MessageCircle, Share2, FileText, Copy, ChartLine, TrendingUp, TrendingDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -150,19 +153,6 @@ const IqInsight = () => {
     });
   const { data: educatorsData } = useGetAllEducatorsQuery();
   const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
-  // "Follow-up" badge opens the ORIGINAL insight being replied to (quote-reply style), not
-  // the follow-up card itself — previousAnalysis on the list item is only shallow-populated
-  // (title/createdAt), so the full original is fetched on demand here.
-  const handleOpenPreviousAnalysis = async (previousAnalysisId) => {
-    if (!previousAnalysisId) return;
-    try {
-      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
-      setSelectedIdea(original?.data || original);
-      setIsViewOpen(true);
-    } catch (err) {
-      console.error("Failed to load original insight", err);
-    }
-  };
 
   const totalPages = data?.pagination?.totalPages || 1;
 
@@ -208,6 +198,27 @@ const IqInsight = () => {
 
   const handleCloseView = () => {
     setIsViewOpen(false);
+  };
+
+  // "Follow-up to X" opens the ORIGINAL insight being replied to, not the follow-up
+  // itself (quote-reply style) — previousAnalysis on the list item is only shallow-
+  // populated (title/createdAt), so the full original is fetched on demand here.
+  // Tracked by id (not a plain boolean) since this handler is shared across every card in
+  // the list — only the card whose follow-up was actually clicked should show a spinner.
+  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
+  const handleOpenPreviousAnalysis = async (previousAnalysisId) => {
+    if (!previousAnalysisId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousAnalysisId);
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setSelectedIdea(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+      toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
+    }
   };
 
   // ─── IQ Insight Tour ───────────────────────────────────────────────────────────────────────────────
@@ -541,6 +552,20 @@ const IqInsight = () => {
                   className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' insight-first-card' : ''}`}
                   ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
                 >
+                  {/* Quote-reply preview: this insight is a chained follow-up to a previous
+                      one — shows a condensed preview of that ORIGINAL insight, not this
+                      card's own content. */}
+                  {idea?.previousAnalysis && (
+                    <QuotedReplyPreview
+                      title={idea.previousAnalysis.title}
+                      thumbnail={idea.previousAnalysis.photos?.[0]}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenPreviousAnalysis(idea.previousAnalysis._id);
+                      }}
+                      isLoading={loadingFollowUpId === idea.previousAnalysis._id}
+                    />
+                  )}
                   {/* ── Header: Strategy Name (primary) + Signal Type ── */}
                   <div className="flex items-start gap-1 mb-2">
                     <div className="flex-1 min-w-0">
@@ -586,12 +611,13 @@ const IqInsight = () => {
 
                   {/* ── Chart Image / Video Carousel ── */}
                   {(() => {
-                    // Build carousel items: images + optional DynTube video
-                    const images = idea.image || [];
-                    const hasDyntube = !!idea.dyntubeUrl;
-                    const totalSlides = images.length + (hasDyntube ? 1 : 0);
+                    // Build carousel items in the educator-chosen display order between
+                    // images / TradingView snapshots / DynTube video (Task 14).
+                    const slides = getOrderedMediaSlides(idea);
+                    const totalSlides = slides.length;
                     const currentIdx = idea.currentIndex ?? 0;
-                    const isDyntubeSlide = hasDyntube && currentIdx === images.length;
+                    const currentSlide = slides[currentIdx];
+                    const isDyntubeSlide = currentSlide?.type === "dyntube";
 
                     if (totalSlides === 0) {
                       return (
@@ -629,7 +655,7 @@ const IqInsight = () => {
                           /* Image slide */
                           <>
                             <img
-                              src={images[currentIdx]}
+                              src={currentSlide?.url}
                               alt={idea.pair || idea.name}
                               className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                               onClick={() => {
@@ -713,19 +739,6 @@ const IqInsight = () => {
                           <span className="text-[14px] font-extrabold text-slate-800 dark:text-white truncate">
                             {idea.pair || idea.name}
                           </span>
-                        )}
-                        {idea.previousAnalysis && (
-                          <button
-                            type="button"
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 flex-shrink-0 cursor-pointer hover:bg-indigo-500/20 transition-colors"
-                            title={`Follow-up to "${idea.previousAnalysis.title}"`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenPreviousAnalysis(idea.previousAnalysis._id);
-                            }}
-                          >
-                            <LinkIcon size={10} /> Follow-up
-                          </button>
                         )}
                       </div>
                       {idea.status && (

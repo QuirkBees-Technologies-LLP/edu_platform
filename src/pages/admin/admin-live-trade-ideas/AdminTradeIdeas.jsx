@@ -49,6 +49,10 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  // Whether the create dialog should open in "Update" (chain) mode rather than plain
+  // Edit — see admin's AdminTradeAnalysis.jsx for why this stays a boolean rather than
+  // storing the row directly (ActionMenu() closes over a frozen columns useMemo).
+  const [isChainMode, setIsChainMode] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -131,12 +135,31 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
   const ActionMenu = () => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem
+          onClick={() => {
+            setIsChainMode(false);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
             <MenuTitle>Edit</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            // Update = create a brand-new, chained live idea — never mutate this row.
+            setIsChainMode(true);
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="arrow-circle-right" />
+            </MenuIcon>
+            <MenuTitle>Update</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem onClick={handleDeleteOpen}>
@@ -637,7 +660,9 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
             refetch={reloadTable}
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
-            selectedRow={selectedRow}
+            selectedRow={isChainMode ? {} : selectedRow}
+            chainFrom={isChainMode ? selectedRow : null}
+            setChainFrom={() => setIsChainMode(false)}
           />
           {isDeleteOpen && (
             <DeleteAdminTradeIdeas

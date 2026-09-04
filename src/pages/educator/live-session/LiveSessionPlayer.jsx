@@ -386,21 +386,43 @@ const LiveSessionPlayer = ({
                           await new Promise((resolve) => setTimeout(resolve, 1500));
 
                           if (!isRecording) {
-                            try {
-                              await call.startRecording({
-                                mode: "single",
-                                options: {
-                                  "participant.filter": {
-                                    isPinned: true,
-                                  },
-                                  "participant.border_radius": "0px",
-                                  "participant.video_border_rounded": false,
-                                  "grid.margin": 0,
-                                  "grid.cell_padding": 4,
+                            // Stream rejects startRecording with "no active session" if the
+                            // participant session hasn't fully registered yet — the fixed
+                            // 1.5s delay above isn't always enough (slow network, slower
+                            // media handshake). Retry a few times with a short gap instead
+                            // of a single attempt, and — critically — tell the educator if
+                            // it never succeeds, instead of silently failing: previously
+                            // this only logged a console.warn, so a failed auto-record was
+                            // invisible until the educator checked for recordings after the
+                            // session had already ended.
+                            let recordingStarted = false;
+                            const recordingOptions = {
+                              mode: "single",
+                              options: {
+                                "participant.filter": {
+                                  isPinned: true,
                                 },
-                              });
-                            } catch (err) {
-                              console.warn("⚠ startRecording failed:", err);
+                                "participant.border_radius": "0px",
+                                "participant.video_border_rounded": false,
+                                "grid.margin": 0,
+                                "grid.cell_padding": 4,
+                              },
+                            };
+                            for (let attempt = 1; attempt <= 3 && !recordingStarted; attempt++) {
+                              try {
+                                await call.startRecording(recordingOptions);
+                                recordingStarted = true;
+                              } catch (err) {
+                                console.warn(`⚠ startRecording attempt ${attempt} failed:`, err);
+                                if (attempt < 3) {
+                                  await new Promise((resolve) => setTimeout(resolve, 2000));
+                                }
+                              }
+                            }
+                            if (!recordingStarted) {
+                              toast.error(
+                                "Recording didn't start automatically. Use \"Start Recording\" in the Session Recordings panel below to start it manually."
+                              );
                             }
                           }
 

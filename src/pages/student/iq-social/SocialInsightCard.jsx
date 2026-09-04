@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   TrendingUp,
@@ -8,7 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChartLine,
-  Link2,
 } from "lucide-react";
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { getOrderedMediaSlides } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
 import ImageLightBox from "../iq-insight/ImageLightBox";
 import { useLazyGetTradeAnalysisByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
@@ -50,18 +52,23 @@ const SocialInsightCard = ({ insight }) => {
   // shows the ORIGINAL insight being replied to (quote-reply style), not this card's
   // own content. Null means the modal shows this card's own `insight` as usual.
   const [modalOverride, setModalOverride] = useState(null);
+  const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
 
   const handleOpenPreviousAnalysis = async (e) => {
     e.stopPropagation();
     const previousAnalysisId = insight?.previousAnalysis?._id;
-    if (!previousAnalysisId) return;
+    if (!previousAnalysisId || isLoadingFollowUp) return;
+    setIsLoadingFollowUp(true);
     try {
       const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
       setModalOverride(original?.data || original);
       setIsViewOpen(true);
     } catch (err) {
       console.error("Failed to load original insight", err);
+      toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setIsLoadingFollowUp(false);
     }
   };
 
@@ -75,32 +82,27 @@ const SocialInsightCard = ({ insight }) => {
     }
   };
 
-  const images = insight?.image || [];
-  const hasDyntube = !!insight?.dyntubeUrl;
-  const totalSlides = images.length + (hasDyntube ? 1 : 0);
-  const isDyntubeSlide = hasDyntube && currentIndex === images.length;
+  // Educator-chosen display order between images / TradingView snapshots / DynTube video
+  // (Task 14) — slides render in whichever order was picked, not a hardcoded sequence.
+  const slides = getOrderedMediaSlides(insight);
+  const totalSlides = slides.length;
+  const currentSlide = slides[currentIndex];
+  const isDyntubeSlide = currentSlide?.type === "dyntube";
 
   return (
     <>
       <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
-        {/* Thread indicator: this insight is a chained follow-up to a previous one */}
+        {/* Thread indicator: this insight is a chained follow-up to a previous one.
+            Clicking it opens the ORIGINAL insight being replied to (quote-reply style),
+            not this card's own content — matching a reply linking back to the message
+            it quotes. */}
         {insight?.previousAnalysis && (
-          <div className="mb-2">
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-1 text-[11px] text-slate-500 dark:text-white/50 cursor-pointer hover:text-primary hover:underline w-fit"
-              onClick={handleOpenPreviousAnalysis}
-            >
-              <Link2 size={11} className="flex-shrink-0" />
-              <span className="truncate">
-                Follow-up to{" "}
-                <span className="font-semibold text-slate-700 dark:text-white/80">
-                  {insight.previousAnalysis.title}
-                </span>
-              </span>
-            </button>
-            <div className="ml-[6px] mt-1 h-3 w-px bg-slate-300 dark:bg-white/15" />
-          </div>
+          <QuotedReplyPreview
+            title={insight.previousAnalysis.title}
+            thumbnail={insight.previousAnalysis.photos?.[0]}
+            onClick={handleOpenPreviousAnalysis}
+            isLoading={isLoadingFollowUp}
+          />
         )}
         {/* Header: educator */}
         <div className="flex items-start gap-1 mb-2">
@@ -153,7 +155,7 @@ const SocialInsightCard = ({ insight }) => {
 
         {/* Chart image / DynTube video carousel */}
         <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-extrabold capitalize tracking-wide text-white bg-violet-500/90 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-violet-600 dark:text-violet-300 bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/20">
             Insight
           </span>
           {totalSlides > 0 ? (
@@ -177,7 +179,7 @@ const SocialInsightCard = ({ insight }) => {
               ) : (
                 <>
                   <img
-                    src={images[currentIndex]}
+                    src={currentSlide?.url}
                     alt={insight?.name}
                     className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                     onClick={() => setIsLightBoxOpen(true)}

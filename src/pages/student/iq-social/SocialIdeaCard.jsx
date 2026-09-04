@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   TrendingUp,
@@ -11,6 +12,9 @@ import {
 } from "lucide-react";
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 
 const LabelMap = {
   active: "Active",
@@ -35,6 +39,28 @@ const SocialIdeaCard = ({ idea }) => {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [copiedField, setCopiedField] = useState(null);
+  // Overrides `idea` in the modal when the user opened it via "Follow-up to X" — shows the
+  // ORIGINAL idea being replied to (quote-reply style), not this card's own content. Null
+  // means the modal shows this card's own `idea` as usual.
+  const [modalOverride, setModalOverride] = useState(null);
+  const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
+  const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
+
+  const handleOpenPreviousIdea = async () => {
+    const previousIdeaId = idea?.previousIdea?._id;
+    if (!previousIdeaId || isLoadingFollowUp) return;
+    setIsLoadingFollowUp(true);
+    try {
+      const original = await fetchIdeaById(previousIdeaId).unwrap();
+      setModalOverride(original?.data || original);
+      setIsViewOpen(true);
+    } catch (err) {
+      console.error("Failed to load original idea", err);
+      toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setIsLoadingFollowUp(false);
+    }
+  };
 
   const handleCopyField = async (fieldName, value) => {
     try {
@@ -46,9 +72,23 @@ const SocialIdeaCard = ({ idea }) => {
     }
   };
 
+  // Educator-chosen display order between images and TradingView snapshots (Task 14).
+  const orderedImages = getOrderedImageUrls(idea);
+
   return (
     <>
       <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
+        {/* Thread indicator: this idea is a chained follow-up to a previous one. Clicking
+            it opens the ORIGINAL idea being replied to (quote-reply style), not this
+            card's own content — matching a reply linking back to the message it quotes. */}
+        {idea?.previousIdea && (
+          <QuotedReplyPreview
+            title={idea.previousIdea.name}
+            thumbnail={idea.previousIdea.image?.[0]}
+            onClick={handleOpenPreviousIdea}
+            isLoading={isLoadingFollowUp}
+          />
+        )}
         {/* Header: educator - pair + status */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
@@ -70,17 +110,17 @@ const SocialIdeaCard = ({ idea }) => {
               </span>
               {idea?.status && (
                 <span
-                  className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
-                    ? "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
+                    ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[idea.status] === "Pending"
-                      ? "bg-purple-500/15 text-purple-600 dark:text-purple-400"
+                      ? "text-purple-600 dark:text-purple-400"
                       : LabelMap[idea.status] === "Win"
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                        ? "text-emerald-600 dark:text-emerald-400"
                         : LabelMap[idea.status] === "Partial Win"
-                          ? "bg-emerald-400/15 text-emerald-500 dark:text-emerald-400"
+                          ? "text-emerald-500 dark:text-emerald-400"
                           : LabelMap[idea.status] === "Loss"
-                            ? "bg-red-500/15 text-red-600 dark:text-red-400"
-                            : "bg-slate-500/15 text-slate-600 dark:text-slate-400"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-600 dark:text-slate-400"
                     }`}
                 >
                   {LabelMap[idea.status] === "Win"
@@ -123,13 +163,13 @@ const SocialIdeaCard = ({ idea }) => {
 
         {/* Chart image */}
         <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-extrabold capitalize tracking-wide text-white bg-indigo-500/90 backdrop-blur-sm">
+          <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20">
             Idea
           </span>
-          {idea?.image && idea.image.length > 0 ? (
+          {orderedImages.length > 0 ? (
             <>
               <img
-                src={idea.image[currentIndex] || idea.image[0]}
+                src={orderedImages[currentIndex] || orderedImages[0]}
                 alt={idea?.name}
                 className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                 onClick={() => setIsLightBoxOpen(true)}
@@ -144,12 +184,12 @@ const SocialIdeaCard = ({ idea }) => {
               >
                 <Eye size={14} />
               </button>
-              {idea.image.length > 1 && (
+              {orderedImages.length > 1 && (
                 <>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === 0 ? idea.image.length - 1 : i - 1));
+                      setCurrentIndex((i) => (i === 0 ? orderedImages.length - 1 : i - 1));
                     }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
@@ -158,14 +198,14 @@ const SocialIdeaCard = ({ idea }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === idea.image.length - 1 ? 0 : i + 1));
+                      setCurrentIndex((i) => (i === orderedImages.length - 1 ? 0 : i + 1));
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                    {idea.image.map((_, idx) => (
+                    {orderedImages.map((_, idx) => (
                       <div
                         key={idx}
                         className={`w-1.5 h-1.5 rounded-full transition-colors ${currentIndex === idx ? "bg-white" : "bg-white/40"
@@ -245,12 +285,21 @@ const SocialIdeaCard = ({ idea }) => {
               </div>
             );
           })}
+          {idea?.description && (
+            <div
+              className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: idea.description }}
+            />
+          )}
         </div>
 
         {/* View Details */}
         <button
           className="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 dark:hover:text-white font-semibold py-2 mt-2 rounded-lg flex items-center justify-center gap-1.5 text-[12px] transition-colors"
-          onClick={() => setIsViewOpen(true)}
+          onClick={() => {
+            setModalOverride(null);
+            setIsViewOpen(true);
+          }}
         >
           <Eye size={14} /> View Details
         </button>
@@ -258,14 +307,17 @@ const SocialIdeaCard = ({ idea }) => {
 
       <ViewClientTradeIdeas
         isViewOpen={isViewOpen}
-        handleCloseView={() => setIsViewOpen(false)}
-        selectedIdea={idea}
+        handleCloseView={() => {
+          setIsViewOpen(false);
+          setModalOverride(null);
+        }}
+        selectedIdea={modalOverride || idea}
         setIsLightBoxOpen={setIsLightBoxOpen}
       />
       <ImageLightBox
         isLightBoxOpen={isLightBoxOpen}
         setIsLightBoxOpen={setIsLightBoxOpen}
-        selectedIdea={idea}
+        selectedIdea={modalOverride || idea}
       />
     </>
   );
