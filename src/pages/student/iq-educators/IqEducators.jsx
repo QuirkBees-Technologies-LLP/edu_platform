@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import {
   ArrowUp,
   CirclePlay,
@@ -278,6 +279,7 @@ const IqEducators = () => {
       setIsViewOpen(true);
     } catch (err) {
       console.error("Failed to load original idea", err);
+      toast.error("Could not open the original post. Please try again.");
     }
   };
 
@@ -290,6 +292,7 @@ const IqEducators = () => {
       setIsLiveIdeaViewOpen(true);
     } catch (err) {
       console.error("Failed to load original live idea", err);
+      toast.error("Could not open the original post. Please try again.");
     }
   };
 
@@ -677,6 +680,7 @@ const IqEducators = () => {
       setIsViewOpen1(true);
     } catch (err) {
       console.error("Failed to load original insight", err);
+      toast.error("Could not open the original post. Please try again.");
     }
   };
 
@@ -1410,8 +1414,13 @@ const IqEducators = () => {
                 that, the same EducatorFeed already renders up top in place of the old
                 "About Me" card (via feedContent), so it's never shown in both places
                 at once. */}
+            {/* col-span-12 at every breakpoint — this used to share its row at md with a
+                second card (renderLiveFeedCard, the old "Live Feed" block), so it only
+                needed half the row; that sibling is gone, but a leftover md:col-span-6
+                kept this card at half width anyway, leaving a blank gap next to it on
+                medium screens. Full width now that nothing else shares the row. */}
             {isEducatorLive && (
-              <div className="col-span-12 md:col-span-6 xl:col-span-12 h-[900px]">
+              <div className="col-span-12 h-[900px]">
                 <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
               </div>
             )}

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { useTourStep } from "@/hooks/useTourStep";
@@ -109,6 +110,7 @@ const ClientLiveIdeas = () => {
       setIsViewOpen(true);
     } catch (err) {
       console.error("Failed to load original live idea", err);
+      toast.error("Could not open the original post. Please try again.");
     }
   };
 

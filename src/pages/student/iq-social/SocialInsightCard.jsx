@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   TrendingUp,
@@ -63,6 +64,7 @@ const SocialInsightCard = ({ insight }) => {
       setIsViewOpen(true);
     } catch (err) {
       console.error("Failed to load original insight", err);
+      toast.error("Could not open the original post. Please try again.");
     }
   };
 

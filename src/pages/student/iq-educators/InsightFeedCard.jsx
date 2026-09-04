@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { ChartLine, Eye } from "lucide-react";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
@@ -51,6 +52,7 @@ const InsightFeedCard = ({ insight }) => {
       setIsViewOpen(true);
     } catch (err) {
       console.error("Failed to load original insight", err);
+      toast.error("Could not open the original post. Please try again.");
     }
   };
 

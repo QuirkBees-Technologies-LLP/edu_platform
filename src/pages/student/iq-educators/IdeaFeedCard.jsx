@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   TrendingUp,
@@ -52,6 +53,7 @@ const IdeaFeedCard = ({ idea }) => {
       setIsViewOpen(true);
     } catch (err) {
       console.error("Failed to load original idea", err);
+      toast.error("Could not open the original post. Please try again.");
     }
   };
 
