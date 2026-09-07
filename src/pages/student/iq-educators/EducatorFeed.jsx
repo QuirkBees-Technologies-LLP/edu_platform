@@ -21,7 +21,7 @@ const TABS = [
 ];
 const ALL_TYPES = TABS.map((t) => t.key);
 
-const EducatorFeed = ({ educatorId, headerGradient }) => {
+const EducatorFeed = ({ educatorId, headerGradient, className = "" }) => {
   // Genuine multi-select: nothing selected (the default) shows every content type merged
   // together; selecting one or more narrows the feed to just those types.
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -255,7 +255,7 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
     activeTypes.some((t) => tabState[t].isFetching && tabState[t].page === 1);
 
   return (
-    <div className="rounded-2xl shadow-md overflow-hidden h-full flex flex-col bg-[#151320]">
+    <div className={`rounded-2xl shadow-md overflow-hidden h-full flex flex-col bg-[#151320] ${className}`}>
       {/* Title */}
       <div className="pt-3 pb-2 px-4 select-none flex-shrink-0">
         <h3 className="text-white font-bold text-sm sm:text-base text-center">
