@@ -2,33 +2,18 @@ import { StreamCall } from "@stream-io/video-react-sdk";
 import Loader from "../../../components/ui/loader";
 import { Send } from "lucide-react";
 import { toAbsoluteUrl } from "@/utils/Assets";
-import { useEffect, useRef, useState } from "react";
 
 const StreamWrapper = ({ call, children, bannerImage, feedContent }) => {
-  // Right column (feed) always conforms to the left column's (image) natural
-  // height — never the other way around. Measured via ResizeObserver since
-  // the image's rendered height depends on its own aspect ratio at whatever
-  // width it ends up with, which isn't known until layout/paint.
-  const imageColRef = useRef(null);
-  const [imageColHeight, setImageColHeight] = useState(null);
-
-  useEffect(() => {
-    const el = imageColRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver((entries) => {
-      const height = entries[0]?.contentRect?.height;
-      if (height) setImageColHeight(height);
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   if (!call)
     return (
       <div className="">
         <div className="grid grid-cols-12 gap-6">
-          {/* Image Section */}
-          <div className="col-span-12 lg:col-span-8" ref={imageColRef}>
+          {/* Image Section — full width when there's no feed beside it (feedContent is no
+              longer always passed in), col-span-8 otherwise. Height is no longer measured
+              via ResizeObserver and pasted onto the feed column: the caller (IqEducators.jsx)
+              now handles the feed's height itself via CSS Grid stretch against its own,
+              larger sibling column, not this image alone. */}
+          <div className={feedContent ? "col-span-12 lg:col-span-8" : "col-span-12"}>
             <div className="card rounded-none rounded-b-xl">
               <img
                 src={
@@ -78,12 +63,11 @@ const StreamWrapper = ({ call, children, bannerImage, feedContent }) => {
             </div>
           </div> */}
 
-          <div
-            className="col-span-12 lg:col-span-4"
-            style={imageColHeight ? { height: imageColHeight, maxHeight: imageColHeight, overflow: "hidden" } : undefined}
-          >
-            {feedContent}
-          </div>
+          {feedContent && (
+            <div className="col-span-12 lg:col-span-4">
+              {feedContent}
+            </div>
+          )}
         </div>
       </div>
     );

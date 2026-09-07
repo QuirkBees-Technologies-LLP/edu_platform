@@ -86,13 +86,43 @@ const IqEducators = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-  const [isEducatorLive, setIsEducatorLive] = useState(false);
-  // Matches ClientLiveSessionWrapper's own "lg" split for its video/chat grid — below it,
-  // that wrapper renders the Educator Feed itself right after Chat, so the bottom-of-page
-  // copy below must not mount there too (a real conditional, not just CSS-hidden — a
-  // hidden-but-mounted duplicate was still fetching/rendering behind the scenes).
-  const isLgUp = useResponsive("up", "lg");
   const [isExpanded, setIsExpanded] = useState(false);
+  const isLgUp = useResponsive("up", "lg");
+  // Educator Feed must match the left column's REAL rendered height (Player + Master
+  // Classes + Recordings + Ideas + ...), not just whichever side happens to be tallest.
+  // Pure CSS Grid stretch can't express that: EducatorFeed's own scrollable list has no
+  // definite height to clip against, so instead of scrolling internally it renders its
+  // full content stack, and if that's taller than the left column, stretch pulls the
+  // LEFT column down to match the feed instead of the other way around. Measuring the
+  // left column directly and applying it as the feed's height (only at lg+) is the
+  // reliable fix — still fully automatic/responsive, just via JS instead of CSS alone.
+  const leftColRef = useRef(null);
+  const [leftColHeight, setLeftColHeight] = useState(null);
+  useEffect(() => {
+    const el = leftColRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect?.height;
+      if (height) setLeftColHeight(height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  // DOM node for the sidebar's chat slot, threaded down through ClientViewLiveSession →
+  // ClientLiveSessionWrapper so Chat can portal into it while live — a state setter
+  // (not a plain ref) because the slot doesn't exist until this component's own render
+  // commits, and a ref alone wouldn't trigger the re-render the deeply-nested portal
+  // caller needs to notice it became available. Only rendered at lg+ (below that, Chat
+  // keeps rendering inline, stacked below the video, exactly as it already did) so that,
+  // at lg+, Player never has to share its own row/width with Chat to fit it "next to"
+  // itself — they're both full-width of their own separate grid cells instead.
+  const [chatSlotEl, setChatSlotEl] = useState(null);
+  // Chat, once portaled into chatSlotEl, needs to match Player's own rendered height
+  // specifically — not the whole left column's height (leftColHeight, above), which is
+  // much taller (Master Classes/Ideas/etc. included) and would leave Chat's bottom
+  // hanging well past Player's actual bottom edge. Reported up from deep inside
+  // ClientLiveSessionWrapper via onVideoHeightChange.
+  const [videoHeight, setVideoHeight] = useState(null);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
   const { auth } = useAuthContext();
@@ -1068,32 +1098,34 @@ const IqEducators = () => {
           </button>
         </div>
       </div>
+      {/* Player lives inside the left column itself (not its own full-width row above,
+          and no longer passing feedContent down to it) so that, at lg and up, the left
+          column's total stacked height — Player + Master Classes + Recordings + Ideas +
+          (Insights/Live Ideas, when present) — is exactly what the single Educator Feed
+          panel on the right is measured against (leftColRef/leftColHeight above). Below
+          lg this column is col-span-12 either way, so Player renders full-width there
+          exactly as before — nothing changes on tablet/mobile. */}
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
-        <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
+        <div ref={leftColRef} className="col-span-12 lg:col-span-8 flex flex-col gap-8">
+
           <ClientViewLiveSession
             bannerImage={response?.data?.educator?.bannerImage}
             callId={callId}
             educatorData={response?.data?.educator?.description}
             headerGradient={getHeaderGradient()}
-            feedContent={
-              // Deliberately unwrapped — each consumer of feedContent (StreamWrapper's
-              // no-call banner layout, ClientLiveSessionWrapper's video/chat grid) is
-              // responsible for giving this its own bounded height, since they measure
-              // against different sibling content (a static banner vs. a live video) and
-              // a height baked in here can't fit both. See StreamWrapper.jsx and
-              // ClientLiveSessionWrapper.jsx.
-              <EducatorFeed
-                educatorId={id}
-                headerGradient={getHeaderGradient()}
-              />
-            }
-            onStatusChange={(status) => setIsEducatorLive(status === "live")}
+            chatSlotEl={isLgUp ? chatSlotEl : null}
+            onVideoHeightChange={setVideoHeight}
           />
-        </div>
-      </div>
 
-      <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 items-start">
-        <div className="col-span-12 xl:col-span-8 space-y-8">
+          {/* Below lg, Educator Feed renders here — immediately after Player, or after
+              Chat if it's present, since Chat is nested inside ClientViewLiveSession's
+              own internal video/chat stack when live — rather than at the sidebar's DOM
+              position, which is the very end of the page once both columns stack. A real
+              conditional (not CSS-hidden), so exactly one EducatorFeed instance is ever
+              mounted at a time — the other copy lives in the sidebar at lg+, below. */}
+          {!isLgUp && (
+            <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
+          )}
 
           {/* Master Classes */}
           {response?.data?.masterClasses?.length > 0 && <div className="text-gray-900 mb-8">
@@ -1241,7 +1273,7 @@ const IqEducators = () => {
           </div>}
 
           {/* Ideas */}
-          {response?.data?.idea?.length > 0 && <div className="text-gray-900 mb-28">
+          {response?.data?.idea?.length > 0 && <div className="text-gray-900 mb-8">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Ideas</h2>
@@ -1278,7 +1310,7 @@ const IqEducators = () => {
 
           {/* Insights */}
 
-          {response?.data?.insight?.length > 0 && <div className="text-gray-900 mb-28">
+          {response?.data?.insight?.length > 0 && <div className="text-gray-900 mb-8">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Insights</h2>
@@ -1319,7 +1351,7 @@ const IqEducators = () => {
           {/* Live Ideas */}
 
 
-          {liveIdea?.length > 0 && <div className="text-gray-900">
+          {liveIdea?.length > 0 && <div className="text-gray-900 mb-8">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -1365,82 +1397,45 @@ const IqEducators = () => {
           </div>}
         </div>
 
-        {/* Sidebar */}
-        <div className=" col-span-12 xl:col-span-4">
-          <div className="grid grid-cols-12 gap-6">
-            {/* <div className="col-span-12 md:col-span-6 xl:col-span-12 space-y-6">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">Chatbox</h3>
-                </div>
-
-                <div className="p-4 overflow-y-auto flex flex-col space-y-4 relative group">
-                  {messages.map((message) => (
-                    <div key={message.id} className="flex flex-col gap-2">
-                      <div className="text-sm text-gray-900 font-medium">
-                        {message.sender}{" "}
-                        <span className="text-xs text-gray-600 font-normal ml-1">
-                          {message.time}
-                        </span>
-                      </div>
-                      <div className="text-xs font-normal rounded-lg text-gray-800 break-words leading-[1.9]">
-                        {message.text}
-                      </div>
-                    </div>
-                  ))}
-
-                  <div ref={messagesEndRef} />
-
-                  <div className="absolute inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div>
-                </div>
-
-                <form onSubmit={handleSendMessage} className="p-4">
-                  <div className="flex items-center justify-center">
-                    <div className="relative w-full max-w-md">
-                      <input
-                        type="text"
-                        placeholder="Your comment..."
-                        className="w-full p-4 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 text-xs dark:bg-gray-100"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                      />
-
-                      <button
-                        type="submit"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 duration-200 focus:outline-none"
-                        aria-label="Send message"
-                      >
-                        <Send size={20} />
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div> */}
-            {/* Educator feed — Live Feed / Analysis Updates were dropped from this
-                sidebar spot (already removed on IQ Social). This instance only takes
-                over once the stream goes live and shifts next to Master Classes; before
-                that, the same EducatorFeed already renders up top in place of the old
-                "About Me" card (via feedContent), so it's never shown in both places
-                at once. */}
-            {/* col-span-12 at every breakpoint — this used to share its row at md with a
-                second card (renderLiveFeedCard, the old "Live Feed" block), so it only
-                needed half the row; that sibling is gone, but a leftover md:col-span-6
-                kept this card at half width anyway, leaving a blank gap next to it on
-                medium screens. Full width now that nothing else shares the row. */}
-            {/* Desktop ("lg" and up) only. Below "lg", ClientLiveSessionWrapper renders
-                this same feed itself, directly under Chat once the video/chat columns
-                stack — this copy must not also mount there, or two separate live
-                EducatorFeed instances end up fetching/rendering at once. */}
-            {isEducatorLive && isLgUp && (
-              <div className="col-span-12 h-[900px]">
-                <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
-              </div>
-            )}
+        {/* Sidebar: the desktop (lg+) home for Chat (while live, portaled in from
+            ClientLiveSessionWrapper via chatSlotEl) stacked above Educator Feed. The
+            whole column is capped to leftColHeight (measured above) so it matches the
+            left column instead of growing past it; Chat takes its own natural height at
+            the top (empty:hidden collapses it to nothing when there's no chat to show),
+            and Educator Feed's flex-1 wrapper absorbs whatever's left, clipping/scrolling
+            internally rather than pushing the column taller. Below lg neither renders
+            here — both render inline right after Player instead (see above), so nothing
+            is ever mounted in two places at once. */}
+        {isLgUp && (
+          <div
+            className="col-span-12 lg:col-span-4 flex flex-col"
+            style={
+              leftColHeight
+                ? { height: leftColHeight, maxHeight: leftColHeight, overflow: "hidden" }
+                : undefined
+            }
+          >
+            {/* chatbox_chat: ChatContainer's internal layout (header pinned, message list
+                flex-1 + scrollable, input pinned) depends on demo1.css rules scoped under
+                this ancestor class (.chatbox_chat .chat-components/.str-chat/etc { height:
+                100% }). Those rules are DOM-based, not React-tree-based, so now that Chat
+                is portaled out of ClientLiveSessionWrapper's own chatbox_chat-classed
+                grid, its real DOM ancestor here needs the same class or none of that CSS
+                applies — which is what was clipping the message input off entirely. */}
+            <div
+              ref={setChatSlotEl}
+              className="chatbox_chat empty:hidden mb-8 flex-shrink-0 overflow-hidden"
+              style={videoHeight ? { height: videoHeight, maxHeight: videoHeight } : undefined}
+            />
+            <div className="flex-1 min-h-0">
+              <EducatorFeed
+                educatorId={id}
+                headerGradient={getHeaderGradient()}
+                className="h-full"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <VideoPlayerModal
