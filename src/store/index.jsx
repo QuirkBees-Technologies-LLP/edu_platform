@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
 import authReducer from "./reducer/authSlice"; // Import auth slice
 import courseReducer from "./reducer/courseSlice";
 import sectionReducer from "./reducer/sectionSlice";
@@ -193,5 +194,10 @@ export const store = configureStore({
       clientLearningContentApiSlice.middleware,
     ),
 });
+
+// Wires up the window focus/reconnect listeners RTK Query needs to act on any
+// endpoint's `refetchOnFocus`/`refetchOnReconnect` option — without this call, those
+// options are silently inert app-wide, regardless of being set on any slice.
+setupListeners(store.dispatch);
 
 export const persistor = persistStore(store);

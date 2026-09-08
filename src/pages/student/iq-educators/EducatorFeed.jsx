@@ -73,40 +73,45 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "" }) => {
       { skip: !educatorId }
     );
 
-  // Append each newly-fetched page, de-duping by _id in case of any overlap.
+  // Merge each newly-fetched page into local state: update any item already loaded
+  // (e.g. edited since it was first fetched) with its fresh copy, in place, and append
+  // genuinely new ones. A plain "skip if already present" filter was silently keeping
+  // stale data forever — a refetch would fetch fresh data into postsResponse/
+  // ideasResponse/etc, but every already-seen item would just get discarded here
+  // instead of updating the matching item already in local state.
   useEffect(() => {
     if (!postsResponse?.posts) return;
     setAllPosts((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = postsResponse.posts.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      postsResponse.posts.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [postsResponse]);
 
   useEffect(() => {
     if (!ideasResponse?.ideas) return;
     setAllIdeas((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = ideasResponse.ideas.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      ideasResponse.ideas.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [ideasResponse]);
 
   useEffect(() => {
     if (!insightsResponse?.insights) return;
     setAllInsights((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = insightsResponse.insights.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      insightsResponse.insights.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [insightsResponse]);
 
   useEffect(() => {
     if (!liveIdeasResponse?.data) return;
     setAllLiveIdeas((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = liveIdeasResponse.data.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      liveIdeasResponse.data.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [liveIdeasResponse]);
 

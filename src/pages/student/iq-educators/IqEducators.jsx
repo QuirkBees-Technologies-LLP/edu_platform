@@ -460,6 +460,15 @@ const IqEducators = () => {
 
         {/* Price levels */}
         <div className="mb-2 space-y-1.5">
+          {/* Follow-up only: description shown above Entry/Invalidation/Exits, with more
+              visible styling, so the caption reads first. Regular (non-follow-up) ideas
+              keep the description in its original spot below the price levels. */}
+          {courseIdea?.previousIdea && courseIdea?.description && (
+            <div
+              className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: courseIdea.description }}
+            />
+          )}
           {courseIdea?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
@@ -515,7 +524,7 @@ const IqEducators = () => {
               </div>
             );
           })}
-          {courseIdea?.description && (
+          {!courseIdea?.previousIdea && courseIdea?.description && (
             <div
               className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
               dangerouslySetInnerHTML={{ __html: courseIdea.description }}
@@ -638,6 +647,16 @@ const IqEducators = () => {
 
         {/* Price levels */}
         <div className="mb-2 space-y-1.5">
+          {/* Follow-up only: description shown above Entry/Invalidation/Exits, with more
+              visible styling, so the caption reads first. Regular (non-follow-up) live
+              ideas keep the description in its original spot (a fallback below the price
+              levels, shown only when there's no entry/invalidation/exits). */}
+          {liveIdeaData?.previousLiveIdea && (liveIdeaData?.description || liveIdeaData?.message) && (
+            <div
+              className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: liveIdeaData.description || liveIdeaData.message }}
+            />
+          )}
           {liveIdeaData?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
@@ -693,7 +712,8 @@ const IqEducators = () => {
               </div>
             );
           })}
-          {!liveIdeaData?.entry &&
+          {!liveIdeaData?.previousLiveIdea &&
+            !liveIdeaData?.entry &&
             !liveIdeaData?.invalidation &&
             (!liveIdeaData?.exits || liveIdeaData.exits.length === 0) &&
             (liveIdeaData?.description || liveIdeaData?.message) && (
