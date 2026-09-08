@@ -4,6 +4,20 @@ import baseQueryWithReauth from "../apiSlice";
 export const clientTradeIdeasApiSlice = createApi({
   reducerPath: "clientTradeIdeas",
   baseQuery: baseQueryWithReauth,
+  // Admin/educator edits happen through entirely separate RTK Query API slices
+  // (adminTradeIdeasApiSlice, educatorTradeIdeasApiSlice, ...) with their own
+  // reducerPath, so tag-based cache invalidation can't reach across into this one —
+  // by design, RTK Query only invalidates within the same API instance. Without this,
+  // a student who already has an Ideas/Live Ideas/Insights list cached (e.g. visited
+  // it earlier in the session) keeps seeing the pre-edit data on the next visit, even
+  // though the update saved correctly on the backend (verified — no server-side cache
+  // exists on any read path either; this is purely a client cache-freshness gap).
+  // refetchOnMountOrArgChange covers navigating to/revisiting the page.
+  // refetchOnFocus covers the page being left open the whole time in one tab while the
+  // edit was made elsewhere — needs setupListeners(store.dispatch) in store/index.jsx
+  // to actually fire; without it this option is silently inert.
+  refetchOnMountOrArgChange: true,
+  refetchOnFocus: true,
   endpoints: (builder) => ({
     getClientTradeIdeas: builder.query({
       query: ({
