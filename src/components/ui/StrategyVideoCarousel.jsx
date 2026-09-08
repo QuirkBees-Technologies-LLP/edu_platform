@@ -299,8 +299,9 @@ const StrategyVideoCarousel = ({ videos: rawVideos, className = "", title, descr
                                     className="w-full h-full"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
+                                    scrolling="no"
                                     title={selectedVideo?.title || "Video Player"}
-                                    style={{ border: "none" }}
+                                    style={{ border: "none", overflow: "hidden" }}
                                 />
                             </div>
                         </div>
