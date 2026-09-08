@@ -526,7 +526,7 @@ const CreateLiveTradeIdea = forwardRef(
                     <textarea
                       rows={3}
                       placeholder="Enter a description — this becomes the copy shown on the resulting social post"
-                      className={`form-control input input-md w-full ${formik.errors.description && formik.touched.description
+                      className={`textarea w-full min-h-[80px] ${formik.errors.description && formik.touched.description
                         ? "border border-danger"
                         : ""
                         }`}
