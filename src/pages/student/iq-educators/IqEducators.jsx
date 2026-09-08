@@ -88,6 +88,12 @@ const IqEducators = () => {
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const isLgUp = useResponsive("up", "lg");
+  // Reported up from deep inside ClientLiveSessionWrapper (Stream call hooks live there,
+  // not here). While the stream isn't live, Player pairs directly with Educator Feed in
+  // one row instead of its own dedicated row with Chat — matching the original layout —
+  // so which row actually renders Feed (below) depends on this.
+  const [liveStatus, setLiveStatus] = useState(null);
+  const isLive = liveStatus === "live";
   // Educator Feed must match the left column's REAL rendered height (Player + Master
   // Classes + Recordings + Ideas + ...), not just whichever side happens to be tallest.
   // Pure CSS Grid stretch can't express that: EducatorFeed's own scrollable list has no
@@ -108,21 +114,28 @@ const IqEducators = () => {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  // DOM node for the sidebar's chat slot, threaded down through ClientViewLiveSession →
-  // ClientLiveSessionWrapper so Chat can portal into it while live — a state setter
-  // (not a plain ref) because the slot doesn't exist until this component's own render
-  // commits, and a ref alone wouldn't trigger the re-render the deeply-nested portal
-  // caller needs to notice it became available. Only rendered at lg+ (below that, Chat
-  // keeps rendering inline, stacked below the video, exactly as it already did) so that,
-  // at lg+, Player never has to share its own row/width with Chat to fit it "next to"
-  // itself — they're both full-width of their own separate grid cells instead.
-  const [chatSlotEl, setChatSlotEl] = useState(null);
-  // Chat, once portaled into chatSlotEl, needs to match Player's own rendered height
-  // specifically — not the whole left column's height (leftColHeight, above), which is
-  // much taller (Master Classes/Ideas/etc. included) and would leave Chat's bottom
-  // hanging well past Player's actual bottom edge. Reported up from deep inside
-  // ClientLiveSessionWrapper via onVideoHeightChange.
-  const [videoHeight, setVideoHeight] = useState(null);
+  // While NOT live, Educator Feed needs to visually span BOTH the Player row above and
+  // the Master Classes row below (row-span-2, see the sidebar JSX) — but sizing that
+  // purely via CSS stretch hits the same circular-height problem leftColHeight above was
+  // built to avoid: Feed's own scrollable list has no definite height to clip against, so
+  // it would render its full content stack and pull the OTHER rows down to match IT
+  // instead of the reverse. Measuring the Player row's own height directly (same
+  // ResizeObserver pattern as leftColHeight) and summing it with leftColHeight + the
+  // grid's row gap gives Feed a real pixel height to clip against instead.
+  const videoRowRef = useRef(null);
+  const [videoRowHeight, setVideoRowHeight] = useState(null);
+  useEffect(() => {
+    const el = videoRowRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect?.height;
+      if (height) setVideoRowHeight(height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  // Tailwind's gap-y-8 = 2rem = 32px, matching this same grid's own row gap.
+  const GRID_ROW_GAP_PX = 32;
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
   const { auth } = useAuthContext();
@@ -1118,31 +1131,63 @@ const IqEducators = () => {
           </button>
         </div>
       </div>
-      {/* Player lives inside the left column itself (not its own full-width row above,
-          and no longer passing feedContent down to it) so that, at lg and up, the left
-          column's total stacked height — Player + Master Classes + Recordings + Ideas +
-          (Insights/Live Ideas, when present) — is exactly what the single Educator Feed
-          panel on the right is measured against (leftColRef/leftColHeight above). Below
-          lg this column is col-span-12 either way, so Player renders full-width there
-          exactly as before — nothing changes on tablet/mobile. */}
+      {/* Player+Chat get their own full-width row while live (ClientViewLiveSession's own
+          return is a nested grid-cols-12, col-span-12 of THIS outer grid, splitting
+          Video/Chat 8:4 — or 11:1 once Chat's own collapse toggle fires — entirely on its
+          own). While NOT live there's no Chat, so this outer wrapper itself is constrained
+          to 8/12 instead (ClientViewLiveSession's own inner video block just fills that,
+          full width of its own nested grid), and Educator Feed renders as a genuine
+          sibling of it right here for the remaining 4/12 — a real, single flat grid item,
+          unlike nesting Feed inside ClientViewLiveSession/StreamTheme's own tree, which a
+          cross-component CSS row-span can't reach into. It spans down into the row below
+          too (row-span-2) so it reads as one tall panel beside Player, matching the
+          original layout; sized via videoRowHeight + leftColHeight (JS-measured, see
+          those above) rather than plain CSS stretch, for the same circular-height reason
+          leftColHeight itself exists. Master Classes/Recordings/Ideas always render in the
+          row below regardless of live status: leftColRef here only measures that row's
+          left cell (no longer Player), and its own Feed copy (below) only renders while
+          live, since this one already covers the not-live case. */}
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
-        <div ref={leftColRef} className="col-span-12 lg:col-span-8 flex flex-col gap-8">
-
+        {/* Explicit wrapper (rather than relying on a class deep inside
+            ClientViewLiveSession's own tree) since Stream's own <StreamTheme> wraps its
+            children in its own DOM div with no column span of its own — without this
+            wrapper the row would collapse to a single implicit grid track instead of
+            taking its intended width. */}
+        <div ref={videoRowRef} className={isLive ? "col-span-12" : "col-span-12 lg:col-span-8"}>
           <ClientViewLiveSession
             bannerImage={response?.data?.educator?.bannerImage}
             callId={callId}
             educatorData={response?.data?.educator?.description}
             headerGradient={getHeaderGradient()}
-            chatSlotEl={isLgUp ? chatSlotEl : null}
-            onVideoHeightChange={setVideoHeight}
+            onStatusChange={setLiveStatus}
           />
+        </div>
+
+        {isLgUp && !isLive && (
+          <div
+            className="col-span-12 lg:col-span-4 row-span-2 flex flex-col"
+            style={
+              videoRowHeight && leftColHeight
+                ? {
+                    height: videoRowHeight + GRID_ROW_GAP_PX + leftColHeight,
+                    maxHeight: videoRowHeight + GRID_ROW_GAP_PX + leftColHeight,
+                    overflow: "hidden",
+                  }
+                : undefined
+            }
+          >
+            <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} className="h-full" />
+          </div>
+        )}
+
+        <div ref={leftColRef} className="col-span-12 lg:col-span-8 flex flex-col gap-8">
 
           {/* Below lg, Educator Feed renders here — immediately after Player, or after
-              Chat if it's present, since Chat is nested inside ClientViewLiveSession's
-              own internal video/chat stack when live — rather than at the sidebar's DOM
-              position, which is the very end of the page once both columns stack. A real
-              conditional (not CSS-hidden), so exactly one EducatorFeed instance is ever
-              mounted at a time — the other copy lives in the sidebar at lg+, below. */}
+              Chat if it's present, since Chat renders directly above this in DOM order
+              when live — rather than at the sidebar's DOM position, which is the very end
+              of the page once both columns stack. A real conditional (not CSS-hidden), so
+              exactly one EducatorFeed instance is ever mounted at a time — the other copy
+              lives in the sidebar at lg+, below. */}
           {!isLgUp && (
             <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
           )}
@@ -1417,16 +1462,16 @@ const IqEducators = () => {
           </div>}
         </div>
 
-        {/* Sidebar: the desktop (lg+) home for Chat (while live, portaled in from
-            ClientLiveSessionWrapper via chatSlotEl) stacked above Educator Feed. The
-            whole column is capped to leftColHeight (measured above) so it matches the
-            left column instead of growing past it; Chat takes its own natural height at
-            the top (empty:hidden collapses it to nothing when there's no chat to show),
-            and Educator Feed's flex-1 wrapper absorbs whatever's left, clipping/scrolling
-            internally rather than pushing the column taller. Below lg neither renders
-            here — both render inline right after Player instead (see above), so nothing
-            is ever mounted in two places at once. */}
-        {isLgUp && (
+        {/* Sidebar: the desktop (lg+) home for Educator Feed while live — Chat renders
+            entirely inside ClientViewLiveSession's own video row (see there), so nothing
+            here reacts to Chat's collapse state; this only ever spans the row below
+            (row-span-1, default), capped to leftColHeight (measured above) to match it,
+            clipping/scrolling internally rather than pushing the column taller. While NOT
+            live, the row-1 Feed sibling above already covers this column (spanning down
+            via row-span-2), so this is skipped to avoid mounting Feed twice. Below lg it
+            renders inline right after Player instead (see above), so nothing is ever
+            mounted in two places at once. */}
+        {isLgUp && isLive && (
           <div
             className="col-span-12 lg:col-span-4 flex flex-col"
             style={
@@ -1435,25 +1480,11 @@ const IqEducators = () => {
                 : undefined
             }
           >
-            {/* chatbox_chat: ChatContainer's internal layout (header pinned, message list
-                flex-1 + scrollable, input pinned) depends on demo1.css rules scoped under
-                this ancestor class (.chatbox_chat .chat-components/.str-chat/etc { height:
-                100% }). Those rules are DOM-based, not React-tree-based, so now that Chat
-                is portaled out of ClientLiveSessionWrapper's own chatbox_chat-classed
-                grid, its real DOM ancestor here needs the same class or none of that CSS
-                applies — which is what was clipping the message input off entirely. */}
-            <div
-              ref={setChatSlotEl}
-              className="chatbox_chat empty:hidden mb-8 flex-shrink-0 overflow-hidden"
-              style={videoHeight ? { height: videoHeight, maxHeight: videoHeight } : undefined}
+            <EducatorFeed
+              educatorId={id}
+              headerGradient={getHeaderGradient()}
+              className="h-full"
             />
-            <div className="flex-1 min-h-0">
-              <EducatorFeed
-                educatorId={id}
-                headerGradient={getHeaderGradient()}
-                className="h-full"
-              />
-            </div>
           </div>
         )}
       </div>
