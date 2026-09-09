@@ -133,7 +133,7 @@ const ClientLiveSessionContent = ({
   // the WIDTH instead once 16:9-at-full-width would exceed it, which is exactly what
   // made the video look like it "doesn't resize" before).
   const videoBlock = (
-    <div className="aspect-video w-full min-h-[320px]">
+    <div className="aspect-video w-full min-h-[180px] lg:min-h-[320px]">
       <div className="grid gap-5 h-full min-h-0">
         <div className="flex flex-col rounded-lg items-center justify-start text-white h-full min-h-0">
           <div className="flex flex-col gap-12 bg-black rounded-xl text-center w-full h-full min-h-0">
