@@ -62,6 +62,10 @@ const CreateLiveTradeIdea = forwardRef(
       timeFrame: "",
       status: "",
       pips: 0,
+      // Only ever shown/used in chain mode (see the fields themselves, below): Invalidation
+      // when reporting a Loss/Break Even, Exits when reporting a Win/Partial Win.
+      invalidation: "",
+      exits: [""],
       description: "",
       tradingViewLinks: [""],
     };
@@ -94,6 +98,30 @@ const CreateLiveTradeIdea = forwardRef(
       category: Yup.string().required("Category is required"),
       pips: numberField(),
       timeFrame: Yup.string().required("Time Frame is required"),
+      // Only asked for in chain mode — Live Idea's plain create/edit never had these
+      // fields at all.
+      invalidation: Yup.number()
+        .typeError("Invalidation must be a number")
+        .when("status", {
+          is: (status) => isChainMode && ["loss", "breakEven"].includes(status),
+          then: (schema) =>
+            schema
+              .required("Invalidation is required")
+              .positive("Invalidation must be a positive number"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
+      exits: Yup.array()
+        .of(
+          Yup.number()
+            .typeError("Exit must be a number")
+            .required("Exit is required")
+            .positive("Exit must be a positive number")
+        )
+        .when("status", {
+          is: (status) => isChainMode && ["win", "partialWin"].includes(status),
+          then: (schema) => schema.min(1, "At least one exit is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
     });
 
     const formik = useFormik({
@@ -116,6 +144,13 @@ const CreateLiveTradeIdea = forwardRef(
         formData.append("isLiveIdea", true);
         formData.append("timeFrame", values.timeFrame);
         formData.append("description", values.description || "");
+        if (isChainMode && ["loss", "breakEven"].includes(values.status)) {
+          formData.append("invalidation", values.invalidation ?? "");
+        }
+        if (isChainMode && ["win", "partialWin"].includes(values.status)) {
+          const exitsValues = (values.exits || []).filter((e) => e !== "" && e !== null && e !== undefined);
+          formData.append("exits", JSON.stringify(exitsValues));
+        }
 
         // Append TradingView links (always send, even empty, so backend can clear old links)
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
@@ -216,10 +251,24 @@ const CreateLiveTradeIdea = forwardRef(
             ? chainFrom.timeFrame[0]
             : chainFrom?.timeFrame || "",
           description: "",
+          invalidation: "",
+          exits: [""],
           tradingViewLinks: chainFrom?.tradingViewLinks?.length > 0 ? chainFrom.tradingViewLinks : [""],
         });
       }
     }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
+
+    // Function to add/remove an exit input — Live Idea's own version of the same
+    // pattern already used on the plain Idea form (Exits, shown only when reporting a
+    // Win/Partial Win outcome in chain mode).
+    const addExit = () => {
+      formik.setFieldValue("exits", [...(formik.values.exits || []), ""]);
+    };
+    const removeExit = (index) => {
+      const updated = [...(formik.values.exits || [])];
+      updated.splice(index, 1);
+      formik.setFieldValue("exits", updated);
+    };
 
     // TradingView link handlers (same pattern as Ideas)
     const handleReorderLinks = useCallback((dragIndex, hoverIndex) => {
@@ -337,6 +386,12 @@ const CreateLiveTradeIdea = forwardRef(
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Category</span>
                         <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.category?.name || "—"}</span>
                       </span>
+                      {chainFrom?.pips !== undefined && chainFrom?.pips !== null && (
+                        <span className="flex flex-col gap-0.5">
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Pips</span>
+                          <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom.pips}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -479,6 +534,81 @@ const CreateLiveTradeIdea = forwardRef(
                     )}
                   </div>
                 </div>
+
+                {isChainMode && ["loss", "breakEven"].includes(formik.values.status) && (
+                  <div className="col-span-12 md:col-span-6">
+                    <div className="flex flex-col gap-1">
+                      <label className="form-label text-gray-900 gap-1">
+                        Invalidation <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Enter invalidation"
+                        autoComplete="off"
+                        {...formik.getFieldProps("invalidation")}
+                        className={`form-control input input-md w-full ${formik.errors.invalidation && formik.touched.invalidation
+                          ? "border border-danger"
+                          : ""
+                          }`}
+                      />
+                      {formik.touched.invalidation && formik.errors.invalidation && (
+                        <span role="alert" className="text-danger text-xs mt-1">
+                          {formik.errors.invalidation}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {isChainMode && ["win", "partialWin"].includes(formik.values.status) && (
+                  <div className="col-span-12 md:col-span-6">
+                    <div className="flex flex-col w-full gap-1">
+                      <label className="form-label text-gray-900 gap-1">
+                        Exits <span className="text-danger">*</span>
+                        <button type="button" onClick={addExit} className="ml-2">
+                          <i className="ki-filled ki-plus-squared"></i>
+                        </button>
+                      </label>
+                      {(formik.values.exits || []).map((exit, index) => (
+                        <div key={index} className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2 relative">
+                            <input
+                              type="number"
+                              placeholder="Enter exits"
+                              autoComplete="off"
+                              value={exit}
+                              onChange={(e) => {
+                                const newExits = [...formik.values.exits];
+                                newExits[index] = e.target.value;
+                                formik.setFieldValue("exits", newExits);
+                              }}
+                              className={`form-control input input-md w-full ${formik.errors.exits?.[index] &&
+                                formik.touched.exits?.[index]
+                                ? "border border-danger"
+                                : ""
+                                }`}
+                            />
+                            {formik.values.exits.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeExit(index)}
+                                className="text-gray-600 hover:text-red-500"
+                              >
+                                <i className="ki-cross-square ki-filled"></i>
+                              </button>
+                            )}
+                          </div>
+                          {formik.touched.exits?.[index] && formik.errors.exits?.[index] && (
+                            <div role="alert" className="text-danger text-xs">
+                              {formik.errors.exits[index]}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {!isChainMode && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
