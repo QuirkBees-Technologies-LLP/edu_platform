@@ -1138,15 +1138,16 @@ const IqEducators = () => {
           to 8/12 instead (ClientViewLiveSession's own inner video block just fills that,
           full width of its own nested grid), and Educator Feed renders as a genuine
           sibling of it right here for the remaining 4/12 — a real, single flat grid item,
-          unlike nesting Feed inside ClientViewLiveSession/StreamTheme's own tree, which a
-          cross-component CSS row-span can't reach into. It spans down into the row below
-          too (row-span-2) so it reads as one tall panel beside Player, matching the
-          original layout; sized via videoRowHeight + leftColHeight (JS-measured, see
-          those above) rather than plain CSS stretch, for the same circular-height reason
-          leftColHeight itself exists. Master Classes/Recordings/Ideas always render in the
-          row below regardless of live status: leftColRef here only measures that row's
-          left cell (no longer Player), and its own Feed copy (below) only renders while
-          live, since this one already covers the not-live case. */}
+          unlike nesting Feed inside ClientViewLiveSession/StreamTheme's own tree. It's
+          self-start (not stretched) and given maxHeight = videoRowHeight + leftColHeight
+          (JS-measured, see those above, not plain CSS stretch — same circular-height
+          reason leftColHeight itself exists) so it can visually read as one tall panel
+          beside Player when it actually has enough content to need that, WITHOUT forcing
+          a short feed to stretch and leave dead space when it doesn't. Master
+          Classes/Recordings/Ideas always render in the row below regardless of live
+          status: leftColRef here only measures that row's left cell (no longer Player),
+          and its own Feed copy (below) only renders while live, since this one already
+          covers the not-live case. */}
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         {/* Explicit wrapper (rather than relying on a class deep inside
             ClientViewLiveSession's own tree) since Stream's own <StreamTheme> wraps its
@@ -1164,19 +1165,24 @@ const IqEducators = () => {
         </div>
 
         {isLgUp && !isLive && (
-          <div
-            className="col-span-12 lg:col-span-4 row-span-2 flex flex-col"
-            style={
-              videoRowHeight && leftColHeight
-                ? {
-                    height: videoRowHeight + GRID_ROW_GAP_PX + leftColHeight,
-                    maxHeight: videoRowHeight + GRID_ROW_GAP_PX + leftColHeight,
-                    overflow: "hidden",
-                  }
-                : undefined
-            }
-          >
-            <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} className="h-full" />
+          // row-span-2 is required, not optional: without it, Feed's own natural height
+          // (which self-start otherwise lets grow freely) inflates THIS row alone instead
+          // of being absorbed across both rows' combined track — since Video's own row1
+          // height is just a 16:9 box, that pushed row1 (and Master Classes' row2 below
+          // it) far taller than intended, leaving a huge blank gap under the video. With
+          // row-span-2, Feed's height demand is measured against row1 + row2 combined,
+          // which — since maxHeight below is exactly that same sum — it fits inside
+          // without inflating either.
+          <div className="col-span-12 lg:col-span-4 row-span-2 flex flex-col self-start">
+            <EducatorFeed
+              educatorId={id}
+              headerGradient={getHeaderGradient()}
+              maxHeight={
+                videoRowHeight && leftColHeight
+                  ? videoRowHeight + GRID_ROW_GAP_PX + leftColHeight
+                  : undefined
+              }
+            />
           </div>
         )}
 
@@ -1464,26 +1470,19 @@ const IqEducators = () => {
 
         {/* Sidebar: the desktop (lg+) home for Educator Feed while live — Chat renders
             entirely inside ClientViewLiveSession's own video row (see there), so nothing
-            here reacts to Chat's collapse state; this only ever spans the row below
-            (row-span-1, default), capped to leftColHeight (measured above) to match it,
-            clipping/scrolling internally rather than pushing the column taller. While NOT
-            live, the row-1 Feed sibling above already covers this column (spanning down
-            via row-span-2), so this is skipped to avoid mounting Feed twice. Below lg it
-            renders inline right after Player instead (see above), so nothing is ever
-            mounted in two places at once. */}
+            here reacts to Chat's collapse state. self-start + maxHeight (rather than a
+            forced height) lets it size to its actual content up to leftColHeight, instead
+            of always stretching to match Master Classes' often much taller natural height
+            when the feed itself has little content. While NOT live, the row-1 Feed
+            sibling above already covers this column, so this is skipped to avoid mounting
+            Feed twice. Below lg it renders inline right after Player instead (see above),
+            so nothing is ever mounted in two places at once. */}
         {isLgUp && isLive && (
-          <div
-            className="col-span-12 lg:col-span-4 flex flex-col"
-            style={
-              leftColHeight
-                ? { height: leftColHeight, maxHeight: leftColHeight, overflow: "hidden" }
-                : undefined
-            }
-          >
+          <div className="col-span-12 lg:col-span-4 flex flex-col self-start">
             <EducatorFeed
               educatorId={id}
               headerGradient={getHeaderGradient()}
-              className="h-full"
+              maxHeight={leftColHeight || undefined}
             />
           </div>
         )}
