@@ -16,6 +16,7 @@ import {
   UserCheck,
   Copy,
   ChartLine,
+  Loader2,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
@@ -46,7 +47,10 @@ import {
   useLazyGetTradeAnalysisByIdQuery,
   useLazyGetIdeaByIdQuery,
   useLazyGetLiveIdeaSingleQuery,
+  useGetEducatorIdeasQuery,
+  useGetEducatorInsightsQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { useGetEducatorPostsQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
@@ -224,10 +228,41 @@ const IqEducators = () => {
   };
 
   const { id } = useParams();
+
+  // Fired here, before useGetEducatorWithCoursesQuery below, purely to get these 4
+  // requests dispatched first over the wire — Educator Feed (right side) is meant to load
+  // ahead of the profile/Master Classes query. EducatorFeed's own identical hook calls
+  // (same educatorId/page/limit args) further down the tree just subscribe to this same
+  // in-flight/cached request via RTK Query's normal key-based dedup rather than firing a
+  // duplicate — this component never reads the return values itself, EducatorFeed still
+  // owns all of its own pagination/tab-switching state. useGetLiveTradeIdeaQuery here
+  // uses the exact same args (page 1, limit 10, this educatorId) as EducatorFeed's own
+  // "liveIdeas" tab, so it doubles as that prefetch too — no separate call needed for it.
+  useGetEducatorPostsQuery({ educatorId: id, page: 1, limit: 10 }, { skip: !id });
+  useGetEducatorIdeasQuery({ educatorId: id, page: 1, limit: 10 }, { skip: !id });
+  useGetEducatorInsightsQuery({ educatorId: id, page: 1, limit: 10 }, { skip: !id });
+  const {
+    data: liveTradeIdeas,
+    refetch: refetchLiveIdeas,
+    isFetching: isFetchingLiveIdeas,
+    isLoading: isLoadingLiveIdeasQuery,
+  } = useGetLiveTradeIdeaQuery({
+    page: 1,
+    limit: 10,
+    id: id,
+  }, {
+    refetchOnMountOrArgChange: true,
+  });
+
   const {
     data: response,
     refetch: refetchEducator,
     isFetching: isFetchingEducator,
+    // isLoading (unlike isFetching) is only ever true for the FIRST fetch of a given id —
+    // background refetches (refetchOnMountOrArgChange/refetchOnFocus) flip isFetching
+    // again later without touching this, which is exactly what the one-time page loading
+    // gate below needs: show it once up front, never again.
+    isLoading: isLoadingEducator,
   } = useGetEducatorWithCoursesQuery(id, {
     refetchOnMountOrArgChange: true,
   });
@@ -236,20 +271,20 @@ const IqEducators = () => {
   const educatorCategoryName = response?.data?.educator?.categories?.[0]?.name?.toLowerCase() ?? "";
   const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing") || educatorCategoryName.includes("e-commerce") || educatorCategoryName.includes("ecommerce") || educatorCategoryName.includes("e commerce");
 
-  const {
-    data: liveTradeIdeas,
-    refetch: refetchLiveIdeas,
-    isFetching: isFetchingLiveIdeas,
-  } = useGetLiveTradeIdeaQuery({
-    page: 1,
-    limit: 10,
-    id: id,
-  }, {
-    refetchOnMountOrArgChange: true,
-  });
   const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
   const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
   const [fetchLiveIdeaById] = useLazyGetLiveIdeaSingleQuery();
+
+  // One-time page loading gate: the real content below stays mounted the whole time (so
+  // every query/effect still fires and finishes normally, nothing restarts once
+  // revealed) but is visually hidden behind a single loading spinner until every
+  // REQUIRED section has finished its first load — the profile/Master Classes/Ideas/
+  // Insights query, the page's own Live Ideas query, and Educator Feed's own queries
+  // (reported up via onReady, since they're fetched independently inside it). feedReady
+  // latches true the first time EducatorFeed reports ready and is never reset — later
+  // tab switches inside it only affect its own internal loading state.
+  const [feedReady, setFeedReady] = useState(false);
+  const pageReady = !isLoadingEducator && !isLoadingLiveIdeasQuery && feedReady;
 
   useEffect(() => {
 
@@ -981,6 +1016,17 @@ const IqEducators = () => {
 
   return (
     <div className="container-fluid pb-10">
+      {!pageReady && (
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <span className="mt-3 text-sm text-gray-400">Loading educator profile...</span>
+        </div>
+      )}
+      {/* Real content stays mounted (never conditionally rendered) even while the spinner
+          above covers it — hidden purely visually via the `hidden` class — so every
+          query and effect below keeps running and finishes normally instead of
+          restarting once revealed. */}
+      <div className={pageReady ? "" : "hidden"}>
       {/* Share Toast Notification */}
       {showShareToast && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transform transition-all duration-300 ease-in-out animate-bounce">
@@ -1147,14 +1193,44 @@ const IqEducators = () => {
           Classes/Recordings/Ideas always render in the row below regardless of live
           status: leftColRef here only measures that row's left cell (no longer Player),
           and its own Feed copy (below) only renders while live, since this one already
-          covers the not-live case. */}
-      <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
+          covers the not-live case.
+
+          gridTemplateRows below (not-live only) is required, not decorative: Feed's
+          row-span-2 lets it grow past a single row's worth of height, and by default CSS
+          Grid distributes that extra growth across BOTH spanned tracks — including row 1,
+          which otherwise only needs Player's own small aspect-video height. That leaves
+          Player sitting inside a much taller stretched row-1 cell with dead space below
+          it, and Master Classes (row 2) pushed down to start after that gap. Pinning row
+          1's track to exactly videoRowHeight (an explicit size, not "auto") makes it
+          un-inflatable — Feed's extra growth is then forced entirely onto row 2 instead,
+          which is where it visually belongs (beside/below Master Classes). */}
+      <div
+        className="grid grid-cols-12 gap-y-8 md:gap-x-8"
+        style={
+          isLgUp && !isLive && videoRowHeight
+            ? { gridTemplateRows: `${videoRowHeight}px auto` }
+            : undefined
+        }
+      >
         {/* Explicit wrapper (rather than relying on a class deep inside
             ClientViewLiveSession's own tree) since Stream's own <StreamTheme> wraps its
             children in its own DOM div with no column span of its own — without this
             wrapper the row would collapse to a single implicit grid track instead of
-            taking its intended width. */}
-        <div ref={videoRowRef} className={isLive ? "col-span-12" : "col-span-12 lg:col-span-8"}>
+            taking its intended width.
+
+            self-start is required, not cosmetic: by default this item STRETCHES to match
+            row 1's height — including any inflation Feed's row-span-2 causes before the
+            gridTemplateRows pin above kicks in (that pin itself is derived from
+            videoRowHeight, measured off THIS element). Without self-start, an already-
+            inflated row would stretch this wrapper too, so the ResizeObserver reads back
+            the inflated height instead of the video's true one, and the pin just locks in
+            the bug instead of fixing it. self-start keeps this sized to its own actual
+            content regardless of the row, so the measurement — and the pin built from it
+            — are always correct. */}
+        <div
+          ref={videoRowRef}
+          className={`self-start ${isLive ? "col-span-12" : "col-span-12 lg:col-span-8"}`}
+        >
           <ClientViewLiveSession
             bannerImage={response?.data?.educator?.bannerImage}
             callId={callId}
@@ -1177,6 +1253,7 @@ const IqEducators = () => {
             <EducatorFeed
               educatorId={id}
               headerGradient={getHeaderGradient()}
+              onReady={() => setFeedReady(true)}
               maxHeight={
                 videoRowHeight && leftColHeight
                   ? videoRowHeight + GRID_ROW_GAP_PX + leftColHeight
@@ -1186,16 +1263,36 @@ const IqEducators = () => {
           </div>
         )}
 
-        <div ref={leftColRef} className="col-span-12 lg:col-span-8 flex flex-col gap-8">
+        {/* self-start for the same reason videoRowRef needs it: without it, this item
+            STRETCHES to match row 2's actual track height — and since Feed (row-span-2)
+            can make that track taller than Master Classes' own natural content, a
+            stretched leftColRef would report that INFLATED height back through
+            leftColHeight, which directly feeds Feed's own maxHeight formula above,
+            growing Feed even more next render — a runaway feedback loop, not a one-time
+            measurement error. self-start keeps this at its own true natural content
+            height regardless of what the row ends up needing for Feed. */}
+        <div ref={leftColRef} className="col-span-12 lg:col-span-8 flex flex-col gap-8 self-start">
 
           {/* Below lg, Educator Feed renders here — immediately after Player, or after
               Chat if it's present, since Chat renders directly above this in DOM order
               when live — rather than at the sidebar's DOM position, which is the very end
               of the page once both columns stack. A real conditional (not CSS-hidden), so
               exactly one EducatorFeed instance is ever mounted at a time — the other copy
-              lives in the sidebar at lg+, below. */}
+              lives in the sidebar at lg+, below.
+
+              Fixed maxHeight here (unlike the two lg+ instances, which measure against
+              Player/Master Classes) — on mobile everything already stacks in one long
+              column, so there's no sibling section to match; a flat cap just keeps the
+              feed from growing indefinitely and pushing everything below it far down the
+              page. EducatorFeed's own internal list still scrolls + infinite-loads inside
+              that cap exactly as it does elsewhere. */}
           {!isLgUp && (
-            <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
+            <EducatorFeed
+              educatorId={id}
+              headerGradient={getHeaderGradient()}
+              onReady={() => setFeedReady(true)}
+              maxHeight={900}
+            />
           )}
 
           {/* Master Classes */}
@@ -1482,6 +1579,7 @@ const IqEducators = () => {
             <EducatorFeed
               educatorId={id}
               headerGradient={getHeaderGradient()}
+              onReady={() => setFeedReady(true)}
               maxHeight={leftColHeight || undefined}
             />
           </div>
@@ -1555,6 +1653,7 @@ const IqEducators = () => {
           />
         )
       }
+      </div>
     </div>
   );
 };

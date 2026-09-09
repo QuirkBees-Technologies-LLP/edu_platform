@@ -21,7 +21,7 @@ const TABS = [
 ];
 const ALL_TYPES = TABS.map((t) => t.key);
 
-const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight }) => {
+const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, onReady }) => {
   // Genuine multi-select: nothing selected (the default) shows every content type merged
   // together; selecting one or more narrows the feed to just those types.
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -252,6 +252,15 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight })
   const isLoading =
     fullFeed.length === 0 &&
     activeTypes.some((t) => tabState[t].isFetching && tabState[t].page === 1);
+
+  // Reported up to IqEducators.jsx for its one-time page loading gate: this only ever
+  // needs to know about the very first load (all 4 tabs' page-1 fetches, since
+  // selectedTypes starts empty) — the parent latches it once and ignores any later
+  // isLoading flips from the user switching tabs, so this can just fire on every settle
+  // without needing to track "was this the first time" itself.
+  useEffect(() => {
+    if (!isLoading) onReady?.();
+  }, [isLoading, onReady]);
 
   // Genuine infinite scroll — no "Load more" click required. A sentinel sits right after
   // the list; whenever it's visible within feedScrollRef (the list's own scroll
