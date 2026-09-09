@@ -102,11 +102,22 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
+      // Entry is only ever shown/editable outside chain mode — in chain mode it's
+      // seeded from the source idea and never touched again, so it's not required there.
+      entry: !isChainMode
+        ? Yup.number().required("Entry is required").positive("Entry must be a positive number")
+        : Yup.number().notRequired(),
       description: Yup.string().required("Description is required"),
+      // Outside chain mode both are always shown (unchanged behavior). In chain mode,
+      // only the field matching the outcome being reported is shown/required —
+      // Invalidation for a Loss/Break Even, Exits for a Win/Partial Win.
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
-        .required("Invalidation is required"),
+        .when("status", {
+          is: (status) => !isChainMode || ["loss", "breakEven"].includes(status),
+          then: (schema) => schema.required("Invalidation is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
       exits: Yup.array()
         .of(
           Yup.number()
@@ -114,7 +125,11 @@ const CreateTradeIdeas = forwardRef(
             .required("Exit is required")
             .positive("Exit must be a positive number")
         )
-        .min(1, "At least one exit is required"),
+        .when("status", {
+          is: (status) => !isChainMode || ["win", "partialWin"].includes(status),
+          then: (schema) => schema.min(1, "At least one exit is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
       category: Yup.string().required("Category is required"),
       pips: Yup.number()
         .typeError("Pips must be a number")
@@ -428,6 +443,12 @@ const CreateTradeIdeas = forwardRef(
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Category</span>
                         <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.category?.name || "—"}</span>
                       </span>
+                      {chainFrom?.pips !== undefined && chainFrom?.pips !== null && (
+                        <span className="flex flex-col gap-0.5">
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Pips</span>
+                          <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom.pips}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -621,7 +642,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
                 )}
-                {!isChainMode && (
+                {(!isChainMode || ["loss", "breakEven"].includes(formik.values.status)) && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -647,7 +668,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
                 )}
-                {!isChainMode && (
+                {(!isChainMode || ["win", "partialWin"].includes(formik.values.status)) && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
