@@ -21,7 +21,7 @@ const TABS = [
 ];
 const ALL_TYPES = TABS.map((t) => t.key);
 
-const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, onReady }) => {
+const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, onReady, onEmptyChange }) => {
   // Genuine multi-select: nothing selected (the default) shows every content type merged
   // together; selecting one or more narrows the feed to just those types.
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -261,6 +261,17 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, o
   useEffect(() => {
     if (!isLoading) onReady?.();
   }, [isLoading, onReady]);
+
+  // Reported up to IqEducators.jsx so the sidebar slot this renders inside can drop its
+  // row-span/maxHeight sizing (meant for a genuinely tall feed) when the active tab has
+  // nothing to show — otherwise an empty/near-empty card still reserves the full height
+  // it would need for real content, leaving a large blank gap below the "no updates"
+  // placeholder. Only fires once loading has actually settled, so the fleeting initial
+  // isLoading=true state (before anything has even had a chance to arrive) never gets
+  // reported as "empty".
+  useEffect(() => {
+    if (!isLoading) onEmptyChange?.(combinedFeed.length === 0);
+  }, [isLoading, combinedFeed.length, onEmptyChange]);
 
   // Genuine infinite scroll — no "Load more" click required. A sentinel sits right after
   // the list; whenever it's visible within feedScrollRef (the list's own scroll

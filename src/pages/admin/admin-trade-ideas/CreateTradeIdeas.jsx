@@ -134,7 +134,11 @@ const CreateTradeIdeas = forwardRef(
           then: (schema) => schema.min(1, "At least one exit is required"),
           otherwise: (schema) => schema.notRequired(),
         }),
-      description: Yup.string().required("Description is required"),
+      // Required outside chain mode (unchanged); optional in chain mode — the educator
+      // may have nothing to add beyond the reference fields/status being reported.
+      description: !isChainMode
+        ? Yup.string().required("Description is required")
+        : Yup.string().notRequired(),
       category: Yup.string().required("Category is required"),
       pips: Yup.number()
         .typeError("Pips must be a number")
@@ -286,7 +290,7 @@ const CreateTradeIdeas = forwardRef(
           timeFrame: Array.isArray(chainFrom?.timeFrame)
             ? chainFrom.timeFrame[0]
             : chainFrom?.timeFrame || "",
-          status: "active",
+          status: chainFrom?.status || "active",
           entry: chainFrom?.entry || "",
           invalidation: chainFrom?.invalidation || "",
           description: "",
@@ -520,7 +524,7 @@ const CreateTradeIdeas = forwardRef(
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Description<span className="text-danger">*</span>
+                    Description{!isChainMode && <span className="text-danger">*</span>}
                   </label>
                   <RichTextEditor
                     content={formik.values.description}
