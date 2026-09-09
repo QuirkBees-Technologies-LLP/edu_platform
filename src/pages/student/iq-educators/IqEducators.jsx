@@ -285,6 +285,12 @@ const IqEducators = () => {
   // tab switches inside it only affect its own internal loading state.
   const [feedReady, setFeedReady] = useState(false);
   const pageReady = !isLoadingEducator && !isLoadingLiveIdeasQuery && feedReady;
+  // Reported up from EducatorFeed: whether the currently active tab/filter has zero
+  // items (after loading settles). The row-span/maxHeight sizing on the sidebar slot(s)
+  // below exists specifically to let a genuinely tall feed span down into (or match)
+  // Master Classes' row — an empty feed doesn't need any of that, and forcing it anyway
+  // just reserves a big blank area under the "no updates" placeholder.
+  const [feedEmpty, setFeedEmpty] = useState(false);
 
   useEffect(() => {
 
@@ -1241,21 +1247,28 @@ const IqEducators = () => {
         </div>
 
         {isLgUp && !isLive && (
-          // row-span-2 is required, not optional: without it, Feed's own natural height
-          // (which self-start otherwise lets grow freely) inflates THIS row alone instead
-          // of being absorbed across both rows' combined track — since Video's own row1
-          // height is just a 16:9 box, that pushed row1 (and Master Classes' row2 below
-          // it) far taller than intended, leaving a huge blank gap under the video. With
-          // row-span-2, Feed's height demand is measured against row1 + row2 combined,
-          // which — since maxHeight below is exactly that same sum — it fits inside
-          // without inflating either.
-          <div className="col-span-12 lg:col-span-4 row-span-2 flex flex-col self-start">
+          // row-span-2 is required, not optional, WHEN Feed actually has content: without
+          // it, Feed's own natural height (which self-start otherwise lets grow freely)
+          // inflates THIS row alone instead of being absorbed across both rows' combined
+          // track — since Video's own row1 height is just a 16:9 box, that pushed row1
+          // (and Master Classes' row2 below it) far taller than intended, leaving a huge
+          // blank gap under the video. With row-span-2, Feed's height demand is measured
+          // against row1 + row2 combined, which — since maxHeight below is exactly that
+          // same sum — it fits inside without inflating either. When Feed is EMPTY though,
+          // none of that sizing is needed at all — row-span-2 + a tall maxHeight would
+          // just reserve that same combined height as blank space under a one-line "no
+          // updates" placeholder, so both are dropped in favor of the item's own tiny
+          // natural size within row 1 alone.
+          <div
+            className={`col-span-12 lg:col-span-4 flex flex-col self-start ${feedEmpty ? "" : "row-span-2"}`}
+          >
             <EducatorFeed
               educatorId={id}
               headerGradient={getHeaderGradient()}
               onReady={() => setFeedReady(true)}
+              onEmptyChange={setFeedEmpty}
               maxHeight={
-                videoRowHeight && leftColHeight
+                !feedEmpty && videoRowHeight && leftColHeight
                   ? videoRowHeight + GRID_ROW_GAP_PX + leftColHeight
                   : undefined
               }
@@ -1580,7 +1593,8 @@ const IqEducators = () => {
               educatorId={id}
               headerGradient={getHeaderGradient()}
               onReady={() => setFeedReady(true)}
-              maxHeight={leftColHeight || undefined}
+              onEmptyChange={setFeedEmpty}
+              maxHeight={!feedEmpty ? leftColHeight || undefined : undefined}
             />
           </div>
         )}

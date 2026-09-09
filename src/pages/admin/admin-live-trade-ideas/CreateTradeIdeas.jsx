@@ -218,7 +218,7 @@ const CreateLiveTradeIdea = forwardRef(
           name: chainFrom?.name || "",
           files: seedImages,
           type: chainFrom?.type || "",
-          status: "active",
+          status: chainFrom?.status || "active",
           category: chainFrom?.category?._id || "",
           pips: 0,
           educatorId: chainFrom?.educatorDetails?._id || educatorId,
