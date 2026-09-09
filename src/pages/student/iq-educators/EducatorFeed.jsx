@@ -21,7 +21,7 @@ const TABS = [
 ];
 const ALL_TYPES = TABS.map((t) => t.key);
 
-const EducatorFeed = ({ educatorId, headerGradient, className = "" }) => {
+const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, onReady }) => {
   // Genuine multi-select: nothing selected (the default) shows every content type merged
   // together; selecting one or more narrows the feed to just those types.
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -247,20 +247,54 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "" }) => {
     loadMoreTriggeredRef.current = false;
   }, [activeTypesKey, allPosts, allIdeas, allInsights, allLiveIdeas, visibleCount]);
 
-  const handleScroll = (e) => {
-    const el = e.currentTarget;
-    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 80;
-    if (nearBottom) loadMore();
-  };
-
   // Loading if nothing's rendered yet and any of the currently-active types is still
   // fetching its first page.
   const isLoading =
     fullFeed.length === 0 &&
     activeTypes.some((t) => tabState[t].isFetching && tabState[t].page === 1);
 
+  // Reported up to IqEducators.jsx for its one-time page loading gate: this only ever
+  // needs to know about the very first load (all 4 tabs' page-1 fetches, since
+  // selectedTypes starts empty) — the parent latches it once and ignores any later
+  // isLoading flips from the user switching tabs, so this can just fire on every settle
+  // without needing to track "was this the first time" itself.
+  useEffect(() => {
+    if (!isLoading) onReady?.();
+  }, [isLoading, onReady]);
+
+  // Genuine infinite scroll — no "Load more" click required. A sentinel sits right after
+  // the list; whenever it's visible within feedScrollRef (the list's own scroll
+  // container, passed as `root` so this works whether the list is actually tall enough
+  // to scroll or not), fetch the next page. This correctly covers BOTH cases a plain
+  // onScroll handler can't: a short first page that doesn't yet overflow the visible
+  // area (the sentinel is already on-screen, so this fires immediately without waiting
+  // for a scroll event that can never happen) and a long list (the sentinel only enters
+  // view once actually scrolled near the bottom, same as normal infinite-scroll).
+  // loadMore()'s own loadMoreTriggeredRef guard prevents this from firing a second fetch
+  // while one is already in flight; that guard resets once the fetched data actually
+  // lands (see the effect above), so this naturally re-fires and chains page after page
+  // for as long as the sentinel stays visible, stopping the moment canLoadMore is false.
+  const sentinelRef = useRef(null);
+  useEffect(() => {
+    const root = feedScrollRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { root, rootMargin: "80px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  });
+
+
   return (
-    <div className={`rounded-2xl shadow-md overflow-hidden h-full flex flex-col bg-[#151320] ${className}`}>
+    <div
+      className={`rounded-2xl shadow-md overflow-hidden flex flex-col bg-[#151320] ${className}`}
+      style={maxHeight ? { maxHeight } : undefined}
+    >
       {/* Title */}
       <div className="pt-3 pb-2 px-4 select-none flex-shrink-0">
         <h3 className="text-white font-bold text-sm sm:text-base text-center">
@@ -316,7 +350,6 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "" }) => {
       <div
         ref={feedScrollRef}
         className="flex-1 min-h-0 p-3 overflow-y-auto space-y-3"
-        onScroll={handleScroll}
       >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[150px]">
@@ -354,6 +387,10 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "" }) => {
 
         {!isLoading && combinedFeed.length > 0 && (isFetchingMore || canLoadMore) && (
           <div className="flex items-center justify-center py-2">
+            {/* The sentinel (not this text) is what actually drives loading — see the
+                IntersectionObserver effect above. "Loading more..." just reflects that;
+                the click handler stays only as a fallback for browsers without
+                IntersectionObserver support. */}
             {isFetchingMore ? (
               <span className="text-[11px] text-white/40">Loading more...</span>
             ) : (
@@ -367,6 +404,7 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "" }) => {
             )}
           </div>
         )}
+        {!isLoading && canLoadMore && <div ref={sentinelRef} className="h-px" />}
       </div>
     </div>
   );
