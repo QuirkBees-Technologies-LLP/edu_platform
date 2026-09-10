@@ -690,6 +690,14 @@ const ClientTradeIdeas = () => {
 
               {/* ── Structured Price Levels ── */}
               <div className="mb-2 space-y-1.5 flex-1">
+                {/* Description always leads, above Entry/Invalidation/Exits — the caption
+                    reads first, matching the Follow-Up card layout. */}
+                {trade?.description && (
+                  <div
+                    className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: trade.description }}
+                  />
+                )}
                 {trade.entry && (
                   <div
                     className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
@@ -741,12 +749,6 @@ const ClientTradeIdeas = () => {
                     </div>
                   );
                 })}
-                {trade?.description && (
-                  <div
-                    className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
-                    dangerouslySetInnerHTML={{ __html: trade.description }}
-                  />
-                )}
               </div>
 
               {/* ── Footer: Source + Time ── */}

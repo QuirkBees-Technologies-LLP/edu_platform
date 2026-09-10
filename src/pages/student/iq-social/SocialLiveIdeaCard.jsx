@@ -227,11 +227,9 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
 
         {/* Price levels */}
         <div className="mb-2 space-y-1.5 flex-1">
-          {/* Follow-up only: description shown above Entry/Invalidation/Exits, with more
-              visible styling, so the caption reads first. Regular (non-follow-up) live
-              ideas keep the description in its original spot (a fallback below the price
-              levels, shown only when there's no entry/invalidation/exits). */}
-          {liveIdea?.previousLiveIdea && (liveIdea?.description || liveIdea?.message) && (
+          {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
+              first, matching the Follow-Up card layout. */}
+          {(liveIdea?.description || liveIdea?.message) && (
             <div
               className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
               dangerouslySetInnerHTML={{ __html: liveIdea.description || liveIdea.message }}
@@ -292,19 +290,6 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
               </div>
             );
           })}
-          {!liveIdea?.previousLiveIdea &&
-            !liveIdea?.entry &&
-            !liveIdea?.invalidation &&
-            (!liveIdea?.exits || liveIdea.exits.length === 0) &&
-            (liveIdea?.description || liveIdea?.message) && (
-              <div className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: liveIdea.description || liveIdea.message,
-                  }}
-                />
-              </div>
-            )}
         </div>
 
         {/* View Details */}
