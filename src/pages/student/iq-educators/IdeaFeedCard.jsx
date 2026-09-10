@@ -184,10 +184,9 @@ const IdeaFeedCard = ({ idea }) => {
 
         {/* Price levels */}
         <div className="mb-2 space-y-1.5">
-          {/* Follow-up only: description shown above Entry/Invalidation/Exits, with more
-              visible styling, so the caption reads first. Regular (non-follow-up) ideas
-              keep the description in its original spot below the price levels. */}
-          {idea?.previousIdea && idea?.description && (
+          {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
+              first, matching the Follow-Up card layout. */}
+          {idea?.description && (
             <div
               className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
               dangerouslySetInnerHTML={{ __html: idea.description }}
@@ -248,12 +247,6 @@ const IdeaFeedCard = ({ idea }) => {
               </div>
             );
           })}
-          {!idea?.previousIdea && idea?.description && (
-            <div
-              className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: idea.description }}
-            />
-          )}
         </div>
       </div>
 

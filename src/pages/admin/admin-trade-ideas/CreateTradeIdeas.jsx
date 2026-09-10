@@ -476,7 +476,7 @@ const CreateTradeIdeas = forwardRef(
                       <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Category</span>
                       <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.category?.name || "—"}</span>
                     </span>
-                    {chainFrom?.pips !== undefined && chainFrom?.pips !== null && (
+                    {!!chainFrom?.pips && (
                       <span className="flex flex-col gap-0.5">
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Pips</span>
                         <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom.pips}</span>

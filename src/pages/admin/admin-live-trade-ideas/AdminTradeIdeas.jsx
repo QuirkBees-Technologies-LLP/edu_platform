@@ -15,6 +15,12 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Toolbar,
   ToolbarActions,
   ToolbarDescription,
@@ -29,6 +35,7 @@ import TradeImageSlider from "./TradeImageSlider";
 import {
   useIdeaExportMutation,
   useLazyGetAdminLiveTradeIdeasQuery,
+  useLazyGetAdminLiveTradeIdeaThreadQuery,
 } from "../../../store/api/admin/adminLiveTradeIdeasApiSlice";
 import { TruncatedText } from "../../../lib/utils";
 import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
@@ -75,6 +82,10 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
 
   const [fetchTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetAdminLiveTradeIdeasQuery();
+  // Only used to resolve a follow-up row's true parent when "Edit" is clicked directly
+  // on it (the table now shows the latest follow-up as its own row, not just the
+  // original) — see the Edit MenuItem below.
+  const [fetchThreadForEdit] = useLazyGetAdminLiveTradeIdeaThreadQuery();
 
   const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
@@ -143,15 +154,37 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
     loss: "badge-danger",
   };
 
-  const ActionMenu = () => {
+  // Takes the row directly as an argument rather than reading `selectedRow` state —
+  // this whole function is invoked from inside the `columns` useMemo below (deps
+  // [isRTL]), which only re-runs when the language direction changes. If the handlers
+  // here read `selectedRow` via closure instead, they'd stay frozen to whatever it was
+  // on the render that useMemo last actually ran, never seeing later clicks at all.
+  const ActionMenu = (raw) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
         <MenuItem
-          onClick={() => {
+          onClick={async () => {
             setIsChainMode(false);
-            // Only reached from the table row (always a root record — onlyRoot=true),
-            // never from the thread modal, so this is always a plain edit.
-            setFollowUpEditSource(null);
+            // The table shows both the original and the current latest follow-up as
+            // their own rows now, so "Edit" here can land on either — resolve the
+            // clicked row's true parent (if it has one) so a follow-up still opens as
+            // "Edit Follow-Up" (reference strip, no share prompt) instead of the plain
+            // full-editable form.
+            if (raw?.previousLiveIdea) {
+              try {
+                const thread = await fetchThreadForEdit(raw._id).unwrap();
+                const items = thread?.data || [];
+                const clicked = items.find((t) => String(t._id) === String(raw._id));
+                const parent = clicked?.previousLiveIdea
+                  ? items.find((t) => String(t._id) === String(clicked.previousLiveIdea))
+                  : null;
+                setFollowUpEditSource(parent || null);
+              } catch (err) {
+                setFollowUpEditSource(null);
+              }
+            } else {
+              setFollowUpEditSource(null);
+            }
             setIsCreateOpen(!isCreateOpen);
           }}
         >
@@ -166,7 +199,7 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
           onClick={() => {
             // Follow Up = open the full update thread for this live idea instead of
             // jumping straight into a chained create — see FollowUpThreadModal.
-            setThreadRootId(selectedRow?._id);
+            setThreadRootId(raw?._id);
             setIsThreadOpen(true);
           }}
         >
@@ -254,12 +287,33 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <div className="flex flex-col gap-0.5">
-              <a
-                className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
-                href="#"
-              >
-                {info.row.original.name}
-              </a>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <a
+                  className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
+                  href="#"
+                >
+                  {info.row.original.name}
+                </a>
+                {/* This row is the current latest Follow-Up in its thread, not the
+                    original — the table shows both as separate rows (see onlyRoot). */}
+                {info.row.original.previousLiveIdea && (
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex cursor-pointer">
+                          <KeenIcon
+                            icon="arrow-circle-right"
+                            className="text-primary text-sm shrink-0"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        Follow-Up
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             </div>
           </div>
         ),
@@ -361,7 +415,7 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {ActionMenu()}
+              {ActionMenu(row.original)}
             </MenuItem>
           </Menu>
         ),
