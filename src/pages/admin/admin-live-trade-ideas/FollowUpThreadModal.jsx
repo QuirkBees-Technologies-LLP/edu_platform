@@ -33,11 +33,12 @@ const statusColorMap = {
 };
 
 // Shows the full self-referencing update chain (root live idea + every chained
-// "Update"/Follow-Up, at any depth), so Admin/Educator can see the whole thread instead
-// of hunting through separate table rows. See AdminTradeIdeas.jsx's "Follow Up" action.
-// Each item's true parent is resolved by matching previousLiveIdea against the thread's
-// own ids (not by list position) so Edit/"Replying to" stay correct even if a follow-up
-// is later added to something other than the latest item.
+// "Update"/Follow-Up), so Admin/Educator can see the whole thread instead of hunting
+// through separate table rows. See AdminTradeIdeas.jsx's "Follow Up" action. The chain
+// is strictly linear — a new Follow-Up can only ever be added to the current latest
+// item (the single "Add Follow-Up" button below), never to an earlier one — so each
+// item's parent is resolved by matching previousLiveIdea against the thread's own ids
+// (not by list position) purely for correctness, not to support branching.
 const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowUp, onDeleted }) => {
   const [fetchThread, { data, isFetching }] = useLazyGetAdminLiveTradeIdeaThreadQuery();
   const [deleteAdminLiveTradeIdea, { isLoading: isDeleting }] = useDeleteAdminLiveTradeIdeaMutation();
@@ -114,49 +115,45 @@ const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowU
                     <span className="absolute left-0.5 top-4 size-3 rounded-full border-2 border-primary bg-white dark:bg-slate-900" />
 
                     <div className="mb-4 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-3">
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">
-                            {originalIndex === 0 ? "Original" : `Follow-Up ${originalIndex}`}
-                          </span>
-                          <span
-                            className={`badge badge-sm badge-outline capitalize ${statusColorMap[item.status] || "badge-secondary"}`}
-                          >
-                            {LabelMap[item.status] || item.status}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-[11px] text-gray-500 mr-1">
-                            {item.createdAt ? new Date(item.createdAt).toLocaleString() : "—"}
-                          </span>
-                          <button
-                            type="button"
-                            className="inline-flex items-center justify-center size-7 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-200/70 hover:text-primary dark:hover:bg-slate-700/60 dark:hover:text-primary transition-colors"
-                            onClick={() => onAddFollowUp(item)}
-                            title="Add a follow-up to this entry"
-                          >
-                            <Plus className="size-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            className="inline-flex items-center justify-center size-7 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-200/70 hover:text-primary dark:hover:bg-slate-700/60 dark:hover:text-primary transition-colors"
-                            onClick={() => onEditItem(item, parent)}
-                            title="Edit this entry"
-                          >
-                            <Pencil className="size-3.5" />
-                          </button>
-                          {originalIndex > 0 && (
+                      <div className="mb-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 whitespace-nowrap">
+                              {originalIndex === 0 ? "Original" : `Follow-Up ${originalIndex}`}
+                            </span>
+                            <span
+                              className={`badge badge-sm badge-outline capitalize ${statusColorMap[item.status] || "badge-secondary"}`}
+                            >
+                              {LabelMap[item.status] || item.status}
+                            </span>
+                          </div>
+                          {/* Edit/Delete always sit in the card's top-right corner,
+                              regardless of screen size. */}
+                          <div className="flex items-center gap-1 shrink-0">
                             <button
                               type="button"
-                              disabled={!canDelete}
-                              className="inline-flex items-center justify-center size-7 rounded-md text-slate-500 dark:text-slate-400 hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
-                              onClick={() => canDelete && setDeleteTarget(item)}
-                              title={canDelete ? "Delete this follow-up" : "Delete its own follow-up(s) first"}
+                              className="inline-flex items-center justify-center size-7 rounded-md text-slate-500 dark:text-slate-400 hover:bg-slate-200/70 hover:text-primary dark:hover:bg-slate-700/60 dark:hover:text-primary transition-colors"
+                              onClick={() => onEditItem(item, parent)}
+                              title="Edit this entry"
                             >
-                              <Trash2 className="size-3.5" />
+                              <Pencil className="size-3.5" />
                             </button>
-                          )}
+                            {originalIndex > 0 && (
+                              <button
+                                type="button"
+                                disabled={!canDelete}
+                                className="inline-flex items-center justify-center size-7 rounded-md text-slate-500 dark:text-slate-400 hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
+                                onClick={() => canDelete && setDeleteTarget(item)}
+                                title={canDelete ? "Delete this follow-up" : "Delete its own follow-up(s) first"}
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
+                        <span className="block mt-1 text-[11px] text-gray-500 whitespace-nowrap">
+                          {item.createdAt ? new Date(item.createdAt).toLocaleString() : "—"}
+                        </span>
                       </div>
 
                       {parent && (
@@ -176,19 +173,25 @@ const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowU
                           <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Direction</span>
                           <span className="text-xs font-medium text-slate-800 dark:text-slate-100 capitalize">{item.type || "—"}</span>
                         </span>
-                        {["loss", "breakEven"].includes(item.status) && (
+                        {item.invalidation !== undefined && item.invalidation !== null && (
                           <span className="flex flex-col gap-0.5">
                             <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Invalidation</span>
-                            <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{item.invalidation ?? "—"}</span>
+                            <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{item.invalidation}</span>
                           </span>
                         )}
-                        {["win", "partialWin"].includes(item.status) && (
+                        {item.exits && item.exits.length > 0 && (
                           <span className="flex flex-col gap-0.5">
                             <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Exits</span>
-                            <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{item.exits?.join(", ") || "—"}</span>
+                            <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{item.exits.join(", ")}</span>
                           </span>
                         )}
-                        {item.pips !== undefined && item.pips !== null && (
+                        {item.category?.name && (
+                          <span className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Category</span>
+                            <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{item.category.name}</span>
+                          </span>
+                        )}
+                        {!!item.pips && (
                           <span className="flex flex-col gap-0.5">
                             <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Pips</span>
                             <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{item.pips}</span>
@@ -226,15 +229,22 @@ const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowU
       </DialogContent>
 
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-        <DialogContent className="p-5 max-w-[440px]">
-          <div className="text-center">
-            <Trash2 className="mx-auto mb-3.5 size-8 text-gray-500 dark:text-gray-400" />
-            <p className="mb-4 text-gray-700 dark:text-gray-300 text-center">
-              Delete this follow-up? It will be removed from the admin, educator, and
-              student sides, including the Educator Feed and IQ Social.
-            </p>
+        <DialogContent className="p-6 max-w-[420px]">
+          <div className="flex flex-col items-center text-center gap-3">
+            <span className="flex items-center justify-center size-12 rounded-full bg-danger/10">
+              <Trash2 className="size-5 text-danger" />
+            </span>
+            <div>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1.5">
+                Delete this follow-up?
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                It will be removed from the admin, educator, and student sides —
+                including the Educator Feed and IQ Social.
+              </p>
+            </div>
           </div>
-          <div className="flex justify-center items-center space-x-4">
+          <div className="flex justify-center items-center gap-3 mt-6">
             <button className="btn btn-light" onClick={() => setDeleteTarget(null)}>
               Cancel
             </button>
@@ -244,7 +254,7 @@ const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowU
               disabled={isDeleting}
               onClick={handleConfirmDelete}
             >
-              Yes, delete it
+              {isDeleting ? "Deleting..." : "Yes, delete it"}
             </button>
           </div>
         </DialogContent>

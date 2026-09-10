@@ -15,6 +15,12 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -34,7 +40,10 @@ import FollowUpThreadModal from "./FollowUpThreadModal";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import TradeImageSlider from "./TradeImageSlider";
 import { TruncatedText } from "../../../lib/utils";
-import { useLazyGetEducatorTradeIdeasQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
+import {
+  useLazyGetEducatorTradeIdeasQuery,
+  useLazyGetEducatorTradeIdeaThreadQuery,
+} from "../../../store/api/educator/educatorTradeIdeasApiSlice";
 import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 import EducatorTradeCards from "./EducatorTradeCards";
 import { set } from "date-fns";
@@ -71,6 +80,10 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isSocialComposerOpen, setIsSocialComposerOpen] = useState(false);
   const [getEducatorTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetEducatorTradeIdeasQuery();
+  // Only used to resolve a follow-up row's true parent when "Edit" is clicked directly
+  // on it (the table now shows the latest follow-up as its own row, not just the
+  // original) — see the Edit MenuItem below.
+  const [fetchThreadForEdit] = useLazyGetEducatorTradeIdeaThreadQuery();
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
 
   const handleCloseView = () => {
@@ -127,12 +140,29 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
         <MenuItem
-          onClick={() => {
+          onClick={async () => {
             setSelectedRow(raw);
             setIsChainMode(false);
-            // Only reached from the table row (always a root record — onlyRoot=true),
-            // never from the thread modal, so this is always a plain edit.
-            setFollowUpEditSource(null);
+            // The table shows both the original and the current latest follow-up as
+            // their own rows now, so "Edit" here can land on either — resolve the
+            // clicked row's true parent (if it has one) so a follow-up still opens as
+            // "Edit Follow-Up" (reference strip, no share prompt) instead of the plain
+            // full-editable form.
+            if (raw?.previousIdea) {
+              try {
+                const thread = await fetchThreadForEdit(raw._id).unwrap();
+                const items = thread?.data || [];
+                const clicked = items.find((t) => String(t._id) === String(raw._id));
+                const parent = clicked?.previousIdea
+                  ? items.find((t) => String(t._id) === String(clicked.previousIdea))
+                  : null;
+                setFollowUpEditSource(parent || null);
+              } catch (err) {
+                setFollowUpEditSource(null);
+              }
+            } else {
+              setFollowUpEditSource(null);
+            }
             setIsCreateOpen(!isCreateOpen);
           }}
         >
@@ -217,12 +247,33 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <div className="flex flex-col gap-0.5">
-              <a
-                className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
-                href="#"
-              >
-                {info.row.original.name}
-              </a>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <a
+                  className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
+                  href="#"
+                >
+                  {info.row.original.name}
+                </a>
+                {/* This row is the current latest Follow-Up in its thread, not the
+                    original — the table shows both as separate rows (see onlyRoot). */}
+                {info.row.original.previousIdea && (
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex cursor-pointer">
+                          <KeenIcon
+                            icon="arrow-circle-right"
+                            className="text-primary text-sm shrink-0"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        Follow-Up
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             </div>
           </div>
         ),
