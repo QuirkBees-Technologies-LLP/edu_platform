@@ -23,6 +23,7 @@ import {
 } from "@/partials/toolbar";
 import CreateTradeIdeas from "./CreateTradeIdeas";
 import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
+import FollowUpThreadModal from "./FollowUpThreadModal";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import TradeImageSlider from "./TradeImageSlider";
 import {
@@ -53,6 +54,16 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
   // Edit — see admin's AdminTradeAnalysis.jsx for why this stays a boolean rather than
   // storing the row directly (ActionMenu() closes over a frozen columns useMemo).
   const [isChainMode, setIsChainMode] = useState(false);
+  // "Follow Up" action: which root live idea's thread the modal below should display,
+  // and whether the modal is open. Kept separate from selectedRow/isChainMode so opening
+  // a thread doesn't disturb the Edit/Update (chain) flow's own state.
+  const [threadRootId, setThreadRootId] = useState(null);
+  const [isThreadOpen, setIsThreadOpen] = useState(false);
+  // Only set when editing an EXISTING follow-up from the thread modal — the predecessor
+  // record it chains from, shown as the create form's read-only reference strip. Kept
+  // separate from isChainMode/selectedRow (which drive plain-create/chain-create) so
+  // "Edit Follow-Up" can pass its own chainFrom without disturbing that pair.
+  const [followUpEditSource, setFollowUpEditSource] = useState(null);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [tradeIdeas, setTradeIdeas] = useState([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -138,6 +149,9 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
         <MenuItem
           onClick={() => {
             setIsChainMode(false);
+            // Only reached from the table row (always a root record — onlyRoot=true),
+            // never from the thread modal, so this is always a plain edit.
+            setFollowUpEditSource(null);
             setIsCreateOpen(!isCreateOpen);
           }}
         >
@@ -150,16 +164,17 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            // Update = create a brand-new, chained live idea — never mutate this row.
-            setIsChainMode(true);
-            setIsCreateOpen(!isCreateOpen);
+            // Follow Up = open the full update thread for this live idea instead of
+            // jumping straight into a chained create — see FollowUpThreadModal.
+            setThreadRootId(selectedRow?._id);
+            setIsThreadOpen(true);
           }}
         >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="arrow-circle-right" />
             </MenuIcon>
-            <MenuTitle>Update</MenuTitle>
+            <MenuTitle>Follow Up</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem onClick={handleDeleteOpen}>
@@ -446,6 +461,7 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
         educator: selectedEducator || "",
         status: selectedType || "",
         search: searchText || "",
+        onlyRoot: true,
       }).unwrap();
 
       return {
@@ -661,8 +677,11 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
             selectedRow={isChainMode ? {} : selectedRow}
-            chainFrom={isChainMode ? selectedRow : null}
-            setChainFrom={() => setIsChainMode(false)}
+            chainFrom={isChainMode ? selectedRow : followUpEditSource}
+            setChainFrom={() => {
+              setIsChainMode(false);
+              setFollowUpEditSource(null);
+            }}
           />
           {isDeleteOpen && (
             <DeleteAdminTradeIdeas
@@ -672,6 +691,30 @@ const AdminTradeIdeas = ({ title = "Live IQ Ideas" }) => {
               selectedRow={selectedRow}
             />
           )}
+
+          <FollowUpThreadModal
+            isOpen={isThreadOpen}
+            rootId={threadRootId}
+            onClose={() => setIsThreadOpen(false)}
+            onEditItem={(item, predecessor) => {
+              setIsThreadOpen(false);
+              setSelectedRow(item);
+              setIsChainMode(false);
+              // Non-null only for an actual follow-up (predecessor = the record it
+              // chains from) — this is what makes CreateTradeIdeas render "Edit
+              // Follow-Up" (reference strip + status-only editing) instead of the
+              // plain full-editable "Edit Live Trade Idea" form. Null for the root item.
+              setFollowUpEditSource(predecessor);
+              setIsCreateOpen(true);
+            }}
+            onAddFollowUp={(latestItem) => {
+              setIsThreadOpen(false);
+              setSelectedRow(latestItem);
+              setIsChainMode(true);
+              setIsCreateOpen(true);
+            }}
+            onDeleted={reloadTable}
+          />
         </>
       )}
       {activeTab === "UserView" && <AdminTradeCards />}

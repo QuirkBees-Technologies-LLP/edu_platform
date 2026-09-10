@@ -6,11 +6,14 @@ export const adminTradeIdeasApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getAdminTradeIdeas: builder.query({
-      query: ({ page = 1, limit = 10, isview = true , category = ""}) =>
-        `/admin/idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}`,
+      query: ({ page = 1, limit = 10, isview = true , category = "", onlyRoot = false}) =>
+        `/admin/idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}&onlyRoot=${onlyRoot}`,
     }),
     getAdminWithoutTradeIdeas: builder.query({
       query: ({ isview = true }) => `/admin/idea/get?isview=${isview}`,
+    }),
+    getAdminTradeIdeaThread: builder.query({
+      query: (id) => `/admin/idea/thread/${id}`,
     }),
     getUsers: builder.query({
       query: () => "users",
@@ -46,6 +49,7 @@ export const {
   useGetAdminTradeIdeasQuery,
   useGetAdminWithoutTradeIdeasQuery,
   useLazyGetAdminTradeIdeasQuery,
+  useLazyGetAdminTradeIdeaThreadQuery,
   useGetUsersQuery,
   useGetCommentsQuery,
   useCreateTradeIdeasMutation,

@@ -6,7 +6,10 @@ export const educatorLiveTradeIdeasApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getEducatorLiveTradeIdeas: builder.query({
-            query: ({ page = 1, limit = 10, isview = true, category = "", status = "", search = "" }) => `/educator/live-idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}&status=${status}&search=${search}`,
+            query: ({ page = 1, limit = 10, isview = true, category = "", status = "", search = "", onlyRoot = false }) => `/educator/live-idea/get?page=${page}&limit=${limit}&isview=${isview}&category=${category}&status=${status}&search=${search}&onlyRoot=${onlyRoot}`,
+        }),
+        getEducatorLiveTradeIdeaThread: builder.query({
+            query: (id) => `/educator/live-idea/thread/${id}`,
         }),
         createEducatorLiveTradeIdea: builder.mutation({
             query: (data) => ({
@@ -32,4 +35,4 @@ export const educatorLiveTradeIdeasApiSlice = createApi({
     }),
 });
 
-export const { useGetEducatorLiveTradeIdeasQuery, useLazyGetEducatorLiveTradeIdeasQuery, useCreateEducatorLiveTradeIdeaMutation, useUpdateEducatorLiveTradeIdeaMutation, useDeleteEducatorLiveTradeIdeaMutation } = educatorLiveTradeIdeasApiSlice;
+export const { useGetEducatorLiveTradeIdeasQuery, useLazyGetEducatorLiveTradeIdeasQuery, useLazyGetEducatorLiveTradeIdeaThreadQuery, useCreateEducatorLiveTradeIdeaMutation, useUpdateEducatorLiveTradeIdeaMutation, useDeleteEducatorLiveTradeIdeaMutation } = educatorLiveTradeIdeasApiSlice;

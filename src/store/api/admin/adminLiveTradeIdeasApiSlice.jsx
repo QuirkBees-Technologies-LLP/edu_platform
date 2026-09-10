@@ -6,7 +6,10 @@ export const adminLiveTradeIdeasApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getAdminLiveTradeIdeas: builder.query({
-      query: ({ page = 1, limit = 10, isview = true, category = "", search = "", educator = "", status = "" }) => `/admin/live-idea?page=${page}&limit=${limit}&isview=${isview}&category=${category}&search=${search}&educator=${educator}&status=${status}`,
+      query: ({ page = 1, limit = 10, isview = true, category = "", search = "", educator = "", status = "", onlyRoot = false }) => `/admin/live-idea?page=${page}&limit=${limit}&isview=${isview}&category=${category}&search=${search}&educator=${educator}&status=${status}&onlyRoot=${onlyRoot}`,
+    }),
+    getAdminLiveTradeIdeaThread: builder.query({
+      query: (id) => `/admin/live-idea/thread/${id}`,
     }),
     createAdminLiveTradeIdea: builder.mutation({
       query: (data) => ({
@@ -43,4 +46,4 @@ export const adminLiveTradeIdeasApiSlice = createApi({
   }),
 });
 
-export const { useGetAdminLiveTradeIdeasQuery, useLazyGetAdminLiveTradeIdeasQuery, useCreateAdminLiveTradeIdeaMutation, useUpdateAdminLiveTradeIdeaMutation, useDeleteAdminLiveTradeIdeaMutation,useIdeaExportMutation  } = adminLiveTradeIdeasApiSlice;
+export const { useGetAdminLiveTradeIdeasQuery, useLazyGetAdminLiveTradeIdeasQuery, useLazyGetAdminLiveTradeIdeaThreadQuery, useCreateAdminLiveTradeIdeaMutation, useUpdateAdminLiveTradeIdeaMutation, useDeleteAdminLiveTradeIdeaMutation,useIdeaExportMutation  } = adminLiveTradeIdeasApiSlice;
