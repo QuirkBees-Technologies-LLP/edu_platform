@@ -45,7 +45,19 @@ const CreateLiveTradeIdea = forwardRef(
 
     const educatorId = auth?.user?._id ?? null;
     const { data } = useGetCommonCategoryQuery();
+    // Pure chain-create: no existing record yet, a brand-new document is POSTed with
+    // previousLiveIdea pointing at chainFrom. Never true while editing an existing record.
     const isChainMode = !selectedRow?._id && !!chainFrom?._id;
+    // Editing an EXISTING follow-up in place (opened from the thread modal's pencil
+    // icon on a non-root item): both an id to PUT to AND a predecessor to show as the
+    // read-only reference strip. Distinct from plain Edit (selectedRow set, chainFrom
+    // null — used only for the original/root record).
+    const isFollowUpEdit = !!selectedRow?._id && !!chainFrom?._id;
+    // Drives every UI/validation gate that should behave the same whether we're
+    // creating a new follow-up or editing an existing one — only actual submission
+    // (create vs update, and whether previousLiveIdea is sent) still branches on the
+    // two flags separately below.
+    const isFollowUpForm = isChainMode || isFollowUpEdit;
 
     const initialValues = {
       name: "",
@@ -82,12 +94,12 @@ const CreateLiveTradeIdea = forwardRef(
       category: Yup.string().required("Category is required"),
       pips: numberField(),
       timeFrame: Yup.string().required("Time Frame is required"),
-      // Only asked for in chain mode — Live Idea's plain create/edit never had these
-      // fields at all.
+      // Only asked for in a follow-up form (create-chain or edit-follow-up) — Live
+      // Idea's plain create/edit never had these fields at all.
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
         .when("status", {
-          is: (status) => isChainMode && ["loss", "breakEven"].includes(status),
+          is: (status) => isFollowUpForm && ["loss", "breakEven"].includes(status),
           then: (schema) =>
             schema
               .required("Invalidation is required")
@@ -102,7 +114,7 @@ const CreateLiveTradeIdea = forwardRef(
             .positive("Exit must be a positive number")
         )
         .when("status", {
-          is: (status) => isChainMode && ["win", "partialWin"].includes(status),
+          is: (status) => isFollowUpForm && ["win", "partialWin"].includes(status),
           then: (schema) => schema.min(1, "At least one exit is required"),
           otherwise: (schema) => schema.notRequired(),
         }),
@@ -128,22 +140,27 @@ const CreateLiveTradeIdea = forwardRef(
         formData.append("timeFrame", values.timeFrame);
         formData.append("isLiveIdea", true);
         formData.append("description", values.description || "");
-        if (isChainMode && ["loss", "breakEven"].includes(values.status)) {
+        if (isFollowUpForm && ["loss", "breakEven"].includes(values.status)) {
           formData.append("invalidation", values.invalidation ?? "");
         }
-        if (isChainMode && ["win", "partialWin"].includes(values.status)) {
+        if (isFollowUpForm && ["win", "partialWin"].includes(values.status)) {
           const exitsValues = (values.exits || []).filter((e) => e !== "" && e !== null && e !== undefined);
           formData.append("exits", JSON.stringify(exitsValues));
         }
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
-        if (isChainMode) {
-          formData.append("previousLiveIdea", chainFrom._id);
+        // Images were pre-loaded from the reference record (create-chain) or from the
+        // follow-up's own current images (edit-follow-up) — either way, send back which
+        // ones the educator kept so the backend knows what to preserve.
+        if (isFollowUpForm) {
           const keptImages = (values.files || [])
             .filter((f) => !f?.file?.file && f?.dataURL)
             .map((f) => f.dataURL);
           formData.append("existingImages", JSON.stringify(keptImages));
+        }
+        if (isChainMode) {
+          formData.append("previousLiveIdea", chainFrom._id);
         }
 
         try {
@@ -153,7 +170,7 @@ const CreateLiveTradeIdea = forwardRef(
               formData,
             }).unwrap();
 
-            toast.success("Live Trade Idea updated successfully!");
+            toast.success(isFollowUpEdit ? "Follow-up updated successfully!" : "Live Trade Idea updated successfully!");
           } else {
             await createAdminLiveTradeIdea(formData).unwrap();
 
@@ -197,6 +214,11 @@ const CreateLiveTradeIdea = forwardRef(
           streamCallId: selectedRow?.streamCallId,
           isLiveIdea: selectedRow?.isLiveIdea,
           timeFrame: selectedRow?.timeFrame,
+          // Only ever populated on a follow-up (see isFollowUpEdit) — a root live idea
+          // never has these, so they simply stay blank/default in that case.
+          description: selectedRow?.description || "",
+          invalidation: selectedRow?.invalidation ?? "",
+          exits: selectedRow?.exits?.length > 0 ? selectedRow.exits : [""],
         };
         formik.setValues(initData);
       }
@@ -286,21 +308,28 @@ const CreateLiveTradeIdea = forwardRef(
           <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id
-                  ? "Edit Live Trade Idea"
-                  : isChainMode
-                    ? "Update Live Trade Idea"
-                    : "Create Live Trade Idea"}
+                {isFollowUpEdit
+                  ? "Edit Follow-Up"
+                  : selectedRow?._id
+                    ? "Edit Live Trade Idea"
+                    : isChainMode
+                      ? "Update Live Trade Idea"
+                      : "Create Live Trade Idea"}
               </DialogTitle>
               {isChainMode && (
                 <p className="text-xs text-gray-500 mt-1">
                   This publishes a follow-up live idea chained to "{chainFrom?.name}".
                 </p>
               )}
+              {isFollowUpEdit && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Editing this follow-up in the thread for "{chainFrom?.name}".
+                </p>
+              )}
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">
               <div className="grid grid-cols-12 gap-4">
-                {isChainMode && (
+                {isFollowUpForm && (
                   <div className="col-span-12">
                     <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-3 flex flex-wrap gap-x-6 gap-y-2">
                       <span className="flex flex-col gap-0.5">
@@ -328,7 +357,7 @@ const CreateLiveTradeIdea = forwardRef(
                     </div>
                   </div>
                 )}
-                {!isChainMode && (
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -352,7 +381,7 @@ const CreateLiveTradeIdea = forwardRef(
                   </div>
                 </div>
                 )}
-                {!isChainMode && (
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -390,7 +419,7 @@ const CreateLiveTradeIdea = forwardRef(
                 </div>
                 )}
 
-                {!isChainMode && (
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -451,7 +480,7 @@ const CreateLiveTradeIdea = forwardRef(
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        {!isChainMode && <SelectItem value="pending">Pending</SelectItem>}
+                        {!isFollowUpForm && <SelectItem value="pending">Pending</SelectItem>}
                         <SelectItem value="active">Active</SelectItem>
                         <SelectItem value="win">Win</SelectItem>
                         <SelectItem value="partialWin">Partial Win</SelectItem>
@@ -468,7 +497,7 @@ const CreateLiveTradeIdea = forwardRef(
                   </div>
                 </div>
 
-                {isChainMode && ["loss", "breakEven"].includes(formik.values.status) && (
+                {isFollowUpForm && ["loss", "breakEven"].includes(formik.values.status) && (
                   <div className="col-span-12 md:col-span-6">
                     <div className="flex flex-col gap-1">
                       <label className="form-label text-gray-900 gap-1">
@@ -493,7 +522,7 @@ const CreateLiveTradeIdea = forwardRef(
                   </div>
                 )}
 
-                {isChainMode && ["win", "partialWin"].includes(formik.values.status) && (
+                {isFollowUpForm && ["win", "partialWin"].includes(formik.values.status) && (
                   <div className="col-span-12 md:col-span-6">
                     <div className="flex flex-col w-full gap-1">
                       <label className="form-label text-gray-900 gap-1">
@@ -542,7 +571,7 @@ const CreateLiveTradeIdea = forwardRef(
                   </div>
                 )}
 
-                {!isChainMode && (
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -603,7 +632,7 @@ const CreateLiveTradeIdea = forwardRef(
                   </div>
                 </div>
 
-                {(isChainMode
+                {(isFollowUpForm
                   ? ["win", "loss", "partialWin", "breakEven"]
                   : ["win", "loss", "partialWin"]
                 ).includes(formik.values.status) && (
