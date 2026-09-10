@@ -53,7 +53,19 @@ const CreateTradeIdeas = forwardRef(
     const [updateTradeIdea] = useUpdateTradeIdeaMutation();
     const educatorId = auth?.user?._id;
     const { data } = useGetCommonCategoryQuery();
+    // Pure chain-create: no existing record yet, a brand-new document is POSTed with
+    // previousIdea pointing at chainFrom. Never true while editing an existing record.
     const isChainMode = !selectedRow?._id && !!chainFrom?._id;
+    // Editing an EXISTING follow-up in place (opened from the thread modal's pencil
+    // icon on a non-root item): both an id to PUT to AND a predecessor to show as the
+    // read-only reference strip. Distinct from plain Edit (selectedRow set, chainFrom
+    // null — used only for the original/root record).
+    const isFollowUpEdit = !!selectedRow?._id && !!chainFrom?._id;
+    // Drives every UI/validation gate that should behave the same whether we're
+    // creating a new follow-up or editing an existing one — only actual submission
+    // (create vs update, and whether previousIdea is sent) still branches on the two
+    // flags separately below.
+    const isFollowUpForm = isChainMode || isFollowUpEdit;
 
     const initialValues = {
       name: "",
@@ -102,20 +114,21 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      // Entry is only ever shown/editable outside chain mode — in chain mode it's
-      // seeded from the source idea and never touched again, so it's not required there.
-      entry: !isChainMode
+      // Entry is only ever shown/editable outside a follow-up form (create-chain or
+      // edit-follow-up) — there it's seeded from the reference record and never
+      // touched again, so it's not required there.
+      entry: !isFollowUpForm
         ? Yup.number()
           .required("Entry is required")
           .positive("Entry must be a positive number")
         : Yup.number().notRequired(),
-      // Outside chain mode both are always shown (unchanged behavior). In chain mode,
-      // only the field matching the outcome being reported is shown/required —
-      // Invalidation for a Loss/Break Even, Exits for a Win/Partial Win.
+      // Outside a follow-up form both are always shown (unchanged behavior). In a
+      // follow-up form, only the field matching the outcome being reported is
+      // shown/required — Invalidation for a Loss/Break Even, Exits for a Win/Partial Win.
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
         .when("status", {
-          is: (status) => !isChainMode || ["loss", "breakEven"].includes(status),
+          is: (status) => !isFollowUpForm || ["loss", "breakEven"].includes(status),
           then: (schema) =>
             schema
               .required("Invalidation is required")
@@ -130,13 +143,13 @@ const CreateTradeIdeas = forwardRef(
             .positive("Exit must be a positive number")
         )
         .when("status", {
-          is: (status) => !isChainMode || ["win", "partialWin"].includes(status),
+          is: (status) => !isFollowUpForm || ["win", "partialWin"].includes(status),
           then: (schema) => schema.min(1, "At least one exit is required"),
           otherwise: (schema) => schema.notRequired(),
         }),
-      // Required outside chain mode (unchanged); optional in chain mode — the educator
+      // Required outside a follow-up form (unchanged); optional there — the educator
       // may have nothing to add beyond the reference fields/status being reported.
-      description: !isChainMode
+      description: !isFollowUpForm
         ? Yup.string().required("Description is required")
         : Yup.string().notRequired(),
       category: Yup.string().required("Category is required"),
@@ -144,7 +157,7 @@ const CreateTradeIdeas = forwardRef(
         .typeError("Pips must be a number")
         .when("status", {
           is: (status) =>
-            (isChainMode
+            (isFollowUpForm
               ? ["win", "loss", "partialWin", "breakEven"]
               : ["win", "loss", "partialWin"]
             ).includes(status),
@@ -214,7 +227,7 @@ const CreateTradeIdeas = forwardRef(
           if (wasUpdate) {
             await updateTradeIdea(formData).unwrap();
             refetch();
-            toast.success("Idea updated successfully!");
+            toast.success(isFollowUpEdit ? "Follow-up updated successfully!" : "Idea updated successfully!");
           } else {
             await createTradeIdeas(formData).unwrap();
             refetch();
@@ -225,7 +238,9 @@ const CreateTradeIdeas = forwardRef(
           handleCloseCreate();
           // Share-to-social prompt only makes sense when updating an existing idea, not
           // when creating a brand new one (chained or plain).
-          if (wasUpdate && onSubmitSuccess) onSubmitSuccess();
+          // Never for a chain-create or a follow-up edit — sharing only makes sense for
+          // the original idea itself, not a follow-up in its thread.
+          if (wasUpdate && !isFollowUpEdit && onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =
@@ -409,17 +424,28 @@ const CreateTradeIdeas = forwardRef(
         <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
           <DialogHeader>
             <DialogTitle>
-              {selectedRow?._id ? "Edit IQ Idea" : isChainMode ? "Update IQ Idea" : "Create IQ Idea"}
+              {isFollowUpEdit
+                ? "Edit Follow-Up"
+                : selectedRow?._id
+                  ? "Edit IQ Idea"
+                  : isChainMode
+                    ? "Update IQ Idea"
+                    : "Create IQ Idea"}
             </DialogTitle>
             {isChainMode && (
               <p className="text-xs text-gray-500 mt-1">
                 This publishes a follow-up idea chained to "{chainFrom?.name}".
               </p>
             )}
+            {isFollowUpEdit && (
+              <p className="text-xs text-gray-500 mt-1">
+                Editing this follow-up in the thread for "{chainFrom?.name}".
+              </p>
+            )}
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
-              {isChainMode && (
+              {isFollowUpForm && (
                 <div className="col-span-12">
                   <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-3 flex flex-wrap gap-x-6 gap-y-2">
                     <span className="flex flex-col gap-0.5">
@@ -459,7 +485,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
               )}
-              {!isChainMode && (
+              {!isFollowUpForm && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -483,7 +509,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
               )}
-              {!isChainMode && (
+              {!isFollowUpForm && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -524,7 +550,7 @@ const CreateTradeIdeas = forwardRef(
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Description{!isChainMode && <span className="text-danger">*</span>}
+                    Description{!isFollowUpForm && <span className="text-danger">*</span>}
                   </label>
                   <RichTextEditor
                     content={formik.values.description}
@@ -544,7 +570,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
-              {!isChainMode && (
+              {!isFollowUpForm && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -606,7 +632,7 @@ const CreateTradeIdeas = forwardRef(
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      {!isChainMode && <SelectItem value="pending">Pending</SelectItem>}
+                      {!isFollowUpForm && <SelectItem value="pending">Pending</SelectItem>}
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="win">Win</SelectItem>
                       <SelectItem value="partialWin">Partial Win</SelectItem>
@@ -623,7 +649,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
 
-              {!isChainMode && (
+              {!isFollowUpForm && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -647,7 +673,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
               )}
-              {(!isChainMode || ["loss", "breakEven"].includes(formik.values.status)) && (
+              {(!isFollowUpForm || ["loss", "breakEven"].includes(formik.values.status)) && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -673,7 +699,7 @@ const CreateTradeIdeas = forwardRef(
               </div>
               )}
 
-              {(!isChainMode || ["win", "partialWin"].includes(formik.values.status)) && (
+              {(!isFollowUpForm || ["win", "partialWin"].includes(formik.values.status)) && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -727,7 +753,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div>
               )}
-              {!isChainMode && (
+              {!isFollowUpForm && (
               <div className="col-span-12 md:col-span-6">
                 <div className="flex flex-col w-full gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -787,7 +813,7 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div> */}
 
-              {(isChainMode
+              {(isFollowUpForm
                 ? ["win", "loss", "partialWin", "breakEven"]
                 : ["win", "loss", "partialWin"]
               ).includes(formik.values.status) && (
