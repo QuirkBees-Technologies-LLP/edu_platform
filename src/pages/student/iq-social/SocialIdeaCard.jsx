@@ -15,6 +15,7 @@ import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
+import ExpandableDescription from "@/components/ui/ExpandableDescription";
 
 const LabelMap = {
   active: "Active",
@@ -34,7 +35,13 @@ const LabelMap = {
 // useGetClientTradeIdeasQuery, is the exact same hook /ideas itself calls, so the raw
 // document already carries `.educatorDetails` — precisely what ViewClientTradeIdeas
 // expects — and can be handed to it directly.
-const SocialIdeaCard = ({ idea }) => {
+//
+// showFollowUp: true (default) renders a follow-up idea with the quoted-reply banner
+// linking back to the original, as the unfiltered/mixed feed wants. Passed false when
+// this card is shown while the Ideas filter alone is active, where the data is already
+// collapsed to each thread's latest item and should render with the normal
+// (non-follow-up) design instead.
+const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -73,15 +80,20 @@ const SocialIdeaCard = ({ idea }) => {
   };
 
   // Educator-chosen display order between images and TradingView snapshots (Task 14).
-  const orderedImages = getOrderedImageUrls(idea);
+  // newestFirst: the most recently added image leads, so a follow-up's newest chart is
+  // what's seen without paging through older ones.
+  const orderedImages = getOrderedImageUrls(idea, { newestFirst: true });
 
   return (
     <>
-      <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
+      {/* isolate: the type badge (z-20) and image buttons (z-30) inside this card would
+          otherwise compete with the page's sticky toolbar (also z-20) in the root stacking
+          context and paint over the header while scrolling. Isolating confines them here. */}
+      <div className="relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
         {/* Thread indicator: this idea is a chained follow-up to a previous one. Clicking
             it opens the ORIGINAL idea being replied to (quote-reply style), not this
             card's own content — matching a reply linking back to the message it quotes. */}
-        {idea?.previousIdea && (
+        {showFollowUp && idea?.previousIdea && (
           <QuotedReplyPreview
             title={idea.previousIdea.name}
             thumbnail={idea.previousIdea.image?.[0]}
@@ -93,7 +105,7 @@ const SocialIdeaCard = ({ idea }) => {
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%]">
+              <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0">
                 <img
                   src={idea?.educatorDetails?.image || ""}
                   alt={idea?.educatorDetails?.first_name}
@@ -110,7 +122,7 @@ const SocialIdeaCard = ({ idea }) => {
               </span>
               {idea?.status && (
                 <span
-                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[idea.status] === "Active"
                     ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[idea.status] === "Pending"
                       ? "text-purple-600 dark:text-purple-400"
@@ -232,12 +244,7 @@ const SocialIdeaCard = ({ idea }) => {
         <div className="mb-2 space-y-1.5">
           {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
               first, matching the Follow-Up card layout. */}
-          {idea?.description && (
-            <div
-              className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: idea.description }}
-            />
-          )}
+          <ExpandableDescription html={idea?.description} />
           {idea?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"

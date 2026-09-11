@@ -12,6 +12,7 @@ import EducatorImage from "./EducatorImage";
 import { Link } from "react-router-dom";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import { useLazyGetLiveIdeaSingleQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { getLatestFirstImages } from "@/utils/mediaOrder";
 
 const LabelMap = {
   active: "Active",
@@ -117,7 +118,9 @@ const ViewClientLiveIdeas = forwardRef(
 
                 <div className="">
                   <ClientTradeSlider
-                    sliderImages={viewedIdea?.image}
+                    // newestFirst matches the card this modal opened from — otherwise the
+                    // slider would lead with a different image than the card showed.
+                    sliderImages={getLatestFirstImages(viewedIdea)}
                     setIsLightBoxOpen={setIsLightBoxOpen}
                     selectedIdea={viewedIdea}
                   />

@@ -29,6 +29,12 @@ export const clientTradeIdeasApiSlice = createApi({
         activeIdea = "",
         startDate = "",
         endDate = "",
+        // /ideas, /live-ideas, and IQ Social only — collapses each thread down to just
+        // its current latest version, so a Follow-Up replaces the original in this
+        // listing instead of appearing as its own separate entry. Every other consumer
+        // of this same endpoint (IQ Insight, the admin/educator card views) omits this
+        // and keeps seeing every idea unaffected.
+        latestOnly = false,
       }) => {
         const params = new URLSearchParams();
         params.set("page", page);
@@ -39,6 +45,7 @@ export const clientTradeIdeasApiSlice = createApi({
         if (activeIdea) params.set("ideaType", activeIdea);
         if (startDate) params.set("startDate", startDate);
         if (endDate) params.set("endDate", endDate);
+        if (latestOnly) params.set("latestOnly", "true");
 
         if (Array.isArray(categoryName) && categoryName.length > 0) {
           categoryName.forEach((name) => params.append("categoryName", name));
@@ -58,6 +65,9 @@ export const clientTradeIdeasApiSlice = createApi({
         educator = "",
         startDate = "",
         endDate = "",
+        // /live-ideas and IQ Social only — same as getClientTradeIdeas' latestOnly,
+        // collapses each thread down to just its current latest version.
+        latestOnly = false,
       }) => {
         const params = new URLSearchParams();
         params.set("page", page);
@@ -68,6 +78,7 @@ export const clientTradeIdeasApiSlice = createApi({
         if (educator) params.set("educator", educator);
         if (startDate) params.set("startDate", startDate);
         if (endDate) params.set("endDate", endDate);
+        if (latestOnly) params.set("latestOnly", "true");
 
         if (Array.isArray(categoryName) && categoryName.length > 0) {
           categoryName.forEach((name) => params.append("categoryName", name));
@@ -141,7 +152,13 @@ export const clientTradeIdeasApiSlice = createApi({
       },
     }),
     getLiveTradeIdea: builder.query({
-      query: ({ id, page = 1, limit = 9 }) => `/users/live-idea/${id}?page=${page}&limit=${limit}`,
+      // latestOnly: collapses each thread down to just its current latest version —
+      // used by the educator profile page's own Live Ideas tab (always true) and by
+      // Educator Feed's Live Ideas tab specifically (true only while that filter alone
+      // is active; Educator Feed's unfiltered/mixed view omits it, showing every live
+      // idea with its follow-up design intact).
+      query: ({ id, page = 1, limit = 9, latestOnly = false }) =>
+        `/users/live-idea/${id}?page=${page}&limit=${limit}${latestOnly ? "&latestOnly=true" : ""}`,
     }),
     getAllEducators: builder.query({
       query: () => `/users/educator-course/list`,
@@ -149,9 +166,11 @@ export const clientTradeIdeasApiSlice = createApi({
     // Public-facing educator profile feed (Educator Feed's "Ideas" tab) — a single
     // educator's ideas, paginated. Deliberately separate from getClientTradeIdeas,
     // which is scoped to the requesting user's allowed categories/plan.
+    // latestOnly: true only while Educator Feed's Ideas filter alone is active — its
+    // unfiltered/mixed view omits it, showing every idea with its follow-up design intact.
     getEducatorIdeas: builder.query({
-      query: ({ educatorId, page = 1, limit = 10 }) =>
-        `/users/idea/educator/${educatorId}?page=${page}&limit=${limit}`,
+      query: ({ educatorId, page = 1, limit = 10, latestOnly = false }) =>
+        `/users/idea/educator/${educatorId}?page=${page}&limit=${limit}${latestOnly ? "&latestOnly=true" : ""}`,
       keepUnusedDataFor: 60, // individual page results cached 60s
     }),
     // Public-facing educator profile feed (Educator Feed's "Insights" tab) — a single

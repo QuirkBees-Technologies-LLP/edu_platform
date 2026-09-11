@@ -62,7 +62,9 @@ const InsightFeedCard = ({ insight }) => {
 
   return (
     <>
-      <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35]">
+      {/* isolate: keeps this card's badge/button z-indexes from competing with sticky
+          page chrome in the root stacking context. */}
+      <div className="relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35]">
         {/* Thread indicator: this insight is a chained follow-up to a previous one.
             Clicking it opens the ORIGINAL insight being replied to (quote-reply style),
             not this card's own content. */}

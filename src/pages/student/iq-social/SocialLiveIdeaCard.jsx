@@ -14,6 +14,8 @@ import ViewClientLiveIdeas from "../client-live-ideas/ViewClientLiveIdeas";
 import ImageLightBox from "../client-live-ideas/ImageLightBox";
 import { useLazyGetLiveIdeaSingleQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
+import ExpandableDescription from "@/components/ui/ExpandableDescription";
+import { getLatestFirstImages } from "@/utils/mediaOrder";
 
 const LabelMap = {
   active: "Active",
@@ -33,7 +35,13 @@ const LabelMap = {
 // same hook /live-ideas itself calls, so the raw document already carries
 // `.educatorDetails` — precisely what ViewClientLiveIdeas expects — and can be handed to
 // it directly.
-const SocialLiveIdeaCard = ({ liveIdea }) => {
+//
+// showFollowUp: true (default) renders a follow-up live idea with the quoted-reply
+// banner linking back to the original, as the unfiltered/mixed feed wants. Passed false
+// when this card is shown while the Live Ideas filter alone is active, where the data
+// is already collapsed to each thread's latest item and should render with the normal
+// (non-follow-up) design instead.
+const SocialLiveIdeaCard = ({ liveIdea, showFollowUp = true }) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -61,6 +69,10 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
     }
   };
 
+  // Newest image first, so a follow-up's latest chart leads instead of sitting at the end
+  // of the slider behind the originals.
+  const liveImages = getLatestFirstImages(liveIdea);
+
   const handleCopyField = async (fieldName, value) => {
     try {
       await navigator.clipboard.writeText(value ?? "N/A");
@@ -73,12 +85,14 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
 
   return (
     <>
-      <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
+      {/* isolate: keeps this card's badge/button z-indexes from competing with the page's
+          sticky toolbar (also z-20) and painting over the header while scrolling. */}
+      <div className="relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
         {/* Thread indicator: this live idea is a chained follow-up to a previous one.
             Clicking it opens the ORIGINAL live idea being replied to (quote-reply style),
             not this card's own content — matching a reply linking back to the message it
             quotes. */}
-        {liveIdea?.previousLiveIdea && (
+        {showFollowUp && liveIdea?.previousLiveIdea && (
           <QuotedReplyPreview
             title={liveIdea.previousLiveIdea.name}
             thumbnail={liveIdea.previousLiveIdea.image?.[0]}
@@ -90,7 +104,7 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%]">
+              <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0">
                 <img
                   src={liveIdea?.educatorDetails?.image || ""}
                   alt={liveIdea?.educatorDetails?.first_name}
@@ -107,7 +121,7 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
               </span>
               {liveIdea?.status && (
                 <span
-                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[liveIdea.status] === "Active"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[liveIdea.status] === "Active"
                     ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[liveIdea.status] === "Pending"
                       ? "text-purple-600 dark:text-purple-400"
@@ -163,10 +177,10 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-amber-600 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20">
             Live Idea
           </span>
-          {liveIdea?.image && liveIdea.image.length > 0 ? (
+          {liveImages.length > 0 ? (
             <>
               <img
-                src={liveIdea.image[currentIndex] || liveIdea.image[0]}
+                src={liveImages[currentIndex] || liveImages[0]}
                 alt={liveIdea?.name}
                 className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                 onClick={() => setIsLightBoxOpen(true)}
@@ -181,12 +195,12 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
               >
                 <Eye size={14} />
               </button>
-              {liveIdea.image.length > 1 && (
+              {liveImages.length > 1 && (
                 <>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === 0 ? liveIdea.image.length - 1 : i - 1));
+                      setCurrentIndex((i) => (i === 0 ? liveImages.length - 1 : i - 1));
                     }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
@@ -195,14 +209,14 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === liveIdea.image.length - 1 ? 0 : i + 1));
+                      setCurrentIndex((i) => (i === liveImages.length - 1 ? 0 : i + 1));
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                    {liveIdea.image.map((_, idx) => (
+                    {liveImages.map((_, idx) => (
                       <div
                         key={idx}
                         className={`w-1.5 h-1.5 rounded-full transition-colors ${currentIndex === idx ? "bg-white" : "bg-white/40"
@@ -229,12 +243,7 @@ const SocialLiveIdeaCard = ({ liveIdea }) => {
         <div className="mb-2 space-y-1.5 flex-1">
           {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
               first, matching the Follow-Up card layout. */}
-          {(liveIdea?.description || liveIdea?.message) && (
-            <div
-              className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: liveIdea.description || liveIdea.message }}
-            />
-          )}
+          <ExpandableDescription html={liveIdea?.description || liveIdea?.message} />
           {liveIdea?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
