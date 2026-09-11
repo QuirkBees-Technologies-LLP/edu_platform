@@ -17,6 +17,8 @@ import {
   Copy,
   ChartLine,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
@@ -45,15 +47,14 @@ import { useLayout } from "../../../providers";
 import {
   useGetLiveTradeIdeaQuery,
   useLazyGetTradeAnalysisByIdQuery,
-  useLazyGetIdeaByIdQuery,
-  useLazyGetLiveIdeaSingleQuery,
   useGetEducatorIdeasQuery,
   useGetEducatorInsightsQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { useGetEducatorPostsQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
-import { getOrderedImageUrls } from "@/utils/mediaOrder";
+import { getOrderedImageUrls, getLatestFirstImages } from "@/utils/mediaOrder";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
+import ExpandableDescription from "@/components/ui/ExpandableDescription";
 import EducatorFeed from "./EducatorFeed";
 import { useResponsive } from "../../../hooks";
 
@@ -250,6 +251,10 @@ const IqEducators = () => {
     page: 1,
     limit: 10,
     id: id,
+    // This page's own Live Ideas tab always wants the collapsed (latest-only) view —
+    // unlike Educator Feed's Live Ideas tab, which only collapses while that filter
+    // alone is active.
+    latestOnly: true,
   }, {
     refetchOnMountOrArgChange: true,
   });
@@ -272,8 +277,6 @@ const IqEducators = () => {
   const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing") || educatorCategoryName.includes("e-commerce") || educatorCategoryName.includes("ecommerce") || educatorCategoryName.includes("e commerce");
 
   const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
-  const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
-  const [fetchLiveIdeaById] = useLazyGetLiveIdeaSingleQuery();
 
   // One-time page loading gate: the real content below stays mounted the whole time (so
   // every query/effect still fires and finishes normally, nothing restarts once
@@ -358,44 +361,20 @@ const IqEducators = () => {
     }
   };
 
-  // Tracked by id (not a plain boolean) since all three "Follow-up to X" handlers below
-  // are shared across every card in their respective section — only the card whose
-  // follow-up was actually clicked should show a spinner.
+  // Tracked by id (not a plain boolean) since it's shared across every card in the
+  // Insights section below — only the card whose follow-up was actually clicked should
+  // show a spinner.
   const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
 
-  // "Follow-up to X" opens the ORIGINAL idea being replied to, not the follow-up itself
-  // (quote-reply style) — previousIdea on the list item is only shallow-populated
-  // (name/createdAt), so the full original is fetched on demand here.
-  const handleOpenPreviousIdea = async (previousIdeaId) => {
-    if (!previousIdeaId || loadingFollowUpId) return;
-    setLoadingFollowUpId(previousIdeaId);
-    try {
-      const original = await fetchIdeaById(previousIdeaId).unwrap();
-      setSelectedIdea(original?.data || original);
-      setIsViewOpen(true);
-    } catch (err) {
-      console.error("Failed to load original idea", err);
-      toast.error("Could not open the original post. Please try again.");
-    } finally {
-      setLoadingFollowUpId(null);
-    }
-  };
-
-  // Same for Live Ideas.
-  const handleOpenPreviousLiveIdea = async (previousLiveIdeaId) => {
-    if (!previousLiveIdeaId || loadingFollowUpId) return;
-    setLoadingFollowUpId(previousLiveIdeaId);
-    try {
-      const original = await fetchLiveIdeaById(previousLiveIdeaId).unwrap();
-      setSelectedLiveIdea(original?.data || original);
-      setIsLiveIdeaViewOpen(true);
-    } catch (err) {
-      console.error("Failed to load original live idea", err);
-      toast.error("Could not open the original post. Please try again.");
-    } finally {
-      setLoadingFollowUpId(null);
-    }
-  };
+  // Image-slider position per card, keyed by card id. These cards are produced by plain
+  // render functions rather than components, so none of them can hold its own useState —
+  // the positions live here together instead, the same way copiedField already does.
+  const [imageIndexById, setImageIndexById] = useState({});
+  const stepImage = (id, count, delta) =>
+    setImageIndexById((prev) => ({
+      ...prev,
+      [id]: (((prev[id] ?? 0) + delta) % count + count) % count,
+    }));
 
   // Ported from the Educator Feed's IdeaFeedCard — same card content, minus the "View
   // Details" button: clicking the chart image opens the same details modal Social Feed
@@ -404,38 +383,23 @@ const IqEducators = () => {
     const modalIdea = { ...courseIdea, educatorDetails: courseIdea?.educatorId };
     // Educator-chosen display order (Task 14) — this card only shows a single static
     // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
-    const orderedThumbnail = getOrderedImageUrls(courseIdea)[0];
+    const orderedImages = getOrderedImageUrls(courseIdea, { newestFirst: true });
+    const currentIndex = imageIndexById[courseIdea?._id] ?? 0;
     return (
       <div
         key={courseIdea?._id}
-        className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+        className={`relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
       >
-        {/* Quote-reply preview: this idea is a chained follow-up to a previous one — shows
-            a condensed preview of that ORIGINAL idea (thumbnail + name + snippet), not this
-            card's own content. reserveSpace keeps the same vertical space even without a
-            follow-up, otherwise cards without one sit shorter and the grid/slider rows
-            misalign depending on which cards happen to have one. */}
-        <QuotedReplyPreview
-          title={courseIdea?.previousIdea?.name}
-          thumbnail={courseIdea?.previousIdea?.image?.[0]}
-          reserveSpace
-          onClick={(e) => {
-            if (!courseIdea?.previousIdea) return;
-            e.stopPropagation();
-            handleOpenPreviousIdea(courseIdea.previousIdea._id);
-          }}
-          isLoading={!!courseIdea?.previousIdea && loadingFollowUpId === courseIdea.previousIdea._id}
-        />
         {/* Header: name + status */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start gap-2 mb-2">
-              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%] truncate">
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0 truncate">
                 {courseIdea?.name || "—"}
               </span>
               {courseIdea?.status && (
                 <span
-                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[courseIdea.status] === "Active"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[courseIdea.status] === "Active"
                     ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[courseIdea.status] === "Pending"
                       ? "text-purple-600 dark:text-purple-400"
@@ -494,12 +458,49 @@ const IqEducators = () => {
             setIsViewOpen(true);
           }}
         >
-          {orderedThumbnail ? (
-            <img
-              src={orderedThumbnail}
-              alt={courseIdea?.name}
-              className="w-full h-[220px] object-cover object-right"
-            />
+          {orderedImages.length > 0 ? (
+            <>
+              <img
+                src={orderedImages[currentIndex] || orderedImages[0]}
+                alt={courseIdea?.name}
+                className="w-full h-[220px] object-cover object-right transition-opacity duration-300"
+              />
+              {/* Slider only once there's more than one image, matching the IQ Social card.
+                  The arrows stop propagation so paging doesn't also open the details modal
+                  this chart area opens on click. */}
+              {orderedImages.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(courseIdea?._id, orderedImages.length, -1);
+                    }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(courseIdea?._id, orderedImages.length, 1);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                    {orderedImages.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                          currentIndex === idx ? "bg-white" : "bg-white/40"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
               <div className="flex flex-col items-center gap-2 opacity-40">
@@ -514,15 +515,9 @@ const IqEducators = () => {
 
         {/* Price levels */}
         <div className="mb-2 space-y-1.5">
-          {/* Follow-up only: description shown above Entry/Invalidation/Exits, with more
-              visible styling, so the caption reads first. Regular (non-follow-up) ideas
-              keep the description in its original spot below the price levels. */}
-          {courseIdea?.previousIdea && courseIdea?.description && (
-            <div
-              className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: courseIdea.description }}
-            />
-          )}
+          {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
+              first, matching the Follow-Up card layout. */}
+          <ExpandableDescription html={courseIdea?.description} />
           {courseIdea?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
@@ -578,12 +573,6 @@ const IqEducators = () => {
               </div>
             );
           })}
-          {!courseIdea?.previousIdea && courseIdea?.description && (
-            <div
-              className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: courseIdea.description }}
-            />
-          )}
         </div>
       </div>
     );
@@ -592,37 +581,25 @@ const IqEducators = () => {
   // Ported from the Educator Feed's LiveIdeaFeedCard — same treatment as renderIdeaCard.
   const renderLiveIdeaCard = (liveIdeaData, extraClassName = "") => {
     const modalLiveIdea = { ...liveIdeaData, educatorDetails: liveIdeaData?.educatorId };
+    // Newest image first, so this thumbnail shows a follow-up's latest chart rather than
+    // the oldest one in the array.
+    const latestFirstLiveImages = getLatestFirstImages(liveIdeaData);
+    const currentIndex = imageIndexById[liveIdeaData?._id] ?? 0;
     return (
       <div
         key={liveIdeaData?._id}
-        className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+        className={`relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
       >
-        {/* Quote-reply preview: this live idea is a chained follow-up to a previous one —
-            shows a condensed preview of that ORIGINAL live idea (thumbnail + name +
-            snippet), not this card's own content. reserveSpace keeps the same vertical
-            space even without a follow-up, otherwise cards without one sit shorter and
-            the grid/slider rows misalign depending on which cards happen to have one. */}
-        <QuotedReplyPreview
-          title={liveIdeaData?.previousLiveIdea?.name}
-          thumbnail={liveIdeaData?.previousLiveIdea?.image?.[0]}
-          reserveSpace
-          onClick={(e) => {
-            if (!liveIdeaData?.previousLiveIdea) return;
-            e.stopPropagation();
-            handleOpenPreviousLiveIdea(liveIdeaData.previousLiveIdea._id);
-          }}
-          isLoading={!!liveIdeaData?.previousLiveIdea && loadingFollowUpId === liveIdeaData.previousLiveIdea._id}
-        />
         {/* Header: name + status */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start gap-2 mb-2">
-              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%] truncate">
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0 truncate">
                 {liveIdeaData?.name || "—"}
               </span>
               {liveIdeaData?.status && (
                 <span
-                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[liveIdeaData.status] === "Active"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[liveIdeaData.status] === "Active"
                     ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[liveIdeaData.status] === "Pending"
                       ? "text-purple-600 dark:text-purple-400"
@@ -681,12 +658,49 @@ const IqEducators = () => {
             setIsLiveIdeaViewOpen(true);
           }}
         >
-          {liveIdeaData?.image?.length > 0 ? (
-            <img
-              src={liveIdeaData.image[0]}
-              alt={liveIdeaData?.name}
-              className="w-full h-[220px] object-cover object-right"
-            />
+          {latestFirstLiveImages.length > 0 ? (
+            <>
+              <img
+                src={latestFirstLiveImages[currentIndex] || latestFirstLiveImages[0]}
+                alt={liveIdeaData?.name}
+                className="w-full h-[220px] object-cover object-right transition-opacity duration-300"
+              />
+              {/* Slider only once there's more than one image, matching the IQ Social card.
+                  The arrows stop propagation so paging doesn't also open the details modal
+                  this chart area opens on click. */}
+              {latestFirstLiveImages.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(liveIdeaData?._id, latestFirstLiveImages.length, -1);
+                    }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(liveIdeaData?._id, latestFirstLiveImages.length, 1);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                    {latestFirstLiveImages.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                          currentIndex === idx ? "bg-white" : "bg-white/40"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
               <div className="flex flex-col items-center gap-2 opacity-40">
@@ -701,16 +715,9 @@ const IqEducators = () => {
 
         {/* Price levels */}
         <div className="mb-2 space-y-1.5">
-          {/* Follow-up only: description shown above Entry/Invalidation/Exits, with more
-              visible styling, so the caption reads first. Regular (non-follow-up) live
-              ideas keep the description in its original spot (a fallback below the price
-              levels, shown only when there's no entry/invalidation/exits). */}
-          {liveIdeaData?.previousLiveIdea && (liveIdeaData?.description || liveIdeaData?.message) && (
-            <div
-              className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: liveIdeaData.description || liveIdeaData.message }}
-            />
-          )}
+          {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
+              first, matching the Follow-Up card layout. */}
+          <ExpandableDescription html={liveIdeaData?.description || liveIdeaData?.message} />
           {liveIdeaData?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
@@ -766,19 +773,6 @@ const IqEducators = () => {
               </div>
             );
           })}
-          {!liveIdeaData?.previousLiveIdea &&
-            !liveIdeaData?.entry &&
-            !liveIdeaData?.invalidation &&
-            (!liveIdeaData?.exits || liveIdeaData.exits.length === 0) &&
-            (liveIdeaData?.description || liveIdeaData?.message) && (
-              <div className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: liveIdeaData.description || liveIdeaData.message,
-                  }}
-                />
-              </div>
-            )}
         </div>
       </div>
     );
@@ -822,7 +816,7 @@ const IqEducators = () => {
     return (
       <div
         key={insight?._id}
-        className={`relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+        className={`relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
       >
         {/* Quote-reply preview: this insight is a chained follow-up to a previous one —
             shows a condensed preview of that ORIGINAL insight (thumbnail + title +

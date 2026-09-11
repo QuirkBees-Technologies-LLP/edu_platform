@@ -552,7 +552,7 @@ const IqInsight = () => {
               tradeIdeas.map((idea, index) => (
                 <div
                   key={idea._id}
-                  className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' insight-first-card' : ''}`}
+                  className={`relative isolate rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' insight-first-card' : ''}`}
                   ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
                 >
                   {/* Quote-reply preview: this insight is a chained follow-up to a previous

@@ -52,9 +52,16 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, o
       { skip: !educatorId }
     );
 
+  // latestOnly: collapses each idea/live idea thread down to just its current latest
+  // version, with the normal (non-follow-up) card design — used only while that type's
+  // filter is the SOLE active selection. The unfiltered/mixed view (and any other
+  // combination) fetches every item uncollapsed, with its follow-up design intact.
+  const isIdeasOnly = selectedTypes.length === 1 && selectedTypes[0] === "ideas";
+  const isLiveIdeasOnly = selectedTypes.length === 1 && selectedTypes[0] === "liveIdeas";
+
   const { data: ideasResponse, isFetching: isFetchingIdeas } =
     useGetEducatorIdeasQuery(
-      { educatorId, page: ideasPage, limit: PAGE_SIZE },
+      { educatorId, page: ideasPage, limit: PAGE_SIZE, latestOnly: isIdeasOnly },
       { skip: !educatorId }
     );
 
@@ -69,9 +76,30 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, o
   // currentPage/totalPages, so "hasMore" is derived below.
   const { data: liveIdeasResponse, isFetching: isFetchingLiveIdeas } =
     useGetLiveTradeIdeaQuery(
-      { id: educatorId, page: liveIdeasPage, limit: PAGE_SIZE },
+      { id: educatorId, page: liveIdeasPage, limit: PAGE_SIZE, latestOnly: isLiveIdeasOnly },
       { skip: !educatorId }
     );
+
+  // Switching in/out of the collapsed (latestOnly) view changes what shape of data comes
+  // back for that type — without a reset, previously-accumulated pages from the OTHER
+  // shape would stay merged into the array and show alongside the newly-fetched ones.
+  const prevIdeasOnlyRef = useRef(isIdeasOnly);
+  useEffect(() => {
+    if (prevIdeasOnlyRef.current !== isIdeasOnly) {
+      prevIdeasOnlyRef.current = isIdeasOnly;
+      setAllIdeas([]);
+      setIdeasPage(1);
+    }
+  }, [isIdeasOnly]);
+
+  const prevLiveIdeasOnlyRef = useRef(isLiveIdeasOnly);
+  useEffect(() => {
+    if (prevLiveIdeasOnlyRef.current !== isLiveIdeasOnly) {
+      prevLiveIdeasOnlyRef.current = isLiveIdeasOnly;
+      setAllLiveIdeas([]);
+      setLiveIdeasPage(1);
+    }
+  }, [isLiveIdeasOnly]);
 
   // Merge each newly-fetched page into local state: update any item already loaded
   // (e.g. edited since it was first fetched) with its fresh copy, in place, and append
@@ -385,11 +413,19 @@ const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, o
                   />
                 );
               case "ideas":
-                return <IdeaFeedCard key={entry.id} idea={entry.raw} />;
+                return (
+                  <IdeaFeedCard key={entry.id} idea={entry.raw} showFollowUp={!isIdeasOnly} />
+                );
               case "insights":
                 return <InsightFeedCard key={entry.id} insight={entry.raw} />;
               case "liveIdeas":
-                return <LiveIdeaFeedCard key={entry.id} liveIdea={entry.raw} />;
+                return (
+                  <LiveIdeaFeedCard
+                    key={entry.id}
+                    liveIdea={entry.raw}
+                    showFollowUp={!isLiveIdeasOnly}
+                  />
+                );
               default:
                 return null;
             }

@@ -10,10 +10,17 @@ const isTvSnapshotUrl = (url) =>
 
 const DEFAULT_ORDER = ["image", "tradingview", "dyntube"];
 
+// newestFirst flips the order *within* each media group so the most recently added item
+// leads. New uploads are appended to the stored array (imageUrls.concat(uploadedUrls) on
+// the backend), so the stored order is oldest-first and reversing a group surfaces the
+// latest image. The educator-chosen order *between* groups (mediaOrder) is deliberately
+// left alone — only the contents of each group flip.
+const applyDirection = (urls, newestFirst) => (newestFirst ? [...urls].reverse() : urls);
+
 // Returns an ordered list of { type: "image" | "tradingview" | "dyntube", url } slides,
 // in the order the educator chose (falling back to image → tradingview → dyntube for
 // records saved before this feature existed, or with no dyntube field at all for Ideas).
-export function getOrderedMediaSlides(doc) {
+export function getOrderedMediaSlides(doc, { newestFirst = false } = {}) {
   const allImages = Array.isArray(doc?.image)
     ? doc.image
     : Array.isArray(doc?.photos)
@@ -29,8 +36,11 @@ export function getOrderedMediaSlides(doc) {
       : DEFAULT_ORDER;
 
   const groups = {
-    image: uploadedImages.map((url) => ({ type: "image", url })),
-    tradingview: tvImages.map((url) => ({ type: "tradingview", url })),
+    image: applyDirection(uploadedImages, newestFirst).map((url) => ({ type: "image", url })),
+    tradingview: applyDirection(tvImages, newestFirst).map((url) => ({
+      type: "tradingview",
+      url,
+    })),
     dyntube: dyntubeUrl ? [{ type: "dyntube", url: dyntubeUrl }] : [],
   };
 
@@ -49,8 +59,15 @@ export function getOrderedMediaSlides(doc) {
 // Convenience for callers that only render <img> elements (plain sliders, single-thumbnail
 // cards) and have no dyntube slide to worry about — the ordered image + TradingView-snapshot
 // URLs only, dyntube excluded.
-export function getOrderedImageUrls(doc) {
-  return getOrderedMediaSlides(doc)
+export function getOrderedImageUrls(doc, options) {
+  return getOrderedMediaSlides(doc, options)
     .filter((slide) => slide.type !== "dyntube")
     .map((slide) => slide.url);
+}
+
+// Live Ideas keep a plain `image` array with no mediaOrder field and no uploaded-vs-snapshot
+// split, so "newest first" for them is simply the stored array reversed — same reasoning as
+// applyDirection above: the backend appends new uploads to the end.
+export function getLatestFirstImages(doc) {
+  return Array.isArray(doc?.image) ? [...doc.image].reverse() : [];
 }

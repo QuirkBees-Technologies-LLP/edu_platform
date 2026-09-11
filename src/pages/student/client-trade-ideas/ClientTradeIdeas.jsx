@@ -6,13 +6,11 @@ import { useTourStep } from "@/hooks/useTourStep";
 import {
   useGetAllEducatorsQuery,
   useGetClientTradeIdeasQuery,
-  useLazyGetIdeaByIdQuery,
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
-import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -48,6 +46,7 @@ import Loader from "../../../components/ui/loader";
 import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import CustomDateRangePicker from "../../../components/CustomDateRangePicker";
+import ExpandableDescription from "@/components/ui/ExpandableDescription";
 const LabelMap = {
   active: "Active",
   pending: "Pending",
@@ -97,29 +96,10 @@ const ClientTradeIdeas = () => {
       endDate: selectedDateRange.end
         ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
         : "",
+      // Show the original idea, or its current latest Follow-Up in place of it — never
+      // every Follow-Up as its own separate entry.
+      latestOnly: true,
     });
-
-  const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
-  // Thread indicator handler: opens the ORIGINAL idea a "Follow-up to X" link references
-  // (quote-reply style) in the same shared modal state this page already uses for its own
-  // cards' "View Details". Tracked by id (not a plain boolean) since this handler is shared
-  // across every card in the list — only the card whose follow-up was actually clicked
-  // should show a spinner.
-  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
-  const handleOpenPreviousIdea = async (previousIdeaId) => {
-    if (!previousIdeaId || loadingFollowUpId) return;
-    setLoadingFollowUpId(previousIdeaId);
-    try {
-      const original = await fetchIdeaById(previousIdeaId).unwrap();
-      setSelectedIdea(original?.data || original);
-      setIsViewOpen(true);
-    } catch (err) {
-      console.error("Failed to load original idea", err);
-      toast.error("Could not open the original post. Please try again.");
-    } finally {
-      setLoadingFollowUpId(null);
-    }
-  };
 
   const { data: educatorsData } = useGetAllEducatorsQuery();
   const { data: categoryList } = useGetCommonCategoryQuery();
@@ -530,34 +510,22 @@ const ClientTradeIdeas = () => {
           {tradeIdeas?.map((trade, index) => {
             // Educator-chosen display order between images and TradingView snapshots
             // (Task 14).
-            const orderedTradeImages = getOrderedImageUrls(trade);
+            // newestFirst: the most recently added image leads, so a follow-up's newest
+            // chart is what's seen without paging through older ones.
+            const orderedTradeImages = getOrderedImageUrls(trade, { newestFirst: true });
             return (
             <div
               key={trade._id}
-              className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
+              className={`relative isolate rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
-              {/* Quote-reply preview: this idea is a chained follow-up to a previous one —
-                  shows a condensed preview of that ORIGINAL idea, not this card's own
-                  content. */}
-              {trade?.previousIdea && (
-                <QuotedReplyPreview
-                  title={trade.previousIdea.name}
-                  thumbnail={trade.previousIdea.image?.[0]}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenPreviousIdea(trade.previousIdea._id);
-                  }}
-                  isLoading={loadingFollowUpId === trade.previousIdea._id}
-                />
-              )}
               {/* ── Header: Strategy Name (primary) + Signal Type ── */}
               <div className="flex items-start gap-1 mb-2">
                 <div className="flex-1 min-w-0">
                   {/* Strategy name + Status */}
                   {/* Row 1: Educator - Pair + Status */}
                   <div className="flex justify-between items-start gap-2 mb-2">
-                    <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%]">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0">
                       <img
                         src={`${trade?.educatorDetails?.image || ""}`}
                         alt={trade?.educatorDetails?.first_name}
@@ -570,7 +538,7 @@ const ClientTradeIdeas = () => {
                     </span>
                     {trade.status && (
                       <span
-                        className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${LabelMap[trade.status] === 'Active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
+                        className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[trade.status] === 'Active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
                           LabelMap[trade.status] === 'Pending' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' :
                             LabelMap[trade.status] === 'Win' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' :
                               LabelMap[trade.status] === 'Partial Win' ? 'bg-emerald-400/15 text-emerald-500 dark:text-emerald-400' :
@@ -692,12 +660,7 @@ const ClientTradeIdeas = () => {
               <div className="mb-2 space-y-1.5 flex-1">
                 {/* Description always leads, above Entry/Invalidation/Exits — the caption
                     reads first, matching the Follow-Up card layout. */}
-                {trade?.description && (
-                  <div
-                    className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
-                    dangerouslySetInnerHTML={{ __html: trade.description }}
-                  />
-                )}
+                <ExpandableDescription html={trade?.description} />
                 {trade.entry && (
                   <div
                     className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
