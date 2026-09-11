@@ -7,9 +7,14 @@ import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Video from "yet-another-react-lightbox/plugins/video";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Counter from "yet-another-react-lightbox/plugins/counter";
+import { getLatestFirstImages } from "@/utils/mediaOrder";
 
+// Only ever opened on Live Ideas (Insights use iq-insight/ImageLightBox), so the ordering
+// here can match the Live Idea cards unconditionally: same newest-first order they display,
+// so the slide the user clicked is the slide that opens rather than a different one.
 const ImageLightBox = ({ isLightBoxOpen, setIsLightBoxOpen, selectedIdea }) => {
-  const images = selectedIdea?.image?.length > 0 ? selectedIdea.image.map((image) => ({
+  const orderedUrls = getLatestFirstImages(selectedIdea);
+  const images = orderedUrls.length > 0 ? orderedUrls.map((image) => ({
     src: image,
     alt: "image 1",
     width: 3840,

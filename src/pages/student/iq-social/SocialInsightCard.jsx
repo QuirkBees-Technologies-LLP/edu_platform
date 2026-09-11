@@ -91,7 +91,9 @@ const SocialInsightCard = ({ insight }) => {
 
   return (
     <>
-      <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
+      {/* isolate: keeps this card's badge/button z-indexes from competing with the page's
+          sticky toolbar (also z-20) and painting over the header while scrolling. */}
+      <div className="relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] mb-6">
         {/* Thread indicator: this insight is a chained follow-up to a previous one.
             Clicking it opens the ORIGINAL insight being replied to (quote-reply style),
             not this card's own content — matching a reply linking back to the message

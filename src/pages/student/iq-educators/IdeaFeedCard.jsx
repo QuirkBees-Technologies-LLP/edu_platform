@@ -6,12 +6,15 @@ import {
   TrendingDown,
   Copy,
   ChartLine,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { useLazyGetIdeaByIdQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
+import ExpandableDescription from "@/components/ui/ExpandableDescription";
 
 const LabelMap = {
   active: "Active",
@@ -33,10 +36,17 @@ const LabelMap = {
 // `idea.educatorId` in place would violate "keep the original structure", so instead a new
 // object carrying `educatorDetails` is built only at the point of handing data to that modal —
 // the original `idea` prop itself is never touched.
-const IdeaFeedCard = ({ idea }) => {
+//
+// showFollowUp: true (default) renders a follow-up idea with the quoted-reply banner
+// linking back to the original, as Educator Feed's unfiltered/mixed view wants. Passed
+// false when this card is shown inside Educator Feed's own Ideas-only filter, where the
+// data is already collapsed to each thread's latest item and should render with the
+// normal (non-follow-up) design instead.
+const IdeaFeedCard = ({ idea, showFollowUp = true }) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   // Overrides `idea` in the modal when the user opened it via "Follow-up to X" — shows the
   // ORIGINAL idea being replied to (quote-reply style), not this card's own content. Already
   // carries `educatorDetails` (from getIdeaById's own response mapping), so unlike `idea`
@@ -75,15 +85,17 @@ const IdeaFeedCard = ({ idea }) => {
 
   // Educator-chosen display order (Task 14) — this card only shows a single static
   // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
-  const orderedThumbnail = getOrderedImageUrls(idea)[0];
+  const orderedImages = getOrderedImageUrls(idea, { newestFirst: true });
 
   return (
     <>
-      <div className="relative rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35]">
+      {/* isolate: keeps this card's badge/button z-indexes from competing with sticky
+          page chrome in the root stacking context. */}
+      <div className="relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35]">
         {/* Thread indicator: this idea is a chained follow-up to a previous one. Clicking
             it opens the ORIGINAL idea being replied to (quote-reply style), not this
             card's own content — matching a reply linking back to the message it quotes. */}
-        {idea?.previousIdea && (
+        {showFollowUp && idea?.previousIdea && (
           <QuotedReplyPreview
             title={idea.previousIdea.name}
             thumbnail={idea.previousIdea.image?.[0]}
@@ -97,12 +109,12 @@ const IdeaFeedCard = ({ idea }) => {
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start gap-2 mb-2">
-              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%] truncate">
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0 truncate">
                 {idea?.name || "—"}
               </span>
               {idea?.status && (
                 <span
-                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 ${LabelMap[idea.status] === "Active"
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[idea.status] === "Active"
                     ? "text-cyan-600 dark:text-cyan-400"
                     : LabelMap[idea.status] === "Pending"
                       ? "text-purple-600 dark:text-purple-400"
@@ -164,12 +176,49 @@ const IdeaFeedCard = ({ idea }) => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20">
             Idea
           </span>
-          {orderedThumbnail ? (
-            <img
-              src={orderedThumbnail}
-              alt={idea?.name}
-              className="w-full h-[220px] object-cover object-right"
-            />
+          {orderedImages.length > 0 ? (
+            <>
+              <img
+                src={orderedImages[currentIndex] || orderedImages[0]}
+                alt={idea?.name}
+                className="w-full h-[220px] object-cover object-right transition-opacity duration-300"
+              />
+              {/* Slider only once there's more than one image, matching the IQ Social card.
+                  The arrows stop propagation so paging doesn't also open the details modal
+                  this chart area opens on click. */}
+              {orderedImages.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentIndex((i) => (i === 0 ? orderedImages.length - 1 : i - 1));
+                    }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentIndex((i) => (i === orderedImages.length - 1 ? 0 : i + 1));
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                    {orderedImages.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                          currentIndex === idx ? "bg-white" : "bg-white/40"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
               <div className="flex flex-col items-center gap-2 opacity-40">
@@ -186,12 +235,7 @@ const IdeaFeedCard = ({ idea }) => {
         <div className="mb-2 space-y-1.5">
           {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
               first, matching the Follow-Up card layout. */}
-          {idea?.description && (
-            <div
-              className="px-1 py-1 text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-3"
-              dangerouslySetInnerHTML={{ __html: idea.description }}
-            />
-          )}
+          <ExpandableDescription html={idea?.description} />
           {idea?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"

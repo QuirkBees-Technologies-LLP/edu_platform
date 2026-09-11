@@ -96,28 +96,36 @@ const CreateLiveTradeIdea = forwardRef(
       timeFrame: Yup.string().required("Time Frame is required"),
       // Only asked for in a follow-up form (create-chain or edit-follow-up) — Live
       // Idea's plain create/edit never had these fields at all.
-      invalidation: Yup.number()
-        .typeError("Invalidation must be a number")
-        .when("status", {
-          is: (status) => isFollowUpForm && ["loss", "breakEven"].includes(status),
-          then: (schema) =>
-            schema
-              .required("Invalidation is required")
-              .positive("Invalidation must be a positive number"),
-          otherwise: (schema) => schema.notRequired(),
-        }),
-      exits: Yup.array()
-        .of(
-          Yup.number()
-            .typeError("Exit must be a number")
-            .required("Exit is required")
-            .positive("Exit must be a positive number")
-        )
-        .when("status", {
-          is: (status) => isFollowUpForm && ["win", "partialWin"].includes(status),
-          then: (schema) => schema.min(1, "At least one exit is required"),
-          otherwise: (schema) => schema.notRequired(),
-        }),
+      // numberField() rather than a bare Yup.number(): outside a follow-up form this field
+      // is never rendered, so it keeps its "" initial value — and a bare number schema casts
+      // "" to NaN and fails typeError even under notRequired() (which only permits
+      // undefined). That blocked submit on a field the user cannot see. The transform maps
+      // "" to null, which nullable + notRequired accepts.
+      invalidation: numberField().when("status", {
+        is: (status) => isFollowUpForm && ["loss", "breakEven"].includes(status),
+        then: (schema) =>
+          schema
+            .required("Invalidation is required")
+            .positive("Invalidation must be a positive number"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+      // .of() has to live inside the `then` branch: element rules on an array apply
+      // unconditionally, so declaring it at the top level meant the [""] initial value always
+      // failed "Exit must be a number" — again on a field this form doesn't render. Only the
+      // array-level .min() was ever gated by the .when().
+      exits: Yup.array().when("status", {
+        is: (status) => isFollowUpForm && ["win", "partialWin"].includes(status),
+        then: (schema) =>
+          schema
+            .of(
+              Yup.number()
+                .typeError("Exit must be a number")
+                .required("Exit is required")
+                .positive("Exit must be a positive number")
+            )
+            .min(1, "At least one exit is required"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
     });
 
     const formik = useFormik({
@@ -126,6 +134,9 @@ const CreateLiveTradeIdea = forwardRef(
       revalidateOnMount: true,
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
+        // Clear any banner from a previous failed attempt, so the user isn't left looking at
+        // a stale error while this one is still in flight.
+        setStatus(null);
         const formData = new FormData();
         formData.append("name", values.name);
         values.files.forEach((file) =>
@@ -184,6 +195,10 @@ const CreateLiveTradeIdea = forwardRef(
           console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
+          // The modal stays open on failure (handleCloseCreate only runs on success), so the
+          // error also goes to formik.status — which the Alert above already renders but
+          // nothing was ever setting. A toast alone fades before the user can act on it.
+          setStatus(errorMessage);
           toast.error(errorMessage);
         }
       },
