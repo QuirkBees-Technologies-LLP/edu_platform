@@ -1015,7 +1015,13 @@ const IqEducators = () => {
   }
 
   return (
-    <div className="container-fluid pb-10">
+    // Fixed-width, centred container instead of container-fluid: the 8/4 content/feed
+    // grid and the 3-up card rows inside it were sized for typical desktop widths and
+    // stretched apart on wide monitors. container-fixed brings the theme's padding and
+    // centring; the 1440px cap (rather than its 1280px default) keeps the three cards
+    // beside the Educator Feed at a comfortable width. Below that it's full-width, so the
+    // existing responsive breakpoints still apply on smaller screens.
+    <div className="container-fixed max-w-[1440px] pb-10">
       {!pageReady && (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
