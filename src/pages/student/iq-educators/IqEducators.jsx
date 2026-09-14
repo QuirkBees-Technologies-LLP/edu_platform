@@ -1014,8 +1014,50 @@ const IqEducators = () => {
       });
   }
 
+  // One Recording card for both the collapsed row and the "View All" grid, so the two
+  // can't drift apart. Equal card sizes come from three things together: the thumbnail
+  // uses aspect-video (it was h-[28vh], so its height tracked screen HEIGHT and cards grew
+  // on large monitors regardless of their width), the title reserves exactly two lines,
+  // and the card is a full-height flex column so the date row sits at the same baseline.
+  const renderRecordingCard = (course, extraClassName = "") => (
+    <div
+      key={course?._id}
+      className={`cursor-pointer border rounded-xl shadow-sm flex flex-col h-full ${extraClassName}`}
+    >
+      <div className="rounded-t-xl overflow-hidden" onClick={() => setRecording(course)}>
+        <RecordingThumbnail
+          videoUrl={course?.url}
+          seekTime={2}
+          image={course?.thumbnail}
+          defaultImage={response?.data?.educator?.bannerImage}
+          onRecordingClick={() => handleOpen(course?.url)}
+          sizeClassName="aspect-video"
+        />
+      </div>
+      <div className="p-4 flex flex-col flex-1">
+        <h3
+          className="text-base font-normal leading-6 line-clamp-2 min-h-12"
+          title={course?.call_title}
+        >
+          {course?.call_title}
+        </h3>
+        <div className="card-footer justify-between pt-4 p-0 mt-auto">
+          <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+            <Calendar size={16} /> {new Date(course?.start_time).toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="container-fluid pb-10">
+    // Fixed-width, centred container instead of container-fluid: the 8/4 content/feed
+    // grid and the 3-up card rows inside it were sized for typical desktop widths and
+    // stretched apart on wide monitors. container-fixed brings the theme's padding and
+    // centring; the 1440px cap (rather than its 1280px default) keeps the three cards
+    // beside the Educator Feed at a comfortable width. Below that it's full-width, so the
+    // existing responsive breakpoints still apply on smaller screens.
+    <div className="container-fixed max-w-[1440px] pb-10">
       {!pageReady && (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
@@ -1374,69 +1416,20 @@ const IqEducators = () => {
               {response?.data?.recordings?.length > 0 ? (
                 showAll ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full cursor-pointer border rounded-xl shadow-sm"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                    {response?.data?.recordings?.map((course) => renderRecordingCard(course))}
                   </div>
                 ) : (
-                  <div className="flex gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  // Widths subtract the gap: plain 1/2 and 1/3 ignored gap-4, so three
+                  // cards plus two gaps overflowed the row and every card was slightly off
+                  // from the "View All" grid's sizing. With the gap accounted for, each
+                  // card here is exactly as wide as its counterpart in that grid.
+                  <div className="flex gap-4 items-stretch">
+                    {response?.data?.recordings?.map((course) =>
+                      renderRecordingCard(
+                        course,
+                        "w-full sm:w-[calc((100%-1rem)/2)] md:w-[calc((100%-2rem)/3)] flex-shrink-0"
+                      )
+                    )}
                   </div>
                 )
               ) : (
