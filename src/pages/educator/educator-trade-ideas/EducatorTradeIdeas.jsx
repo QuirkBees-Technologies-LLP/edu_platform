@@ -90,6 +90,11 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
     setIsLightBoxOpen(false);
   };
   const handleClickOpen = () => {
+    // Plain create: drop any row/follow-up state left behind by a row click, Edit or
+    // Follow Up so the form can't open in edit/chain mode with stale data.
+    setSelectedRow({});
+    setIsChainMode(false);
+    setFollowUpEditSource(null);
     setIsCreateOpen(true);
   };
 

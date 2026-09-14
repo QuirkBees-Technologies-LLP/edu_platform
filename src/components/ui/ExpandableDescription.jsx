@@ -1,13 +1,13 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 
-const TEXT_CLASS = "text-sm font-medium leading-5 text-slate-800 dark:text-slate-100";
+const TEXT_CLASS = "text-[15px] font-medium leading-[22px] text-slate-800 dark:text-slate-100";
 const TOGGLE_CLASS =
-  "text-[11px] font-semibold leading-5 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors";
+  "text-[12px] font-semibold leading-[22px] text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors";
 // Block-level markup from the rich-text editor is forced inline in the collapsed teaser so
 // the toggle can sit on the same line as the text it follows — a trailing <p> would
 // otherwise push it onto a line of its own.
 const INLINE_CHILDREN = "[&_p]:inline [&_p]:m-0 [&_div]:inline";
-const LINE_HEIGHT = 20; // leading-5, in px
+const LINE_HEIGHT = 22; // leading-[22px], in px
 const MAX_LINES = 2;
 
 // Returns `root`'s HTML truncated to `limit` visible characters, with tags kept balanced
@@ -147,7 +147,7 @@ const ExpandableDescription = ({ html }) => {
     <div className="relative px-1 py-1">
       <div
         ref={containerRef}
-        className={`max-h-10 overflow-hidden ${TEXT_CLASS} ${INLINE_CHILDREN}`}
+        className={`max-h-[44px] overflow-hidden ${TEXT_CLASS} ${INLINE_CHILDREN}`}
       >
         <span dangerouslySetInnerHTML={{ __html: isTruncated ? collapsedHtml : html }} />
         {isTruncated && (

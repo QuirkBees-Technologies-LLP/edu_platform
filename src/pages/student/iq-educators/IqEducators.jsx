@@ -523,12 +523,12 @@ const IqEducators = () => {
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
               onClick={() => handleCopyField(courseIdea._id, "Entry", courseIdea.entry)}
             >
-              <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
-              <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">Entry</span>
+              <span className="text-[11px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
                 {copiedField?.id === courseIdea._id && copiedField?.field === "Entry" ? (
                   <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                 ) : null}
-                <span className="text-[10px]">📍</span> {courseIdea.entry}
+                <span className="text-[9px]">📍</span> {courseIdea.entry}
                 <Copy size={10} className="text-slate-400 dark:text-white/50" />
               </span>
             </div>
@@ -538,14 +538,14 @@ const IqEducators = () => {
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
               onClick={() => handleCopyField(courseIdea._id, "Stop Loss", courseIdea.invalidation)}
             >
-              <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">
                 Invalidation
               </span>
-              <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+              <span className="text-[11px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
                 {copiedField?.id === courseIdea._id && copiedField?.field === "Stop Loss" ? (
                   <span className="text-[9px] text-red-500 mr-1">Copied</span>
                 ) : null}
-                <span className="text-[10px]">❌</span> {courseIdea.invalidation}
+                <span className="text-[9px]">❌</span> {courseIdea.invalidation}
                 <Copy size={10} className="text-slate-400 dark:text-white/50" />
               </span>
             </div>
@@ -560,14 +560,14 @@ const IqEducators = () => {
                 className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
                 onClick={() => handleCopyField(courseIdea._id, fieldName, tpValue)}
               >
-                <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+                <span className="text-[11px] text-slate-600 dark:text-white font-medium">
                   {fieldName}
                 </span>
-                <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   {copiedField?.id === courseIdea._id && copiedField?.field === fieldName ? (
                     <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                   ) : null}
-                  <span className="text-[10px]">🎯</span> {tpValue}
+                  <span className="text-[9px]">🎯</span> {tpValue}
                   <Copy size={10} className="text-slate-400 dark:text-white/50" />
                 </span>
               </div>
@@ -723,12 +723,12 @@ const IqEducators = () => {
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
               onClick={() => handleCopyField(liveIdeaData._id, "Entry", liveIdeaData.entry)}
             >
-              <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
-              <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">Entry</span>
+              <span className="text-[11px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
                 {copiedField?.id === liveIdeaData._id && copiedField?.field === "Entry" ? (
                   <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                 ) : null}
-                <span className="text-[10px]">📍</span> {liveIdeaData.entry}
+                <span className="text-[9px]">📍</span> {liveIdeaData.entry}
                 <Copy size={10} className="text-slate-400 dark:text-white/50" />
               </span>
             </div>
@@ -738,14 +738,14 @@ const IqEducators = () => {
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
               onClick={() => handleCopyField(liveIdeaData._id, "Stop Loss", liveIdeaData.invalidation)}
             >
-              <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">
                 Invalidation
               </span>
-              <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+              <span className="text-[11px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
                 {copiedField?.id === liveIdeaData._id && copiedField?.field === "Stop Loss" ? (
                   <span className="text-[9px] text-red-500 mr-1">Copied</span>
                 ) : null}
-                <span className="text-[10px]">❌</span> {liveIdeaData.invalidation}
+                <span className="text-[9px]">❌</span> {liveIdeaData.invalidation}
                 <Copy size={10} className="text-slate-400 dark:text-white/50" />
               </span>
             </div>
@@ -760,14 +760,14 @@ const IqEducators = () => {
                 className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
                 onClick={() => handleCopyField(liveIdeaData._id, fieldName, tpValue)}
               >
-                <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+                <span className="text-[11px] text-slate-600 dark:text-white font-medium">
                   {fieldName}
                 </span>
-                <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   {copiedField?.id === liveIdeaData._id && copiedField?.field === fieldName ? (
                     <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                   ) : null}
-                  <span className="text-[10px]">🎯</span> {tpValue}
+                  <span className="text-[9px]">🎯</span> {tpValue}
                   <Copy size={10} className="text-slate-400 dark:text-white/50" />
                 </span>
               </div>

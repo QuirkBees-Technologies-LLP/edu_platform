@@ -250,12 +250,12 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
               onClick={() => handleCopyField("Entry", idea.entry)}
             >
-              <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
-              <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">Entry</span>
+              <span className="text-[11px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
                 {copiedField === "Entry" ? (
                   <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                 ) : null}
-                <span className="text-[10px]">📍</span> {idea.entry}
+                <span className="text-[9px]">📍</span> {idea.entry}
                 <Copy size={10} className="text-slate-400 dark:text-white/50" />
               </span>
             </div>
@@ -265,14 +265,14 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
               onClick={() => handleCopyField("Stop Loss", idea.invalidation)}
             >
-              <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">
                 Invalidation
               </span>
-              <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+              <span className="text-[11px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
                 {copiedField === "Stop Loss" ? (
                   <span className="text-[9px] text-red-500 mr-1">Copied</span>
                 ) : null}
-                <span className="text-[10px]">❌</span> {idea.invalidation}
+                <span className="text-[9px]">❌</span> {idea.invalidation}
                 <Copy size={10} className="text-slate-400 dark:text-white/50" />
               </span>
             </div>
@@ -287,14 +287,14 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
                 className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
                 onClick={() => handleCopyField(fieldName, tpValue)}
               >
-                <span className="text-[12px] text-slate-600 dark:text-white font-medium">
+                <span className="text-[11px] text-slate-600 dark:text-white font-medium">
                   {fieldName}
                 </span>
-                <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   {copiedField === fieldName ? (
                     <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                   ) : null}
-                  <span className="text-[10px]">🎯</span> {tpValue}
+                  <span className="text-[9px]">🎯</span> {tpValue}
                   <Copy size={10} className="text-slate-400 dark:text-white/50" />
                 </span>
               </div>
