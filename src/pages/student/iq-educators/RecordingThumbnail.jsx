@@ -7,6 +7,10 @@ const RecordingThumbnail = ({
   image,
   defaultImage,
   onRecordingClick,
+  // Height of the thumbnail box. Defaults to the viewport-relative height the admin and
+  // educator recording pages were built around; card grids pass "aspect-video" instead so
+  // the thumbnail scales with the card's width rather than growing with screen height.
+  sizeClassName = "h-[28vh]",
 }) => {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -96,14 +100,14 @@ const RecordingThumbnail = ({
     <div
       ref={containerRef}
       onClick={handleClick}
-      className="w-full h-[28vh] cursor-pointer bg-light flex justify-center items-center rounded-lg relative overflow-hidden"
+      className={`w-full ${sizeClassName} cursor-pointer bg-light flex justify-center items-center rounded-lg relative overflow-hidden`}
     >
       {displayImage ? (
         <>
           <img
             src={displayImage}
             alt="Thumbnail"
-            className="rounded-lg w-full h-[28vh] object-cover"
+            className="rounded-lg w-full h-full object-cover"
           />
           <div className="rounded-lg absolute inset-0 flex justify-center items-center bg-black/25">
             <svg
