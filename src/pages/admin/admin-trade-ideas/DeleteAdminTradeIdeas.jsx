@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import { toast } from 'sonner';
+import { FollowUpDeleteWarning } from '@/utils/ideaThread';
 
 
 const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
-    const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] = useDeleteTradeIdeaMutation();
+    const [deleteTradeIdea, { isLoading }] = useDeleteTradeIdeaMutation();
 
     const handleDelete = async () => {
         try {
@@ -15,7 +16,7 @@ const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, sel
             toast.success("Trade idea deleted successfully!");
             handleDeleteClose();
         } catch (error) {
-            toast.error(err.data.message);
+            toast.error(error?.data?.message || "Failed to delete trade idea.");
         }
     };
 
@@ -27,13 +28,14 @@ const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, sel
                 <VisuallyHidden>
                     <DialogTitle>Hidden Title</DialogTitle>
                 </VisuallyHidden>
-                <div className='text-center'>
-                    <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
-                    {/* Modal Text */}
-                    <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
-                        Are you sure you want to delete this item?
-                    </p>
+                <div className='flex justify-center mb-3.5'>
+                    <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700"></i>
                 </div>
+                {/* Modal Text */}
+                <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
+                    Are you sure you want to delete this item?
+                </p>
+                <FollowUpDeleteWarning />
                 {/* Action Buttons */}
                 <div className="flex justify-center items-center space-x-4">
                     <button className='btn btn-light' onClick={() => {

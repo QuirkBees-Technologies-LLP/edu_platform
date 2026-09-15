@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DraggableLinkList from "@/components/ui/DraggableLinkList";
+import { isTvSnapshotUrl } from "@/utils/mediaOrder";
 import {
   Select,
   SelectContent,
@@ -790,27 +791,46 @@ const CreateLiveTradeIdea = forwardRef(
                       )}
                     </ImageInput>
 
-                    {/* Show preview only if there are images */}
-                    {formik.values.files
-                      .filter((file) => !!file?.dataURL)
-                      .map((file, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={file.dataURL}
-                            alt="uploaded"
-                            className="rounded-lg border-2 border-success size-24 object-cover"
-                          />
-                          <div className="absolute -right-4 -top-4">
-                            <button
-                              type="button"
-                              className="btn btn-xs btn-icon rounded-full btn-danger"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <i className="ki-outline ki-cross"></i>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                    {/* Show preview only if there are images. Charts generated from a
+                        TradingView link are marked and numbered to match their link input —
+                        one chart per non-empty link, in link order. */}
+                    {(() => {
+                      let tvSeen = 0;
+                      let uploadSeen = 0;
+                      return formik.values.files
+                        .filter((file) => !!file?.dataURL)
+                        .map((file, index) => {
+                          const isTv = isTvSnapshotUrl(file.dataURL);
+                          const number = isTv ? ++tvSeen : ++uploadSeen;
+                          return (
+                            <div key={index} className="relative">
+                              <img
+                                src={file.dataURL}
+                                alt={`${isTv ? "TradingView Image" : "Custom Image"} ${number}`}
+                                className={`rounded-lg border-2 size-24 object-cover ${
+                                  isTv ? "border-primary" : "border-success"
+                                }`}
+                              />
+                              <span
+                                className={`absolute left-0 bottom-0 right-0 rounded-b-lg px-1 py-0.5 text-[9px] font-semibold leading-tight text-white text-center ${
+                                  isTv ? "bg-primary/90" : "bg-success/90"
+                                }`}
+                              >
+                                {isTv ? "TradingView Image" : "Custom Image"} {number}
+                              </span>
+                              <div className="absolute -right-4 -top-4">
+                                <button
+                                  type="button"
+                                  className="btn btn-xs btn-icon rounded-full btn-danger"
+                                  onClick={() => handleRemoveImage(index)}
+                                >
+                                  <i className="ki-outline ki-cross"></i>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        });
+                    })()}
                   </div>
                   {formik.touched.files && formik.errors.files && (
                     <span role="alert" className="text-danger text-xs mt-1">

@@ -14,7 +14,7 @@ import ImageLightBox from "../client-live-ideas/ImageLightBox";
 import { useLazyGetLiveIdeaSingleQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ExpandableDescription from "@/components/ui/ExpandableDescription";
-import { getLatestFirstImages } from "@/utils/mediaOrder";
+import { getImages } from "@/utils/mediaOrder";
 
 const LabelMap = {
   active: "Active",
@@ -84,9 +84,8 @@ const LiveIdeaFeedCard = ({ liveIdea, showFollowUp = true }) => {
 
   const modalLiveIdea = { ...liveIdea, educatorDetails: liveIdea?.educatorId };
 
-  // Newest image first, so this thumbnail shows a follow-up's latest chart rather than
-  // the oldest one in the array.
-  const latestFirstImages = getLatestFirstImages(liveIdea);
+  // Stored order — exactly how the educator/admin arranged the images.
+  const liveImages = getImages(liveIdea);
 
   return (
     <>
@@ -178,22 +177,22 @@ const LiveIdeaFeedCard = ({ liveIdea, showFollowUp = true }) => {
           <span className="absolute left-2 top-2 z-20 px-2 py-0.5 rounded-md text-[10px] font-semibold capitalize tracking-wide text-amber-600 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20">
             Live Idea
           </span>
-          {latestFirstImages.length > 0 ? (
+          {liveImages.length > 0 ? (
             <>
               <img
-                src={latestFirstImages[currentIndex] || latestFirstImages[0]}
+                src={liveImages[currentIndex] || liveImages[0]}
                 alt={liveIdea?.name}
                 className="w-full h-[220px] object-cover object-right transition-opacity duration-300"
               />
               {/* Slider only once there's more than one image, matching the IQ Social card.
                   The arrows stop propagation so paging doesn't also open the details modal
                   this chart area opens on click. */}
-              {latestFirstImages.length > 1 && (
+              {liveImages.length > 1 && (
                 <>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === 0 ? latestFirstImages.length - 1 : i - 1));
+                      setCurrentIndex((i) => (i === 0 ? liveImages.length - 1 : i - 1));
                     }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
@@ -202,14 +201,14 @@ const LiveIdeaFeedCard = ({ liveIdea, showFollowUp = true }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentIndex((i) => (i === latestFirstImages.length - 1 ? 0 : i + 1));
+                      setCurrentIndex((i) => (i === liveImages.length - 1 ? 0 : i + 1));
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                    {latestFirstImages.map((_, idx) => (
+                    {liveImages.map((_, idx) => (
                       <div
                         key={idx}
                         className={`w-1.5 h-1.5 rounded-full transition-colors ${

@@ -85,7 +85,7 @@ const IdeaFeedCard = ({ idea, showFollowUp = true }) => {
 
   // Educator-chosen display order (Task 14) — this card only shows a single static
   // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
-  const orderedImages = getOrderedImageUrls(idea, { newestFirst: true });
+  const orderedImages = getOrderedImageUrls(idea);
 
   return (
     <>

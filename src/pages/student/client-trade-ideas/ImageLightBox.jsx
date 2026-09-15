@@ -10,10 +10,10 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import { getOrderedImageUrls } from "@/utils/mediaOrder";
 
 // Only ever opened on Ideas (Insights use iq-insight/ImageLightBox), so the ordering here
-// can match the Idea cards unconditionally: same newest-first order they display, so the
+// can match the Idea cards unconditionally: the same stored order they display, so the
 // slide the user clicked is the slide that opens rather than a different one.
 const ImageLightBox = ({ isLightBoxOpen, setIsLightBoxOpen, selectedIdea }) => {
-  const orderedUrls = getOrderedImageUrls(selectedIdea, { newestFirst: true });
+  const orderedUrls = getOrderedImageUrls(selectedIdea);
   const images = orderedUrls.length > 0 ? orderedUrls.map((image) => ({
     src: image,
     alt: "image 1",

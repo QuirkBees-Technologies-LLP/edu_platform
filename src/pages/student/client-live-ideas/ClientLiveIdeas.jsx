@@ -46,7 +46,7 @@ import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEduct
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import CustomDateRangePicker from "../../../components/CustomDateRangePicker";
 import ExpandableDescription from "@/components/ui/ExpandableDescription";
-import { getLatestFirstImages } from "@/utils/mediaOrder";
+import { getImages } from "@/utils/mediaOrder";
 import ViewClientLiveIdeas from "./ViewClientLiveIdeas";
 const LabelMap = {
   active: "Active",
@@ -572,9 +572,8 @@ const ClientLiveIdeas = () => {
                 {trade.image && trade.image.length > 0 ? (
                   <>
                     <img
-                      // Newest image first, so a follow-up's latest chart leads. Only the
-                      // lookup flips — the length/index checks around it are order-agnostic.
-                      src={getLatestFirstImages(trade)[trade.currentIndex ?? 0]}
+                      // Stored order — exactly how the educator/admin arranged the images.
+                      src={getImages(trade)[trade.currentIndex ?? 0]}
                       alt={trade.pair || trade.name}
                       className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                       onClick={() => {
