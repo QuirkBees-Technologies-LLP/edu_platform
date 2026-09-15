@@ -118,9 +118,9 @@ const ViewClientTradeIdeas = forwardRef(
 
                 <div className="">
                   <ClientTradeSlider
-                    // newestFirst matches the card this modal opened from — otherwise the
-                    // slider would lead with a different image than the card showed.
-                    sliderImages={getOrderedImageUrls(viewedIdea, { newestFirst: true })}
+                    // Same stored order as the card this modal opened from, so the slider
+                    // leads with the image the card showed.
+                    sliderImages={getOrderedImageUrls(viewedIdea)}
                     setIsLightBoxOpen={setIsLightBoxOpen}
                     selectedIdea={viewedIdea}
                   />

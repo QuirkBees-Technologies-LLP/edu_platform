@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useCallback, useRef } from "react";
+import { forwardRef, useEffect, useCallback } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { DndProvider } from "react-dnd";
@@ -256,18 +256,15 @@ const CreateTradeIdeas = forwardRef(
       }
     }, [educatorId, formik.values]);
 
-    // Which kind of session last filled the form. Closing the dialog keeps its values
-    // (so a half-written new idea survives), but anything loaded by Edit / Follow-Up
-    // must never leak into a plain Create — wipe back to blank when opened for Create.
-    const filledByRef = useRef("create");
+    // Opening the form for a plain Create always starts blank. This used to keep values
+    // from the previous session so a half-written idea survived being closed, but that
+    // also meant Create reopened showing the last idea's symbol, description and levels —
+    // and an abandoned draft silently became the starting point for the next idea. Edit
+    // and Follow-Up are left alone here; their own effects below fill the form.
     useEffect(() => {
       if (!isCreateOpen) return;
-      if (selectedRow?._id || chainFrom?._id) {
-        filledByRef.current = "existing";
-      } else if (filledByRef.current !== "create") {
-        formik.resetForm({ values: { ...initialValues, educatorId: educatorId || "" } });
-        filledByRef.current = "create";
-      }
+      if (selectedRow?._id || chainFrom?._id) return;
+      formik.resetForm({ values: { ...initialValues, educatorId: educatorId || "" } });
     }, [isCreateOpen, selectedRow?._id, chainFrom?._id]);
 
     useEffect(() => {

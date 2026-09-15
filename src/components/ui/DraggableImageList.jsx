@@ -1,13 +1,14 @@
 import React, { useRef, useCallback } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { GripVertical } from "lucide-react";
+import { isTvSnapshotUrl } from "@/utils/mediaOrder";
 
 const DRAG_TYPE = "DRAGGABLE_IMAGE_ITEM";
 
 /**
  * Single draggable image thumbnail.
  */
-const DraggableImageItem = ({ file, index, onMove, onRemove }) => {
+const DraggableImageItem = ({ file, index, isTv, number, onMove, onRemove }) => {
   const ref = useRef(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -54,9 +55,21 @@ const DraggableImageItem = ({ file, index, onMove, onRemove }) => {
       </div>
       <img
         src={file.dataURL}
-        alt="uploaded"
-        className="rounded-lg border-2 border-success size-24 object-cover"
+        alt={`${isTv ? "TradingView Image" : "Custom Image"} ${number}`}
+        className={`rounded-lg border-2 size-24 object-cover ${
+          isTv ? "border-primary" : "border-success"
+        }`}
       />
+      {/* Every thumbnail says where it came from: a chart generated from a TradingView link,
+          or a file uploaded manually. Each kind is numbered within its own sequence, so a
+          TradingView image's number matches the link input that produced it. */}
+      <span
+        className={`absolute left-0 bottom-0 right-0 rounded-b-lg px-1 py-0.5 text-[9px] font-semibold leading-tight text-white text-center ${
+          isTv ? "bg-primary/90" : "bg-success/90"
+        }`}
+      >
+        {isTv ? "TradingView Image" : "Custom Image"} {number}
+      </span>
       <div className="absolute -right-4 -top-4">
         <button
           type="button"
@@ -90,17 +103,30 @@ const DraggableImageList = ({ files, onReorder, onRemove }) => {
 
   if (visibleFiles.length === 0) return null;
 
+  // Each kind counts separately. Charts are generated one per non-empty link, in link
+  // order, so the Nth chart belongs to the Nth link — the same mapping the forms already
+  // use when removing one. Counting uploads apart from charts keeps that pairing intact
+  // however the two are interleaved.
+  let tvSeen = 0;
+  let uploadSeen = 0;
+
   return (
     <>
-      {visibleFiles.map((file, index) => (
-        <DraggableImageItem
-          key={file.dataURL + index}
-          file={file}
-          index={index}
-          onMove={handleMove}
-          onRemove={onRemove}
-        />
-      ))}
+      {visibleFiles.map((file, index) => {
+        const isTv = isTvSnapshotUrl(file.dataURL);
+        const number = isTv ? ++tvSeen : ++uploadSeen;
+        return (
+          <DraggableImageItem
+            key={file.dataURL + index}
+            file={file}
+            index={index}
+            isTv={isTv}
+            number={number}
+            onMove={handleMove}
+            onRemove={onRemove}
+          />
+        );
+      })}
     </>
   );
 };

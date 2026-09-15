@@ -510,9 +510,7 @@ const ClientTradeIdeas = () => {
           {tradeIdeas?.map((trade, index) => {
             // Educator-chosen display order between images and TradingView snapshots
             // (Task 14).
-            // newestFirst: the most recently added image leads, so a follow-up's newest
-            // chart is what's seen without paging through older ones.
-            const orderedTradeImages = getOrderedImageUrls(trade, { newestFirst: true });
+            const orderedTradeImages = getOrderedImageUrls(trade);
             return (
             <div
               key={trade._id}

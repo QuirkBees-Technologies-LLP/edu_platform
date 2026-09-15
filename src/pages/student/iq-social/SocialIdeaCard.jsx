@@ -80,9 +80,7 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
   };
 
   // Educator-chosen display order between images and TradingView snapshots (Task 14).
-  // newestFirst: the most recently added image leads, so a follow-up's newest chart is
-  // what's seen without paging through older ones.
-  const orderedImages = getOrderedImageUrls(idea, { newestFirst: true });
+  const orderedImages = getOrderedImageUrls(idea);
 
   return (
     <>

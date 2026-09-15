@@ -15,7 +15,7 @@ import ImageLightBox from "../client-live-ideas/ImageLightBox";
 import { useLazyGetLiveIdeaSingleQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ExpandableDescription from "@/components/ui/ExpandableDescription";
-import { getLatestFirstImages } from "@/utils/mediaOrder";
+import { getImages } from "@/utils/mediaOrder";
 
 const LabelMap = {
   active: "Active",
@@ -69,9 +69,8 @@ const SocialLiveIdeaCard = ({ liveIdea, showFollowUp = true }) => {
     }
   };
 
-  // Newest image first, so a follow-up's latest chart leads instead of sitting at the end
-  // of the slider behind the originals.
-  const liveImages = getLatestFirstImages(liveIdea);
+  // Stored order — exactly how the educator/admin arranged the images.
+  const liveImages = getImages(liveIdea);
 
   const handleCopyField = async (fieldName, value) => {
     try {

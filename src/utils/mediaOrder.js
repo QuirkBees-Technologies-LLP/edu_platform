@@ -1,26 +1,25 @@
 // Resolves the educator-chosen display order (Task 14) between the three media groups an
 // Insight/Idea can carry: uploaded images, TradingView chart snapshots, and (Insights only)
-// a DynTube video. The snapshot images live mixed into the same `image`/`photos` array as
-// manual uploads — this is the one heuristic (URL substring) already used elsewhere in the
-// codebase to tell them apart, reused here so grouping/ordering stays consistent with it.
-const TV_SNAPSHOT_MARKERS = ["tv-chart-images", "tv-snapshot"];
+// a DynTube video. Snapshot images live mixed into the same `image`/`photos` array as manual
+// uploads, so they're told apart by which Azure container they were written to.
+//
+// Only the container counts — not the file name. Generated snapshots are named
+// "…-tv-snapshot_<id>.png", and an educator who downloads one and re-uploads it keeps that
+// name while the file lands in the UPLOADS container. Matching the name flagged those
+// uploads as TradingView charts, which mislabelled them in the form and mis-sorted them
+// under Display Order. The container is assigned by the backend and can't be spoofed by a
+// file name, and it's the same signal the backend itself uses.
+const TV_SNAPSHOT_CONTAINER = "/tv-chart-images/";
 
-const isTvSnapshotUrl = (url) =>
-  typeof url === "string" && TV_SNAPSHOT_MARKERS.some((marker) => url.includes(marker));
+export const isTvSnapshotUrl = (url) =>
+  typeof url === "string" && url.includes(TV_SNAPSHOT_CONTAINER);
 
 const DEFAULT_ORDER = ["image", "tradingview", "dyntube"];
-
-// newestFirst flips the order *within* each media group so the most recently added item
-// leads. New uploads are appended to the stored array (imageUrls.concat(uploadedUrls) on
-// the backend), so the stored order is oldest-first and reversing a group surfaces the
-// latest image. The educator-chosen order *between* groups (mediaOrder) is deliberately
-// left alone — only the contents of each group flip.
-const applyDirection = (urls, newestFirst) => (newestFirst ? [...urls].reverse() : urls);
 
 // Returns an ordered list of { type: "image" | "tradingview" | "dyntube", url } slides,
 // in the order the educator chose (falling back to image → tradingview → dyntube for
 // records saved before this feature existed, or with no dyntube field at all for Ideas).
-export function getOrderedMediaSlides(doc, { newestFirst = false } = {}) {
+export function getOrderedMediaSlides(doc) {
   const allImages = Array.isArray(doc?.image)
     ? doc.image
     : Array.isArray(doc?.photos)
@@ -36,11 +35,8 @@ export function getOrderedMediaSlides(doc, { newestFirst = false } = {}) {
       : DEFAULT_ORDER;
 
   const groups = {
-    image: applyDirection(uploadedImages, newestFirst).map((url) => ({ type: "image", url })),
-    tradingview: applyDirection(tvImages, newestFirst).map((url) => ({
-      type: "tradingview",
-      url,
-    })),
+    image: uploadedImages.map((url) => ({ type: "image", url })),
+    tradingview: tvImages.map((url) => ({ type: "tradingview", url })),
     dyntube: dyntubeUrl ? [{ type: "dyntube", url: dyntubeUrl }] : [],
   };
 
@@ -59,15 +55,14 @@ export function getOrderedMediaSlides(doc, { newestFirst = false } = {}) {
 // Convenience for callers that only render <img> elements (plain sliders, single-thumbnail
 // cards) and have no dyntube slide to worry about — the ordered image + TradingView-snapshot
 // URLs only, dyntube excluded.
-export function getOrderedImageUrls(doc, options) {
-  return getOrderedMediaSlides(doc, options)
+export function getOrderedImageUrls(doc) {
+  return getOrderedMediaSlides(doc)
     .filter((slide) => slide.type !== "dyntube")
     .map((slide) => slide.url);
 }
 
-// Live Ideas keep a plain `image` array with no mediaOrder field and no uploaded-vs-snapshot
-// split, so "newest first" for them is simply the stored array reversed — same reasoning as
-// applyDirection above: the backend appends new uploads to the end.
-export function getLatestFirstImages(doc) {
-  return Array.isArray(doc?.image) ? [...doc.image].reverse() : [];
+// Live Ideas have no mediaOrder field and no uploaded-vs-snapshot split, so their images
+// are shown exactly as stored — the order the educator/admin arranged them in.
+export function getImages(doc) {
+  return Array.isArray(doc?.image) ? doc.image : [];
 }

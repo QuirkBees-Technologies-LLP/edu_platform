@@ -7,6 +7,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import DraggableImageList from "@/components/ui/DraggableImageList";
 import DraggableLinkList from "@/components/ui/DraggableLinkList";
 import DraggableMediaOrder from "@/components/ui/DraggableMediaOrder";
+import { isTvSnapshotUrl } from "@/utils/mediaOrder";
 import {
   Select,
   SelectContent,
@@ -70,7 +71,7 @@ const CreateTradeAnalysis = forwardRef(
         // Edit: pre-fill everything from the existing insight.
         const existingImages =
           selectedRow?.image
-            ?.filter((img) => !img.includes('tv-chart-images') && !img.includes('tv-snapshot'))
+            ?.filter((img) => !isTvSnapshotUrl(img))
             .map((img) => ({ file: null, dataURL: img })) || [];
         let tvLinks = [""];
         if (selectedRow?.tradingViewLinks?.length > 0) {
@@ -181,7 +182,7 @@ const CreateTradeAnalysis = forwardRef(
             .filter((f) => !f?.file?.file && f?.dataURL)
             .map((f) => f.dataURL);
           // Also preserve TV chart images (auto-generated, not shown in form but must not be deleted)
-          const tvChartImages = (selectedRow?.image || []).filter((img) => img.includes('tv-chart-images') || img.includes('tv-snapshot'));
+          const tvChartImages = (selectedRow?.image || []).filter((img) => isTvSnapshotUrl(img));
           const allKeptImages = [...keptImages, ...tvChartImages];
           formData.append("existingImages", JSON.stringify(allKeptImages));
         }
