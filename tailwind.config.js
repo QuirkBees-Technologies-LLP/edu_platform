@@ -434,7 +434,11 @@ module.exports = {
         md: '768px',
         lg: '1024px',
         xl: '1280px',
-        '2xl': '1536px'
+        '2xl': '1536px',
+        // Ultrawide tiers so layouts can respond past 2xl instead of topping out there:
+        // 3xl covers 2K/1920-class monitors, 4xl covers 2560-class and ultrawide.
+        '3xl': '1920px',
+        '4xl': '2560px'
       },
       keyframes: {
         'accordion-down': {
