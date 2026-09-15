@@ -53,6 +53,10 @@ import {
 import { useGetEducatorPostsQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
 import { getOrderedImageUrls, getImages } from "@/utils/mediaOrder";
+import PageContainer from "@/components/container/PageContainer";
+
+// How much of the screen this page uses. One knob — see PageContainer for the presets.
+const PAGE_WIDTH = "wide";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ExpandableDescription from "@/components/ui/ExpandableDescription";
 import EducatorFeed from "./EducatorFeed";
@@ -1050,13 +1054,13 @@ const IqEducators = () => {
   );
 
   return (
-    // Fixed-width, centred container instead of container-fluid: the 8/4 content/feed
-    // grid and the 3-up card rows inside it were sized for typical desktop widths and
-    // stretched apart on wide monitors. container-fixed brings the theme's padding and
-    // centring; the 1440px cap (rather than its 1280px default) keeps the three cards
-    // beside the Educator Feed at a comfortable width. Below that it's full-width, so the
-    // existing responsive breakpoints still apply on smaller screens.
-    <div className="container-fixed max-w-[1440px] pb-10">
+    // Width is a preset rather than a hardcoded cap, so it can be retuned here without
+    // touching the layout. "wide" = 94% of the viewport up to 1920px: this is a dense page
+    // (8/4 content-plus-feed grid with 3-up card rows), so it should use a large monitor
+    // rather than sit in a narrow column — but it stops growing past 1920px instead of
+    // stretching across an ultrawide. Swap to "default" (88%/1600px) or "narrow"
+    // (80%/1280px) to tighten it; see PageContainer for the full set.
+    <PageContainer width={PAGE_WIDTH} className="pb-10">
       {!pageReady && (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
@@ -1270,7 +1274,7 @@ const IqEducators = () => {
             — are always correct. */}
         <div
           ref={videoRowRef}
-          className={`self-start ${isLive ? "col-span-12" : "col-span-12 lg:col-span-8"}`}
+          className={`self-start ${isLive ? "col-span-12" : "col-span-12 lg:col-span-8 3xl:col-span-9 4xl:col-span-10"}`}
         >
           <ClientViewLiveSession
             bannerImage={response?.data?.educator?.bannerImage}
@@ -1295,7 +1299,7 @@ const IqEducators = () => {
           // updates" placeholder, so both are dropped in favor of the item's own tiny
           // natural size within row 1 alone.
           <div
-            className={`col-span-12 lg:col-span-4 flex flex-col self-start ${feedEmpty ? "" : "row-span-2"}`}
+            className={`col-span-12 lg:col-span-4 3xl:col-span-3 4xl:col-span-2 flex flex-col self-start ${feedEmpty ? "" : "row-span-2"}`}
           >
             <EducatorFeed
               educatorId={id}
@@ -1319,7 +1323,7 @@ const IqEducators = () => {
             growing Feed even more next render — a runaway feedback loop, not a one-time
             measurement error. self-start keeps this at its own true natural content
             height regardless of what the row ends up needing for Feed. */}
-        <div ref={leftColRef} className="col-span-12 lg:col-span-8 flex flex-col gap-8 self-start">
+        <div ref={leftColRef} className="col-span-12 lg:col-span-8 3xl:col-span-9 4xl:col-span-10 flex flex-col gap-8 self-start">
 
           {/* Below lg, Educator Feed renders here — immediately after Player, or after
               Chat if it's present, since Chat renders directly above this in DOM order
@@ -1363,7 +1367,7 @@ const IqEducators = () => {
                   {response?.data?.masterClasses?.map((mc) => (
                     <div
                       key={mc?._id}
-                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                      className={`w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
                       onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
                     >
                       <div className="rounded-t-xl overflow-hidden">
@@ -1414,7 +1418,7 @@ const IqEducators = () => {
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {response?.data?.recordings?.length > 0 ? (
                 showAll ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
                     {response?.data?.recordings?.map((course) => renderRecordingCard(course))}
                   </div>
                 ) : (
@@ -1426,7 +1430,7 @@ const IqEducators = () => {
                     {response?.data?.recordings?.map((course) =>
                       renderRecordingCard(
                         course,
-                        "w-full sm:w-[calc((100%-1rem)/2)] md:w-[calc((100%-2rem)/3)] flex-shrink-0"
+                        "w-full sm:w-[calc((100%-1rem)/2)] md:w-[calc((100%-2rem)/3)] 3xl:w-[calc((100%-3rem)/4)] 4xl:w-[calc((100%-4rem)/5)] flex-shrink-0"
                       )
                     )}
                   </div>
@@ -1456,14 +1460,14 @@ const IqEducators = () => {
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {response?.data?.idea?.length > 0 ? (
                 idea ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4 items-start">
                     {response?.data?.idea?.map((course) => renderIdeaCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
                   <div className="flex gap-4 items-start">
                     {response?.data?.idea?.map((course) =>
-                      renderIdeaCard(course, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
+                      renderIdeaCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
                     )}
                   </div>
                 )
@@ -1494,14 +1498,14 @@ const IqEducators = () => {
               {response?.data?.insight?.length > 0 ? (
                 insight ? (
                   // GRID VIEW (sabhi courses ek sath)
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4 items-start">
                     {response?.data?.insight?.map((course) => renderInsightCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
                   <div className="flex gap-4 items-start">
                     {response?.data?.insight?.map((course) =>
-                      renderInsightCard(course, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
+                      renderInsightCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
                     )}
                   </div>
                 )
@@ -1551,7 +1555,7 @@ const IqEducators = () => {
               {liveIdea?.length > 0 ? (
                 <div className="flex gap-4 items-start">
                   {liveIdea?.map((liveIdeaData) =>
-                    renderLiveIdeaCard(liveIdeaData, "w-full sm:w-1/2 md:w-1/3 flex-shrink-0")
+                    renderLiveIdeaCard(liveIdeaData, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
                   )}
                 </div>
 
@@ -1574,7 +1578,7 @@ const IqEducators = () => {
             Feed twice. Below lg it renders inline right after Player instead (see above),
             so nothing is ever mounted in two places at once. */}
         {isLgUp && isLive && (
-          <div className="col-span-12 lg:col-span-4 flex flex-col self-start">
+          <div className="col-span-12 lg:col-span-4 3xl:col-span-3 4xl:col-span-2 flex flex-col self-start">
             <EducatorFeed
               educatorId={id}
               headerGradient={getHeaderGradient()}
@@ -1654,7 +1658,7 @@ const IqEducators = () => {
         )
       }
       </div>
-    </div>
+    </PageContainer>
   );
 };
 
