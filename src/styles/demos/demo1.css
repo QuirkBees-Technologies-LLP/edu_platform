@@ -99,7 +99,51 @@ body {
   }
 
   .demo1.sidebar-collapse .sidebar:not(:hover) .small-logo {
-    display: flex;
+    display: block;
+    /* The mini logo is authored with w-full, which resolves to whatever space the flex
+       row leaves it. Collapsed that was almost nothing, so the Q rendered zero-width and
+       looked missing. Pin it to a square instead so it stays legible. */
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex: none;
+  }
+
+  /* Collapsed header: the expanded padding (px-6 = 48px) plus a 30px toggle left the Q
+     roughly 2px inside an 80px rail. Tighten the padding and center the pair so the logo
+     and the expand arrow sit side by side with real spacing. */
+  .demo1.sidebar-collapse .sidebar:not(:hover) .sidebar-header {
+    padding-inline: 10px;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  /* The logo is wrapped in a link; without this it is still a shrinkable flex item and
+     collapses again no matter what width the image asks for. Only `flex` is set here on
+     purpose: the header renders one logo link per theme and hides the inactive one with
+     Tailwind's `hidden`/`dark:hidden`, so setting `display` would out-specify that and
+     reveal both logos at once. As a flex child the anchor is blockified and centred by
+     the header's own items-center anyway. */
+  .demo1.sidebar-collapse .sidebar:not(:hover) .sidebar-header>a {
+    flex: none;
+  }
+
+  /* Collapsed and idle shows the logo alone, centred in the rail. The expand arrow is
+     revealed on hover — hovering a collapsed sidebar already widens it back to full
+     width, which drops the :not(:hover) guard on these rules and brings the toggle back
+     with it. */
+  /* Scoped away from the student Back button, which shares the .toggle class but is a
+     separate control pinned outside the rail — hiding it along with the expand arrow took
+     away the only way back. */
+  .demo1.sidebar-collapse .sidebar:not(:hover) .sidebar-header .toggle:not([aria-label="Go back"]) {
+    display: none;
+  }
+
+  /* Padding animates alongside the sidebar's own width transition, so expanding and
+     collapsing stay in step instead of the header snapping first. */
+  .demo1 .sidebar .sidebar-header {
+    transition: padding var(--tw-sidebar-transition-duration) var(--tw-sidebar-transition-timing),
+      gap var(--tw-sidebar-transition-duration) var(--tw-sidebar-transition-timing);
   }
 
   .demo1.sidebar-collapse .sidebar:not(:hover) .menu>.menu-item>.menu-link .menu-title,

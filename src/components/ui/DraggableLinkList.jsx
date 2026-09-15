@@ -10,6 +10,7 @@ const DRAG_TYPE = "DRAGGABLE_LINK_ITEM";
 const DraggableLinkItem = ({
   link,
   index,
+  number,
   totalCount,
   onMove,
   onChange,
@@ -66,6 +67,13 @@ const DraggableLinkItem = ({
           <GripVertical size={16} className="text-gray-400" />
         </div>
       )}
+      {/* Just the number — it matches the number on the chart this link produces. */}
+      <span
+        title={`TradingView Link ${number}`}
+        className="flex-shrink-0 inline-flex size-7 items-center justify-center rounded-md border border-primary/25 bg-primary/10 text-[12px] font-semibold text-primary"
+      >
+        {number}
+      </span>
       <input
         type="text"
         value={link}
@@ -115,18 +123,25 @@ const DraggableLinkList = ({
 
   return (
     <div className="flex flex-col gap-2">
-      {(links || [""]).map((link, index) => (
-        <DraggableLinkItem
-          key={index}
-          link={link}
-          index={index}
-          totalCount={links.length}
-          onMove={handleMove}
-          onChange={onChange}
-          onRemove={onRemove}
-          placeholder={placeholder}
-        />
-      ))}
+      {(links || [""]).map((link, index) => {
+        // Row position, so every row is numbered including an empty one. Charts are
+        // generated one per non-empty link in this same order, so the numbers line up
+        // as long as rows aren't left blank in the middle.
+        const number = index + 1;
+        return (
+          <DraggableLinkItem
+            key={index}
+            link={link}
+            index={index}
+            number={number}
+            totalCount={links.length}
+            onMove={handleMove}
+            onChange={onChange}
+            onRemove={onRemove}
+            placeholder={placeholder}
+          />
+        );
+      })}
       <button
         type="button"
         className="btn btn-sm btn-light w-fit"

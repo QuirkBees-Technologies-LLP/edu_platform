@@ -52,7 +52,7 @@ import {
 } from "../../../store/api/client/clientTradeIdeasApiSlice";
 import { useGetEducatorPostsQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
-import { getOrderedImageUrls, getLatestFirstImages } from "@/utils/mediaOrder";
+import { getOrderedImageUrls, getImages } from "@/utils/mediaOrder";
 import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
 import ExpandableDescription from "@/components/ui/ExpandableDescription";
 import EducatorFeed from "./EducatorFeed";
@@ -383,7 +383,7 @@ const IqEducators = () => {
     const modalIdea = { ...courseIdea, educatorDetails: courseIdea?.educatorId };
     // Educator-chosen display order (Task 14) — this card only shows a single static
     // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
-    const orderedImages = getOrderedImageUrls(courseIdea, { newestFirst: true });
+    const orderedImages = getOrderedImageUrls(courseIdea);
     const currentIndex = imageIndexById[courseIdea?._id] ?? 0;
     return (
       <div
@@ -581,9 +581,8 @@ const IqEducators = () => {
   // Ported from the Educator Feed's LiveIdeaFeedCard — same treatment as renderIdeaCard.
   const renderLiveIdeaCard = (liveIdeaData, extraClassName = "") => {
     const modalLiveIdea = { ...liveIdeaData, educatorDetails: liveIdeaData?.educatorId };
-    // Newest image first, so this thumbnail shows a follow-up's latest chart rather than
-    // the oldest one in the array.
-    const latestFirstLiveImages = getLatestFirstImages(liveIdeaData);
+    // Stored order — exactly how the educator/admin arranged the images.
+    const liveImages = getImages(liveIdeaData);
     const currentIndex = imageIndexById[liveIdeaData?._id] ?? 0;
     return (
       <div
@@ -658,22 +657,22 @@ const IqEducators = () => {
             setIsLiveIdeaViewOpen(true);
           }}
         >
-          {latestFirstLiveImages.length > 0 ? (
+          {liveImages.length > 0 ? (
             <>
               <img
-                src={latestFirstLiveImages[currentIndex] || latestFirstLiveImages[0]}
+                src={liveImages[currentIndex] || liveImages[0]}
                 alt={liveIdeaData?.name}
                 className="w-full h-[220px] object-cover object-right transition-opacity duration-300"
               />
               {/* Slider only once there's more than one image, matching the IQ Social card.
                   The arrows stop propagation so paging doesn't also open the details modal
                   this chart area opens on click. */}
-              {latestFirstLiveImages.length > 1 && (
+              {liveImages.length > 1 && (
                 <>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      stepImage(liveIdeaData?._id, latestFirstLiveImages.length, -1);
+                      stepImage(liveIdeaData?._id, liveImages.length, -1);
                     }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
@@ -682,14 +681,14 @@ const IqEducators = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      stepImage(liveIdeaData?._id, latestFirstLiveImages.length, 1);
+                      stepImage(liveIdeaData?._id, liveImages.length, 1);
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                    {latestFirstLiveImages.map((_, idx) => (
+                    {liveImages.map((_, idx) => (
                       <div
                         key={idx}
                         className={`w-1.5 h-1.5 rounded-full transition-colors ${
