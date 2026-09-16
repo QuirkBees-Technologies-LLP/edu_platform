@@ -137,11 +137,12 @@ export const ALL_FILTER_TIMEFRAME_OPTIONS = [
 
 // ── React / Defy Timeframe Restrictions ─────────────────────────────
 // When ONLY React and/or Defy are selected (no other strategies),
-// hide these timeframes completely from the dropdown.
-export const REACT_DEFY_HIDDEN_TIMEFRAMES = ["1H", "2H", "3H"];
+// hide these timeframes completely from the dropdown. H1 was previously hidden
+// here too — now surfaced, since React/Defy do fire real H1 signals.
+export const REACT_DEFY_HIDDEN_TIMEFRAMES = ["2H", "3H"];
 
 // Same restriction in canonical (M/H) format used by strategy configs and Alert Preferences.
-export const REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL = ["H1", "H2", "H3"];
+export const REACT_DEFY_HIDDEN_TIMEFRAMES_CANONICAL = ["H2", "H3"];
 
 // Timeframes that should be visible but auto-unchecked (excluded)
 // whenever the React/Defy-only mode activates.

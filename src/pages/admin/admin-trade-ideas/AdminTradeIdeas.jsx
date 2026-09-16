@@ -15,6 +15,12 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Toolbar,
   ToolbarActions,
   ToolbarDescription,
@@ -23,9 +29,13 @@ import {
 } from "@/partials/toolbar";
 import CreateTradeIdeas from "./CreateTradeIdeas";
 import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
+import FollowUpThreadModal from "./FollowUpThreadModal";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import TradeImageSlider from "./TradeImageSlider";
-import { useLazyGetAdminTradeIdeasQuery } from "../../../store/api/admin/adminTradeIdeasApiSlice";
+import {
+  useLazyGetAdminTradeIdeasQuery,
+  useLazyGetAdminTradeIdeaThreadQuery,
+} from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import { TruncatedText } from "../../../lib/utils";
 import ViewAdminTradeIdeas from "./ViewAdminTradeIdeas";
 import AdminTradeCards from "./AdminTradeCards";
@@ -44,6 +54,22 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
+  // Whether the create dialog should open in "Update" (chain) mode rather than plain
+  // Edit — see AdminTradeAnalysis.jsx's identical flag for why this stays a boolean
+  // rather than storing the row directly (ActionMenu() closes over a frozen columns
+  // useMemo). The actual row to chain from is derived where CreateTradeIdeas is
+  // rendered below, where selectedRow is always current.
+  const [isChainMode, setIsChainMode] = useState(false);
+  // "Follow Up" action: which root idea's thread the modal below should display, and
+  // whether the modal is open. Kept separate from selectedRow/isChainMode so opening a
+  // thread doesn't disturb the Edit/Update (chain) flow's own state.
+  const [threadRootId, setThreadRootId] = useState(null);
+  const [isThreadOpen, setIsThreadOpen] = useState(false);
+  // Only set when editing an EXISTING follow-up from the thread modal — the predecessor
+  // record it chains from, shown as the create form's read-only reference strip. Kept
+  // separate from isChainMode/selectedRow (which drive plain-create/chain-create) so
+  // "Edit Follow-Up" can pass its own chainFrom without disturbing that pair.
+  const [followUpEditSource, setFollowUpEditSource] = useState(null);
   const [isSocialPromptOpen, setIsSocialPromptOpen] = useState(false);
   const [isSocialComposerOpen, setIsSocialComposerOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
@@ -53,8 +79,17 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
   const [category, setCategory] = useState(null);
   const [fetchTradeIdeas, { data, isLoading, refetch }] =
     useLazyGetAdminTradeIdeasQuery();
+  // Only used to resolve a follow-up row's true parent when "Edit" is clicked directly
+  // on it (the table now shows the latest follow-up as its own row, not just the
+  // original) — see the Edit MenuItem below.
+  const [fetchThreadForEdit] = useLazyGetAdminTradeIdeaThreadQuery();
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
   const handleClickOpen = () => {
+    // Plain create: drop any row/follow-up state left behind by a row click, Edit or
+    // Follow Up so the form can't open in edit/chain mode with stale data.
+    setSelectedRow({});
+    setIsChainMode(false);
+    setFollowUpEditSource(null);
     setIsCreateOpen(true);
   };
 
@@ -104,15 +139,60 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
     loss: "badge-danger",
   };
 
-  const ActionMenu = () => {
+  // Takes the row directly as an argument rather than reading `selectedRow` state —
+  // this whole function is invoked from inside the `columns` useMemo below (deps
+  // [isRTL]), which only re-runs when the language direction changes. If the handlers
+  // here read `selectedRow` via closure instead, they'd stay frozen to whatever it was
+  // on the render that useMemo last actually ran, never seeing later clicks at all.
+  const ActionMenu = (raw) => {
     return (
       <MenuSub className="menu-default" rootClassName="w-full max-w-[200px]">
-        <MenuItem onClick={() => setIsCreateOpen(!isCreateOpen)}>
+        <MenuItem
+          onClick={async () => {
+            setIsChainMode(false);
+            // The table shows both the original and the current latest follow-up as
+            // their own rows now, so "Edit" here can land on either — resolve the
+            // clicked row's true parent (if it has one) so a follow-up still opens as
+            // "Edit Follow-Up" (reference strip, no share prompt) instead of the plain
+            // full-editable form.
+            if (raw?.previousIdea) {
+              try {
+                const thread = await fetchThreadForEdit(raw._id).unwrap();
+                const items = thread?.data || [];
+                const clicked = items.find((t) => String(t._id) === String(raw._id));
+                const parent = clicked?.previousIdea
+                  ? items.find((t) => String(t._id) === String(clicked.previousIdea))
+                  : null;
+                setFollowUpEditSource(parent || null);
+              } catch (err) {
+                setFollowUpEditSource(null);
+              }
+            } else {
+              setFollowUpEditSource(null);
+            }
+            setIsCreateOpen(!isCreateOpen);
+          }}
+        >
           <MenuLink>
             <MenuIcon>
               <KeenIcon icon="notepad-edit" />
             </MenuIcon>
-            <MenuTitle>Update</MenuTitle>
+            <MenuTitle>Edit</MenuTitle>
+          </MenuLink>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            // Follow Up = open the full update thread for this idea instead of jumping
+            // straight into a chained create — see FollowUpThreadModal.
+            setThreadRootId(raw?._id);
+            setIsThreadOpen(true);
+          }}
+        >
+          <MenuLink>
+            <MenuIcon>
+              <KeenIcon icon="arrow-circle-right" />
+            </MenuIcon>
+            <MenuTitle>Follow Up</MenuTitle>
           </MenuLink>
         </MenuItem>
         <MenuItem onClick={handleDeleteOpen}>
@@ -169,12 +249,33 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <div className="flex flex-col gap-0.5">
-              <a
-                className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
-                href="#"
-              >
-                {info.row.original.name}
-              </a>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <a
+                  className="leading-none font-medium text-sm text-gray-900 hover:text-primary"
+                  href="#"
+                >
+                  {info.row.original.name}
+                </a>
+                {/* This row is the current latest Follow-Up in its thread, not the
+                    original — the table shows both as separate rows (see onlyRoot). */}
+                {info.row.original.previousIdea && (
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex cursor-pointer">
+                          <KeenIcon
+                            icon="arrow-circle-right"
+                            className="text-primary text-sm shrink-0"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        Follow-Up
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             </div>
           </div>
         ),
@@ -326,7 +427,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {ActionMenu()}
+              {ActionMenu(row.original)}
             </MenuItem>
           </Menu>
         ),
@@ -401,6 +502,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         page: newPage,
         limit: newLimit,
         category: category?._id || "",
+        onlyRoot: true,
       }).unwrap();
 
       return {
@@ -550,7 +652,12 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
             refetch={reloadTable}
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
-            selectedRow={selectedRow}
+            selectedRow={isChainMode ? {} : selectedRow}
+            chainFrom={isChainMode ? selectedRow : followUpEditSource}
+            setChainFrom={() => {
+              setIsChainMode(false);
+              setFollowUpEditSource(null);
+            }}
             onSubmitSuccess={() => setIsSocialPromptOpen(true)}
           />
           {isDeleteOpen && (
@@ -561,6 +668,30 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
               selectedRow={selectedRow}
             />
           )}
+
+          <FollowUpThreadModal
+            isOpen={isThreadOpen}
+            rootId={threadRootId}
+            onClose={() => setIsThreadOpen(false)}
+            onEditItem={(item, predecessor) => {
+              setIsThreadOpen(false);
+              setSelectedRow(item);
+              setIsChainMode(false);
+              // Non-null only for an actual follow-up (predecessor = the record it
+              // chains from) — this is what makes CreateTradeIdeas render "Edit
+              // Follow-Up" (reference strip + status-only editing) instead of the
+              // plain full-editable "Edit IQ Idea" form. Null for the root item.
+              setFollowUpEditSource(predecessor);
+              setIsCreateOpen(true);
+            }}
+            onAddFollowUp={(latestItem) => {
+              setIsThreadOpen(false);
+              setSelectedRow(latestItem);
+              setIsChainMode(true);
+              setIsCreateOpen(true);
+            }}
+            onDeleted={reloadTable}
+          />
 
           <SocialPostPrompt
             isOpen={isSocialPromptOpen}

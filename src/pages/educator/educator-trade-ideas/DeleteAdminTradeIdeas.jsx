@@ -1,9 +1,9 @@
 import React, { forwardRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useDeleteTradeIdeaMutation } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import { toast } from "sonner";
 import { useDeleteEducatorTradeIdeaMutation } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
+import { FollowUpDeleteWarning } from "@/utils/ideaThread";
 
 // Delete eductor trade idea
 
@@ -12,7 +12,7 @@ const DeleteAdminTradeIdeas = forwardRef(
     { isDeleteOpen, handleDeleteClose, selectedRow, setSelectedRow, refetch },
     ref
   ) => {
-    const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] =
+    const [deleteTradeIdea, { isLoading }] =
       useDeleteEducatorTradeIdeaMutation();
 
     const handleDelete = async () => {
@@ -22,8 +22,8 @@ const DeleteAdminTradeIdeas = forwardRef(
         setSelectedRow(null);
         toast.success("Ideas deleted successfully!");
         handleDeleteClose();
-      } catch (error) {
-        toast.error(err.data.message);
+      } catch (err) {
+        toast.error(err?.data?.message || "Failed to delete idea.");
       }
     };
 
@@ -38,11 +38,14 @@ const DeleteAdminTradeIdeas = forwardRef(
           <VisuallyHidden>
             <DialogTitle>Hidden Title</DialogTitle>
           </VisuallyHidden>
-          <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+          <div className="flex justify-center mb-3.5">
+            <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700"></i>
+          </div>
           {/* Modal Text */}
           <p className="mb-4 text-gray-700 dark:text-gray-700 text-center">
             Are you sure you want to delete this item?
           </p>
+          <FollowUpDeleteWarning />
           {/* Action Buttons */}
           <div className="flex justify-center items-center space-x-4">
             <button

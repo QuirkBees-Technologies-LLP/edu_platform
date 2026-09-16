@@ -51,12 +51,14 @@ const IqCrypto = () => {
       if (page === 1) {
         setTradeIdeas(data.data);
       } else {
-        // Append new unique items only
+        // Merge in this page: update any item already loaded (e.g. edited since it was
+        // first fetched) with its fresh copy, in place, and append genuinely new ones —
+        // a plain "skip if already present" filter was silently keeping stale data for
+        // anything beyond page 1 forever.
         setTradeIdeas((prevIdeas) => {
-          const newIdeas = data.data.filter(
-            (idea) => !prevIdeas.some((prev) => prev._id === idea._id)
-          );
-          return [...prevIdeas, ...newIdeas];
+          const merged = new Map(prevIdeas.map((idea) => [idea._id, idea]));
+          data.data.forEach((idea) => merged.set(idea._id, idea));
+          return Array.from(merged.values());
         });
       }
     }

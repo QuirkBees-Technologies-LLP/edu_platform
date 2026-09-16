@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/auth";
 import { useTourStep } from "@/hooks/useTourStep";
@@ -9,6 +10,7 @@ import {
 import { format } from "date-fns";
 import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
 import ImageLightBox from "./ImageLightBox";
+import { getOrderedImageUrls } from "@/utils/mediaOrder";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -44,6 +46,7 @@ import Loader from "../../../components/ui/loader";
 import { useGetCommonCategoryQuery } from "../../../store/api/client/clientEductorApiSlice";
 import SearchFilterInput from "../../../components/SearchFilterInput";
 import CustomDateRangePicker from "../../../components/CustomDateRangePicker";
+import ExpandableDescription from "@/components/ui/ExpandableDescription";
 const LabelMap = {
   active: "Active",
   pending: "Pending",
@@ -93,6 +96,9 @@ const ClientTradeIdeas = () => {
       endDate: selectedDateRange.end
         ? format(selectedDateRange.end, "yyyy-MM-dd 23:59:59")
         : "",
+      // Show the original idea, or its current latest Follow-Up in place of it — never
+      // every Follow-Up as its own separate entry.
+      latestOnly: true,
     });
 
   const { data: educatorsData } = useGetAllEducatorsQuery();
@@ -113,12 +119,15 @@ const ClientTradeIdeas = () => {
         setTradeIdeas(data.data);
         setTotalSummary(data.totalSummary); // replace data if first page
       } else {
-        // Append new unique items only
+        // Merge in this page: update any item already loaded (e.g. edited since it was
+        // first fetched) with its fresh copy, in place, and append genuinely new ones —
+        // a plain "skip if already present" filter was silently keeping stale data for
+        // anything beyond page 1 forever, since a refetch of a later page would just get
+        // discarded instead of updating the matching item already in local state.
         setTradeIdeas((prevIdeas) => {
-          const newIdeas = data.data.filter(
-            (idea) => !prevIdeas.some((prev) => prev._id === idea._id),
-          );
-          return [...prevIdeas, ...newIdeas];
+          const merged = new Map(prevIdeas.map((idea) => [idea._id, idea]));
+          data.data.forEach((idea) => merged.set(idea._id, idea));
+          return Array.from(merged.values());
         });
       }
     }
@@ -498,10 +507,14 @@ const ClientTradeIdeas = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tradeIdeas?.map((trade, index) => (
+          {tradeIdeas?.map((trade, index) => {
+            // Educator-chosen display order between images and TradingView snapshots
+            // (Task 14).
+            const orderedTradeImages = getOrderedImageUrls(trade);
+            return (
             <div
               key={trade._id}
-              className={`relative rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
+              className={`relative isolate rounded-2xl p-[1.125rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col h-full border border-slate-200 dark:border-[#1F1F35] ${index === 0 ? ' ti-first-card' : ''}`}
               ref={index === tradeIdeas.length - 1 ? lastTradeIdeaRef : null}
             >
               {/* ── Header: Strategy Name (primary) + Signal Type ── */}
@@ -510,7 +523,7 @@ const ClientTradeIdeas = () => {
                   {/* Strategy name + Status */}
                   {/* Row 1: Educator - Pair + Status */}
                   <div className="flex justify-between items-start gap-2 mb-2">
-                    <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight max-w-[75%]">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0">
                       <img
                         src={`${trade?.educatorDetails?.image || ""}`}
                         alt={trade?.educatorDetails?.first_name}
@@ -523,7 +536,7 @@ const ClientTradeIdeas = () => {
                     </span>
                     {trade.status && (
                       <span
-                        className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 ${LabelMap[trade.status] === 'Active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
+                        className={`px-3 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[trade.status] === 'Active' ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
                           LabelMap[trade.status] === 'Pending' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' :
                             LabelMap[trade.status] === 'Win' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' :
                               LabelMap[trade.status] === 'Partial Win' ? 'bg-emerald-400/15 text-emerald-500 dark:text-emerald-400' :
@@ -559,10 +572,10 @@ const ClientTradeIdeas = () => {
 
               {/* ── Chart Image Thumbnail ── */}
               <div className="-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px]">
-                {trade.image && trade.image.length > 0 ? (
+                {orderedTradeImages.length > 0 ? (
                   <>
                     <img
-                      src={trade.image[trade.currentIndex ?? 0]}
+                      src={orderedTradeImages[trade.currentIndex ?? 0]}
                       alt={trade.pair}
                       className="w-full h-[220px] object-cover object-right transition-opacity duration-300 cursor-pointer"
                       onClick={() => {
@@ -581,7 +594,7 @@ const ClientTradeIdeas = () => {
                     >
                       <Eye size={14} />
                     </button>
-                    {trade.image.length > 1 && (
+                    {orderedTradeImages.length > 1 && (
                       <>
                         <button
                           onClick={(e) => {
@@ -620,7 +633,7 @@ const ClientTradeIdeas = () => {
                           <ChevronRight size={16} />
                         </button>
                         <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                          {trade.image.map((_, idx) => (
+                          {orderedTradeImages.map((_, idx) => (
                             <div
                               key={idx}
                               className={`w-1.5 h-1.5 rounded-full transition-colors ${(trade.currentIndex ?? 0) === idx ? "bg-white" : "bg-white/40"
@@ -643,17 +656,20 @@ const ClientTradeIdeas = () => {
 
               {/* ── Structured Price Levels ── */}
               <div className="mb-2 space-y-1.5 flex-1">
+                {/* Description always leads, above Entry/Invalidation/Exits — the caption
+                    reads first, matching the Follow-Up card layout. */}
+                <ExpandableDescription html={trade?.description} />
                 {trade.entry && (
                   <div
                     className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
                     onClick={() => handleCopyField(trade._id, "Entry", trade.entry)}
                   >
-                    <span className="text-[12px] text-slate-600 dark:text-white font-medium">Entry</span>
-                    <span className="text-[12px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+                    <span className="text-[11px] text-slate-600 dark:text-white font-medium">Entry</span>
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
                       {copiedField.id === trade._id && copiedField.field === "Entry" ? (
                         <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                       ) : null}
-                      <span className="text-[10px]">📍</span> {trade.entry}
+                      <span className="text-[9px]">📍</span> {trade.entry}
                       <Copy size={10} className="text-slate-400 dark:text-white/50" />
                     </span>
                   </div>
@@ -663,12 +679,12 @@ const ClientTradeIdeas = () => {
                     className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
                     onClick={() => handleCopyField(trade._id, "Stop Loss", trade.invalidation)}
                   >
-                    <span className="text-[12px] text-slate-600 dark:text-white font-medium">Invalidation</span>
-                    <span className="text-[12px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+                    <span className="text-[11px] text-slate-600 dark:text-white font-medium">Invalidation</span>
+                    <span className="text-[11px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
                       {copiedField.id === trade._id && copiedField.field === "Stop Loss" ? (
                         <span className="text-[9px] text-red-500 mr-1">Copied</span>
                       ) : null}
-                      <span className="text-[10px]">❌</span> {trade.invalidation}
+                      <span className="text-[9px]">❌</span> {trade.invalidation}
                       <Copy size={10} className="text-slate-400 dark:text-white/50" />
                     </span>
                   </div>
@@ -683,12 +699,12 @@ const ClientTradeIdeas = () => {
                       className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
                       onClick={() => handleCopyField(trade._id, fieldName, tpValue)}
                     >
-                      <span className="text-[12px] text-slate-600 dark:text-white font-medium">{fieldName}</span>
-                      <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <span className="text-[11px] text-slate-600 dark:text-white font-medium">{fieldName}</span>
+                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                         {copiedField.id === trade._id && copiedField.field === fieldName ? (
                           <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
                         ) : null}
-                        <span className="text-[10px]">🎯</span> {tpValue}
+                        <span className="text-[9px]">🎯</span> {tpValue}
                         <Copy size={10} className="text-slate-400 dark:text-white/50" />
                       </span>
                     </div>
@@ -710,7 +726,8 @@ const ClientTradeIdeas = () => {
                 <Eye size={14} /> View Details
               </button>
             </div>
-          ))}
+            );
+          })}
 
           <ViewClientTradeIdeas
             isViewOpen={isViewOpen}

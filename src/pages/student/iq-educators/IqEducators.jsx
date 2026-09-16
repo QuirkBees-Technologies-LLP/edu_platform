@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import {
   ArrowUp,
   CirclePlay,
@@ -13,6 +14,11 @@ import {
   TrendingUp,
   UserPlus,
   UserCheck,
+  Copy,
+  ChartLine,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"; // Added Check icon
 import { useAuthContext } from "@/auth";
 import { Sparkles, TrendingUpDown, RotateCw } from "lucide-react";
@@ -26,9 +32,11 @@ import { useToggleFollowMutation } from "../../../store/api/client/clientEductor
 import VideoPlayerModal from "./VideoPlayerModal";
 import ClientViewLiveSession from "../client-live-session/ClientViewLiveSession";
 import RecordingThumbnail from "./RecordingThumbnail";
-import ShowMoreLess from "../../../components/ui/showmoreless";
-import ViewInsightTradeIdeas from "./ViewInsightTradeIdeas";
-import ViewClientTradeIdeas from "./ViewClientTradeIdeas";
+import ViewInsightTradeIdeas from "../iq-insight/ViewInsightTradeIdeas";
+import InsightImageLightBox from "../iq-insight/ImageLightBox";
+import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
+import ViewClientLiveIdeas from "../client-live-ideas/ViewClientLiveIdeas";
+import LiveIdeaImageLightBox from "../client-live-ideas/ImageLightBox";
 import { format } from "date-fns";
 import InfoImage from "../../../../public/media/images/info.jpg";
 import videotutorial from "../../../../public/media/videos/videotutorial.mp4";
@@ -36,9 +44,23 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import RatingModal from "./RatingModel";
 import { useLayout } from "../../../providers";
-import { useGetLiveTradeIdeaQuery } from "../../../store/api/client/clientTradeIdeasApiSlice";
+import {
+  useGetLiveTradeIdeaQuery,
+  useLazyGetTradeAnalysisByIdQuery,
+  useGetEducatorIdeasQuery,
+  useGetEducatorInsightsQuery,
+} from "../../../store/api/client/clientTradeIdeasApiSlice";
+import { useGetEducatorPostsQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
+import { getOrderedImageUrls, getImages } from "@/utils/mediaOrder";
+import PageContainer from "@/components/container/PageContainer";
+
+// How much of the screen this page uses. One knob — see PageContainer for the presets.
+const PAGE_WIDTH = "wide";
+import QuotedReplyPreview from "@/components/ui/QuotedReplyPreview";
+import ExpandableDescription from "@/components/ui/ExpandableDescription";
 import EducatorFeed from "./EducatorFeed";
+import { useResponsive } from "../../../hooks";
 
 // Strips HTML tags AND decodes entities (e.g. "&nbsp;") into plain text,
 // unlike a naive tag-stripping regex which leaves entities behind literally.
@@ -66,11 +88,63 @@ const IqEducators = () => {
   const [isViewOpen1, setIsViewOpen1] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState({});
   const [isLightBoxOpen1, setIsLightBoxOpen1] = useState(false);
+  const [isLiveIdeaViewOpen, setIsLiveIdeaViewOpen] = useState(false);
+  const [selectedLiveIdea, setSelectedLiveIdea] = useState({});
+  const [isLiveIdeaLightBoxOpen, setIsLiveIdeaLightBoxOpen] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-  const [isEducatorLive, setIsEducatorLive] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const isLgUp = useResponsive("up", "lg");
+  // Reported up from deep inside ClientLiveSessionWrapper (Stream call hooks live there,
+  // not here). While the stream isn't live, Player pairs directly with Educator Feed in
+  // one row instead of its own dedicated row with Chat — matching the original layout —
+  // so which row actually renders Feed (below) depends on this.
+  const [liveStatus, setLiveStatus] = useState(null);
+  const isLive = liveStatus === "live";
+  // Educator Feed must match the left column's REAL rendered height (Player + Master
+  // Classes + Recordings + Ideas + ...), not just whichever side happens to be tallest.
+  // Pure CSS Grid stretch can't express that: EducatorFeed's own scrollable list has no
+  // definite height to clip against, so instead of scrolling internally it renders its
+  // full content stack, and if that's taller than the left column, stretch pulls the
+  // LEFT column down to match the feed instead of the other way around. Measuring the
+  // left column directly and applying it as the feed's height (only at lg+) is the
+  // reliable fix — still fully automatic/responsive, just via JS instead of CSS alone.
+  const leftColRef = useRef(null);
+  const [leftColHeight, setLeftColHeight] = useState(null);
+  useEffect(() => {
+    const el = leftColRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect?.height;
+      if (height) setLeftColHeight(height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  // While NOT live, Educator Feed needs to visually span BOTH the Player row above and
+  // the Master Classes row below (row-span-2, see the sidebar JSX) — but sizing that
+  // purely via CSS stretch hits the same circular-height problem leftColHeight above was
+  // built to avoid: Feed's own scrollable list has no definite height to clip against, so
+  // it would render its full content stack and pull the OTHER rows down to match IT
+  // instead of the reverse. Measuring the Player row's own height directly (same
+  // ResizeObserver pattern as leftColHeight) and summing it with leftColHeight + the
+  // grid's row gap gives Feed a real pixel height to clip against instead.
+  const videoRowRef = useRef(null);
+  const [videoRowHeight, setVideoRowHeight] = useState(null);
+  useEffect(() => {
+    const el = videoRowRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect?.height;
+      if (height) setVideoRowHeight(height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  // Tailwind's gap-y-8 = 2rem = 32px, matching this same grid's own row gap.
+  const GRID_ROW_GAP_PX = 32;
   const [showRatingModal, setShowRatingModal] = useState(false);
   const navigate = useNavigate();
   const { auth } = useAuthContext();
@@ -159,10 +233,45 @@ const IqEducators = () => {
   };
 
   const { id } = useParams();
+
+  // Fired here, before useGetEducatorWithCoursesQuery below, purely to get these 4
+  // requests dispatched first over the wire — Educator Feed (right side) is meant to load
+  // ahead of the profile/Master Classes query. EducatorFeed's own identical hook calls
+  // (same educatorId/page/limit args) further down the tree just subscribe to this same
+  // in-flight/cached request via RTK Query's normal key-based dedup rather than firing a
+  // duplicate — this component never reads the return values itself, EducatorFeed still
+  // owns all of its own pagination/tab-switching state. useGetLiveTradeIdeaQuery here
+  // uses the exact same args (page 1, limit 10, this educatorId) as EducatorFeed's own
+  // "liveIdeas" tab, so it doubles as that prefetch too — no separate call needed for it.
+  useGetEducatorPostsQuery({ educatorId: id, page: 1, limit: 10 }, { skip: !id });
+  useGetEducatorIdeasQuery({ educatorId: id, page: 1, limit: 10 }, { skip: !id });
+  useGetEducatorInsightsQuery({ educatorId: id, page: 1, limit: 10 }, { skip: !id });
+  const {
+    data: liveTradeIdeas,
+    refetch: refetchLiveIdeas,
+    isFetching: isFetchingLiveIdeas,
+    isLoading: isLoadingLiveIdeasQuery,
+  } = useGetLiveTradeIdeaQuery({
+    page: 1,
+    limit: 10,
+    id: id,
+    // This page's own Live Ideas tab always wants the collapsed (latest-only) view —
+    // unlike Educator Feed's Live Ideas tab, which only collapses while that filter
+    // alone is active.
+    latestOnly: true,
+  }, {
+    refetchOnMountOrArgChange: true,
+  });
+
   const {
     data: response,
     refetch: refetchEducator,
     isFetching: isFetchingEducator,
+    // isLoading (unlike isFetching) is only ever true for the FIRST fetch of a given id —
+    // background refetches (refetchOnMountOrArgChange/refetchOnFocus) flip isFetching
+    // again later without touching this, which is exactly what the one-time page loading
+    // gate below needs: show it once up front, never again.
+    isLoading: isLoadingEducator,
   } = useGetEducatorWithCoursesQuery(id, {
     refetchOnMountOrArgChange: true,
   });
@@ -171,17 +280,24 @@ const IqEducators = () => {
   const educatorCategoryName = response?.data?.educator?.categories?.[0]?.name?.toLowerCase() ?? "";
   const isDigitalMarketing = educatorCategoryName.includes("digital marketing") || educatorCategoryName.includes("digitalmarketing") || educatorCategoryName.includes("e-commerce") || educatorCategoryName.includes("ecommerce") || educatorCategoryName.includes("e commerce");
 
-  const {
-    data: liveTradeIdeas,
-    refetch: refetchLiveIdeas,
-    isFetching: isFetchingLiveIdeas,
-  } = useGetLiveTradeIdeaQuery({
-    page: 1,
-    limit: 10,
-    id: id,
-  }, {
-    refetchOnMountOrArgChange: true,
-  });
+  const [fetchTradeAnalysisById] = useLazyGetTradeAnalysisByIdQuery();
+
+  // One-time page loading gate: the real content below stays mounted the whole time (so
+  // every query/effect still fires and finishes normally, nothing restarts once
+  // revealed) but is visually hidden behind a single loading spinner until every
+  // REQUIRED section has finished its first load — the profile/Master Classes/Ideas/
+  // Insights query, the page's own Live Ideas query, and Educator Feed's own queries
+  // (reported up via onReady, since they're fetched independently inside it). feedReady
+  // latches true the first time EducatorFeed reports ready and is never reset — later
+  // tab switches inside it only affect its own internal loading state.
+  const [feedReady, setFeedReady] = useState(false);
+  const pageReady = !isLoadingEducator && !isLoadingLiveIdeasQuery && feedReady;
+  // Reported up from EducatorFeed: whether the currently active tab/filter has zero
+  // items (after loading settles). The row-span/maxHeight sizing on the sidebar slot(s)
+  // below exists specifically to let a genuinely tall feed span down into (or match)
+  // Master Classes' row — an empty feed doesn't need any of that, and forcing it anyway
+  // just reserves a big blank area under the "no updates" placeholder.
+  const [feedEmpty, setFeedEmpty] = useState(false);
 
   useEffect(() => {
 
@@ -234,6 +350,548 @@ const IqEducators = () => {
   };
   const handleCloseView1 = () => {
     setIsViewOpen1(false);
+  };
+  const handleCloseLiveIdeaView = () => {
+    setIsLiveIdeaViewOpen(false);
+  };
+
+  const handleCopyField = async (id, fieldName, value) => {
+    try {
+      await navigator.clipboard.writeText(value ?? "N/A");
+      setCopiedField({ id, field: fieldName });
+      setTimeout(() => setCopiedField(null), 1200);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  // Tracked by id (not a plain boolean) since it's shared across every card in the
+  // Insights section below — only the card whose follow-up was actually clicked should
+  // show a spinner.
+  const [loadingFollowUpId, setLoadingFollowUpId] = useState(null);
+
+  // Image-slider position per card, keyed by card id. These cards are produced by plain
+  // render functions rather than components, so none of them can hold its own useState —
+  // the positions live here together instead, the same way copiedField already does.
+  const [imageIndexById, setImageIndexById] = useState({});
+  const stepImage = (id, count, delta) =>
+    setImageIndexById((prev) => ({
+      ...prev,
+      [id]: (((prev[id] ?? 0) + delta) % count + count) % count,
+    }));
+
+  // Ported from the Educator Feed's IdeaFeedCard — same card content, minus the "View
+  // Details" button: clicking the chart image opens the same details modal Social Feed
+  // uses instead.
+  const renderIdeaCard = (courseIdea, extraClassName = "") => {
+    const modalIdea = { ...courseIdea, educatorDetails: courseIdea?.educatorId };
+    // Educator-chosen display order (Task 14) — this card only shows a single static
+    // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
+    const orderedImages = getOrderedImageUrls(courseIdea);
+    const currentIndex = imageIndexById[courseIdea?._id] ?? 0;
+    return (
+      <div
+        key={courseIdea?._id}
+        className={`relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+      >
+        {/* Header: name + status */}
+        <div className="flex items-start gap-1 mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0 truncate">
+                {courseIdea?.name || "—"}
+              </span>
+              {courseIdea?.status && (
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[courseIdea.status] === "Active"
+                    ? "text-cyan-600 dark:text-cyan-400"
+                    : LabelMap[courseIdea.status] === "Pending"
+                      ? "text-purple-600 dark:text-purple-400"
+                      : LabelMap[courseIdea.status] === "Win"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : LabelMap[courseIdea.status] === "Partial Win"
+                          ? "text-emerald-500 dark:text-emerald-400"
+                          : LabelMap[courseIdea.status] === "Loss"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-600 dark:text-slate-400"
+                    }`}
+                >
+                  {LabelMap[courseIdea.status] === "Win"
+                    ? `WIN +${courseIdea.pips} pips`
+                    : LabelMap[courseIdea.status] === "Loss"
+                      ? `LOSS -${courseIdea.pips} pips`
+                      : LabelMap[courseIdea.status]}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
+              {(courseIdea?.type || courseIdea?.timeFrame) && (
+                <span
+                  className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-extrabold flex-shrink-0 border leading-none ${courseIdea.type === "buy"
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-600 border-red-500/20"
+                    }`}
+                >
+                  {courseIdea.type === "buy" ? (
+                    <TrendingUp size={14} />
+                  ) : (
+                    <TrendingDown size={14} />
+                  )}
+                  {courseIdea.type
+                    ? courseIdea.type.charAt(0).toUpperCase() + courseIdea.type.slice(1).toLowerCase()
+                    : ""}
+                  {courseIdea.timeFrame
+                    ? ` - ${Array.isArray(courseIdea.timeFrame) ? courseIdea.timeFrame.join("/") : courseIdea.timeFrame}`
+                    : ""}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                {courseIdea?.createdAt ? format(new Date(courseIdea.createdAt), "MMM dd, hh:mm a") : ""}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart image — click opens the details modal */}
+        <div
+          className={`-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] ${isEducator ? "" : "cursor-pointer"}`}
+          onClick={() => {
+            if (isEducator) return;
+            setSelectedIdea(modalIdea);
+            setIsViewOpen(true);
+          }}
+        >
+          {orderedImages.length > 0 ? (
+            <>
+              <img
+                src={orderedImages[currentIndex] || orderedImages[0]}
+                alt={courseIdea?.name}
+                className="w-full h-[220px] object-cover object-right transition-opacity duration-300"
+              />
+              {/* Slider only once there's more than one image, matching the IQ Social card.
+                  The arrows stop propagation so paging doesn't also open the details modal
+                  this chart area opens on click. */}
+              {orderedImages.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(courseIdea?._id, orderedImages.length, -1);
+                    }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(courseIdea?._id, orderedImages.length, 1);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                    {orderedImages.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                          currentIndex === idx ? "bg-white" : "bg-white/40"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 opacity-40">
+                <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">
+                  No Chart Loading...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Price levels */}
+        <div className="mb-2 space-y-1.5">
+          {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
+              first, matching the Follow-Up card layout. */}
+          <ExpandableDescription html={courseIdea?.description} />
+          {courseIdea?.entry && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(courseIdea._id, "Entry", courseIdea.entry)}
+            >
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">Entry</span>
+              <span className="text-[11px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+                {copiedField?.id === courseIdea._id && copiedField?.field === "Entry" ? (
+                  <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[9px]">📍</span> {courseIdea.entry}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {courseIdea?.invalidation && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(courseIdea._id, "Stop Loss", courseIdea.invalidation)}
+            >
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">
+                Invalidation
+              </span>
+              <span className="text-[11px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+                {copiedField?.id === courseIdea._id && copiedField?.field === "Stop Loss" ? (
+                  <span className="text-[9px] text-red-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[9px]">❌</span> {courseIdea.invalidation}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
+            const tpValue = courseIdea?.exits?.[idx];
+            if (!tpValue && tpValue !== 0) return null;
+            const fieldName = `Exit ${idx + 1}`;
+            return (
+              <div
+                key={tpField}
+                className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                onClick={() => handleCopyField(courseIdea._id, fieldName, tpValue)}
+              >
+                <span className="text-[11px] text-slate-600 dark:text-white font-medium">
+                  {fieldName}
+                </span>
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  {copiedField?.id === courseIdea._id && copiedField?.field === fieldName ? (
+                    <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                  ) : null}
+                  <span className="text-[9px]">🎯</span> {tpValue}
+                  <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Ported from the Educator Feed's LiveIdeaFeedCard — same treatment as renderIdeaCard.
+  const renderLiveIdeaCard = (liveIdeaData, extraClassName = "") => {
+    const modalLiveIdea = { ...liveIdeaData, educatorDetails: liveIdeaData?.educatorId };
+    // Stored order — exactly how the educator/admin arranged the images.
+    const liveImages = getImages(liveIdeaData);
+    const currentIndex = imageIndexById[liveIdeaData?._id] ?? 0;
+    return (
+      <div
+        key={liveIdeaData?._id}
+        className={`relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+      >
+        {/* Header: name + status */}
+        <div className="flex items-start gap-1 mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <span className="inline-flex items-center text-sm font-extrabold text-blue-400 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 dark:border-blue-500/25 px-2.5 py-1 rounded-lg leading-tight min-w-0 truncate">
+                {liveIdeaData?.name || "—"}
+              </span>
+              {liveIdeaData?.status && (
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-wider flex-shrink-0 whitespace-nowrap ${LabelMap[liveIdeaData.status] === "Active"
+                    ? "text-cyan-600 dark:text-cyan-400"
+                    : LabelMap[liveIdeaData.status] === "Pending"
+                      ? "text-purple-600 dark:text-purple-400"
+                      : LabelMap[liveIdeaData.status] === "Win"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : LabelMap[liveIdeaData.status] === "Partial Win"
+                          ? "text-emerald-500 dark:text-emerald-400"
+                          : LabelMap[liveIdeaData.status] === "Loss"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-600 dark:text-slate-400"
+                    }`}
+                >
+                  {LabelMap[liveIdeaData.status] === "Win"
+                    ? `WIN +${liveIdeaData.pips} pips`
+                    : LabelMap[liveIdeaData.status] === "Loss"
+                      ? `LOSS -${liveIdeaData.pips} pips`
+                      : LabelMap[liveIdeaData.status]}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-2 flex-nowrap overflow-x-auto scrollbar-hide">
+              {(liveIdeaData?.type || liveIdeaData?.timeFrame) && (
+                <span
+                  className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-extrabold flex-shrink-0 border leading-none ${liveIdeaData.type === "buy"
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-600 border-red-500/20"
+                    }`}
+                >
+                  {liveIdeaData.type === "buy" ? (
+                    <TrendingUp size={14} />
+                  ) : (
+                    <TrendingDown size={14} />
+                  )}
+                  {liveIdeaData.type
+                    ? liveIdeaData.type.charAt(0).toUpperCase() + liveIdeaData.type.slice(1).toLowerCase()
+                    : ""}
+                  {liveIdeaData.timeFrame
+                    ? ` - ${Array.isArray(liveIdeaData.timeFrame) ? liveIdeaData.timeFrame.join("/") : liveIdeaData.timeFrame}`
+                    : ""}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                {liveIdeaData?.createdAt ? format(new Date(liveIdeaData.createdAt), "MMM dd, hh:mm a") : ""}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart image — click opens the details modal */}
+        <div
+          className={`-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] ${isEducator ? "" : "cursor-pointer"}`}
+          onClick={() => {
+            if (isEducator) return;
+            setSelectedLiveIdea(modalLiveIdea);
+            setIsLiveIdeaViewOpen(true);
+          }}
+        >
+          {liveImages.length > 0 ? (
+            <>
+              <img
+                src={liveImages[currentIndex] || liveImages[0]}
+                alt={liveIdeaData?.name}
+                className="w-full h-[220px] object-cover object-right transition-opacity duration-300"
+              />
+              {/* Slider only once there's more than one image, matching the IQ Social card.
+                  The arrows stop propagation so paging doesn't also open the details modal
+                  this chart area opens on click. */}
+              {liveImages.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(liveIdeaData?._id, liveImages.length, -1);
+                    }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stepImage(liveIdeaData?._id, liveImages.length, 1);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 backdrop-blur-sm transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                    {liveImages.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                          currentIndex === idx ? "bg-white" : "bg-white/40"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 opacity-40">
+                <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">
+                  No Chart Loading...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Price levels */}
+        <div className="mb-2 space-y-1.5">
+          {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
+              first, matching the Follow-Up card layout. */}
+          <ExpandableDescription html={liveIdeaData?.description || liveIdeaData?.message} />
+          {liveIdeaData?.entry && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(liveIdeaData._id, "Entry", liveIdeaData.entry)}
+            >
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">Entry</span>
+              <span className="text-[11px] font-bold text-slate-700 dark:text-white flex items-center gap-1">
+                {copiedField?.id === liveIdeaData._id && copiedField?.field === "Entry" ? (
+                  <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[9px]">📍</span> {liveIdeaData.entry}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {liveIdeaData?.invalidation && (
+            <div
+              className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+              onClick={() => handleCopyField(liveIdeaData._id, "Stop Loss", liveIdeaData.invalidation)}
+            >
+              <span className="text-[11px] text-slate-600 dark:text-white font-medium">
+                Invalidation
+              </span>
+              <span className="text-[11px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
+                {copiedField?.id === liveIdeaData._id && copiedField?.field === "Stop Loss" ? (
+                  <span className="text-[9px] text-red-500 mr-1">Copied</span>
+                ) : null}
+                <span className="text-[9px]">❌</span> {liveIdeaData.invalidation}
+                <Copy size={10} className="text-slate-400 dark:text-white/50" />
+              </span>
+            </div>
+          )}
+          {["Exit1", "Exit2", "Exit3"].map((tpField, idx) => {
+            const tpValue = liveIdeaData?.exits?.[idx];
+            if (!tpValue && tpValue !== 0) return null;
+            const fieldName = `Exit ${idx + 1}`;
+            return (
+              <div
+                key={tpField}
+                className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"
+                onClick={() => handleCopyField(liveIdeaData._id, fieldName, tpValue)}
+              >
+                <span className="text-[11px] text-slate-600 dark:text-white font-medium">
+                  {fieldName}
+                </span>
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  {copiedField?.id === liveIdeaData._id && copiedField?.field === fieldName ? (
+                    <span className="text-[9px] text-emerald-500 mr-1">Copied</span>
+                  ) : null}
+                  <span className="text-[9px]">🎯</span> {tpValue}
+                  <Copy size={10} className="text-slate-400 dark:text-white/50" />
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // "Follow-up to X" opens the ORIGINAL insight being replied to, not the follow-up
+  // itself (quote-reply style) — previousAnalysis on the list item is only shallow-
+  // populated (title/createdAt), so the full original is fetched on demand here.
+  const handleOpenPreviousAnalysisInsight = async (previousAnalysisId) => {
+    if (!previousAnalysisId || loadingFollowUpId) return;
+    setLoadingFollowUpId(previousAnalysisId);
+    try {
+      const original = await fetchTradeAnalysisById(previousAnalysisId).unwrap();
+      setSelectedInsight(original?.data || original);
+      setIsViewOpen1(true);
+    } catch (err) {
+      console.error("Failed to load original insight", err);
+      toast.error("Could not open the original post. Please try again.");
+    } finally {
+      setLoadingFollowUpId(null);
+    }
+  };
+
+  // Ported from the Educator Feed's InsightFeedCard — same card content, minus the "View
+  // Details" button: clicking the chart image opens the same details modal Social Feed
+  // uses instead. This source (TradeAnalysisModel via getEductorAndCourses) carries the
+  // real field names (`.title`, `.photos`, `.createdBy`) while the shared
+  // ViewInsightTradeIdeas/EducatorImage components read `.name`, `.image`,
+  // `.educatorDetails` — so a new object carrying those aliases is built only at the
+  // point of handing data to the modal, same adapter pattern as renderIdeaCard.
+  const renderInsightCard = (insight, extraClassName = "") => {
+    const modalInsight = {
+      ...insight,
+      name: insight?.title,
+      image: insight?.photos,
+      educatorDetails: insight?.createdBy,
+    };
+    // Educator-chosen display order (Task 14) — this card only shows a single static
+    // thumbnail, so it's just the first image/TradingView-snapshot slide in that order.
+    const orderedThumbnail = getOrderedImageUrls(insight)[0];
+    return (
+      <div
+        key={insight?._id}
+        className={`relative isolate rounded-2xl p-[1.125rem] bg-white dark:bg-[#0F0F1A] text-slate-800 dark:text-slate-100 overflow-hidden flex flex-col border border-slate-200 dark:border-[#1F1F35] ${extraClassName}`}
+      >
+        {/* Quote-reply preview: this insight is a chained follow-up to a previous one —
+            shows a condensed preview of that ORIGINAL insight (thumbnail + title +
+            snippet), not this card's own content. reserveSpace keeps the same vertical
+            space even without a follow-up, otherwise cards without one sit shorter and
+            the grid/slider rows misalign depending on which cards happen to have one. */}
+        <QuotedReplyPreview
+          title={insight?.previousAnalysis?.title}
+          thumbnail={insight?.previousAnalysis?.photos?.[0]}
+          reserveSpace
+          onClick={(e) => {
+            if (!insight?.previousAnalysis) return;
+            e.stopPropagation();
+            handleOpenPreviousAnalysisInsight(insight.previousAnalysis._id);
+          }}
+          isLoading={!!insight?.previousAnalysis && loadingFollowUpId === insight.previousAnalysis._id}
+        />
+        {/* Header — date/time, same treatment as the Educator Feed's InsightFeedCard */}
+        <div className="flex items-start gap-1 mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-white/60 font-bold whitespace-nowrap">
+                {insight?.createdAt ? format(new Date(insight.createdAt), "MMM dd, hh:mm a") : ""}
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Chart image — click opens the details modal */}
+        <div
+          className={`-mx-[1.125rem] mb-2 overflow-hidden border-y border-slate-100 dark:border-[#1F1F35]/50 relative h-[220px] ${isEducator ? "" : "cursor-pointer"}`}
+          onClick={() => {
+            if (isEducator) return;
+            setSelectedInsight(modalInsight);
+            setIsViewOpen1(true);
+          }}
+        >
+          {orderedThumbnail ? (
+            <img
+              src={orderedThumbnail}
+              alt={insight?.title}
+              className="w-full h-[220px] object-cover object-center"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-slate-100 dark:bg-[#141422] flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 opacity-40">
+                <ChartLine size={28} className="text-slate-400 dark:text-slate-600" />
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-600 tracking-wide">
+                  No Chart Loading...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Title + description */}
+        <div className="mb-2 space-y-1.5">
+          {insight?.title && (
+            <div className="px-1 py-1">
+              <span className="text-[14px] font-extrabold text-slate-800 dark:text-white">
+                {insight.title}
+              </span>
+            </div>
+          )}
+          {insight?.description && (
+            <div
+              className="px-1 py-1 text-[12px] text-slate-600 dark:text-slate-300 line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: insight.description }}
+            />
+          )}
+        </div>
+      </div>
+    );
   };
   //  useEffect(() => {
   //   if (response?.data?.schedules?.length > 0) {
@@ -359,25 +1017,61 @@ const IqEducators = () => {
       });
   }
 
-  const getRelativeTime = (date) => {
-    if (!date) return "";
-
-    const now = new Date();
-    const past = new Date(date);
-    const diffInSeconds = Math.floor((now - past) / 1000);
-
-    const minutes = Math.floor(diffInSeconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (diffInSeconds < 60) return "Just now";
-    if (minutes < 60) return `${minutes} min ago`;
-    if (hours < 24) return `${hours} hr ago`;
-    return `${days} day${days > 1 ? "s" : ""} ago`;
-  };
+  // One Recording card for both the collapsed row and the "View All" grid, so the two
+  // can't drift apart. Equal card sizes come from three things together: the thumbnail
+  // uses aspect-video (it was h-[28vh], so its height tracked screen HEIGHT and cards grew
+  // on large monitors regardless of their width), the title reserves exactly two lines,
+  // and the card is a full-height flex column so the date row sits at the same baseline.
+  const renderRecordingCard = (course, extraClassName = "") => (
+    <div
+      key={course?._id}
+      className={`cursor-pointer border rounded-xl shadow-sm flex flex-col h-full ${extraClassName}`}
+    >
+      <div className="rounded-t-xl overflow-hidden" onClick={() => setRecording(course)}>
+        <RecordingThumbnail
+          videoUrl={course?.url}
+          seekTime={2}
+          image={course?.thumbnail}
+          defaultImage={response?.data?.educator?.bannerImage}
+          onRecordingClick={() => handleOpen(course?.url)}
+          sizeClassName="aspect-video"
+        />
+      </div>
+      <div className="p-4 flex flex-col flex-1">
+        <h3
+          className="text-base font-normal leading-6 line-clamp-2 min-h-12"
+          title={course?.call_title}
+        >
+          {course?.call_title}
+        </h3>
+        <div className="card-footer justify-between pt-4 p-0 mt-auto">
+          <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
+            <Calendar size={16} /> {new Date(course?.start_time).toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="container-fluid pb-10">
+    // Width is a preset rather than a hardcoded cap, so it can be retuned here without
+    // touching the layout. "wide" = 94% of the viewport up to 1920px: this is a dense page
+    // (8/4 content-plus-feed grid with 3-up card rows), so it should use a large monitor
+    // rather than sit in a narrow column — but it stops growing past 1920px instead of
+    // stretching across an ultrawide. Swap to "default" (88%/1600px) or "narrow"
+    // (80%/1280px) to tighten it; see PageContainer for the full set.
+    <PageContainer width={PAGE_WIDTH} className="pb-10">
+      {!pageReady && (
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <span className="mt-3 text-sm text-gray-400">Loading educator profile...</span>
+        </div>
+      )}
+      {/* Real content stays mounted (never conditionally rendered) even while the spinner
+          above covers it — hidden purely visually via the `hidden` class — so every
+          query and effect below keeps running and finishes normally instead of
+          restarting once revealed. */}
+      <div className={pageReady ? "" : "hidden"}>
       {/* Share Toast Notification */}
       {showShareToast && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transform transition-all duration-300 ease-in-out animate-bounce">
@@ -528,32 +1222,130 @@ const IqEducators = () => {
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
-        <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
+      {/* Player+Chat get their own full-width row while live (ClientViewLiveSession's own
+          return is a nested grid-cols-12, col-span-12 of THIS outer grid, splitting
+          Video/Chat 8:4 — or 11:1 once Chat's own collapse toggle fires — entirely on its
+          own). While NOT live there's no Chat, so this outer wrapper itself is constrained
+          to 8/12 instead (ClientViewLiveSession's own inner video block just fills that,
+          full width of its own nested grid), and Educator Feed renders as a genuine
+          sibling of it right here for the remaining 4/12 — a real, single flat grid item,
+          unlike nesting Feed inside ClientViewLiveSession/StreamTheme's own tree. It's
+          self-start (not stretched) and given maxHeight = videoRowHeight + leftColHeight
+          (JS-measured, see those above, not plain CSS stretch — same circular-height
+          reason leftColHeight itself exists) so it can visually read as one tall panel
+          beside Player when it actually has enough content to need that, WITHOUT forcing
+          a short feed to stretch and leave dead space when it doesn't. Master
+          Classes/Recordings/Ideas always render in the row below regardless of live
+          status: leftColRef here only measures that row's left cell (no longer Player),
+          and its own Feed copy (below) only renders while live, since this one already
+          covers the not-live case.
+
+          gridTemplateRows below (not-live only) is required, not decorative: Feed's
+          row-span-2 lets it grow past a single row's worth of height, and by default CSS
+          Grid distributes that extra growth across BOTH spanned tracks — including row 1,
+          which otherwise only needs Player's own small aspect-video height. That leaves
+          Player sitting inside a much taller stretched row-1 cell with dead space below
+          it, and Master Classes (row 2) pushed down to start after that gap. Pinning row
+          1's track to exactly videoRowHeight (an explicit size, not "auto") makes it
+          un-inflatable — Feed's extra growth is then forced entirely onto row 2 instead,
+          which is where it visually belongs (beside/below Master Classes). */}
+      <div
+        className="grid grid-cols-12 gap-y-8 md:gap-x-8"
+        style={
+          isLgUp && !isLive && videoRowHeight
+            ? { gridTemplateRows: `${videoRowHeight}px auto` }
+            : undefined
+        }
+      >
+        {/* Explicit wrapper (rather than relying on a class deep inside
+            ClientViewLiveSession's own tree) since Stream's own <StreamTheme> wraps its
+            children in its own DOM div with no column span of its own — without this
+            wrapper the row would collapse to a single implicit grid track instead of
+            taking its intended width.
+
+            self-start is required, not cosmetic: by default this item STRETCHES to match
+            row 1's height — including any inflation Feed's row-span-2 causes before the
+            gridTemplateRows pin above kicks in (that pin itself is derived from
+            videoRowHeight, measured off THIS element). Without self-start, an already-
+            inflated row would stretch this wrapper too, so the ResizeObserver reads back
+            the inflated height instead of the video's true one, and the pin just locks in
+            the bug instead of fixing it. self-start keeps this sized to its own actual
+            content regardless of the row, so the measurement — and the pin built from it
+            — are always correct. */}
+        <div
+          ref={videoRowRef}
+          className={`self-start ${isLive ? "col-span-12" : "col-span-12 lg:col-span-8 3xl:col-span-9 4xl:col-span-10"}`}
+        >
           <ClientViewLiveSession
             bannerImage={response?.data?.educator?.bannerImage}
             callId={callId}
             educatorData={response?.data?.educator?.description}
             headerGradient={getHeaderGradient()}
-            feedContent={
-              // Deliberately unwrapped — each consumer of feedContent (StreamWrapper's
-              // no-call banner layout, ClientLiveSessionWrapper's video/chat grid) is
-              // responsible for giving this its own bounded height, since they measure
-              // against different sibling content (a static banner vs. a live video) and
-              // a height baked in here can't fit both. See StreamWrapper.jsx and
-              // ClientLiveSessionWrapper.jsx.
-              <EducatorFeed
-                educatorId={id}
-                headerGradient={getHeaderGradient()}
-              />
-            }
-            onStatusChange={(status) => setIsEducatorLive(status === "live")}
+            onStatusChange={setLiveStatus}
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
-        <div className="col-span-12 xl:col-span-8 space-y-8">
+        {isLgUp && !isLive && (
+          // row-span-2 is required, not optional, WHEN Feed actually has content: without
+          // it, Feed's own natural height (which self-start otherwise lets grow freely)
+          // inflates THIS row alone instead of being absorbed across both rows' combined
+          // track — since Video's own row1 height is just a 16:9 box, that pushed row1
+          // (and Master Classes' row2 below it) far taller than intended, leaving a huge
+          // blank gap under the video. With row-span-2, Feed's height demand is measured
+          // against row1 + row2 combined, which — since maxHeight below is exactly that
+          // same sum — it fits inside without inflating either. When Feed is EMPTY though,
+          // none of that sizing is needed at all — row-span-2 + a tall maxHeight would
+          // just reserve that same combined height as blank space under a one-line "no
+          // updates" placeholder, so both are dropped in favor of the item's own tiny
+          // natural size within row 1 alone.
+          <div
+            className={`col-span-12 lg:col-span-4 3xl:col-span-3 4xl:col-span-2 flex flex-col self-start ${feedEmpty ? "" : "row-span-2"}`}
+          >
+            <EducatorFeed
+              educatorId={id}
+              headerGradient={getHeaderGradient()}
+              onReady={() => setFeedReady(true)}
+              onEmptyChange={setFeedEmpty}
+              maxHeight={
+                !feedEmpty && videoRowHeight && leftColHeight
+                  ? videoRowHeight + GRID_ROW_GAP_PX + leftColHeight
+                  : undefined
+              }
+            />
+          </div>
+        )}
+
+        {/* self-start for the same reason videoRowRef needs it: without it, this item
+            STRETCHES to match row 2's actual track height — and since Feed (row-span-2)
+            can make that track taller than Master Classes' own natural content, a
+            stretched leftColRef would report that INFLATED height back through
+            leftColHeight, which directly feeds Feed's own maxHeight formula above,
+            growing Feed even more next render — a runaway feedback loop, not a one-time
+            measurement error. self-start keeps this at its own true natural content
+            height regardless of what the row ends up needing for Feed. */}
+        <div ref={leftColRef} className="col-span-12 lg:col-span-8 3xl:col-span-9 4xl:col-span-10 flex flex-col gap-8 self-start">
+
+          {/* Below lg, Educator Feed renders here — immediately after Player, or after
+              Chat if it's present, since Chat renders directly above this in DOM order
+              when live — rather than at the sidebar's DOM position, which is the very end
+              of the page once both columns stack. A real conditional (not CSS-hidden), so
+              exactly one EducatorFeed instance is ever mounted at a time — the other copy
+              lives in the sidebar at lg+, below.
+
+              Fixed maxHeight here (unlike the two lg+ instances, which measure against
+              Player/Master Classes) — on mobile everything already stacks in one long
+              column, so there's no sibling section to match; a flat cap just keeps the
+              feed from growing indefinitely and pushing everything below it far down the
+              page. EducatorFeed's own internal list still scrolls + infinite-loads inside
+              that cap exactly as it does elsewhere. */}
+          {!isLgUp && (
+            <EducatorFeed
+              educatorId={id}
+              headerGradient={getHeaderGradient()}
+              onReady={() => setFeedReady(true)}
+              maxHeight={900}
+            />
+          )}
 
           {/* Master Classes */}
           {response?.data?.masterClasses?.length > 0 && <div className="text-gray-900 mb-8">
@@ -575,7 +1367,7 @@ const IqEducators = () => {
                   {response?.data?.masterClasses?.map((mc) => (
                     <div
                       key={mc?._id}
-                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
+                      className={`w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
                       onClick={() => { if (!isEducator) navigate(`/master-class/${id}`); }}
                     >
                       <div className="rounded-t-xl overflow-hidden">
@@ -626,70 +1418,21 @@ const IqEducators = () => {
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {response?.data?.recordings?.length > 0 ? (
                 showAll ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full cursor-pointer border rounded-xl shadow-sm"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
+                    {response?.data?.recordings?.map((course) => renderRecordingCard(course))}
                   </div>
                 ) : (
-                  <div className="flex gap-4">
-                    {response?.data?.recordings?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className="w-full sm:w-1/2 md:w-1/3 cursor-pointer border rounded-xl shadow-sm flex-shrink-0"
-                      >
-                        <div
-                          className="rounded-t-xl overflow-hidden"
-                          onClick={() => setRecording(course)}
-                        >
-                          <RecordingThumbnail
-                            videoUrl={course?.url}
-                            seekTime={2}
-                            image={course?.thumbnail}
-                            defaultImage={response?.data?.educator?.bannerImage}
-                            onRecordingClick={() => handleOpen(course?.url)}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.call_title}
-                          </h3>
-                          <div className="card-footer justify-between pt-4 p-0 mt-4">
-                            <p className="text-sm text-gray-900 dark:text-gray-900 flex items-center gap-2">
-                              <Calendar size={16} />{" "}
-                              {new Date(course?.start_time).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  // Widths subtract the gap: plain 1/2 and 1/3 ignored gap-4, so three
+                  // cards plus two gaps overflowed the row and every card was slightly off
+                  // from the "View All" grid's sizing. With the gap accounted for, each
+                  // card here is exactly as wide as its counterpart in that grid.
+                  <div className="flex gap-4 items-stretch">
+                    {response?.data?.recordings?.map((course) =>
+                      renderRecordingCard(
+                        course,
+                        "w-full sm:w-[calc((100%-1rem)/2)] md:w-[calc((100%-2rem)/3)] 3xl:w-[calc((100%-3rem)/4)] 4xl:w-[calc((100%-4rem)/5)] flex-shrink-0"
+                      )
+                    )}
                   </div>
                 )
               ) : (
@@ -701,7 +1444,7 @@ const IqEducators = () => {
           </div>}
 
           {/* Ideas */}
-          {response?.data?.idea?.length > 0 && <div className="text-gray-900 mb-28">
+          {response?.data?.idea?.length > 0 && <div className="text-gray-900 mb-8">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Ideas</h2>
@@ -717,82 +1460,15 @@ const IqEducators = () => {
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {response?.data?.idea?.length > 0 ? (
                 idea ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.name}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4 items-start">
+                    {response?.data?.idea?.map((course) => renderIdeaCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.idea?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedIdea(course);
-                          setIsViewOpen(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.image?.[0]}
-                            alt={course?.name}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4 d-flex">
-                          <div className="justify-between">
-                            <h3 className="text-md font-normal mb-2">
-                              {course?.name}
-                            </h3>
-                          </div>
-
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="flex gap-4 items-start">
+                    {response?.data?.idea?.map((course) =>
+                      renderIdeaCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                    )}
                   </div>
                 )
               ) : (
@@ -805,7 +1481,7 @@ const IqEducators = () => {
 
           {/* Insights */}
 
-          {response?.data?.insight?.length > 0 && <div className="text-gray-900 mb-28">
+          {response?.data?.insight?.length > 0 && <div className="text-gray-900 mb-8">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Insights</h2>
@@ -822,79 +1498,15 @@ const IqEducators = () => {
               {response?.data?.insight?.length > 0 ? (
                 insight ? (
                   // GRID VIEW (sabhi courses ek sath)
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full border rounded-xl shadow-sm ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4 items-start">
+                    {response?.data?.insight?.map((course) => renderInsightCard(course))}
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4">
-                    {response?.data?.insight?.map((course) => (
-                      <div
-                        key={course?._id}
-                        className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                        onClick={() => {
-                          if (isEducator) return;
-                          setSelectedInsight(course);
-                          setIsViewOpen1(true);
-                        }}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/iq-vault?mainSection=${course.section}&language=${course.language}&categoryId=${course.category._id}&courseId=${course._id}`
-                      //   )
-                      // }
-                      >
-                        <div className="rounded-t-xl overflow-hidden">
-                          <img
-                            src={course?.photos?.[0]}
-                            alt={course?.title}
-                            className="w-full h-36 object-cover"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-md font-normal mb-2">
-                            {course?.title}
-                          </h3>
-                          <ShowMoreLess
-                            className="text-xs text-gray-600"
-                            html={course?.description || "No description"}
-                            limit={65}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="flex gap-4 items-start">
+                    {response?.data?.insight?.map((course) =>
+                      renderInsightCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                    )}
                   </div>
                 )
               ) : (
@@ -910,7 +1522,7 @@ const IqEducators = () => {
           {/* Live Ideas */}
 
 
-          {liveIdea?.length > 0 && <div className="text-gray-900">
+          {liveIdea?.length > 0 && <div className="text-gray-900 mb-8">
             <div className={`${getHeaderGradient()} text-white p-6 rounded-t-2xl`}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -941,109 +1553,10 @@ const IqEducators = () => {
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {liveIdea?.length > 0 ? (
-                <div className="flex gap-4">
-                  {liveIdea?.map((liveIdeaData) => (
-                    <div
-                      key={liveIdeaData?._id}
-                      className={`w-full sm:w-1/2 md:w-1/3 border rounded-xl shadow-sm flex-shrink-0 ${isEducator ? '' : 'cursor-pointer'}`}
-                      onClick={() => {
-                        if (isEducator) return;
-                        setSelectedIdea(liveIdeaData);
-                        setIsLightBoxOpen(true);
-                      }}
-                    >
-                      {/* IMAGE CONTAINER */}
-                      <div className="relative rounded-t-xl overflow-hidden">
-                        <img
-                          src={liveIdeaData?.image?.[0]}
-                          alt={liveIdeaData?.name}
-                          className="w-full h-36 object-cover"
-                        />
-
-                        {/* 🔥 OVERLAY START */}
-                        <div className="absolute top-2 left-2 right-2 flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              className={`px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2 ${liveIdeaData?.type === "buy"
-                                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                                : "bg-red-500 hover:bg-red-600 text-white"
-                                }`}
-                            >
-                              {liveIdeaData?.type === "buy" ? (
-                                <TrendingUp size={16} />
-                              ) : (
-                                <TrendingDown size={16} />
-                              )}
-                              {liveIdeaData?.type?.toUpperCase()}
-                            </button>
-
-                            <div className="bg-gray-800 px-2 py-1 rounded-lg font-semibold text-xs text-white">
-                              {liveIdeaData?.name}
-                            </div>
-                          </div>
-
-                          {LabelMap[liveIdeaData?.status] === "Active" && (
-                            <div className="bg-cyan-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                              Active
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Pending" && (
-                            <div className="bg-purple-700 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                              Pending
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Win" && (
-                            <div className="bg-emerald-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              ★ WIN +{liveIdeaData?.pips} pips
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Loss" && (
-                            <div className="bg-red-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              ▲ LOSS -{liveIdeaData?.pips} pips
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Partial Win" && (
-                            <div className="bg-purple-500 text-white px-2 py-1 rounded-lg font-semibold text-xs flex items-center gap-2">
-                              ▲ PARTIAL WIN {liveIdeaData?.pips} pips
-                            </div>
-                          )}
-
-                          {LabelMap[liveIdeaData?.status] === "Break Even" && (
-                            <div className="bg-blue-500 text-white px-2 py-1 rounded-lg font-semibold text-xs">
-                              Break Even
-                            </div>
-                          )}
-
-                        </div>
-                        {/* 🔥 OVERLAY END */}
-                      </div>
-
-                      {/* DATE */}
-                      <div className="p-4 flex items-center justify-between">
-                        {/* LEFT: Full Date */}
-                        <div className="text-sm text-gray-600">
-                          {format(new Date(liveIdeaData?.createdAt), "dd/MM/yyyy hh:mm a")}
-                        </div>
-
-                        {/* RIGHT: Relative Time */}
-                        <div
-                          className="text-sm text-gray-600"
-                          title={format(new Date(liveIdeaData?.createdAt), "dd MMM yyyy, hh:mm a")}
-                        >
-                          {getRelativeTime(liveIdeaData?.createdAt)}
-                        </div>
-                      </div>
-
-
-                    </div>
-
-                  ))}
+                <div className="flex gap-4 items-start">
+                  {liveIdea?.map((liveIdeaData) =>
+                    renderLiveIdeaCard(liveIdeaData, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                  )}
                 </div>
 
               ) : (
@@ -1055,71 +1568,26 @@ const IqEducators = () => {
           </div>}
         </div>
 
-        {/* Sidebar */}
-        <div className=" col-span-12 xl:col-span-4">
-          <div className="grid grid-cols-12 gap-6">
-            {/* <div className="col-span-12 md:col-span-6 xl:col-span-12 space-y-6">
-              <div className="card rounded-2xl shadow-md overflow-hidden">
-                <div className={`${getHeaderGradient()} px-4 py-3 flex justify-between items-center rounded-t-2xl`}>
-                  <h3 className="text-white font-semibold text-sm">Chatbox</h3>
-                </div>
-
-                <div className="p-4 overflow-y-auto flex flex-col space-y-4 relative group">
-                  {messages.map((message) => (
-                    <div key={message.id} className="flex flex-col gap-2">
-                      <div className="text-sm text-gray-900 font-medium">
-                        {message.sender}{" "}
-                        <span className="text-xs text-gray-600 font-normal ml-1">
-                          {message.time}
-                        </span>
-                      </div>
-                      <div className="text-xs font-normal rounded-lg text-gray-800 break-words leading-[1.9]">
-                        {message.text}
-                      </div>
-                    </div>
-                  ))}
-
-                  <div ref={messagesEndRef} />
-
-                  <div className="absolute inset-0 flex text-center items-center bg-gray-50 dark:bg-gray-100 justify-center text-gray-800 text-lg opacity-0 group-hover:opacity-100 transition duration-300">
-                    No This feature is under-development
-                  </div>
-                </div>
-
-                <form onSubmit={handleSendMessage} className="p-4">
-                  <div className="flex items-center justify-center">
-                    <div className="relative w-full max-w-md">
-                      <input
-                        type="text"
-                        placeholder="Your comment..."
-                        className="w-full p-4 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 text-xs dark:bg-gray-100"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                      />
-
-                      <button
-                        type="submit"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 duration-200 focus:outline-none"
-                        aria-label="Send message"
-                      >
-                        <Send size={20} />
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div> */}
-            {/* Educator feed — sits next to Master Classes only once the stream is live.
-                Before that, the same EducatorFeed instance renders in place of the old
-                "About Me" card (up in the video/chat row via feedContent), so it's never
-                shown in both places at once. */}
-            {isEducatorLive && (
-              <div className="col-span-12 md:col-span-6 xl:col-span-12 h-[500px]">
-                <EducatorFeed educatorId={id} headerGradient={getHeaderGradient()} />
-              </div>
-            )}
+        {/* Sidebar: the desktop (lg+) home for Educator Feed while live — Chat renders
+            entirely inside ClientViewLiveSession's own video row (see there), so nothing
+            here reacts to Chat's collapse state. self-start + maxHeight (rather than a
+            forced height) lets it size to its actual content up to leftColHeight, instead
+            of always stretching to match Master Classes' often much taller natural height
+            when the feed itself has little content. While NOT live, the row-1 Feed
+            sibling above already covers this column, so this is skipped to avoid mounting
+            Feed twice. Below lg it renders inline right after Player instead (see above),
+            so nothing is ever mounted in two places at once. */}
+        {isLgUp && isLive && (
+          <div className="col-span-12 lg:col-span-4 3xl:col-span-3 4xl:col-span-2 flex flex-col self-start">
+            <EducatorFeed
+              educatorId={id}
+              headerGradient={getHeaderGradient()}
+              onReady={() => setFeedReady(true)}
+              onEmptyChange={setFeedEmpty}
+              maxHeight={!feedEmpty ? leftColHeight || undefined : undefined}
+            />
           </div>
-        </div>
+        )}
       </div>
 
       <VideoPlayerModal
@@ -1134,6 +1602,13 @@ const IqEducators = () => {
         setIsLightBoxOpen={setIsLightBoxOpen}
         handleCloseView={handleCloseView}
         selectedIdea={selectedIdea}
+      />
+
+      <ViewClientLiveIdeas
+        isViewOpen={isLiveIdeaViewOpen}
+        setIsLightBoxOpen={setIsLiveIdeaLightBoxOpen}
+        handleCloseView={handleCloseLiveIdeaView}
+        selectedIdea={selectedLiveIdea}
       />
 
       <ViewInsightTradeIdeas
@@ -1164,7 +1639,26 @@ const IqEducators = () => {
           />
         )
       }
-    </div>
+      {
+        isLiveIdeaLightBoxOpen && (
+          <LiveIdeaImageLightBox
+            isLightBoxOpen={isLiveIdeaLightBoxOpen}
+            setIsLightBoxOpen={setIsLiveIdeaLightBoxOpen}
+            selectedIdea={selectedLiveIdea}
+          />
+        )
+      }
+      {
+        isLightBoxOpen1 && (
+          <InsightImageLightBox
+            isLightBoxOpen={isLightBoxOpen1}
+            setIsLightBoxOpen={setIsLightBoxOpen1}
+            selectedIdea={selectedInsight}
+          />
+        )
+      }
+      </div>
+    </PageContainer>
   );
 };
 

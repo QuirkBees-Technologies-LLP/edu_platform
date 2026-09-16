@@ -1,11 +1,13 @@
 import React, { forwardRef, useEffect, useState, useCallback, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Play, X } from "lucide-react";
+import { Play, X, ImageIcon, Link2, Video } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DraggableImageList from "@/components/ui/DraggableImageList";
 import DraggableLinkList from "@/components/ui/DraggableLinkList";
+import DraggableMediaOrder from "@/components/ui/DraggableMediaOrder";
+import { isTvSnapshotUrl } from "@/utils/mediaOrder";
 import {
   Select,
   SelectContent,
@@ -13,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -70,7 +71,7 @@ const CreateTradeAnalysis = forwardRef(
         // Edit: pre-fill everything from the existing insight.
         const existingImages =
           selectedRow?.image
-            ?.filter((img) => !img.includes('tv-chart-images') && !img.includes('tv-snapshot'))
+            ?.filter((img) => !isTvSnapshotUrl(img))
             .map((img) => ({ file: null, dataURL: img })) || [];
         let tvLinks = [""];
         if (selectedRow?.tradingViewLinks?.length > 0) {
@@ -84,24 +85,27 @@ const CreateTradeAnalysis = forwardRef(
           createdBy: createdBy || "",
           description: selectedRow?.description || "",
           category: selectedRow?.category?._id || "",
-          checkTime: selectedRow?.isUpdatedAnalysis || false,
           tradingViewLinks: tvLinks,
           dyntubeUrl: selectedRow?.dyntubeUrl || "",
+          // Educator-chosen display order between images / TradingView charts / DynTube
+          // video (Task 14) — whichever group is first here is what students see first.
+          mediaOrder: selectedRow?.mediaOrder?.length > 0 ? selectedRow.mediaOrder : ["image", "tradingview", "dyntube"],
         };
       }
       if (chainFrom?._id) {
         // "Update" (chain) action: a brand-new, standalone follow-up insight, not an edit
-        // of the source one — every field starts blank except the title, which is carried
-        // over so the educator isn't retyping it.
+        // of the source one — every field, including the title, starts blank so the
+        // educator writes a fresh title for this follow-up rather than reusing the
+        // original's.
         return {
-          title: chainFrom?.title || "",
+          title: "",
           files: [],
           createdBy: createdBy || "",
           description: "",
           category: "",
-          checkTime: false,
           tradingViewLinks: [""],
           dyntubeUrl: "",
+          mediaOrder: ["image", "tradingview", "dyntube"],
         };
       }
       return {
@@ -110,9 +114,9 @@ const CreateTradeAnalysis = forwardRef(
         createdBy: createdBy || "",
         description: "",
         category: "",
-        checkTime: false,
         tradingViewLinks: [""],
         dyntubeUrl: "",
+        mediaOrder: ["image", "tradingview", "dyntube"],
       };
     }, [selectedRow?._id, chainFrom?._id, createdBy]);
 
@@ -149,11 +153,13 @@ const CreateTradeAnalysis = forwardRef(
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
         formData.append("category", values.category);
-        formData.append("checkTime", values.checkTime);
 
         // Append TradingView links (always send, even empty, so backend can clear old links)
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
+
+        // Educator-chosen display order between the media groups (Task 14).
+        formData.append("mediaOrder", JSON.stringify(values.mediaOrder || ["image", "tradingview", "dyntube"]));
 
         // Chained create (Task 4.2's "Update" action): link this brand-new insight back to
         // the one it follows up on. Only applies when actually creating (not editing).
@@ -176,7 +182,7 @@ const CreateTradeAnalysis = forwardRef(
             .filter((f) => !f?.file?.file && f?.dataURL)
             .map((f) => f.dataURL);
           // Also preserve TV chart images (auto-generated, not shown in form but must not be deleted)
-          const tvChartImages = (selectedRow?.image || []).filter((img) => img.includes('tv-chart-images') || img.includes('tv-snapshot'));
+          const tvChartImages = (selectedRow?.image || []).filter((img) => isTvSnapshotUrl(img));
           const allKeptImages = [...keptImages, ...tvChartImages];
           formData.append("existingImages", JSON.stringify(allKeptImages));
         }
@@ -229,8 +235,28 @@ const CreateTradeAnalysis = forwardRef(
 
     const handleRemoveImage = (index) => {
       const newFiles = [...formik.values.files];
-      newFiles.splice(index, 1);
+      const [removed] = newFiles.splice(index, 1);
       formik.setFieldValue("files", newFiles);
+
+      // Removing an auto-generated TradingView chart image (tv-chart-images container)
+      // should also drop its source link — otherwise the next save regenerates the
+      // very image the user just removed. Snapshot images are appended in the same
+      // order as their (non-empty) source links, so the Nth TV image maps to the
+      // Nth non-empty link.
+      if (removed?.dataURL?.includes("tv-chart-images")) {
+        const tvImageIndex = newFiles
+          .slice(0, index)
+          .filter((f) => f?.dataURL?.includes("tv-chart-images")).length;
+        const links = [...(formik.values.tradingViewLinks || [])];
+        const nonEmptyLinkIndexes = links
+          .map((link, i) => (link && link.trim() ? i : -1))
+          .filter((i) => i !== -1);
+        const linkIndexToRemove = nonEmptyLinkIndexes[tvImageIndex];
+        if (linkIndexToRemove !== undefined) {
+          links.splice(linkIndexToRemove, 1);
+          formik.setFieldValue("tradingViewLinks", links.length > 0 ? links : [""]);
+        }
+      }
     };
 
     // Drag-and-drop reorder handlers
@@ -461,25 +487,27 @@ const CreateTradeAnalysis = forwardRef(
                   </div>
                 </div>
 
-                {selectedRow?._id && (
-                  <div className="col-span-12">
-                    <div className="flex items-center gap-2 h-full ">
-                      <Checkbox
-                        id="checkTime"
-                        checked={formik.values.checkTime}
-                        onCheckedChange={(checked) =>
-                          formik.setFieldValue("checkTime", checked)
-                        }
-                      />
-                      <label
-                        htmlFor="checkTime"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        Do Not Update TimeStamp
-                      </label>
-                    </div>
+                {/* Display order (Task 14): which media type students see first */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-slate-800 dark:text-slate-100 gap-1">
+                      Display Order
+                    </label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                      Drag to choose which media students see first.
+                    </p>
+                    <DraggableMediaOrder
+                      order={formik.values.mediaOrder || ["image", "tradingview", "dyntube"]}
+                      onChange={(next) => formik.setFieldValue("mediaOrder", next)}
+                      labels={{
+                        image: { label: "Image", icon: <ImageIcon size={14} className="text-gray-400" /> },
+                        tradingview: { label: "TradingView Chart", icon: <Link2 size={14} className="text-gray-400" /> },
+                        dyntube: { label: "Video", icon: <Video size={14} className="text-gray-400" /> },
+                      }}
+                    />
                   </div>
-                )}
+                </div>
+
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
                     {/* Upload Box - always shown */}

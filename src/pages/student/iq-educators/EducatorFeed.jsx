@@ -21,7 +21,7 @@ const TABS = [
 ];
 const ALL_TYPES = TABS.map((t) => t.key);
 
-const EducatorFeed = ({ educatorId, headerGradient }) => {
+const EducatorFeed = ({ educatorId, headerGradient, className = "", maxHeight, onReady, onEmptyChange }) => {
   // Genuine multi-select: nothing selected (the default) shows every content type merged
   // together; selecting one or more narrows the feed to just those types.
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -52,9 +52,16 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
       { skip: !educatorId }
     );
 
+  // latestOnly: collapses each idea/live idea thread down to just its current latest
+  // version, with the normal (non-follow-up) card design — used only while that type's
+  // filter is the SOLE active selection. The unfiltered/mixed view (and any other
+  // combination) fetches every item uncollapsed, with its follow-up design intact.
+  const isIdeasOnly = selectedTypes.length === 1 && selectedTypes[0] === "ideas";
+  const isLiveIdeasOnly = selectedTypes.length === 1 && selectedTypes[0] === "liveIdeas";
+
   const { data: ideasResponse, isFetching: isFetchingIdeas } =
     useGetEducatorIdeasQuery(
-      { educatorId, page: ideasPage, limit: PAGE_SIZE },
+      { educatorId, page: ideasPage, limit: PAGE_SIZE, latestOnly: isIdeasOnly },
       { skip: !educatorId }
     );
 
@@ -69,44 +76,70 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
   // currentPage/totalPages, so "hasMore" is derived below.
   const { data: liveIdeasResponse, isFetching: isFetchingLiveIdeas } =
     useGetLiveTradeIdeaQuery(
-      { id: educatorId, page: liveIdeasPage, limit: PAGE_SIZE },
+      { id: educatorId, page: liveIdeasPage, limit: PAGE_SIZE, latestOnly: isLiveIdeasOnly },
       { skip: !educatorId }
     );
 
-  // Append each newly-fetched page, de-duping by _id in case of any overlap.
+  // Switching in/out of the collapsed (latestOnly) view changes what shape of data comes
+  // back for that type — without a reset, previously-accumulated pages from the OTHER
+  // shape would stay merged into the array and show alongside the newly-fetched ones.
+  const prevIdeasOnlyRef = useRef(isIdeasOnly);
+  useEffect(() => {
+    if (prevIdeasOnlyRef.current !== isIdeasOnly) {
+      prevIdeasOnlyRef.current = isIdeasOnly;
+      setAllIdeas([]);
+      setIdeasPage(1);
+    }
+  }, [isIdeasOnly]);
+
+  const prevLiveIdeasOnlyRef = useRef(isLiveIdeasOnly);
+  useEffect(() => {
+    if (prevLiveIdeasOnlyRef.current !== isLiveIdeasOnly) {
+      prevLiveIdeasOnlyRef.current = isLiveIdeasOnly;
+      setAllLiveIdeas([]);
+      setLiveIdeasPage(1);
+    }
+  }, [isLiveIdeasOnly]);
+
+  // Merge each newly-fetched page into local state: update any item already loaded
+  // (e.g. edited since it was first fetched) with its fresh copy, in place, and append
+  // genuinely new ones. A plain "skip if already present" filter was silently keeping
+  // stale data forever — a refetch would fetch fresh data into postsResponse/
+  // ideasResponse/etc, but every already-seen item would just get discarded here
+  // instead of updating the matching item already in local state.
   useEffect(() => {
     if (!postsResponse?.posts) return;
     setAllPosts((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = postsResponse.posts.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      postsResponse.posts.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [postsResponse]);
 
   useEffect(() => {
     if (!ideasResponse?.ideas) return;
     setAllIdeas((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = ideasResponse.ideas.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      ideasResponse.ideas.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [ideasResponse]);
 
   useEffect(() => {
     if (!insightsResponse?.insights) return;
     setAllInsights((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = insightsResponse.insights.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      insightsResponse.insights.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [insightsResponse]);
 
   useEffect(() => {
     if (!liveIdeasResponse?.data) return;
     setAllLiveIdeas((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = liveIdeasResponse.data.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      liveIdeasResponse.data.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [liveIdeasResponse]);
 
@@ -242,20 +275,65 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
     loadMoreTriggeredRef.current = false;
   }, [activeTypesKey, allPosts, allIdeas, allInsights, allLiveIdeas, visibleCount]);
 
-  const handleScroll = (e) => {
-    const el = e.currentTarget;
-    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 80;
-    if (nearBottom) loadMore();
-  };
-
   // Loading if nothing's rendered yet and any of the currently-active types is still
   // fetching its first page.
   const isLoading =
     fullFeed.length === 0 &&
     activeTypes.some((t) => tabState[t].isFetching && tabState[t].page === 1);
 
+  // Reported up to IqEducators.jsx for its one-time page loading gate: this only ever
+  // needs to know about the very first load (all 4 tabs' page-1 fetches, since
+  // selectedTypes starts empty) — the parent latches it once and ignores any later
+  // isLoading flips from the user switching tabs, so this can just fire on every settle
+  // without needing to track "was this the first time" itself.
+  useEffect(() => {
+    if (!isLoading) onReady?.();
+  }, [isLoading, onReady]);
+
+  // Reported up to IqEducators.jsx so the sidebar slot this renders inside can drop its
+  // row-span/maxHeight sizing (meant for a genuinely tall feed) when the active tab has
+  // nothing to show — otherwise an empty/near-empty card still reserves the full height
+  // it would need for real content, leaving a large blank gap below the "no updates"
+  // placeholder. Only fires once loading has actually settled, so the fleeting initial
+  // isLoading=true state (before anything has even had a chance to arrive) never gets
+  // reported as "empty".
+  useEffect(() => {
+    if (!isLoading) onEmptyChange?.(combinedFeed.length === 0);
+  }, [isLoading, combinedFeed.length, onEmptyChange]);
+
+  // Genuine infinite scroll — no "Load more" click required. A sentinel sits right after
+  // the list; whenever it's visible within feedScrollRef (the list's own scroll
+  // container, passed as `root` so this works whether the list is actually tall enough
+  // to scroll or not), fetch the next page. This correctly covers BOTH cases a plain
+  // onScroll handler can't: a short first page that doesn't yet overflow the visible
+  // area (the sentinel is already on-screen, so this fires immediately without waiting
+  // for a scroll event that can never happen) and a long list (the sentinel only enters
+  // view once actually scrolled near the bottom, same as normal infinite-scroll).
+  // loadMore()'s own loadMoreTriggeredRef guard prevents this from firing a second fetch
+  // while one is already in flight; that guard resets once the fetched data actually
+  // lands (see the effect above), so this naturally re-fires and chains page after page
+  // for as long as the sentinel stays visible, stopping the moment canLoadMore is false.
+  const sentinelRef = useRef(null);
+  useEffect(() => {
+    const root = feedScrollRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { root, rootMargin: "80px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  });
+
+
   return (
-    <div className="rounded-2xl shadow-md overflow-hidden h-full flex flex-col bg-[#151320]">
+    <div
+      className={`rounded-2xl shadow-md overflow-hidden flex flex-col bg-[#151320] ${className}`}
+      style={maxHeight ? { maxHeight } : undefined}
+    >
       {/* Title */}
       <div className="pt-3 pb-2 px-4 select-none flex-shrink-0">
         <h3 className="text-white font-bold text-sm sm:text-base text-center">
@@ -311,7 +389,6 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
       <div
         ref={feedScrollRef}
         className="flex-1 min-h-0 p-3 overflow-y-auto space-y-3"
-        onScroll={handleScroll}
       >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[150px]">
@@ -327,13 +404,28 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
           combinedFeed.map((entry) => {
             switch (entry.type) {
               case "posts":
-                return <SocialPostCard key={entry.id} post={entry.raw} showTypeBadge />;
+                return (
+                  <SocialPostCard
+                    key={entry.id}
+                    post={entry.raw}
+                    showTypeBadge
+                    showAuthorName={false}
+                  />
+                );
               case "ideas":
-                return <IdeaFeedCard key={entry.id} idea={entry.raw} />;
+                return (
+                  <IdeaFeedCard key={entry.id} idea={entry.raw} showFollowUp={!isIdeasOnly} />
+                );
               case "insights":
                 return <InsightFeedCard key={entry.id} insight={entry.raw} />;
               case "liveIdeas":
-                return <LiveIdeaFeedCard key={entry.id} liveIdea={entry.raw} />;
+                return (
+                  <LiveIdeaFeedCard
+                    key={entry.id}
+                    liveIdea={entry.raw}
+                    showFollowUp={!isLiveIdeasOnly}
+                  />
+                );
               default:
                 return null;
             }
@@ -342,6 +434,10 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
 
         {!isLoading && combinedFeed.length > 0 && (isFetchingMore || canLoadMore) && (
           <div className="flex items-center justify-center py-2">
+            {/* The sentinel (not this text) is what actually drives loading — see the
+                IntersectionObserver effect above. "Loading more..." just reflects that;
+                the click handler stays only as a fallback for browsers without
+                IntersectionObserver support. */}
             {isFetchingMore ? (
               <span className="text-[11px] text-white/40">Loading more...</span>
             ) : (
@@ -355,6 +451,7 @@ const EducatorFeed = ({ educatorId, headerGradient }) => {
             )}
           </div>
         )}
+        {!isLoading && canLoadMore && <div ref={sentinelRef} className="h-px" />}
       </div>
     </div>
   );

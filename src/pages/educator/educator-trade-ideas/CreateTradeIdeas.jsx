@@ -5,6 +5,8 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DraggableImageList from "@/components/ui/DraggableImageList";
 import DraggableLinkList from "@/components/ui/DraggableLinkList";
+import DraggableMediaOrder from "@/components/ui/DraggableMediaOrder";
+import { ImageIcon, Link2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,11 @@ const CreateTradeIdeas = forwardRef(
       selectedRow,
       refetch,
       onSubmitSuccess,
+      // "Update" (chain) action: the source idea to link the new one back to via
+      // previousIdea, forming a thread — see EducatorTradeIdeas.jsx's ActionMenu. Always
+      // creates a brand-new document, never an in-place edit.
+      chainFrom,
+      setChainFrom,
     },
     ref
   ) => {
@@ -48,6 +54,19 @@ const CreateTradeIdeas = forwardRef(
 
     const educatorId = auth?.user?._id ?? null;
     const { data } = useGetCommonCategoryQuery();
+    // Pure chain-create: no existing record yet, a brand-new document is POSTed with
+    // previousIdea pointing at chainFrom. Never true while editing an existing record.
+    const isChainMode = !selectedRow?._id && !!chainFrom?._id;
+    // Editing an EXISTING follow-up in place (opened from the thread modal's pencil
+    // icon on a non-root item): both an id to PUT to AND a predecessor to show as the
+    // read-only reference strip. Distinct from plain Edit (selectedRow set, chainFrom
+    // null — used only for the original/root record).
+    const isFollowUpEdit = !!selectedRow?._id && !!chainFrom?._id;
+    // Drives every UI/validation gate that should behave the same whether we're
+    // creating a new follow-up or editing an existing one — only actual submission
+    // (create vs update, and whether previousIdea is sent) still branches on the two
+    // flags separately below.
+    const isFollowUpForm = isChainMode || isFollowUpEdit;
 
     const initialValues = {
       name: "",
@@ -62,8 +81,11 @@ const CreateTradeIdeas = forwardRef(
       description: "",
       category: "",
       pips: 0,
-      checkTime: false,
       tradingViewLinks: [""],
+      // Educator-chosen display order between images and TradingView charts (Task 14) —
+      // whichever group is first here is what students see first. Ideas have no video
+      // field, so only these two groups apply.
+      mediaOrder: ["image", "tradingview"],
     };
     const numberField = () =>
       Yup.number()
@@ -92,11 +114,27 @@ const CreateTradeIdeas = forwardRef(
         .required("Status is required"),
       timeFrame: Yup.string().required("Type is required"),
       educatorId: Yup.string().required("Educator ID is required"),
-      entry: Yup.number().required("Entry is required").positive("Entry must be a positive number"),
-      description: Yup.string().required("Description is required"),
+      // Entry is only ever shown/editable outside a follow-up form (create-chain or
+      // edit-follow-up) — there it's seeded from the reference record and never
+      // touched again, so it's not required there.
+      entry: !isFollowUpForm
+        ? Yup.number().required("Entry is required").positive("Entry must be a positive number")
+        : Yup.number().notRequired(),
+      // Required outside a follow-up form (unchanged); optional there — the educator
+      // may have nothing to add beyond the reference fields/status being reported.
+      description: !isFollowUpForm
+        ? Yup.string().required("Description is required")
+        : Yup.string().notRequired(),
+      // Outside a follow-up form both are always shown (unchanged behavior). In a
+      // follow-up form, only the field matching the outcome being reported is
+      // shown/required — Invalidation for a Loss/Break Even, Exits for a Win/Partial Win.
       invalidation: Yup.number()
         .typeError("Invalidation must be a number")
-        .required("Invalidation is required"),
+        .when("status", {
+          is: (status) => !isFollowUpForm || ["loss", "breakEven"].includes(status),
+          then: (schema) => schema.required("Invalidation is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
       exits: Yup.array()
         .of(
           Yup.number()
@@ -104,12 +142,20 @@ const CreateTradeIdeas = forwardRef(
             .required("Exit is required")
             .positive("Exit must be a positive number")
         )
-        .min(1, "At least one exit is required"),
+        .when("status", {
+          is: (status) => !isFollowUpForm || ["win", "partialWin"].includes(status),
+          then: (schema) => schema.min(1, "At least one exit is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
       category: Yup.string().required("Category is required"),
       pips: Yup.number()
         .typeError("Pips must be a number")
         .when("status", {
-          is: (status) => ["win", "loss", "partialWin"].includes(status),
+          is: (status) =>
+            (isFollowUpForm
+              ? ["win", "loss", "partialWin", "breakEven"]
+              : ["win", "loss", "partialWin"]
+            ).includes(status),
           then: (schema) =>
             schema
               .required("Pips is required")
@@ -143,15 +189,19 @@ const CreateTradeIdeas = forwardRef(
         formData.append("invalidation", values.invalidation);
         formData.append("description", values.description);
         formData.append("category", values.category);
-        formData.append("checkTime", values.checkTime);
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
 
         // Append TradingView links (always send, even empty, so backend can clear old links)
         const tvLinks = (values.tradingViewLinks || []).filter(l => l && l.trim());
         formData.append("tradingViewLinks", JSON.stringify(tvLinks));
 
-        // Send existing image URLs the user kept (so backend knows which to preserve)
-        if (selectedRow?._id) {
+        // Educator-chosen display order between the media groups (Task 14).
+        formData.append("mediaOrder", JSON.stringify(values.mediaOrder || ["image", "tradingview"]));
+
+        // Send existing image URLs the user kept (so backend knows which to preserve) —
+        // both for editing in place, and for a chain-create where images were pre-loaded
+        // from the source idea and the educator may have pruned some.
+        if (selectedRow?._id || isChainMode) {
           const keptImages = (values.files || [])
             .filter((f) => !f?.file?.file && f?.dataURL)
             .map((f) => f.dataURL);
@@ -162,24 +212,31 @@ const CreateTradeIdeas = forwardRef(
           formData.append("id", selectedRow?._id);
         }
 
+        if (isChainMode) {
+          formData.append("previousIdea", chainFrom._id);
+        }
+
         try {
           if (selectedRow?._id) {
             await updateEducatorTradeIdea(formData).unwrap();
 
-            toast.success("Idea updated successfully!");
+            toast.success(isFollowUpEdit ? "Follow-up updated successfully!" : "Idea updated successfully!");
           } else {
             await createEducatorTradeIdeas(formData).unwrap();
 
-            toast.success("Idea created successfully!");
+            toast.success(isChainMode ? "Update published successfully!" : "Idea created successfully!");
           }
           const wasUpdate = !!selectedRow?._id;
           formik.resetForm();
           setSelectedRow(null);
+          setChainFrom?.(null);
           refetch();
           handleCloseCreate();
           // Share-to-social prompt only makes sense when updating an existing idea, not
-          // when creating a brand new one.
-          if (wasUpdate && onSubmitSuccess) onSubmitSuccess();
+          // when creating a brand new one (chained or plain).
+          // Never for a chain-create or a follow-up edit — sharing only makes sense for
+          // the original idea itself, not a follow-up in its thread.
+          if (wasUpdate && !isFollowUpEdit && onSubmitSuccess) onSubmitSuccess();
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =
@@ -197,10 +254,23 @@ const CreateTradeIdeas = forwardRef(
       }
     }, [educatorId, formik.values]);
 
+    // Opening the form for a plain Create always starts blank. This used to keep values
+    // from the previous session so a half-written idea survived being closed, but that
+    // also meant Create reopened showing the last idea's symbol, description and levels —
+    // and an abandoned draft silently became the starting point for the next idea. Edit
+    // and Follow-Up are left alone here; their own effects below fill the form.
+    useEffect(() => {
+      if (!isCreateOpen) return;
+      if (selectedRow?._id || chainFrom?._id) return;
+      formik.resetForm({ values: { ...initialValues, educatorId: educatorId || "" } });
+    }, [isCreateOpen, selectedRow?._id, chainFrom?._id]);
+
     useEffect(() => {
       if (selectedRow?._id) {
         const existingImages =
-          selectedRow?.image?.map((img) => ({
+          // Only this record's own images — the stack of earlier records' images is shown to
+          // students only. Falls back to `image` for records saved before ownImage existed.
+          (selectedRow?.ownImage?.length ? selectedRow.ownImage : selectedRow?.image)?.map((img) => ({
             file: null,
             dataURL: img,
           })) || [];
@@ -217,12 +287,47 @@ const CreateTradeIdeas = forwardRef(
           description: selectedRow?.description,
           exits: selectedRow?.exits,
           pips: selectedRow?.pips,
-          checkTime: selectedRow?.isUpdatedIdea || false,
           tradingViewLinks: selectedRow?.tradingViewLinks?.length > 0 ? selectedRow.tradingViewLinks : [""],
+          mediaOrder: selectedRow?.mediaOrder?.length > 0 ? selectedRow.mediaOrder : ["image", "tradingview"],
         };
         formik.setValues(initData);
       }
     }, [selectedRow?._id, isCreateOpen]);
+
+    // "Update" (chain) action: reference fields (symbol/direction/type/entry/invalidation/
+    // exits/category) are copied from the source idea — they're rendered read-only below,
+    // not editable, since this is reporting an outcome on the same trade setup, not a new
+    // one. Images ARE pre-loaded (unlike Insights' chain form, which starts blank) so the
+    // educator can keep "before" images alongside new "after" ones, per Task 11. Status/
+    // pips/description start fresh — this is a new outcome being reported.
+    useEffect(() => {
+      if (!selectedRow?._id && chainFrom?._id) {
+        // A follow-up starts with no images. Whatever the educator adds here is this
+        // record's OWN image; the backend stacks the earlier records' images beneath it
+        // (newest first) when building the post. Pre-loading the source's images made
+        // them look like this follow-up's own, which is what stacked them twice.
+        const seedImages = [];
+
+        formik.setValues({
+          name: chainFrom?.name || "",
+          files: seedImages,
+          type: chainFrom?.type || "",
+          timeFrame: Array.isArray(chainFrom?.timeFrame)
+            ? chainFrom.timeFrame[0]
+            : chainFrom?.timeFrame || "",
+          status: chainFrom?.status || "active",
+          category: chainFrom?.category?._id || "",
+          entry: chainFrom?.entry || "",
+          invalidation: chainFrom?.invalidation || "",
+          description: "",
+          exits: chainFrom?.exits?.length > 0 ? chainFrom.exits : [""],
+          pips: 0,
+          educatorId: chainFrom?.educatorDetails?._id || educatorId,
+          tradingViewLinks: [""],
+          mediaOrder: chainFrom?.mediaOrder?.length > 0 ? chainFrom.mediaOrder : ["image", "tradingview"],
+        });
+      }
+    }, [chainFrom?._id, selectedRow?._id, isCreateOpen]);
 
     // Function to add a new exit input
     const addExit = () => {
@@ -258,8 +363,28 @@ const CreateTradeIdeas = forwardRef(
 
     const handleRemoveImage = (index) => {
       const newFiles = [...formik.values.files];
-      newFiles.splice(index, 1);
+      const [removed] = newFiles.splice(index, 1);
       formik.setFieldValue("files", newFiles);
+
+      // Removing an auto-generated TradingView chart image (tv-chart-images container)
+      // should also drop its source link — otherwise the next save regenerates the
+      // very image the user just removed. Snapshot images are appended in the same
+      // order as their (non-empty) source links, so the Nth TV image maps to the
+      // Nth non-empty link.
+      if (removed?.dataURL?.includes("tv-chart-images")) {
+        const tvImageIndex = newFiles
+          .slice(0, index)
+          .filter((f) => f?.dataURL?.includes("tv-chart-images")).length;
+        const links = [...(formik.values.tradingViewLinks || [])];
+        const nonEmptyLinkIndexes = links
+          .map((link, i) => (link && link.trim() ? i : -1))
+          .filter((i) => i !== -1);
+        const linkIndexToRemove = nonEmptyLinkIndexes[tvImageIndex];
+        if (linkIndexToRemove !== undefined) {
+          links.splice(linkIndexToRemove, 1);
+          formik.setFieldValue("tradingViewLinks", links.length > 0 ? links : [""]);
+        }
+      }
     };
 
     // Drag-and-drop reorder handlers
@@ -301,6 +426,7 @@ const CreateTradeIdeas = forwardRef(
           // here since it tracks edit-vs-create mode, not the form's field values.
           onOpenChange={() => {
             setSelectedRow({});
+            setChainFrom?.(null);
             handleCloseCreate();
           }}
         >
@@ -308,11 +434,68 @@ const CreateTradeIdeas = forwardRef(
           <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id ? "Create IQ Idea" : "Create IQ Idea"}
+                {isFollowUpEdit
+                  ? "Edit Follow-Up"
+                  : selectedRow?._id
+                    ? "Edit IQ Idea"
+                    : isChainMode
+                      ? "Update IQ Idea"
+                      : "Create IQ Idea"}
               </DialogTitle>
+              {isChainMode && (
+                <p className="text-xs text-gray-500 mt-1">
+                  This publishes a follow-up idea chained to "{chainFrom?.name}".
+                </p>
+              )}
+              {isFollowUpEdit && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Editing this follow-up in the thread for "{chainFrom?.name}".
+                </p>
+              )}
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">
               <div className="grid grid-cols-12 gap-4">
+                {isFollowUpForm && (
+                  <div className="col-span-12">
+                    <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-3 flex flex-wrap gap-x-6 gap-y-2">
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Symbol</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.name || "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Direction</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100 capitalize">{chainFrom?.type || "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Type</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100 capitalize">{Array.isArray(chainFrom?.timeFrame) ? chainFrom.timeFrame.join("/") : chainFrom?.timeFrame || "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Entry</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.entry ?? "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Invalidation</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.invalidation ?? "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Exits</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.exits?.join(", ") || "—"}</span>
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Category</span>
+                        <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom?.category?.name || "—"}</span>
+                      </span>
+                      {!!chainFrom?.pips && (
+                        <span className="flex flex-col gap-0.5">
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Pips</span>
+                          <span className="text-xs font-medium text-slate-800 dark:text-slate-100">{chainFrom.pips}</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -335,6 +518,8 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
+                )}
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -370,11 +555,12 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
+                )}
 
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
-                      Description<span className="text-danger">*</span>
+                      Description{!isFollowUpForm && <span className="text-danger">*</span>}
                     </label>
                     <RichTextEditor
                       content={formik.values.description}
@@ -397,6 +583,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -433,6 +620,7 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
+                )}
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -456,7 +644,7 @@ const CreateTradeIdeas = forwardRef(
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
+                        {!isFollowUpForm && <SelectItem value="pending">Pending</SelectItem>}
                         <SelectItem value="active">Active</SelectItem>
                         <SelectItem value="win">Win</SelectItem>
                         <SelectItem value="partialWin">Partial Win</SelectItem>
@@ -473,6 +661,7 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -495,6 +684,8 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
+                )}
+                {(!isFollowUpForm || ["loss", "breakEven"].includes(formik.values.status)) && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -519,6 +710,8 @@ const CreateTradeIdeas = forwardRef(
                       )}
                   </div>
                 </div>
+                )}
+                {(!isFollowUpForm || ["win", "partialWin"].includes(formik.values.status)) && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -571,6 +764,8 @@ const CreateTradeIdeas = forwardRef(
                     ))}
                   </div>
                 </div>
+                )}
+                {!isFollowUpForm && (
                 <div className="col-span-12 md:col-span-6">
                   <div className="flex flex-col w-full gap-1">
                     <label className="form-label text-gray-900 gap-1">
@@ -607,26 +802,8 @@ const CreateTradeIdeas = forwardRef(
                     )}
                   </div>
                 </div>
-
-                {selectedRow?._id && (
-                  <div className="col-span-12 md:col-span-6">
-                    <div className="flex items-center gap-2 h-full ">
-                      <Checkbox
-                        id="checkTime"
-                        checked={formik.values.checkTime}
-                        onCheckedChange={(checked) =>
-                          formik.setFieldValue("checkTime", checked)
-                        }
-                      />
-                      <label
-                        htmlFor="checkTime"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        Do Not Update TimeStamp
-                      </label>
-                    </div>
-                  </div>
                 )}
+
                 {/* <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -648,9 +825,10 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div> */}
 
-                {["win", "loss", "partialWin"].includes(
-                  formik.values.status
-                ) && (
+                {(isFollowUpForm
+                  ? ["win", "loss", "partialWin", "breakEven"]
+                  : ["win", "loss", "partialWin"]
+                ).includes(formik.values.status) && (
                     <div className="col-span-12 md:col-span-6">
                       <div className="flex flex-col gap-1">
                         <label className="form-label text-gray-900 gap-1">
@@ -693,6 +871,25 @@ const CreateTradeIdeas = forwardRef(
                   </div>
                 </div>
 
+                {/* Display order (Task 14): which media type students see first */}
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-1">
+                    <label className="form-label text-slate-800 dark:text-slate-100 gap-1">
+                      Display Order
+                    </label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                      Drag to choose which media students see first.
+                    </p>
+                    <DraggableMediaOrder
+                      order={formik.values.mediaOrder || ["image", "tradingview"]}
+                      onChange={(next) => formik.setFieldValue("mediaOrder", next)}
+                      labels={{
+                        image: { label: "Image", icon: <ImageIcon size={14} className="text-gray-400" /> },
+                        tradingview: { label: "TradingView Chart", icon: <Link2 size={14} className="text-gray-400" /> },
+                      }}
+                    />
+                  </div>
+                </div>
 
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">
@@ -740,6 +937,7 @@ const CreateTradeIdeas = forwardRef(
                 className="btn btn-light"
                 onClick={() => {
                   setSelectedRow(null);
+                  setChainFrom?.(null);
                   formik.resetForm();
                   handleCloseCreate();
                 }}

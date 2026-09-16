@@ -527,36 +527,48 @@ const TradingStrategies = () => {
                                 </div>
                             )}
                             <div className="card rounded-2xl border border-gray-300 overflow-hidden">
-                                <div className="w-full h-[425px] dark:bg-black flex items-center justify-center bg-gray-200">
-                                    {/* Show loading while fetching strategy details */}
-                                    {strategyLoading ? (
-                                        <div className="text-center">
-                                            <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
-                                            <h3 className="text-xl text-gray-200">Loading strategy details...</h3>
-                                        </div>
-                                    ) : activeLecture?.content ? (
-                                        <iframe
-                                            src={getEmbedUrl(activeLecture?.content)}
-                                            className="w-full h-full"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                            title={activeLecture?.title || "Video Player"}
-                                        />
-                                    ) : currentStrategy?.sections?.length > 0 && activeSectionHasContent ? (
-                                        <div className="text-center">
-                                            <div className="text-8xl mb-5 opacity-30 text-white">▶</div>
-                                            <h3 className="text-xl text-white">
-                                                Select a lecture to start watching
-                                            </h3>
-                                        </div>
-                                    ) : currentStrategy ? (
-                                        // No sections at all, or the selected section has no lectures/subsections yet
-                                        <div className="text-center text-gray-400">
-                                            <div className="text-8xl mb-5 opacity-30">▶</div>
-                                            <h3 className="text-xl text-gray-200">No lessons available for this strategy</h3>
-                                            <p className="text-sm text-gray-400 mt-2">Lessons will be added soon</p>
-                                        </div>
-                                    ) : null}
+                                {/* Height was a flat h-[425px] before, which didn't match a proper 16:9
+                                    box at this column's actual (responsive) width — too short at some
+                                    widths (clipping Dyntube's toolbar, which sits below the video rather
+                                    than overlaid on it like YouTube's), too tall at others (dead space
+                                    below the player). Padding-top as a % of width keeps it at a real 16:9
+                                    for every embed and every width instead of one fixed guess. */}
+                                <div
+                                    className="relative w-full dark:bg-black bg-gray-200"
+                                    style={{ paddingTop: "56.25%" }}
+                                >
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        {/* Show loading while fetching strategy details */}
+                                        {strategyLoading ? (
+                                            <div className="text-center">
+                                                <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
+                                                <h3 className="text-xl text-gray-200">Loading strategy details...</h3>
+                                            </div>
+                                        ) : activeLecture?.content ? (
+                                            <iframe
+                                                src={getEmbedUrl(activeLecture?.content)}
+                                                className="absolute inset-0 w-full h-full"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                style={{ border: "none" }}
+                                                title={activeLecture?.title || "Video Player"}
+                                            />
+                                        ) : currentStrategy?.sections?.length > 0 && activeSectionHasContent ? (
+                                            <div className="text-center">
+                                                <div className="text-8xl mb-5 opacity-30 text-white">▶</div>
+                                                <h3 className="text-xl text-white">
+                                                    Select a lecture to start watching
+                                                </h3>
+                                            </div>
+                                        ) : currentStrategy ? (
+                                            // No sections at all, or the selected section has no lectures/subsections yet
+                                            <div className="text-center text-gray-400">
+                                                <div className="text-8xl mb-5 opacity-30">▶</div>
+                                                <h3 className="text-xl text-gray-200">No lessons available for this strategy</h3>
+                                                <p className="text-sm text-gray-400 mt-2">Lessons will be added soon</p>
+                                            </div>
+                                        ) : null}
+                                    </div>
                                 </div>
                                 {/* Video Info Bar - Only show if active lecture exists */}
                                 {/* {activeLecture && (

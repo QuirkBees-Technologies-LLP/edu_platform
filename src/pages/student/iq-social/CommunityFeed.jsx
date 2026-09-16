@@ -21,6 +21,9 @@ import {
 } from "@/partials/toolbar";
 
 const PAGE_SIZE = 10;
+// Slots held for each active content type in the combined feed's first window, so a type
+// with few (or older) items still surfaces instead of being buried by a busier one.
+const MIN_SLOTS_PER_TYPE = 2;
 
 // Tabs — same selection model as the Educator Feed: nothing selected (the default) shows
 // every content type merged together; selecting one or more narrows the feed down to just
@@ -146,49 +149,84 @@ const CommunityFeed = () => {
     isError: isErrorPosts,
   } = usePostQuery({ page: postsPage, limit: PAGE_SIZE, socialType: "all" });
 
+  // latestOnly: collapses each idea/live idea thread down to just its current latest
+  // version, with the normal (non-follow-up) card design — used only while that type's
+  // filter is the SOLE active selection (see the same flag on /ideas and /live-ideas).
+  // Any other selection, including the default "nothing selected" mixed feed, fetches
+  // every item uncollapsed, with its follow-up design intact.
+  const isIdeasOnly = selectedTypes.length === 1 && selectedTypes[0] === "ideas";
+  const isLiveIdeasOnly = selectedTypes.length === 1 && selectedTypes[0] === "liveIdeas";
+
   const { data: ideasResponse, isFetching: isFetchingIdeas } =
-    useGetClientTradeIdeasQuery({ page: ideasPage, limit: PAGE_SIZE });
+    useGetClientTradeIdeasQuery({ page: ideasPage, limit: PAGE_SIZE, latestOnly: isIdeasOnly });
 
   const { data: insightsResponse, isFetching: isFetchingInsights } =
     useGetClientTradeAnalysisQuery({ page: insightsPage, limit: PAGE_SIZE });
 
   const { data: liveIdeasResponse, isFetching: isFetchingLiveIdeas } =
-    useGetClientLiveIdeasQuery({ page: liveIdeasPage, limit: PAGE_SIZE });
+    useGetClientLiveIdeasQuery({ page: liveIdeasPage, limit: PAGE_SIZE, latestOnly: isLiveIdeasOnly });
 
-  // Append each newly-fetched page, de-duping by _id in case of any overlap.
+  // Switching in/out of the collapsed (latestOnly) view changes what shape of data comes
+  // back for that type — without a reset, previously-accumulated pages from the OTHER
+  // shape would stay merged into the array and show alongside the newly-fetched ones.
+  const prevIdeasOnlyRef = useRef(isIdeasOnly);
+  useEffect(() => {
+    if (prevIdeasOnlyRef.current !== isIdeasOnly) {
+      prevIdeasOnlyRef.current = isIdeasOnly;
+      setAllIdeas([]);
+      setIdeasPage(1);
+    }
+  }, [isIdeasOnly]);
+
+  const prevLiveIdeasOnlyRef = useRef(isLiveIdeasOnly);
+  useEffect(() => {
+    if (prevLiveIdeasOnlyRef.current !== isLiveIdeasOnly) {
+      prevLiveIdeasOnlyRef.current = isLiveIdeasOnly;
+      setAllLiveIdeas([]);
+      setLiveIdeasPage(1);
+    }
+  }, [isLiveIdeasOnly]);
+
+  // Merge each newly-fetched page into local state: update any item already loaded
+  // (e.g. edited since it was first fetched) with its fresh copy, in place, and append
+  // genuinely new ones. This ran on EVERY fetch here (no "first page = full replace"
+  // branch, unlike the other list pages), so a plain "skip if already present" filter
+  // meant an edited item's fresh data — status included — was thrown away and the
+  // stale copy already in local state just kept being shown, no matter how many times
+  // the underlying query refetched.
   useEffect(() => {
     if (!postsResponse?.posts) return;
     setAllPosts((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = postsResponse.posts.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      postsResponse.posts.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [postsResponse]);
 
   useEffect(() => {
     if (!ideasResponse?.data) return;
     setAllIdeas((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = ideasResponse.data.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      ideasResponse.data.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [ideasResponse]);
 
   useEffect(() => {
     if (!insightsResponse?.data) return;
     setAllInsights((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = insightsResponse.data.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      insightsResponse.data.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [insightsResponse]);
 
   useEffect(() => {
     if (!liveIdeasResponse?.data) return;
     setAllLiveIdeas((prev) => {
-      const seen = new Set(prev.map((p) => p._id));
-      const fresh = liveIdeasResponse.data.filter((p) => !seen.has(p._id));
-      return fresh.length ? [...prev, ...fresh] : prev;
+      const merged = new Map(prev.map((p) => [p._id, p]));
+      liveIdeasResponse.data.forEach((p) => merged.set(p._id, p));
+      return Array.from(merged.values());
     });
   }, [liveIdeasResponse]);
 
@@ -261,7 +299,34 @@ const CommunityFeed = () => {
     setVisibleCount(PAGE_SIZE);
   }, [activeTypesKey]);
 
-  const display = isSingle ? fullFeed : fullFeed.slice(0, visibleCount);
+  // Reserving a couple of slots per type is what keeps a sparse type visible. Sorting the
+  // combined pool purely by recency lets the type with the most content monopolise the
+  // window: site-wide there are hundreds of Ideas against a handful of Live Ideas, and
+  // every Live Idea is older than the newest ~16 Ideas/Posts, so a plain slice(0, 10)
+  // pushed Live Ideas past position 10 and they only appeared after several scrolls. The
+  // Educator Feed never shows this because a single educator has few enough Ideas that
+  // everything fits the first window anyway — the logic there is identical.
+  const display = useMemo(() => {
+    if (isSingle) return fullFeed;
+    if (fullFeed.length <= visibleCount) return fullFeed;
+
+    const chosen = new Set();
+    // Reserve first, so a sparse type gets in before the busy ones fill every slot.
+    activeTypes.forEach((type) => {
+      fullFeed
+        .filter((item) => item.type === type)
+        .slice(0, MIN_SLOTS_PER_TYPE)
+        .forEach((item) => chosen.add(item.id));
+    });
+    // Then fill whatever's left strictly by recency.
+    for (const item of fullFeed) {
+      if (chosen.size >= visibleCount) break;
+      chosen.add(item.id);
+    }
+    // Filtering fullFeed (already newest-first) keeps the window in date order, so the
+    // feed still reads chronologically — reservation only decides who's in it, not where.
+    return fullFeed.filter((item) => chosen.has(item.id));
+  }, [fullFeed, visibleCount, isSingle, activeTypesKey]);
 
   const canLoadMore = isSingle
     ? tabState[activeTypes[0]]?.hasNext ?? false
@@ -443,11 +508,13 @@ const CommunityFeed = () => {
                   case "posts":
                     return <SocialPostCard post={item.raw} showTypeBadge />;
                   case "ideas":
-                    return <SocialIdeaCard idea={item.raw} />;
+                    return <SocialIdeaCard idea={item.raw} showFollowUp={!isIdeasOnly} />;
                   case "insights":
                     return <SocialInsightCard insight={item.raw} />;
                   case "liveIdeas":
-                    return <SocialLiveIdeaCard liveIdea={item.raw} />;
+                    return (
+                      <SocialLiveIdeaCard liveIdea={item.raw} showFollowUp={!isLiveIdeasOnly} />
+                    );
                   default:
                     return null;
                 }
