@@ -213,7 +213,9 @@ const CreateLiveTradeIdea = forwardRef(
     useEffect(() => {
       if (selectedRow?._id) {
         const existingImages =
-          selectedRow?.image?.map((img) => ({
+          // Only this record's own images — the stack of earlier records' images is shown to
+          // students only. Falls back to `image` for records saved before ownImage existed.
+          (selectedRow?.ownImage?.length ? selectedRow.ownImage : selectedRow?.image)?.map((img) => ({
             file: null,
             dataURL: img,
           })) || [];
@@ -246,10 +248,11 @@ const CreateLiveTradeIdea = forwardRef(
     // alongside new "after" ones, per Task 11. Status/pips/description start fresh.
     useEffect(() => {
       if (!selectedRow?._id && chainFrom?._id) {
-        const seedImages = (chainFrom?.image || []).map((img) => ({
-          file: null,
-          dataURL: img,
-        }));
+        // A follow-up starts with no images. Whatever the educator adds here is this
+        // record's OWN image; the backend stacks the earlier records' images beneath it
+        // (newest first) when building the post. Pre-loading the source's images made
+        // them look like this follow-up's own, which is what stacked them twice.
+        const seedImages = [];
 
         formik.setValues({
           name: chainFrom?.name || "",

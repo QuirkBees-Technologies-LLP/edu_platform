@@ -46,11 +46,11 @@ export default function StudentIqSlider({
     prevArrow: <PrevArrow />,
     appendDots: (dots) => (
       <div>
-        <ul className="flex justify-center gap-2 mt-3">{dots}</ul>
+        <ul className="flex justify-center items-center gap-2 mt-3 [&>li]:flex [&>li]:items-center [&>li]:justify-center [&>li]:cursor-pointer [&>li.slick-active>div]:w-5 [&>li.slick-active>div]:bg-primary">{dots}</ul>
       </div>
     ),
     customPaging: () => (
-      <div className="w-2 h-2 bg-gray-400 rounded-full hover:bg-gray-700" />
+      <div className="w-2 h-2 bg-gray-400 rounded-full hover:bg-gray-600 transition-all duration-300" />
     ),
   };
 
