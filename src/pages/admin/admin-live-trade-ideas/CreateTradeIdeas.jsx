@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState, useRef } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -210,35 +210,50 @@ const CreateLiveTradeIdea = forwardRef(
       }
     }, [educatorId, formik.values]);
 
+    // Guards against re-seeding mid-session: this effect's dependency array compares
+    // selectedRow?._id by reference, and any re-render that hands it a new-but-equal id
+    // (e.g. an ObjectId re-created by a table refetch, or one triggered by the async image
+    // upload below) re-runs it and overwrites whatever the user had already typed with the
+    // record's stored values — seen as Pips silently reverting after uploading an image.
+    // Tracking the id we've already seeded, keyed to this open session, makes the seed
+    // happen exactly once per Edit, no matter how many extra times the effect fires.
+    const seededEditIdRef = useRef(null);
     useEffect(() => {
-      if (selectedRow?._id) {
-        const existingImages =
-          // Only this record's own images — the stack of earlier records' images is shown to
-          // students only. Falls back to `image` for records saved before ownImage existed.
-          (selectedRow?.ownImage?.length ? selectedRow.ownImage : selectedRow?.image)?.map((img) => ({
-            file: null,
-            dataURL: img,
-          })) || [];
-
-        const initData = {
-          name: selectedRow?.name,
-          files: existingImages,
-          type: selectedRow?.type,
-          status: selectedRow?.status,
-          category: selectedRow?.category?._id,
-          pips: selectedRow?.pips,
-          educatorId: selectedRow?.educatorId,
-          streamCallId: selectedRow?.streamCallId,
-          isLiveIdea: selectedRow?.isLiveIdea,
-          timeFrame: selectedRow?.timeFrame,
-          // Only ever populated on a follow-up (see isFollowUpEdit) — a root live idea
-          // never has these, so they simply stay blank/default in that case.
-          description: selectedRow?.description || "",
-          invalidation: selectedRow?.invalidation ?? "",
-          exits: selectedRow?.exits?.length > 0 ? selectedRow.exits : [""],
-        };
-        formik.setValues(initData);
+      if (!isCreateOpen) {
+        seededEditIdRef.current = null;
+        return;
       }
+      if (!selectedRow?._id) return;
+      const id = String(selectedRow._id);
+      if (seededEditIdRef.current === id) return;
+      seededEditIdRef.current = id;
+
+      const existingImages =
+        // Only this record's own images — the stack of earlier records' images is shown to
+        // students only. Falls back to `image` for records saved before ownImage existed.
+        (selectedRow?.ownImage?.length ? selectedRow.ownImage : selectedRow?.image)?.map((img) => ({
+          file: null,
+          dataURL: img,
+        })) || [];
+
+      const initData = {
+        name: selectedRow?.name,
+        files: existingImages,
+        type: selectedRow?.type,
+        status: selectedRow?.status,
+        category: selectedRow?.category?._id,
+        pips: selectedRow?.pips,
+        educatorId: selectedRow?.educatorId,
+        streamCallId: selectedRow?.streamCallId,
+        isLiveIdea: selectedRow?.isLiveIdea,
+        timeFrame: selectedRow?.timeFrame,
+        // Only ever populated on a follow-up (see isFollowUpEdit) — a root live idea
+        // never has these, so they simply stay blank/default in that case.
+        description: selectedRow?.description || "",
+        invalidation: selectedRow?.invalidation ?? "",
+        exits: selectedRow?.exits?.length > 0 ? selectedRow.exits : [""],
+      };
+      formik.setValues(initData);
     }, [selectedRow?._id, isCreateOpen]);
 
     // "Update" (chain) action: reference fields (symbol/direction/type/category) are
