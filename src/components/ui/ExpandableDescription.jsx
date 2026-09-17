@@ -1,14 +1,14 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 
-const TEXT_CLASS = "text-[15px] font-medium leading-[22px] text-slate-800 dark:text-slate-100";
+const BASE_TEXT_CLASS = "text-[15px] font-medium leading-[22px] text-slate-800 dark:text-slate-100";
 const TOGGLE_CLASS =
   "text-[12px] font-semibold leading-[22px] text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors";
 // Block-level markup from the rich-text editor is forced inline in the collapsed teaser so
 // the toggle can sit on the same line as the text it follows — a trailing <p> would
 // otherwise push it onto a line of its own.
 const INLINE_CHILDREN = "[&_p]:inline [&_p]:m-0 [&_div]:inline";
-const LINE_HEIGHT = 22; // leading-[22px], in px
-const MAX_LINES = 2;
+const DEFAULT_LINE_HEIGHT = 22; // matches BASE_TEXT_CLASS's leading-[22px], in px
+const DEFAULT_MAX_LINES = 2;
 
 // Returns `root`'s HTML truncated to `limit` visible characters, with tags kept balanced
 // and any trailing whitespace trimmed (so the ellipsis butts directly against the last
@@ -61,7 +61,18 @@ const truncateToChars = (root, limit) => {
 //
 // Re-measured on width changes, since these cards render at several widths (full-width
 // list, 3-up grid, sidebar feed) and the same text wraps differently in each.
-const ExpandableDescription = ({ html }) => {
+const ExpandableDescription = ({
+  html,
+  textClassName = "",
+  // A caller overriding the font size/line-height via textClassName (e.g. a bigger
+  // headline treatment) must pass the matching pixel line-height here too, or the 2-line
+  // truncation measurement below — sized for the default 22px leading — cuts the text at
+  // the wrong point.
+  lineHeight = DEFAULT_LINE_HEIGHT,
+  maxLines = DEFAULT_MAX_LINES,
+}) => {
+  const TEXT_CLASS = `${BASE_TEXT_CLASS} ${textClassName}`.trim();
+  const maxBoxHeight = lineHeight * maxLines;
   const [isExpanded, setIsExpanded] = useState(false);
   // null means the description fits in two lines as-is, so no toggle is needed.
   const [collapsedHtml, setCollapsedHtml] = useState(null);
@@ -89,7 +100,7 @@ const ExpandableDescription = ({ html }) => {
     if (!measure || !width) return;
 
     measure.style.width = `${width}px`;
-    const maxHeight = LINE_HEIGHT * MAX_LINES + 1; // +1 for sub-pixel rounding
+    const maxHeight = maxBoxHeight + 1; // +1 for sub-pixel rounding
 
     measure.innerHTML = html;
     if (measure.scrollHeight <= maxHeight) {
@@ -147,7 +158,8 @@ const ExpandableDescription = ({ html }) => {
     <div className="relative px-1 py-1">
       <div
         ref={containerRef}
-        className={`max-h-[44px] overflow-hidden ${TEXT_CLASS} ${INLINE_CHILDREN}`}
+        className={`overflow-hidden ${TEXT_CLASS} ${INLINE_CHILDREN}`}
+        style={{ maxHeight: maxBoxHeight }}
       >
         <span dangerouslySetInnerHTML={{ __html: isTruncated ? collapsedHtml : html }} />
         {isTruncated && (
