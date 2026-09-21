@@ -292,6 +292,7 @@ const routes = {
   super_admin: [
     { path: "/", element: <DefaultPage /> },
     { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/admin/live-ideas", element: <AdminLiveTradeIdeas /> },
     { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
     { path: "/admin/courses", element: <Courses /> },
     { path: "/admin/live-session", element: <LiveSession /> },

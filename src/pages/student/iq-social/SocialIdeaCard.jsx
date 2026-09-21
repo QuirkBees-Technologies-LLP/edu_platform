@@ -5,10 +5,10 @@ import {
   TrendingUp,
   TrendingDown,
   Eye,
-  Copy,
   ChevronLeft,
   ChevronRight,
   ChartLine,
+  Copy,
 } from "lucide-react";
 import ViewClientTradeIdeas from "../client-trade-ideas/ViewClientTradeIdeas";
 import ImageLightBox from "../client-trade-ideas/ImageLightBox";
@@ -45,13 +45,23 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [copiedField, setCopiedField] = useState(null);
   // Overrides `idea` in the modal when the user opened it via "Follow-up to X" — shows the
   // ORIGINAL idea being replied to (quote-reply style), not this card's own content. Null
   // means the modal shows this card's own `idea` as usual.
   const [modalOverride, setModalOverride] = useState(null);
   const [isLoadingFollowUp, setIsLoadingFollowUp] = useState(false);
   const [fetchIdeaById] = useLazyGetIdeaByIdQuery();
+  const [copiedField, setCopiedField] = useState(null);
+
+  const handleCopyField = async (fieldName, value) => {
+    try {
+      await navigator.clipboard.writeText(value ?? "N/A");
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 1200);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
 
   const handleOpenPreviousIdea = async () => {
     const previousIdeaId = idea?.previousIdea?._id;
@@ -69,18 +79,13 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
     }
   };
 
-  const handleCopyField = async (fieldName, value) => {
-    try {
-      await navigator.clipboard.writeText(value ?? "N/A");
-      setCopiedField(fieldName);
-      setTimeout(() => setCopiedField(null), 1200);
-    } catch (err) {
-      console.error("Copy failed", err);
-    }
-  };
-
   // Educator-chosen display order between images and TradingView snapshots (Task 14).
   const orderedImages = getOrderedImageUrls(idea);
+  // Same condition as the quote banner above: only an actual follow-up, shown as one (not
+  // suppressed by showFollowUp=false for an already-collapsed/latest-only view), gets the
+  // headline-style description treatment. A regular idea keeps its original small caption
+  // between the chart and the price levels.
+  const isFollowUp = showFollowUp && !!idea?.previousIdea;
 
   return (
     <>
@@ -99,6 +104,33 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
             isLoading={isLoadingFollowUp}
           />
         )}
+
+        {/* Description as the card's headline — follow-ups only (see isFollowUp above).
+            Sits right below the follow-up banner, above the educator/status row, leading
+            everything else (same spot a social post's own text would sit). Set in Termina
+            explicitly: its @font-face files are bundled (via keenicons/assets/styles.css)
+            but nothing in the app's actual cascade ends up applying them — every element,
+            including this one by default, renders in Tailwind's Inter regardless of
+            index.css's root font-family rule. Naming it directly here gives the headline
+            real typographic character the surrounding Inter-set UI doesn't have. Known
+            issue at some sizes/weights: the lowercase "i" can render with no visible dot,
+            reading as an "l" — re-check this specifically at this 17px/bold combination
+            before shipping. A warm indigo-tinted off-white instead of flat white/black ties
+            the headline to the app's own accent color rather than being plain grayscale.
+            lineHeight passed through since this text is bigger than
+            ExpandableDescription's own default, so its 2-line truncation still cuts at the
+            right point. A regular (non-follow-up) idea's description is unaffected — see
+            below, in its original spot before the price levels, plain Inter as always. */}
+        {isFollowUp && idea?.description && (
+          <div className="mb-2.5">
+            <ExpandableDescription
+              html={idea.description}
+              textClassName="!font-['Termina'] !text-[17px] !font-bold !leading-[22px] tracking-[-0.01em] text-indigo-950 dark:text-indigo-50"
+              lineHeight={22}
+            />
+          </div>
+        )}
+
         {/* Header: educator - pair + status */}
         <div className="flex items-start gap-1 mb-2">
           <div className="flex-1 min-w-0">
@@ -238,11 +270,18 @@ const SocialIdeaCard = ({ idea, showFollowUp = true }) => {
           )}
         </div>
 
-        {/* Price levels */}
+        {/* Regular (non-follow-up) idea: description keeps its original spot and plain
+            styling, between the chart and the price levels — only a follow-up gets the
+            big headline treatment above (see isFollowUp). */}
+        {!isFollowUp && idea?.description && (
+          <div className="mb-2">
+            <ExpandableDescription html={idea.description} />
+          </div>
+        )}
+
+        {/* Price levels — back to simple full-width rows with a copy button, as before the
+            condensed-chip experiment. */}
         <div className="mb-2 space-y-1.5">
-          {/* Description always leads, above Entry/Invalidation/Exits — the caption reads
-              first, matching the Follow-Up card layout. */}
-          <ExpandableDescription html={idea?.description} />
           {idea?.entry && (
             <div
               className="group/row flex justify-between items-center px-1 py-0.5 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1A1A2E] transition-colors"

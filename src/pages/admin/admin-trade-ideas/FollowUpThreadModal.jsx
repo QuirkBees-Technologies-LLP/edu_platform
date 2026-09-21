@@ -103,7 +103,10 @@ const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowU
             <div className="flex flex-col">
               {displayThread.map(({ item, originalIndex }, dispIndex) => {
                 const parent = findParent(item);
-                const canDelete = originalIndex > 0 && !hasChildren(item);
+                // Deleting a follow-up that has its own follow-ups no longer takes them
+                // down with it — they're reparented onto whatever this one pointed at, so
+                // they move up and take its place in the chain.
+                const canDelete = originalIndex > 0;
                 return (
                   <div key={item._id} className="relative pl-6">
                     {dispIndex > 0 && (
@@ -141,10 +144,9 @@ const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowU
                             {originalIndex > 0 && (
                               <button
                                 type="button"
-                                disabled={!canDelete}
-                                className="inline-flex items-center justify-center size-7 rounded-md text-slate-500 dark:text-slate-400 hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
-                                onClick={() => canDelete && setDeleteTarget(item)}
-                                title={canDelete ? "Delete this follow-up" : "Delete its own follow-up(s) first"}
+                                className="inline-flex items-center justify-center size-7 rounded-md text-slate-500 dark:text-slate-400 hover:bg-danger/10 hover:text-danger dark:hover:bg-danger/10 dark:hover:text-danger transition-colors"
+                                onClick={() => setDeleteTarget(item)}
+                                title="Delete this follow-up"
                               >
                                 <Trash2 className="size-3.5" />
                               </button>
@@ -247,6 +249,9 @@ const FollowUpThreadModal = ({ isOpen, onClose, rootId, onEditItem, onAddFollowU
               <p className="text-sm text-slate-600 dark:text-slate-300">
                 It will be removed from the admin, educator, and student sides —
                 including the Educator Feed and IQ Social.
+                {deleteTarget && hasChildren(deleteTarget) && (
+                  <> Its own follow-up will move up and take its place.</>
+                )}
               </p>
             </div>
           </div>
