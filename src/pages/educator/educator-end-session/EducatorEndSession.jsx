@@ -97,26 +97,26 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
           );
         },
       },
-      {
-        accessorFn: (row) => row.educator,
-        id: "educator",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Educator" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => (
-          <div className="flex items-center gap-2.5">
-            <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.educator?.first_name +
-                " " +
-                info.row.original.educator?.last_name}
-            </span>
-          </div>
-        ),
-        meta: {
-          headerClassName: "min-w-[200px]",
-        },
-      },
+      // {
+      //   accessorFn: (row) => row.educator,
+      //   id: "educator",
+      //   header: ({ column }) => (
+      //     <DataGridColumnHeader title="Educator" column={column} />
+      //   ),
+      //   enableSorting: true,
+      //   cell: (info) => (
+      //     <div className="flex items-center gap-2.5">
+      //       <span className="leading-none text-gray-800 font-normal">
+      //         {info.row.original.educator?.first_name +
+      //           " " +
+      //           info.row.original.educator?.last_name}
+      //       </span>
+      //     </div>
+      //   ),
+      //   meta: {
+      //     headerClassName: "min-w-[200px]",
+      //   },
+      // },
       {
         accessorFn: (row) => row.callId,
         id: "callId",
@@ -159,29 +159,47 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
           headerClassName: "min-w-[120px]",
         },
       },
-      // {
-      //   accessorFn: (row) => row.datetime,
-      //   id: "datetime",
-      //   header: ({ column }) => (
-      //     <DataGridColumnHeader
-      //       title="Scheduled from this date"
-      //       column={column}
-      //     />
-      //   ),
-      //   enableSorting: true,
-      //   cell: (info) => (
-      //     <div className="flex items-center gap-2.5">
-      //       <span className="leading-none text-gray-800 font-normal">
-      //         {info.row.original.datetime
-      //           ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")
-      //           : "N/A"}
-      //       </span>
-      //     </div>
-      //   ),
-      //   meta: {
-      //     headerClassName: "min-w-[200px]",
-      //   },
-      // },
+      {
+        accessorFn: (row) => row.datetime,
+        id: "datetime",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            title="Scheduled from this date"
+            column={column}
+          />
+        ),
+        enableSorting: true,
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <span className="leading-none text-gray-800 font-normal">
+              {info.row.original.datetime
+                ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")
+                : "N/A"}
+            </span>
+          </div>
+        ),
+        meta: {
+          headerClassName: "min-w-[200px]",
+        },
+      },
+      {
+        id: "actions",
+        header: "Action",
+        cell: (info) => {
+          const { callId, status } = info.row.original;
+          return (
+            <button
+              onClick={() => handleRedirect(callId, info.row.original)}
+              className="btn btn-sm btn-light hover:btn-primary"
+            >
+              View
+            </button>
+          );
+        },
+        meta: {
+          headerClassName: "w-[80px]",
+        },
+      },
     ],
     [isRTL]
   );
@@ -228,7 +246,8 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
         ...(selectedLanguage?.length > 0 ? { language: selectedLanguage.join(',') } : {}),
       }).unwrap();
 
-      const endedData = response.data.filter((row) => row.status === "ended");
+      const endedData = response.data.filter((row) => row.status === "ended")
+        .sort((a, b) => new Date(b.datetime || b.createdAt) - new Date(a.datetime || a.createdAt));
 
       return {
         data: endedData || [],

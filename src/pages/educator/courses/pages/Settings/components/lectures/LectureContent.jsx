@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
+import axios from "axios";
 
 const LectureContent = ({
   lecture,
@@ -63,6 +64,81 @@ const LectureContent = ({
   const [resourceFiles, setResourceFiles] = useState([]);
   const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [previewResource, setPreviewResource] = useState(null);
+
+  const [liveSessions, setLiveSessions] = useState([]);
+  const [isFetchingSessions, setIsFetchingSessions] = useState(false);
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchLiveSessions = async (searchQuery = "", pageNum = 1, append = false) => {
+    setIsFetchingSessions(true);
+    try {
+      const token =
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("auth_token");
+
+      // 🔴 IMPORTANT: Tamara project ma Axios Instance (e.g. API / axiosInstance) hoy to e use karo, 
+      // athva sidhu backend port `1700` sathe URL lakkho:
+      const response = await axios.get(
+        `http://localhost:1700/api/v1/educator/live-stream/ended-sessions?search=${encodeURIComponent(searchQuery)}&page=${pageNum}&limit=10`,
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
+      );
+
+      if (response?.data?.success) {
+        const fetchedSessions = response.data.sessions || [];
+        if (append) {
+          setLiveSessions((prev) => [...prev, ...fetchedSessions]);
+        } else {
+          setLiveSessions(fetchedSessions);
+        }
+        setHasMore(response.data.pagination?.hasMore || false);
+      }
+    } catch (error) {
+      console.error("Error fetching ended live sessions:", error);
+    } finally {
+      setIsFetchingSessions(false);
+    }
+  };
+
+  const handleSessionSelect = (session) => {
+    // Session object mathi eku pan URL hoy e ne pick karo
+    const videoPlayUrl =
+      session.recordingUrl ||
+      session.streamUrl ||
+      session.videoUrl ||
+      session.playbackUrl ||
+      session.url ||
+      "";
+
+    console.log("Selected Ended Session:", session);
+    console.log("Extracted Video URL:", videoPlayUrl);
+
+    setFormData((prev) => ({
+      ...prev,
+      content: videoPlayUrl,
+      videoUrl: videoPlayUrl,
+      mappedSessionId: session._id || session.id || session.callId || "",
+      mappedSessionTitle: session.title || session.topic || session.name || "",
+    }));
+
+    // Direct Parent state pan update karo tame jo prop pass karta hoy toh
+    if (typeof setLectureContent === "function") {
+      setLectureContent((prev) => ({
+        ...prev,
+        content: videoPlayUrl,
+        videoUrl: videoPlayUrl,
+      }));
+    }
+
+    setIsSessionModalOpen(false);
+  };
 
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
@@ -287,6 +363,13 @@ const LectureContent = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      ...formData,
+      // Ensure that videoUrl/content has the selected session URL
+      videoUrl: formData.videoUrl || formData.content,
+      content: formData.content || formData.videoUrl,
+    };
+
     if (!formData?.title?.trim()) {
       toast.error("Title is required");
       return;
@@ -358,6 +441,11 @@ const LectureContent = ({
       resourceFiles.forEach((file) => {
         dataToSend.append("resources", file);
       });
+    }
+
+    if (videoInputType === "ended_live_session") {
+      dataToSend.append("mappedSessionId", formData?.mappedSessionId || "");
+      dataToSend.append("mappedSessionTitle", formData?.mappedSessionTitle || "");
     }
 
     setIsLoading(true);
@@ -565,6 +653,12 @@ const LectureContent = ({
                     <span>Upload File</span>
                   </div>
                 </SelectItem>
+                <SelectItem value="ended_live_session">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-4 h-4 text-primary" />
+                    <span>Map Live Session</span>
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -684,6 +778,68 @@ const LectureContent = ({
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+            )}
+
+            {videoInputType === "ended_live_session" && (
+              <div className="space-y-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-2 text-primary">
+                  <Video className="w-4 h-4 text-primary" />
+                  <Label className="font-medium">Map Ended Live Session</Label>
+                </div>
+
+                {formData?.mappedSessionTitle ? (
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-primary/30 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-primary font-semibold uppercase tracking-wider">
+                        Mapped Ended Live Session
+                      </p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+                        {formData.mappedSessionTitle}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsSessionModalOpen(true);
+                        fetchLiveSessions();
+                      }}
+                    >
+                      Change Session
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    className="w-full bg-primary text-white"
+                    onClick={() => {
+                      setIsSessionModalOpen(true);
+                      fetchLiveSessions();
+                    }}
+                  >
+                    Select Live Session
+                  </Button>
+                )}
+                {/* Video Player Preview */}
+                {formData?.content && (
+                  <div className="mt-4 space-y-2">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Video Content Preview
+                    </Label>
+                    <div className="aspect-video w-full border border-gray-700 rounded-lg overflow-hidden bg-black shadow-md">
+                      <video
+                        src={formData.content}
+                        controls
+                        className="w-full h-full object-contain"
+                        controlsList="nodownload"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1086,21 +1242,65 @@ const LectureContent = ({
           </h3>
           <div className="mt-2">
             {lectureContent?.type === "VIDEO" ? (
-              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                <iframe
-                  src={getEmbedUrl(
-                    lectureContent?.videoUrl
-                      ? lectureContent?.videoUrl
-                      : lectureContent?.content
-                  )}
-                  className="w-full h-full rounded-md"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm bg-black">
+                {(() => {
+                  // 👉 અહીં ચેક થશે કે Live Session નો URL છે કે પછી ડાયરેક્ટ વિડીયો છે.
+                  const videoSrc =
+                    formData?.videoUrl ||
+                    formData?.content ||
+                    lectureContent?.videoUrl ||
+                    lectureContent?.content ||
+                    lectureContent?.streamUrl ||
+                    lectureContent?.recordingUrl ||
+                    lectureContent?.mappedSession?.streamUrl ||
+                    lectureContent?.mappedSession?.videoUrl;
+
+                  console.log("Current lectureContent videoSrc:", videoSrc, lectureContent);
+
+                  if (!videoSrc) {
+                    return (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 p-4">
+                        <Video className="w-10 h-10 mb-2 opacity-50" />
+                        <p className="text-sm">No video recording available for this session.</p>
+                      </div>
+                    );
+                  }
+
+                  // Check for YouTube / Vimeo embed links
+                  const isEmbeddable =
+                    videoSrc?.includes("youtube.com") ||
+                    videoSrc?.includes("youtu.be") ||
+                    videoSrc?.includes("vimeo.com");
+
+                  if (isEmbeddable) {
+                    return (
+                      <iframe
+                        src={getEmbedUrl(videoSrc)}
+                        className="w-full h-full rounded-md"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    );
+                  } else {
+                    // HTML5 Video Player for live recording direct MP4 / HLS / S3 URL
+                    return (
+                      <video
+                        key={videoSrc} // 👉 Key આપવાથી URL બદલાય એટલે વિડીયો આપોઆપ રીલોડ થઈ જશે!
+                        src={videoSrc}
+                        controls
+                        autoPlay={false}
+                        className="w-full h-full object-contain"
+                        controlsList="nodownload"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    );
+                  }
+                })()}
               </div>
             ) : (
               <div
-                className="p-4  border border-gray-200 rounded-lg prose max-w-none"
+                className="p-4 border border-gray-200 rounded-lg prose max-w-none"
                 dangerouslySetInnerHTML={{
                   __html: lectureContent?.videoUrl
                     ? lectureContent?.videoUrl
@@ -1152,17 +1352,17 @@ const LectureContent = ({
   const renderSettings = () => {
     return (
       <div className="space-y-6">
-        <div className="space-y-3  p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
             Lecture Order
           </h3>
-          <p className="text-gray-700 p-2  rounded-md">
+          <p className="text-gray-700 p-2 rounded-md">
             {lectureContent?.order || "0"} (Position in section)
           </p>
         </div>
 
-        <div className="flex items-center gap-4  p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
               <Eye className="w-4 h-4 text-green-500" />
@@ -1194,18 +1394,13 @@ const LectureContent = ({
           </div>
         </div>
 
-        <div className="space-y-3  p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-primary" />
             Lecture Type
           </h3>
           <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture?.type === "VIDEO"
-                ? "bg-primary-light text-primary"
-                : "bg-primary-light text-primary"
-                }`}
-            >
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-primary-light text-primary">
               {lecture?.type === "VIDEO" ? (
                 <>
                   <Video className="w-3.5 h-3.5 text-primary" />
@@ -1223,6 +1418,7 @@ const LectureContent = ({
       </div>
     );
   };
+
   const handleEditClick = () => {
     if (!isEditing) {
       if (formData.type === "VIDEO") {
@@ -1247,7 +1443,7 @@ const LectureContent = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between  p-4 rounded-lg border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 shadow-sm">
         <div>
           <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             {lecture?.type === "VIDEO" ? (
@@ -1286,7 +1482,7 @@ const LectureContent = ({
         </Button>
       </div>
 
-      {/* Content */}
+      {/* Main Content View / Edit Animation */}
       <AnimatePresence mode="wait">
         {isEditing ? (
           <motion.div
@@ -1296,7 +1492,7 @@ const LectureContent = ({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className=" p-6 rounded-lg border border-gray-200 shadow-sm">
+            <div className="p-6 rounded-lg border border-gray-200 shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="space-y-3">
@@ -1324,14 +1520,6 @@ const LectureContent = ({
                         Description
                       </Label>
                     </div>
-                    {/* <Input
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      placeholder="Brief description of this lecture"
-                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                    /> */}
                     <RichEditor
                       id="description"
                       name="description"
@@ -1358,10 +1546,7 @@ const LectureContent = ({
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem
-                        value="TEXT"
-                        className="flex items-center gap-2"
-                      >
+                      <SelectItem value="TEXT">
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-primary" />
                           <span>Text</span>
@@ -1448,7 +1633,7 @@ const LectureContent = ({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className=" rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               {/* Tabs */}
               <div className="flex border-b border-gray-200">
                 <button
@@ -1501,6 +1686,198 @@ const LectureContent = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* LIVE SESSION SELECTION MODAL - KEPT OUTSIDE MAIN ANIMATEPRESENCE */}
+      {isSessionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden bg-[#181924] text-gray-100 border border-gray-800">
+
+            {/* --- HEADER --- */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800/80 bg-[#1e1f2b]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-600/10 border border-purple-500/20 text-purple-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-white tracking-wide">
+                    Select Ended Live Session
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Choose a recorded live session to map with this lecture
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsSessionModalOpen(false)}
+                className="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-gray-800/60 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* --- SEARCH BAR --- */}
+            <div className="px-6 py-4 bg-[#181924] border-b border-gray-800/60">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search session by title or ID..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setPage(1);
+                    fetchLiveSessions(e.target.value, 1, false);
+                  }}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-[#262736] border border-gray-700/60 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                />
+                <svg
+                  className="w-4 h-4 absolute left-3.5 top-3.5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* --- SESSION LIST --- */}
+            <div className="p-6 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar bg-[#181924]">
+              {(liveSessions || []).filter(
+                (session) => session.recordings && session.recordings.length > 0
+              ).length === 0 ? (
+                <div className="text-center py-12 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-[#262736] text-gray-400 mx-auto flex items-center justify-center border border-gray-700/50">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-gray-300">
+                    No recorded live sessions found.
+                  </p>
+                </div>
+              ) : (
+                (liveSessions || [])
+                  .filter((session) => session.recordings && session.recordings.length > 0)
+                  .map((session) => {
+                    const recordings = session.recordings || [];
+
+                    return (
+                      <div
+                        key={session.id || session._id || session.callId}
+                        className="group p-4 rounded-xl border border-gray-800 bg-[#1e1f2b] hover:bg-[#232534] hover:border-purple-500/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                      >
+                        {/* Thumbnail & Info */}
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                          <div className="w-24 h-14 rounded-lg bg-[#14151f] border border-gray-800 flex-shrink-0 relative overflow-hidden flex items-center justify-center">
+                            {session.thumbnail ? (
+                              <img
+                                src={session.thumbnail}
+                                alt="thumbnail"
+                                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                }}
+                              />
+                            ) : null}
+                            <div className="absolute inset-0 flex items-center justify-center text-purple-400/80">
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                          </div>
+
+                          <div className="min-w-0 space-y-1">
+                            <h4 className="text-sm font-medium text-white truncate group-hover:text-purple-300 transition-colors">
+                              {session.title || "Untitled Live Session"}
+                            </h4>
+                            <p className="text-[11px] font-mono text-gray-400 truncate">
+                              ID: {session.callId || session.id}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] text-gray-300 bg-[#262736] px-2 py-0.5 rounded border border-gray-700/50">
+                                Recordings: <strong className="text-purple-400 font-semibold">{recordings.length}</strong>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex-shrink-0 flex items-center gap-2">
+                          {recordings.length === 1 ? (
+                            <button
+                              onClick={() =>
+                                handleSessionSelect({
+                                  ...session,
+                                  recordingUrl: typeof recordings[0] === "string" ? recordings[0] : recordings[0].url || recordings[0].streamUrl,
+                                })
+                              }
+                              className="px-4 py-2 text-xs font-medium rounded-xl bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 transition-all active:scale-95"
+                            >
+                              Select Session
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {recordings.map((rec, idx) => {
+                                const recUrl = typeof rec === "string" ? rec : rec.url || rec.streamUrl;
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() =>
+                                      handleSessionSelect({
+                                        ...session,
+                                        recordingUrl: recUrl,
+                                      })
+                                    }
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#262736] hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 transition-all active:scale-95"
+                                  >
+                                    Part {idx + 1}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
+
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="text-center pt-2">
+                  <button
+                    onClick={() => {
+                      const nextPage = page + 1;
+                      setPage(nextPage);
+                      fetchLiveSessions(searchTerm, nextPage, true);
+                    }}
+                    disabled={isFetchingSessions}
+                    className="px-4 py-2 text-xs font-medium rounded-xl border border-gray-700/70 bg-[#262736] text-gray-300 hover:text-white hover:bg-gray-800 transition-all"
+                  >
+                    {isFetchingSessions ? "Loading..." : "Load More Sessions"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* --- FOOTER --- */}
+            <div className="px-6 py-4 border-t border-gray-800/80 bg-[#1e1f2b] flex justify-end">
+              <button
+                onClick={() => setIsSessionModalOpen(false)}
+                className="px-5 py-2 text-xs font-medium rounded-xl border border-gray-700/80 bg-[#262736] text-gray-300 hover:bg-gray-800 hover:text-white transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
