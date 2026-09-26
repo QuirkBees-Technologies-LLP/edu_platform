@@ -11,6 +11,7 @@ const getAuth = () => {
   } catch (error) {
     console.error('AUTH LOCAL STORAGE PARSE ERROR', error);
   }
+
 };
 const setAuth = auth => {
   setData(AUTH_LOCAL_STORAGE_KEY, auth);

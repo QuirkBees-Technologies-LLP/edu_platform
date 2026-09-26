@@ -40,9 +40,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4905028732654A2392D9E4EA425A3F77 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0A743F3603404696B587754BA075F752 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_28B8DAC023274A68B488DCACC8E929EE }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_FBE0108442A54CB59B051C7627848E58 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9B377B0ABD1A45ABBBC9115B7B41A5AA }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F2812D7271EE479D8B181CDDC4384490 }}
 
       - name: Deploy to Azure Web App (Staging)
         uses: azure/webapps-deploy@v3
@@ -50,6 +50,3 @@ jobs:
           app-name: 'edu'
           slot-name: 'staging'
           package: site.zip
-
-
-
