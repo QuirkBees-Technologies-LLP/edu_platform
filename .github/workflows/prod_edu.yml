@@ -57,7 +57,19 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76075C8D564542E2B56E0A2DC5156C6B }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CCB2529DDE84406A4CB3A4D67D43139 }}
 
-      # 5️⃣ Deploy to Azure
+      # 5️⃣ Set App Settings to prevent Kudu build
+      - name: Set Azure App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'edu'
+          slot-name: 'Production'
+          app-settings-json: |
+            [
+              { "name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "false" },
+              { "name": "WEBSITE_RUN_FROM_PACKAGE", "value": "1" }
+            ]
+
+      # 6️⃣ Deploy to Azure
       - name: Deploy to Azure Web App (Production)
         uses: azure/webapps-deploy@v3
         with:

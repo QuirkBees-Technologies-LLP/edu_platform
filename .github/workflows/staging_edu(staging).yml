@@ -35,7 +35,16 @@ jobs:
           export NODE_OPTIONS="--max-old-space-size=4096"
           npm ci
           npm run build
-          zip -r site.zip dist
+
+          # Create a runtime folder (not just dist)
+          mkdir runtime
+          cp -r dist runtime/dist
+          cp server.js runtime/
+          echo '{"name":"edu-app","version":"1.0.0","type":"module","main":"server.js","dependencies":{"express":"^4.21.2"},"scripts":{"start":"node server.js"}}' > runtime/package.json
+          
+          cd runtime
+          npm install --production
+          zip -r ../site.zip *
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -43,6 +52,18 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_FBE0108442A54CB59B051C7627848E58 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9B377B0ABD1A45ABBBC9115B7B41A5AA }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F2812D7271EE479D8B181CDDC4384490 }}
+
+      # Set app settings to prevent Kudu interference
+      - name: Set App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'edu'
+          slot-name: 'staging'
+          app-settings-json: |
+            [
+              { "name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "false" },
+              { "name": "WEBSITE_RUN_FROM_PACKAGE", "value": "1" }
+            ]
 
       - name: Deploy to Azure Web App (Staging)
         uses: azure/webapps-deploy@v3
