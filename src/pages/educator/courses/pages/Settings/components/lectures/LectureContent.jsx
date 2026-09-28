@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
-import axios from "axios";
+import { useGetEndedLiveSessionsQuery } from "@/store/api/educator/educatorLiveStreamApiSlice";
 
 const LectureContent = ({
   lecture,
@@ -65,47 +65,28 @@ const LectureContent = ({
   const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [previewResource, setPreviewResource] = useState(null);
 
-  const [liveSessions, setLiveSessions] = useState([]);
-  const [isFetchingSessions, setIsFetchingSessions] = useState(false);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
 
-  const fetchLiveSessions = async (searchQuery = "", pageNum = 1, append = false) => {
-    setIsFetchingSessions(true);
-    try {
-      const token =
-        localStorage.getItem("token") ||
-        localStorage.getItem("accessToken") ||
-        localStorage.getItem("auth_token");
-
-      // 🔴 IMPORTANT: Tamara project ma Axios Instance (e.g. API / axiosInstance) hoy to e use karo, 
-      // athva sidhu backend port `1700` sathe URL lakkho:
-      const response = await axios.get(
-        `http://localhost:1700/api/v1/educator/live-stream/ended-sessions?search=${encodeURIComponent(searchQuery)}&page=${pageNum}&limit=10`,
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        }
-      );
-
-      if (response?.data?.success) {
-        const fetchedSessions = response.data.sessions || [];
-        if (append) {
-          setLiveSessions((prev) => [...prev, ...fetchedSessions]);
-        } else {
-          setLiveSessions(fetchedSessions);
-        }
-        setHasMore(response.data.pagination?.hasMore || false);
-      }
-    } catch (error) {
-      console.error("Error fetching ended live sessions:", error);
-    } finally {
-      setIsFetchingSessions(false);
+  // RTK Query Hook (Top-level call)
+  const {
+    data: endedSessionsData,
+    isLoading: isFetchingSessions,
+    isFetching,
+  } = useGetEndedLiveSessionsQuery(
+    {
+      search: searchTerm,
+      page: page,
+      limit: 10,
+    },
+    {
+      skip: !isSessionModalOpen,
     }
-  };
+  );
+
+  const liveSessions = endedSessionsData?.sessions || [];
+  const hasMore = endedSessionsData?.pagination?.hasMore || false;
 
   const handleSessionSelect = (session) => {
     // Session object mathi eku pan URL hoy e ne pick karo
@@ -1689,29 +1670,22 @@ const LectureContent = ({
 
       {/* LIVE SESSION SELECTION MODAL - KEPT OUTSIDE MAIN ANIMATEPRESENCE */}
       {isSessionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden bg-[#181924] text-gray-100 border border-gray-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 overflow-y-auto">
+          <div className="relative w-full max-w-2xl flex flex-col rounded-xl shadow-2xl overflow-hidden bg-[#1a1b23] text-white border border-gray-700/80 max-h-[80vh] my-auto">
 
             {/* --- HEADER --- */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800/80 bg-[#1e1f2b]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-purple-600/10 border border-purple-500/20 text-purple-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-white tracking-wide">
-                    Select Ended Live Session
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Choose a recorded live session to map with this lecture
-                  </p>
-                </div>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800/80 bg-transparent">
+              <div>
+                <h3 className="text-lg font-semibold text-white tracking-wide">
+                  Select Ended Live Session
+                </h3>
+                <p className="text-xs text-[#a0a5b5] mt-1 font-normal">
+                  Choose a recorded live session to map with this lecture
+                </p>
               </div>
               <button
                 onClick={() => setIsSessionModalOpen(false)}
-                className="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-gray-800/60 transition-colors"
+                className="text-gray-400 hover:text-white p-1 rounded-lg transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1729,9 +1703,8 @@ const LectureContent = ({
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                     setPage(1);
-                    fetchLiveSessions(e.target.value, 1, false);
                   }}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-[#262736] border border-gray-700/60 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg bg-[#12131a] text-white placeholder-[#808595] focus:outline-none focus:border-blue-500 transition-all"
                 />
                 <svg
                   className="w-4 h-4 absolute left-3.5 top-3.5 text-gray-400"
@@ -1746,7 +1719,11 @@ const LectureContent = ({
 
             {/* --- SESSION LIST --- */}
             <div className="p-6 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar bg-[#181924]">
-              {(liveSessions || []).filter(
+              {isFetchingSessions || isFetching ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="animate-spin text-blue-500 w-8 h-8" />
+                </div>
+              ) : (liveSessions || []).filter(
                 (session) => session.recordings && session.recordings.length > 0
               ).length === 0 ? (
                 <div className="text-center py-12 space-y-3">
@@ -1768,11 +1745,11 @@ const LectureContent = ({
                     return (
                       <div
                         key={session.id || session._id || session.callId}
-                        className="group p-4 rounded-xl border border-gray-800 bg-[#1e1f2b] hover:bg-[#232534] hover:border-purple-500/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                        className="group p-4 rounded-xl border border-gray-700/80 bg-[#15161e] hover:bg-[#1a1b26] hover:border-blue-500/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
                       >
                         {/* Thumbnail & Info */}
                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                          <div className="w-24 h-14 rounded-lg bg-[#14151f] border border-gray-800 flex-shrink-0 relative overflow-hidden flex items-center justify-center">
+                          <div className="w-24 h-14 rounded-lg bg-[#14151f] border border-gray-400 flex-shrink-0 relative overflow-hidden flex items-center justify-center">
                             {session.thumbnail ? (
                               <img
                                 src={session.thumbnail}
@@ -1783,7 +1760,7 @@ const LectureContent = ({
                                 }}
                               />
                             ) : null}
-                            <div className="absolute inset-0 flex items-center justify-center text-purple-400/80">
+                            <div className="absolute inset-0 flex items-center justify-center text-blue-400/80">
                               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1792,15 +1769,15 @@ const LectureContent = ({
                           </div>
 
                           <div className="min-w-0 space-y-1">
-                            <h4 className="text-sm font-medium text-white truncate group-hover:text-purple-300 transition-colors">
+                            <h4 className="text-sm font-medium text-white truncate group-hover:text-blue-300 transition-colors">
                               {session.title || "Untitled Live Session"}
                             </h4>
-                            <p className="text-[11px] font-mono text-gray-400 truncate">
-                              ID: {session.callId || session.id}
+                            <p className="text-xs font-mono text-[#cbd5e1] truncate">
+                              <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id}
                             </p>
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-gray-300 bg-[#262736] px-2 py-0.5 rounded border border-gray-700/50">
-                                Recordings: <strong className="text-purple-400 font-semibold">{recordings.length}</strong>
+                              <span className="text-[11px] text-gray-500 bg-[#262736] px-2 py-0.5 rounded border border-gray-700/50">
+                                Recordings: <strong className="text-blue-400 font-semibold">{recordings.length}</strong>
                               </span>
                             </div>
                           </div>
@@ -1816,7 +1793,7 @@ const LectureContent = ({
                                   recordingUrl: typeof recordings[0] === "string" ? recordings[0] : recordings[0].url || recordings[0].streamUrl,
                                 })
                               }
-                              className="px-4 py-2 text-xs font-medium rounded-xl bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 transition-all active:scale-95"
+                              className="px-4 py-2 text-xs font-medium rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all active:scale-95"
                             >
                               Select Session
                             </button>
@@ -1833,7 +1810,7 @@ const LectureContent = ({
                                         recordingUrl: recUrl,
                                       })
                                     }
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#262736] hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 transition-all active:scale-95"
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#262736] hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition-all active:scale-95"
                                   >
                                     Part {idx + 1}
                                   </button>
@@ -1851,25 +1828,21 @@ const LectureContent = ({
               {hasMore && (
                 <div className="text-center pt-2">
                   <button
-                    onClick={() => {
-                      const nextPage = page + 1;
-                      setPage(nextPage);
-                      fetchLiveSessions(searchTerm, nextPage, true);
-                    }}
-                    disabled={isFetchingSessions}
+                    onClick={() => setPage((prev) => prev + 1)}
+                    disabled={isFetchingSessions || isFetching}
                     className="px-4 py-2 text-xs font-medium rounded-xl border border-gray-700/70 bg-[#262736] text-gray-300 hover:text-white hover:bg-gray-800 transition-all"
                   >
-                    {isFetchingSessions ? "Loading..." : "Load More Sessions"}
+                    {isFetchingSessions || isFetching ? "Loading..." : "Load More Sessions"}
                   </button>
                 </div>
               )}
             </div>
 
             {/* --- FOOTER --- */}
-            <div className="px-6 py-4 border-t border-gray-800/80 bg-[#1e1f2b] flex justify-end">
+            <div className="px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
               <button
                 onClick={() => setIsSessionModalOpen(false)}
-                className="px-5 py-2 text-xs font-medium rounded-xl border border-gray-700/80 bg-[#262736] text-gray-300 hover:bg-gray-800 hover:text-white transition-all"
+                className="px-5 py-2 text-xs font-medium rounded-lg border border-gray-600 bg-[#262838] text-white hover:bg-gray-700 transition-all"
               >
                 Cancel
               </button>

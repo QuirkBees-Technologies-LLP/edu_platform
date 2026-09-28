@@ -1129,7 +1129,7 @@ const IqEducators = () => {
               <div className="flex items-center justify-center gap-2.5 mb-3">
                 <span className="h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-blue-400/70" />
                 <span className="w-1 h-1 rounded-full bg-blue-400" />
-                <span className="text-blue-400 text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase">
+                <span className="text-white/90 text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase">
                   About Me
                 </span>
                 <span className="w-1 h-1 rounded-full bg-blue-400" />
