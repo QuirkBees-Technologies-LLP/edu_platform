@@ -55,15 +55,8 @@ jobs:
 
       # Set app settings to prevent Kudu interference
       - name: Set App Settings
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: 'edu'
-          slot-name: 'staging'
-          app-settings-json: |
-            [
-              { "name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "false" },
-              { "name": "WEBSITE_RUN_FROM_PACKAGE", "value": "1" }
-            ]
+        run: |
+          az webapp config appsettings set --name edu --resource-group rg-iqverse-lms-eus --slot staging --settings SCM_DO_BUILD_DURING_DEPLOYMENT=false WEBSITE_RUN_FROM_PACKAGE=1
 
       - name: Deploy to Azure Web App (Staging)
         uses: azure/webapps-deploy@v3
