@@ -53,11 +53,6 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9B377B0ABD1A45ABBBC9115B7B41A5AA }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F2812D7271EE479D8B181CDDC4384490 }}
 
-      # Set app settings to prevent Kudu interference
-      - name: Set App Settings
-        run: |
-          az webapp config appsettings set --name edu --resource-group rg-iqverse-lms-eus --slot staging --settings SCM_DO_BUILD_DURING_DEPLOYMENT=false WEBSITE_RUN_FROM_PACKAGE=1
-
       - name: Deploy to Azure Web App (Staging)
         uses: azure/webapps-deploy@v3
         with:
