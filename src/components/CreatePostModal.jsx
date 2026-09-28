@@ -511,7 +511,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null, showCategorySele
                 </div>
               </div>
 
-              {showCategorySelector && (
+              {/* {showCategorySelector && (
                 <div className="flex items-center gap-2">
                   <FolderOpen size={16} className="text-gray-500" />
                   <Select
@@ -531,7 +531,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null, showCategorySele
                     </SelectContent>
                   </Select>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Content Textarea */}
