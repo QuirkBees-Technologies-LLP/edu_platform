@@ -1353,7 +1353,7 @@ const IqEducators = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Master Classes</h2>
                 {!isEducator && <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                   onClick={() => navigate(`/master-class/${id}`)}
                 >
                   View All
@@ -1407,7 +1407,7 @@ const IqEducators = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Recordings</h2>
                 <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                   onClick={() => setShowAll((prev) => !prev)}
                 >
                   {showAll ? "Show Less" : "View All"}
@@ -1450,7 +1450,7 @@ const IqEducators = () => {
                 <h2 className="text-xl font-medium">Ideas</h2>
                 {!isEducator && <button
                   onClick={() => setIdea((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                 >
                   {idea ? "Show Less" : "View All"}
                 </button>}
@@ -1487,7 +1487,7 @@ const IqEducators = () => {
                 <h2 className="text-xl font-medium">Insights</h2>
                 {!isEducator && <button
                   onClick={() => setInsight((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                 >
                   {insight ? "Show Less" : "View All"}
                 </button>}

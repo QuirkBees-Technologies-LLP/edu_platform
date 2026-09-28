@@ -770,22 +770,21 @@ const LectureContent = ({
                 </div>
 
                 {formData?.mappedSessionTitle ? (
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-primary/30 flex items-center justify-between">
+                  <div className="p-3 bg-[#181924] rounded-lg border border-blue-500/30 flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-primary font-semibold uppercase tracking-wider">
+                      <p className="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">
                         Mapped Ended Live Session
                       </p>
-                      <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+                      <p className="text-sm font-bold text-white mt-0.5">
                         {formData.mappedSessionTitle}
                       </p>
                     </div>
                     <Button
                       type="button"
-                      variant="outline"
                       size="sm"
+                      className="bg-[#262736] hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition-all text-xs"
                       onClick={() => {
                         setIsSessionModalOpen(true);
-                        fetchLiveSessions();
                       }}
                     >
                       Change Session
@@ -794,10 +793,9 @@ const LectureContent = ({
                 ) : (
                   <Button
                     type="button"
-                    className="w-full bg-primary text-white"
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-md transition-all"
                     onClick={() => {
                       setIsSessionModalOpen(true);
-                      fetchLiveSessions();
                     }}
                   >
                     Select Live Session
@@ -1830,7 +1828,7 @@ const LectureContent = ({
                   <button
                     onClick={() => setPage((prev) => prev + 1)}
                     disabled={isFetchingSessions || isFetching}
-                    className="px-4 py-2 text-xs font-medium rounded-xl border border-gray-700/70 bg-[#262736] text-gray-300 hover:text-white hover:bg-gray-800 transition-all"
+                    className="px-4 py-2 text-xs font-medium rounded-xl border border-blue-500/30 bg-[#262736] text-blue-400 hover:text-white hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isFetchingSessions || isFetching ? "Loading..." : "Load More Sessions"}
                   </button>
@@ -1842,7 +1840,7 @@ const LectureContent = ({
             <div className="px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
               <button
                 onClick={() => setIsSessionModalOpen(false)}
-                className="px-5 py-2 text-xs font-medium rounded-lg border border-gray-600 bg-[#262838] text-white hover:bg-gray-700 transition-all"
+                className="px-5 py-2 text-xs font-medium rounded-lg border border-blue-500/30 bg-transparent text-blue-400 hover:text-blue-300 hover:bg-blue-600/10 transition-all active:scale-95"
               >
                 Cancel
               </button>
