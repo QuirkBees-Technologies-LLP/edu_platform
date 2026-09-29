@@ -147,30 +147,38 @@ const LectureContent = ({
   }, [hasMore, isFetching, isFetchingSessions, isSessionModalOpen]);
 
   const handleSessionSelect = (session) => {
-    const videoPlayUrl =
+    console.log("Selected Session:", session);
+
+    let rawUrl =
+      (session.recordings && session.recordings[0]) ||
       session.recordingUrl ||
-      session.streamUrl ||
-      session.videoUrl ||
       session.playbackUrl ||
-      session.url ||
       "";
 
-    console.log("Selected Ended Session:", session);
-    console.log("Extracted Video URL:", videoPlayUrl);
+    if (typeof rawUrl !== "string") {
+      rawUrl = rawUrl?.url || rawUrl?.location || "";
+    }
+
+    let finalVideoUrl = rawUrl;
+    if (finalVideoUrl.startsWith("rtmps://")) {
+      finalVideoUrl = finalVideoUrl
+        .replace("rtmps://ingress.", "https://hls.")
+        .replace(".stream-io-video.com", ".stream-io-video.com/hls");
+    }
 
     setFormData((prev) => ({
       ...prev,
-      content: videoPlayUrl,
-      videoUrl: videoPlayUrl,
-      mappedSessionId: session._id || session.id || session.callId || "",
-      mappedSessionTitle: session.title || session.topic || session.name || "",
+      content: finalVideoUrl,
+      videoUrl: finalVideoUrl,
+      mappedSessionId: session._id || session.id || "",
+      mappedSessionTitle: session.title || "",
     }));
 
     if (typeof setLectureContent === "function") {
       setLectureContent((prev) => ({
         ...prev,
-        content: videoPlayUrl,
-        videoUrl: videoPlayUrl,
+        content: finalVideoUrl,
+        videoUrl: finalVideoUrl,
       }));
     }
 
@@ -826,9 +834,9 @@ const LectureContent = ({
                 </div>
 
                 {formData?.mappedSessionTitle ? (
-                  <div className="p-3 bg-[#181924] rounded-lg border border-blue-500/30 flex items-center justify-between">
+                  <div className="p-3 rounded-lg border border-blue-500/30 flex items-center justify-between">
                     <div>
-                      <p className="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">
+                      <p className="text-[11px] text-primary font-semibold uppercase tracking-wider">
                         Mapped Ended Live Session
                       </p>
                       <p className="text-sm font-bold text-white mt-0.5">
@@ -838,7 +846,7 @@ const LectureContent = ({
                     <Button
                       type="button"
                       size="sm"
-                      className="inline-flex items-center justify-center whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 btn-sm h-8 rounded-md px-3 gap-1 bg-[#262736] hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition-all text-xs"
+                      className="inline-flex items-center justify-center whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-8 rounded-md px-3 gap-1 bg-primary text-primary-foreground text-xs shadow-sm cursor-pointer"
                       onClick={() => {
                         setIsSessionModalOpen(true);
                       }}
@@ -864,14 +872,47 @@ const LectureContent = ({
                       Video Content Preview
                     </Label>
                     <div className="aspect-video w-full border border-gray-700 rounded-lg overflow-hidden bg-black shadow-md">
-                      <video
-                        src={formData.content}
-                        controls
-                        className="w-full h-full object-contain"
-                        controlsList="nodownload"
-                      >
-                        Your browser does not support the video tag.
-                      </video>
+                      {(() => {
+                        let videoUrl = formData.content;
+
+                        // 1. Check for Embed / iFrame links (YouTube, Vimeo, Dyntube)
+                        const isIframeOrEmbed =
+                          typeof videoUrl === "string" &&
+                          (videoUrl.includes("dyntube") ||
+                            videoUrl.includes("youtube") ||
+                            videoUrl.includes("youtu.be") ||
+                            videoUrl.includes("vimeo") ||
+                            videoUrl.includes("embed") ||
+                            videoUrl.includes("player"));
+
+                        if (isIframeOrEmbed) {
+                          const formattedUrl = videoUrl.startsWith("http")
+                            ? videoUrl
+                            : `https://${videoUrl}`;
+
+                          return (
+                            <iframe
+                              src={formattedUrl}
+                              className="w-full h-full border-0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          );
+                        }
+
+                        // 2. Direct Video File (.mp4, .m3u8, direct storage links)
+                        return (
+                          <video
+                            key={videoUrl}
+                            src={videoUrl}
+                            controls
+                            className="w-full h-full object-contain"
+                            controlsList="nodownload"
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
@@ -1302,16 +1343,31 @@ const LectureContent = ({
                   }
 
                   // Check for YouTube / Vimeo embed links
-                  const isEmbeddable =
+                  const isYouTubeOrVimeo =
                     videoSrc?.includes("youtube.com") ||
                     videoSrc?.includes("youtu.be") ||
                     videoSrc?.includes("vimeo.com");
 
-                  if (isEmbeddable) {
+                  const isDynTube =
+                    videoSrc?.includes("dyntube.com") ||
+                    videoSrc?.includes("videos.dyntube.com");
+
+                  if (isYouTubeOrVimeo) {
                     return (
                       <iframe
                         src={getEmbedUrl(videoSrc)}
-                        className="w-full h-full rounded-md"
+                        className="w-full h-full rounded-md border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    );
+                  } else if (isDynTube) {
+                    return (
+                      <iframe
+                        src={
+                          videoSrc.startsWith("http") ? videoSrc : `https://${videoSrc}`
+                        }
+                        className="w-full h-full rounded-md border-0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                       />
@@ -1722,80 +1778,80 @@ const LectureContent = ({
       </AnimatePresence>
 
       {/* LIVE SESSION SELECTION MODAL - KEPT OUTSIDE MAIN ANIMATEPRESENCE */}
-      {isSessionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-hidden">
-          {/* Modal Frame */}
-          <div className="relative w-full max-w-2xl flex flex-col rounded-xl shadow-2xl overflow-hidden bg-[#181924] text-white border border-gray-400 h-[80vh] max-h-[600px] my-auto">
+      {isSessionModalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-hidden">
+            {/* Modal Frame */}
+            <div className="relative w-full max-w-2xl flex flex-col rounded-xl shadow-2xl overflow-hidden bg-[#181924] text-white border border-gray-400 h-[80vh] max-h-[600px] my-auto">
 
-            {/* --- HEADER --- */}
-            <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-800/80 bg-transparent">
-              <div>
-                <h3 className="text-lg font-semibold text-white tracking-wide">
-                  Select Ended Live Session
-                </h3>
-                <p className="text-xs text-[#a0a5b5] mt-0.5 font-normal">
-                  Choose a recorded live session to map with this lecture
-                </p>
-              </div>
-              <button
-                onClick={() => setIsSessionModalOpen(false)}
-                type="button"
-                className="text-gray-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* --- SEARCH BAR --- */}
-            <div className="flex-shrink-0 px-6 py-3.5 bg-[#181924] border-b border-gray-800/60">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search session by title or ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-sm rounded-lg bg-[#12131a] text-white placeholder-[#808595] focus:outline-none focus:border-primary transition-all border border-gray-700/60"
-                />
-                <svg
-                  className="w-4 h-4 absolute left-3.5 top-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-            </div>
-
-            {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
-            <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
-              {isFetchingSessions && page === 1 ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="animate-spin text-primary w-8 h-8" />
-                </div>
-              ) : (allSessions || []).filter(
-                (session) => session.recordings && session.recordings.length > 0
-              ).length === 0 ? (
-                <div className="text-center py-12 space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-[#262736] text-gray-400 mx-auto flex items-center justify-center border border-gray-700/50">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-gray-300">
-                    No recorded live sessions found.
+              {/* --- HEADER --- */}
+              <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-800/80 bg-transparent">
+                <div>
+                  <h3 className="text-lg font-semibold text-white tracking-wide">
+                    Select Ended Live Session
+                  </h3>
+                  <p className="text-xs text-[#a0a5b5] mt-0.5 font-normal">
+                    Choose a recorded live session to map with this lecture
                   </p>
                 </div>
-              ) : (
-                <>
-                  {(allSessions || [])
-                    .filter((session) => session.recordings && session.recordings.length > 0)
-                    .map((session) => {
-                      const recordings = session.recordings || [];
+                <button
+                  onClick={() => setIsSessionModalOpen(false)}
+                  type="button"
+                  className="text-gray-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
-                      // Proper date calculation for all fields
+              {/* --- SEARCH BAR --- */}
+              <div className="flex-shrink-0 px-6 py-3.5 bg-[#181924] border-b border-gray-800/60">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search session by title or ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 text-sm rounded-lg bg-[#12131a] text-white placeholder-[#808595] focus:outline-none focus:border-primary transition-all border border-gray-700/60"
+                  />
+                  <svg
+                    className="w-4 h-4 absolute left-3.5 top-3 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
+              <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
+                {isFetchingSessions && page === 1 ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="animate-spin text-primary w-8 h-8" />
+                  </div>
+                ) : (allSessions || []).length === 0 ? (
+                  <div className="text-center py-12 space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-[#262736] text-gray-400 mx-auto flex items-center justify-center border border-gray-700/50">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      No recorded live sessions found.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {(allSessions || []).map((session) => {
+                      let recordings = Array.isArray(session.recordings) && session.recordings.length > 0
+                        ? session.recordings
+                        : session.recordingUrl
+                          ? [session.recordingUrl]
+                          : [];
+
                       const rawDate =
                         session.date ||
                         session.endedAt ||
@@ -1818,7 +1874,6 @@ const LectureContent = ({
                           key={session.id || session._id || session.callId}
                           className="group p-4 rounded-xl border border-gray-700/80 bg-[#15161e] hover:bg-[#1a1b26] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
                         >
-                          {/* Thumbnail & Info */}
                           <div className="flex items-center gap-4 flex-1 min-w-0">
                             <div className="w-24 h-14 rounded-lg bg-[#14151f] border border-gray-700/80 flex-shrink-0 relative overflow-hidden flex items-center justify-center">
                               {session.thumbnail ? (
@@ -1841,28 +1896,29 @@ const LectureContent = ({
 
                             <div className="min-w-0 space-y-1">
                               <h4 className="text-sm font-medium text-white truncate group-hover:text-primary transition-colors">
-                                {session.title || "Untitled Live Session"}
+                                {session.title || session.topic || "Untitled Live Session"}
                               </h4>
                               <p className="text-xs font-mono text-[#cbd5e1] truncate">
-                                <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id}
+                                <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id || session._id}
                               </p>
-                              <div className="flex items-center gap-2 text-[11px] text-gray-700">
-                                <span>Ended: <strong className="text-gray-700 font-normal">{formattedEndedDate}</strong></span>
+                              <div className="flex items-center gap-2 text-[11px] text-gray-400">
+                                <span>Ended: <strong className="text-gray-300 font-normal">{formattedEndedDate}</strong></span>
                                 <span>•</span>
                                 <span>Recordings: <strong className="text-primary font-semibold">{recordings.length}</strong></span>
                               </div>
                             </div>
                           </div>
 
-                          {/* Action Buttons */}
                           <div className="flex-shrink-0 flex items-center gap-2">
-                            {recordings.length === 1 ? (
+                            {recordings.length <= 1 ? (
                               <button
                                 type="button"
                                 onClick={() =>
                                   handleSessionSelect({
                                     ...session,
-                                    recordingUrl: typeof recordings[0] === "string" ? recordings[0] : recordings[0].url || recordings[0].streamUrl,
+                                    recordingUrl: recordings[0]
+                                      ? (typeof recordings[0] === "string" ? recordings[0] : recordings[0].url || recordings[0].streamUrl)
+                                      : session.recordingUrl || "",
                                   })
                                 }
                                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors text-xs h-9 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer active:scale-95"
@@ -1896,33 +1952,33 @@ const LectureContent = ({
                       );
                     })}
 
-                  {/* Target Div for Infinite Scroll */}
-                  <div ref={observerRef} className="py-2 text-center min-h-[20px] flex justify-center items-center">
-                    {isFetching && page > 1 && (
-                      <div className="flex justify-center items-center gap-2 text-xs text-gray-400 py-1">
-                        <Loader2 className="animate-spin text-primary w-4 h-4" />
-                        <span>Loading more sessions...</span>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+                    <div ref={observerRef} className="py-2 text-center min-h-[20px] flex justify-center items-center">
+                      {isFetching && page > 1 && (
+                        <div className="flex justify-center items-center gap-2 text-xs text-gray-400 py-1">
+                          <Loader2 className="animate-spin text-primary w-4 h-4" />
+                          <span>Loading more sessions...</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
 
-            {/* --- FOOTER (Standard Cancel Button Fix) --- */}
-            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsSessionModalOpen(false)}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-2 [&_svg]:shrink-0 text-primary-foreground text-sm h-10 rounded-md px-4 py-2 bg-primary hover:bg-primary"
-              >
-                Cancel
-              </button>
-            </div>
+              {/* --- FOOTER --- */}
+              <div className="flex-shrink-0 px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsSessionModalOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 text-primary-foreground text-sm h-10 rounded-md px-4 py-2 bg-primary hover:bg-primary"
+                >
+                  Cancel
+                </button>
+              </div>
 
-          </div>
-        </div>
-      )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
