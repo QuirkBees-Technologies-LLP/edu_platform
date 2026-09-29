@@ -8,23 +8,17 @@ export function useLivestreamStatus(call) {
         if (!call) return;
 
         const handleStart = () => {
-            console.log('✅ Live started');
+            console.log('🟢 Live started');
             setIsLive(true);
         };
 
         const handleEnd = () => {
-            console.log('🛑 Live ended');
+            console.log('🔴 Live ended');
             setIsLive(false);
         };
 
-        call.on('broadcast_started', () => {
-            console.log('🟢 Live started');
-            setIsLive(true);
-        });
-        call.on('broadcast_ended', () => {
-            console.log('🔴 Live ended');
-            setIsLive(false);
-        });
+        call.on('broadcast_started', handleStart);
+        call.on('broadcast_ended', handleEnd);
 
         return () => {
             call.off('broadcast_started', handleStart);
@@ -34,3 +28,4 @@ export function useLivestreamStatus(call) {
 
     return isLive;
 }
+
