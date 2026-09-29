@@ -146,35 +146,46 @@ const LectureContent = ({
     };
   }, [hasMore, isFetching, isFetchingSessions, isSessionModalOpen]);
 
-  const handleSessionSelect = (session) => {
-    const videoPlayUrl =
-      session.recordingUrl ||
-      session.streamUrl ||
-      session.videoUrl ||
-      session.playbackUrl ||
-      session.url ||
-      "";
+  const handleSessionSelect = (session, selectedRecording) => {
+    // selectedRecording is the specific recording object from the new backend response
+    const recording = selectedRecording || (session.recordings && session.recordings[0]) || {};
+    const videoPlayUrl = recording.videoUrl || "";
 
     console.log("Selected Ended Session:", session);
-    console.log("Extracted Video URL:", videoPlayUrl);
+    console.log("Selected Recording:", recording);
+    console.log("Dyntube Video URL:", videoPlayUrl);
+
+    if (!videoPlayUrl || !videoPlayUrl.includes("dyntube.com")) {
+      toast.error("This recording does not have a valid Dyntube playback URL.");
+      return;
+    }
+
+    if (recording.isTemp || recording.status === "TEMPORARY") {
+      toast.error("This recording is still temporary. Please save it permanently first.");
+      return;
+    }
 
     setFormData((prev) => ({
       ...prev,
       content: videoPlayUrl,
       videoUrl: videoPlayUrl,
-      mappedSessionId: session._id || session.id || session.callId || "",
+      mappedSessionId: session.callId || session.id || session._id || "",
       mappedSessionTitle: session.title || session.topic || session.name || "",
+      mappedRecordingId: recording._id || "",
+      recordingProvider: "DYNTUBE",
+      recordingUrl: videoPlayUrl,
+      recordingStatus: "SAVED",
     }));
 
-    if (typeof setLectureContent === "function") {
-      setLectureContent((prev) => ({
-        ...prev,
-        content: videoPlayUrl,
-        videoUrl: videoPlayUrl,
-      }));
-    }
+    setLectureContent((prev) => ({
+      ...prev,
+      content: videoPlayUrl,
+      videoUrl: videoPlayUrl,
+      recordingUrl: videoPlayUrl,
+    }));
 
     setIsSessionModalOpen(false);
+    toast.success("Recording selected successfully");
   };
 
   const [formData, setFormData] = useState({
@@ -190,6 +201,13 @@ const LectureContent = ({
         : lecture?.section,
     thumbnail: lecture?.thumbnailUrl ? lecture?.thumbnailUrl : null,
     videoUrl: lecture?.videoUrl || null,
+    // Recording mapping fields
+    mappedSessionId: lecture?.mappedSessionId || null,
+    mappedSessionTitle: lecture?.mappedSessionTitle || null,
+    mappedRecordingId: lecture?.mappedRecordingId || null,
+    recordingProvider: lecture?.recordingProvider || null,
+    recordingUrl: lecture?.recordingUrl || null,
+    recordingStatus: lecture?.recordingStatus || null,
   });
 
   useEffect(() => {
@@ -207,7 +225,10 @@ const LectureContent = ({
     //   setVideoInputType("upload");
     // }
     if (lecture?.type === "VIDEO") {
-      if (lecture?.content && isValidVideoUrl(lecture?.content)) {
+      // If this lecture has a mapped live session recording, use that mode
+      if (lecture?.mappedSessionId && lecture?.recordingUrl) {
+        setVideoInputType("ended_live_session");
+      } else if (lecture?.content && isValidVideoUrl(lecture?.content)) {
         setVideoInputType("url");
       } else if (lecture?.videoUrl || lecture?.thumbnailUrl) {
         setVideoInputType("upload");
@@ -233,7 +254,19 @@ const LectureContent = ({
         preview: lecture?.preview || false,
         section: sectionId || "",
         thumbnail: lecture?.thumbnailUrl || null,
+        // Restore recording mapping fields
+        mappedSessionId: lecture?.mappedSessionId || null,
+        mappedSessionTitle: lecture?.mappedSessionTitle || null,
+        mappedRecordingId: lecture?.mappedRecordingId || null,
+        recordingProvider: lecture?.recordingProvider || null,
+        recordingUrl: lecture?.recordingUrl || null,
+        recordingStatus: lecture?.recordingStatus || null,
       });
+
+      // If lecture has a recording mapping, auto-set videoInputType
+      if (lecture?.type === "VIDEO" && lecture?.mappedSessionId && lecture?.recordingUrl) {
+        setVideoInputType("ended_live_session");
+      }
 
       // setShowPreview(false);
       // setIsEditing(false);
@@ -483,6 +516,12 @@ const LectureContent = ({
     if (videoInputType === "ended_live_session") {
       dataToSend.append("mappedSessionId", formData?.mappedSessionId || "");
       dataToSend.append("mappedSessionTitle", formData?.mappedSessionTitle || "");
+      if (formData?.mappedRecordingId) {
+        dataToSend.append("mappedRecordingId", formData.mappedRecordingId);
+      }
+      dataToSend.append("recordingProvider", formData?.recordingProvider || "DYNTUBE");
+      dataToSend.append("recordingUrl", formData?.recordingUrl || "");
+      dataToSend.append("recordingStatus", formData?.recordingStatus || "SAVED");
     }
 
     setIsLoading(true);
@@ -857,21 +896,44 @@ const LectureContent = ({
                     Select Live Session
                   </Button>
                 )}
-                {/* Video Player Preview */}
+                {/* Video Player Preview — Dyntube iframe */}
                 {formData?.content && (
                   <div className="mt-4 space-y-2">
-                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Video Content Preview
-                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Video Content Preview
+                      </Label>
+                      {formData?.recordingStatus === "SAVED" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-semibold uppercase tracking-wider">
+                          <Check className="w-3 h-3" />
+                          Saved Recording
+                        </span>
+                      )}
+                    </div>
                     <div className="aspect-video w-full border border-gray-700 rounded-lg overflow-hidden bg-black shadow-md">
-                      <video
-                        src={formData.content}
-                        controls
-                        className="w-full h-full object-contain"
-                        controlsList="nodownload"
-                      >
-                        Your browser does not support the video tag.
-                      </video>
+                      {formData.content.includes("dyntube.com") ? (
+                        <iframe
+                          src={getEmbedUrl(formData.content)}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                          allowFullScreen
+                          title="Dyntube Recording Preview"
+                          style={{ border: "none" }}
+                        />
+                      ) : isValidVideoUrl(formData.content) ? (
+                        <iframe
+                          src={getEmbedUrl(formData.content)}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 p-4">
+                          <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+                          <p className="text-sm">Unable to preview this video URL.</p>
+                          <p className="text-xs mt-1 text-gray-500 break-all max-w-md text-center">{formData.content}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1279,18 +1341,14 @@ const LectureContent = ({
             {lectureContent?.type === "VIDEO" ? (
               <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm bg-black">
                 {(() => {
-                  // 👉 અહીં ચેક થશે કે Live Session નો URL છે કે પછી ડાયરેક્ટ વિડીયો છે.
+                  // Resolve the video source - prioritize recording URL
                   const videoSrc =
-                    formData?.videoUrl ||
-                    formData?.content ||
+                    lectureContent?.recordingUrl ||
                     lectureContent?.videoUrl ||
                     lectureContent?.content ||
-                    lectureContent?.streamUrl ||
-                    lectureContent?.recordingUrl ||
-                    lectureContent?.mappedSession?.streamUrl ||
-                    lectureContent?.mappedSession?.videoUrl;
-
-                  console.log("Current lectureContent videoSrc:", videoSrc, lectureContent);
+                    formData?.recordingUrl ||
+                    formData?.videoUrl ||
+                    formData?.content;
 
                   if (!videoSrc) {
                     return (
@@ -1301,11 +1359,28 @@ const LectureContent = ({
                     );
                   }
 
+                  // Dyntube URLs must use iframe (not <video>)
+                  const isDyntube = videoSrc?.includes("dyntube.com");
+                  if (isDyntube) {
+                    return (
+                      <iframe
+                        src={getEmbedUrl(videoSrc)}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        title="Dyntube Recording"
+                        style={{ border: "none" }}
+                      />
+                    );
+                  }
+
                   // Check for YouTube / Vimeo embed links
                   const isEmbeddable =
                     videoSrc?.includes("youtube.com") ||
                     videoSrc?.includes("youtu.be") ||
-                    videoSrc?.includes("vimeo.com");
+                    videoSrc?.includes("vimeo.com") ||
+                    videoSrc?.includes("loom.com") ||
+                    videoSrc?.includes("dailymotion.com");
 
                   if (isEmbeddable) {
                     return (
@@ -1456,7 +1531,10 @@ const LectureContent = ({
   const handleEditClick = () => {
     if (!isEditing) {
       if (formData.type === "VIDEO") {
-        if (isValidVideoUrl(formData.content)) {
+        // If this lecture has a mapped live session recording, use that mode
+        if (formData.mappedSessionId && formData.recordingUrl) {
+          setVideoInputType("ended_live_session");
+        } else if (isValidVideoUrl(formData.content)) {
           setVideoInputType("url");
         } else if (formData.thumbnail || formData.videoUrl) {
           setVideoInputType("upload");
@@ -1775,9 +1853,7 @@ const LectureContent = ({
                 <div className="flex justify-center py-12">
                   <Loader2 className="animate-spin text-primary w-8 h-8" />
                 </div>
-              ) : (allSessions || []).filter(
-                (session) => session.recordings && session.recordings.length > 0
-              ).length === 0 ? (
+              ) : (allSessions || []).length === 0 ? (
                 <div className="text-center py-12 space-y-3">
                   <div className="w-12 h-12 rounded-full bg-[#262736] text-gray-400 mx-auto flex items-center justify-center border border-gray-700/50">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1785,17 +1861,18 @@ const LectureContent = ({
                     </svg>
                   </div>
                   <p className="text-sm text-gray-300">
-                    No recorded live sessions found.
+                    No ended sessions with saved recordings found.
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Only sessions with permanently saved Dyntube recordings will appear here.
                   </p>
                 </div>
               ) : (
                 <>
-                  {(allSessions || [])
-                    .filter((session) => session.recordings && session.recordings.length > 0)
-                    .map((session) => {
+                  {(allSessions || []).map((session) => {
                       const recordings = session.recordings || [];
 
-                      // Proper date calculation for all fields
+                      // Proper date calculation
                       const rawDate =
                         session.date ||
                         session.endedAt ||
@@ -1846,10 +1923,15 @@ const LectureContent = ({
                               <p className="text-xs font-mono text-[#cbd5e1] truncate">
                                 <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id}
                               </p>
-                              <div className="flex items-center gap-2 text-[11px] text-gray-700">
-                                <span>Ended: <strong className="text-gray-700 font-normal">{formattedEndedDate}</strong></span>
+                              <div className="flex items-center gap-2 text-[11px] text-gray-500">
+                                <span>Ended: <strong className="text-gray-400 font-normal">{formattedEndedDate}</strong></span>
                                 <span>•</span>
                                 <span>Recordings: <strong className="text-primary font-semibold">{recordings.length}</strong></span>
+                                <span>•</span>
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 font-semibold">
+                                  <Check className="w-2.5 h-2.5" />
+                                  Saved
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1860,10 +1942,7 @@ const LectureContent = ({
                               <button
                                 type="button"
                                 onClick={() =>
-                                  handleSessionSelect({
-                                    ...session,
-                                    recordingUrl: typeof recordings[0] === "string" ? recordings[0] : recordings[0].url || recordings[0].streamUrl,
-                                  })
+                                  handleSessionSelect(session, recordings[0])
                                 }
                                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors text-xs h-9 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer active:scale-95"
                               >
@@ -1871,24 +1950,18 @@ const LectureContent = ({
                               </button>
                             ) : (
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                {recordings.map((rec, idx) => {
-                                  const recUrl = typeof rec === "string" ? rec : rec.url || rec.streamUrl;
-                                  return (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      onClick={() =>
-                                        handleSessionSelect({
-                                          ...session,
-                                          recordingUrl: recUrl,
-                                        })
-                                      }
-                                      className="inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors text-xs h-8 px-3 rounded-md bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/30 cursor-pointer active:scale-95"
-                                    >
-                                      Part {idx + 1}
-                                    </button>
-                                  );
-                                })}
+                                {recordings.map((rec, idx) => (
+                                  <button
+                                    key={rec._id || idx}
+                                    type="button"
+                                    onClick={() =>
+                                      handleSessionSelect(session, rec)
+                                    }
+                                    className="inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors text-xs h-8 px-3 rounded-md bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/30 cursor-pointer active:scale-95"
+                                  >
+                                    Recording {idx + 1}
+                                  </button>
+                                ))}
                               </div>
                             )}
                           </div>
