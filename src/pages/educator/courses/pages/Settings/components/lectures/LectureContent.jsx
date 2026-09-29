@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { lmsLectures } from "@/services";
@@ -69,6 +69,9 @@ const LectureContent = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
 
+  const observerRef = useRef(null);
+  const [allSessions, setAllSessions] = useState([]);
+
   // RTK Query Hook (Top-level call)
   const {
     data: endedSessionsData,
@@ -88,8 +91,62 @@ const LectureContent = ({
   const liveSessions = endedSessionsData?.sessions || [];
   const hasMore = endedSessionsData?.pagination?.hasMore || false;
 
+  useEffect(() => {
+    setPage(1);
+    setAllSessions([]);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (endedSessionsData?.sessions) {
+      if (page === 1) {
+        setAllSessions(endedSessionsData.sessions);
+      } else {
+        setAllSessions((prev) => {
+          const existingIds = new Set(prev.map((s) => s.id || s._id || s.callId));
+          const newUnique = endedSessionsData.sessions.filter(
+            (s) => !existingIds.has(s.id || s._id || s.callId)
+          );
+          return [...prev, ...newUnique];
+        });
+      }
+    }
+  }, [endedSessionsData, page]);
+
+  useEffect(() => {
+    if (isSessionModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isSessionModalOpen]);
+
+  useEffect(() => {
+    if (!hasMore || isFetching || isFetchingSessions || !isSessionModalOpen) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetching) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [hasMore, isFetching, isFetchingSessions, isSessionModalOpen]);
+
   const handleSessionSelect = (session) => {
-    // Session object mathi eku pan URL hoy e ne pick karo
     const videoPlayUrl =
       session.recordingUrl ||
       session.streamUrl ||
@@ -109,7 +166,6 @@ const LectureContent = ({
       mappedSessionTitle: session.title || session.topic || session.name || "",
     }));
 
-    // Direct Parent state pan update karo tame jo prop pass karta hoy toh
     if (typeof setLectureContent === "function") {
       setLectureContent((prev) => ({
         ...prev,
@@ -782,7 +838,7 @@ const LectureContent = ({
                     <Button
                       type="button"
                       size="sm"
-                      className="bg-[#262736] hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition-all text-xs"
+                      className="inline-flex items-center justify-center whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 btn-sm h-8 rounded-md px-3 gap-1 bg-[#262736] hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition-all text-xs"
                       onClick={() => {
                         setIsSessionModalOpen(true);
                       }}
@@ -1261,10 +1317,9 @@ const LectureContent = ({
                       />
                     );
                   } else {
-                    // HTML5 Video Player for live recording direct MP4 / HLS / S3 URL
                     return (
                       <video
-                        key={videoSrc} // 👉 Key આપવાથી URL બદલાય એટલે વિડીયો આપોઆપ રીલોડ થઈ જશે!
+                        key={videoSrc}
                         src={videoSrc}
                         controls
                         autoPlay={false}
@@ -1668,22 +1723,24 @@ const LectureContent = ({
 
       {/* LIVE SESSION SELECTION MODAL - KEPT OUTSIDE MAIN ANIMATEPRESENCE */}
       {isSessionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 overflow-y-auto">
-          <div className="relative w-full max-w-2xl flex flex-col rounded-xl shadow-2xl overflow-hidden bg-[#1a1b23] text-white border border-gray-700/80 max-h-[80vh] my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 overflow-hidden">
+          {/* Modal Frame */}
+          <div className="relative w-full max-w-2xl flex flex-col rounded-xl shadow-2xl overflow-hidden bg-[#181924] text-white border border-gray-400 h-[80vh] max-h-[600px] my-auto">
 
             {/* --- HEADER --- */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800/80 bg-transparent">
+            <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-800/80 bg-transparent">
               <div>
                 <h3 className="text-lg font-semibold text-white tracking-wide">
                   Select Ended Live Session
                 </h3>
-                <p className="text-xs text-[#a0a5b5] mt-1 font-normal">
+                <p className="text-xs text-[#a0a5b5] mt-0.5 font-normal">
                   Choose a recorded live session to map with this lecture
                 </p>
               </div>
               <button
                 onClick={() => setIsSessionModalOpen(false)}
-                className="text-gray-400 hover:text-white p-1 rounded-lg transition-colors"
+                type="button"
+                className="text-gray-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1692,20 +1749,17 @@ const LectureContent = ({
             </div>
 
             {/* --- SEARCH BAR --- */}
-            <div className="px-6 py-4 bg-[#181924] border-b border-gray-800/60">
+            <div className="flex-shrink-0 px-6 py-3.5 bg-[#181924] border-b border-gray-800/60">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search session by title or ID..."
                   value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg bg-[#12131a] text-white placeholder-[#808595] focus:outline-none focus:border-blue-500 transition-all"
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-sm rounded-lg bg-[#12131a] text-white placeholder-[#808595] focus:outline-none focus:border-primary transition-all border border-gray-700/60"
                 />
                 <svg
-                  className="w-4 h-4 absolute left-3.5 top-3.5 text-gray-400"
+                  className="w-4 h-4 absolute left-3.5 top-3 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1715,13 +1769,13 @@ const LectureContent = ({
               </div>
             </div>
 
-            {/* --- SESSION LIST --- */}
-            <div className="p-6 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar bg-[#181924]">
-              {isFetchingSessions || isFetching ? (
+            {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
+            <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
+              {isFetchingSessions && page === 1 ? (
                 <div className="flex justify-center py-12">
-                  <Loader2 className="animate-spin text-blue-500 w-8 h-8" />
+                  <Loader2 className="animate-spin text-primary w-8 h-8" />
                 </div>
-              ) : (liveSessions || []).filter(
+              ) : (allSessions || []).filter(
                 (session) => session.recordings && session.recordings.length > 0
               ).length === 0 ? (
                 <div className="text-center py-12 space-y-3">
@@ -1735,112 +1789,132 @@ const LectureContent = ({
                   </p>
                 </div>
               ) : (
-                (liveSessions || [])
-                  .filter((session) => session.recordings && session.recordings.length > 0)
-                  .map((session) => {
-                    const recordings = session.recordings || [];
+                <>
+                  {(allSessions || [])
+                    .filter((session) => session.recordings && session.recordings.length > 0)
+                    .map((session) => {
+                      const recordings = session.recordings || [];
 
-                    return (
-                      <div
-                        key={session.id || session._id || session.callId}
-                        className="group p-4 rounded-xl border border-gray-700/80 bg-[#15161e] hover:bg-[#1a1b26] hover:border-blue-500/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
-                      >
-                        {/* Thumbnail & Info */}
-                        <div className="flex items-center gap-4 flex-1 min-w-0">
-                          <div className="w-24 h-14 rounded-lg bg-[#14151f] border border-gray-400 flex-shrink-0 relative overflow-hidden flex items-center justify-center">
-                            {session.thumbnail ? (
-                              <img
-                                src={session.thumbnail}
-                                alt="thumbnail"
-                                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                }}
-                              />
-                            ) : null}
-                            <div className="absolute inset-0 flex items-center justify-center text-blue-400/80">
-                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
+                      // Proper date calculation for all fields
+                      const rawDate =
+                        session.date ||
+                        session.endedAt ||
+                        session.createdAt ||
+                        session.updatedAt;
+
+                      const parsedDate = rawDate ? new Date(rawDate) : null;
+                      const isValidDate = parsedDate && !isNaN(parsedDate.getTime());
+
+                      const formattedEndedDate = isValidDate
+                        ? parsedDate.toLocaleDateString("en-US", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                        : "N/A";
+
+                      return (
+                        <div
+                          key={session.id || session._id || session.callId}
+                          className="group p-4 rounded-xl border border-gray-700/80 bg-[#15161e] hover:bg-[#1a1b26] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                        >
+                          {/* Thumbnail & Info */}
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <div className="w-24 h-14 rounded-lg bg-[#14151f] border border-gray-700/80 flex-shrink-0 relative overflow-hidden flex items-center justify-center">
+                              {session.thumbnail ? (
+                                <img
+                                  src={session.thumbnail}
+                                  alt="thumbnail"
+                                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              ) : null}
+                              <div className="absolute inset-0 flex items-center justify-center text-primary">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                            </div>
+
+                            <div className="min-w-0 space-y-1">
+                              <h4 className="text-sm font-medium text-white truncate group-hover:text-primary transition-colors">
+                                {session.title || "Untitled Live Session"}
+                              </h4>
+                              <p className="text-xs font-mono text-[#cbd5e1] truncate">
+                                <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id}
+                              </p>
+                              <div className="flex items-center gap-2 text-[11px] text-gray-700">
+                                <span>Ended: <strong className="text-gray-700 font-normal">{formattedEndedDate}</strong></span>
+                                <span>•</span>
+                                <span>Recordings: <strong className="text-primary font-semibold">{recordings.length}</strong></span>
+                              </div>
                             </div>
                           </div>
 
-                          <div className="min-w-0 space-y-1">
-                            <h4 className="text-sm font-medium text-white truncate group-hover:text-blue-300 transition-colors">
-                              {session.title || "Untitled Live Session"}
-                            </h4>
-                            <p className="text-xs font-mono text-[#cbd5e1] truncate">
-                              <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-gray-500 bg-[#262736] px-2 py-0.5 rounded border border-gray-700/50">
-                                Recordings: <strong className="text-blue-400 font-semibold">{recordings.length}</strong>
-                              </span>
-                            </div>
+                          {/* Action Buttons */}
+                          <div className="flex-shrink-0 flex items-center gap-2">
+                            {recordings.length === 1 ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleSessionSelect({
+                                    ...session,
+                                    recordingUrl: typeof recordings[0] === "string" ? recordings[0] : recordings[0].url || recordings[0].streamUrl,
+                                  })
+                                }
+                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors text-xs h-9 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer active:scale-95"
+                              >
+                                Select Session
+                              </button>
+                            ) : (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {recordings.map((rec, idx) => {
+                                  const recUrl = typeof rec === "string" ? rec : rec.url || rec.streamUrl;
+                                  return (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={() =>
+                                        handleSessionSelect({
+                                          ...session,
+                                          recordingUrl: recUrl,
+                                        })
+                                      }
+                                      className="inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors text-xs h-8 px-3 rounded-md bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/30 cursor-pointer active:scale-95"
+                                    >
+                                      Part {idx + 1}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         </div>
+                      );
+                    })}
 
-                        {/* Actions */}
-                        <div className="flex-shrink-0 flex items-center gap-2">
-                          {recordings.length === 1 ? (
-                            <button
-                              onClick={() =>
-                                handleSessionSelect({
-                                  ...session,
-                                  recordingUrl: typeof recordings[0] === "string" ? recordings[0] : recordings[0].url || recordings[0].streamUrl,
-                                })
-                              }
-                              className="px-4 py-2 text-xs font-medium rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all active:scale-95"
-                            >
-                              Select Session
-                            </button>
-                          ) : (
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {recordings.map((rec, idx) => {
-                                const recUrl = typeof rec === "string" ? rec : rec.url || rec.streamUrl;
-                                return (
-                                  <button
-                                    key={idx}
-                                    onClick={() =>
-                                      handleSessionSelect({
-                                        ...session,
-                                        recordingUrl: recUrl,
-                                      })
-                                    }
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#262736] hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition-all active:scale-95"
-                                  >
-                                    Part {idx + 1}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
+                  {/* Target Div for Infinite Scroll */}
+                  <div ref={observerRef} className="py-2 text-center min-h-[20px] flex justify-center items-center">
+                    {isFetching && page > 1 && (
+                      <div className="flex justify-center items-center gap-2 text-xs text-gray-400 py-1">
+                        <Loader2 className="animate-spin text-primary w-4 h-4" />
+                        <span>Loading more sessions...</span>
                       </div>
-                    );
-                  })
-              )}
-
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="text-center pt-2">
-                  <button
-                    onClick={() => setPage((prev) => prev + 1)}
-                    disabled={isFetchingSessions || isFetching}
-                    className="px-4 py-2 text-xs font-medium rounded-xl border border-blue-500/30 bg-[#262736] text-blue-400 hover:text-white hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isFetchingSessions || isFetching ? "Loading..." : "Load More Sessions"}
-                  </button>
-                </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 
-            {/* --- FOOTER --- */}
-            <div className="px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
+            {/* --- FOOTER (Standard Cancel Button Fix) --- */}
+            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
               <button
+                type="button"
                 onClick={() => setIsSessionModalOpen(false)}
-                className="px-5 py-2 text-xs font-medium rounded-lg border border-blue-500/30 bg-transparent text-blue-400 hover:text-blue-300 hover:bg-blue-600/10 transition-all active:scale-95"
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-2 [&_svg]:shrink-0 text-primary-foreground text-sm h-10 rounded-md px-4 py-2 bg-primary hover:bg-primary"
               >
                 Cancel
               </button>
