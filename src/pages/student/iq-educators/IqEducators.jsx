@@ -1465,9 +1465,9 @@ const IqEducators = () => {
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-stretch overflow-x-auto pb-2">
                     {response?.data?.idea?.map((course) =>
-                      renderIdeaCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                      renderIdeaCard(course, "w-[280px] sm:w-[320px] flex-shrink-0")
                     )}
                   </div>
                 )
@@ -1503,9 +1503,9 @@ const IqEducators = () => {
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-stretch overflow-x-auto pb-2">
                     {response?.data?.insight?.map((course) =>
-                      renderInsightCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                      renderInsightCard(course, "w-[280px] sm:w-[320px] flex-shrink-0")
                     )}
                   </div>
                 )
