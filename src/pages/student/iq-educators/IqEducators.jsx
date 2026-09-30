@@ -1553,9 +1553,9 @@ const IqEducators = () => {
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {liveIdea?.length > 0 ? (
-                <div className="flex gap-4 items-start">
+                <div className="flex gap-4 items-stretch overflow-x-auto pb-2">
                   {liveIdea?.map((liveIdeaData) =>
-                    renderLiveIdeaCard(liveIdeaData, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                    renderLiveIdeaCard(liveIdeaData, "w-[280px] sm:w-[320px] flex-shrink-0")
                   )}
                 </div>
 
