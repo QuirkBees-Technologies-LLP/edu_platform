@@ -160,10 +160,10 @@ const LectureContent = ({
       return;
     }
 
-    if (recording.isTemp || recording.status === "TEMPORARY") {
-      toast.error("This recording is still temporary. Please save it permanently first.");
-      return;
-    }
+    // if (recording.isTemp || recording.status === "TEMPORARY") {
+    //   toast.error("This recording is still temporary. Please save it permanently first.");
+    //   return;
+    // }
 
     setFormData((prev) => ({
       ...prev,
@@ -174,7 +174,7 @@ const LectureContent = ({
       mappedRecordingId: recording._id || "",
       recordingProvider: "DYNTUBE",
       recordingUrl: videoPlayUrl,
-      recordingStatus: "SAVED",
+      recordingStatus: recording.isTemp ? "TEMPORARY" : "SAVED",
     }));
 
     setLectureContent((prev) => ({
