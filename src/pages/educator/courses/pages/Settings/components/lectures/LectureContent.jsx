@@ -702,41 +702,68 @@ const LectureContent = ({
               </select>
             </div> */}
 
-            <Select
-              value={videoInputType}
-              onValueChange={(value) => {
-                setVideoInputType(value);
-                setFormData({ ...formData, content: "" });
-                setVideoFile(null);
-                setShowPreview(false);
-                setShowPreview1(false);
-                setShowPreviewVideo(null);
-              }}
-            >
-              <SelectTrigger className="border-primary focus:border-primary focus:ring-primary">
-                <SelectValue defaultValue="url" placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="url">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-primary" />
-                    <span>Video URL</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="upload">
-                  <div className="flex items-center gap-2">
-                    <Video className="w-4 h-4 text-primary" />
-                    <span>Upload File</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="ended_live_session">
-                  <div className="flex items-center gap-2">
-                    <Video className="w-4 h-4 text-primary" />
-                    <span>Map Live Session</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            {/* --- DROPDOWN NI JAGYA E BUTTON TOGGLE --- */}
+            <div className="flex items-center gap-2 p-1 bg-[#12131a] rounded-lg border border-gray-400 w-fit mb-4">
+              {/* Video URL Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setVideoInputType("url");
+                  setFormData({ ...formData, content: "" });
+                  setVideoFile(null);
+                  setShowPreview(false);
+                  setShowPreview1(false);
+                  setShowPreviewVideo(null);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "url"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-gray-700"
+                  }`}
+              >
+                <FileText className="w-4 h-4 text-primary" />
+                <span>Video URL</span>
+              </button>
+
+              {/* Upload File Button */}
+              {/* <button
+                type="button"
+                onClick={() => {
+                  setVideoInputType("upload");
+                  setFormData({ ...formData, content: "" });
+                  setVideoFile(null);
+                  setShowPreview(false);
+                  setShowPreview1(false);
+                  setShowPreviewVideo(null);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "upload"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-gray-400 hover:text-white"
+                  }`}
+              >
+                <Video className="w-4 h-4 text-primary" />
+                <span>Upload File</span>
+              </button> */}
+
+              {/* Map Live Session Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setVideoInputType("ended_live_session");
+                  setFormData({ ...formData, content: "" });
+                  setVideoFile(null);
+                  setShowPreview(false);
+                  setShowPreview1(false);
+                  setShowPreviewVideo(null);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "ended_live_session"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-gray-700"
+                  }`}
+              >
+                <Video className="w-4 h-4 text-primary" />
+                <span>Recorded Session</span>
+              </button>
+            </div>
 
             {/* Video URL Input UI */}
             {videoInputType === "url" && (
@@ -857,18 +884,19 @@ const LectureContent = ({
               </div>
             )}
 
+            {/* Map Live Session UI */}
             {videoInputType === "ended_live_session" && (
               <div className="space-y-4 pt-3 border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2 text-primary">
                   <Video className="w-4 h-4 text-primary" />
-                  <Label className="font-medium">Map Ended Live Session</Label>
+                  <Label className="font-medium">Recorded Session</Label>
                 </div>
 
                 {formData?.mappedSessionTitle ? (
                   <div className="p-3 rounded-lg border border-blue-500/30 flex items-center justify-between">
                     <div>
                       <p className="text-[11px] text-primary font-semibold uppercase tracking-wider">
-                        Mapped Ended Live Session
+                        Recorded Session
                       </p>
                       <p className="text-sm font-bold text-white mt-0.5">
                         {formData.mappedSessionTitle}
@@ -896,11 +924,12 @@ const LectureContent = ({
                     Select Live Session
                   </Button>
                 )}
+
                 {/* Video Player Preview — Dyntube iframe */}
                 {formData?.content && (
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center gap-2">
-                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-700">
                         Video Content Preview
                       </Label>
                       {formData?.recordingStatus === "SAVED" && (
@@ -931,7 +960,9 @@ const LectureContent = ({
                         <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 p-4">
                           <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
                           <p className="text-sm">Unable to preview this video URL.</p>
-                          <p className="text-xs mt-1 text-gray-500 break-all max-w-md text-center">{formData.content}</p>
+                          <p className="text-xs mt-1 text-gray-500 break-all max-w-md text-center">
+                            {formData.content}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -1027,13 +1058,13 @@ const LectureContent = ({
 
   const renderResourcesEditor = () => (
     <div className="space-y-4 border-t border-gray-100 pt-4">
-      <div className="flex items-center gap-2 text-primary">
+      {/* <div className="flex items-center gap-2 text-primary">
         <Paperclip className="w-4 h-4" />
         <Label className="font-medium">Resources / Attachments</Label>
       </div>
       <p className="text-xs text-gray-500">
         Upload supporting materials like PDFs, PPTs, Word docs, or Excel sheets. Max 10 files per upload.
-      </p>
+      </p> */}
 
       {/* Existing resources */}
       {lectureContent?.resources && lectureContent?.resources?.length > 0 && (
@@ -1076,7 +1107,7 @@ const LectureContent = ({
       )}
 
       {/* New file picker */}
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <input
           type="file"
           multiple
@@ -1092,7 +1123,7 @@ const LectureContent = ({
           <Upload className="h-4 w-4 text-primary" />
           <span>Choose Files</span>
         </label>
-      </div>
+      </div> */}
 
       {/* Staged files list */}
       {resourceFiles.length > 0 && (
@@ -1658,12 +1689,12 @@ const LectureContent = ({
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="TEXT">
+                      {/* <SelectItem value="TEXT">
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-primary" />
                           <span>Text</span>
                         </div>
-                      </SelectItem>
+                      </SelectItem> */}
                       <SelectItem value="VIDEO">
                         <div className="flex items-center gap-2">
                           <Video className="w-4 h-4 text-primary" />
