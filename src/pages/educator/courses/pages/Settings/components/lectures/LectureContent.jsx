@@ -858,7 +858,7 @@ const LectureContent = ({
             )}
 
             {videoInputType === "ended_live_session" && (
-              <div className="space-y-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+              <div className="space-y-4 pt-3 border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2 text-primary">
                   <Video className="w-4 h-4 text-primary" />
                   <Label className="font-medium">Map Ended Live Session</Label>
@@ -888,7 +888,7 @@ const LectureContent = ({
                 ) : (
                   <Button
                     type="button"
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-md transition-all"
+                    className="w-full text-white font-medium shadow-md transition-all"
                     onClick={() => {
                       setIsSessionModalOpen(true);
                     }}
@@ -1829,48 +1829,77 @@ const LectureContent = ({
 
               {/* --- SEARCH BAR --- */}
               <div className="flex-shrink-0 px-6 py-3.5 bg-[#181924] border-b border-gray-800/60">
-                <div className="relative">
+                <div className="relative w-full">
+                  {/* Left Search Icon */}
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Project Standard Search Input */}
                   <input
                     type="text"
                     placeholder="Search session by title or ID..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 text-sm rounded-lg bg-[#12131a] text-white placeholder-[#808595] focus:outline-none focus:border-primary transition-all border border-gray-700/60"
+                    autoComplete="off"
+                    className="flex w-full items-center justify-between h-9.5 rounded-md border ring-0 ring-offset-0 pl-9 pr-8 py-2 text-[0.8125rem] font-medium outline-none transition-colors duration-200 border-gray-400 hover:border-gray-500 focus:border-blue-500 focus:ring-0 text-gray-100 placeholder-gray-400 dark:placeholder-gray-800"
+                    style={{
+                      color: "#f3f4f6",
+                      backgroundColor: "#1f1f1f",
+                      caretColor: "#ffffff",
+                    }}
                   />
-                  <svg
-                    className="w-4 h-4 absolute left-3.5 top-3 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+
+                  {/* Clear Button (Optionally visible when typing) */}
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-white"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
 
-            {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
-            <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
-              {isFetchingSessions && page === 1 ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="animate-spin text-primary w-8 h-8" />
-                </div>
-              ) : (allSessions || []).length === 0 ? (
-                <div className="text-center py-12 space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-[#262736] text-gray-400 mx-auto flex items-center justify-center border border-gray-700/50">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
+              {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
+              <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
+                {isFetchingSessions && page === 1 ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="animate-spin text-primary w-8 h-8" />
                   </div>
-                  <p className="text-sm text-gray-300">
-                    No ended sessions with saved recordings found.
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Only sessions with permanently saved Dyntube recordings will appear here.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  {(allSessions || []).map((session) => {
+                ) : (allSessions || []).length === 0 ? (
+                  <div className="text-center py-12 space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-[#262736] text-gray-400 mx-auto flex items-center justify-center border border-gray-700/50">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      No ended sessions with saved recordings found.
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Only sessions with permanently saved Dyntube recordings will appear here.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {(allSessions || []).map((session) => {
                       const recordings = session.recordings || [];
 
                       // Proper date calculation
@@ -1923,8 +1952,8 @@ const LectureContent = ({
                               <p className="text-xs font-mono text-[#cbd5e1] truncate">
                                 <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id || session._id}
                               </p>
-                              <div className="flex items-center gap-2 text-[11px] text-gray-500">
-                                <span>Ended: <strong className="text-gray-400 font-normal">{formattedEndedDate}</strong></span>
+                              <div className="flex items-center gap-2 text-[11px] text-gray-700">
+                                <span>Ended: <strong className="text-gray-600 font-normal">{formattedEndedDate}</strong></span>
                                 <span>•</span>
                                 <span>Recordings: <strong className="text-primary font-semibold">{recordings.length}</strong></span>
                                 <span>•</span>
