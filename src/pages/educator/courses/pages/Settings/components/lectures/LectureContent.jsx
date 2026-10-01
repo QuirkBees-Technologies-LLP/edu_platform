@@ -282,6 +282,25 @@ const LectureContent = ({
     }
   }, [lecture, onLectureUpdate]);
 
+  // Sync recording mapping fields from lectureContent (full API response) into formData
+  // The lecture prop from the list may not include these fields
+  useEffect(() => {
+    if (lectureContent && lectureContent.mappedSessionId && lectureContent.recordingUrl) {
+      setFormData((prev) => ({
+        ...prev,
+        mappedSessionId: lectureContent.mappedSessionId || prev.mappedSessionId,
+        mappedSessionTitle: lectureContent.mappedSessionTitle || prev.mappedSessionTitle,
+        mappedRecordingId: lectureContent.mappedRecordingId || prev.mappedRecordingId,
+        recordingProvider: lectureContent.recordingProvider || prev.recordingProvider,
+        recordingUrl: lectureContent.recordingUrl || prev.recordingUrl,
+        recordingStatus: lectureContent.recordingStatus || prev.recordingStatus,
+      }));
+      if (lectureContent.type === "VIDEO") {
+        setVideoInputType("ended_live_session");
+      }
+    }
+  }, [lectureContent]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -1562,8 +1581,12 @@ const LectureContent = ({
   const handleEditClick = () => {
     if (!isEditing) {
       if (formData.type === "VIDEO") {
-        // If this lecture has a mapped live session recording, use that mode
-        if (formData.mappedSessionId && formData.recordingUrl) {
+        // Check both formData and lectureContent for recording mapping fields
+        const hasMappedSession = 
+          (formData.mappedSessionId && formData.recordingUrl) ||
+          (lectureContent?.mappedSessionId && lectureContent?.recordingUrl);
+        
+        if (hasMappedSession) {
           setVideoInputType("ended_live_session");
         } else if (isValidVideoUrl(formData.content)) {
           setVideoInputType("url");
