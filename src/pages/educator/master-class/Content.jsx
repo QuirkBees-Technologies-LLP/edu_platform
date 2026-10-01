@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BookOpen, Settings, Menu, X, User } from "lucide-react";
+import { BookOpen, Menu, X, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../../auth/useAuthContext";
 
@@ -20,15 +20,13 @@ const Content = ({ defaultActiveTab, defaultView }) => {
         // { icon: BookOpen, label: "Master Class", href: "#classroom" }, // Classroom tab removed
     ];
 
-    const adminNavItems = [
-        { icon: Settings, label: "Settings", href: "#settings" },
-    ];
+    // Settings nav item hidden from Educator UI — content is rendered directly
+    // const adminNavItems = [
+    //     { icon: Settings, label: "Settings", href: "#settings" },
+    // ];
 
     const navItems = [
         ...baseNavItems,
-        ...(auth?.user?.role === "educator" || auth?.user?.role === "admin" || auth?.user?.role === "super_admin"
-            ? adminNavItems
-            : []),
     ];
 
     const handleNavigation = (page) => {

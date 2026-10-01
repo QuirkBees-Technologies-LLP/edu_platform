@@ -274,6 +274,10 @@ const IqEducators = () => {
     isLoading: isLoadingEducator,
   } = useGetEducatorWithCoursesQuery(id, {
     refetchOnMountOrArgChange: true,
+    // ✅ FIX: Poll every 30s so students already on the page detect when an
+    // educator goes live (Schedule.status changes to "active"). Without this,
+    // students only see sessions that were already active at page load time.
+    pollingInterval: 30000,
   });
 
   // Check if educator's first category is Digital Marketing or E-commerce
