@@ -192,7 +192,7 @@ const LectureContent = ({
     title: lecture?.title || "",
     description: lecture?.description || "",
     content: lecture?.content || "",
-    type: lecture?.type || "TEXT",
+    type: lecture?.type || "VIDEO",
     order: lecture?.order || 0,
     preview: lecture?.preview || false,
     section:
@@ -716,8 +716,8 @@ const LectureContent = ({
                   setShowPreviewVideo(null);
                 }}
                 className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "url"
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-gray-700"
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-700"
                   }`}
               >
                 <FileText className="w-4 h-4 text-primary" />
@@ -756,8 +756,8 @@ const LectureContent = ({
                   setShowPreviewVideo(null);
                 }}
                 className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "ended_live_session"
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-gray-700"
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-700"
                   }`}
               >
                 <Video className="w-4 h-4 text-primary" />
@@ -1674,43 +1674,15 @@ const LectureContent = ({
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-primary">
-                    <FileText className="w-4 h-4" />
-                    <Label htmlFor="type" className="font-medium">
-                      Content Type
-                    </Label>
-                  </div>
-                  <Select
-                    value={formData?.type || "TEXT"}
-                    onValueChange={handleSelectChange}
-                  >
-                    <SelectTrigger className="border-primary focus:border-primary focus:ring-primary">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {/* <SelectItem value="TEXT">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-primary" />
-                          <span>Text</span>
-                        </div>
-                      </SelectItem> */}
-                      <SelectItem value="VIDEO">
-                        <div className="flex items-center gap-2">
-                          <Video className="w-4 h-4 text-primary" />
-                          <span>Video</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Content Type dropdown hidden for Educator — hardcoded to VIDEO */}
+                {/* The type is set to VIDEO by default in formData initialization */}
 
                 <div className="border-t border-gray-100 pt-4">
                   {renderContentEditor()}
                 </div>
 
-                {/* Resources section */}
-                {renderResourcesEditor()}
+                {/* Resources section hidden for Educator Masterclass */}
+                {/* {renderResourcesEditor()} */}
 
                 <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
                   <Switch
@@ -1922,10 +1894,10 @@ const LectureContent = ({
                       </svg>
                     </div>
                     <p className="text-sm text-gray-300">
-                      No ended sessions with saved recordings found.
+                      No saved session recordings found.
                     </p>
                     <p className="text-xs text-gray-500">
-                      Only sessions with permanently saved Dyntube recordings will appear here.
+                      Only saved session recordings will appear here.
                     </p>
                   </div>
                 ) : (
