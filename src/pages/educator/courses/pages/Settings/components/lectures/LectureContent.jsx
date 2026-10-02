@@ -160,11 +160,7 @@ const LectureContent = ({
       return;
     }
 
-    // if (recording.isTemp || recording.status === "TEMPORARY") {
-    //   toast.error("This recording is still temporary. Please save it permanently first.");
-    //   return;
-    // }
-
+    // Backend auto-promotes temporary recordings to permanent when mapped to a Masterclass
     setFormData((prev) => ({
       ...prev,
       content: videoPlayUrl,
@@ -174,7 +170,7 @@ const LectureContent = ({
       mappedRecordingId: recording._id || "",
       recordingProvider: "DYNTUBE",
       recordingUrl: videoPlayUrl,
-      recordingStatus: recording.isTemp ? "TEMPORARY" : "SAVED",
+      recordingStatus: "SAVED",
     }));
 
     setLectureContent((prev) => ({
@@ -1920,7 +1916,7 @@ const LectureContent = ({
                       No saved session recordings found.
                     </p>
                     <p className="text-xs text-gray-500">
-                      Only saved session recordings will appear here.
+                      Only sessions currently available on Dyntube (last 28 days or saved permanently) are available here.
                     </p>
                   </div>
                 ) : (
