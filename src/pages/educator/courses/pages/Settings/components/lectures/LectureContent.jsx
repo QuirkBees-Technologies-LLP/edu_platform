@@ -1769,7 +1769,7 @@ const LectureContent = ({
           >
             <div className="rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               {/* Tabs */}
-              <div className="flex border-b border-gray-200">
+              {/* <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
                   className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
@@ -1788,22 +1788,22 @@ const LectureContent = ({
                 >
                   Settings
                 </button>
-              </div>
+              </div> */}
 
               {/* Tab Content */}
               <div className="p-5">
                 <AnimatePresence mode="wait">
-                  {activeTab === "content" ? (
-                    <motion.div
-                      key="content-tab"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {renderViewContent()}
-                    </motion.div>
-                  ) : (
+                  {/* Only Content tab is shown - Settings tab is hidden */}
+                  <motion.div
+                    key="content-tab"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {renderViewContent()}
+                  </motion.div>
+                  {/* Settings tab - commented out
                     <motion.div
                       key="settings-tab"
                       initial={{ opacity: 0 }}
@@ -1813,7 +1813,7 @@ const LectureContent = ({
                     >
                       {renderSettings()}
                     </motion.div>
-                  )}
+                  */}
                 </AnimatePresence>
               </div>
             </div>
@@ -1898,6 +1898,11 @@ const LectureContent = ({
                   )}
                 </div>
               </div>
+
+              {/* Dyntube availability info */}
+              <p className="px-6 pt-3 pb-0 text-xs dark:text-white text-gray-900">
+                Only sessions currently available on Dyntube (last 28 days or saved permanently) are available here.
+              </p>
 
               {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
               <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
