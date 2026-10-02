@@ -72,7 +72,6 @@ const LectureContent = ({
   const observerRef = useRef(null);
   const [allSessions, setAllSessions] = useState([]);
 
-  // RTK Query Hook (Top-level call)
   const {
     data: endedSessionsData,
     isLoading: isFetchingSessions,
@@ -147,7 +146,6 @@ const LectureContent = ({
   }, [hasMore, isFetching, isFetchingSessions, isSessionModalOpen]);
 
   const handleSessionSelect = (session, selectedRecording) => {
-    // selectedRecording is the specific recording object from the new backend response
     const recording = selectedRecording || (session.recordings && session.recordings[0]) || {};
     const videoPlayUrl = recording.videoUrl || "";
 
@@ -197,7 +195,6 @@ const LectureContent = ({
         : lecture?.section,
     thumbnail: lecture?.thumbnailUrl ? lecture?.thumbnailUrl : null,
     videoUrl: lecture?.videoUrl || null,
-    // Recording mapping fields
     mappedSessionId: lecture?.mappedSessionId || null,
     mappedSessionTitle: lecture?.mappedSessionTitle || null,
     mappedRecordingId: lecture?.mappedRecordingId || null,
@@ -221,7 +218,6 @@ const LectureContent = ({
     //   setVideoInputType("upload");
     // }
     if (lecture?.type === "VIDEO") {
-      // If this lecture has a mapped live session recording, use that mode
       if (lecture?.mappedSessionId && lecture?.recordingUrl) {
         setVideoInputType("ended_live_session");
       } else if (lecture?.content && isValidVideoUrl(lecture?.content)) {
@@ -250,7 +246,6 @@ const LectureContent = ({
         preview: lecture?.preview || false,
         section: sectionId || "",
         thumbnail: lecture?.thumbnailUrl || null,
-        // Restore recording mapping fields
         mappedSessionId: lecture?.mappedSessionId || null,
         mappedSessionTitle: lecture?.mappedSessionTitle || null,
         mappedRecordingId: lecture?.mappedRecordingId || null,
@@ -259,7 +254,6 @@ const LectureContent = ({
         recordingStatus: lecture?.recordingStatus || null,
       });
 
-      // If lecture has a recording mapping, auto-set videoInputType
       if (lecture?.type === "VIDEO" && lecture?.mappedSessionId && lecture?.recordingUrl) {
         setVideoInputType("ended_live_session");
       }
@@ -278,8 +272,6 @@ const LectureContent = ({
     }
   }, [lecture, onLectureUpdate]);
 
-  // Sync recording mapping fields from lectureContent (full API response) into formData
-  // The lecture prop from the list may not include these fields
   useEffect(() => {
     if (lectureContent && lectureContent.mappedSessionId && lectureContent.recordingUrl) {
       setFormData((prev) => ({
@@ -316,7 +308,7 @@ const LectureContent = ({
     setFormData((prev) => ({
       ...prev,
       type: value,
-      content: "", // Reset content when type changes
+      content: "",
     }));
     setShowPreview(false);
   };
@@ -392,13 +384,11 @@ const LectureContent = ({
       return `https://www.dailymotion.com/embed/video/${videoId}`;
     }
 
-    // Loom
     if (url.includes("loom.com/share/")) {
       const videoId = url.split("loom.com/share/")[1].split("?")[0];
       return `https://www.loom.com/embed/${videoId}`;
     }
 
-    // Dyntube
     // if (url.includes("dyntube.com/video/")) {
     //     let videoId = url.split("dyntube.com/video/")[1].split("?")[0];
     //     videoId = videoId.replace(/\/$/, "");
@@ -450,7 +440,6 @@ const LectureContent = ({
 
     const payload = {
       ...formData,
-      // Ensure that videoUrl/content has the selected session URL
       videoUrl: formData.videoUrl || formData.content,
       content: formData.content || formData.videoUrl,
     };
@@ -469,7 +458,6 @@ const LectureContent = ({
     //   return;
     // }
 
-    // Content is required only when there are no resources (existing or staged)
     const hasExistingResources = (lectureContent?.resources?.length ?? 0) > 0;
     const hasStagedResources = resourceFiles.length > 0;
     const hasAnyResources = hasExistingResources || hasStagedResources;
@@ -521,7 +509,6 @@ const LectureContent = ({
       dataToSend.append("video", videoFile);
     }
 
-    // Append resource files
     if (resourceFiles.length > 0) {
       resourceFiles.forEach((file) => {
         dataToSend.append("resources", file);
@@ -549,7 +536,7 @@ const LectureContent = ({
       } else {
         clearInterval(interval);
       }
-    }, 100); // adjust speed
+    }, 100);
     try {
       const updatedLecture = await lmsLectures.updateLecture(
         lecture?._id,
@@ -562,15 +549,12 @@ const LectureContent = ({
         setIsLoading(false);
         setUploadProgress(0);
       }, 500);
-      // Notify success
       toast.success("Lecture updated successfully");
 
-      // Reset UI states
       setIsEditing(false);
       setShowPreview(false);
       setResourceFiles([]);
 
-      // Update parent component if callback exists
       if (onLectureUpdate && typeof onLectureUpdate === "function") {
         onLectureUpdate(updatedLecture);
       }
@@ -649,7 +633,7 @@ const LectureContent = ({
                           ...prev,
                           thumbnail: {
                             file,
-                            preview: reader.result, // base64 for preview
+                            preview: reader.result,
                           },
                         }));
                       };
@@ -679,14 +663,13 @@ const LectureContent = ({
                 )}
               </div>
 
-              {/* Thumbnail Preview */}
               {(formData.thumbnail?.preview || formData.thumbnail?.url || (typeof formData.thumbnail === 'string' && formData.thumbnail)) && (
                 <div className="mt-3">
                   <img
                     src={
-                      formData.thumbnail?.preview || // new file upload preview
-                      formData.thumbnail?.url || // object with url property
-                      (typeof formData.thumbnail === 'string' ? formData.thumbnail : '') // direct URL string
+                      formData.thumbnail?.preview ||
+                      formData.thumbnail?.url ||
+                      (typeof formData.thumbnail === 'string' ? formData.thumbnail : '')
                     }
                     alt="Thumbnail"
                     className="w-48 h-28 rounded border border-success object-cover"
@@ -719,7 +702,6 @@ const LectureContent = ({
 
             {/* --- DROPDOWN NI JAGYA E BUTTON TOGGLE --- */}
             <div className="flex items-center gap-2 p-1 bg-[#12131a] rounded-lg border border-gray-400 w-fit mb-4">
-              {/* Video URL Button */}
               <button
                 type="button"
                 onClick={() => {
@@ -739,7 +721,6 @@ const LectureContent = ({
                 <span>Video URL</span>
               </button>
 
-              {/* Upload File Button */}
               {/* <button
                 type="button"
                 onClick={() => {
@@ -759,7 +740,6 @@ const LectureContent = ({
                 <span>Upload File</span>
               </button> */}
 
-              {/* Map Live Session Button */}
               <button
                 type="button"
                 onClick={() => {
@@ -780,7 +760,6 @@ const LectureContent = ({
               </button>
             </div>
 
-            {/* Video URL Input UI */}
             {videoInputType === "url" && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-primary">
@@ -832,7 +811,6 @@ const LectureContent = ({
               </div>
             )}
 
-            {/* Video Upload UI */}
             {videoInputType === "upload" && (
               <div className="space-y-3 pt-3 border-t border-gray-100">
                 <div className="flex items-center gap-2">
@@ -899,7 +877,6 @@ const LectureContent = ({
               </div>
             )}
 
-            {/* Map Live Session UI */}
             {videoInputType === "ended_live_session" && (
               <div className="space-y-4 pt-3 border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2 text-primary">
@@ -940,7 +917,6 @@ const LectureContent = ({
                   </Button>
                 )}
 
-                {/* Video Player Preview — Dyntube iframe */}
                 {formData?.content && (
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center gap-2">
@@ -992,7 +968,6 @@ const LectureContent = ({
     }
   };
 
-  // ── Resource helpers ──────────────────────────────────────────────
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
     if (mimeType.includes("pdf")) return <FileText className="w-5 h-5 text-red-500" />;
@@ -1058,7 +1033,6 @@ const LectureContent = ({
     setDeletingResourceId(resourceId);
     try {
       await lmsLectures.deleteResource(lecture?._id, resourceId, auth?.token);
-      // Refresh lecture content
       const response = await lmsLectures.getLectureById(lecture?._id, auth?.token);
       setLectureContent(response?.data);
       toast.success("Resource deleted successfully");
@@ -1081,7 +1055,6 @@ const LectureContent = ({
         Upload supporting materials like PDFs, PPTs, Word docs, or Excel sheets. Max 10 files per upload.
       </p> */}
 
-      {/* Existing resources */}
       {lectureContent?.resources && lectureContent?.resources?.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-gray-700 ">Existing Resources</p>
@@ -1121,7 +1094,6 @@ const LectureContent = ({
         </div>
       )}
 
-      {/* New file picker */}
       {/* <div className="flex items-center gap-2">
         <input
           type="file"
@@ -1140,7 +1112,6 @@ const LectureContent = ({
         </label>
       </div> */}
 
-      {/* Staged files list */}
       {resourceFiles.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-gray-700">Files to upload ({resourceFiles.length})</p>
@@ -1220,7 +1191,6 @@ const LectureContent = ({
                   </p>
                 </div>
 
-                {/* View / Preview button */}
                 <button
                   type="button"
                   onClick={() => {
@@ -1251,7 +1221,6 @@ const LectureContent = ({
           </div>
         </div>
 
-        {/* Resource Preview Modal */}
         {createPortal(
           <AnimatePresence>
             {previewResource && (
@@ -1274,7 +1243,6 @@ const LectureContent = ({
                   className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col overflow-hidden"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Modal Header */}
                   <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                     <div className="flex items-center gap-2 min-w-0">
                       {getFileIcon(previewResource?.mimeType)}
@@ -1305,7 +1273,6 @@ const LectureContent = ({
                     </div>
                   </div>
 
-                  {/* Modal Body */}
                   <div className="flex-1 overflow-hidden relative">
                     {getPreviewType(previewResource?.mimeType) === "image" ? (
                       <div className="flex items-center justify-center p-6 h-full">
@@ -1387,7 +1354,6 @@ const LectureContent = ({
             {lectureContent?.type === "VIDEO" ? (
               <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm bg-black">
                 {(() => {
-                  // Resolve the video source - prioritize recording URL
                   const videoSrc =
                     lectureContent?.recordingUrl ||
                     lectureContent?.videoUrl ||
@@ -1405,7 +1371,6 @@ const LectureContent = ({
                     );
                   }
 
-                  // Dyntube URLs must use iframe (not <video>)
                   const isDyntube = videoSrc?.includes("dyntube.com");
                   if (isDyntube) {
                     return (
@@ -1420,7 +1385,6 @@ const LectureContent = ({
                     );
                   }
 
-                  // Check for YouTube / Vimeo / Loom / Dailymotion embed links
                   const isEmbeddable =
                     videoSrc?.includes("youtube.com") ||
                     videoSrc?.includes("youtu.be") ||
@@ -1498,7 +1462,6 @@ const LectureContent = ({
           </div>
         </div>
 
-        {/* Resources section inline */}
         {renderViewResources()}
       </div>
     );
@@ -1577,8 +1540,7 @@ const LectureContent = ({
   const handleEditClick = () => {
     if (!isEditing) {
       if (formData.type === "VIDEO") {
-        // Check both formData and lectureContent for recording mapping fields
-        const hasMappedSession =
+        const hasMappedSession = 
           (formData.mappedSessionId && formData.recordingUrl) ||
           (lectureContent?.mappedSessionId && lectureContent?.recordingUrl);
 
@@ -1604,7 +1566,6 @@ const LectureContent = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 shadow-sm">
         <div>
           <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
@@ -1644,7 +1605,6 @@ const LectureContent = ({
         </Button>
       </div>
 
-      {/* Main Content View / Edit Animation */}
       <AnimatePresence mode="wait">
         {isEditing ? (
           <motion.div
@@ -1693,15 +1653,9 @@ const LectureContent = ({
                   </div>
                 </div>
 
-                {/* Content Type dropdown hidden for Educator — hardcoded to VIDEO */}
-                {/* The type is set to VIDEO by default in formData initialization */}
-
                 <div className="border-t border-gray-100 pt-4">
                   {renderContentEditor()}
                 </div>
-
-                {/* Resources section hidden for Educator Masterclass */}
-                {/* {renderResourcesEditor()} */}
 
                 <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
                   <Switch
@@ -1768,8 +1722,7 @@ const LectureContent = ({
             transition={{ duration: 0.2 }}
           >
             <div className="rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-              {/* Tabs */}
-              {/* <div className="flex border-b border-gray-200">
+              <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
                   className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
@@ -1790,7 +1743,6 @@ const LectureContent = ({
                 </button>
               </div> */}
 
-              {/* Tab Content */}
               <div className="p-5">
                 <AnimatePresence mode="wait">
                   {/* Only Content tab is shown - Settings tab is hidden */}
@@ -1821,14 +1773,11 @@ const LectureContent = ({
         )}
       </AnimatePresence>
 
-      {/* LIVE SESSION SELECTION MODAL - KEPT OUTSIDE MAIN ANIMATEPRESENCE */}
       {isSessionModalOpen &&
         createPortal(
           <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-hidden">
-            {/* Modal Frame */}
             <div className="relative w-full max-w-2xl flex flex-col rounded-xl shadow-2xl overflow-hidden bg-[#181924] text-white border border-gray-400 h-[80vh] max-h-[600px] my-auto">
 
-              {/* --- HEADER --- */}
               <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-800/80 bg-transparent">
                 <div>
                   <h3 className="text-lg font-semibold text-white tracking-wide">
@@ -1849,10 +1798,8 @@ const LectureContent = ({
                 </button>
               </div>
 
-              {/* --- SEARCH BAR --- */}
               <div className="flex-shrink-0 px-6 py-3.5 bg-[#181924] border-b border-gray-800/60">
                 <div className="relative w-full">
-                  {/* Left Search Icon */}
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                     <svg
                       className="w-4 h-4"
@@ -1869,7 +1816,6 @@ const LectureContent = ({
                     </svg>
                   </div>
 
-                  {/* Project Standard Search Input */}
                   <input
                     type="text"
                     placeholder="Search session by title or ID..."
@@ -1884,7 +1830,6 @@ const LectureContent = ({
                     }}
                   />
 
-                  {/* Clear Button (Optionally visible when typing) */}
                   {searchTerm && (
                     <button
                       type="button"
@@ -1899,12 +1844,6 @@ const LectureContent = ({
                 </div>
               </div>
 
-              {/* Dyntube availability info */}
-              <p className="px-6 pt-3 pb-0 text-xs dark:text-white text-gray-900">
-                Only sessions currently available on Dyntube (last 28 days or saved permanently) are available here.
-              </p>
-
-              {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
               <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
                 {isFetchingSessions && page === 1 ? (
                   <div className="flex justify-center py-12">
@@ -1929,7 +1868,6 @@ const LectureContent = ({
                     {(allSessions || []).map((session) => {
                       const recordings = session.recordings || [];
 
-                      // Proper date calculation
                       const rawDate =
                         session.date ||
                         session.endedAt ||
@@ -2036,7 +1974,6 @@ const LectureContent = ({
                 )}
               </div>
 
-              {/* --- FOOTER --- */}
               <div className="flex-shrink-0 px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
                 <button
                   type="button"

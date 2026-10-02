@@ -61,10 +61,10 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isReccurenceScheduleOpen, setIsReccurenceScheduleOpen] =
     useState(false);
 
-  const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
+  const [tableKey, setTableKey] = useState(0);
 
   const reloadTable = () => {
-    setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
+    setTableKey((prevKey) => prevKey + 1);
   };
 
   const handleClickOpen = () => {
@@ -357,7 +357,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
           <Menu className="items-stretch">
             <MenuItem
               toggle="dropdown"
-              onClick={() => setSelectedRow(row.original)} // ✅ Set selected row
+              onClick={() => setSelectedRow(row.original)}
               trigger="click"
               dropdownProps={{
                 placement: isRTL() ? "bottom-start" : "bottom-end",
@@ -365,7 +365,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
                   {
                     name: "offset",
                     options: {
-                      offset: isRTL() ? [0, -10] : [0, 10], // [skid, distance]
+                      offset: isRTL() ? [0, -10] : [0, 10],
                     },
                   },
                 ],
@@ -386,14 +386,12 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     [isRTL]
   );
 
-  // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || "";
   });
 
-  // Filtered data based on search term
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data?.data; // If no search term, return full data
+    if (!searchTerm) return data?.data;
 
     // return data.filter(member => member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, data?.data]);
@@ -436,7 +434,6 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
     const newLimit = pageSize;
 
     try {
-      // Fetch API Data
       const response = await getEducatorStreamSchedule({
         page: newPage,
         limit: newLimit,

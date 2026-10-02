@@ -43,7 +43,6 @@ const SectionList = ({
   const reduxSections = useSelector(selectAllSections);
   const sectionsStatus = useSelector(selectSectionsStatus);
 
-  // Update local sections when redux sections change
   useEffect(() => {
     setSections(reduxSections);
   }, [reduxSections]);
@@ -68,11 +67,8 @@ const SectionList = ({
         reorderSections({ sections: payload, token: auth.token })
       ).unwrap();
 
-      // No necesitamos actualizar el estado local aquí porque el useEffect
-      // se encargará de actualizarlo cuando cambien las secciones en Redux
     } catch (error) {
       console.error("Failed to reorder sections:", error);
-      // Si falla, volvemos al estado anterior
       setSections(reduxSections);
     } finally {
       setReorderMode(false);
@@ -112,7 +108,6 @@ const SectionList = ({
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="space-y-4">
-        {/* Header with Add and Reorder Buttons */}
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
             <Folder className="h-5 w-5 text-primary" />
@@ -143,7 +138,6 @@ const SectionList = ({
           </div>
         </div>
 
-        {/* Add Section Form */}
         <AnimatePresence>
           {isAddingSection && (
             <motion.div
@@ -201,7 +195,6 @@ const SectionList = ({
           )}
         </AnimatePresence>
 
-        {/* Sections List */}
         {isLoading || sectionsStatus === "loading" ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-3" />
@@ -251,7 +244,7 @@ const SectionList = ({
                     index={index}
                     moveSection={moveSection}
                     sections={sections}
-                    onReorder={handleReorder} // ✅ Pass this prop
+                    onReorder={handleReorder}
                     // onReorder={async (newOrder) => {
                     //   try {
                     //     const reorderedPayload = newOrder.map(

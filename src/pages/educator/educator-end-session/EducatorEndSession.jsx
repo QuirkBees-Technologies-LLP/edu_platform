@@ -50,21 +50,20 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
   const [getLiveSessionList, { data, isLoading, refetch }] =
     useLazyGetLiveSessionListQuery();
   const navigate = useNavigate();
-  const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
+  const [tableKey, setTableKey] = useState(0);
 
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
   const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   const reloadTable = () => {
-    setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
+    setTableKey((prevKey) => prevKey + 1);
   };
 
   const handleRedirect = (callId, row) => {
     navigate(`/educator/live-session/${callId}`, { state: row });
   };
 
-  // Columns definition
   const columns = useMemo(
     () => [
       {
@@ -217,7 +216,6 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
     }
   };
 
-  // Toolbar
   const ToolbarTable = () => {
     const { table } = useDataGrid();
     return (
@@ -230,14 +228,11 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
     );
   };
 
-  // Fetch server-side data and filter ended calls
-
   const handleFetchData = async ({ pageIndex, pageSize }) => {
     const newPage = pageIndex + 1;
     const newLimit = pageSize;
 
     try {
-      // Fetch API Data
       const response = await getLiveSessionList({
         page: newPage,
         limit: newLimit,
