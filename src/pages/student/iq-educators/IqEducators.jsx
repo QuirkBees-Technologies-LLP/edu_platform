@@ -274,6 +274,10 @@ const IqEducators = () => {
     isLoading: isLoadingEducator,
   } = useGetEducatorWithCoursesQuery(id, {
     refetchOnMountOrArgChange: true,
+    // ✅ FIX: Poll every 30s so students already on the page detect when an
+    // educator goes live (Schedule.status changes to "active"). Without this,
+    // students only see sessions that were already active at page load time.
+    pollingInterval: 30000,
   });
 
   // Check if educator's first category is Digital Marketing or E-commerce
@@ -1129,7 +1133,7 @@ const IqEducators = () => {
               <div className="flex items-center justify-center gap-2.5 mb-3">
                 <span className="h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-blue-400/70" />
                 <span className="w-1 h-1 rounded-full bg-blue-400" />
-                <span className="text-blue-400 text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase">
+                <span className="text-white/90 text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase">
                   About Me
                 </span>
                 <span className="w-1 h-1 rounded-full bg-blue-400" />
@@ -1353,7 +1357,7 @@ const IqEducators = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Master Classes</h2>
                 {!isEducator && <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                   onClick={() => navigate(`/master-class/${id}`)}
                 >
                   View All
@@ -1407,7 +1411,7 @@ const IqEducators = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Recordings</h2>
                 <button
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                   onClick={() => setShowAll((prev) => !prev)}
                 >
                   {showAll ? "Show Less" : "View All"}
@@ -1450,7 +1454,7 @@ const IqEducators = () => {
                 <h2 className="text-xl font-medium">Ideas</h2>
                 {!isEducator && <button
                   onClick={() => setIdea((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                 >
                   {idea ? "Show Less" : "View All"}
                 </button>}
@@ -1465,9 +1469,9 @@ const IqEducators = () => {
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-stretch overflow-x-auto pb-2">
                     {response?.data?.idea?.map((course) =>
-                      renderIdeaCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                      renderIdeaCard(course, "w-[280px] sm:w-[320px] flex-shrink-0")
                     )}
                   </div>
                 )
@@ -1487,7 +1491,7 @@ const IqEducators = () => {
                 <h2 className="text-xl font-medium">Insights</h2>
                 {!isEducator && <button
                   onClick={() => setInsight((prev) => !prev)}
-                  className="text-xs text-primary font-normal border-dashed border-b-2 pb-2 border-primary"
+                  className="text-xs font-medium text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 px-3 py-1 rounded-full transition-all"
                 >
                   {insight ? "Show Less" : "View All"}
                 </button>}
@@ -1503,9 +1507,9 @@ const IqEducators = () => {
                   </div>
                 ) : (
                   // SLIDER VIEW (default horizontal scroll)
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-stretch overflow-x-auto pb-2">
                     {response?.data?.insight?.map((course) =>
-                      renderInsightCard(course, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                      renderInsightCard(course, "w-[280px] sm:w-[320px] flex-shrink-0")
                     )}
                   </div>
                 )
@@ -1553,9 +1557,9 @@ const IqEducators = () => {
 
             <div className="rounded-b-2xl shadow-md p-6 overflow-x-auto">
               {liveIdea?.length > 0 ? (
-                <div className="flex gap-4 items-start">
+                <div className="flex gap-4 items-stretch overflow-x-auto pb-2">
                   {liveIdea?.map((liveIdeaData) =>
-                    renderLiveIdeaCard(liveIdeaData, "w-full sm:w-1/2 md:w-1/3 3xl:w-1/4 4xl:w-1/5 flex-shrink-0")
+                    renderLiveIdeaCard(liveIdeaData, "w-[280px] sm:w-[320px] flex-shrink-0")
                   )}
                 </div>
 

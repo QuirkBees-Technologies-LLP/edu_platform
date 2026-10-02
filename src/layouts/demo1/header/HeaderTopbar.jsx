@@ -41,7 +41,7 @@ const HeaderTopbar = () => {
   ];
 
   const EDUCATOR_ALLOWED_ROUTES = [
-    "/educator/master-class",
+    // "/educator/master-class", // Language filter hidden on Educator Masterclass page — educators see all languages by default
     "/educator/stream-schedule",
     "/educator/ended-stream-schedule",
     "/educator/live-session",

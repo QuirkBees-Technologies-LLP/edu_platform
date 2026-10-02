@@ -112,26 +112,26 @@ const EducatorEndSession = ({ title = "Ended Schedule" }) => {
           headerClassName: "min-w-[150px]",
         },
       },
-      {
-        accessorFn: (row) => row.educator,
-        id: "educator",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Educator" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => (
-          <div className="flex items-center gap-2.5">
-            <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.educator?.first_name +
-                " " +
-                info.row.original.educator?.last_name}
-            </span>
-          </div>
-        ),
-        meta: {
-          headerClassName: "min-w-[140px]",
-        },
-      },
+      // {
+      //   accessorFn: (row) => row.educator,
+      //   id: "educator",
+      //   header: ({ column }) => (
+      //     <DataGridColumnHeader title="Educator" column={column} />
+      //   ),
+      //   enableSorting: true,
+      //   cell: (info) => (
+      //     <div className="flex items-center gap-2.5">
+      //       <span className="leading-none text-gray-800 font-normal">
+      //         {info.row.original.educator?.first_name +
+      //           " " +
+      //           info.row.original.educator?.last_name}
+      //       </span>
+      //     </div>
+      //   ),
+      //   meta: {
+      //     headerClassName: "min-w-[140px]",
+      //   },
+      // },
       {
         accessorFn: (row) => row.create_by,
         id: "schedule_time",

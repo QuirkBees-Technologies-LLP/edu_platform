@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { lmsLectures } from "@/services";
@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
+import { useGetEndedLiveSessionsQuery } from "@/store/api/educator/educatorLiveStreamApiSlice";
 
 const LectureContent = ({
   lecture,
@@ -64,11 +65,130 @@ const LectureContent = ({
   const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [previewResource, setPreviewResource] = useState(null);
 
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+
+  const observerRef = useRef(null);
+  const [allSessions, setAllSessions] = useState([]);
+
+  // RTK Query Hook (Top-level call)
+  const {
+    data: endedSessionsData,
+    isLoading: isFetchingSessions,
+    isFetching,
+  } = useGetEndedLiveSessionsQuery(
+    {
+      search: searchTerm,
+      page: page,
+      limit: 10,
+    },
+    {
+      skip: !isSessionModalOpen,
+    }
+  );
+
+  const liveSessions = endedSessionsData?.sessions || [];
+  const hasMore = endedSessionsData?.pagination?.hasMore || false;
+
+  useEffect(() => {
+    setPage(1);
+    setAllSessions([]);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (endedSessionsData?.sessions) {
+      if (page === 1) {
+        setAllSessions(endedSessionsData.sessions);
+      } else {
+        setAllSessions((prev) => {
+          const existingIds = new Set(prev.map((s) => s.id || s._id || s.callId));
+          const newUnique = endedSessionsData.sessions.filter(
+            (s) => !existingIds.has(s.id || s._id || s.callId)
+          );
+          return [...prev, ...newUnique];
+        });
+      }
+    }
+  }, [endedSessionsData, page]);
+
+  useEffect(() => {
+    if (isSessionModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isSessionModalOpen]);
+
+  useEffect(() => {
+    if (!hasMore || isFetching || isFetchingSessions || !isSessionModalOpen) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetching) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [hasMore, isFetching, isFetchingSessions, isSessionModalOpen]);
+
+  const handleSessionSelect = (session, selectedRecording) => {
+    // selectedRecording is the specific recording object from the new backend response
+    const recording = selectedRecording || (session.recordings && session.recordings[0]) || {};
+    const videoPlayUrl = recording.videoUrl || "";
+
+    console.log("Selected Ended Session:", session);
+    console.log("Selected Recording:", recording);
+    console.log("Dyntube Video URL:", videoPlayUrl);
+
+    if (!videoPlayUrl || !videoPlayUrl.includes("dyntube.com")) {
+      toast.error("This recording does not have a valid Dyntube playback URL.");
+      return;
+    }
+
+    // Backend auto-promotes temporary recordings to permanent when mapped to a Masterclass
+    setFormData((prev) => ({
+      ...prev,
+      content: videoPlayUrl,
+      videoUrl: videoPlayUrl,
+      mappedSessionId: session.callId || session.id || session._id || "",
+      mappedSessionTitle: session.title || session.topic || session.name || "",
+      mappedRecordingId: recording._id || "",
+      recordingProvider: "DYNTUBE",
+      recordingUrl: videoPlayUrl,
+      recordingStatus: "SAVED",
+    }));
+
+    setLectureContent((prev) => ({
+      ...prev,
+      content: videoPlayUrl,
+      videoUrl: videoPlayUrl,
+      recordingUrl: videoPlayUrl,
+    }));
+
+    setIsSessionModalOpen(false);
+    toast.success("Recording selected successfully");
+  };
+
   const [formData, setFormData] = useState({
     title: lecture?.title || "",
     description: lecture?.description || "",
     content: lecture?.content || "",
-    type: lecture?.type || "TEXT",
+    type: lecture?.type || "VIDEO",
     order: lecture?.order || 0,
     preview: lecture?.preview || false,
     section:
@@ -77,6 +197,13 @@ const LectureContent = ({
         : lecture?.section,
     thumbnail: lecture?.thumbnailUrl ? lecture?.thumbnailUrl : null,
     videoUrl: lecture?.videoUrl || null,
+    // Recording mapping fields
+    mappedSessionId: lecture?.mappedSessionId || null,
+    mappedSessionTitle: lecture?.mappedSessionTitle || null,
+    mappedRecordingId: lecture?.mappedRecordingId || null,
+    recordingProvider: lecture?.recordingProvider || null,
+    recordingUrl: lecture?.recordingUrl || null,
+    recordingStatus: lecture?.recordingStatus || null,
   });
 
   useEffect(() => {
@@ -94,7 +221,10 @@ const LectureContent = ({
     //   setVideoInputType("upload");
     // }
     if (lecture?.type === "VIDEO") {
-      if (lecture?.content && isValidVideoUrl(lecture?.content)) {
+      // If this lecture has a mapped live session recording, use that mode
+      if (lecture?.mappedSessionId && lecture?.recordingUrl) {
+        setVideoInputType("ended_live_session");
+      } else if (lecture?.content && isValidVideoUrl(lecture?.content)) {
         setVideoInputType("url");
       } else if (lecture?.videoUrl || lecture?.thumbnailUrl) {
         setVideoInputType("upload");
@@ -120,7 +250,19 @@ const LectureContent = ({
         preview: lecture?.preview || false,
         section: sectionId || "",
         thumbnail: lecture?.thumbnailUrl || null,
+        // Restore recording mapping fields
+        mappedSessionId: lecture?.mappedSessionId || null,
+        mappedSessionTitle: lecture?.mappedSessionTitle || null,
+        mappedRecordingId: lecture?.mappedRecordingId || null,
+        recordingProvider: lecture?.recordingProvider || null,
+        recordingUrl: lecture?.recordingUrl || null,
+        recordingStatus: lecture?.recordingStatus || null,
       });
+
+      // If lecture has a recording mapping, auto-set videoInputType
+      if (lecture?.type === "VIDEO" && lecture?.mappedSessionId && lecture?.recordingUrl) {
+        setVideoInputType("ended_live_session");
+      }
 
       // setShowPreview(false);
       // setIsEditing(false);
@@ -135,6 +277,25 @@ const LectureContent = ({
       }
     }
   }, [lecture, onLectureUpdate]);
+
+  // Sync recording mapping fields from lectureContent (full API response) into formData
+  // The lecture prop from the list may not include these fields
+  useEffect(() => {
+    if (lectureContent && lectureContent.mappedSessionId && lectureContent.recordingUrl) {
+      setFormData((prev) => ({
+        ...prev,
+        mappedSessionId: lectureContent.mappedSessionId || prev.mappedSessionId,
+        mappedSessionTitle: lectureContent.mappedSessionTitle || prev.mappedSessionTitle,
+        mappedRecordingId: lectureContent.mappedRecordingId || prev.mappedRecordingId,
+        recordingProvider: lectureContent.recordingProvider || prev.recordingProvider,
+        recordingUrl: lectureContent.recordingUrl || prev.recordingUrl,
+        recordingStatus: lectureContent.recordingStatus || prev.recordingStatus,
+      }));
+      if (lectureContent.type === "VIDEO") {
+        setVideoInputType("ended_live_session");
+      }
+    }
+  }, [lectureContent]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -287,6 +448,13 @@ const LectureContent = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      ...formData,
+      // Ensure that videoUrl/content has the selected session URL
+      videoUrl: formData.videoUrl || formData.content,
+      content: formData.content || formData.videoUrl,
+    };
+
     if (!formData?.title?.trim()) {
       toast.error("Title is required");
       return;
@@ -358,6 +526,17 @@ const LectureContent = ({
       resourceFiles.forEach((file) => {
         dataToSend.append("resources", file);
       });
+    }
+
+    if (videoInputType === "ended_live_session") {
+      dataToSend.append("mappedSessionId", formData?.mappedSessionId || "");
+      dataToSend.append("mappedSessionTitle", formData?.mappedSessionTitle || "");
+      if (formData?.mappedRecordingId) {
+        dataToSend.append("mappedRecordingId", formData.mappedRecordingId);
+      }
+      dataToSend.append("recordingProvider", formData?.recordingProvider || "DYNTUBE");
+      dataToSend.append("recordingUrl", formData?.recordingUrl || "");
+      dataToSend.append("recordingStatus", formData?.recordingStatus || "SAVED");
     }
 
     setIsLoading(true);
@@ -538,35 +717,68 @@ const LectureContent = ({
               </select>
             </div> */}
 
-            <Select
-              value={videoInputType}
-              onValueChange={(value) => {
-                setVideoInputType(value);
-                setFormData({ ...formData, content: "" });
-                setVideoFile(null);
-                setShowPreview(false);
-                setShowPreview1(false);
-                setShowPreviewVideo(null);
-              }}
-            >
-              <SelectTrigger className="border-primary focus:border-primary focus:ring-primary">
-                <SelectValue defaultValue="url" placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="url">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-primary" />
-                    <span>Video URL</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="upload">
-                  <div className="flex items-center gap-2">
-                    <Video className="w-4 h-4 text-primary" />
-                    <span>Upload File</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            {/* --- DROPDOWN NI JAGYA E BUTTON TOGGLE --- */}
+            <div className="flex items-center gap-2 p-1 bg-[#12131a] rounded-lg border border-gray-400 w-fit mb-4">
+              {/* Video URL Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setVideoInputType("url");
+                  setFormData({ ...formData, content: "" });
+                  setVideoFile(null);
+                  setShowPreview(false);
+                  setShowPreview1(false);
+                  setShowPreviewVideo(null);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "url"
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-700"
+                  }`}
+              >
+                <FileText className="w-4 h-4 text-primary" />
+                <span>Video URL</span>
+              </button>
+
+              {/* Upload File Button */}
+              {/* <button
+                type="button"
+                onClick={() => {
+                  setVideoInputType("upload");
+                  setFormData({ ...formData, content: "" });
+                  setVideoFile(null);
+                  setShowPreview(false);
+                  setShowPreview1(false);
+                  setShowPreviewVideo(null);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "upload"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-gray-400 hover:text-white"
+                  }`}
+              >
+                <Video className="w-4 h-4 text-primary" />
+                <span>Upload File</span>
+              </button> */}
+
+              {/* Map Live Session Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setVideoInputType("ended_live_session");
+                  setFormData({ ...formData, content: "" });
+                  setVideoFile(null);
+                  setShowPreview(false);
+                  setShowPreview1(false);
+                  setShowPreviewVideo(null);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${videoInputType === "ended_live_session"
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-700"
+                  }`}
+              >
+                <Video className="w-4 h-4 text-primary" />
+                <span>Recorded Session</span>
+              </button>
+            </div>
 
             {/* Video URL Input UI */}
             {videoInputType === "url" && (
@@ -686,6 +898,93 @@ const LectureContent = ({
                 </AnimatePresence>
               </div>
             )}
+
+            {/* Map Live Session UI */}
+            {videoInputType === "ended_live_session" && (
+              <div className="space-y-4 pt-3 border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-2 text-primary">
+                  <Video className="w-4 h-4 text-primary" />
+                  <Label className="font-medium">Recorded Session</Label>
+                </div>
+
+                {formData?.mappedSessionTitle ? (
+                  <div className="p-3 rounded-lg border border-blue-500/30 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] text-primary font-semibold uppercase tracking-wider">
+                        Recorded Session
+                      </p>
+                      <p className="text-sm font-bold text-white mt-0.5">
+                        {formData.mappedSessionTitle}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="inline-flex items-center justify-center whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-8 rounded-md px-3 gap-1 bg-primary text-primary-foreground text-xs shadow-sm cursor-pointer"
+                      onClick={() => {
+                        setIsSessionModalOpen(true);
+                      }}
+                    >
+                      Change Session
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    className="w-full text-white font-medium shadow-md transition-all"
+                    onClick={() => {
+                      setIsSessionModalOpen(true);
+                    }}
+                  >
+                    Select Live Session
+                  </Button>
+                )}
+
+                {/* Video Player Preview — Dyntube iframe */}
+                {formData?.content && (
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-700">
+                        Video Content Preview
+                      </Label>
+                      {formData?.recordingStatus === "SAVED" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-semibold uppercase tracking-wider">
+                          <Check className="w-3 h-3" />
+                          Saved Recording
+                        </span>
+                      )}
+                    </div>
+                    <div className="aspect-video w-full border border-gray-700 rounded-lg overflow-hidden bg-black shadow-md">
+                      {formData.content.includes("dyntube.com") ? (
+                        <iframe
+                          src={getEmbedUrl(formData.content)}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                          allowFullScreen
+                          title="Dyntube Recording Preview"
+                          style={{ border: "none" }}
+                        />
+                      ) : isValidVideoUrl(formData.content) ? (
+                        <iframe
+                          src={getEmbedUrl(formData.content)}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 p-4">
+                          <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+                          <p className="text-sm">Unable to preview this video URL.</p>
+                          <p className="text-xs mt-1 text-gray-500 break-all max-w-md text-center">
+                            {formData.content}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
       default:
@@ -774,13 +1073,13 @@ const LectureContent = ({
 
   const renderResourcesEditor = () => (
     <div className="space-y-4 border-t border-gray-100 pt-4">
-      <div className="flex items-center gap-2 text-primary">
+      {/* <div className="flex items-center gap-2 text-primary">
         <Paperclip className="w-4 h-4" />
         <Label className="font-medium">Resources / Attachments</Label>
       </div>
       <p className="text-xs text-gray-500">
         Upload supporting materials like PDFs, PPTs, Word docs, or Excel sheets. Max 10 files per upload.
-      </p>
+      </p> */}
 
       {/* Existing resources */}
       {lectureContent?.resources && lectureContent?.resources?.length > 0 && (
@@ -823,7 +1122,7 @@ const LectureContent = ({
       )}
 
       {/* New file picker */}
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <input
           type="file"
           multiple
@@ -839,7 +1138,7 @@ const LectureContent = ({
           <Upload className="h-4 w-4 text-primary" />
           <span>Choose Files</span>
         </label>
-      </div>
+      </div> */}
 
       {/* Staged files list */}
       {resourceFiles.length > 0 && (
@@ -1086,21 +1385,77 @@ const LectureContent = ({
           </h3>
           <div className="mt-2">
             {lectureContent?.type === "VIDEO" ? (
-              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                <iframe
-                  src={getEmbedUrl(
-                    lectureContent?.videoUrl
-                      ? lectureContent?.videoUrl
-                      : lectureContent?.content
-                  )}
-                  className="w-full h-full rounded-md"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm bg-black">
+                {(() => {
+                  // Resolve the video source - prioritize recording URL
+                  const videoSrc =
+                    lectureContent?.recordingUrl ||
+                    lectureContent?.videoUrl ||
+                    lectureContent?.content ||
+                    formData?.recordingUrl ||
+                    formData?.videoUrl ||
+                    formData?.content;
+
+                  if (!videoSrc) {
+                    return (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 p-4">
+                        <Video className="w-10 h-10 mb-2 opacity-50" />
+                        <p className="text-sm">No video recording available for this session.</p>
+                      </div>
+                    );
+                  }
+
+                  // Dyntube URLs must use iframe (not <video>)
+                  const isDyntube = videoSrc?.includes("dyntube.com");
+                  if (isDyntube) {
+                    return (
+                      <iframe
+                        src={getEmbedUrl(videoSrc)}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        title="Dyntube Recording"
+                        style={{ border: "none" }}
+                      />
+                    );
+                  }
+
+                  // Check for YouTube / Vimeo / Loom / Dailymotion embed links
+                  const isEmbeddable =
+                    videoSrc?.includes("youtube.com") ||
+                    videoSrc?.includes("youtu.be") ||
+                    videoSrc?.includes("vimeo.com") ||
+                    videoSrc?.includes("loom.com") ||
+                    videoSrc?.includes("dailymotion.com");
+
+                  if (isEmbeddable) {
+                    return (
+                      <iframe
+                        src={getEmbedUrl(videoSrc)}
+                        className="w-full h-full rounded-md border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    );
+                  } else {
+                    return (
+                      <video
+                        key={videoSrc}
+                        src={videoSrc}
+                        controls
+                        autoPlay={false}
+                        className="w-full h-full object-contain"
+                        controlsList="nodownload"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    );
+                  }
+                })()}
               </div>
             ) : (
               <div
-                className="p-4  border border-gray-200 rounded-lg prose max-w-none"
+                className="p-4 border border-gray-200 rounded-lg prose max-w-none"
                 dangerouslySetInnerHTML={{
                   __html: lectureContent?.videoUrl
                     ? lectureContent?.videoUrl
@@ -1152,17 +1507,17 @@ const LectureContent = ({
   const renderSettings = () => {
     return (
       <div className="space-y-6">
-        <div className="space-y-3  p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
             Lecture Order
           </h3>
-          <p className="text-gray-700 p-2  rounded-md">
+          <p className="text-gray-700 p-2 rounded-md">
             {lectureContent?.order || "0"} (Position in section)
           </p>
         </div>
 
-        <div className="flex items-center gap-4  p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1">
             <h3 className="font-medium text-gray-800 flex items-center gap-2">
               <Eye className="w-4 h-4 text-green-500" />
@@ -1194,18 +1549,13 @@ const LectureContent = ({
           </div>
         </div>
 
-        <div className="space-y-3  p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="space-y-3 p-4 rounded-lg border border-gray-200 shadow-sm">
           <h3 className="font-medium text-gray-800 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-primary" />
             Lecture Type
           </h3>
           <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture?.type === "VIDEO"
-                ? "bg-primary-light text-primary"
-                : "bg-primary-light text-primary"
-                }`}
-            >
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-primary-light text-primary">
               {lecture?.type === "VIDEO" ? (
                 <>
                   <Video className="w-3.5 h-3.5 text-primary" />
@@ -1223,10 +1573,18 @@ const LectureContent = ({
       </div>
     );
   };
+
   const handleEditClick = () => {
     if (!isEditing) {
       if (formData.type === "VIDEO") {
-        if (isValidVideoUrl(formData.content)) {
+        // Check both formData and lectureContent for recording mapping fields
+        const hasMappedSession =
+          (formData.mappedSessionId && formData.recordingUrl) ||
+          (lectureContent?.mappedSessionId && lectureContent?.recordingUrl);
+
+        if (hasMappedSession) {
+          setVideoInputType("ended_live_session");
+        } else if (isValidVideoUrl(formData.content)) {
           setVideoInputType("url");
         } else if (formData.thumbnail || formData.videoUrl) {
           setVideoInputType("upload");
@@ -1247,7 +1605,7 @@ const LectureContent = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between  p-4 rounded-lg border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 shadow-sm">
         <div>
           <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             {lecture?.type === "VIDEO" ? (
@@ -1286,7 +1644,7 @@ const LectureContent = ({
         </Button>
       </div>
 
-      {/* Content */}
+      {/* Main Content View / Edit Animation */}
       <AnimatePresence mode="wait">
         {isEditing ? (
           <motion.div
@@ -1296,7 +1654,7 @@ const LectureContent = ({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className=" p-6 rounded-lg border border-gray-200 shadow-sm">
+            <div className="p-6 rounded-lg border border-gray-200 shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="space-y-3">
@@ -1324,14 +1682,6 @@ const LectureContent = ({
                         Description
                       </Label>
                     </div>
-                    {/* <Input
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      placeholder="Brief description of this lecture"
-                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                    /> */}
                     <RichEditor
                       id="description"
                       name="description"
@@ -1343,46 +1693,15 @@ const LectureContent = ({
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-primary">
-                    <FileText className="w-4 h-4" />
-                    <Label htmlFor="type" className="font-medium">
-                      Content Type
-                    </Label>
-                  </div>
-                  <Select
-                    value={formData?.type || "TEXT"}
-                    onValueChange={handleSelectChange}
-                  >
-                    <SelectTrigger className="border-primary focus:border-primary focus:ring-primary">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        value="TEXT"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-primary" />
-                          <span>Text</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="VIDEO">
-                        <div className="flex items-center gap-2">
-                          <Video className="w-4 h-4 text-primary" />
-                          <span>Video</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Content Type dropdown hidden for Educator — hardcoded to VIDEO */}
+                {/* The type is set to VIDEO by default in formData initialization */}
 
                 <div className="border-t border-gray-100 pt-4">
                   {renderContentEditor()}
                 </div>
 
-                {/* Resources section */}
-                {renderResourcesEditor()}
+                {/* Resources section hidden for Educator Masterclass */}
+                {/* {renderResourcesEditor()} */}
 
                 <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
                   <Switch
@@ -1448,9 +1767,9 @@ const LectureContent = ({
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className=" rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               {/* Tabs */}
-              <div className="flex border-b border-gray-200">
+              {/* <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
                   className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
@@ -1469,22 +1788,22 @@ const LectureContent = ({
                 >
                   Settings
                 </button>
-              </div>
+              </div> */}
 
               {/* Tab Content */}
               <div className="p-5">
                 <AnimatePresence mode="wait">
-                  {activeTab === "content" ? (
-                    <motion.div
-                      key="content-tab"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {renderViewContent()}
-                    </motion.div>
-                  ) : (
+                  {/* Only Content tab is shown - Settings tab is hidden */}
+                  <motion.div
+                    key="content-tab"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {renderViewContent()}
+                  </motion.div>
+                  {/* Settings tab - commented out
                     <motion.div
                       key="settings-tab"
                       initial={{ opacity: 0 }}
@@ -1494,13 +1813,245 @@ const LectureContent = ({
                     >
                       {renderSettings()}
                     </motion.div>
-                  )}
+                  */}
                 </AnimatePresence>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* LIVE SESSION SELECTION MODAL - KEPT OUTSIDE MAIN ANIMATEPRESENCE */}
+      {isSessionModalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-hidden">
+            {/* Modal Frame */}
+            <div className="relative w-full max-w-2xl flex flex-col rounded-xl shadow-2xl overflow-hidden bg-[#181924] text-white border border-gray-400 h-[80vh] max-h-[600px] my-auto">
+
+              {/* --- HEADER --- */}
+              <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-800/80 bg-transparent">
+                <div>
+                  <h3 className="text-lg font-semibold text-white tracking-wide">
+                    Select Ended Live Session
+                  </h3>
+                  <p className="text-xs text-[#a0a5b5] mt-0.5 font-normal">
+                    Choose a recorded live session to map with this lecture
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsSessionModalOpen(false)}
+                  type="button"
+                  className="text-gray-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* --- SEARCH BAR --- */}
+              <div className="flex-shrink-0 px-6 py-3.5 bg-[#181924] border-b border-gray-800/60">
+                <div className="relative w-full">
+                  {/* Left Search Icon */}
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Project Standard Search Input */}
+                  <input
+                    type="text"
+                    placeholder="Search session by title or ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    autoComplete="off"
+                    className="flex w-full items-center justify-between h-9.5 rounded-md border ring-0 ring-offset-0 pl-9 pr-8 py-2 text-[0.8125rem] font-medium outline-none transition-colors duration-200 border-gray-400 hover:border-gray-500 focus:border-blue-500 focus:ring-0 text-gray-100 placeholder-gray-400 dark:placeholder-gray-800"
+                    style={{
+                      color: "#f3f4f6",
+                      backgroundColor: "#1f1f1f",
+                      caretColor: "#ffffff",
+                    }}
+                  />
+
+                  {/* Clear Button (Optionally visible when typing) */}
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-white"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Dyntube availability info */}
+              <p className="px-6 pt-3 pb-0 text-xs dark:text-white text-gray-900">
+                Only sessions currently available on Dyntube (last 28 days or saved permanently) are available here.
+              </p>
+
+              {/* --- SESSION LIST (INFINITE SCROLL CONTAINER) --- */}
+              <div className="p-6 overflow-y-auto space-y-3.5 flex-1 min-h-0 custom-scrollbar bg-[#181924]">
+                {isFetchingSessions && page === 1 ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="animate-spin text-primary w-8 h-8" />
+                  </div>
+                ) : (allSessions || []).length === 0 ? (
+                  <div className="text-center py-12 space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-[#262736] text-gray-400 mx-auto flex items-center justify-center border border-gray-700/50">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+
+                    <p className="text-sm text-gray-900 dark:text-white">
+                      No saved session recordings found.
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-white">
+                      Only sessions currently available on Dyntube (last 28 days or saved permanently) are available here.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {(allSessions || []).map((session) => {
+                      const recordings = session.recordings || [];
+
+                      // Proper date calculation
+                      const rawDate =
+                        session.date ||
+                        session.endedAt ||
+                        session.createdAt ||
+                        session.updatedAt;
+
+                      const parsedDate = rawDate ? new Date(rawDate) : null;
+                      const isValidDate = parsedDate && !isNaN(parsedDate.getTime());
+
+                      const formattedEndedDate = isValidDate
+                        ? parsedDate.toLocaleDateString("en-US", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                        : "N/A";
+
+                      return (
+                        <div
+                          key={session.id || session._id || session.callId}
+                          className="group p-4 rounded-xl border border-gray-700/80 bg-[#15161e] hover:bg-[#1a1b26] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                        >
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <div className="w-24 h-14 rounded-lg bg-[#14151f] border border-gray-700/80 flex-shrink-0 relative overflow-hidden flex items-center justify-center">
+                              {session.thumbnail ? (
+                                <img
+                                  src={session.thumbnail}
+                                  alt="thumbnail"
+                                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              ) : null}
+                              <div className="absolute inset-0 flex items-center justify-center text-primary">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                            </div>
+
+                            <div className="min-w-0 space-y-1">
+                              <h4 className="text-sm font-medium text-white truncate group-hover:text-primary transition-colors">
+                                {session.title || session.topic || "Untitled Live Session"}
+                              </h4>
+                              <p className="text-xs font-mono text-[#cbd5e1] truncate">
+                                <span className="text-[#94a3b8] font-sans">ID:</span> {session.callId || session.id || session._id}
+                              </p>
+                              <div className="flex items-center gap-2 text-[11px] text-gray-700">
+                                <span>Ended: <strong className="text-gray-600 font-normal">{formattedEndedDate}</strong></span>
+                                <span>•</span>
+                                <span>Recordings: <strong className="text-primary font-semibold">{recordings.length}</strong></span>
+                                <span>•</span>
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 font-semibold">
+                                  <Check className="w-2.5 h-2.5" />
+                                  Saved
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex-shrink-0 flex items-center gap-2">
+                            {recordings.length <= 1 ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleSessionSelect(session, recordings[0])
+                                }
+                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors text-xs h-9 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer active:scale-95"
+                              >
+                                Select Session
+                              </button>
+                            ) : (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {recordings.map((rec, idx) => (
+                                  <button
+                                    key={rec._id || idx}
+                                    type="button"
+                                    onClick={() =>
+                                      handleSessionSelect(session, rec)
+                                    }
+                                    className="inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors text-xs h-8 px-3 rounded-md bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/30 cursor-pointer active:scale-95"
+                                  >
+                                    Recording {idx + 1}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    <div ref={observerRef} className="py-2 text-center min-h-[20px] flex justify-center items-center">
+                      {isFetching && page > 1 && (
+                        <div className="flex justify-center items-center gap-2 text-xs text-gray-400 py-1">
+                          <Loader2 className="animate-spin text-primary w-4 h-4" />
+                          <span>Loading more sessions...</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* --- FOOTER --- */}
+              <div className="flex-shrink-0 px-6 py-4 border-t border-gray-800/80 bg-transparent flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsSessionModalOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-0 focus:ring-0 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 text-primary-foreground text-sm h-10 rounded-md px-4 py-2 bg-primary hover:bg-primary"
+                >
+                  Cancel
+                </button>
+              </div>
+
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

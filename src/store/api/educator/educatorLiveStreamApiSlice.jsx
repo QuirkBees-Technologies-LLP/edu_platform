@@ -12,6 +12,10 @@ export const educatorLiveStreamApiSlice = createApi({
       query: ({ page = 1, limit = 10 , status = "" ,search="", language = ""}) =>
         `/educator/live-stream/list?page=${page}&limit=${limit}&status=${status}&search=${search}&language=${language}`,
     }),
+    getEndedLiveSessions: builder.query({
+      query: ({ page = 1, limit = 10, search = "" } = {}) =>
+        `/educator/live-stream/ended-sessions?page=${page}&limit=${limit}&search=${search}`,
+    }),
     updateStreamStatus: builder.mutation({
       query: ({ id, status }) => ({
         url: `/educator/schedule/status/${id}`,
@@ -75,6 +79,7 @@ export const {
   useGetEducatorAcademyCategoryQuery,
   useLazyGetLiveSessionListQuery,
   useUpdateStreamStatusMutation,
+  useGetEndedLiveSessionsQuery,
   useEndCallMutation,
   useEducatorLiveStreamStatusUpdateMutation,
   useEducatorChangeLiveStreamStatusUpdateMutation,

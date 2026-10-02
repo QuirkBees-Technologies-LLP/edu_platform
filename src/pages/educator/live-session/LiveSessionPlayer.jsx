@@ -372,6 +372,18 @@ const LiveSessionPlayer = ({
                           toast.success("Stream stopped successfully");
                         } else {
                           console.log("👉 Going live for:", callId);
+
+                          // ✅ FIX: Update Schedule+LiveStream status to "active" BEFORE
+                          // going live, so students can discover the session immediately.
+                          // Previously this ran after goLive + captions + recording (8-10s
+                          // delay), creating a race condition where students saw no session.
+                          // If goLive() fails below, the existing "Stop Live" handler
+                          // resets status to "pending", so this is safe.
+                          await updateLiveStatus({
+                            callId,
+                            status: "active",
+                          }).unwrap();
+
                           await call.goLive();
                           setGoLiveStartedAt(new Date());
 
@@ -426,10 +438,6 @@ const LiveSessionPlayer = ({
                             }
                           }
 
-                          await updateLiveStatus({
-                            callId,
-                            status: "active",
-                          }).unwrap();
                           toast.success("Stream started successfully");
                         }
                       } catch (err) {
