@@ -1578,10 +1578,10 @@ const LectureContent = ({
     if (!isEditing) {
       if (formData.type === "VIDEO") {
         // Check both formData and lectureContent for recording mapping fields
-        const hasMappedSession = 
+        const hasMappedSession =
           (formData.mappedSessionId && formData.recordingUrl) ||
           (lectureContent?.mappedSessionId && lectureContent?.recordingUrl);
-        
+
         if (hasMappedSession) {
           setVideoInputType("ended_live_session");
         } else if (isValidVideoUrl(formData.content)) {
@@ -1912,10 +1912,10 @@ const LectureContent = ({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <p className="text-sm text-gray-300">
+                    <p className="text-sm text-gray-900 dark:text-white">
                       No saved session recordings found.
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-white">
                       Only sessions currently available on Dyntube (last 28 days or saved permanently) are available here.
                     </p>
                   </div>
