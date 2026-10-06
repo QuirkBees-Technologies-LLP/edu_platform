@@ -7,7 +7,7 @@ export * from './DataGridPagination';
 export * from './DataGridLoader';
 export * from './DataGridEmpty';
 export * from './DataGridColumnHeader';
-export * from './DataGridColumnFilter';
+// export * from './DataGridColumnFilter';
 export * from './DataGridColumnVisibility';
 export * from './DataGridRowSelectAll';
 export * from './DataGridRowSelect';
