@@ -159,24 +159,26 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
         },
       },
       {
-        accessorFn: (row) => row.datetime,
+        accessorFn: (row) => row.endedAt || row.updatedAt || row.date,
         id: "datetime",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Scheduled from this date"
+            title="Session End Date"
             column={column}
           />
         ),
         enableSorting: true,
-        cell: (info) => (
-          <div className="flex items-center gap-2.5">
-            <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.datetime
-                ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")
-                : "N/A"}
-            </span>
-          </div>
-        ),
+        cell: (info) => {
+          const rawDate = info.row.original.endedAt || info.row.original.updatedAt;
+
+          return (
+            <div className="flex items-center gap-2.5">
+              <span className="leading-none text-gray-800 font-normal">
+                {rawDate ? format(new Date(rawDate), "MMM dd, yyyy, hh:mm a") : "N/A"}
+              </span>
+            </div>
+          );
+        },
         meta: {
           headerClassName: "min-w-[200px]",
         },
