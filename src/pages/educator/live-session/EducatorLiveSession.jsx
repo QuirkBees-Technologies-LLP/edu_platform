@@ -75,10 +75,10 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     setIsCreateOpen(true);
   };
 
-  const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
+  const [tableKey, setTableKey] = useState(0);
 
   const reloadTable = () => {
-    setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
+    setTableKey((prevKey) => prevKey + 1);
   };
 
   const handleDeleteOpen = () => {
@@ -421,16 +421,13 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     [isRTL]
   );
 
-  // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem(storageFilterId) || "";
   });
 
-  // Filtered data based on search term
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data?.data; // If no search term, return full data
+    if (!searchTerm) return data?.data;
 
-    // return data.filter(member => member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, data?.data]);
   const handleRowSelection = (state) => {
     const selectedRowIds = Object.keys(state);
@@ -470,7 +467,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
     const newLimit = pageSize;
 
     try {
-      // Fetch API Data
       const response = await getLiveSessionList({
         page: newPage,
         limit: newLimit,
@@ -524,7 +520,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
               <button className="btn btn-primary" onClick={handleClickOpen}>
                 Create a New Live Session
               </button>
-              {/* Tooltip */}
               <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
                 It won't appear in the schedule
               </div>
