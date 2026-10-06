@@ -50,21 +50,20 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
   const [getLiveSessionList, { data, isLoading, refetch }] =
     useLazyGetLiveSessionListQuery();
   const navigate = useNavigate();
-  const [tableKey, setTableKey] = useState(0); // ✅ Key to trigger re-render
+  const [tableKey, setTableKey] = useState(0);
 
   const [searchText, setSearchText] = useState("");
   const [searchTextInput, setSearchTextInput] = useState("");
   const selectedLanguage = useSelector(selectSelectedLanguagesAdmin);
 
   const reloadTable = () => {
-    setTableKey((prevKey) => prevKey + 1); // ✅ Change key to force re-fetch
+    setTableKey((prevKey) => prevKey + 1);
   };
 
   const handleRedirect = (callId, row) => {
     navigate(`/educator/live-session/${callId}`, { state: row });
   };
 
-  // Columns definition
   const columns = useMemo(
     () => [
       {
@@ -160,24 +159,26 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
         },
       },
       {
-        accessorFn: (row) => row.datetime,
+        accessorFn: (row) => row.endedAt || row.updatedAt || row.date,
         id: "datetime",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Scheduled from this date"
+            title="Session End Date"
             column={column}
           />
         ),
         enableSorting: true,
-        cell: (info) => (
-          <div className="flex items-center gap-2.5">
-            <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.datetime
-                ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")
-                : "N/A"}
-            </span>
-          </div>
-        ),
+        cell: (info) => {
+          const rawDate = info.row.original.endedAt || info.row.original.updatedAt;
+
+          return (
+            <div className="flex items-center gap-2.5">
+              <span className="leading-none text-gray-800 font-normal">
+                {rawDate ? format(new Date(rawDate), "MMM dd, yyyy, hh:mm a") : "N/A"}
+              </span>
+            </div>
+          );
+        },
         meta: {
           headerClassName: "min-w-[200px]",
         },
@@ -217,7 +218,6 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
     }
   };
 
-  // Toolbar
   const ToolbarTable = () => {
     const { table } = useDataGrid();
     return (
@@ -230,14 +230,11 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
     );
   };
 
-  // Fetch server-side data and filter ended calls
-
   const handleFetchData = async ({ pageIndex, pageSize }) => {
     const newPage = pageIndex + 1;
     const newLimit = pageSize;
 
     try {
-      // Fetch API Data
       const response = await getLiveSessionList({
         page: newPage,
         limit: newLimit,
