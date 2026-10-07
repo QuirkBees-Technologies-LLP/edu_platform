@@ -31,7 +31,6 @@ import { KeenIcon } from "@/components";
 import { useUpdateEducatorRecordingMutation } from "../../../store/api/educator/educatorRecordingApiSlice";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import { useCreateEducatorRecordingMutation } from "../../../store/api/educator/educatorRecordingApiSlice";
-import { Input } from "postcss";
 import DateTimePicker from "../educator-stream-schedule/DateTimePicker";
 
 const CreateEducatorRecording = forwardRef(

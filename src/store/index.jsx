@@ -31,7 +31,17 @@ import { educatorTradeAnalysisApiSlice } from "./api/educator/educatorTradeAnaly
 import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSlice";
 import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
 import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
-import { persistReducer, persistStore } from "redux-persist";
+// import { persistReducer, persistStore } from "redux-persist";
+import {
+  persistReducer,
+  persistStore,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER
+} from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 import { clientLanguageApiSlice } from "./api/client/clientLanguageApiSlice";
@@ -144,7 +154,11 @@ export const store = configureStore({
     [clientLearningContentApiSlice.reducerPath]: clientLearningContentApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(
       adminCoursesTypesApiSlice.middleware,
       adminLanguagesApiSlice.middleware,
       clientCreateUpdateApiSlice.middleware,

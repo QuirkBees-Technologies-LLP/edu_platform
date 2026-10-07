@@ -863,7 +863,7 @@ const ClientDashboard = () => {
                         }
                         className="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition"
                       >
-                        <FaGooglePlay className="w-4 h-4" b />
+                        <FaGooglePlay className="w-4 h-4" />
                         Download Now
                       </button>
                       <button

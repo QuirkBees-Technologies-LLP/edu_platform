@@ -232,7 +232,7 @@ const HeaderTopbar = () => {
             }}
           >
             <MenuToggle className="btn rounded-full ps-0">
-              <span class="badge badge-xs badge-primary badge-outline">
+              <span className="badge badge-xs badge-primary badge-outline">
                 Premium
               </span>
               <img

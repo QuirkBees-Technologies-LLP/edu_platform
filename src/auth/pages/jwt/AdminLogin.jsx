@@ -77,8 +77,8 @@ const AdminLogin = () => {
                 <KeenIcon icon="black-left" />
               </Link>
             </div>
-            <div class="flex justify-center mb-8">
-              <img src="/media/app/default-logo-dark.png" class="w-100 h-5" alt="" />
+            <div className="flex justify-center mb-8">
+              <img src="/media/app/default-logo-dark.png" className="w-100 h-5" alt="" />
               {/* <img src="/media/app/default-logo-dark.png" class="w-100 h-5 dark_mode" alt="" /> */}
             </div>
             <h3 className="text-xl font-medium text-gray-100 dark:text-gray-900 leading-none mb-3 text-center">

@@ -99,10 +99,10 @@ const ClientLogin = () => {
               <KeenIcon icon="black-left" />
             </Link>
           </div>
-          <div class="flex justify-center mb-8">
+          <div className="flex justify-center mb-8">
             <img
               src="/media/app/default-logo-dark.png"
-              class="w-100 h-5"
+              className="w-100 h-5"
               alt=""
             />
             {/* <img src="/media/app/default-logo-dark.png" class="w-100 h-5 dark_mode" alt="" /> */}
