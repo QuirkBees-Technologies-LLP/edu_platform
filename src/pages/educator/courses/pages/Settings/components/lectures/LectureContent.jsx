@@ -1741,7 +1741,7 @@ const LectureContent = ({
                 >
                   Settings
                 </button>
-              </div> */}
+              </div>
 
               <div className="p-5">
                 <AnimatePresence mode="wait">
