@@ -22,4 +22,4 @@ const Content = () => {
       <Outlet />
     </div>;
 };
-export { Content };
+export { Content };
