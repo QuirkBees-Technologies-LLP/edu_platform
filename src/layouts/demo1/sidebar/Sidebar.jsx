@@ -133,11 +133,11 @@ export const Sidebar = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={clsx(
-          'sidebar transition-all duration-300 ease-in-out lg:fixed lg:top-0 lg:bottom-0 lg:left-0 lg:z-50 flex flex-col items-stretch shrink-0',
-          'bg-[#07050C]/95 backdrop-blur-xl border-r border-[#26153B]/60 shadow-[10px_0_40px_rgba(0,0,0,0.8)] lg:rounded-r-[28px]',
+          'sidebar transition-all duration-300 ease-in-out lg:fixed lg:top-0 lg:bottom-0 lg:left-0 lg:z-[100] flex flex-col items-stretch shrink-0',
+          'bg-[#07050C]/98 backdrop-blur-2xl border-r border-[#26153B]/80 shadow-[25px_0_60px_rgba(0,0,0,0.95)] lg:rounded-r-[28px]',
           desktopMode && isCollapsed && !isHovered
             ? 'w-[78px]'
-            : 'w-[280px]'
+            : 'w-[280px] absolute lg:fixed left-0 top-0 bottom-0'
         )}
       >
         {desktopMode && <SidebarHeader ref={headerRef} isHovered={isHovered} />}
