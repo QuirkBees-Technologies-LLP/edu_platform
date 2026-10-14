@@ -14,7 +14,8 @@ import {
   MenuTitle,
 } from "@/components/menu";
 import { useMenus } from "@/providers";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Instagram } from "lucide-react";
+import { Link } from "react-router-dom";
 const SidebarMenu = () => {
   const linkPl = "ps-[10px]";
   const linkPr = "pe-[10px]";
@@ -34,12 +35,12 @@ const SidebarMenu = () => {
     "gap-[5px]",
   ];
   const accordionPl = [
-    "ps-[10px]",
-    "ps-[22px]",
-    "ps-[22px]",
-    "ps-[22px]",
-    "ps-[22px]",
-    "ps-[22px]",
+    "ps-[32px]",
+    "ps-[32px]",
+    "ps-[32px]",
+    "ps-[32px]",
+    "ps-[32px]",
+    "ps-[32px]",
   ];
   const accordionBorderLeft = [
     "before:start-[20px]",
@@ -76,26 +77,28 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "flex items-center grow cursor-pointer border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg dark:hover:!text-gray-50",
+              "relative flex items-center grow cursor-pointer border border-transparent transition-all duration-200",
+              // Left Glowing Active Bar Indicator
+              "menu-item-active:before:absolute menu-item-active:before:-left-2 menu-item-active:before:top-1/2 menu-item-active:before:-translate-y-1/2 menu-item-active:before:w-2.5 menu-item-active:before:h-8 menu-item-active:before:bg-[#8B5CF6] menu-item-active:before:rounded-r-md menu-item-active:before:shadow-[0_0_12px_#8B5CF6]",
               accordionLinkGap[0],
               linkPl,
               linkPr,
               linkPy
             )}
           >
-            <MenuIcon
-              className={clsx(
-                "items-start text-gray-400 dark:text-gray-900 dark:menu-item-active:text-gray-900 dark:hover:!text-gray-900 menu-item-active:text-gray-100",
-                iconWidth
-              )}
-            >
-              {item.icon && item.icon}
-            </MenuIcon>
-            <MenuTitle className="text-sm text-gray-400 dark:text-gray-900 font-noraml dark:menu-item-active:text-gray-900 dark:hover:!text-gray-900 menu-item-active:text-gray-100">
+            {/* Wrapper Box: Fixed 40x40px size so all icons stay perfectly aligned */}
+            <div className="flex items-center justify-center w-[40px] h-[40px] min-w-[40px] shrink-0 rounded-[12px] transition-all border border-transparent menu-item-active:bg-[#1C1335] menu-item-active:!border-[#6D28D9]/40 menu-item-active:shadow-[0_0_10px_rgba(139,92,246,0.2)]">
+              <MenuIcon className="!w-auto !h-auto flex items-center justify-center text-gray-400 menu-item-active:text-[#A78BFA]">
+                {item.icon && item.icon}
+              </MenuIcon>
+            </div>
+
+            <MenuTitle className="text-sm font-normal text-gray-400 menu-item-active:text-[#A78BFA] menu-item-active:font-medium">
               {item.title}
             </MenuTitle>
             {buildMenuArrow()}
           </MenuLink>
+
           <MenuSub
             externalLink={item.externalLink}
             newTab={item.newTab}
@@ -119,22 +122,23 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "border border-transparent menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg dark:hover:!text-gray-50",
+              "relative flex items-center grow cursor-pointer border border-transparent transition-all duration-200",
+              // Left Glowing Active Bar Indicator
+              "menu-item-active:before:absolute menu-item-active:before:-left-2 menu-item-active:before:top-1/2 menu-item-active:before:-translate-y-1/2 menu-item-active:before:w-2.5 menu-item-active:before:h-8 menu-item-active:before:bg-[#8B5CF6] menu-item-active:before:rounded-r-md menu-item-active:before:shadow-[0_0_12px_#8B5CF6]",
               accordionLinkGap[0],
               linkPy,
               linkPl,
               linkPr
             )}
           >
-            <MenuIcon
-              className={clsx(
-                "items-start text-gray-400 dark:text-gray-900 dark:menu-item-active:text-gray-900 dark:hover:!text-gray-900 menu-item-active:text-gray-100",
-                iconWidth
-              )}
-            >
-              {item.icon && item.icon}
-            </MenuIcon>
-            <MenuTitle className="text-sm text-gray-400 dark:text-gray-900 font-noraml dark:menu-item-active:text-gray-900 dark:hover:!text-gray-900 menu-item-active:text-gray-100">
+            {/* Wrapper Box: Fixed 40x40px size so all icons stay perfectly aligned */}
+            <div className="flex items-center justify-center w-[40px] h-[40px] min-w-[40px] shrink-0 rounded-[12px] transition-all border border-transparent menu-item-active:bg-[#1C1335] menu-item-active:!border-[#6D28D9]/40 menu-item-active:shadow-[0_0_10px_rgba(139,92,246,0.2)]">
+              <MenuIcon className="!w-auto !h-auto flex items-center justify-center text-gray-400 menu-item-active:text-[#A78BFA]">
+                {item.icon && item.icon}
+              </MenuIcon>
+            </div>
+
+            <MenuTitle className="text-sm font-normal text-gray-400 menu-item-active:text-[#A78BFA] menu-item-active:font-medium">
               {item.title}
             </MenuTitle>
           </MenuLink>
@@ -227,7 +231,7 @@ const SidebarMenu = () => {
             path={item.path}
             className={clsx(
               !item.collapse &&
-                "relative before:absolute before:top-0 before:bottom-0 before:left-1 before:border-s before:border-gray-200",
+              "relative before:absolute before:top-0 before:bottom-0 before:left-1 before:border-s before:border-gray-200",
               itemsGap,
               !item.collapse && accordionBorderLeft[level],
               !item.collapse && accordionPl[level],
@@ -250,7 +254,7 @@ const SidebarMenu = () => {
             newTab={item.newTab}
             path={item.path}
             className={clsx(
-              "border mt-2 border-transparent items-center grow text-gray-100 dark:text-gray-800 menu-item-active:bg-dark-imperial-blue-active dark:menu-item-active:bg-animated-gradient dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-dark-imperial-blue-active dark:hover:bg-animated-gradient bg-300 animate-gradientMove dark:hover:border-gray-100 hover:rounded-lg gap-4",
+              "flex items-center grow border-0 bg-transparent transition-colors py-1.5 px-2",
               accordionLinkGap[level],
               accordionLinkPl,
               linkPr,
@@ -258,7 +262,7 @@ const SidebarMenu = () => {
             )}
           >
             {buildMenuBullet()}
-            <MenuTitle className="text-2sm font-normal menu-item-active:text-white menu-item-active:font-semibold menu-link-hover:!text-white">
+            <MenuTitle className="text-xs font-normal text-gray-400 menu-item-active:text-[#A78BFA] menu-item-active:font-medium hover:text-white transition-colors">
               {item.title}
             </MenuTitle>
           </MenuLink>
@@ -333,13 +337,93 @@ const SidebarMenu = () => {
   const { getMenuConfig } = useMenus();
   const menuConfig = getMenuConfig("primary");
   return (
-    <Menu
-      highlight={true}
-      multipleExpand={false}
-      className={clsx("flex flex-col grow", itemsGap)}
-    >
-      {menuConfig && buildMenu(menuConfig)}
-    </Menu>
+    <div className="flex flex-col justify-between h-full grow">
+      {/* 1. Primary Menu Navigation */}
+      <Menu
+        highlight={true}
+        multipleExpand={false}
+        className={clsx("flex flex-col grow", itemsGap)}
+      >
+        {menuConfig && buildMenu(menuConfig)}
+      </Menu>
+
+      {/* 2. Client Bottom Section */}
+      <div className="pt-4 mt-auto border-t border-gray-800/60 flex flex-col gap-3 px-3 pb-3">
+
+        {/* Option 1: Download IQ Social */}
+        <div className="flex items-center gap-3 cursor-pointer group">
+          <div className="w-[40px] h-[40px] min-w-[40px] shrink-0 rounded-[12px] bg-[#141022] border border-gray-800/80 flex items-center justify-center text-gray-400 group-hover:text-white transition-all">
+            <svg
+              className="w-5 h-5 text-gray-400 group-hover:text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="5" />
+              <circle cx="12" cy="12" r="1" />
+            </svg>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-medium text-gray-300 group-hover:text-white transition-colors">
+              Download IQ Social
+            </span>
+            <div className="flex items-center gap-1.5">
+              <a
+                href="https://apple.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[9px] text-gray-400 hover:text-white transition-colors underline"
+              >
+                Download iOS
+              </a>
+              <span className="text-gray-600">•</span>
+              <a
+                href="https://play.google.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[9px] text-gray-400 hover:text-white transition-colors underline"
+              >
+                Android
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Option 2: Our Instagram */}
+        <a
+          href="https://instagram.com"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-3 group text-decoration-none"
+        >
+          <div className="w-[40px] h-[40px] min-w-[40px] shrink-0 rounded-[12px] bg-[#141022] border border-gray-800/80 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:border-purple-500/40 transition-all">
+            <Instagram className="w-5 h-5" />
+          </div>
+          <span className="text-xs font-medium text-gray-300 group-hover:text-white transition-colors">
+            Our Instagram
+          </span>
+        </a>
+
+        {/* Option 3: User Profile Section */}
+        <Link
+          to="/profile"
+          className="flex items-center gap-3 group text-decoration-none pt-1"
+        >
+          <div className="relative w-[40px] h-[40px] min-w-[40px] shrink-0">
+            <img
+              src="https://i.pravatar.cc/100?img=12"
+              alt="Test User"
+              className="w-full h-full rounded-[12px] object-cover border border-purple-500/60 p-[1px]"
+            />
+          </div>
+          <span className="text-xs font-medium text-gray-200 group-hover:text-purple-400 transition-colors">
+            Test User
+          </span>
+        </Link>
+      </div>
+    </div>
   );
 };
 export { SidebarMenu };
