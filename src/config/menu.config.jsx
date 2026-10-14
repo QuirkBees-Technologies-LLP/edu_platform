@@ -22,6 +22,10 @@ import {
   MonitorPlay,
   Clapperboard,
   ChartLine,
+  LayoutGrid,
+  Tv2,
+  BarChart3,
+  Bell,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1327,6 +1331,42 @@ export const filterSidebarByPlan = (sidebarItems = [], allowedPaths = []) => {
     .filter(Boolean);
 };
 
+const CustomHomeIcon = ({ className = "w-5 h-5" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect x="3" y="3" width="5.5" height="11" rx="1.5" />
+    <rect x="10.5" y="3" width="10.5" height="11" rx="2" />
+    <rect x="3" y="16" width="11" height="5" rx="1.5" />
+    <rect x="16" y="16" width="5" height="5" rx="1.5" />
+  </svg>
+);
+
+export const StrategiesIcon = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <rect x="2" y="19" width="20" height="2.5" rx="1" />
+    <rect x="3.5" y="10" width="4.5" height="7.5" rx="1" />
+    <rect x="9.8" y="6" width="4.5" height="11.5" rx="1" />
+    <rect x="16" y="2" width="4.5" height="15.5" rx="1" />
+  </svg>
+);
+
+export const LiveStreamsIcon = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <rect x="2" y="5" width="20" height="14" rx="4" />
+    <path d="M10 8.5L15.5 12L10 15.5V8.5Z" fill="#18132A" />
+  </svg>
+);
+
+export const IdeasIcon = ({ className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M12 2C8.13 2 5 5.13 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13 15.87 2 12 2ZM9 20C9 20.55 9.45 21 10 21H14C14.55 21 15 20.55 15 20H9Z" />
+  </svg>
+);
+
 export const sideMenus = {
   super_admin: [
     {
@@ -1696,7 +1736,7 @@ export const sideMenus = {
   student: [
     {
       title: "Home",
-      icon: <LayoutDashboard />,
+      icon: <CustomHomeIcon />,
       path: '/dashboard',
       children: [
         {
@@ -1708,7 +1748,7 @@ export const sideMenus = {
     },
     {
       title: "Academy",
-      icon: <School />,
+      icon: <GraduationCap />,
       path: '/iq-vault',
       children: [
         {
@@ -1721,7 +1761,7 @@ export const sideMenus = {
 
     {
       title: "Live Streams",
-      icon: <MonitorPlay />,
+      icon: <LiveStreamsIcon />,
       path: "/iq-academy",
       children: [
         {
@@ -1734,7 +1774,7 @@ export const sideMenus = {
     },
     {
       title: "Ideas & Insights",
-      icon: <Lightbulb />,
+      icon: <IdeasIcon />,
       path: "/ideas"
     },
     {
@@ -1744,7 +1784,7 @@ export const sideMenus = {
     },
     {
       title: "Strategies",
-      icon: <ChartNoAxesCombined />,
+      icon: <StrategiesIcon />,
       path: "/trading-strategies",
       children: [
         // {
@@ -1764,7 +1804,7 @@ export const sideMenus = {
     },
     {
       title: "IQ Strategies Alerts",
-      icon: <ChartLine />,
+      icon: <Bell />,
       path: "/trading-signals",
     },
     {

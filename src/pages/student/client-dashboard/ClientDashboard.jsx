@@ -1668,9 +1668,9 @@ const ClientDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="relative min-h-screen bg-[#07030E] text-white overflow-x-hidden -mt-16 pt-20 transition-colors duration-200">
+      <div className="relative min-h-screen bg-[#05020A] text-white overflow-x-hidden -mt-16 pt-20 transition-colors duration-200">
         {/* Radial Background Flare */}
-        <div className="absolute top-0 left-0 right-0 h-[450px] bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(124,58,237,0.30),rgba(7,3,14,0))] pointer-events-none z-0" />
+        <div className="absolute top-0 left-0 right-0 h-[520px] bg-[radial-gradient(ellipse_100%_70%_at_25%_0%,rgba(67,38,125,0.48)_0%,rgba(33,18,68,0.28)_50%,rgba(5,2,10,0)_90%)] pointer-events-none z-0" />
 
         <Container className="relative z-10">
           {/* Header Row: Welcome & Top Action Buttons */}
@@ -1748,7 +1748,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Academy</h3>
-                        <p className="text-[11px] text-purple-200/70 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
                           Build your foundation with core education.
                         </p>
                       </div>
@@ -1778,7 +1778,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Strategies</h3>
-                        <p className="text-[11px] text-blue-200/70 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
                           Learn proven strategies and advanced techniques.
                         </p>
                       </div>
@@ -1808,7 +1808,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Live Streams</h3>
-                        <p className="text-[11px] text-fuchsia-200/70 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
                           Join our live sessions.
                         </p>
                       </div>
@@ -1838,7 +1838,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Strategy Alerts</h3>
-                        <p className="text-[11px] text-amber-200/70 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
                           Real-time alerts from IQONIC strategies.
                         </p>
                       </div>
@@ -1868,7 +1868,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Ideas & Insights</h3>
-                        <p className="text-[11px] text-yellow-200/70 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
                           Explore market ideas, insights, and live trading setups.
                         </p>
                       </div>
@@ -1907,8 +1907,8 @@ const ClientDashboard = () => {
                       key={pill}
                       onClick={() => setSocialType(pill)}
                       className={`px-3.5 py-1.5 rounded-lg text-[10px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${socialType === pill
-                          ? "bg-[#251842] text-white border border-[#8B5CF6]/50 shadow-sm"
-                          : "bg-[#130728]/80 text-gray-400 border border-[#2D1653] hover:text-white"
+                        ? "bg-[#251842] text-white border border-[#8B5CF6]/50 shadow-sm"
+                        : "bg-[#130728]/80 text-gray-400 border border-[#2D1653] hover:text-white"
                         }`}
                     >
                       {pill === "CORPORATE" && (
@@ -1942,8 +1942,8 @@ const ClientDashboard = () => {
                           {/* Left Edge Ambient Radial Soft Glow */}
                           <div
                             className={`absolute top-0 bottom-0 left-0 w-48 pointer-events-none opacity-40 ${isCorporate
-                                ? "bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-blue-600/50 via-blue-900/10 to-transparent"
-                                : "bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-purple-600/50 via-purple-900/10 to-transparent"
+                              ? "bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-blue-600/50 via-blue-900/10 to-transparent"
+                              : "bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-purple-600/50 via-purple-900/10 to-transparent"
                               }`}
                           />
 
@@ -1973,10 +1973,11 @@ const ClientDashboard = () => {
 
                                 {/* Category & Post Type Labels */}
                                 <div className="flex items-center gap-1.5">
+                                  {/* Category Label (Corporate vs Education) */}
                                   <span
-                                    className={`px-2.5 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase flex items-center gap-1 border ${isCorporate
-                                        ? "bg-[#162B54]/70 text-[#93C5FD] border-[#2563EB]/40"
-                                        : "bg-[#3B1F6A]/70 text-[#D8B4FE] border-[#6B3BA7]/50"
+                                    className={`px-2 py-0.5 rounded-[5px] text-[9px] font-bold tracking-wider uppercase flex items-center gap-1 ${isCorporate
+                                        ? "bg-[#182848] text-[#7DD3FC]"
+                                        : "bg-[#2D124D] text-[#C084FC]"
                                       }`}
                                   >
                                     {isCorporate ? (
@@ -1984,24 +1985,25 @@ const ClientDashboard = () => {
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
                                       </svg>
                                     ) : (
-                                      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                      <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
                                       </svg>
                                     )}
                                     {post.category || "EDUCATION"}
                                   </span>
 
-                                  <span className="px-2.5 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase bg-[#2A154D]/70 text-[#D8B4FE] border border-[#52298A]/50">
-                                    POST
+                                  {/* Secondary Badge Label (POST / ANNOUNCEMENTS) */}
+                                  <span className="px-2 py-0.5 rounded-[5px] text-[9px] font-bold tracking-wider uppercase bg-[#180E2B] text-[#A78BFA] border border-[#3B1D6E]/40">
+                                    {post.postType || "POST"}
                                   </span>
                                 </div>
                               </div>
                             </div>
 
                             {/* Options Dot */}
-                            <button className="text-gray-400 hover:text-white transition cursor-pointer text-base">
+                            {/* <button className="text-gray-400 hover:text-white transition cursor-pointer text-base">
                               •••
-                            </button>
+                            </button> */}
                           </div>
 
                           {/* Post Content Text */}
