@@ -21,7 +21,7 @@ const Header = () => {
   }, [headerSticky]);
   return <header className={clsx(
     'header fixed top-0 z-40 start-0 end-0 flex items-stretch shrink-0 transition-all duration-300',
-    'backdrop-blur-md border-b border-[#1E0D3B]/40',
+    'backdrop-blur-md border-b border-gray-50 dark:border-[#1E0D3B]/40',
     // headerSticky && 'shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
   )}>
     <div className="flex justify-between items-stretch lg:gap-4 container-fluid">

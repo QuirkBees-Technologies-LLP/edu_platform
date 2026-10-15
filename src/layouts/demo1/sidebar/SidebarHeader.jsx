@@ -71,7 +71,7 @@ const StudentBackButton = () => {
     <DefaultTooltip title="Back" placement="right" className="z-50">
       <button
         onClick={() => navigate(-1)}
-        className="btn btn-icon btn-icon-md size-[30px] rounded-lg border bg-light dark:bg-primary text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-700 toggle absolute start-full top-[55%] rtl:translate-x-2/4 -translate-x-2/4 -translate-y-2/4 border-gray-200 dark:border-gray-300 shadow-sm"
+        className="btn btn-icon btn-icon-md size-[30px] rounded-lg bg-gray-900 dark:bg-[#1A112C] text-white hover:bg-gray-800 dark:hover:bg-[#2A1C44] toggle absolute start-full top-[55%] rtl:translate-x-2/4 -translate-x-2/4 -translate-y-2/4 border border-gray-700 dark:border-purple-500/30 shadow-md transition-all flex items-center justify-center cursor-pointer"
         aria-label="Go back"
       >
         <KeenIcon icon="black-left" />
