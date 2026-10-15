@@ -111,18 +111,18 @@ const ClientDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="relative min-h-screen bg-[#05020A] text-white overflow-x-hidden -mt-16 pt-20 transition-colors duration-200">
+      <div className="relative min-h-screen bg-white dark:bg-[#05020A] text-white overflow-x-hidden -mt-16 pt-20 transition-colors duration-200">
         {/* Radial Background Flare */}
-        <div className="absolute top-0 left-0 right-0 h-[520px] bg-[radial-gradient(ellipse_100%_70%_at_25%_0%,rgba(67,38,125,0.48)_0%,rgba(33,18,68,0.28)_50%,rgba(5,2,10,0)_90%)] pointer-events-none z-0" />
+        <div className="absolute top-0 left-0 right-0 h-[520px] bg-[radial-gradient(ellipse_100%_70%_at_25%_0%,rgba(67,38,125,0.48)_0%,rgba(33,18,68,0.28)_50%,rgba(5,2,10,0)_90%)] pointer-events-none z-0 hidden dark:block" />
 
         <Container className="relative z-10">
           {/* Header Row: Welcome & Top Action Buttons */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-8 pb-6 w-full">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-[#ffffff] uppercase tracking-[0.25em]">
+              <span className="text-[10px] font-bold text-gray-700 dark:text-white uppercase tracking-[0.25em]">
                 WELCOME BACK
               </span>
-              <h1 className="text-2xl md:text-[30px] font-black text-white tracking-tight flex items-center gap-2">
+              <h1 className="text-2xl md:text-[30px] font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
                 <span>👋</span> Hello, <span className="text-[#8B5CF6]">{userName}</span>
               </h1>
             </div>
@@ -132,13 +132,13 @@ const ClientDashboard = () => {
               {/* 1. Fast Start Training Button */}
               <button
                 onClick={() => navigate('/fast-start-training')}
-                className="group relative flex items-center gap-3 px-4.5 py-2.5 rounded-[16px] bg-gradient-to-b from-[#060D0C] via-[#091715] to-[#0E2E25] border border-white/20 hover:border-emerald-400/60 transition-all duration-300 text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_4px_15px_rgba(0,0,0,0.5)]"
+                className="group relative flex items-center gap-3 px-4.5 py-2.5 rounded-[16px] bg-gray-100 dark:bg-gradient-to-b dark:from-[#060D0C] dark:via-[#091715] dark:to-[#0E2E25] border border-gray-200 dark:border-white/20 hover:border-emerald-400/60 transition-all duration-300 text-gray-900 dark:text-white cursor-pointer shadow-sm dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_4px_15px_rgba(0,0,0,0.5)]"
               >
                 {/* Inner Muted Dark Circle */}
-                <div className="w-8 h-8 rounded-full bg-[#102621] flex items-center justify-center shrink-0 border border-white/10">
-                  <Play size={11} className="fill-[#71F3BD] text-[#71F3BD] ml-0.5" />
+                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-[#102621] flex items-center justify-center shrink-0 border border-emerald-200 dark:border-white/10">
+                  <Play size={11} className="fill-emerald-600 dark:fill-[#71F3BD] text-emerald-600 dark:text-[#71F3BD] ml-0.5" />
                 </div>
-                <span className="text-[14px] font-medium tracking-tight text-white/95 pr-1">
+                <span className="text-[14px] font-medium tracking-tight text-gray-800 dark:text-white/95 pr-1">
                   Fast Start Training
                 </span>
               </button>
@@ -146,13 +146,13 @@ const ClientDashboard = () => {
               {/* 2. Need Help? Button */}
               <button
                 onClick={() => navigate('/support')}
-                className="group relative flex items-center gap-3 px-4.5 py-2.5 rounded-[16px] bg-gradient-to-b from-[#0B0714] via-[#120B22] to-[#25153F] border border-white/20 hover:border-purple-400/60 transition-all duration-300 text-white cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_4px_15px_rgba(0,0,0,0.5)]"
+                className="group relative flex items-center gap-3 px-4.5 py-2.5 rounded-[16px] bg-gray-100 dark:bg-gradient-to-b dark:from-[#0B0714] dark:via-[#120B22] dark:to-[#25153F] border border-gray-200 dark:border-white/20 hover:border-purple-400/60 transition-all duration-300 text-gray-900 dark:text-white cursor-pointer shadow-sm dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_4px_15px_rgba(0,0,0,0.5)]"
               >
                 {/* Inner Muted Dark Circle */}
-                <div className="w-8 h-8 rounded-full bg-[#1D1236] flex items-center justify-center shrink-0 border border-white/10">
-                  <Headphones size={15} className="text-[#D2B5FF]" />
+                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-[#1D1236] flex items-center justify-center shrink-0 border border-purple-200 dark:border-white/10">
+                  <Headphones size={15} className="text-purple-600 dark:text-[#D2B5FF]" />
                 </div>
-                <span className="text-[14px] font-medium tracking-tight text-white/95 pr-1">
+                <span className="text-[14px] font-medium tracking-tight text-gray-800 dark:text-white/95 pr-1">
                   Need Help?
                 </span>
               </button>
@@ -165,7 +165,7 @@ const ClientDashboard = () => {
 
             {/* 1. YOUR LEARNING JOURNEY */}
             <div className="flex flex-col gap-3 w-full">
-              <h2 className="text-base font-bold text-white tracking-wide">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white tracking-wide">
                 Your Learning Journey
               </h2>
               <div className="w-full overflow-x-auto pb-2 scrollbar-none">
@@ -174,24 +174,24 @@ const ClientDashboard = () => {
                   {/* Card 1: Academy */}
                   <div
                     onClick={() => navigate("/iq-vault")}
-                    className="relative rounded-[22px] border border-[#7C3AED]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-[0_0_20px_rgba(124,58,237,0.25)] bg-[#0C051A]"
+                    className="relative rounded-[22px] border border-gray-300 dark:border-[#7C3AED]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(124,58,237,0.25)] bg-white dark:bg-[#0C051A]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
                       style={{ backgroundImage: "url('/media/images/academy_300x300.jpg')" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#250B48] via-[#1A0736]/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-purple-950/90 via-purple-900/60 to-transparent dark:from-[#250B48] dark:via-[#1A0736]/80 dark:to-transparent" />
 
                     <div className="relative z-10 flex items-end justify-between w-full">
                       <div className="flex flex-col gap-1 pr-2">
                         {/* Flat Graduation Cap Icon (No Container Box) */}
-                        <div className="text-[#C084FC] mb-1">
+                        <div className="text-purple-300 dark:text-[#C084FC] mb-1">
                           <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Academy</h3>
-                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
                           Build your foundation with core education.
                         </p>
                       </div>
@@ -204,24 +204,24 @@ const ClientDashboard = () => {
                   {/* Card 2: Strategies */}
                   <div
                     onClick={() => window.open("https://base.iqonic.life/login.html", "_blank")}
-                    className="relative rounded-[22px] border border-[#2563EB]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-[0_0_20px_rgba(37,99,235,0.25)] bg-[#0A0E23]"
+                    className="relative rounded-[22px] border border-blue-300 dark:border-[#2563EB]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(37,99,235,0.25)] bg-white dark:bg-[#0A0E23]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
                       style={{ backgroundImage: "url('/media/images/iqcharts_400x300.jpg')" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F225A] via-[#0A1740]/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-900/60 to-transparent dark:from-[#0F225A] dark:via-[#0A1740]/80 dark:to-transparent" />
 
                     <div className="relative z-10 flex items-end justify-between w-full">
                       <div className="flex flex-col gap-1 pr-2">
                         {/* Flat Bar Chart Icon (No Container Box) */}
-                        <div className="text-[#60A5FA] mb-1">
+                        <div className="text-blue-300 dark:text-[#60A5FA] mb-1">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M4 19h4v-7H4v7zm6 0h4V5h-4v14zm6 0h4v-11h-4v11z" />
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Strategies</h3>
-                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
                           Learn proven strategies and advanced techniques.
                         </p>
                       </div>
@@ -234,24 +234,24 @@ const ClientDashboard = () => {
                   {/* Card 3: Live Streams */}
                   <div
                     onClick={() => navigate("/iq-academy")}
-                    className="relative rounded-[22px] border border-[#C026D3]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-[0_0_20px_rgba(192,38,211,0.25)] bg-[#180524]"
+                    className="relative rounded-[22px] border border-fuchsia-300 dark:border-[#C026D3]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(192,38,211,0.25)] bg-white dark:bg-[#180524]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
                       style={{ backgroundImage: "url('/media/images/livestream_400x300.jpg')" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#4A0864] via-[#310542]/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-fuchsia-950/90 via-fuchsia-900/60 to-transparent dark:from-[#4A0864] dark:via-[#310542]/80 dark:to-transparent" />
 
                     <div className="relative z-10 flex items-end justify-between w-full">
                       <div className="flex flex-col gap-1 pr-2">
                         {/* Rounded Play Box Icon */}
-                        <div className="text-[#E879F9] mb-1">
+                        <div className="text-fuchsia-300 dark:text-[#E879F9] mb-1">
                           <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 13V8l6 4-6 4z" />
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Live Streams</h3>
-                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
                           Join our live sessions.
                         </p>
                       </div>
@@ -264,24 +264,24 @@ const ClientDashboard = () => {
                   {/* Card 4: Strategy Alerts */}
                   <div
                     onClick={() => navigate("/trading-signals")}
-                    className="relative rounded-[22px] border border-[#D97706]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-[0_0_20px_rgba(217,119,6,0.25)] bg-[#1F0E04]"
+                    className="relative rounded-[22px] border border-amber-300 dark:border-[#D97706]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(217,119,6,0.25)] bg-white dark:bg-[#1F0E04]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
                       style={{ backgroundImage: "url('/media/images/iqsocial_400x300.jpg')" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#522304] via-[#361702]/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-amber-950/90 via-amber-900/60 to-transparent dark:from-[#522304] dark:via-[#361702]/80 dark:to-transparent" />
 
                     <div className="relative z-10 flex items-end justify-between w-full">
                       <div className="flex flex-col gap-1 pr-2">
                         {/* Flat Bell Icon */}
-                        <div className="text-[#FBBF24] mb-1">
+                        <div className="text-amber-300 dark:text-[#FBBF24] mb-1">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Strategy Alerts</h3>
-                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
                           Real-time alerts from IQONIC strategies.
                         </p>
                       </div>
@@ -294,24 +294,24 @@ const ClientDashboard = () => {
                   {/* Card 5: Ideas & Insights */}
                   <div
                     onClick={() => navigate("/ideas")}
-                    className="relative rounded-[22px] border border-[#CA8A04]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-[0_0_20px_rgba(202,138,4,0.25)] bg-[#1A1604]"
+                    className="relative rounded-[22px] border border-yellow-300 dark:border-[#CA8A04]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(202,138,4,0.25)] bg-white dark:bg-[#1A1604]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
                       style={{ backgroundImage: "url('/media/images/1400x400 banner.jpg')" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#473B06] via-[#2F2704]/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-yellow-950/90 via-yellow-900/60 to-transparent dark:from-[#473B06] dark:via-[#2F2704]/80 dark:to-transparent" />
 
                     <div className="relative z-10 flex items-end justify-between w-full">
                       <div className="flex flex-col gap-1 pr-2">
                         {/* Flat Lightbulb Icon */}
-                        <div className="text-[#EAB308] mb-1">
+                        <div className="text-yellow-300 dark:text-[#EAB308] mb-1">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" />
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Ideas & Insights</h3>
-                        <p className="text-[11px] text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
                           Explore market ideas, insights, and live trading setups.
                         </p>
                       </div>
@@ -330,7 +330,7 @@ const ClientDashboard = () => {
               <div className="lg:col-span-7 flex flex-col gap-4 w-full min-w-0">
                 {/* Header Row: Title & Filter Icon */}
                 <div className="flex items-center justify-between w-full pb-1">
-                  <h2 className="text-xl font-bold text-white tracking-tight">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
                     Your Social Feed
                   </h2>
                   <div className="relative">
@@ -340,7 +340,7 @@ const ClientDashboard = () => {
                         setIsFilterModalOpen(!isFilterModalOpen);
                         document.body.style.overflow = !isFilterModalOpen ? 'hidden' : 'unset';
                       }}
-                      className="text-white/80 hover:text-white transition cursor-pointer p-1.5 rounded-lg hover:bg-white/5"
+                      className="text-gray-800 dark:text-white/80 hover:text-gray-900 dark:hover:text-white transition cursor-pointer p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
                     >
                       <Filter size={18} />
                     </button>
@@ -355,14 +355,14 @@ const ClientDashboard = () => {
                         }}
                       >
                         <div
-                          className="relative w-[420px] rounded-2xl bg-[#1A1C23] border border-white/15 p-6 shadow-2xl"
+                          className="relative w-[420px] rounded-2xl bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/15 p-6 shadow-2xl"
                           onClick={(e) => e.stopPropagation()}
                         >
 
                           {/* Modal Header with Filter Icon */}
-                          <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-5">
-                            <div className="flex items-center gap-2 text-white">
-                              <Filter size={16} className="text-gray-800" />
+                          <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-white/10 mb-5">
+                            <div className="flex items-center gap-2 text-gray-800 dark:text-white">
+                              <Filter size={16} className="text-purple-600 dark:text-gray-800" />
                               <span className="text-sm font-bold tracking-wider uppercase">
                                 IQ Social - Filters
                               </span>
@@ -373,7 +373,7 @@ const ClientDashboard = () => {
                                 setIsFilterModalOpen(false);
                                 document.body.style.overflow = 'unset';
                               }}
-                              className="text-gray-400 hover:text-white text-sm cursor-pointer p-1"
+                              className="text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm cursor-pointer p-1"
                             >
                               ✕
                             </button>
@@ -383,23 +383,23 @@ const ClientDashboard = () => {
                           <div className="grid grid-cols-2 gap-6 text-sm">
                             {/* Corporate Column */}
                             <div className="flex flex-col gap-3">
-                              <h4 className="flex items-center gap-1.5 font-bold text-white text-xs tracking-wider uppercase border-b border-white/10 pb-2">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
+                              <h4 className="flex items-center gap-1.5 font-bold text-gray-800 dark:text-white text-xs tracking-wider uppercase border-b border-gray-200 dark:border-white/10 pb-2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400 dark:text-blue-400">
                                   <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                                   <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                                 </svg>
                                 Corporate
                               </h4>
-                              <ul className="space-y-3 text-gray-700 text-sm">
-                                <li className="hover:text-white cursor-pointer transition-colors flex items-center gap-2">
+                              <ul className="space-y-3 text-gray-700 dark:text-gray-300 text-sm">
+                                <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   General
                                 </li>
-                                <li className="hover:text-white cursor-pointer transition-colors flex items-center gap-2">
+                                <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   Atlas
                                 </li>
-                                <li className="hover:text-white cursor-pointer transition-colors flex items-center gap-2">
+                                <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   Thrive
                                 </li>
@@ -408,27 +408,27 @@ const ClientDashboard = () => {
 
                             {/* Education Column */}
                             <div className="flex flex-col gap-3">
-                              <h4 className="flex items-center gap-1.5 font-bold text-white text-xs tracking-wider uppercase border-b border-white/10 pb-2">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-400">
+                              <h4 className="flex items-center gap-1.5 font-bold text-gray-800 dark:text-white text-xs tracking-wider uppercase border-b border-gray-200 dark:border-white/10 pb-2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-400 dark:text-purple-400">
                                   <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                                   <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
                                 </svg>
                                 Education
                               </h4>
-                              <ul className="space-y-3 text-gray-700 text-sm">
-                                <li className="hover:text-white cursor-pointer transition-colors flex items-center gap-2">
+                              <ul className="space-y-3 text-gray-700 dark:text-gray-300 text-sm">
+                                <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   Posts
                                 </li>
-                                <li className="hover:text-white cursor-pointer transition-colors flex items-center gap-2">
+                                <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   Ideas
                                 </li>
-                                <li className="hover:text-white cursor-pointer transition-colors flex items-center gap-2">
+                                <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   Insights
                                 </li>
-                                <li className="hover:text-white cursor-pointer transition-colors flex items-center gap-2">
+                                <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   Live ideas
                                 </li>
@@ -451,15 +451,15 @@ const ClientDashboard = () => {
                       onClick={() => setSocialType(pill)}
                       className={`px-3 py-1.5 rounded-xl text-[8px] font-medium tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border ${socialType === pill
                         ? pill === "ALL"
-                          ? "bg-[#251842] text-white border-white/40 shadow-sm"
+                          ? "bg-purple-900 dark:bg-[#251842] text-white border-purple-400 dark:border-white/40 shadow-sm"
                           : pill === "CORPORATE"
-                            ? "bg-[#1E3A8A]/30 text-blue-200 border-blue-500/60 shadow-sm"
-                            : "bg-[#4C1D95]/40 text-purple-200 border-purple-500/60 shadow-sm"
+                            ? "bg-blue-600/30 text-blue-700 dark:text-blue-200 dark:bg-[#1E3A8A]/30 dark:text-blue-200 border-blue-500/60 shadow-sm"
+                            : "bg-purple-600/40 text-purple-700 dark:text-purple-200 dark:bg-[#4C1D95]/40 dark:text-purple-200 border-purple-500/60 shadow-sm"
                         : pill === "ALL"
-                          ? "bg-[#130728]/80 text-gray-400 border-[#2D1653] hover:text-white"
+                          ? "bg-gray-900 dark:bg-[#130728]/80 text-gray-400 dark:text-gray-400 border-gray-400 dark:border-[#2D1653] hover:text-gray-900 dark:hover:text-white"
                           : pill === "CORPORATE"
-                            ? "bg-[#1E3A8A]/10 text-blue-400/50 border-blue-500/15 hover:text-blue-300"
-                            : "bg-[#4C1D95]/10 text-purple-400/50 border-purple-500/15 hover:text-purple-300"
+                            ? "bg-blue-50 dark:bg-[#1E3A8A]/10 text-blue-700 dark:text-blue-400/50 border-blue-200 dark:border-blue-500/15 hover:text-blue-700 dark:hover:text-blue-300"
+                            : "bg-purple-50 dark:bg-[#4C1D95]/10 text-purple-700 dark:text-purple-400/50 border-purple-200 dark:border-purple-500/15 hover:text-purple-700 dark:hover:text-purple-300"
                         }`}
                     >
                       {pill === "CORPORATE" && (
@@ -501,15 +501,15 @@ const ClientDashboard = () => {
 
                           <div
                             key={post._id}
-                            className={`relative overflow-hidden rounded-3xl border border-white/10 bg-[#07020E] p-5 flex flex-col gap-4 shadow-2xl transition-all ${isCorporate ? "border-l-[#3B82F6]" : "border-l-[#A855F7]"
-                              } border-l-[5px]`}
+                            className={`relative overflow-hidden rounded-3xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#07020E] p-5 flex flex-col gap-4 shadow-xl dark:shadow-2xl transition-all ${isCorporate ? "border-l-blue-500 dark:border-l-[#3B82F6]" : "border-l-purple-500 dark:border-l-[#A855F7]"
+                              } border-l-[7px]`}
                           >
 
                             {/* Left Side Ambient Glow Background */}
                             <div
                               className={`absolute inset-y-0 left-0 w-32 pointer-events-none ${isCorporate
-                                ? "bg-gradient-to-r from-[#2563EB]/15 via-[#1D4ED8]/3 to-transparent"
-                                : "bg-gradient-to-r from-[#A855F7]/15 via-[#581C87]/5 to-transparent"
+                                  ? "bg-gradient-to-r from-[#2563EB]/15 via-[#1D4ED8]/3 to-transparent"
+                                  : "bg-gradient-to-r from-[#A855F7]/15 via-[#581C87]/5 to-transparent"
                                 }`}
                             />
 
@@ -524,12 +524,12 @@ const ClientDashboard = () => {
 
                                 <div className="flex flex-col gap-1 min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="text-sm font-bold text-white tracking-tight">
+                                    <span className="text-sm font-bold text-gray-800 dark:text-white tracking-tight">
                                       {post.author?.first_name || "IQONIC"}{" "}
                                       {post.author?.last_name || "TEAM"}
                                     </span>
 
-                                    <span className="text-[10px] text-gray-400 font-normal">
+                                    <span className="text-[10px] text-gray-600 dark:text-gray-400 font-normal">
                                       • {timeAgo(post.createdAt)}
                                     </span>
                                   </div>
@@ -538,8 +538,8 @@ const ClientDashboard = () => {
                                   <div className="flex items-center gap-1.5 flex-wrap">
                                     <span
                                       className={`px-2 py-0.5 rounded-[5px] text-[9px] font-bold tracking-wider uppercase flex items-center gap-1 ${isCorporate
-                                        ? "bg-[#182848] text-[#7DD3FC]"
-                                        : "bg-[#2D124D] text-[#C084FC]"
+                                        ? "bg-blue-100 dark:bg-[#182848] text-blue-800 dark:text-[#7DD3FC]"
+                                        : "bg-purple-100 dark:bg-[#2D124D] text-purple-800 dark:text-[#C084FC]"
                                         }`}
                                     >
                                       {isCorporate ? (
@@ -565,7 +565,7 @@ const ClientDashboard = () => {
                                       {post.category || "EDUCATION"}
                                     </span>
 
-                                    <span className="px-2 py-0.5 rounded-[5px] text-[9px] font-bold tracking-wider uppercase bg-[#180E2B] text-[#A78BFA] border border-[#3B1D6E]/40">
+                                    <span className="px-2 py-0.5 rounded-[5px] text-[9px] font-bold tracking-wider uppercase bg-purple-50 dark:bg-[#180E2B] text-purple-800 dark:text-[#A78BFA] border border-purple-200 dark:border-[#3B1D6E]/40">
                                       {post.postType || "POST"}
                                     </span>
                                   </div>
@@ -583,13 +583,13 @@ const ClientDashboard = () => {
                             </div>
 
                             {/* Post Content */}
-                            <p className="relative z-10 text-xs sm:text-sm text-white/90 font-normal leading-relaxed tracking-normal pr-2 break-words">
+                            <p className="relative z-10 text-xs sm:text-sm text-gray-800 dark:text-white/90 font-normal leading-relaxed tracking-normal pr-2 break-words">
                               {post.content?.replace(/<[^>]+>/g, "")}
                             </p>
 
                             {/* Media Attachment */}
                             {postImage && (
-                              <div className="relative z-10 rounded-2xl overflow-hidden border border-white/10 mt-2 w-full bg-[#05020A]">
+                              <div className="relative z-10 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 mt-2 w-full bg-gray-50 dark:bg-[#05020A]">
                                 <img
                                   src={postImage}
                                   alt="Post media"
@@ -599,15 +599,15 @@ const ClientDashboard = () => {
                             )}
 
                             {/* Footer Action Bar */}
-                            <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/10 text-gray-300 text-xs mt-1">
+                            <div className="relative z-10 flex items-center justify-between pt-3 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 border-t dark:border-white/10 text-gray-300 text-xs mt-1">
                               <div className="flex items-center gap-4 sm:gap-6">
                                 {/* Likes */}
                                 <button
                                   type="button"
-                                  className="flex items-center gap-2 hover:text-purple-400 transition-colors cursor-pointer"
+                                  className="flex items-center gap-2 hover:text-purple-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
                                 >
                                   <Heart size={18} />
-                                  <span className="text-xs font-medium text-white/80">
+                                  <span className="text-xs font-medium text-gray-800 dark:text-white/80">
                                     {post.likesCount || 20}
                                   </span>
                                 </button>
@@ -615,10 +615,10 @@ const ClientDashboard = () => {
                                 {/* Comments */}
                                 <button
                                   type="button"
-                                  className="flex items-center gap-2 hover:text-purple-400 transition-colors cursor-pointer"
+                                  className="flex items-center gap-2 hover:text-purple-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
                                 >
                                   <MessageCircle size={18} />
-                                  <span className="text-xs font-medium text-white/80">
+                                  <span className="text-xs font-medium text-gray-800 dark:text-white/80">
                                     {post.commentsCount || 12}
                                   </span>
                                 </button>
@@ -626,10 +626,10 @@ const ClientDashboard = () => {
                                 {/* Shares */}
                                 <button
                                   type="button"
-                                  className="flex items-center gap-2 hover:text-purple-400 transition-colors cursor-pointer"
+                                  className="flex items-center gap-2 hover:text-purple-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
                                 >
                                   <Share2 size={18} />
-                                  <span className="text-xs font-medium text-white/80">
+                                  <span className="text-xs font-medium text-gray-800 dark:text-white/80">
                                     {post.sharesCount || 31}
                                   </span>
                                 </button>
@@ -639,7 +639,7 @@ const ClientDashboard = () => {
                               <button
                                 type="button"
                                 aria-label="Bookmark post"
-                                className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                                className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                               >
                                 <svg
                                   width="18"
@@ -658,7 +658,7 @@ const ClientDashboard = () => {
                         );
                       })
                   ) : (
-                    <div className="text-center py-12 text-gray-400 text-xs bg-[#07020E] rounded-3xl border border-white/10">
+                    <div className="text-center py-12 text-gray-400 dark:text-gray-400 text-xs bg-white dark:bg-[#07020E] rounded-3xl border border-gray-200 dark:border-white/10">
                       No posts available right now.
                     </div>
                   )}
@@ -671,16 +671,16 @@ const ClientDashboard = () => {
                 {/* Header: Title & View Calendar */}
                 <div className="flex items-start justify-between w-full px-1">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.22em]">
+                    <span className="text-[10px] font-bold text-gray-800 dark:text-gray-400 uppercase tracking-[0.22em]">
                       TODAY'S SCHEDULE
                     </span>
-                    <h3 className="text-2xl font-black text-white tracking-tight">
+                    <h3 className="text-2xl font-black text-gray-800 dark:text-white tracking-tight">
                       Livestreams
                     </h3>
                   </div>
                   <button
                     onClick={() => navigate("/iq-academy")}
-                    className="text-xs font-medium text-gray-400 hover:text-white transition cursor-pointer pt-2 flex items-center gap-1"
+                    className="text-xs font-medium text-gray-800 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition cursor-pointer pt-2 flex items-center gap-1"
                   >
                     <span>View calendar</span>
                     <span>&rarr;</span>
@@ -825,7 +825,7 @@ const ClientDashboard = () => {
                 {/* IQ Social App Download Banner */}
                 <div className="flex flex-col gap-3 w-full mt-2">
                   {/* Header Title Outside Container */}
-                  <h3 className="text-xl font-bold text-white tracking-tight px-1">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight px-1">
                     Quick Access
                   </h3>
 
