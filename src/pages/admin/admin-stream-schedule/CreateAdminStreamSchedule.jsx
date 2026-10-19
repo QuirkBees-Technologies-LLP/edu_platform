@@ -128,7 +128,7 @@ const CreateAdminStreamSchedule = forwardRef(
         formData.append("category", values.category);
         formData.append("description", values.description);
         formData.append("language", values.language);
-        formData.append("datetime", values.datetime);
+        formData.append("datetime", new Date(values.datetime).toISOString());
         values.tags.forEach((tag) => {
           formData.append(`tags[]`, tag);
         });
