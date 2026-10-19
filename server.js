@@ -10,8 +10,29 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "dist", "index.html"));
+// });
+
+app.get("*", (req, res, next) => {
+  const indexPath = path.join(__dirname, "dist", "index.html");
+
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error("SPA index.html serving failed:", {
+        path: indexPath,
+        code: err.code,
+        message: err.message,
+        url: req.originalUrl,
+        pid: process.pid,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (!res.headersSent) {
+        next(err);
+      }
+    }
+  });
 });
 
 app.listen(PORT, () => {
