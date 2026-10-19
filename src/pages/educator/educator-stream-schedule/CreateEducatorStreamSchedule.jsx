@@ -127,7 +127,7 @@ const CreateEducatorStreamSchedule = forwardRef(
         // formData.append("streamType", values.streamType);
         formData.append("category", values.category);
         formData.append("description", values.description);
-        formData.append("datetime", values.datetime);
+        formData.append("datetime", new Date(values.datetime).toISOString());
         formData.append("language", values.language);
         values.tags.forEach((tag) => {
           formData.append(`tags[]`, tag);

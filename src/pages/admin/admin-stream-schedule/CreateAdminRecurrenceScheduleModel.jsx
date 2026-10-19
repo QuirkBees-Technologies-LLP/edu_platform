@@ -208,7 +208,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
 
           formData.append("title", values.title);
           formData.append("description", values.description);
-          formData.append("datetime", values.datetime);
+          formData.append("datetime", new Date(values.datetime).toISOString());
           formData.append("category", values.category);
           formData.append("language", values.language);
           // TimeZone is optional for Digital Marketing educators
@@ -245,7 +245,10 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
             formData.append("recurrenceRule[occurrences]", occurrences);
           }
           if (endDateTime) {
-            formData.append("recurrenceRule[endDateTime]", endDateTime);
+            formData.append(
+              "recurrenceRule[endDateTime]",
+              new Date(endDateTime).toISOString()
+            );
           }
 
           if (selectedRow?._id) {
