@@ -19,8 +19,8 @@ import { Link } from "react-router-dom";
 const SidebarMenu = () => {
   const linkPl = "ps-[10px]";
   const linkPr = "pe-[10px]";
-  const linkPy = "py-[6px]";
-  const itemsGap = "gap-0.5";
+  const linkPy = "py-0";
+  const itemsGap = "gap-1";
   const subLinkPy = "py-[8px]";
   const rightOffset = "me-[-10px]";
   const iconWidth = "w-[20px]";
@@ -348,7 +348,7 @@ const SidebarMenu = () => {
       </Menu>
 
       {/* 2. Client Bottom Section */}
-      <div className="pt-4 mt-auto border-t border-gray-800/60 flex flex-col gap-3 px-3 pb-3">
+      <div className="pt-2 mt-auto border-t border-gray-800/60 flex flex-col gap-1.5 px-3 pb-3">
 
         {/* Option 1: Download IQ Social */}
         <div className="flex items-center gap-3 cursor-pointer group">

@@ -132,13 +132,12 @@ const ClientDashboard = () => {
               {/* 1. Fast Start Training Button */}
               <button
                 onClick={() => navigate('/fast-start-training')}
-                className="group relative flex items-center gap-3 px-4.5 py-2.5 rounded-[16px] bg-gray-100 dark:bg-gradient-to-b dark:from-[#060D0C] dark:via-[#091715] dark:to-[#0E2E25] border border-gray-200 dark:border-white/20 hover:border-emerald-400/60 transition-all duration-300 text-gray-900 dark:text-white cursor-pointer shadow-sm dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_4px_15px_rgba(0,0,0,0.5)]"
+                className="group relative flex cursor-pointer items-center gap-3 rounded-[14px] border border-gray-200 bg-gray-100 px-4 py-2 text-gray-900 shadow-sm transition-all duration-300 dark:border-transparent dark:text-white dark:shadow-[0_0_10px_rgba(113,243,189,0.1)] dark:[background-image:linear-gradient(180deg,#071411_0%,#0C1E1A_100%),linear-gradient(180deg,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0.08)_38%,rgba(113,243,189,0.28)_100%)] dark:[background-origin:border-box] dark:[background-clip:padding-box,border-box]"
               >
-                {/* Inner Muted Dark Circle */}
-                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-[#102621] flex items-center justify-center shrink-0 border border-emerald-200 dark:border-white/10">
-                  <Play size={11} className="fill-emerald-600 dark:fill-[#71F3BD] text-emerald-600 dark:text-[#71F3BD] ml-0.5" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-100 dark:border-white/10 dark:bg-[#102621]">
+                  <Play size={11} className="ml-0.5 fill-emerald-600 text-emerald-600 dark:fill-[#71F3BD] dark:text-[#71F3BD]" />
                 </div>
-                <span className="text-[14px] font-medium tracking-tight text-gray-800 dark:text-white/95 pr-1">
+                <span className="pr-1 text-[14px] font-medium tracking-tight text-gray-800 dark:text-white/95">
                   Fast Start Training
                 </span>
               </button>
@@ -146,13 +145,12 @@ const ClientDashboard = () => {
               {/* 2. Need Help? Button */}
               <button
                 onClick={() => navigate('/support')}
-                className="group relative flex items-center gap-3 px-4.5 py-2.5 rounded-[16px] bg-gray-100 dark:bg-gradient-to-b dark:from-[#0B0714] dark:via-[#120B22] dark:to-[#25153F] border border-gray-200 dark:border-white/20 hover:border-purple-400/60 transition-all duration-300 text-gray-900 dark:text-white cursor-pointer shadow-sm dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_4px_15px_rgba(0,0,0,0.5)]"
+                className="group relative flex cursor-pointer items-center gap-3 rounded-[14px] border border-gray-200 bg-gray-100 px-4 py-2 text-gray-900 shadow-sm transition-all duration-300 dark:border-transparent dark:text-white dark:shadow-[0_0_10px_rgba(168,85,247,0.14)] dark:[background-image:linear-gradient(180deg,#0C0814_0%,#1A1030_100%),linear-gradient(180deg,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.08)_38%,rgba(196,160,255,0.4)_100%)] dark:[background-origin:border-box] dark:[background-clip:padding-box,border-box]"
               >
-                {/* Inner Muted Dark Circle */}
-                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-[#1D1236] flex items-center justify-center shrink-0 border border-purple-200 dark:border-white/10">
-                  <Headphones size={15} className="text-purple-600 dark:text-[#D2B5FF]" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-purple-200 bg-purple-100 dark:border-white/10 dark:bg-[#1D1236]">
+                  <Headphones size={14} className="text-purple-600 dark:text-[#D2B5FF]" />
                 </div>
-                <span className="text-[14px] font-medium tracking-tight text-gray-800 dark:text-white/95 pr-1">
+                <span className="pr-1 text-[14px] font-medium tracking-tight text-gray-800 dark:text-white/95">
                   Need Help?
                 </span>
               </button>
