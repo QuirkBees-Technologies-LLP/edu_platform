@@ -40,8 +40,11 @@ const EducatorLiveSessionView = () => {
         return response.token;
       };
 
-      // A static token expires (Stream returns 401) if this page stays open.
-      // tokenProvider lets Stop Live and the other call requests fetch a new one.
+      // Chat mounts only after sessionToken is set. Fetch it before the video
+      // client is created, because a reused client may not call tokenProvider yet.
+      await loadToken();
+
+      // tokenProvider still refreshes an expired token so Stop Live can recover.
       const newClient = StreamVideoClient.getOrCreateInstance({
         apiKey,
         tokenProvider: loadToken,
