@@ -18,7 +18,12 @@ import { usePostQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
 
 import "intro.js/introjs.css";
-import { Container } from "@/components/container";
+
+const isStreamLive = (stream) => {
+  if (stream?.isLive === true || stream?.live === true || stream?.is_live === true) return true;
+  const status = String(stream?.status ?? stream?.liveStatus ?? "").toLowerCase();
+  return status === "live" || status === "active";
+};
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -60,8 +65,16 @@ const ClientDashboard = () => {
     }
   }, [Posts]);
 
-  const { data: liveEducator } = useGetLiveEducatorListQuery();
-  const liveStreams = liveEducator?.streams || [];
+  const {
+    data: liveEducator,
+    isLoading: educatorsLoading,
+    refetch: refetchLiveStreams,
+  } = useGetLiveEducatorListQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
+  });
+  const liveStreams = (liveEducator?.streams || []).filter(isStreamLive);
 
   const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
@@ -85,11 +98,190 @@ const ClientDashboard = () => {
     "Manny";
 
   useEffect(() => {
-    if (isFilterModalOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+    const refreshLiveStatus = () => {
+      if (document.visibilityState === "hidden") return;
+      refetchLiveStreams();
+    };
+
+    document.addEventListener("visibilitychange", refreshLiveStatus);
+    window.addEventListener("focus", refreshLiveStatus);
+    window.addEventListener("pageshow", refreshLiveStatus);
+    const poll = window.setInterval(refreshLiveStatus, 15000);
+    return () => {
+      document.removeEventListener("visibilitychange", refreshLiveStatus);
+      window.removeEventListener("focus", refreshLiveStatus);
+      window.removeEventListener("pageshow", refreshLiveStatus);
+      window.clearInterval(poll);
+    };
+  }, [refetchLiveStreams]);
+
+  useEffect(() => {
+    const user = auth?.user;
+    const isStudent = user?.role === "student";
+    const hasSeenTour = user?.hasSeenTour;
+
+    if (isStudent && hasSeenTour !== true && !tourStartedRef.current) {
+      tourStartedRef.current = true;
+      const timer = setTimeout(() => {
+        startTour();
+      }, 1000);
+
+      return () => {
+        clearTimeout(timer);
+        tourStartedRef.current = false;
+      };
     }
+  }, [auth?.user?.hasSeenTour, auth?.user?.role]);
+
+  const startTour = () => {
+    const steps = [];
+
+    // Step 1: Welcome Card in center
+    steps.push({
+      title: "Welcome to IQonic! 👋",
+      intro: `
+         <div class="welcome-tour-card">
+          <h2 class="text-3xl md:text-5xl font-bold mb-4">Welcome to Your Dashboard, ${auth?.user?.firstName || auth?.user?.name || "Trader"}!</h2>
+          <p class="text-lg md:text-xl text-gray-100" style="color: #f3f4f6; font-weight: 500;">We're thrilled to have you here. This quick tour will guide you through the key features of your dashboard covering both <strong>Trading Education</strong> and <strong>Digital Marketing</strong> so you can get the most out of your experience.</p>
+        </div>
+      `,
+    });
+
+    // Step 2: Live Educator
+    const live = document.querySelector(".live-card");
+    if (live) {
+      steps.push({
+        element: live,
+        title: "📡 Live Now",
+        intro: "If an educator is streaming right now, they'll show up here.<br><br>Tap any card to jump straight into their live session.",
+        position: "right"
+      });
+    }
+
+
+    // Step 3: IQ Academy
+    const academy = document.querySelector(".academy-card");
+    if (academy) {
+      steps.push({
+        element: academy,
+        title: "🎓 IQ Academy",
+        intro: "This is your course library structured lessons on <strong>Forex</strong>, <strong>Crypto</strong>, and <strong>Digital Marketing</strong>.<br><br>Everything from beginner fundamentals to advanced techniques, all in one place.",
+        position: 'bottom'
+      });
+    }
+
+    // Step 4: Fast Start Training
+    const fast = document.querySelector(".fast-start-card");
+    if (fast) {
+      steps.push({
+        element: fast,
+        title: "⚡ Fast Start Training",
+        intro: "Best place to start if you're new.<br><br>Short, focused video lessons that walk you through the basics so you can get up to speed fast.",
+        position: 'left'
+      });
+    }
+
+    // Step 4.5: IQ Live
+    const iqLive = document.querySelector(".iq-live-card");
+    if (iqLive) {
+      steps.push({
+        element: iqLive,
+        title: "📅 IQ Live Scheduled Sessions",
+        intro: "See what's coming up across the platform.<br><br>Browse scheduled live sessions for <strong>Trading</strong> (Forex, Crypto, market analysis) or <strong>Digital Marketing</strong> and join when they go live.",
+        position: 'right'
+      });
+    }
+
+    // Step 5: IQ Strategies
+    const strategies = document.querySelector(".strategies-card");
+    if (strategies) {
+      steps.push({
+        element: strategies,
+        title: "📊 IQ Strategies",
+        intro: "Each strategy here comes from one of our educators, complete with video breakdowns.<br><br>Pick one that matches your style  whether you're just starting out or looking to level up.",
+        position: 'left'
+      });
+    }
+
+    // Step 6: IQ Social
+    const socialCard = document.querySelector(".social-card");
+    if (socialCard) {
+      steps.push({
+        element: socialCard,
+        title: "💬 IQ Social",
+        intro: "Your direct line to the educators you follow.<br><br>Market insights, trade ideas, and platform announcements all in a single feed.",
+        position: 'left'
+      });
+    }
+
+    // Step 7: Live Activity Feed
+    const socialFeed = document.querySelector(".social-feed");
+    if (socialFeed) {
+      steps.push({
+        element: socialFeed,
+        title: "📰 Activity Feed",
+        intro: "The latest posts from educators and the IQonic team show up here in real time.<br><br>Scroll through to stay in the loop.",
+        position: 'right'
+      });
+    }
+
+    if (steps.length === 0) return;
+
+    const tour = introJs.tour().setOptions({
+      steps,
+      hidePrev: true,
+      nextLabel: "Next →",
+      prevLabel: "← Back",
+      skipLabel: "Skip",
+      doneLabel: "Continue →",
+      showProgress: true,
+      showBullets: false,
+      overlayOpacity: 0.8,
+      exitOnOverlayClick: false,
+      exitOnEsc: true,
+      scrollToElement: false,
+      tooltipClass: "custom-intro-tooltip",
+    });
+
+    tour.onchange(function (targetElement) {
+      if (this._currentStep === 0 || !targetElement) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      const rect = targetElement.getBoundingClientRect();
+      const absoluteTop = rect.top + window.pageYOffset;
+      const middle = absoluteTop - (window.innerHeight / 2) + (rect.height / 2);
+
+      window.scrollTo({ top: middle, behavior: "smooth" });
+    });
+
+    let isCompleted = false;
+    let userClickedSkip = false;
+    const handleSkipClick = (e) => {
+      if (e.target.closest?.('.introjs-skipbutton')) {
+        userClickedSkip = true;
+      }
+    };
+    document.addEventListener('click', handleSkipClick, true);
+
+    tour.oncomplete(() => {
+      document.removeEventListener('click', handleSkipClick, true);
+      if (!userClickedSkip) {
+        isCompleted = true;
+      }
+      if (tourStartedRef.current) {
+        tourStartedRef.current = false;
+      }
+    });
+    tour.onexit(() => {
+      document.removeEventListener('click', handleSkipClick, true);
+      if (isCompleted) {
+        navigate('/fast-start-training', { state: { continueTour: true } });
+      } else {
+        markTourComplete();
+      }
+    });
 
     return () => {
       document.body.style.overflow = "unset";
@@ -508,8 +700,8 @@ const ClientDashboard = () => {
                             {/* Left Side Ambient Glow Background */}
                             <div
                               className={`absolute inset-y-0 left-0 w-32 pointer-events-none ${isCorporate
-                                  ? "bg-gradient-to-r from-[#2563EB]/15 via-[#1D4ED8]/3 to-transparent"
-                                  : "bg-gradient-to-r from-[#A855F7]/15 via-[#581C87]/5 to-transparent"
+                                ? "bg-gradient-to-r from-[#2563EB]/15 via-[#1D4ED8]/3 to-transparent"
+                                : "bg-gradient-to-r from-[#A855F7]/15 via-[#581C87]/5 to-transparent"
                                 }`}
                             />
 

@@ -111,6 +111,26 @@ const formatDuration = (durationInSeconds) => {
     }${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
+const requestAudioUnlock = () => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("iq-live-audio-unlock"));
+};
+
+const ParticipantCountBadge = () => {
+  const { useParticipantCount } = useCallStateHooks();
+  const participantCount = useParticipantCount();
+
+  return (
+    <span className="shrink-0 inline-flex items-center gap-1 text-white/70 text-xs leading-none">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+      {participantCount}
+    </span>
+  );
+};
+
 const useCallDuration = () => {
   const { useIsCallLive, useCallSession } = useCallStateHooks();
   const isCallLive = useIsCallLive();
@@ -168,8 +188,6 @@ export function createLivestreamParticipantOverlay({
     const call = useCall();
     const { participant, participantViewElement } =
       useParticipantViewContext();
-    const { useParticipantCount } = useCallStateHooks();
-    const participantCount = useParticipantCount();
     const duration = useCallDuration();
     const { isMuted, volume, setIsMuted, setVolume } = useLayout();
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -241,11 +259,15 @@ export function createLivestreamParticipantOverlay({
       }
     }, [isMuted, volume, call]);
 
-    const toggleMute = () => setIsMuted((prev) => !prev);
+    const toggleMute = () => {
+      setIsMuted((prev) => !prev);
+      requestAudioUnlock();
+    };
     const handleVolumeChange = (e) => {
       const next = Number(e.target.value);
       setVolume(next);
       setIsMuted(next === 0);
+      requestAudioUnlock();
     };
 
     const toggleFullscreen = useCallback(() => {
@@ -287,15 +309,7 @@ export function createLivestreamParticipantOverlay({
             LIVE
           </span>
 
-          {showParticipantCount && (
-            <span className="shrink-0 inline-flex items-center gap-1 text-white/70 text-xs leading-none">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              {participantCount}
-            </span>
-          )}
+          {showParticipantCount && <ParticipantCountBadge />}
 
           <span
             className="min-w-0 flex-1 truncate text-white/90 text-sm font-medium"

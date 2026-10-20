@@ -1,5 +1,6 @@
 
 export const throttle = (func, limit) => {
+
   let lastFunc;
   let lastRan;
   return function (...args) {

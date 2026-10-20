@@ -347,6 +347,13 @@ body {
   background: #000;
 }
 
+/* Students must not see how many people joined, including the SDK's
+   post-broadcast "participants joined" line. */
+.student-live-player .str-video__livestream-layout__viewers-count,
+.student-live-player .str-video__livestream-layout__early-viewers-count {
+  display: none !important;
+}
+
 .str-video_livestream-layout_player-wrapper {
   flex: 1;
   min-height: 0;
@@ -852,6 +859,32 @@ chat */
 
 .str-chat__virtual-list {
   height: 200px !important;
+}
+
+/* The student live chat uses a normal message list. The 200px virtual-list
+   cap above clipped everything after the first message. Scroll lives on
+   .str-chat__message-list, which is the element Stream attaches onScroll to. */
+.student-live-chat .str-chat__main-panel-inner {
+  height: min(560px, calc(100vh - 220px));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.student-live-chat .str-chat__message-list {
+  flex: 1;
+  min-height: 0;
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+.student-live-chat .str-chat__message-list-scroll {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.dark .student-live-chat .message-ui {
+  background: transparent;
 }
 
 .str-chat__message-list-scroll [data-test-id="virtuoso-item-list"] {

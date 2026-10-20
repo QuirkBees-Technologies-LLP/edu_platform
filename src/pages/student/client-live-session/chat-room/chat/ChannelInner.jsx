@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageInput, VirtualizedMessageList, Window } from 'stream-chat-react';
+import { MessageInput, MessageList, Window } from 'stream-chat-react';
 import { useOverrideSubmit } from '../hooks/useOverrideSubmit';
 
 
@@ -11,11 +11,9 @@ export const ChannelInner = () => {
   return (
     <>
       <Window>
-        <VirtualizedMessageList
-        style={{ flex: 1, overflowY: "auto" }}
-          additionalVirtuosoProps={{ alignToBottom: true, followOutput: true }}
+        <MessageList
           hideDeletedMessages
-          separateGiphyPreview
+          messageActions={["react"]}
         />
         <MessageInput maxRows={2} grow overrideSubmitHandler={overrideSubmitHandler} />
       </Window>

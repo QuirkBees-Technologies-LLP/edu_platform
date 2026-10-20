@@ -101,6 +101,8 @@ const LiveSessionPlayer = ({
         call.on("rtmp_broadcast_started", (event) => {
           console.log("🎥 OBS/RTMP Connected:", event);
           setIsOBSConnected(true);
+          // OBS is the audio source. Drop the browser mic so students don't hear both.
+          call.microphone.disable().catch(() => {});
         });
 
         call.on("rtmp_broadcast_stopped", (event) => {
@@ -387,6 +389,20 @@ const LiveSessionPlayer = ({
                           await call.goLive();
                           setGoLiveStartedAt(new Date());
 
+                          // Browser go-live does not publish a microphone by itself, so
+                          // students join a live call with no audio track. OBS supplies
+                          // the audio when it is connected; otherwise use the browser mic.
+                          if (!isOBSConnected) {
+                            try {
+                              await call.microphone.enable();
+                            } catch (micError) {
+                              console.warn("Microphone was not published:", micError);
+                              toast.error(
+                                "Students cannot hear you until the microphone is allowed, or OBS is connected."
+                              );
+                            }
+                          }
+
                           // Start closed captions via server-side API (bypasses user permission)
                           try {
                             await startCaptions({ callId }).unwrap();
@@ -442,8 +458,15 @@ const LiveSessionPlayer = ({
                         }
                       } catch (err) {
                         console.error("❌ Error updating live status:", err);
+                        const streamMessage = err?.message || err?.data?.message;
+                        const tokenExpired =
+                          err?.code === 40 ||
+                          err?.status === 401 ||
+                          String(streamMessage).includes("code 40");
                         toast.error(
-                          err?.data?.message || "Failed to update live status"
+                          tokenExpired
+                            ? "The live session token expired. Refresh this page, then click Stop Live again."
+                            : streamMessage || "Failed to update live status"
                         );
                       }
                     }}

@@ -34,14 +34,20 @@ const EducatorLiveSessionView = () => {
     if (!apiKey || !userId || !callId) return;
 
     try {
-      const response = await getClientToken({ userId }).unwrap();
-      const token = response.token;
-      setSessionToken(token);
+      const loadToken = async () => {
+        const response = await getClientToken({ userId }).unwrap();
+        setSessionToken(response.token);
+        return response.token;
+      };
 
-      // ✅ Use getOrCreateInstance to prevent duplicate clients for the same userId
+      // Chat mounts only after sessionToken is set. Fetch it before the video
+      // client is created, because a reused client may not call tokenProvider yet.
+      await loadToken();
+
+      // tokenProvider still refreshes an expired token so Stop Live can recover.
       const newClient = StreamVideoClient.getOrCreateInstance({
         apiKey,
-        token,
+        tokenProvider: loadToken,
         user: {
           id: userId,
           name: auth?.user?.first_name + " " + auth?.user?.last_name,
