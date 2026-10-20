@@ -34,14 +34,17 @@ const EducatorLiveSessionView = () => {
     if (!apiKey || !userId || !callId) return;
 
     try {
-      const response = await getClientToken({ userId }).unwrap();
-      const token = response.token;
-      setSessionToken(token);
+      const loadToken = async () => {
+        const response = await getClientToken({ userId }).unwrap();
+        setSessionToken(response.token);
+        return response.token;
+      };
 
-      // ✅ Use getOrCreateInstance to prevent duplicate clients for the same userId
+      // A static token expires (Stream returns 401) if this page stays open.
+      // tokenProvider lets Stop Live and the other call requests fetch a new one.
       const newClient = StreamVideoClient.getOrCreateInstance({
         apiKey,
-        token,
+        tokenProvider: loadToken,
         user: {
           id: userId,
           name: auth?.user?.first_name + " " + auth?.user?.last_name,

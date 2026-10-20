@@ -52,6 +52,30 @@ const ClientLiveSessionContent = ({
     onStatusChange?.(status);
   }, [status, onStatusChange]);
 
+  // Browsers throttle sockets while the tab is hidden, so a "stream ended"
+  // event can be missed. Pull the latest call state once the tab is visible again.
+  useEffect(() => {
+    if (!call?.get) return undefined;
+    let wasHidden = document.hidden;
+
+    const refreshCall = () => {
+      if (document.visibilityState === "hidden") {
+        wasHidden = true;
+        return;
+      }
+      if (!wasHidden) return;
+      wasHidden = false;
+      call.get().catch(() => {});
+    };
+
+    document.addEventListener("visibilitychange", refreshCall);
+    window.addEventListener("focus", refreshCall);
+    return () => {
+      document.removeEventListener("visibilitychange", refreshCall);
+      window.removeEventListener("focus", refreshCall);
+    };
+  }, [call]);
+
   const { title, description, tags } = custom || {};
   const maxLength = 150;
 

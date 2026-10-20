@@ -25,7 +25,6 @@ const   ChatContainer = ({ sessionToken, callId, headerGradient }) => {
   } = useEventContext();
 
   const [dmChannel, setDmChannel] = useState(null);
-  const [messageActionUser, setMessageActionUser] = useState(null);
   const [participantProfile, setParticipantProfile] = useState(null);
   const [snackbar, setSnackbar] = useState(false);
 
@@ -58,7 +57,7 @@ const   ChatContainer = ({ sessionToken, callId, headerGradient }) => {
   if (!chatClient) return null;
 
   return (
-    <div className={`chat str-chat h-full`}>
+    <div className={`chat student-live-chat str-chat h-full`}>
       {isFullScreen && (
         <ChatSidebar
           isFullScreen={isFullScreen}
@@ -81,15 +80,9 @@ const   ChatContainer = ({ sessionToken, callId, headerGradient }) => {
             />
             <Channel
               channel={currentChannel}
-              // EmptyStateIndicator={<div>Empty</div>}
               GiphyPreviewMessage={GiphyPreview}
               Input={MessageInputUI}
-              VirtualMessage={(props) => (
-                <MessageUI
-                  {...props}
-                  setMessageActionUser={setMessageActionUser}
-                />
-              )}
+              Message={MessageUI}
             >
               <ChannelInner />
             </Channel>

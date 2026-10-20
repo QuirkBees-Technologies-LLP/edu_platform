@@ -37,6 +37,12 @@ import { useCompleteTourMutation } from "../../../store/api/client/clientProfile
 import introJs from "intro.js";
 import "intro.js/introjs.css";
 
+const isStreamLive = (stream) => {
+  if (stream?.isLive === true || stream?.live === true || stream?.is_live === true) return true;
+  const status = String(stream?.status ?? stream?.liveStatus ?? "").toLowerCase();
+  return status === "live" || status === "active";
+};
+
 const ClientDashboard = () => {
   const navigate = useNavigate();
   const [socialType, setSocialType] = useState("company");
@@ -88,10 +94,16 @@ const ClientDashboard = () => {
     }
   }, [Posts]);
 
-  const { data: liveEducator, isLoading: educatorsLoading } =
-    useGetLiveEducatorListQuery();
-
-  const liveStreams = liveEducator?.streams || [];
+  const {
+    data: liveEducator,
+    isLoading: educatorsLoading,
+    refetch: refetchLiveStreams,
+  } = useGetLiveEducatorListQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
+  });
+  const liveStreams = (liveEducator?.streams || []).filter(isStreamLive);
 
   const [activeTab, setActiveTab] = useState("feed");
   const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
@@ -138,6 +150,24 @@ const ClientDashboard = () => {
   };
 
   useEffect(() => {
+    const refreshLiveStatus = () => {
+      if (document.visibilityState === "hidden") return;
+      refetchLiveStreams();
+    };
+
+    document.addEventListener("visibilitychange", refreshLiveStatus);
+    window.addEventListener("focus", refreshLiveStatus);
+    window.addEventListener("pageshow", refreshLiveStatus);
+    const poll = window.setInterval(refreshLiveStatus, 15000);
+    return () => {
+      document.removeEventListener("visibilitychange", refreshLiveStatus);
+      window.removeEventListener("focus", refreshLiveStatus);
+      window.removeEventListener("pageshow", refreshLiveStatus);
+      window.clearInterval(poll);
+    };
+  }, [refetchLiveStreams]);
+
+  useEffect(() => {
     const user = auth?.user;
     const isStudent = user?.role === "student";
     const hasSeenTour = user?.hasSeenTour;
@@ -163,7 +193,7 @@ const ClientDashboard = () => {
       title: "Welcome to IQonic! 👋",
       intro: `
          <div class="welcome-tour-card">
-          <h2 class="text-3xl md:text-5xl font-bold mb-4">Welcome to Your Dashboard, ${auth?.user?.firstName || auth?.user?.name || 'Trader'}!</h2>
+          <h2 class="text-3xl md:text-5xl font-bold mb-4">Welcome to Your Dashboard, ${auth?.user?.firstName || auth?.user?.name || "Trader"}!</h2>
           <p class="text-lg md:text-xl text-gray-100" style="color: #f3f4f6; font-weight: 500;">We're thrilled to have you here. This quick tour will guide you through the key features of your dashboard covering both <strong>Trading Education</strong> and <strong>Digital Marketing</strong> so you can get the most out of your experience.</p>
         </div>
       `,
@@ -176,9 +206,10 @@ const ClientDashboard = () => {
         element: live,
         title: "📡 Live Now",
         intro: "If an educator is streaming right now, they'll show up here.<br><br>Tap any card to jump straight into their live session.",
-        position: 'right'
+        position: "right"
       });
     }
+
 
     // Step 3: IQ Academy
     const academy = document.querySelector(".academy-card");

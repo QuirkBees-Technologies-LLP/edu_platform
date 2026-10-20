@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { StreamChat } from "stream-chat";
 import { useCheckList } from "./useCheckList";
-import { getRandomTitle } from "../chat/utils";
 import { useEventContext } from "../context/EventContext";
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -16,7 +15,7 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
   const [globalUnread, setGlobalUnread] = useState(false);
   const [qaUnread, setQaUnread] = useState(false);
 
-  const { chatType, eventName } = useEventContext();
+  const { chatType } = useEventContext();
   useCheckList({ chatClient, targetOrigin });
 
   useEffect(() => {
@@ -49,22 +48,6 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
     }
   };
 
-  const switchChannel = async (type, event) => {
-    if (!chatClient || type === "direct") {
-      setCurrentChannel(null);
-      return;
-    }
-
-    const channelIsEvent = type === "main-event" || type === "room";
-    const channelId = event && channelIsEvent ? `${type}-${event}` : type;
-    const newChannel = chatClient.channel("livestream", channelId);
-
-    await newChannel.watch({ watchers: { limit: 100 } });
-
-    setUnreadStatus(channelId, false);
-    // setCurrentChannel(newChannel);
-  };
-
   useEffect(() => {
     const handleMessage = (event) => {
       if (!currentChannel?.id || !event.channel_id) return;
@@ -85,44 +68,48 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
   };
 
   useEffect(() => {
+    let cancelled = false;
+
     const initChat = async () => {
       try {
-        if (!apiKey || !userId || !userToken) {
-          console.error("Missing API key, User ID, or Token.");
+        if (!apiKey || !userId || !userToken || !callId) {
           return;
         }
 
         const client = StreamChat.getInstance(apiKey);
 
-        if (!client) {
-          console.error("Failed to initialize StreamChat client.");
-          return;
+        if (!client.userID || client.userID !== userId) {
+          await client.connectUser(
+            {
+              id: userId,
+              name: userName,
+              image: `https://getstream.io/random_svg/?name=${userName}`,
+            },
+            userToken
+          );
         }
 
-        if (client.wsConnection && client.wsConnection.isHealthy) {
-          setChatClient(client);
-          // return;
-        }
+        if (cancelled) return;
 
-        await client.connectUser(
-          {
-            id: userId,
-            name: userName,
-            image: `https://getstream.io/random_svg/?name=${userName}`,
-            // title: userId === 'daddy' ? 'Admin' : getRandomTitle(),
-          },
-          userToken
-        );
-
-        // 🔥 Create a unique chat per IQ Academy
-        const uniqueChannelId = `livestream-${eventName || "default"}`; // Unique per event
-
+        // Same channel the educator watches: livestream + this call id.
+        // create() throws once the educator has already opened it, and that
+        // used to skip watch(), so later educator messages never arrived.
         const globalChannel = client.channel("livestream", callId, {
           name: "Global",
         });
 
-        await globalChannel.create(); // Ensure the channel exists
-        await globalChannel.watch({ watchers: { limit: 100 } });
+        try {
+          await globalChannel.create();
+        } catch {
+          // The channel already exists. watch() still subscribes to new messages.
+        }
+
+        await globalChannel.watch({
+          watchers: { limit: 100 },
+          messages: { limit: 100 },
+        });
+
+        if (cancelled) return;
 
         client.on("message.new", handleDmMessages);
         client.on("notification.message_new", handleDmMessages);
@@ -130,16 +117,15 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
         setChatClient(client);
         setCurrentChannel(globalChannel);
       } catch (error) {
-        console.error("Error initializing chat:", error);
+        if (!cancelled) console.error("Error initializing chat:", error);
       }
     };
 
-    if (!chatClient) {
-      initChat();
-    } else {
-      switchChannel(chatType, eventName);
-    }
-  }, [chatType, eventName, userToken, apiKey, userId]);
+    initChat();
+    return () => {
+      cancelled = true;
+    };
+  }, [userToken, apiKey, userId, callId, userName]);
 
   useEffect(() => {
     return () => {

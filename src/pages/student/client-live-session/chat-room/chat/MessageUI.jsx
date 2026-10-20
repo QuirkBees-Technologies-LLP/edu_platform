@@ -227,7 +227,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
   }, [message]);
 
   // ✅ tum already yeh check kar rahe ho
-  const isRecentMessage = messages?.[messages.length - 1].id === message.id;
+  const isRecentMessage = messages?.[messages.length - 1]?.id === message.id;
 
   // 👇 yaha scroll hook lagao
   useEffect(() => {
@@ -239,7 +239,7 @@ export const MessageUI = ({ setMessageActionUser }) => {
       });
     }
   }, [isRecentMessage, messages.length]);
-  const isTopMessage = messages?.[0].id === message.id;
+  const isTopMessage = messages?.[0]?.id === message.id;
 
   const showTitle =
     message.user?.title === "Admin" || message.user?.title === "Moderator";
