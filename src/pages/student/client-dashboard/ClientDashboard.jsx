@@ -18,7 +18,9 @@ import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { useGetLiveEducatorListQuery } from "../../../store/api/client/clientLiveSessionApiSlice";
 import { usePostQuery } from "../../../store/api/client/clientSocialApiSlilce";
 import { useCompleteTourMutation } from "../../../store/api/client/clientProfileApiSlice";
+import { Container } from "@/components/container";
 
+import introJs from "intro.js";
 import "intro.js/introjs.css";
 
 const isStreamLive = (stream) => {
@@ -284,6 +286,16 @@ const ClientDashboard = () => {
         markTourComplete();
       }
     });
+
+    tour.start();
+  };
+
+  useEffect(() => {
+    if (isFilterModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
 
     return () => {
       document.body.style.overflow = "unset";
