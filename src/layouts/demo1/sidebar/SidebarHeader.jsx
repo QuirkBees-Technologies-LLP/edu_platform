@@ -101,7 +101,7 @@ const SidebarHeader = forwardRef(({ isHovered = false, ...props }, ref) => {
       <Link to="/" className="flex items-center justify-center shrink-0 overflow-hidden">
         {showMiniLogo ? (
           <img
-            src={toAbsoluteUrl('/media/app/mini-logo.png')}
+            src={toAbsoluteUrl('/media/app/mini-logo-dark.png')}
             className="h-7 max-h-7 w-auto object-contain shrink-0 transition-all duration-300"
             alt="IQONIC Mini"
           />

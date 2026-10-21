@@ -1,6 +1,5 @@
 
 import React from 'react';
-import logo from '../../../public/media/app/default-logo-dark.png'
 import bgImage from '../../../public/media/images/1920x1080/bg-img.png';
 
 const Support = () => {
@@ -16,10 +15,10 @@ const Support = () => {
 
                 {/* Logo */}
                 <div className="mb-6 sm:mb-8">
-                    <img 
-                        src={logo} 
+                    <img
+                        src="/media/app/default-logo.png"
                         alt="Iqonic Logo"
-                        className="mx-auto h-auto max-h-[50px] w-auto max-w-[120px] object-contain brightness-110 sm:max-h-[60px] sm:max-w-[150px] md:max-h-[80px] md:max-w-[200px]"
+                        className="mx-auto h-10 w-auto max-w-[160px] object-contain sm:h-12 sm:max-w-[190px] md:h-14 md:max-w-[220px]"
                     />
                 </div>
 
@@ -28,11 +27,11 @@ const Support = () => {
                     Welcome to
                 </h1>
                 
-                <h2 className="mb-6 text-2xl font-semibold tracking-tight text-slate-200 sm:mb-8 sm:text-3xl md:mb-10 md:text-4xl">
+                <h2 className="mb-6 text-2xl font-semibold tracking-tight text-slate-500 sm:mb-8 sm:text-3xl md:mb-10 md:text-4xl">
                     Iqonic Support
                 </h2>
 
-                <p className="mb-8 text-base leading-relaxed text-slate-300 sm:mb-10 sm:text-lg md:mb-12">
+                <p className="mb-8 text-base leading-relaxed text-slate-500 sm:mb-10 sm:text-lg md:mb-12">
                     We're here to help you with all your questions and support needs. Click the button below to get in touch with our support team.
                 </p>
 
