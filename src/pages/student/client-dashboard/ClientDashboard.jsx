@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
+  Building2,
   ChevronRight,
   Download,
+  GraduationCap,
   OctagonAlert,
   Play,
   Headphones,
@@ -442,34 +444,20 @@ const ClientDashboard = () => {
                 </div>
 
                 {/* Filter Pills */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   {["ALL", "CORPORATE", "EDUCATION"].map((pill) => (
                     <button
                       key={pill}
                       onClick={() => setSocialType(pill)}
-                      className={`px-3 py-1.5 rounded-xl text-[8px] font-medium tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border ${socialType === pill
-                        ? pill === "ALL"
-                          ? "bg-purple-900 dark:bg-[#251842] text-white border-purple-400 dark:border-white/40 shadow-sm"
-                          : pill === "CORPORATE"
-                            ? "bg-blue-600/30 text-blue-700 dark:text-blue-200 dark:bg-[#1E3A8A]/30 dark:text-blue-200 border-blue-500/60 shadow-sm"
-                            : "bg-purple-600/40 text-purple-700 dark:text-purple-200 dark:bg-[#4C1D95]/40 dark:text-purple-200 border-purple-500/60 shadow-sm"
-                        : pill === "ALL"
-                          ? "bg-gray-900 dark:bg-[#130728]/80 text-gray-400 dark:text-gray-400 border-gray-400 dark:border-[#2D1653] hover:text-gray-900 dark:hover:text-white"
-                          : pill === "CORPORATE"
-                            ? "bg-blue-50 dark:bg-[#1E3A8A]/10 text-blue-700 dark:text-blue-400/50 border-blue-200 dark:border-blue-500/15 hover:text-blue-700 dark:hover:text-blue-300"
-                            : "bg-purple-50 dark:bg-[#4C1D95]/10 text-purple-700 dark:text-purple-400/50 border-purple-200 dark:border-purple-500/15 hover:text-purple-700 dark:hover:text-purple-300"
+                      className={`flex h-[26px] cursor-pointer items-center gap-1 rounded-lg border-0 px-2.5 text-[10px] font-semibold tracking-wide transition-colors ${socialType === pill
+                        ? "bg-[#4F4F4F] text-white"
+                        : pill === "EDUCATION"
+                          ? "bg-[#160E26] text-[#B0AEC0] hover:text-white"
+                          : "bg-[#100A2E] text-[#B0AEC0] hover:text-white"
                         }`}
                     >
-                      {pill === "CORPORATE" && (
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
-                        </svg>
-                      )}
-                      {pill === "EDUCATION" && (
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
-                        </svg>
-                      )}
+                      {pill === "CORPORATE" && <Building2 size={10} strokeWidth={2} />}
+                      {pill === "EDUCATION" && <GraduationCap size={10} strokeWidth={2} />}
                       <span>{pill}</span>
                     </button>
                   ))}
