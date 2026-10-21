@@ -319,7 +319,7 @@ const ClientDashboard = () => {
 
       <div className="relative min-h-screen bg-white dark:bg-[#05020A] text-white overflow-x-hidden -mt-16 pt-20 transition-colors duration-200">
         {/* Radial Background Flare */}
-        <div className="absolute top-0 left-0 right-0 h-[520px] bg-[radial-gradient(ellipse_100%_70%_at_25%_0%,rgba(67,38,125,0.48)_0%,rgba(33,18,68,0.28)_50%,rgba(5,2,10,0)_90%)] pointer-events-none z-0 hidden dark:block" />
+        <div className="absolute top-0 left-0 right-0 h-[340px] bg-[linear-gradient(180deg,#231A49_0%,#1C153C_26%,#100C24_55%,rgba(5,2,10,0)_100%)] pointer-events-none z-0 hidden dark:block" />
 
         <Container className="relative z-10">
           {/* Header Row: Welcome & Top Action Buttons */}
