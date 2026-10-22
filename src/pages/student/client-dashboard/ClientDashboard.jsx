@@ -557,15 +557,6 @@ const ClientDashboard = () => {
                                   </div>
                                 </div>
                               </div>
-
-                              {/* More Options */}
-                              {/* <button
-                                type="button"
-                                aria-label="More options"
-                                className="relative z-10 shrink-0 text-gray-400 hover:text-white transition-colors cursor-pointer text-base"
-                              >
-                                •••
-                              </button> */}
                             </div>
 
                             {/* Post Content */}
@@ -675,15 +666,6 @@ const ClientDashboard = () => {
 
                 {/* Main Card Container */}
                 <div className="rounded-t-[32px] rounded-b-[24px] bg-[#05020A] border border-white/10 p-5 flex flex-col gap-5 shadow-2xl min-h-[480px]">
-
-                  {/* Timezone Selector Row ("EST v") */}
-                  {/* <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 pl-1 pb-1 cursor-pointer hover:text-white transition">
-                    <span>EST</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </div> */}
-
                   {/* Livestreams List with Timeline */}
                   <div className="flex flex-col gap-3 relative">
                     {liveStreams.length > 0 ? (
