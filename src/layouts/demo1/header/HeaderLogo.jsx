@@ -4,12 +4,15 @@ import { toAbsoluteUrl } from '@/utils';
 import { useDemo1Layout } from '../';
 const HeaderLogo = () => {
   const {
+    mobileSidebarOpen,
     setMobileSidebarOpen,
     setMobileMegaMenuOpen,
     megaMenuEnabled
   } = useDemo1Layout();
-  const handleSidebarOpen = () => {
-    setMobileSidebarOpen(true);
+  const handleSidebarOpen = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setMobileSidebarOpen(!mobileSidebarOpen);
   };
   const handleMegaMenuOpen = () => {
     setMobileMegaMenuOpen(true);
@@ -23,7 +26,7 @@ const HeaderLogo = () => {
       </Link>
 
       <div className="flex items-center">
-        <button type="button" className="btn btn-icon btn-light btn-clear btn-sm" onClick={handleSidebarOpen}>
+        <button type="button" className="btn btn-icon btn-light btn-clear btn-sm relative z-10 !h-10 !w-10 shrink-0" onClick={handleSidebarOpen} aria-label="Open menu">
           <KeenIcon icon="menu" />
         </button>
 

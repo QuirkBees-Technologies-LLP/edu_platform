@@ -1,11 +1,17 @@
 import clsx from 'clsx';
 import { KeenIcon } from '@/components';
+import { useResponsive } from '@/hooks';
 import { useDemo1Layout } from '../Demo1LayoutProvider';
 
 const SidebarToggle = ({ isHovered = false }) => {
-  const { layout, setSidebarCollapse } = useDemo1Layout();
+  const { layout, setSidebarCollapse, setMobileSidebarOpen } = useDemo1Layout();
+  const desktopMode = useResponsive('up', 'lg');
 
   const handleClick = () => {
+    if (!desktopMode) {
+      setMobileSidebarOpen(false);
+      return;
+    }
     setSidebarCollapse(!layout.options.sidebar.collapse);
   };
 

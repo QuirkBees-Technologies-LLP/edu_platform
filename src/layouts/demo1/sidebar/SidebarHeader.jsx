@@ -95,7 +95,7 @@ const SidebarHeader = forwardRef(({ isHovered = false, ...props }, ref) => {
   return (
     <div
       ref={ref}
-      className={`sidebar-header hidden lg:flex items-center relative shrink-0 pt-4 pb-2 transition-all duration-300 ${showMiniLogo ? 'justify-center px-2' : 'justify-between px-5'
+      className={`sidebar-header flex items-center relative shrink-0 pt-4 pb-2 transition-all duration-300 ${showMiniLogo ? 'justify-center px-2' : 'justify-between px-5'
         }`}
     >
       <Link to="/" className="flex items-center justify-center shrink-0 overflow-hidden">

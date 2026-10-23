@@ -113,7 +113,7 @@ const ClientDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="relative min-h-screen bg-white dark:bg-[#05020A] text-white overflow-x-hidden -mt-16 pt-20 transition-colors duration-200">
+      <div className="relative min-h-screen max-w-full bg-white dark:bg-[#05020A] text-white overflow-x-clip -mt-16 pt-3 lg:pt-20 transition-colors duration-200">
         {/* Radial Background Flare */}
         <div className="absolute top-0 left-0 right-0 h-[520px] bg-[radial-gradient(ellipse_100%_70%_at_25%_0%,rgba(67,38,125,0.48)_0%,rgba(33,18,68,0.28)_50%,rgba(5,2,10,0)_90%)] pointer-events-none z-0 hidden dark:block" />
 
@@ -130,7 +130,7 @@ const ClientDashboard = () => {
             </div>
 
             {/* Exact Figma Buttons */}
-            <div className="flex items-center gap-3.5 shrink-0">
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:gap-3.5">
               {/* 1. Fast Start Training Button */}
               <button
                 onClick={() => navigate('/fast-start-training')}
@@ -161,20 +161,20 @@ const ClientDashboard = () => {
         </Container>
 
         <Container className="relative z-10">
-          <div className="flex flex-col gap-8 pb-12 w-full">
+          <div className="flex min-w-0 flex-col gap-8 pb-12 w-full">
 
             {/* 1. YOUR LEARNING JOURNEY */}
             <div className="flex flex-col gap-3 w-full">
               <h2 className="text-base font-bold text-gray-900 dark:text-white tracking-wide">
                 Your Learning Journey
               </h2>
-              <div className="w-full overflow-x-auto pb-2 scrollbar-none">
-                <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 min-w-[1000px] sm:min-w-0 items-stretch">
+              <div className="w-full min-w-0">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 items-stretch">
 
                   {/* Card 1: Academy */}
                   <div
                     onClick={() => navigate("/iq-vault")}
-                    className="relative rounded-[22px] border border-gray-300 dark:border-[#7C3AED]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(124,58,237,0.25)] bg-white dark:bg-[#0C051A]"
+                    className="relative min-w-0 w-full rounded-[22px] border border-gray-300 dark:border-[#7C3AED]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(124,58,237,0.25)] bg-white dark:bg-[#0C051A]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
@@ -191,7 +191,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Academy</h3>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-white/80 line-clamp-2 leading-tight font-normal">
                           Build your foundation with core education.
                         </p>
                       </div>
@@ -204,7 +204,7 @@ const ClientDashboard = () => {
                   {/* Card 2: Strategies */}
                   <div
                     onClick={() => window.open("https://base.iqonic.life/login.html", "_blank")}
-                    className="relative rounded-[22px] border border-blue-300 dark:border-[#2563EB]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(37,99,235,0.25)] bg-white dark:bg-[#0A0E23]"
+                    className="relative min-w-0 w-full rounded-[22px] border border-blue-300 dark:border-[#2563EB]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(37,99,235,0.25)] bg-white dark:bg-[#0A0E23]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
@@ -221,7 +221,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Strategies</h3>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-white/80 line-clamp-2 leading-tight font-normal">
                           Learn proven strategies and advanced techniques.
                         </p>
                       </div>
@@ -234,7 +234,7 @@ const ClientDashboard = () => {
                   {/* Card 3: Live Streams */}
                   <div
                     onClick={() => navigate("/iq-academy")}
-                    className="relative rounded-[22px] border border-fuchsia-300 dark:border-[#C026D3]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(192,38,211,0.25)] bg-white dark:bg-[#180524]"
+                    className="relative min-w-0 w-full rounded-[22px] border border-fuchsia-300 dark:border-[#C026D3]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(192,38,211,0.25)] bg-white dark:bg-[#180524]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
@@ -251,7 +251,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Live Streams</h3>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-white/80 line-clamp-2 leading-tight font-normal">
                           Join our live sessions.
                         </p>
                       </div>
@@ -264,7 +264,7 @@ const ClientDashboard = () => {
                   {/* Card 4: Strategy Alerts */}
                   <div
                     onClick={() => navigate("/trading-signals")}
-                    className="relative rounded-[22px] border border-amber-300 dark:border-[#D97706]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(217,119,6,0.25)] bg-white dark:bg-[#1F0E04]"
+                    className="relative min-w-0 w-full rounded-[22px] border border-amber-300 dark:border-[#D97706]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(217,119,6,0.25)] bg-white dark:bg-[#1F0E04]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
@@ -281,7 +281,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Strategy Alerts</h3>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-white/80 line-clamp-2 leading-tight font-normal">
                           Real-time alerts from IQONIC strategies.
                         </p>
                       </div>
@@ -294,7 +294,7 @@ const ClientDashboard = () => {
                   {/* Card 5: Ideas & Insights */}
                   <div
                     onClick={() => navigate("/ideas")}
-                    className="relative rounded-[22px] border border-yellow-300 dark:border-[#CA8A04]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(202,138,4,0.25)] bg-white dark:bg-[#1A1604]"
+                    className="relative min-w-0 w-full rounded-[22px] border border-yellow-300 dark:border-[#CA8A04]/80 overflow-hidden cursor-pointer h-48 flex flex-col justify-end p-4 shadow-md dark:shadow-[0_0_20px_rgba(202,138,4,0.25)] bg-white dark:bg-[#1A1604]"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center opacity-70"
@@ -311,7 +311,7 @@ const ClientDashboard = () => {
                           </svg>
                         </div>
                         <h3 className="text-sm font-bold text-white">Ideas & Insights</h3>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-800 line-clamp-2 leading-tight font-normal">
+                        <p className="text-[11px] text-white/80 line-clamp-2 leading-tight font-normal">
                           Explore market ideas, insights, and live trading setups.
                         </p>
                       </div>
@@ -325,7 +325,7 @@ const ClientDashboard = () => {
             </div>
 
             {/* 2. MAIN 2-COLUMN SECTION */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start w-full">
+            <div className="grid min-w-0 grid-cols-1 lg:grid-cols-12 gap-7 items-start w-full">
               {/* LEFT COLUMN: YOUR SOCIAL FEED */}
               <div className="lg:col-span-7 flex flex-col gap-4 w-full min-w-0">
                 {/* Header Row: Title & Filter Icon */}
@@ -355,7 +355,7 @@ const ClientDashboard = () => {
                         }}
                       >
                         <div
-                          className="relative w-[420px] rounded-2xl bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/15 p-6 shadow-2xl"
+                          className="relative w-full max-w-[420px] rounded-2xl bg-white dark:bg-[#1A1C23] border border-gray-200 dark:border-white/15 p-6 shadow-2xl"
                           onClick={(e) => e.stopPropagation()}
                         >
 
@@ -373,7 +373,7 @@ const ClientDashboard = () => {
                                 setIsFilterModalOpen(false);
                                 document.body.style.overflow = 'unset';
                               }}
-                              className="text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm cursor-pointer p-1"
+                              className="text-gray-600 hover:text-gray-900 dark:hover:text-white text-sm cursor-pointer p-1"
                             >
                               ✕
                             </button>
@@ -390,7 +390,7 @@ const ClientDashboard = () => {
                                 </svg>
                                 Corporate
                               </h4>
-                              <ul className="space-y-3 text-gray-700 dark:text-gray-300 text-sm">
+                              <ul className="space-y-3 text-gray-700 dark:text-gray-600 text-sm">
                                 <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   General
@@ -415,7 +415,7 @@ const ClientDashboard = () => {
                                 </svg>
                                 Education
                               </h4>
-                              <ul className="space-y-3 text-gray-700 dark:text-gray-300 text-sm">
+                              <ul className="space-y-3 text-gray-700 dark:text-gray-600 text-sm">
                                 <li className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
                                   Posts
@@ -648,7 +648,7 @@ const ClientDashboard = () => {
                 {/* Header: Title & View Calendar */}
                 <div className="flex items-start justify-between w-full px-1">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-bold text-gray-800 dark:text-gray-400 uppercase tracking-[0.22em]">
+                    <span className="text-[10px] font-bold text-gray-800 dark:text-gray-600 uppercase tracking-[0.22em]">
                       TODAY'S SCHEDULE
                     </span>
                     <h3 className="text-2xl font-black text-gray-800 dark:text-white tracking-tight">
@@ -657,7 +657,7 @@ const ClientDashboard = () => {
                   </div>
                   <button
                     onClick={() => navigate("/iq-academy")}
-                    className="text-xs font-medium text-gray-800 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition cursor-pointer pt-2 flex items-center gap-1"
+                    className="text-xs font-medium text-gray-800 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition cursor-pointer pt-2 flex items-center gap-1"
                   >
                     <span>View calendar</span>
                     <span>&rarr;</span>
@@ -798,10 +798,10 @@ const ClientDashboard = () => {
                   </h3>
 
                   {/* Main Outer Container */}
-                  <div className="rounded-[28px] bg-[#070210] border border-[#2B164C] p-4.5 flex flex-wrap lg:flex-nowrap items-center justify-between gap-4 shadow-2xl">
+                  <div className="rounded-[28px] bg-[#070210] border border-[#2B164C] p-4 flex flex-col lg:flex-row lg:flex-nowrap lg:items-center justify-between gap-4 shadow-2xl min-w-0">
 
                     {/* Left Side: App Icon Outer Box + Title + Users Count */}
-                    <div className="flex items-center gap-3.5 min-w-max shrink-0">
+                    <div className="flex items-center gap-3.5 min-w-0">
                       {/* Outer Dark Shadow Box */}
                       <div className="w-14 h-14 rounded-[20px] bg-[#0E051F] border border-[#23113E] flex items-center justify-center p-1.5 shrink-0 shadow-inner">
                         {/* Inner Gradient App Icon Box */}
@@ -826,7 +826,7 @@ const ClientDashboard = () => {
                     </div>
 
                     {/* Right Side: Download Store Buttons */}
-                    <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2.5 min-w-0">
                       {/* Download iOS Button */}
                       <button
                         onClick={() => window.open("https://apps.apple.com/in/app/iq-social/id6752330121", "_blank")}
