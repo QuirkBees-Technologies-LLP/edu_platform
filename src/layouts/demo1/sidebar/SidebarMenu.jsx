@@ -337,7 +337,7 @@ const SidebarMenu = () => {
   const { getMenuConfig } = useMenus();
   const menuConfig = getMenuConfig("primary");
   return (
-    <div className="flex flex-col justify-between h-full grow">
+    <div className="flex min-h-full flex-1 flex-col justify-between">
       {/* 1. Primary Menu Navigation */}
       <Menu
         highlight={true}

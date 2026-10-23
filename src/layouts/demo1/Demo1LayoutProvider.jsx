@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { useMenuChildren } from "@/components/menu";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
@@ -38,7 +38,20 @@ const Demo1LayoutProvider = ({ children }) => {
   const [layout, setLayout] = useState(getLayoutConfig());
 
   const [megaMenuEnabled, setMegaMenuEnabled] = useState(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpenState] = useState(false);
+  const mobileSidebarOpenedAt = useRef(0);
+  const setMobileSidebarOpen = (open) => {
+    if (typeof open === "function") {
+      setMobileSidebarOpenState((current) => {
+        const next = open(current);
+        if (next) mobileSidebarOpenedAt.current = Date.now();
+        return next;
+      });
+      return;
+    }
+    if (open) mobileSidebarOpenedAt.current = Date.now();
+    setMobileSidebarOpenState(open);
+  };
   const [mobileMegaMenuOpen, setMobileMegaMenuOpen] = useState(false);
   const [sidebarMouseLeave, setSidebarMouseLeave] = useState(false);
 
@@ -128,6 +141,7 @@ const Demo1LayoutProvider = ({ children }) => {
         megaMenuEnabled,
         sidebarMouseLeave,
         setMobileSidebarOpen,
+        mobileSidebarOpenedAt,
         setMegaMenuEnabled,
         setSidebarMouseLeave,
         setMobileMegaMenuOpen,

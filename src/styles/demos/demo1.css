@@ -28,6 +28,17 @@ body {
   width: var(--tw-sidebar-width);
 }
 
+/* Phone drawer fills its sheet. The desktop width rule must not pin it over the page. */
+@media (max-width: 1023px) {
+  .demo1 .sidebar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    inset: auto;
+    border-radius: 0;
+  }
+}
+
 .demo1.header-fixed .wrapper {
   padding-top: var(--tw-header-height);
 }
@@ -171,7 +182,7 @@ body {
   }
 
   .demo1.sidebar-collapse .sidebar .sidebar-content {
-    overflow: hidden;
+    overflow-x: hidden;
   }
 }
 
